@@ -1,0 +1,65 @@
+# =============================================================================
+# State PWD Rate Multipliers — Applied on top of MORTH Base Rates 2024-25
+# =============================================================================
+# Usage: State_Rate = MORTH_Base_Rate × multiplier
+# These reflect local market conditions, labour rates, and state SOR.
+# Source: State PWD rate analysis / DSR reports 2024-25.
+# =============================================================================
+
+meta:
+  base:     "MORTH Schedule of Rates 2024-25"
+  note:     "Multipliers are indicative. Verify against current state SOR."
+
+multipliers:
+  # High-cost states (high labour/material cost index)
+  MH:   1.05    # Maharashtra — moderate premium, good infrastructure
+  GJ:   1.02    # Gujarat — competitive market
+  KA:   1.08    # Karnataka — urban/tech corridor premium
+  TN:   1.06    # Tamil Nadu — coastal, skilled labour
+  AP:   1.04    # Andhra Pradesh — moderate
+  TS:   1.04    # Telangana — moderate
+
+  # Mid-range states
+  UP:   0.97    # Uttar Pradesh — large volume, slight discount
+  MP:   0.95    # Madhya Pradesh — central, moderate
+  RJ:   0.95    # Rajasthan — arid, logistics cost
+  HR:   1.00    # Haryana — reference neutral
+  BR:   0.90    # Bihar — lower cost base
+  JH:   0.92    # Jharkhand — mineral-rich but remote
+  OR:   0.93    # Odisha — moderate coastal
+  CG:   0.92    # Chhattisgarh — inland remote
+  WB:   1.02    # West Bengal — port + urban premium
+  AS:   0.95    # Assam — NE, logistics cost moderate
+
+  # North-eastern / hilly (higher logistics premium)
+  UK:   1.15    # Uttarakhand — hilly, higher material cost
+  HP:   1.18    # Himachal Pradesh — mountainous terrain
+  JK:   1.20    # Jammu & Kashmir — difficult terrain + strategic
+  SK:   1.25    # Sikkim — very remote mountainous
+  NL:   1.22    # Nagaland — NE hilly
+  MN:   1.20    # Manipur — NE remote
+  ML:   1.20    # Meghalaya — NE hills
+  MZ:   1.22    # Mizoram — very remote
+  TR:   1.15    # Tripura — NE moderate
+  AR:   1.25    # Arunachal — high altitude remote
+
+  # South / island
+  KL:   1.08    # Kerala — high labour cost
+  GA:   1.10    # Goa — premium coastal market
+  PB:   1.02    # Punjab — moderate
+  DL:   1.12    # Delhi NCT — high urban premium
+  AN:   1.30    # Andaman & Nicobar — island, very high logistics
+  LD:   1.35    # Lakshadweep — remote island, highest multiplier
+
+# Category multipliers (applied on top of state multiplier for special work)
+category_multipliers:
+  UNDERWATER_WORK:     1.35   # diving, tremie, dewatering
+  NIGHT_WORK:          1.25   # shift allowance
+  MONSOON_WORK:        1.20   # weather risk premium
+  HIGH_ALTITUDE_GT_3000M: 1.40   # >3000m elevation
+  URBAN_RESTRICTED:    1.15   # restricted site, traffic management
+  DEMOLITION:          1.50   # demolition and disposal
+  EMERGENCY_REPAIR:    1.60   # emergency / force-account
+
+# State PWD override directory (per-state YAML files with item overrides)
+override_dir: "state_pwd_overrides/"

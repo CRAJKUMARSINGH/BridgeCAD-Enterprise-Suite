@@ -1,14 +1,29 @@
-# 🌉 Ultimate Bridge GAD Generator
+# 🌉 BridgeCAD Enterprise Suite (Active) · Ultimate Bridge GAD Generator (Legacy)
 
-**The Complete Solution for Bridge Engineering & Bill Generation**
-
-Integrated from 4 trial applications into one unified, production-ready platform.
+> ⚠️ **Repository Orientation — please read before installing.**
+> This repository ships **two application generations** in one tree.
+>
+> | Application | Status | Entry | CI Workflow |
+> |-------------|:------:|-------|-------------|
+> | **BridgeCAD Enterprise Suite** | **✅ ACTIVE · v0.1.0-rc1** | `cd "BridgeCAD Enterprise Suite"` | [`.github/workflows/suite-ci.yml`](.github/workflows/suite-ci.yml) |
+> | Ultimate Bridge GAD Generator | 🏛️ LEGACY — kept for reference | `streamlit run streamlit_app_ultimate.py` | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) |
+>
+> **Start with the Suite if you are new to the repo.**  It is the monorepo with
+> the package layout (`packages/*`, `apps/*`), 8 internal Python packages,
+> 28 E2E fixtures, 7-sheet DXF output, FastAPI gateway, Streamlit UI, and a
+> React web console.  See its dedicated README at
+> [`BridgeCAD Enterprise Suite/README.md`](BridgeCAD%20Enterprise%20Suite/README.md).
+>
+> The root-level **Ultimate Bridge GAD Generator** (`streamlit_app_ultimate.py`
+> + `src/bridge_gad/`) is the earlier unified Streamlit prototype.  It still
+> runs and is tested by the root CI, but new engineering features live in the
+> Suite.
 
 ---
 
-## 🎯 What This Is
+## 🎯 What This Is (Legacy "Ultimate" App)
 
-The **Ultimate Bridge GAD Generator** combines:
+The **Ultimate Bridge GAD Generator** (root-level, legacy) combines:
 - ✅ Professional bridge drawing generation (AutoCAD DXF)
 - ✅ Statutory-compliant bill generation
 - ✅ 10+ export formats
@@ -354,20 +369,14 @@ We welcome contributions! See `CONTRIBUTING.md` for guidelines.
 
 ## 📞 Support
 
-### RKS LEGAL - Techno Legal Consultants
-
-📍 **Address:**  
-303 Vallabh Apartment  
-Navratna Complex, Bhuwana  
-Udaipur - 313001
-
-📧 **Email:** crajkumarsingh@hotmail.com  
-📱 **Mobile:** +919414163019
-
-### For Issues:
-- GitHub Issues: [Your repo]/issues
-- Email support: crajkumarsingh@hotmail.com
-- Documentation: See included .md files
+### For Issues & Contact:
+- **GitHub Issues:** [CRAJKUMARSINGH/Bridge_GAD_Yogendra_Borse/issues](https://github.com/CRAJKUMARSINGH/Bridge_GAD_Yogendra_Borse/issues)
+- **Documentation:** See included `.md` files, especially
+  [`BridgeCAD Enterprise Suite/README.md`](BridgeCAD%20Enterprise%20Suite/README.md)
+  for the active platform.
+- **Professional services / legal consultation (RKS LEGAL):** Raise a GitHub
+  issue first and tag it with the `support` label; direct contact details are
+  intentionally omitted from source to keep public trees free of PII.
 
 ---
 

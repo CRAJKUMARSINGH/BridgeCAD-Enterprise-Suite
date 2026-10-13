@@ -19,6 +19,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
 
+# Windows consoles are often cp1252; keep harness logs ASCII-safe.
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 

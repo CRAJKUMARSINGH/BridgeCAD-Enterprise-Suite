@@ -1,0 +1,181 @@
+# =============================================================================
+# IRC:SP:55-2019 — Drawing Standards for Road Bridges
+# =============================================================================
+# Reference: IRC:SP:55-2019 "Guidelines on Quality Systems for Road Bridges"
+#            Annex F (Layer Naming), Annex G (Drawing Standards)
+# =============================================================================
+
+meta:
+  standard:   "IRC:SP:55-2019"
+  title:      "Drawing Standards and Quality Systems for Road Bridges"
+  edition:    "2019 (3rd revision)"
+
+# ── Standard Drawing Scales (IRC SP:55-2019 Annex G) ──────────────────────────
+scales:
+  general_arrangement:     [100, 200, 500]
+  plan_view:               [100, 200, 500]
+  longitudinal_section:    [100, 200, 500]
+  cross_section:           [25,  50,  100]
+  foundation_details:      [25,  50,  100]
+  pier_details:            [20,  25,   50]
+  abutment_details:        [20,  25,   50]
+  bearing_details:         [ 5,  10,   20]
+  expansion_joint:         [ 5,  10,   20]
+  reinforcement:           [20,  25,   50]
+  site_plan:               [500, 1000, 2000]
+  key_plan:                [2000, 5000]
+
+preferred_scales:
+  general_arrangement:     100
+  plan_view:               100
+  longitudinal_section:    100
+  cross_section:            50
+  foundation_details:       50
+  pier_details:             25
+  abutment_details:         25
+  bearing_details:          10
+  reinforcement:            25
+
+# ── Text Heights (mm at plot scale) ───────────────────────────────────────────
+text_heights_mm:
+  A0:
+    TITLE:      6.0
+    SUBTITLE:   4.0
+    HEADING:    3.5
+    BODY:       2.5
+    DIMENSION:  2.5
+    NOTE:       2.0
+    LABEL:      2.5
+    LEVEL_TAG:  2.0
+    CHAINAGE:   2.0
+    SPEC_NOTE:  1.8
+  A1:
+    TITLE:      5.0
+    SUBTITLE:   3.5
+    HEADING:    3.0
+    BODY:       2.5
+    DIMENSION:  2.5
+    NOTE:       2.0
+    LABEL:      2.5
+    LEVEL_TAG:  2.0
+    CHAINAGE:   2.0
+    SPEC_NOTE:  1.8
+  A2:
+    TITLE:      4.0
+    SUBTITLE:   3.0
+    HEADING:    2.5
+    BODY:       2.0
+    DIMENSION:  2.0
+    NOTE:       1.8
+    SPEC_NOTE:  1.5
+  A3:
+    TITLE:      3.5
+    SUBTITLE:   2.5
+    HEADING:    2.0
+    BODY:       1.8
+    DIMENSION:  1.8
+    NOTE:       1.5
+    SPEC_NOTE:  1.2
+
+# ── Lineweights (mm) — ISO 128 / IRC SP:55-2019 Annex F ──────────────────────
+lineweights:
+  EXTRA_HEAVY:  0.70    # cut section outline; title block outer border
+  HEAVY:        0.50    # main structural outline; primary visible lines
+  MEDIUM:       0.35    # secondary outlines; substructure elements
+  STANDARD:     0.25    # hatching boundaries; minor elements
+  LIGHT:        0.18    # dimensions; text leaders; section marks
+  THIN:         0.13    # hatch lines; construction grid
+  HAIR:         0.09    # reference/construction lines (non-plot)
+
+# ── Layer Assignments ─────────────────────────────────────────────────────────
+layers:
+  STRUC-OUTLINE:    {color: 1,  linetype: Continuous, lw: EXTRA_HEAVY, desc: "Primary structural outline"}
+  STRUC-SECTION:    {color: 2,  linetype: Continuous, lw: HEAVY,       desc: "Section cut boundary"}
+  STRUC-HIDDEN:     {color: 8,  linetype: HIDDEN,     lw: LIGHT,       desc: "Hidden lines"}
+  STRUC-CENTRE:     {color: 6,  linetype: CENTER,     lw: LIGHT,       desc: "Centrelines"}
+  STRUC-HATCHING:   {color: 8,  linetype: Continuous, lw: THIN,        desc: "Section hatching"}
+  STRUC-DETAIL:     {color: 4,  linetype: Continuous, lw: MEDIUM,      desc: "Detail outlines"}
+  CIVIL-GROUND:     {color: 3,  linetype: Continuous, lw: MEDIUM,      desc: "Existing ground profile"}
+  CIVIL-HFL:        {color: 5,  linetype: DASHED,     lw: STANDARD,    desc: "Highest Flood Level"}
+  CIVIL-LWL:        {color: 4,  linetype: DASHED,     lw: STANDARD,    desc: "Low Water Level"}
+  CIVIL-SCOUR:      {color: 1,  linetype: DASHED2,    lw: STANDARD,    desc: "Design scour level"}
+  CIVIL-ROAD:       {color: 7,  linetype: Continuous, lw: MEDIUM,      desc: "Approach road alignment"}
+  SUPER-DECK:       {color: 2,  linetype: Continuous, lw: HEAVY,       desc: "Deck slab faces"}
+  SUPER-GIRDER:     {color: 1,  linetype: Continuous, lw: HEAVY,       desc: "Girder webs and flanges"}
+  SUPER-PARAPET:    {color: 2,  linetype: Continuous, lw: MEDIUM,      desc: "Parapet and railing"}
+  SUPER-WEARING:    {color: 8,  linetype: Continuous, lw: STANDARD,    desc: "Wearing coat cross-section"}
+  SUPER-CAMBER:     {color: 6,  linetype: DASHED,     lw: LIGHT,       desc: "Pre-camber reference"}
+  SUPER-KERB:       {color: 7,  linetype: Continuous, lw: MEDIUM,      desc: "Kerb cross-section"}
+  SUPER-DRAINAGE:   {color: 4,  linetype: Continuous, lw: LIGHT,       desc: "Deck drainage outlets"}
+  SUB-PIER:         {color: 2,  linetype: Continuous, lw: HEAVY,       desc: "Pier shaft and cap"}
+  SUB-ABUT:         {color: 3,  linetype: Continuous, lw: HEAVY,       desc: "Abutment and wing walls"}
+  SUB-BEARING:      {color: 5,  linetype: Continuous, lw: STANDARD,    desc: "Bearing pad outlines"}
+  SUB-EXPJOINT:     {color: 6,  linetype: Continuous, lw: STANDARD,    desc: "Expansion joint locations"}
+  FOUND-PILE:       {color: 4,  linetype: Continuous, lw: MEDIUM,      desc: "Pile circles + elevation"}
+  FOUND-CAP:        {color: 2,  linetype: Continuous, lw: MEDIUM,      desc: "Pile cap / footing"}
+  FOUND-WELL:       {color: 4,  linetype: Continuous, lw: MEDIUM,      desc: "Well steining circles"}
+  DIM-LINEAR:       {color: 3,  linetype: Continuous, lw: LIGHT,       desc: "Linear dimensions"}
+  DIM-LEADER:       {color: 3,  linetype: Continuous, lw: LIGHT,       desc: "Leader lines"}
+  DIM-LEVEL:        {color: 3,  linetype: Continuous, lw: LIGHT,       desc: "RL level tags"}
+  DIM-CHAINAGE:     {color: 3,  linetype: Continuous, lw: LIGHT,       desc: "Chainage markers"}
+  TEXT-GENERAL:     {color: 7,  linetype: Continuous, lw: LIGHT,       desc: "General annotations"}
+  TEXT-TITLE:       {color: 7,  linetype: Continuous, lw: MEDIUM,      desc: "Title block text"}
+  TEXT-LEVEL:       {color: 5,  linetype: Continuous, lw: LIGHT,       desc: "Reduced level tags"}
+  TEXT-SPEC:        {color: 7,  linetype: Continuous, lw: THIN,        desc: "Specification notes"}
+  BORDER-OUTER:     {color: 7,  linetype: Continuous, lw: EXTRA_HEAVY, desc: "Sheet outer border"}
+  BORDER-INNER:     {color: 7,  linetype: Continuous, lw: HEAVY,       desc: "Sheet inner margin"}
+  TITLEBLK-BOX:     {color: 7,  linetype: Continuous, lw: MEDIUM,      desc: "Title block cells"}
+  TITLEBLK-TEXT:    {color: 7,  linetype: Continuous, lw: LIGHT,       desc: "Title block text fields"}
+  SYM-NORTHARROW:   {color: 7,  linetype: Continuous, lw: LIGHT,       desc: "North arrow symbol"}
+  SYM-SECTIONMARK:  {color: 1,  linetype: Continuous, lw: LIGHT,       desc: "Section cut markers A-A"}
+  SYM-REVISION:     {color: 6,  linetype: Continuous, lw: LIGHT,       desc: "Revision cloud markers"}
+
+# ── Sheet Sizes and Margins (ISO 5457) ────────────────────────────────────────
+sheet_sizes:
+  A0: {width: 1189, height:  841, margin_left: 20, margin_other: 10, tb_width: 190, tb_height: 55}
+  A1: {width:  841, height:  594, margin_left: 20, margin_other: 10, tb_width: 185, tb_height: 55}
+  A2: {width:  594, height:  420, margin_left: 15, margin_other: 10, tb_width: 180, tb_height: 50}
+  A3: {width:  420, height:  297, margin_left: 15, margin_other: 10, tb_width: 170, tb_height: 45}
+  A4: {width:  297, height:  210, margin_left: 15, margin_other: 10, tb_width: 160, tb_height: 40}
+  A0_EXTENDED: {width: 1682, height: 841, margin_left: 20, margin_other: 10, tb_width: 190, tb_height: 55}
+  A1_EXTENDED: {width: 1189, height: 594, margin_left: 20, margin_other: 10, tb_width: 185, tb_height: 55}
+
+# ── Hatch Pattern Assignments ─────────────────────────────────────────────────
+hatch_patterns:
+  CONCRETE:       {pattern: "ANSI31", scale: 1.0,  description: "45° diagonal — RCC/PCC"}
+  MASONRY:        {pattern: "ANSI37", scale: 1.0,  description: "Brick bond pattern"}
+  EARTH:          {pattern: "EARTH",  scale: 1.0,  description: "Soil / earthwork fill"}
+  ROCK:           {pattern: "AR-RROCK", scale: 0.5, description: "Rock formation"}
+  STEEL:          {pattern: "ANSI31", scale: 0.5,  description: "Fine diagonal — steel"}
+  SAND:           {pattern: "AR-SAND", scale: 0.3, description: "Sandy material"}
+  GRAVEL:         {pattern: "GRAVEL", scale: 0.5,  description: "Granular fill"}
+  BITUMINOUS:     {pattern: "AR-SAND", scale: 0.5, description: "Bituminous wearing coat"}
+  TIMBER:         {pattern: "ANSI32", scale: 1.0,  description: "Timber / wood section"}
+  SOLID_FILL:     {pattern: "SOLID",  scale: 1.0,  description: "Solid section fill"}
+
+# ── Title Block Mandatory Fields (IRC SP:55 Annex G) ─────────────────────────
+title_block_mandatory_fields:
+  - project_title
+  - bridge_name
+  - drawing_number
+  - drawing_title
+  - scale
+  - sheet_number
+  - revision_tag
+  - date
+  - designed_by
+  - checked_by
+  - approved_by
+  - client
+  - consultant
+
+# ── Dimension Style Defaults ──────────────────────────────────────────────────
+dimension_style_defaults:
+  A1:
+    text_height_mm:  2.5
+    arrow_size_mm:   2.5
+    extension_mm:    1.5
+    offset_mm:       1.0
+    gap_mm:          0.8
+    decimal_places:  3
+    units:           "mm"

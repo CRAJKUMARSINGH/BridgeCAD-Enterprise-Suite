@@ -1,0 +1,115 @@
+{
+  "test_run_timestamp": "20261005_080155",
+  "test_run_datetime": "2026-10-05 08:02:20",
+  "total_tests": 10,
+  "passed": 9,
+  "failed": 1,
+  "results": [
+    {
+      "test_number": 1,
+      "input_file": "inputs\\23_span_bridge_input.xlsx",
+      "output_file": "outputs\\23_span_bridge_input_20261005_080155.dxf",
+      "status": "SUCCESS",
+      "size_bytes": 163035,
+      "size_kb": 159.21,
+      "time_seconds": 22.09,
+      "speed_kbps": 7.21,
+      "timestamp": "2026-10-05 08:02:17"
+    },
+    {
+      "test_number": 2,
+      "input_file": "inputs\\bridge_parameters_comprehensive.xlsx",
+      "output_file": "outputs\\bridge_parameters_comprehensive_20261005_080155.dxf",
+      "status": "SUCCESS",
+      "size_bytes": 75699,
+      "size_kb": 73.92,
+      "time_seconds": 0.35,
+      "speed_kbps": 213.15,
+      "timestamp": "2026-10-05 08:02:17"
+    },
+    {
+      "test_number": 3,
+      "input_file": "inputs\\bridge_parameters_simple.xlsx",
+      "output_file": "outputs\\bridge_parameters_simple_20261005_080155.dxf",
+      "status": "SUCCESS",
+      "size_bytes": 75525,
+      "size_kb": 73.75,
+      "time_seconds": 0.35,
+      "speed_kbps": 211.02,
+      "timestamp": "2026-10-05 08:02:18"
+    },
+    {
+      "test_number": 4,
+      "input_file": "inputs\\large_bridge.xlsx",
+      "output_file": "outputs\\large_bridge_20261005_080155.dxf",
+      "status": "SUCCESS",
+      "size_bytes": 85305,
+      "size_kb": 83.31,
+      "time_seconds": 0.32,
+      "speed_kbps": 261.8,
+      "timestamp": "2026-10-05 08:02:18"
+    },
+    {
+      "test_number": 5,
+      "input_file": "inputs\\lisp_input.xlsx",
+      "output_file": "outputs\\lisp_input_20261005_080155.dxf",
+      "status": "SUCCESS",
+      "size_bytes": 83892,
+      "size_kb": 81.93,
+      "time_seconds": 0.38,
+      "speed_kbps": 217.11,
+      "timestamp": "2026-10-05 08:02:18"
+    },
+    {
+      "test_number": 6,
+      "input_file": "inputs\\lisp_params.xlsx",
+      "output_file": "outputs\\lisp_params_20261005_080155.dxf",
+      "status": "SUCCESS",
+      "size_bytes": 76958,
+      "size_kb": 75.15,
+      "time_seconds": 0.95,
+      "speed_kbps": 79.39,
+      "timestamp": "2026-10-05 08:02:19"
+    },
+    {
+      "test_number": 7,
+      "input_file": "inputs\\real_lisp.xlsx",
+      "output_file": "outputs\\real_lisp_20261005_080155.dxf",
+      "status": "SUCCESS",
+      "size_bytes": 81006,
+      "size_kb": 79.11,
+      "time_seconds": 0.39,
+      "speed_kbps": 200.87,
+      "timestamp": "2026-10-05 08:02:20"
+    },
+    {
+      "test_number": 8,
+      "input_file": "inputs\\sample_input.xlsx",
+      "output_file": "outputs\\sample_input_20261005_080155.dxf",
+      "status": "SUCCESS",
+      "size_bytes": 80600,
+      "size_kb": 78.71,
+      "time_seconds": 0.23,
+      "speed_kbps": 346.09,
+      "timestamp": "2026-10-05 08:02:20"
+    },
+    {
+      "test_number": 9,
+      "input_file": "inputs\\spans.xlsx",
+      "output_file": "outputs\\spans_20261005_080155.dxf",
+      "status": "SUCCESS",
+      "size_bytes": 71803,
+      "size_kb": 70.12,
+      "time_seconds": 0.28,
+      "speed_kbps": 252.34,
+      "timestamp": "2026-10-05 08:02:20"
+    },
+    {
+      "test_number": 10,
+      "input_file": "inputs\\spans_only.xlsx",
+      "status": "SKIPPED",
+      "time_seconds": 0,
+      "timestamp": "2026-10-05 08:02:20"
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+# =============================================================================
+# IRC:5-2015 — Hydraulic Design Standards for Road Bridges
+# =============================================================================
+# Reference: IRC:5-2015 "Standard Specifications and Code of Practice for
+#            Road Bridges — Section I: General Features of Design"
+# =============================================================================
+
+meta:
+  standard:    "IRC:5-2015"
+  title:       "Hydraulic Design Standards for Road Bridges"
+  edition:     "2015 (7th revision)"
+  applicable_to: ["Major Bridges", "Minor Bridges", "Culverts", "Causeways"]
+
+# ── Design Discharge & Return Period ──────────────────────────────────────────
+return_periods:
+  culvert_minor_road:       25      # years — IRC SP:13
+  minor_bridge_state_hwy:   50      # years — MORTH Cl.704
+  major_bridge_national_hwy: 100    # years — NHAI / IRC:5 Cl.2.1
+  major_bridge_expressway:   200    # years — NHAI access-controlled
+  critical_infrastructure:   500    # years — defence / lifeline
+  pmf_extreme:             "PMF"   # Probable Maximum Flood
+
+# ── Lacey's Regime Constants (IRC:5-2015 Clause 24) ──────────────────────────
+lacey_regime:
+  perimeter_constant:  4.75    # P = 4.75 × √Q
+  depth_constant:      0.477   # R = 0.477 × (Q/f²)^(1/3)
+  velocity_constant:   0.44    # V = 0.44 × f^(1/3) × R^(2/3)
+  slope_constant:      3340    # S = f^(5/3) / (3340 × Q^(1/6))
+  scour_multiplier:    1.34    # D_s = 1.34 × R  (IRC:78 Cl.7.2)
+
+# ── Silt Factor (IRC:5-2015 Cl.24.1) ──────────────────────────────────────────
+# f = 1.76 × √(d50_mm)
+silt_factor_by_material:
+  very_fine_sand_0_08mm:    0.50
+  fine_sand_0_15mm:         0.68
+  medium_sand_0_25mm:       0.88
+  coarse_sand_0_50mm:       1.25
+  fine_gravel_2mm:          2.49
+  medium_gravel_5mm:        3.94
+  coarse_gravel_10mm:       5.57
+  cobble_50mm:             12.45
+
+# ── Design Scour Depth Multipliers (IRC:78-2014 Table 3) ─────────────────────
+scour_multipliers:
+  pier_general:             2.00
+  pier_deep_afflux:         2.00
+  abutment:                 1.27
+  guide_bund_nose:          2.75
+  guide_bund_body:          1.50
+  contraction_scour:        1.25
+
+# ── Freeboard Minimums ────────────────────────────────────────────────────────
+# Soffit clearance above HFL (IRC:5-2015 Cl.22)
+freeboard_minimums_m:
+  major_bridge_general:      1.00   # IRC:5 Cl.22.1
+  major_bridge_nhai:         2.00   # NHAI guideline 2019
+  major_bridge_expressway:   2.00   # Access-controlled
+  major_bridge_state_hwy:    1.50   # State highway
+  minor_bridge:              0.60   # IRC:5 Cl.22.2
+  culvert:                   0.30   # IRC SP:13
+  submersible_bridge:        0.00   # intentionally submersible
+  causeway:                  0.00   # low-level crossing
+  pmgsy_rural:               0.60   # PMGSY village connectivity
+
+# ── Waterway (IRC:5-2015 Clause 17) ──────────────────────────────────────────
+linear_waterway_formula:
+  natural_channel_C:   4.80   # L_w = C × √Q  (natural channels)
+  artificial_canal_C:  6.30   # artificial channels
+  note: "L_w in metres, Q in m³/s"
+
+# ── Afflux Limits (IRC:5-2015 Clause 21) ─────────────────────────────────────
+max_afflux_m:
+  national_highway:     0.30
+  state_highway:        0.45
+  rural_road_plain:     0.60
+  rural_road_hilly:     0.30
+  urban_drainage:       0.15
+
+# ── Manning's n Values (for hydraulic calculations) ──────────────────────────
+mannings_n:
+  smooth_concrete:      0.012
+  rough_concrete:       0.015
+  natural_channel_clean: 0.025
+  natural_channel_weeds: 0.035
+  flood_plain_light:    0.040
+  flood_plain_heavy:    0.060
+  gravel_bed_clean:     0.022
+  boulder_bed:          0.040
+  rock_cut:             0.030
+
+# ── Foundation Depth Requirements (IRC:78-2014 Cl.7.2) ───────────────────────
+min_foundation_depth_below_scour_m:
+  pile:                 1.50   # pile tip below design scour level
+  well_caisson:         2.00   # well founding level below design scour
+  open_footing:         1.50   # footing below design scour level

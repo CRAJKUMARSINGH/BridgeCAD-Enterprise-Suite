@@ -65,7 +65,7 @@ def _size_for(opts: RenderOptions) -> Tuple[float, float]:
     return LAYOUT_PRESETS["A4_landscape"]
 
 
-def _repair_none_insert_text(msp) -> int:
+def _repair_none_insert_text(msp) -> Tuple[int, int]:
     """In-place repair for TEXT / MTEXT / ATTRIB entities whose ``dxf.insert``
     is ``None`` — the exact failure mode hit by
     ``ezdxf.addons.drawing.text._get_wcs_insert`` which raises
@@ -141,36 +141,34 @@ def _repair_none_insert_text(msp) -> int:
 
 
 def _safe_draw_frontend(context, out, cfg, msp) -> Tuple[int, int, List[str]]:
-    """Draw every modelspace entity one-by-one, never letting a single rogue
-    entity poison the entire page. Returns ``(rendered_count, skipped_count,
+    """Draw modelspace, falling back entity-by-entity so one rogue entity
+    cannot blank the whole page. Returns ``(rendered_count, skipped_count,
     skipped_types)``.
     """
+    from ezdxf.addons.drawing import Frontend
+
     rendered = 0
     skipped = 0
     skipped_types: List[str] = []
     entities = list(msp)
-    # Attempt bulk draw first for the common fast path.
     try:
         frontend = Frontend(context, out, config=cfg)
         frontend.draw_layout(msp, finalize=True)
         return len(entities), 0, []
     except Exception:
         pass
-    # Fallback: entity-by-entity with filter_func skipping bad actors.
     for idx, entity in enumerate(entities):
         etype = "?"
         try:
             etype = entity.dxftype()
         except Exception:
             etype = "<unknown>"
-        def _filter(e, _target=entity):
-            try:
-                return e is _target
-            except Exception:
-                return False
         try:
             frontend = Frontend(context, out, config=cfg)
-            frontend.draw_entities([entity])
+            if hasattr(frontend, "draw_entities"):
+                frontend.draw_entities([entity])
+            else:
+                frontend.draw_entity(entity)
             rendered += 1
         except Exception:
             skipped += 1
@@ -377,24 +375,43 @@ def bundle_drawings_to_pdf(
         # ------------------------------------------------------------------
         # (Optional) Cover page
         # ------------------------------------------------------------------
-        if cover_page_title or False:
+        if cover_page_title:
             fig = plt.figure(figsize=(fig_w, fig_h), dpi=opts.dpi,
-                             facecolor=opts.facecolor)
-            ax = fig.add_axes([0.05, 0.05, 0.90, 0.90])
-            ax.text(0.5, 0.70, cover_page_title or "Drawing Package",
-                    ha="center", va="center",
-                    fontsize=max(14.0, opts.title_fontsize * 1.8),
-                    fontweight="bold", transform=ax.transAxes)
-            ax.text(0.5, 0.55,
-                    f"{len(dxf_paths)} sheet(s)",
-                    ha="center", va="center",
-                    fontsize=opts.title_fontsize * 1.1,
-                    transform=ax.transAxes)
+                             facecolor="#f7f4ee")
+            ax = fig.add_axes([0.07, 0.08, 0.86, 0.82])
+            ax.set_xlim(0, 1)
+            ax.set_ylim(0, 1)
             ax.set_xticks([])
             ax.set_yticks([])
+            ax.set_facecolor("#fbfaf6")
             for spine in ax.spines.values():
-                spine.set_linewidth(1.0)
-            pdf.savefig(fig, dpi=opts.dpi)
+                spine.set_linewidth(1.4)
+                spine.set_color("#1f3d2b")
+            ax.add_patch(plt.Rectangle((0.0, 0.88), 1.0, 0.12,
+                                       transform=ax.transAxes, color="#1f3d2b",
+                                       zorder=0, clip_on=False))
+            ax.text(0.5, 0.94, "GENERAL ARRANGEMENT DRAWING",
+                    ha="center", va="center", color="white",
+                    fontsize=max(16.0, opts.title_fontsize * 1.6),
+                    fontweight="bold", transform=ax.transAxes)
+            ax.text(0.5, 0.72, cover_page_title,
+                    ha="center", va="center", color="#1f3d2b",
+                    fontsize=max(13.0, opts.title_fontsize * 1.35),
+                    fontweight="bold", transform=ax.transAxes, wrap=True)
+            ax.text(0.5, 0.52, f"{len(dxf_paths)} coordinated sheet(s)",
+                    ha="center", va="center", color="#4a5c50",
+                    fontsize=opts.title_fontsize * 1.15,
+                    transform=ax.transAxes)
+            ax.plot([0.22, 0.78], [0.44, 0.44], color="#c4a35a", lw=1.6,
+                    transform=ax.transAxes)
+            ax.text(0.5, 0.32, "IRC / MoRTH presentation booklet",
+                    ha="center", va="center", color="#6b5a3a",
+                    fontsize=opts.title_fontsize, transform=ax.transAxes,
+                    style="italic")
+            ax.text(0.5, 0.12, "Not a construction IFC issue — GAD for review",
+                    ha="center", va="center", color="#7a7a7a",
+                    fontsize=opts.title_fontsize * 0.9, transform=ax.transAxes)
+            pdf.savefig(fig, dpi=opts.dpi, facecolor=fig.get_facecolor())
             plt.close(fig)
 
         # ------------------------------------------------------------------

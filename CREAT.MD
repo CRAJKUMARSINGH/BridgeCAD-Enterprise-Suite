@@ -161,7 +161,7 @@ Viaduct BR No.187              GAD 24.750m RCC T-BEAM
 
 ---
 
-### [2026-10-01 13:16 IST] M8 + M9 + M10-RC1 COMPLETE — BRIDGECAD-OSS-1.0-RC1 ★ ACCEPTED ★
+### [2026-10-01 13:16 IST] M8 + M9 + M10-RC1 COMPLETE
 
 **RC1 smoke: 11/11 PASS exit 0**
 
@@ -395,3 +395,19 @@ New test: test_phase_three_package_zip() with 38 assertions.
 4. **Manual entries** can be added by the developer at any time — just use the 
    `### [YYYY-MM-DD HH:MM IST] DESCRIPTION` format above the previous entry.
 5. **The hook** is at `.kiro/hooks/creat-md-autolog.json` — do not delete it.
+
+---
+
+### [2026-10-01 15:30 IST] Production Hardening COMPLETE — 6/6 tasks, 34/34 RC1 Smoke ★ ACCEPTED ★
+
+**Final RC1 smoke: 34/34 PASS exit 0** (28 E2E fixtures now in the gate)
+
+| Task | Deliverable | Result |
+|---|---|---|
+| #1+2 | React 6-page SPA + typed API client + Zustand + React-Query | ✅ |
+| #3 | 4 multi-arch Dockerfiles + docker-compose.prod.yml + nginx/prod.conf | ✅ |
+| #4 | ci.yml (6 jobs) + bench.yml (regression gate) + release.yml (ghcr.io push) | ✅ |
+| #5 | 28/28 E2E fixtures from Scribd corpus — all bridge type variants PASS | ✅ |
+| #6 | .env.example (60 vars) + pyproject.toml (pinned) + pre-commit + CHANGELOG | ✅ |
+
+**BRIDGECAD-OSS-1.0-RC1 — FULLY HARDENED ★**

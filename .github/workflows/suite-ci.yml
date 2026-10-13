@@ -1,0 +1,203 @@
+name: BridgeCAD Enterprise Suite — CI
+
+# Runs the Suite's own 6-job matrix (lint / typecheck / unit / e2e / rc1-smoke /
+# react-build) from the checked-out workspace root.  The nested workflow at
+#   "BridgeCAD Enterprise Suite/.github/workflows/ci.yml"
+# is NEVER executed by GitHub Actions because workflows must live at the repo
+# root .github/workflows/.  This file mirrors that workflow with correct
+# working-directory prefixes so the Suite is tested on every push/PR.
+#
+# Legacy app tests continue to live in ci.yml (separately named jobs).
+# The two workflows DO NOT depend on each other; they run in parallel.
+
+on:
+  push:
+    branches: ["main", "develop", "release/**"]
+  pull_request:
+    branches: ["main", "develop"]
+
+concurrency:
+  group: suite-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  SUITE_DIR: "BridgeCAD Enterprise Suite"
+  PYTHON_VERSION: "3.11"
+  NODE_VERSION:   "20"
+
+defaults:
+  run:
+    working-directory: "BridgeCAD Enterprise Suite"
+
+jobs:
+  # ──────────────────────────────────────────────────────────────────────────
+  lint:
+    name: "[Suite] Lint & Format"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install ruff
+        run: pip install ruff==0.6.0
+
+      - name: Ruff lint
+        run: ruff check packages/ apps/ scripts/
+
+      - name: Ruff format check
+        run: ruff format --check packages/ apps/ scripts/
+
+  # ──────────────────────────────────────────────────────────────────────────
+  typecheck:
+    name: "[Suite] Mypy Type Check"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install packages + mypy
+        run: |
+          pip install --upgrade pip
+          for pkg in packages/*/pyproject.toml; do
+            pip install -e "${pkg%/pyproject.toml}" --quiet
+          done
+          pip install mypy pydantic>=2.6 scipy numpy
+
+      - name: mypy bridgecad_core
+        run: mypy packages/bridgecad-core/bridgecad_core --ignore-missing-imports --no-strict-optional
+
+      - name: mypy bridgecad_io
+        run: mypy packages/bridgecad-io/bridgecad_io --ignore-missing-imports --no-strict-optional
+
+      - name: mypy bridgecad_bill
+        run: mypy packages/bridgecad-bill/bridgecad_bill --ignore-missing-imports --no-strict-optional
+
+  # ──────────────────────────────────────────────────────────────────────────
+  unit:
+    name: "[Suite] Unit Tests"
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install all packages
+        run: |
+          pip install --upgrade pip
+          for pkg in packages/*/pyproject.toml; do
+            pip install -e "${pkg%/pyproject.toml}" --quiet
+          done
+          pip install pytest pytest-cov openpyxl ezdxf scipy numpy pyyaml
+
+      - name: Run unit + integration tests
+        run: |
+          pytest tests/ \
+            --ignore=tests/e2e \
+            --ignore=tests/benchmarks \
+            -v --tb=short \
+            --cov=packages \
+            --cov-report=xml \
+            --cov-report=term-missing
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: false
+
+  # ──────────────────────────────────────────────────────────────────────────
+  e2e:
+    name: "[Suite] E2E Fixtures (5 bridge types)"
+    runs-on: ubuntu-latest
+    needs: unit
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install all packages
+        run: |
+          pip install --upgrade pip
+          for pkg in packages/*/pyproject.toml; do
+            pip install -e "${pkg%/pyproject.toml}" --quiet
+          done
+          pip install openpyxl ezdxf scipy numpy pyyaml
+
+      - name: Run E2E fixture suite
+        run: python tests/e2e/run_e2e.py
+
+      - name: Run integration smoke
+        run: python tests/integration/test_full_pipeline.py
+
+  # ──────────────────────────────────────────────────────────────────────────
+  rc1-smoke:
+    name: "[Suite] RC1 Release Smoke"
+    runs-on: ubuntu-latest
+    needs: [unit, e2e]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install
+        run: |
+          pip install --upgrade pip
+          for pkg in packages/*/pyproject.toml; do
+            pip install -e "${pkg%/pyproject.toml}" --quiet
+          done
+          pip install openpyxl ezdxf scipy numpy sqlalchemy pyyaml
+
+      - name: RC1 Smoke
+        run: python rc1_smoke.py
+
+  # ──────────────────────────────────────────────────────────────────────────
+  react-build:
+    name: "[Suite] React TypeCheck + Build"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: "BridgeCAD Enterprise Suite/apps/web-console/package-lock.json"
+
+      - name: npm ci
+        working-directory: "BridgeCAD Enterprise Suite/apps/web-console"
+        run: npm ci
+
+      - name: TypeScript check
+        working-directory: "BridgeCAD Enterprise Suite/apps/web-console"
+        run: npm run typecheck
+
+      - name: Vite build
+        working-directory: "BridgeCAD Enterprise Suite/apps/web-console"
+        run: npm run build
+        env:
+          VITE_API_URL: http://localhost:8000
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-console-dist
+          path: "BridgeCAD Enterprise Suite/apps/web-console/dist/"
+          retention-days: 7

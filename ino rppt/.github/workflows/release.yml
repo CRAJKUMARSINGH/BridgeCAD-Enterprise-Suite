@@ -1,0 +1,176 @@
+name: Release — Build & Push Docker Images
+
+on:
+  push:
+    tags:
+      - "v*.*.*"         # e.g. v0.1.0-rc1, v1.0.0
+
+env:
+  REGISTRY:         ghcr.io
+  IMAGE_PREFIX:     ghcr.io/${{ github.repository_owner }}/bridgecad
+  PYTHON_VERSION:   "3.11"
+  NODE_VERSION:     "20"
+
+jobs:
+  # ── Validate first ─────────────────────────────────────────────────────────
+  validate:
+    name: Validate Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install
+        run: |
+          pip install --upgrade pip
+          for pkg in packages/*/pyproject.toml; do
+            pip install -e "${pkg%/pyproject.toml}" --quiet
+          done
+          pip install openpyxl ezdxf scipy numpy sqlalchemy pyyaml
+
+      - name: RC1 smoke must pass
+        run: python rc1_smoke.py
+
+      - name: E2E fixtures must pass
+        run: python tests/e2e/run_e2e.py
+
+  # ── Build + push multi-arch Docker images ─────────────────────────────────
+  docker:
+    name: Docker Multi-arch Build & Push
+    runs-on: ubuntu-latest
+    needs: validate
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        include:
+          - service: api
+            context: .
+            dockerfile: apps/api-gateway/Dockerfile
+            image_suffix: api
+
+          - service: streamlit
+            context: .
+            dockerfile: apps/streamlit-ui/Dockerfile
+            image_suffix: streamlit
+
+          - service: cli
+            context: .
+            dockerfile: apps/cli-console/Dockerfile
+            image_suffix: cli
+
+          - service: web
+            context: .
+            dockerfile: apps/web-console/Dockerfile
+            image_suffix: web
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU (for arm64 emulation)
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version from git tag
+        id: meta
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "image=${{ env.IMAGE_PREFIX }}/${{ matrix.image_suffix }}" >> $GITHUB_OUTPUT
+
+      - name: Docker metadata (tags + labels)
+        id: docker_meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.meta.outputs.image }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push ${{ matrix.service }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VITE_API_URL=https://api.bridgecad.io
+            BRIDGECAD_VERSION=${{ steps.meta.outputs.version }}
+
+  # ── Create GitHub Release ──────────────────────────────────────────────────
+  github-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: docker
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version
+        id: ver
+        run: echo "version=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+
+      - name: Build Python sdist + wheels for all packages
+        run: |
+          pip install build
+          mkdir -p dist/
+          for pkg in packages/*/pyproject.toml; do
+            dir="${pkg%/pyproject.toml}"
+            (cd "$dir" && python -m build --outdir ../../dist/) || true
+          done
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "BridgeCAD Enterprise ${{ steps.ver.outputs.version }}"
+          body: |
+            ## BridgeCAD Enterprise Suite ${{ steps.ver.outputs.version }}
+
+            ### Docker Images (multi-arch: amd64 + arm64)
+            ```bash
+            docker pull ghcr.io/${{ github.repository_owner }}/bridgecad/api:${{ steps.ver.outputs.version }}
+            docker pull ghcr.io/${{ github.repository_owner }}/bridgecad/streamlit:${{ steps.ver.outputs.version }}
+            docker pull ghcr.io/${{ github.repository_owner }}/bridgecad/cli:${{ steps.ver.outputs.version }}
+            docker pull ghcr.io/${{ github.repository_owner }}/bridgecad/web:${{ steps.ver.outputs.version }}
+            ```
+
+            ### Quick Start
+            ```bash
+            git clone https://github.com/${{ github.repository }}
+            cd "BridgeCAD Enterprise Suite"
+            cp .env.example .env          # fill DATABASE_URL, POSTGRES_PASSWORD, etc.
+            docker compose -f docker-compose.prod.yml up -d
+            ```
+
+            See [CHANGELOG.md](CHANGELOG.md) for full release notes.
+          files: dist/*.whl
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(steps.ver.outputs.version, 'rc') || contains(steps.ver.outputs.version, 'alpha') || contains(steps.ver.outputs.version, 'beta') }}

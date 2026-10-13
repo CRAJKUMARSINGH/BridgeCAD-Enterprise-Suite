@@ -53,9 +53,8 @@ outputs/*.xlsx
 *.err
 acad.err
 
-# Node (if needed later)
+# Node
 node_modules/
-package-lock.json
 
 # Misc
 *.bak
@@ -93,6 +92,9 @@ ULTIMATE_INTEGRATION_PLAN.md
 # Telemetry file (opt-in only — should never be committed)
 Bridge_GAD_Telemetry.json
 Bridge_GAD_PluginRegistry.json
+
+# Debug environment files — may contain local secrets; never commit
+.dbg/
 
 # Temp upload directory (app_lean.py legacy)
 temp/

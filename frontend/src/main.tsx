@@ -102,7 +102,8 @@ function App() {
 
       setNotice("DXF and PDF generated successfully. Download them from the export panel.");
       setBackend("online");
-    } catch {
+    } catch (err) {
+      console.error("Drawing generation failed:", err);
       setNotice("Live generation is not configured here yet. The review draft and 11-bridge PDF catalogue are still ready to use.");
       setBackend("demo");
     } finally {

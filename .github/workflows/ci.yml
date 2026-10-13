@@ -40,13 +40,44 @@ jobs:
           EOF
 
       # ── Guard: no PII in source ───────────────────────────────────────────
-      - name: Check for PII in source
+      # Scan ONLY git-tracked source files (never build-generated artifacts
+      # such as *.egg-info/, which repeat the author email from pyproject).
+      # Use `git grep` + a manual fallback for shallow-checkout edge cases,
+      # explicitly excluding .egg-info/, dist/, build/, and vendor/.
+      - name: Check for PII in tracked source
         run: |
-          if grep -rn "@hotmail\|@gmail\|+91[0-9]\{10\}" src/ streamlit_app_ultimate.py app_lean.py 2>/dev/null; then
-            echo "PII detected — move to environment variables"
+          PII_PATTERNS='@hotmail\|@gmail\|+91[0-9]\{10\}'
+          EXCLUDE_DIRS='{*.egg-info/*,*/.egg-info/*,egg-info/*,dist/*,build/*,vendor/*,03_outputs/*,outputs/*,node_modules/*,.venv/*,venv/*,__pycache__/*}'
+          if command -v git >/dev/null 2>&1 && git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+            echo "[PII] Using git grep over tracked files only"
+            EXIT_CODE=0
+            git grep -n "$PII_PATTERNS" ':(exclude,glob)**/*.egg-info/**' \
+                                    ':(exclude,glob)**/vendor/**'        \
+                                    ':(exclude,glob)**/03_outputs/**'   \
+                                    ':(exclude,glob)**/outputs/**'       \
+                                    ':(exclude,glob)**/dist/**'          \
+                                    ':(exclude,glob)**/build/**'         \
+                                    || EXIT_CODE=$?
+            if [ "$EXIT_CODE" -eq 0 ]; then
+              echo "::error::PII detected in tracked source — move to environment variables"
+              exit 1
+            elif [ "$EXIT_CODE" -eq 1 ]; then
+              echo "No PII found in git-tracked source."
+            else
+              echo "[PII] git grep exit=$EXIT_CODE; falling back to find + grep"
+            fi
+          fi
+          # Fallback scan (also runs when shallow checkout lacks .git)
+          EXIT_CODE=0
+          find . -type f \
+            \( -name "*.py" -o -name "*.md" -o -name "*.txt" -o -name "*.yaml" -o -name "*.yml" -o -name "*.json" -o -name "*.sh" -o -name "*.ps1" -o -name "*.toml" \) \
+            ! -path "./$EXCLUDE_DIRS" \
+            -exec grep -l "$PII_PATTERNS" {} + 2>/dev/null || EXIT_CODE=$?
+          if [ "$EXIT_CODE" -eq 0 ]; then
+            echo "::error::PII detected by fallback scan — see files above"
             exit 1
           fi
-          echo "No PII found."
+          echo "No PII found (fallback scan complete)."
 
       # ── Guard: telemetry opt-in ───────────────────────────────────────────
       - name: Check telemetry is opt-in
@@ -98,8 +129,19 @@ jobs:
         run: flake8 src/ --max-line-length=120 --ignore=E501,W503,E402 --count
 
       # ── Type check ────────────────────────────────────────────────────────
-      - name: Type check
-        run: mypy src/bridge_gad/ --ignore-missing-imports --no-error-summary || true
+      # NOTE: legacy app still has many `Any`-annotated call sites; we run
+      # mypy but do NOT fail the build here. Use a separate "legacy-mypy"
+      # job if you want enforcement. The Suite's mypy gate lives in
+      # suite-ci.yml and DOES fail on real regressions.
+      - name: Type check (legacy — advisory only)
+        run: |
+          set +e
+          mypy src/bridge_gad/ --ignore-missing-imports --no-error-summary
+          MYPY_EXIT=$?
+          if [ "$MYPY_EXIT" -ne 0 ]; then
+            echo "::notice::Legacy mypy reported issues (exit $MYPY_EXIT) — advisory only, not blocking"
+          fi
+          exit 0
 
       # ── Unit tests ────────────────────────────────────────────────────────
       - name: Run tests
@@ -123,7 +165,18 @@ jobs:
       - name: Install pip-audit
         run: pip install pip-audit
       - name: Audit dependencies for CVEs
-        run: pip-audit -r requirements.txt --ignore-vuln PYSEC-2022-42969 || true
+        run: |
+          set +e
+          pip-audit -r requirements.txt --ignore-vuln PYSEC-2022-42969
+          AUDIT_EXIT=$?
+          if [ "$AUDIT_EXIT" -eq 0 ]; then
+            echo "pip-audit passed."
+          elif [ "$AUDIT_EXIT" -eq 1 ]; then
+            echo "::warning::pip-audit reported known vulnerabilities (exit 1) — not blocking release, but please review"
+          else
+            echo "::warning::pip-audit internal error (exit $AUDIT_EXIT) — advisory only"
+          fi
+          exit 0
 
   docker:
     runs-on: ubuntu-latest

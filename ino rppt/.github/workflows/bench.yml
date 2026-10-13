@@ -1,0 +1,132 @@
+name: Benchmarks
+
+on:
+  schedule:
+    - cron: "0 2 * * 1"   # Monday 02:00 UTC
+  workflow_dispatch:        # manual trigger
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  benchmark:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # needed for benchmark comparison
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install
+        run: |
+          pip install --upgrade pip
+          for pkg in packages/*/pyproject.toml; do
+            pip install -e "${pkg%/pyproject.toml}" --quiet
+          done
+          pip install pytest pytest-benchmark openpyxl ezdxf scipy numpy pyyaml
+
+      - name: Write benchmark tests
+        run: |
+          cat > tests/benchmarks/test_pipeline_bench.py << 'EOF'
+          """Pipeline performance benchmarks."""
+          import sys, json
+          from pathlib import Path
+          from decimal import Decimal
+
+          # path bootstrap
+          suite = Path(__file__).parents[2]
+          for pkg in ["bridgecad-core","bridgecad-io","bridgecad-draw",
+                      "bridgecad-bill","bridgecad-qa","bridgecad-export"]:
+              p = suite / "packages" / pkg
+              if p.exists() and str(p) not in sys.path:
+                  sys.path.insert(0, str(p))
+
+          def _load_project():
+              from tests.e2e.run_e2e import _build_from_fixture
+              f = suite / "tests/e2e/fixtures/simple_12m.json"
+              data = json.loads(f.read_text())
+              return _build_from_fixture(data)
+
+          def test_qa_checks(benchmark):
+              """QA: 30 checks on simple_12m should finish < 200 ms."""
+              project = _load_project()
+              from bridgecad_core.validation import run_all
+              result = benchmark(run_all, project)
+              assert result.score >= 80
+
+          def test_boq_extraction(benchmark):
+              """BOQ extraction should finish < 500 ms."""
+              project = _load_project()
+              from bridgecad_bill.processor import extract_and_price
+              boq = benchmark(extract_and_price, project)
+              assert boq.grand_total > 0
+
+          def test_single_dxf_sheet(benchmark):
+              """Single DXF sheet (plan) should finish < 3 s."""
+              import tempfile
+              project = _load_project()
+              from bridgecad_draw.sheet1_plan import generate
+              def _gen():
+                  with tempfile.TemporaryDirectory() as td:
+                      p = generate(project, Path(td) / "test.dxf")
+                      return p.stat().st_size
+              size = benchmark(_gen)
+              assert size > 10_000
+
+          def test_full_7sheet_package(benchmark):
+              """7-sheet DXF package should finish < 15 s."""
+              import tempfile
+              project = _load_project()
+              from bridgecad_draw.booklet import generate_package
+              def _gen():
+                  with tempfile.TemporaryDirectory() as td:
+                      sheets = generate_package(project, Path(td))
+                      return len(sheets)
+              n = benchmark.pedantic(_gen, rounds=3, warmup_rounds=1)
+              assert n == 7
+          EOF
+
+      - name: Run benchmarks
+        run: |
+          pytest tests/benchmarks/test_pipeline_bench.py \
+            --benchmark-autosave \
+            --benchmark-json=benchmark_results.json \
+            -v
+
+      - name: Check regression vs stored baseline
+        run: |
+          python - << 'PYEOF'
+          import json, sys
+          with open("benchmark_results.json") as f:
+              data = json.load(f)
+          thresholds = {
+              "test_qa_checks":          0.200,
+              "test_boq_extraction":     0.500,
+              "test_single_dxf_sheet":   3.0,
+              "test_full_7sheet_package":15.0,
+          }
+          failed = []
+          for bench in data.get("benchmarks", []):
+              name  = bench["name"].split("::")[-1]
+              mean  = bench["stats"]["mean"]
+              limit = thresholds.get(name)
+              if limit and mean > limit * 1.2:   # 20% regression tolerance
+                  failed.append(f"{name}: {mean:.3f}s > {limit*1.2:.3f}s limit")
+          if failed:
+              print("BENCHMARK REGRESSIONS:")
+              for f in failed: print(" ✗", f)
+              sys.exit(1)
+          print("All benchmarks within 20% of targets ✓")
+          PYEOF
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: benchmark_results.json
+          retention-days: 30

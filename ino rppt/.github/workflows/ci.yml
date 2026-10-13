@@ -1,0 +1,188 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "develop", "release/**"]
+  pull_request:
+    branches: ["main", "develop"]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.11"
+  NODE_VERSION:   "20"
+
+jobs:
+  # ────────────────────────────────────────────────────────────────────────────
+  lint:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install ruff
+        run: pip install ruff==0.6.0
+
+      - name: Ruff lint
+        run: ruff check packages/ apps/ scripts/
+
+      - name: Ruff format check
+        run: ruff format --check packages/ apps/ scripts/
+
+  # ────────────────────────────────────────────────────────────────────────────
+  typecheck:
+    name: Mypy Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install packages + mypy
+        run: |
+          pip install --upgrade pip
+          for pkg in packages/*/pyproject.toml; do
+            pip install -e "${pkg%/pyproject.toml}" --quiet
+          done
+          pip install mypy pydantic>=2.6 scipy numpy
+
+      - name: mypy bridgecad_core
+        run: mypy packages/bridgecad-core/bridgecad_core --ignore-missing-imports --no-strict-optional
+
+      - name: mypy bridgecad_io
+        run: mypy packages/bridgecad-io/bridgecad_io --ignore-missing-imports --no-strict-optional
+
+      - name: mypy bridgecad_bill
+        run: mypy packages/bridgecad-bill/bridgecad_bill --ignore-missing-imports --no-strict-optional
+
+  # ────────────────────────────────────────────────────────────────────────────
+  unit:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install all packages
+        run: |
+          pip install --upgrade pip
+          for pkg in packages/*/pyproject.toml; do
+            pip install -e "${pkg%/pyproject.toml}" --quiet
+          done
+          pip install pytest pytest-cov openpyxl ezdxf scipy numpy pyyaml
+
+      - name: Run unit + integration tests
+        run: |
+          pytest tests/ \
+            --ignore=tests/e2e \
+            --ignore=tests/benchmarks \
+            -v --tb=short \
+            --cov=packages \
+            --cov-report=xml \
+            --cov-report=term-missing
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: false
+
+  # ────────────────────────────────────────────────────────────────────────────
+  e2e:
+    name: E2E Fixtures (5 bridge types)
+    runs-on: ubuntu-latest
+    needs: unit
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install all packages
+        run: |
+          pip install --upgrade pip
+          for pkg in packages/*/pyproject.toml; do
+            pip install -e "${pkg%/pyproject.toml}" --quiet
+          done
+          pip install openpyxl ezdxf scipy numpy pyyaml
+
+      - name: Run E2E fixture suite
+        run: python tests/e2e/run_e2e.py
+
+      - name: Run integration smoke
+        run: python tests/integration/test_full_pipeline.py
+
+  # ────────────────────────────────────────────────────────────────────────────
+  rc1-smoke:
+    name: RC1 Release Smoke
+    runs-on: ubuntu-latest
+    needs: [unit, e2e]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install
+        run: |
+          pip install --upgrade pip
+          for pkg in packages/*/pyproject.toml; do
+            pip install -e "${pkg%/pyproject.toml}" --quiet
+          done
+          pip install openpyxl ezdxf scipy numpy sqlalchemy pyyaml
+
+      - name: RC1 Smoke
+        run: python rc1_smoke.py
+
+  # ────────────────────────────────────────────────────────────────────────────
+  react-build:
+    name: React TypeCheck + Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: apps/web-console/package-lock.json
+
+      - name: npm ci
+        working-directory: apps/web-console
+        run: npm ci
+
+      - name: TypeScript check
+        working-directory: apps/web-console
+        run: npm run typecheck
+
+      - name: Vite build
+        working-directory: apps/web-console
+        run: npm run build
+        env:
+          VITE_API_URL: http://localhost:8000
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-console-dist
+          path: apps/web-console/dist/
+          retention-days: 7

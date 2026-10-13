@@ -18,7 +18,12 @@ PyYAML>=6.0
 pydantic>=2.0
 
 # --- CLI ---
-typer[all]>=0.9        # requires click>=8 — do NOT pin click below 8
+# NOTE: typer WITHOUT `[all]` extra to avoid transient downgrade pin on `rich`.
+#       rich, click, shellingham listed explicitly (typer needs them on Windows).
+typer>=0.9               # rich/click/shellingham below; use click>=8
+rich>=13.8.0,<17.0       # typer rendering, progress, tables; compatible w/ 13.x-16.x
+click>=8.1.0             # typer needs click>=8; explicitly listed
+shellingham>=1.3.0       # typer shell autodetection (Windows)
 
 # --- Web API ---
 fastapi>=0.100.0

@@ -1,0 +1,141 @@
+# =============================================================================
+# MORTH Schedule of Rates 2024-25 — 100 Seed Items
+# =============================================================================
+# Reference: MORTH 5th Revision + State PWD Rate Analysis 2024-25
+# Note: Rates are indicative all-inclusive (INR per unit, incl. labour,
+#       materials, equipment, overheads). Add GST as applicable.
+#       Actual rates must be verified against current State SOR.
+# =============================================================================
+
+meta:
+  year:       "2024-25"
+  currency:   "INR"
+  base_index: "MORTH Schedule of Rates + State PWD analysis"
+  note:       "Inclusive of all taxes except GST. Add 18% GST for contract."
+
+rates:
+
+  # ── Chapter 300: Earthwork ─────────────────────────────────────────────────
+  "301.1":  {desc: "Earthwork excavation for foundations (hard soil)",        unit: CUM,   rate:    350}
+  "301.2":  {desc: "Earthwork excavation in rock (blasting / chiseling)",     unit: CUM,   rate:    850}
+  "301.3":  {desc: "Embankment with imported moorum — compacted",             unit: CUM,   rate:    620}
+  "301.4":  {desc: "Embankment with granular material (boulder/gravel)",       unit: CUM,   rate:    780}
+  "301.5":  {desc: "Dewatering during excavation (provisional LS)",           unit: LS,    rate: 45000}
+  "301.6":  {desc: "Anti-termite treatment below footings",                   unit: SQM,   rate:    120}
+
+  # ── Chapter 401: Granular Sub-base ────────────────────────────────────────
+  "401.1":  {desc: "Granular sub-base (GSB) well-graded material",            unit: CUM,   rate:  1250}
+  "401.2":  {desc: "Wet mix macadam (WMM) base course",                       unit: CUM,   rate:  1850}
+  "401.3":  {desc: "Compaction of sub-grade (roller passes)",                 unit: SQM,   rate:     55}
+
+  # ── Chapter 500–510: Bituminous Works ─────────────────────────────────────
+  "501.1":  {desc: "Tack coat — bitumen emulsion RS-1 @ 0.25 kg/sqm",        unit: SQM,   rate:     25}
+  "501.2":  {desc: "Prime coat — bitumen emulsion SS-1",                      unit: SQM,   rate:     30}
+  "505.1":  {desc: "Dense bituminous macadam (DBM) 75mm — Gr 1",             unit: SQM,   rate:    450}
+  "510.1":  {desc: "Bituminous concrete (BC) wearing coat 40mm — Gr 1",      unit: SQM,   rate:    380}
+  "510.2":  {desc: "Stone matrix asphalt (SMA) 40mm — PMB 45",               unit: SQM,   rate:    520}
+  "510.3":  {desc: "Semi-dense bituminous concrete (SDBC) 25mm",             unit: SQM,   rate:    320}
+
+  # ── Chapter 600–608: River Training ───────────────────────────────────────
+  "601.1":  {desc: "Stone pitching random rubble 450mm thick",                unit: SQM,   rate:  1100}
+  "601.2":  {desc: "Boulder riprap launching apron D50=300mm",               unit: CUM,   rate:  2200}
+  "601.3":  {desc: "Gabion box 2×1×1m galv wire mesh filled",                unit: EACH,  rate:  4500}
+  "601.4":  {desc: "CC pitching M15 — 100mm thick on filter",                unit: SQM,   rate:  1400}
+  "601.5":  {desc: "Geobag sand-filled PP woven 50kg capacity",               unit: EACH,  rate:    280}
+
+  # ── Chapter 800: Safety Works ──────────────────────────────────────────────
+  "801.1":  {desc: "Metal beam crash barrier W-beam HDG supply & erect",      unit: RM,    rate:  4200}
+  "801.2":  {desc: "SS 304 pipe railing 3-rail 50mm OD",                      unit: RM,    rate:  8500}
+  "801.3":  {desc: "RCC parapet H=1.0m precast incl. fixings",               unit: RM,    rate:  6800}
+  "801.4":  {desc: "Thermoplastic road marking 100mm wide",                   unit: RM,    rate:    120}
+  "801.5":  {desc: "Delineators (reflective) supply & fix",                   unit: EACH,  rate:    850}
+
+  # ── Chapter 1600: Reinforcement ────────────────────────────────────────────
+  "1601.1": {desc: "Reinforcement steel Fe500D supply fix incl. binding wire", unit: MT,  rate: 75000}
+  "1601.2": {desc: "Prestress strand 12.7mm G1860 supply fix stress incl. grout", unit: MT, rate: 145000}
+  "1601.3": {desc: "Prestress strand 15.2mm G1860 supply fix stress incl. grout", unit: MT, rate: 140000}
+  "1601.4": {desc: "HDPE corrugated sheathing for PS ducts",                  unit: RM,    rate:    185}
+  "1601.5": {desc: "HT bar coupler (parallel thread type) supply fix",        unit: EACH,  rate:    350}
+
+  # ── Chapter 1700: Concrete Works ──────────────────────────────────────────
+  "1701.1": {desc: "Concrete M15 PCC blinding / levelling course",            unit: CUM,   rate:  5800}
+  "1701.2": {desc: "Concrete M20 PCC mass/plain",                             unit: CUM,   rate:  6500}
+  "1701.3": {desc: "Concrete M25 RCC — foundation pile cap / footing",        unit: CUM,   rate:  7200}
+  "1701.4": {desc: "Concrete M30 RCC — pier abutment substructure",           unit: CUM,   rate:  8400}
+  "1701.5": {desc: "Concrete M35 RCC — deck slab girder",                     unit: CUM,   rate:  9600}
+  "1701.6": {desc: "Concrete M40 RCC — superstructure PSC deck",              unit: CUM,   rate: 11000}
+  "1701.7": {desc: "Concrete M45 PSC — prestressed girder",                   unit: CUM,   rate: 13500}
+  "1701.8": {desc: "Concrete M50 PSC — box girder high strength",             unit: CUM,   rate: 16000}
+  "1701.9": {desc: "Concrete M55 HPC — special long-span/marine",             unit: CUM,   rate: 22000}
+  "1702.1": {desc: "Formwork — plain surface wall / slab",                    unit: SQM,   rate:    950}
+  "1702.2": {desc: "Formwork — curved soffit T-beam / box",                  unit: SQM,   rate:  1850}
+  "1702.3": {desc: "Formwork — elevated staging > 5m height",                 unit: SQM,   rate:  2400}
+  "1703.1": {desc: "Cement grout injection into PS ducts",                    unit: RM,    rate:    280}
+
+  # ── Chapter 1800: Piling ───────────────────────────────────────────────────
+  "1801.1": {desc: "Bored cast-in-situ pile dia 600mm per RM",               unit: RM,    rate:  2800}
+  "1801.2": {desc: "Bored cast-in-situ pile dia 1000mm per RM",              unit: RM,    rate:  5500}
+  "1801.3": {desc: "Bored cast-in-situ pile dia 1200mm per RM",              unit: RM,    rate:  7800}
+  "1801.4": {desc: "Bored cast-in-situ pile dia 1500mm per RM",              unit: RM,    rate: 11500}
+  "1801.5": {desc: "Pile load test initial + routine (per test)",             unit: EACH,  rate: 250000}
+  "1801.6": {desc: "Cut off pile head and chip",                              unit: EACH,  rate:  5500}
+  "1801.7": {desc: "Pile integrity test (PIT)",                               unit: EACH,  rate:  3500}
+  "1810.1": {desc: "Well sinking RCC steining per RM depth",                 unit: RM,    rate: 28000}
+  "1810.2": {desc: "Well cap concrete M25",                                   unit: CUM,   rate:  7200}
+  "1810.3": {desc: "Well plugging — sand + bottom plug + top plug",           unit: CUM,   rate:  4500}
+
+  # ── Chapter 2400: Structural Steel ────────────────────────────────────────
+  "2401.1": {desc: "Structural steel Fe410W fabricate + erect",               unit: MT,    rate: 95000}
+  "2401.2": {desc: "HSFG bolt M20 Gr 8.8 supply + torque-wrench tighten",   unit: EACH,  rate:    185}
+  "2401.3": {desc: "Anti-corrosion 3-coat epoxy system blast Sa 2.5",        unit: SQM,   rate:  1250}
+  "2401.4": {desc: "Hot-dip galvanising fasteners brackets",                  unit: KG,    rate:     85}
+
+  # ── Chapter 2500: River Training Works ────────────────────────────────────
+  "2501.1": {desc: "Guide bund Belsund-type stone-pitched embankment",        unit: CUM,   rate:  1800}
+  "2501.2": {desc: "Groyne / spur dyke pervious stone rubble",                unit: CUM,   rate:  2200}
+  "2501.3": {desc: "Marginal bund flood protection earthwork",                unit: CUM,   rate:    950}
+
+  # ── Chapter 2600: Waterproofing ────────────────────────────────────────────
+  "2601.1": {desc: "Modified bituminous membrane waterproofing on deck",      unit: SQM,   rate:    850}
+  "2601.2": {desc: "Epoxy waterproofing coating substructure exposed face",   unit: SQM,   rate:    650}
+  "2601.3": {desc: "Deck drainage scupper RCC precast 150mm dia",            unit: EACH,  rate:  2800}
+  "2601.4": {desc: "CI downpipe drainage 150mm dia per metre run",            unit: RM,    rate:    850}
+
+  # ── Chapter 2700: Bearings ─────────────────────────────────────────────────
+  "2701.1": {desc: "Elastomeric bearing 400×400×65mm IRHD60 supply+install", unit: EACH,  rate: 12000}
+  "2701.2": {desc: "Elastomeric bearing 500×500×75mm IRHD60 supply+install", unit: EACH,  rate: 18000}
+  "2701.3": {desc: "POT-PTFE bearing design load 1000–2000 kN supply+erect", unit: EACH,  rate: 85000}
+  "2701.4": {desc: "POT-PTFE bearing design load 2000–5000 kN supply+erect", unit: EACH,  rate: 150000}
+  "2701.5": {desc: "Spherical bearing design load > 5000 kN supply+erect",   unit: EACH,  rate: 320000}
+
+  # ── Chapter 2800: Expansion Joints ────────────────────────────────────────
+  "2801.1": {desc: "Compression seal joint ±10mm movement per RM",           unit: RM,    rate:  4500}
+  "2801.2": {desc: "Strip seal joint ±40mm movement per RM",                 unit: RM,    rate: 12500}
+  "2801.3": {desc: "Single modular joint ±80mm movement per RM",             unit: RM,    rate: 28000}
+  "2801.4": {desc: "Double modular joint ±160mm movement per RM",            unit: RM,    rate: 52000}
+
+  # ── Chapter 2900: Bridge Accessories ──────────────────────────────────────
+  "2901.1": {desc: "Approach slab M30 both ends per CUM",                    unit: CUM,   rate:  8500}
+  "2901.2": {desc: "Weep hole PVC pipe 100mm dia supply+fix",               unit: EACH,  rate:    350}
+  "2901.3": {desc: "Backfill abutment select granular moorum",               unit: CUM,   rate:    850}
+  "2901.4": {desc: "Bearing pedestal M35 incl. formwork dowels",             unit: CUM,   rate: 10500}
+
+  # ── Quality Assurance ──────────────────────────────────────────────────────
+  "QA.1":   {desc: "Concrete cube testing per 5 CUM (3 cubes per set)",     unit: EACH,  rate:  1200}
+  "QA.2":   {desc: "Rebar pull-out / bend rebend test per 10 MT",           unit: EACH,  rate:  2800}
+  "QA.3":   {desc: "Proof load test on completed bridge",                    unit: LS,    rate: 350000}
+  "QA.4":   {desc: "UPV / ultrasonic pulse velocity test per location",     unit: EACH,  rate:  4500}
+  "QA.5":   {desc: "Core extraction + compressive strength test",           unit: EACH,  rate:  3800}
+
+  # ── Provisional Sums ──────────────────────────────────────────────────────
+  "PROV.1": {desc: "Provisional sum — utility/service shifting",            unit: LS,    rate: 500000}
+  "PROV.2": {desc: "Provisional sum — traffic management during construction", unit: LS, rate: 250000}
+  "PROV.3": {desc: "Day works — unskilled labour (provisional daily rate)",  unit: DAY,   rate:    800}
+  "PROV.4": {desc: "Day works — excavator hire (provisional hourly rate)",   unit: HR,    rate:  4500}
+
+  # ── Miscellaneous ─────────────────────────────────────────────────────────
+  "MISC.1": {desc: "Survey and setting out (total station + DGPS)",          unit: LS,    rate:  85000}
+  "MISC.2": {desc: "Environmental mitigation works (provisional)",           unit: LS,    rate: 200000}
+  "MISC.3": {desc: "Demolition of existing structure (provisional)",         unit: LS,    rate: 800000}
+  "MISC.4": {desc: "Site laboratory setup and maintenance",                  unit: MONTH, rate:  35000}
+  "MISC.5": {desc: "As-built survey and drawing preparation",                unit: LS,    rate: 120000}

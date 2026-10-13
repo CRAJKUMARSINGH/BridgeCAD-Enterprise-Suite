@@ -306,9 +306,9 @@ Contributors will be:
 
 ## 📞 Questions?
 
-- 💬 [Open a Discussion](https://github.com/YOUR_USERNAME/bridge-gad-generator/discussions)
-- 📧 Email: crajkumarsingh@hotmail.com
-- 🐛 [Report an Issue](https://github.com/YOUR_USERNAME/bridge-gad-generator/issues)
+- 💬 [Open a Discussion](https://github.com/CRAJKUMARSINGH/Bridge_GAD_Yogendra_Borse/discussions)
+- 🐛 [Report an Issue](https://github.com/CRAJKUMARSINGH/Bridge_GAD_Yogendra_Borse/issues)
+- 🔒 Private / support: Use a private issue or repository discussion — personal contact details are kept out of source files in this public repository.
 
 ---
 

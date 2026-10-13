@@ -1,0 +1,133 @@
+# =============================================================================
+# IRC:21-2000 / IRC:112-2020 — Structural Design Parameters
+# =============================================================================
+# Reference: IRC:21-2000 "Standard Specifications and Code of Practice for
+#            Road Bridges — Section III: Cement Concrete (Plain and Reinforced)"
+#            IRC:112-2020 "Code of Practice for Concrete Road Bridges"
+# =============================================================================
+
+meta:
+  standards:   ["IRC:21-2000", "IRC:112-2020", "IRC:6-2017", "IRC:83-2018"]
+  title:       "Structural Design Parameters for Bridges"
+
+# ── Span/Depth Ratios (IRC:21-2000 Table 12 / IRC:112-2020 Annex J) ──────────
+span_depth_ratios:
+  # (superstructure_type, span_config) → {min, max, reference}
+  RCC_TBEAM:
+    SIMPLY_SUPPORTED:   {min: 10, max: 15, ref: "IRC:21 Table 12"}
+    CONTINUOUS:         {min: 12, max: 18, ref: "IRC:21 Table 12"}
+  SOLID_SLAB:
+    SIMPLY_SUPPORTED:   {min:  8, max: 12, ref: "IRC:21 Cl.305"}
+    CONTINUOUS:         {min: 10, max: 14, ref: "IRC:21 Cl.305"}
+  VOIDED_SLAB:
+    SIMPLY_SUPPORTED:   {min: 10, max: 14, ref: "IRC:21 Cl.305"}
+  PSC_IGIRDER:
+    SIMPLY_SUPPORTED:   {min: 14, max: 20, ref: "IRC:112 Annex J"}
+    CONTINUOUS:         {min: 16, max: 22, ref: "IRC:112 Annex J"}
+  PSC_BOX_GIRDER:
+    SIMPLY_SUPPORTED:   {min: 16, max: 22, ref: "IRC:112 Cl.16"}
+    CONTINUOUS:         {min: 18, max: 25, ref: "IRC:112 Cl.16"}
+    BALANCED_CANTILEVER:{min: 12, max: 18, ref: "IRC:112 Cl.16"}
+  STEEL_PLATE_GIRDER:
+    SIMPLY_SUPPORTED:   {min: 18, max: 25, ref: "IRC:24-2010"}
+  STEEL_COMPOSITE:
+    SIMPLY_SUPPORTED:   {min: 18, max: 25, ref: "IRC:24-2010"}
+  STEEL_TRUSS:
+    SIMPLY_SUPPORTED:   {min:  8, max: 12, ref: "IRC:24-2010"}
+  CONCRETE_ARCH:
+    ARCH_OPEN:          {min: 30, max: 60, ref: "IRC:21 (rise/span ~1/5)"}
+  BOWSTRING_ARCH:
+    SIMPLY_SUPPORTED:   {min: 16, max: 25, ref: "IRC:24-2010"}
+
+# ── Minimum Deck Slab Thickness (IRC:21-2000 Cl.304.7) ───────────────────────
+min_deck_slab_thickness_mm:
+  general:              200    # IRC:21 Cl.304.7
+  psc_composite:        230    # IRC:112 Cl.16.4
+  box_culvert_top:      200    # IRC SP:13
+  solid_slab_bridge:    200    # IRC:21 Cl.305
+
+# ── Nominal Cover (IS:456-2000 Table 16 / IRC:112-2020 Table 14) ─────────────
+nominal_cover_mm:
+  # (exposure_class, member) → cover in mm
+  MILD:
+    DECK_SLAB:      40
+    PIER:           40
+    PILE:           50
+    ABUTMENT:       40
+    FOOTING:        40
+  MODERATE:
+    DECK_SLAB:      40
+    PIER:           45
+    PILE:           50
+    ABUTMENT:       45
+    FOOTING:        50
+  SEVERE:
+    DECK_SLAB:      45
+    PIER:           50
+    PILE:           60
+    ABUTMENT:       50
+    FOOTING:        50
+  VERY_SEVERE:
+    DECK_SLAB:      50
+    PIER:           55
+    PILE:           65
+    ABUTMENT:       55
+    FOOTING:        60
+  EXTREME:
+    DECK_SLAB:      75
+    PIER:           75
+    PILE:           75
+    ABUTMENT:       75
+    FOOTING:        75
+
+# ── Impact Factor (IRC:6-2017 Clause 3.5) ─────────────────────────────────────
+impact_factor:
+  formula:   "IF = 4.5 / (6 + L)  capped at 0.10 to 0.50"
+  class_a_b: {formula: "4.5 / (6+L)", min: 0.10, max: 0.50}
+  class_70R: {flat: 0.10}
+  class_aa:  {flat: 0.10}
+  footway:   {flat: 0.00}
+
+# ── Expansion Joint Gap (IRC:6-2017 Cl.3.8 / IRC SP:55 Cl.7.3) ───────────────
+expansion_joint_gap:
+  thermal_coefficient_concrete: 1.17e-5   # /°C
+  design_temperature_range_C:   30        # ΔT = ±15°C (IRC:6 Cl.3.8)
+  min_gap_mm:                   20
+  min_gap_fixed_end_mm:         10
+  creep_shrinkage_addition_mm:  10        # additional allowance
+  note: "gap = L × α × ΔT + creep_shrinkage; minimum 20 mm"
+
+# ── Serviceability Deflection (IRC:6-2017 Cl.3.7 / IRC:112-2020 Cl.12.4) ─────
+deflection_limits:
+  live_load_general:   "span / 600"      # IRC:6 Cl.3.7
+  pedestrian_sensitive:"span / 800"
+  dynamic_camber:      "span / 1000"
+  note: "Check against pre-camber; net deflection must not create ponding"
+
+# ── Bearing Pad Requirements (IRC:83-2018) ─────────────────────────────────────
+bearing_pad:
+  elastomeric_max_design_stress_MPa:    10.0   # IRC:83 Part II
+  elastomeric_max_shear_strain:          0.70
+  pot_max_elastomer_pressure_MPa:       35.0   # IRC:83 Part I
+  ptfe_sliding_max_pressure_MPa:        45.0
+  ptfe_surface_roughness_Ra_max:         0.40   # μm
+  min_rotation_capacity_rad:             0.005  # design minimum
+
+# ── Prestress Loss Budget (IRC:112-2020 Clause 6.8) ───────────────────────────
+prestress_losses:
+  jacking_stress_pct_fpk:    75       # max 75% of characteristic strength
+  friction_loss_typical_pct:  5       # μ × α (Wobble + curvature)
+  anchorage_slip_mm:          6       # draw-in loss typical
+  elastic_shortening_pct:     3       # initial
+  creep_loss_pct:             8       # long-term
+  shrinkage_loss_pct:         4       # long-term
+  relaxation_loss_pct:        2       # stress-relaxation
+  total_long_term_loss_pct:  18       # typical sum (design budget)
+
+# ── Seismic Design (IS:1893-2016 / IRC:6-2017 Clause 3.9) ─────────────────────
+seismic:
+  zone_factors:   {II: 0.10, III: 0.16, IV: 0.24, V: 0.36}
+  importance_factor_major_bridge: 1.50   # IRC:6 Cl.3.9
+  importance_factor_minor:        1.20
+  response_reduction_factor:      2.50   # ductile detailing bridges
+  ductility_class:                "DCM"  # Ductile Class Medium per IRC:112

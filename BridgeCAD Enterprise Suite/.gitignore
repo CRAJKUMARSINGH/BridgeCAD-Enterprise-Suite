@@ -68,3 +68,25 @@ temp/
 logs/
 *.bak
 *.tmp
+
+# ---- Generated outputs (never commit DXF/PDF/XLSX outputs) ----
+smoke_output*/
+test_run_output*/
+tests/e2e/output/
+tests/benchmarks/.benchmarks/
+benchmark_results.json
+*.dxf
+*.pdf
+
+# ---- Database ----
+*.db
+*.sqlite3
+~/.bridgecad/
+
+# ---- Templates (generated xlsx — users generate fresh) ----
+templates/**/*.xlsx
+
+# ---- Scratch / one-off scripts at repo root ----
+_tmp_*.py
+_final_*.py
+outputs/

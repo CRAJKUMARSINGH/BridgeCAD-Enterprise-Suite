@@ -1,0 +1,95 @@
+﻿pip-audit 
+: WARNING:p
+ip_audit._c
+li:--no-dep
+s is 
+supported, 
+but users 
+are 
+encouraged 
+to fully 
+hash their 
+pinned depe
+ndencies
+At line:1 
+char:1
++ 
+pip-audit 
+-r ".agents
+\tasks\secu
+rity-audit-
+2026-10-13\
+requirement
+s_pi ...
++ ~~~~~~~~~
+~~~~~~~~~~~
+~~~~~~~~~~~
+~~~~~~~~~~~
+~~~~~~~~~~~
+~~~~~~~~~~~
+~~~~~
+    + Cate 
+   goryIn  
+  fo       
+           
+: NotS    
+pecifi    
+ed: (W    
+ARNING    
+:pip_a    
+ud...e    
+d depe    
+ndenci    
+es:Str    
+ing) [    
+], Rem    
+oteExc    
+eption
+    + Full 
+   yQuali  
+  fiedEr   
+ rorId     
+: Nati    
+veComm    
+andErr    
+or
+ 
+WARNING:pip
+_audit._cli
+:Consider 
+using a 
+tool like `
+pip-compile
+`: https://
+pip-tools.r
+eadthedocs.
+io/en/lates
+t/#using-ha
+shes
+ERROR:pip_a
+udit._cli:r
+equirement 
+file .agent
+s\tasks\sec
+urity-audit
+-2026-10-13
+\requiremen
+ts_pinned.t
+xt 
+contains 
+invalid 
+specifier 
+at line 1: 
+Invalid req
+uirement: 
+: Expected 
+semicolon 
+(after 
+name with 
+no version 
+specifier) 
+or end
+    python 
+:
+           
+^

@@ -231,18 +231,16 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ### RKS LEGAL - Techno Legal Consultants
 
-📍 **Address:**  
-303 Vallabh Apartment, Navratna Complex, Bhuwana  
-Udaipur - 313001, India
-
-📧 **Email:** crajkumarsingh@hotmail.com  
-📱 **Phone:** +91 9414163019
+> Professional & legal service inquiries for RKS LEGAL are routed through
+> GitHub issues or the repository discussion board — contact details are
+> intentionally kept out of the public source tree.  Use the links below
+> and tag your issue with `support` or `rks-legal`.
 
 ### Get Help
 - 📖 [Documentation](docs/)
-- 🐛 [Report Bug](https://github.com/YOUR_USERNAME/bridge-gad-generator/issues)
-- 💡 [Request Feature](https://github.com/YOUR_USERNAME/bridge-gad-generator/issues)
-- 💬 [Discussions](https://github.com/YOUR_USERNAME/bridge-gad-generator/discussions)
+- 🐛 [Report Bug](https://github.com/CRAJKUMARSINGH/Bridge_GAD_Yogendra_Borse/issues)
+- 💡 [Request Feature](https://github.com/CRAJKUMARSINGH/Bridge_GAD_Yogendra_Borse/issues)
+- 💬 [Discussions](https://github.com/CRAJKUMARSINGH/Bridge_GAD_Yogendra_Borse/discussions)
 
 ---
 

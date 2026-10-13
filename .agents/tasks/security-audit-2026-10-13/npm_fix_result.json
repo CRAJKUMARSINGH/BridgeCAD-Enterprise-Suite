@@ -1,0 +1,5 @@
+{
+  "vulnerabilities_remaining": 0,
+  "packages_updated": ["vite", "esbuild", "source-map-js"],
+  "status": "PASS"
+}

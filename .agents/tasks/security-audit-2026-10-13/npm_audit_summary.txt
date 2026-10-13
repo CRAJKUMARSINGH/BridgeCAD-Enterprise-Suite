@@ -1,0 +1,87 @@
+====================================================================
+BRIDGE GAD PROJECT — NPM SECURITY AUDIT SUMMARY
+Date: 2026-10-13
+====================================================================
+
+TOOL VERSIONS
+  npm version : 11.9.0
+  pnpm version: 10.33.0 (available, but no pnpm-lock.yaml — project uses npm)
+
+--------------------------------------------------------------------
+SCOPE
+  Frontend directory: e:\Rajkumar\Bridge_GAD_Yogendra_Borse\frontend
+  Root workspace   : no package-lock.json found — root audit skipped
+--------------------------------------------------------------------
+
+VULNERABILITY COUNTS (npm audit — frontend)
+  Critical  : 0
+  High      : 2
+  Moderate  : 1
+  Low       : 0
+  Info      : 0
+  TOTAL     : 3
+
+--------------------------------------------------------------------
+PNPM AUDIT
+  Status : SKIPPED — no pnpm-lock.yaml in frontend directory
+  Error  : ERR_PNPM_AUDIT_NO_LOCKFILE
+           "No pnpm-lock.yaml found: Cannot audit a project without a lockfile"
+
+--------------------------------------------------------------------
+ERRORS ENCOUNTERED
+  None — both npm audit commands completed normally.
+  Exit code 1 from npm audit is expected when vulnerabilities exist.
+
+--------------------------------------------------------------------
+FULL HUMAN-READABLE npm audit OUTPUT
+--------------------------------------------------------------------
+# npm audit report
+
+esbuild  <=0.24.2
+Severity: moderate
+esbuild enables any website to send any requests to the development server
+and read the response
+Advisory: https://github.com/advisories/GHSA-67mh-4wv8-2f99
+Fix available via `npm audit fix --force`
+  → Will install vite@8.3.4, which is a BREAKING CHANGE
+Affected path: node_modules/esbuild
+  vite  <=6.4.2
+  Depends on vulnerable versions of esbuild
+  Affected path: node_modules/vite
+
+source-map-js  1.0.0 - 1.2.1
+Severity: high
+source-map-js allows event-loop denial of service through indexed
+source-map section offsets
+Advisory: https://github.com/advisories/GHSA-68fv-2mgg-jv7q
+Fix available via `npm audit fix`
+Affected path: node_modules/source-map-js
+
+3 vulnerabilities (1 moderate, 2 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+--------------------------------------------------------------------
+RECOMMENDED REMEDIATION
+--------------------------------------------------------------------
+1. source-map-js (HIGH x2) — safe fix available:
+     npm audit fix --prefix "e:\Rajkumar\Bridge_GAD_Yogendra_Borse\frontend"
+   This upgrades source-map-js without breaking changes.
+
+2. esbuild / vite (MODERATE) — requires a breaking Vite major upgrade:
+     npm audit fix --force --prefix "e:\Rajkumar\Bridge_GAD_Yogendra_Borse\frontend"
+   Review Vite v8 migration guide before applying.
+   Note: esbuild vulnerability only affects the dev server; it has no
+   impact on production builds or the deployed application.
+
+--------------------------------------------------------------------
+OUTPUT FILES
+  npm_audit.json          — full JSON from `npm audit --json`
+  npm_audit_readable.txt  — human-readable audit output
+  pnpm_audit.json         — pnpm audit result (error: no lockfile)
+  npm_audit_summary.txt   — this file
+====================================================================

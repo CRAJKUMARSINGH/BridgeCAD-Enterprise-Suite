@@ -1,0 +1,171 @@
+================================================================================
+ PIP-AUDIT SECURITY AUDIT SUMMARY
+ Project : Bridge GAD (Yogendra Borse)
+ Date    : 2026-10-13
+ Tool    : pip-audit 2.10.1
+================================================================================
+
+INSTALLATION STATUS
+-------------------
+pip-audit was PRE-INSTALLED (version 2.10.1)
+Location: C:\Program Files\Python314\Lib\site-packages
+
+NOTE: A cache permission warning was reported during all runs:
+  WARNING:pip_audit._cache: Failed to read from cache directory, performance
+  may be degraded: [Errno 13] Permission denied: '...pip-audit\Cache\...'
+  This does not affect audit correctness, only performance (caching is skipped).
+
+================================================================================
+AUDIT 1 — requirements.txt
+================================================================================
+
+Command : pip-audit -r requirements.txt --format json --progress-spinner off
+Exit Code: 0
+
+Result  : ✅ NO KNOWN VULNERABILITIES FOUND
+
+Markdown Output:
+  No known vulnerabilities found
+
+Packages audited (from requirements.txt):
+  altair, annotated-doc, annotated-types, anyio, arq, ast-serialize,
+  attrs, black, cairocffi, cairosvg, certifi, cffi, charset-normalizer,
+  click, colorama, contourpy, coverage, cssselect2, cycler, defusedxml,
+  ezdxf, fastapi, flake8, fonttools, h11, hiredis, httptools, idna,
+  iniconfig, itsdangerous, jinja2, jsonschema, jsonschema-specifications,
+  kiwisolver, librt, markdown-it-py, markupsafe, matplotlib, mccabe,
+  mdurl, mypy, mypy-extensions, narwhals, numpy, opentelemetry-api,
+  openpyxl, pandas, pathspec, pillow, platformdirs, pluggy, protobuf,
+  pyarrow, pycodestyle, pycparser, pydantic, pydantic-core, pydeck,
+  pyflakes, pyjwt, pygments, pyparsing, pytest, pytest-cov, pytokens,
+  python-dateutil, python-dotenv, python-multipart, pyyaml, redis,
+  referencing, reportlab, requests, rich, rpds-py, scipy, shellingham,
+  six, starlette, streamlit, tinycss2, toml, typer, typing-extensions,
+  typing-inspection, tzdata, urllib3, uvicorn, watchdog, watchfiles,
+  webencodings, websockets, xlrd, xlsxwriter, et-xmlfile
+
+Vulnerability count (requirements.txt):
+  CRITICAL : 0
+  HIGH     : 0
+  MEDIUM   : 0
+  LOW      : 0
+  TOTAL    : 0
+
+================================================================================
+AUDIT 2 — Python Environment Scan (pyproject.toml / installed environment)
+================================================================================
+
+Command : pip-audit --format json --progress-spinner off  (run from project root)
+Exit Code: 1 (vulnerabilities found)
+
+Result  : ⚠️  46 vulnerability instances found in 1 package (32 unique CVEs/PSYECs)
+
+NOTE: gitpython is NOT listed in requirements.txt or pyproject.toml as a direct
+project dependency. It is an installed package in the global Python environment.
+It may be a transitive dependency of a dev tool or was installed separately.
+
+Vulnerable Package:
+  Package  : gitpython
+  Version  : 3.0.6  (INSTALLED)
+  Fix      : Upgrade to >= 3.1.60 (latest patched version)
+  Vulns    : 46 entries (32 unique IDs)
+
+Unique Vulnerability IDs:
+  PYSEC-2022-42992
+  PYSEC-2023-137
+  PYSEC-2023-161
+  PYSEC-2023-165
+  PYSEC-2024-4
+  PYSEC-2026-2161
+  PYSEC-2026-2162
+  PYSEC-2026-2163
+  PYSEC-2026-3783
+  PYSEC-2026-3784
+  PYSEC-2026-3785
+  PYSEC-2026-3786
+  PYSEC-2026-3787
+  PYSEC-2026-3788
+  PYSEC-2026-3836
+  PYSEC-2026-3837
+  PYSEC-2026-3838
+  PYSEC-2026-3839
+  PYSEC-2026-3840
+  PYSEC-2026-3841
+  PYSEC-2026-3843
+  PYSEC-2026-3948
+  PYSEC-2026-3949
+  PYSEC-2026-3950
+  PYSEC-2026-3951
+  PYSEC-2026-3952
+  PYSEC-2026-3953
+  PYSEC-2026-3980
+  PYSEC-2026-3981
+  PYSEC-2026-3982
+  PYSEC-2026-3984
+  PYSEC-2026-3995
+
+Known issue categories (from public advisories):
+  - Remote code execution via crafted git repository (CVE-2024-22190 / PYSEC-2024-4)
+  - Shell injection via unsafe clone/pull operations
+  - Path traversal issues
+  - Arbitrary file write/truncation via Commit.count options (PYSEC-2026-3995)
+
+Vulnerability count (environment scan):
+  CRITICAL : N/A (severity field not populated in this audit output)
+  HIGH     : N/A
+  MEDIUM   : N/A
+  LOW      : N/A
+  TOTAL    : 46 instances / 32 unique IDs across 1 package (gitpython 3.0.6)
+
+================================================================================
+REMEDIATION RECOMMENDATION
+================================================================================
+
+ACTION REQUIRED (environment fix):
+  pip install --upgrade "gitpython>=3.1.60"
+
+  This upgrades the globally installed gitpython from 3.0.6 to a patched version.
+  If gitpython is used only by development tooling (e.g., TruffleHog, git hooks),
+  upgrading it in the global environment is safe and has no impact on the project's
+  runtime requirements.txt packages.
+
+PROJECT DEPENDENCY STATUS:
+  ✅ All packages in requirements.txt are clean — zero known vulnerabilities.
+  ✅ All packages in pyproject.toml direct dependencies are clean.
+  ⚠️  gitpython 3.0.6 found in the Python environment is outdated and vulnerable.
+
+================================================================================
+ERRORS / WARNINGS ENCOUNTERED
+================================================================================
+
+1. Cache permission error (non-fatal, all runs):
+   "Failed to read from cache directory, performance may be degraded:
+    [Errno 13] Permission denied: '...pip-audit\Cache\...'"
+   Impact: Audit results are still correct; only caching is skipped.
+   Fix   : Run `icacls "%LOCALAPPDATA%\pip-audit\Cache" /grant %USERNAME%:F /T`
+           to grant cache directory permissions.
+
+2. venv junction warning (non-fatal):
+   "WARNING:venv: Actual environment location may have moved due to redirects,
+    links or junctions."
+   Impact: None — audit completes successfully.
+
+3. pyproject.toml direct path argument rejected:
+   pip-audit does not accept a file path to pyproject.toml; it requires the
+   project directory. The environment scan was run from the project root instead.
+
+4. Invalid distribution warning (non-fatal):
+   "WARNING: Ignoring invalid distribution ~ytz (...\Python314\site-packages)"
+   Impact: None — this is a corrupt/partial install unrelated to the project.
+
+================================================================================
+OUTPUT FILES
+================================================================================
+
+pip_audit.json          — Full JSON results for requirements.txt (0 vulns)
+pip_audit_pyproject.json — Full JSON results for environment scan (46 vulns)
+pip_audit_summary.txt   — This file
+
+================================================================================
+END OF REPORT
+================================================================================

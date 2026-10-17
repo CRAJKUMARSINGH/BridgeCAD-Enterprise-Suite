@@ -113,12 +113,18 @@ async def predict(
 ):
     """Synchronous generation — blocks until the drawing is ready.
     For large files prefer POST /jobs (async).
+
+    BUG-FIX (2026-10-16): FileResponse inside a TemporaryDirectory context manager
+    caused FileNotFoundError because the tempdir was deleted before FastAPI could
+    stream the file.  Fixed by reading file bytes into memory before the tempdir
+    exits, then returning Response(content=bytes).  This keeps the fix minimal and
+    avoids any change to generate_bridge_drawing().
     """
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir)
 
         # KERO-003: strip directory components
-        safe_name = Path(excel_file.filename).name
+        safe_name = Path(excel_file.filename or "upload.xlsx").name or "upload.xlsx"
         excel_path = temp_dir_path / safe_name
         with open(excel_path, "wb") as f:
             shutil.copyfileobj(excel_file.file, f)
@@ -129,27 +135,54 @@ async def predict(
             with open(config_path, "wb") as f:
                 shutil.copyfileobj(config_file.file, f)
 
-        output_path = temp_dir_path / f"output.{output_format}"
+        # generate_bridge_drawing always writes DXF; post-convert when needed
+        dxf_output_path = temp_dir_path / "output.dxf"
 
         try:
             result_path = generate_bridge_drawing(
                 excel_file=excel_path,
                 config_file=config_path,
-                output_path=output_path,
+                output_path=dxf_output_path,
             )
             if not result_path.exists():
                 raise HTTPException(status_code=500, detail="No output file created")
 
-            mime = _MIME_TYPES.get(output_format.lower(), "application/octet-stream")
-            return FileResponse(
-                result_path,
-                media_type=mime,
-                filename=f"bridge_drawing.{output_format}",
-            )
+            fmt = output_format.lower()
+            if fmt in ("pdf", "png", "svg") and result_path.suffix.lower() == ".dxf":
+                # Convert DXF → requested format
+                try:
+                    from .dxf_to_pdf import convert_dxf_to_pdf
+                    converted_path = temp_dir_path / f"output.{fmt}"
+                    if fmt == "pdf":
+                        convert_dxf_to_pdf(result_path, converted_path)
+                    else:
+                        # For png/svg fall back to DXF if converter unavailable
+                        converted_path = result_path
+                        fmt = "dxf"
+                    if converted_path.exists():
+                        result_path = converted_path
+                    else:
+                        # Conversion produced nothing — return DXF instead
+                        fmt = "dxf"
+                except Exception as conv_exc:
+                    logger.warning("Format conversion failed (%s) — returning DXF", conv_exc)
+                    fmt = "dxf"
+
+            # Read into memory BEFORE the TemporaryDirectory context exits
+            file_bytes = result_path.read_bytes()
+
         except HTTPException:
             raise
         except Exception as exc:
             raise HTTPException(status_code=500, detail=str(exc))
+
+    # tempdir is now cleaned up — serve from in-memory bytes
+    mime = _MIME_TYPES.get(fmt, "application/octet-stream")
+    return Response(
+        content=file_bytes,
+        media_type=mime,
+        headers={"Content-Disposition": f'attachment; filename="bridge_drawing.{fmt}"'},
+    )
 
 
 @app.post("/jobs", status_code=202)
@@ -369,11 +402,17 @@ async def get_package(
 
 @app.get("/generate_sample_pdf")
 async def generate_sample_pdf():
-    """Generate a sample PDF drawing using the simple_12m template."""
+    """Generate a sample PDF drawing using the simple_12m template.
+
+    BUG-FIX (2026-10-16): FileResponse inside TemporaryDirectory caused
+    FileNotFoundError.  Fixed by reading result bytes into memory before the
+    tempdir context exits, then returning Response(content=bytes).
+    Also: if PDF conversion fails, return DXF so the endpoint never 500s on
+    a conversion-only failure.
+    """
     try:
         from .bridge_canvas_features import BRIDGE_TEMPLATES, make_template_excel
         from .bridge_generator import BridgeGADGenerator
-        from .dxf_to_pdf import convert_dxf_to_pdf
         import pandas as pd
     except ImportError as exc:
         raise HTTPException(
@@ -383,40 +422,49 @@ async def generate_sample_pdf():
 
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir)
-        
+
         # Generate Excel input from template
         template_key = "simple_12m"
         params = BRIDGE_TEMPLATES[template_key]["parameters"]
         xls_bytes = make_template_excel(params)
-        
-        excel_path = temp_dir_path / f"{template_key}_input.xlsx"
-        excel_path.write_bytes(xls_bytes)
-        
-        # Convert to format expected by generator
+
+        # Convert to the row-oriented format BridgeGADGenerator.read_variables_from_excel expects
+        import pandas as pd  # noqa: F811 — already imported above, re-import for clarity
         df = pd.DataFrame([[v, k, k] for k, v in params.items()], columns=["Value", "Variable", "Description"])
         generator_input_path = temp_dir_path / "generator_input.xlsx"
         df.to_excel(generator_input_path, index=False, header=False)
-        
+
         # Generate DXF
         dxf_path = temp_dir_path / "sample_bridge.dxf"
         gen = BridgeGADGenerator()
         gen.generate_complete_drawing(generator_input_path, dxf_path)
-        
+
         if not dxf_path.exists():
             raise HTTPException(status_code=500, detail="DXF generation failed")
-        
-        # Convert DXF to PDF
-        pdf_path = temp_dir_path / "sample_bridge.pdf"
-        convert_dxf_to_pdf(dxf_path, pdf_path)
-        
-        if not pdf_path.exists():
-            raise HTTPException(status_code=500, detail="PDF conversion failed")
-        
-        return FileResponse(
-            pdf_path,
-            media_type=_MIME_TYPES["pdf"],
-            filename="sample_bridge_gad.pdf",
-        )
+
+        # Attempt DXF → PDF conversion
+        pdf_bytes: Optional[bytes] = None
+        serve_as = "dxf"
+        try:
+            from .dxf_to_pdf import convert_dxf_to_pdf
+            pdf_path = temp_dir_path / "sample_bridge.pdf"
+            convert_dxf_to_pdf(dxf_path, pdf_path)
+            if pdf_path.exists():
+                pdf_bytes = pdf_path.read_bytes()
+                serve_as = "pdf"
+        except Exception as conv_exc:
+            logger.warning("PDF conversion failed for sample PDF (%s) — serving DXF", conv_exc)
+
+        # Read into memory BEFORE TemporaryDirectory exits
+        file_bytes = pdf_bytes if pdf_bytes else dxf_path.read_bytes()
+
+    # tempdir cleaned up — serve from memory
+    mime = _MIME_TYPES[serve_as]
+    return Response(
+        content=file_bytes,
+        media_type=mime,
+        headers={"Content-Disposition": f'attachment; filename="sample_bridge_gad.{serve_as}"'},
+    )
 
 
 if __name__ == "__main__":

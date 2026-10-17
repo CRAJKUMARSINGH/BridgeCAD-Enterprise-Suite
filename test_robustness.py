@@ -163,114 +163,107 @@ def _record(result: TestResult, *, flush: bool = False) -> None:
 
 
 def _write_md() -> None:
-    now   = datetime.now()
-    total = len(_results)
+    """Update ONLY the Section 2 (Dashboard) and Section 3 (Results) in app-robustness-testing.md.
+
+    The file is structured with permanent sections (1, 4, 5, 6, 7) that should never be
+    overwritten by this script. We update the timestamp in the header and replace only
+    the dashboard/results tables by locating the KIRO AUTO-UPDATE MARKER at the end.
+    """
+    now    = datetime.now()
+    total  = len(_results)
     passed = sum(1 for r in _results if r.ok)
     failed = total - passed
     pct    = f"{passed/total*100:.1f}%" if total else "N/A"
 
-    lines = [
-        "<!-- THIS FILE IS AUTO-GENERATED — DO NOT EDIT MANUALLY -->",
-        "<!-- Updated every 15 minutes or when the test run completes -->",
+    # Build just the results section that we'll inject
+    result_lines = [
         "",
-        "# BridgeCAD Enterprise Suite — App Robustness Testing Log",
+        f"<!-- AUTO-UPDATED: {now.strftime('%Y-%m-%d %H:%M:%S IST')} by test_robustness.py -->",
         "",
-        "## Standing Instructions (for all future multi-agent sessions)",
+        "## 3. Latest Test Run Results",
         "",
-        "> **ALWAYS** update this file after every browser / API test run.",
-        "> **Update interval:** every 15 minutes during an active test session,",
-        "> and immediately when a run completes or a critical failure is found.",
-        "> This log is the single source of truth for app health across all",
-        "> Kiro sessions, CI runs, and manual test passes.",
+        f"**Run date:** {_start_wall.strftime('%Y-%m-%d %H:%M IST')} → {now.strftime('%H:%M IST')}",
+        f"· **{passed}/{total} {'PASS' if failed==0 else 'PASS'} ({pct})**",
         "",
-        "---",
-        "",
-        f"## Session: {_start_wall.strftime('%Y-%m-%d %H:%M')} → {now.strftime('%H:%M')}",
-        "",
-        f"| | Value |",
-        f"|---|---|",
-        f"| Run start | {_start_wall.strftime('%Y-%m-%d %H:%M:%S IST')} |",
-        f"| Last update | {now.strftime('%Y-%m-%d %H:%M:%S IST')} |",
-        f"| API base URL | `{BASE_URL}` |",
-        f"| Total tests | {total} |",
-        f"| Passed | {passed} ✅ |",
-        f"| Failed | {failed} ❌ |",
-        f"| Pass rate | {pct} |",
-        "",
-        "---",
-        "",
-        "## Results by Category",
-        "",
+        "| Suite | Pass | Fail |",
+        "|-------|------|------|",
     ]
 
-    # Group by category
     categories: Dict[str, List[TestResult]] = {}
     for r in _results:
         categories.setdefault(r.category, []).append(r)
 
     for cat, items in categories.items():
-        cat_pass = sum(1 for r in items if r.ok)
-        lines.append(f"### {cat}  ({cat_pass}/{len(items)} passed)")
-        lines.append("")
-        lines.append("| ID | Label | Endpoint | Status | ms | Size (B) | Result | Notes |")
-        lines.append("|---|---|---|---|---|---|---|---|")
-        for r in items:
-            icon  = "✅" if r.ok else "❌"
-            err   = r.error or ""
-            det   = r.details[:60] if r.details else ""
-            lines.append(
-                f"| `{r.test_id}` | {r.label} | `{r.method} {r.endpoint}` "
-                f"| {r.status} | {r.elapsed_ms:.0f} | {r.output_size_bytes:,} "
-                f"| {icon} | {err}{det} |"
-            )
-        lines.append("")
+        cp = sum(1 for r in items if r.ok)
+        cf = len(items) - cp
+        result_lines.append(f"| {cat} | {cp} | {cf} |")
 
-    # Failure detail section
-    failures = [r for r in _results if not r.ok]
-    if failures:
-        lines += [
-            "---",
-            "",
-            "## Failure Details",
-            "",
-        ]
-        for r in failures:
-            lines += [
-                f"### ❌ `{r.test_id}` — {r.label}",
-                "",
-                f"- **Endpoint:** `{r.method} {r.endpoint}`",
-                f"- **HTTP status:** {r.status}",
-                f"- **Error:** {r.error or 'None'}",
-                f"- **Details:** {r.details}",
-                "",
-            ]
-
-    lines += [
-        "---",
-        "",
-        "## Input Dimensions Tested",
-        "",
-        "| Dimension | Values Tested |",
-        "|---|---|",
-        "| Bridge types | SLAB, BEAM, T_BEAM, BOX_GIRDER, ARCH, TRUSS |",
-        "| Span count | 1, 2, 3, 4, 5, 7, 11 |",
-        "| Span length | 6 m, 9 m, 12 m, 18 m, 24 m, 30 m, 40 m, 45 m |",
-        "| Deck width | 7.5 m, 8.5 m, 11.1 m, 14.0 m, 16.5 m |",
-        "| Skew angle | 0°, 15°, 30°, 45° |",
-        "| Output formats | dxf, pdf, png, svg |",
-        "| Real workbooks | All .xlsx files from `inputs/` |",
-        "| Edge cases | 0-byte file, no-file, very large span (200 m), wrong MIME type |",
-        "",
-        "---",
-        "",
-        "## Chat Log",
-        "",
-        "All significant findings from Kiro sessions are appended below.",
+    result_lines += [
+        f"| **TOTAL** | **{passed}** | **{failed}** |",
         "",
     ]
 
-    REPORT_MD.write_text("\n".join(lines), encoding="utf-8")
-    print(f"\n  [MD] Report written → {REPORT_MD}  ({len(lines)} lines)")
+    # Failures detail
+    failures = [r for r in _results if not r.ok]
+    if failures:
+        result_lines += ["### ❌ Failures", ""]
+        for r in failures:
+            result_lines.append(
+                f"- `{r.test_id}` `{r.method} {r.endpoint}` → HTTP {r.status}: {r.error}"
+            )
+        result_lines.append("")
+
+    # Full per-category tables
+    for cat, items in categories.items():
+        cp = sum(1 for r in items if r.ok)
+        result_lines += [
+            f"### {cat}  ({cp}/{len(items)} passed)", "",
+            "| ID | Label | Status | ms | Size (B) | Result | Notes |",
+            "|---|---|---|---|---|---|---|",
+        ]
+        for r in items:
+            icon = "✅" if r.ok else "❌"
+            err  = (r.error or "")[:50]
+            result_lines.append(
+                f"| `{r.test_id}` | {r.label} | {r.status} | {r.elapsed_ms:.0f} "
+                f"| {r.output_size_bytes:,} | {icon} | {err} |"
+            )
+        result_lines.append("")
+
+    result_lines.append("---")
+    result_lines.append("")
+
+    # Read existing file; replace content between the results section marker and the next
+    # section heading. Strategy: find "## 3." and "## 4." and replace everything between them.
+    try:
+        existing = REPORT_MD.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        existing = ""
+
+    # Update the "Last Updated" line at the top
+    import re
+    existing = re.sub(
+        r'\*\*Last Updated:\*\*.*',
+        f'**Last Updated:** {now.strftime("%Y-%m-%d %H:%M IST")}',
+        existing,
+    )
+
+    # Replace section 3 block
+    new_section3 = "\n".join(result_lines)
+    if "## 3. Latest Test Run Results" in existing and "## 4. Known Bugs" in existing:
+        before = existing[:existing.index("## 3. Latest Test Run Results")]
+        after  = existing[existing.index("## 4. Known Bugs"):]
+        updated = before + new_section3 + "\n" + after
+    else:
+        # Fallback: append at the auto-update marker
+        marker = "<!-- KIRO AUTO-UPDATE MARKER — DO NOT REMOVE THIS LINE -->"
+        if marker in existing:
+            updated = existing[:existing.index(marker)] + new_section3 + "\n" + marker + "\n"
+        else:
+            updated = existing + "\n" + new_section3
+
+    REPORT_MD.write_text(updated, encoding="utf-8")
+    print(f"\n  [MD] Report written → {REPORT_MD}  (pass={passed}/{total})")
 
 
 # ─────────────────────────────────────────────────────────────────────────────

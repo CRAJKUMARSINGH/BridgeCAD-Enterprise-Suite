@@ -1,0 +1,131 @@
+site_name: BridgeCAD Enterprise Suite
+site_description: >-
+  Parametric bridge GAD generation — Excel workbook in, 7-sheet
+  standards-compliant DXF package, priced BOQ and QA report out.
+site_url: https://crajkumarsingh.github.io/BridgeCAD-Enterprise-Suite/
+repo_url: https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite
+repo_name: CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite
+edit_uri: edit/main/docs/
+copyright: MIT licensed
+
+docs_dir: docs
+site_dir: site
+
+# Flip to true once the first clean build passes.
+strict: true
+
+hooks:
+  - scripts/mkdocs_hooks.py
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.tracking
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.tabs.link
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Dark
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Light
+
+validation:
+  links:
+    anchors: warn
+    absolute_links: warn
+    unrecognized_links: warn
+  nav:
+    omitted_files: warn
+    not_found: warn
+
+plugins:
+  - search
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: iso_date
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths:
+            - packages/bridgecad-core
+            - packages/bridgecad-io
+            - packages/bridgecad-draw
+            - packages/bridgecad-bill
+            - packages/bridgecad-qa
+            - packages/bridgecad-export
+            - packages/bridgecad-plugins
+            - packages/bridgecad-ai
+            - packages/bridgecad-infra
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+            show_signature_annotations: true
+            separate_signature: true
+            members_order: source
+  - minify:
+      minify_html: true
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+# Sphinx owns docs/api/** — see s16.
+exclude_docs: |
+  api/**
+  README.md
+  build_manual.py
+  manual_template.md
+
+nav:
+  - Home: index.md
+  - Master guide: guide.md
+  - Getting started: getting-started.md
+  - Reference:
+      - Excel contract: excel-contract.md
+      - Standards: standards.md
+      - Plugin authoring: plugin-authoring.md
+      - API reference: api-reference.md
+  - Operations:
+      - Deployment: deployment.md
+      - Troubleshooting: troubleshooting.md
+  - Project:
+      - Contributing: contributing.md
+      - Changelog: changelog.md
+      - Security: security.md
+      - Code of conduct: code-of-conduct.md
+      - Docs index: docs-index.md
+      - Standards alignment: BRIDGE_GAD_STANDARDS_ALIGNMENT.md
+      - User manual: Bridge_GAD_User_Manual.md
+      - Roadmap status: ROADMAP_STATUS.md
+
+extra:
+  generator: false

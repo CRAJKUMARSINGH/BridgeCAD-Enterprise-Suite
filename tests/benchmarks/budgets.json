@@ -1,0 +1,25 @@
+{
+  "defaults": {
+    "metric": "median",
+    "warn_ratio": 0.85
+  },
+  "budgets": {
+    "test_gad_generation": {
+      "max_seconds": 5.0,
+      "max_peak_mb": 512,
+      "note": "typical 30 m span, 4-lane, single sheet render"
+    },
+    "test_hundred_sheet_project": {
+      "max_seconds": 60.0,
+      "note": "100-sheet project, full export batch"
+    },
+    "test_boq_export": {
+      "max_seconds": 2.0,
+      "note": "BOQ for a single structure"
+    },
+    "tests/benchmarks/test_drawings.py::*": {
+      "max_seconds": 3.0,
+      "note": "per-sheet DXF generation"
+    }
+  }
+}

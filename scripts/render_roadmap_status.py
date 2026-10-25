@@ -1,0 +1,260 @@
+#!/usr/bin/env python3
+"""Render docs/ROADMAP_STATUS.md from a GitHub issues dump.
+
+Input : roadmap.json  (produced by .github/workflows/roadmap-status.yml)
+Output: markdown on stdout, or to --out
+
+Stdlib only. Deterministic. Safe on an empty or malformed dump.
+
+Usage:
+    python scripts/render_roadmap_status.py roadmap.json > docs/ROADMAP_STATUS.md
+    python scripts/render_roadmap_status.py roadmap.json --out docs/ROADMAP_STATUS.md
+    python scripts/render_roadmap_status.py roadmap.json --out docs/ROADMAP_STATUS.md --check
+
+Exit codes:
+    0  rendered (or file is up to date with --check)
+    1  --check and the file on disk is stale
+    2  input could not be read or parsed
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import sys
+from datetime import UTC, datetime
+from pathlib import Path
+
+WEEK_RE = re.compile(r"^w(\d{2})$")
+PHASE_RE = re.compile(r"^phase-(\d)$")
+
+WEEK_COUNT = 15
+WEEKS_PER_PHASE = 3
+BAR_WIDTH = 24
+STATE_DONE = "closed"
+
+PHASE_NAMES = {
+    1: "Foundation & truth-up",
+    2: "Engineering correctness & V&V",
+    3: "Interoperability & drawing standards",
+    4: "Platform hardening, security & performance",
+    5: "Release engineering, compliance & launch",
+}
+
+
+# --------------------------------------------------------------------- utils
+def phase_of(week: int) -> int:
+    """Phase a week belongs to, derived from the roadmap layout."""
+    return min(5, max(1, (week - 1) // WEEKS_PER_PHASE + 1))
+
+
+def bar(done: int, total: int, width: int = BAR_WIDTH) -> str:
+    if total <= 0:
+        return "\u2591" * width
+    filled = max(0, min(width, round(width * done / total)))
+    return "\u2588" * filled + "\u2591" * (width - filled)
+
+
+def pct(done: int, total: int) -> str:
+    return f"{round(100 * done / total)}%" if total else "0%"
+
+
+def label_names(issue: dict) -> list[str]:
+    names: list[str] = []
+    for lbl in issue.get("labels") or []:
+        name = lbl if isinstance(lbl, str) else str(lbl.get("name", ""))
+        if name:
+            names.append(name)
+    return names
+
+
+def cell(text: str) -> str:
+    """Make a value safe inside a markdown table cell."""
+    return text.replace("|", "\\|").replace("\n", " ").strip()
+
+
+def link(issue: dict) -> str:
+    number = issue.get("number")
+    url = issue.get("url") or ""
+    return f"[#{number}]({url})" if number and url else (f"#{number}" if number else "—")
+
+
+# --------------------------------------------------------------------- input
+def load(path: Path) -> list[dict]:
+    if not path.exists():
+        print(f"warn: {path} not found, rendering an empty status", file=sys.stderr)
+        return []
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        print(f"error: {path} is not valid JSON: {exc}", file=sys.stderr)
+        raise SystemExit(2) from exc
+    if isinstance(data, list):
+        return [d for d in data if isinstance(d, dict)]
+    if isinstance(data, dict) and isinstance(data.get("issues"), list):
+        return [d for d in data["issues"] if isinstance(d, dict)]
+    print(f"error: {path} must be a JSON array of issues", file=sys.stderr)
+    raise SystemExit(2)
+
+
+def collect(issues: list[dict]) -> tuple[dict[int, dict], list[dict]]:
+    """Split issues into {week_number: record} and an unassigned remainder."""
+    weeks: dict[int, dict] = {}
+    unassigned: list[dict] = []
+
+    for issue in issues:
+        labels = label_names(issue)
+
+        week: int | None = None
+        for lbl in labels:
+            m = WEEK_RE.match(lbl)
+            if m:
+                week = int(m.group(1))
+                break
+
+        if week is None or not 1 <= week <= WEEK_COUNT:
+            unassigned.append(issue)
+            continue
+
+        phase: int | None = None
+        for lbl in labels:
+            m = PHASE_RE.match(lbl)
+            if m:
+                phase = int(m.group(1))
+                break
+
+        record = {
+            "number": issue.get("number"),
+            "title": (issue.get("title") or "").strip(),
+            "state": (issue.get("state") or "open").lower(),
+            "url": issue.get("url") or "",
+            "phase": phase if phase in PHASE_NAMES else phase_of(week),
+            "closed_at": issue.get("closed_at"),
+        }
+
+        # Later duplicates win; the highest-numbered issue is usually current.
+        if week not in weeks or (record["number"] or 0) >= (weeks[week]["number"] or 0):
+            weeks[week] = record
+
+    return weeks, unassigned
+
+
+# -------------------------------------------------------------------- render
+def render(weeks: dict[int, dict], unassigned: list[dict], stamp: str) -> str:
+    done = sum(1 for w in weeks.values() if w["state"] == STATE_DONE)
+    total = WEEK_COUNT
+    lines: list[str] = [
+        "# Roadmap status",
+        "",
+        "> Auto-generated by `.github/workflows/roadmap-status.yml`. "
+        "Do not edit this file by hand.",
+        f"> Last updated: {stamp}",
+        "",
+        f"**Overall: {done}/{total} weeks complete** `{bar(done, total)}` {pct(done, total)}",
+        "",
+    ]
+
+    lines += ["## By phase", "", "| Phase | Progress | Complete |", "|---|---|---|"]
+    for p in sorted(PHASE_NAMES):
+        phase_weeks = [w for w in weeks.values() if w["phase"] == p]
+        p_done = sum(1 for w in phase_weeks if w["state"] == STATE_DONE)
+        done_weeks = ", ".join(
+            f"W{w:02d}"
+            for w in sorted(weeks)
+            if weeks[w]["phase"] == p and weeks[w]["state"] == STATE_DONE
+        )
+        lines.append(
+            f"| {p} · {PHASE_NAMES[p]} | `{bar(p_done, WEEKS_PER_PHASE)}` "
+            f"{p_done}/{WEEKS_PER_PHASE} | {done_weeks or '—'} |"
+        )
+    lines.append("")
+
+    lines += [
+        "## Weeks",
+        "",
+        "| Week | Milestone | Phase | Status | Issue |",
+        "|---|---|---|---|---|",
+    ]
+    for w in range(1, WEEK_COUNT + 1):
+        rec = weeks.get(w)
+        if rec is None:
+            lines.append(f"| W{w:02d} | _not created_ | {phase_of(w)} | open | — |")
+            continue
+        state = "done" if rec["state"] == STATE_DONE else rec["state"]
+        marker = "**done**" if state == "done" else state
+        lines.append(
+            f"| W{w:02d} | {cell(rec['title']) or '—'} | {rec['phase']} | "
+            f"{marker} | {link(rec)} |"
+        )
+    lines.append("")
+
+    lines += [
+        "## How this file is produced",
+        "",
+        "Every change to an issue labelled `roadmap` re-runs "
+        "`.github/workflows/roadmap-status.yml`, which dumps the issue list to "
+        "`roadmap.json` and renders this file from it.",
+        "",
+        "Progress is driven **only** by issue state. Closing a week's issue is the "
+        "single source of truth for whether that week is done.",
+        "",
+    ]
+
+    if unassigned:
+        lines += [
+            "## Unassigned roadmap issues",
+            "",
+            "Labelled `roadmap` but missing a valid `wNN` label (01–15):",
+            "",
+        ]
+        for issue in sorted(unassigned, key=lambda i: i.get("number") or 0):
+            lines.append(f"- {link(issue)} {cell(issue.get('title') or '')}")
+        lines.append("")
+
+    return "\n".join(lines).rstrip() + "\n"
+
+
+# ---------------------------------------------------------------------- main
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument(
+        "input",
+        nargs="?",
+        default="roadmap.json",
+        help="path to the issues JSON dump (default: roadmap.json)",
+    )
+    parser.add_argument("--out", help="write here instead of stdout")
+    parser.add_argument(
+        "--check", action="store_true", help="exit 1 if --out is stale; write nothing"
+    )
+    parser.add_argument(
+        "--stamp", default=None, help="override the timestamp (ISO 8601, for reproducible builds)"
+    )
+    args = parser.parse_args(argv)
+
+    stamp = args.stamp or datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
+    weeks, unassigned = collect(load(Path(args.input)))
+    output = render(weeks, unassigned, stamp)
+
+    if args.check:
+        if not args.out:
+            print("error: --check requires --out", file=sys.stderr)
+            return 2
+        target = Path(args.out)
+        current = target.read_text(encoding="utf-8") if target.exists() else ""
+        if current != output:
+            print(f"stale: {target} differs from rendered output", file=sys.stderr)
+            return 1
+        print(f"up to date: {target}", file=sys.stderr)
+        return 0
+
+    if args.out:
+        Path(args.out).write_text(output, encoding="utf-8")
+    else:
+        sys.stdout.write(output)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

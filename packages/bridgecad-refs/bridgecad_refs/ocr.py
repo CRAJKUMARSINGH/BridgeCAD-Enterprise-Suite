@@ -22,6 +22,7 @@ WHY CONFIDENCE IS CARRIED
     tolerance a value may be asserted at is derived from confidence and stated
     precision together.
 """
+
 from __future__ import annotations
 
 import shutil
@@ -30,8 +31,8 @@ from pathlib import Path
 
 OCR_PIPELINE_VERSION = 1
 DPI = 400
-MIN_WORD_CONF = 70.0          # below this, a fact is needs_manual
-ASSERT_CONF_FLOOR = 90.0      # below this, no 1 mm assertion
+MIN_WORD_CONF = 70.0  # below this, a fact is needs_manual
+ASSERT_CONF_FLOOR = 90.0  # below this, no 1 mm assertion
 
 REPAIR_MAP = str.maketrans({"O": "0", "o": "0", "l": "1", "S": "5", "B": "8"})
 DIGIT_CONTEXT = str.maketrans({"O": "0", "o": "0", "l": "1", "S": "5", "B": "8"})
@@ -55,6 +56,7 @@ def available() -> bool:
 def rasterise(pdf_path: Path, dpi: int = DPI):
     """Page images via pypdfium2 — no poppler dependency to install."""
     import pypdfium2 as pdfium
+
     pdf = pdfium.PdfDocument(str(pdf_path))
     for page in pdf:
         yield page.render(scale=dpi / 72).to_pil().convert("L")
@@ -65,6 +67,7 @@ def deskew(image):
     square; a scanned set is not, and 1 degree over 400 mm is 7 mm of drift."""
     import numpy as np
     from PIL import Image
+
     a = np.asarray(image)
     edges = (a < 128).astype(np.uint8)
     row_sums = edges.sum(axis=1)
@@ -96,8 +99,8 @@ def repair_token(token: str) -> tuple[str, str | None]:
 def ocr_page(image) -> list[OcrWord]:
     import pytesseract
     from pytesseract import Output
-    data = pytesseract.image_to_data(image, lang="eng", config="--psm 11",
-                                     output_type=Output.DICT)
+
+    data = pytesseract.image_to_data(image, lang="eng", config="--psm 11", output_type=Output.DICT)
     words: list[OcrWord] = []
     for i, text in enumerate(data["text"]):
         if not text.strip():
@@ -106,16 +109,23 @@ def ocr_page(image) -> list[OcrWord]:
         if conf < 0:
             continue
         repaired, original = repair_token(text.strip())
-        words.append(OcrWord(repaired, conf,
-                             float(data["left"][i]), float(data["top"][i]),
-                             float(data["left"][i] + data["width"][i]),
-                             float(data["top"][i] + data["height"][i]),
-                             original))
+        words.append(
+            OcrWord(
+                repaired,
+                conf,
+                float(data["left"][i]),
+                float(data["top"][i]),
+                float(data["left"][i] + data["width"][i]),
+                float(data["top"][i] + data["height"][i]),
+                original,
+            )
+        )
     return words
 
 
 def engine_version() -> str:
     import pytesseract
+
     return pytesseract.get_tesseract_version().public
 
 
@@ -126,5 +136,10 @@ def rows_to_lines(words: list[OcrWord], tol: int = 8) -> list[tuple[str, list[Oc
     for w in words:
         key = round(w.top / tol) * tol
         rows.setdefault(key, []).append(w)
-    return [(" ".join(w.text for w in sorted(rows[k], key=lambda x: x.x0)), sorted(rows[k], key=lambda x: x.x0))
-            for k in sorted(rows)]
+    return [
+        (
+            " ".join(w.text for w in sorted(rows[k], key=lambda x: x.x0)),
+            sorted(rows[k], key=lambda x: x.x0),
+        )
+        for k in sorted(rows)
+    ]

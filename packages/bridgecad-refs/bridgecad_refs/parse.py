@@ -9,6 +9,7 @@ anything.
 and is treated as less precise than "104.500". A reference that only gives 1 dp
 must not be used to justify a 0.1 mm assertion.
 """
+
 from __future__ import annotations
 
 import re
@@ -29,20 +30,23 @@ SCALE = re.compile(r"\b1\s*:\s*(\d{1,4})\b")
 REVISION = re.compile(r"\b([PCA]\d{1,2})\b")
 
 LEVEL_KEYS = {
-    "HFL": "hfl_m", "LWL": "lwl_m",
-    "DECKLEVEL": "deck_level_m", "FOUNDINGLEVEL": "founding_level_m",
-    "GROUNDLEVEL": "ground_level_m", "SOFFITLEVEL": "soffit_level_m",
+    "HFL": "hfl_m",
+    "LWL": "lwl_m",
+    "DECKLEVEL": "deck_level_m",
+    "FOUNDINGLEVEL": "founding_level_m",
+    "GROUNDLEVEL": "ground_level_m",
+    "SOFFITLEVEL": "soffit_level_m",
     "BEARINGLEVEL": "bearing_level_m",
 }
 
 
 @dataclass(frozen=True)
 class Fact:
-    kind: str            # level | dimension | scale | revision
+    kind: str  # level | dimension | scale | revision
     key: str
     value: Decimal
     unit: str
-    precision: int       # decimal places as stated on the drawing
+    precision: int  # decimal places as stated on the drawing
     raw: str
 
 

@@ -1,6 +1,7 @@
 """
 bridgecad_qa.reports — Generate HTML QA compliance report.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -15,23 +16,30 @@ def generate_html_report(
     """Write a styled HTML QA report to *output_path*."""
     from .compliance import score as _score
 
-    comp  = _score(report)
-    p     = Path(output_path)
+    comp = _score(report)
+    p = Path(output_path)
     p.parent.mkdir(parents=True, exist_ok=True)
 
     pm = project.project_master if project else None
-    proj_title  = str(getattr(pm, "project_title", "Bridge Project") or "Bridge Project")
-    bridge_name = str(getattr(pm, "bridge_name",  "")  or "")
-    chainage    = str(float(getattr(pm, "chainage_km", 0) or 0))
+    proj_title = str(getattr(pm, "project_title", "Bridge Project") or "Bridge Project")
+    bridge_name = str(getattr(pm, "bridge_name", "") or "")
+    chainage = str(float(getattr(pm, "chainage_km", 0) or 0))
 
-    colour = "#27ae60" if comp.grade in ("A+","A") else \
-             "#f39c12" if comp.grade in ("B","C")  else "#e74c3c"
+    colour = (
+        "#27ae60"
+        if comp.grade in ("A+", "A")
+        else "#f39c12"
+        if comp.grade in ("B", "C")
+        else "#e74c3c"
+    )
 
     rows_html = ""
     for f in sorted(report.findings, key=lambda x: (x.passed, x.check_id)):
-        sev   = f.severity.name if hasattr(f.severity, "name") else str(f.severity)
-        icon  = "✅" if f.passed else ("🔴" if "CRITICAL" in sev else "🟡")
-        style = "" if f.passed else ('background:#fff3cd' if "WARNING" in sev else 'background:#f8d7da')
+        sev = f.severity.name if hasattr(f.severity, "name") else str(f.severity)
+        icon = "✅" if f.passed else ("🔴" if "CRITICAL" in sev else "🟡")
+        style = (
+            "" if f.passed else ("background:#fff3cd" if "WARNING" in sev else "background:#f8d7da")
+        )
         rows_html += (
             f"<tr style='{style}'>"
             f"<td>{icon}</td>"

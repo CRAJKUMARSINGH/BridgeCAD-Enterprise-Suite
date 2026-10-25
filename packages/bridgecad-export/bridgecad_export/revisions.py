@@ -10,6 +10,7 @@ PURPOSE LADDER, and what each level requires:
 A set may not claim a purpose its sheets do not satisfy. This is the rule that
 stops "Construction ready" being a string someone typed.
 """
+
 from __future__ import annotations
 
 import json

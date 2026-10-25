@@ -24,20 +24,18 @@ def test_all_enums_have_unique_member_names(cls) -> None:
 @pytest.mark.parametrize("cls", ALL_ENUM_CLASSES, ids=lambda c: c.__name__)
 def test_all_str_enums_value_equals_member_name_or_valid_string(cls) -> None:
     for member in cls:
-        assert isinstance(member.value, str | int), (
-            f"{cls.__name__}.{member.name} value is not str/int: {type(member.value)}"
-        )
+        assert isinstance(
+            member.value, str | int
+        ), f"{cls.__name__}.{member.name} value is not str/int: {type(member.value)}"
         if isinstance(member.value, str):
-            assert len(member.value) > 0, (
-                f"{cls.__name__}.{member.name} has empty value string"
-            )
-            assert " " not in member.value, (
-                f"{cls.__name__}.{member.name} value contains whitespace: {member.value!r}"
-            )
+            assert len(member.value) > 0, f"{cls.__name__}.{member.name} has empty value string"
+            assert (
+                " " not in member.value
+            ), f"{cls.__name__}.{member.name} value contains whitespace: {member.value!r}"
         else:
-            assert not isinstance(member.value, bool), (
-                f"{cls.__name__}.{member.name} value is bool, expected int"
-            )
+            assert not isinstance(
+                member.value, bool
+            ), f"{cls.__name__}.{member.name} value is bool, expected int"
 
 
 # ---------------------------------------------------------------------------
@@ -133,22 +131,16 @@ def test_bearing_material_has_nrb() -> None:
 # Smoke / count tests
 # ---------------------------------------------------------------------------
 def test_enum_registry_size_ge_160() -> None:
-    assert len(ENUM_REGISTRY) >= 160, (
-        f"Expected >= 160 enums registered, got {len(ENUM_REGISTRY)}"
-    )
+    assert len(ENUM_REGISTRY) >= 160, f"Expected >= 160 enums registered, got {len(ENUM_REGISTRY)}"
 
 
 def test_all_validation_rules_count_eq_150() -> None:
-    assert len(ALL_RULES) == 150, (
-        f"Expected 150 rules, got {len(ALL_RULES)}"
-    )
+    assert len(ALL_RULES) == 150, f"Expected 150 rules, got {len(ALL_RULES)}"
 
 
 def test_registry_keys_match_class_names() -> None:
     for key_name, cls in ENUM_REGISTRY.items():
-        assert cls.__name__ == key_name, (
-            f"Registry key {key_name!r} != class name {cls.__name__!r}"
-        )
+        assert cls.__name__ == key_name, f"Registry key {key_name!r} != class name {cls.__name__!r}"
 
 
 def test_all_rules_have_unique_ids() -> None:
@@ -158,6 +150,7 @@ def test_all_rules_have_unique_ids() -> None:
 
 def test_rulespec_severity_has_valid_type() -> None:
     from bridgecad_core.types import ValidationSeverity
+
     for r in ALL_RULES[:25]:
         assert r.severity is ValidationSeverity.CRITICAL
     for r in ALL_RULES[25:100]:

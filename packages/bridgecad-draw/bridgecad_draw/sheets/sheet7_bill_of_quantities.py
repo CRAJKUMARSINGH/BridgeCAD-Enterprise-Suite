@@ -10,6 +10,7 @@ Quantities come from ``project.calculations``. A handful — formwork area,
 wearing coat, approach slab, railing — are ratios of measured quantities, so
 they are marked with the multiplier that produced them in the notes.
 """
+
 from __future__ import annotations
 
 from bridgecad_draw.sheets._common import Canvas, field
@@ -140,17 +141,23 @@ def build(project):
         rows.append([no, desc, unit, _fmt(qty.get(key), digits), "TBC", "", ref])
 
     total_cost = facts["total_cost"]
-    rows.append([
-        "", "TOTAL ESTIMATED COST (CIVIL WORKS)",
-        "", "", "",
-        "NOT PRICED" if total_cost is None else f"INR {total_cost:,.0f}",
-        "",
-    ])
+    rows.append(
+        [
+            "",
+            "TOTAL ESTIMATED COST (CIVIL WORKS)",
+            "",
+            "",
+            "",
+            "NOT PRICED" if total_cost is None else f"INR {total_cost:,.0f}",
+            "",
+        ]
+    )
 
     # ── title band ─────────────────────────────────────────────────────────
     with cv.on("TEXT-HEADER"):
-        cv.text("BILL OF QUANTITIES — ABSTRACT OF ESTIMATED COST", x0, 522.0,
-                height=cv.height * 1.4)
+        cv.text(
+            "BILL OF QUANTITIES — ABSTRACT OF ESTIMATED COST", x0, 522.0, height=cv.height * 1.4
+        )
     with cv.on("TEXT-GENERAL"):
         bridge = str(field(pm, "bridge_name", "") or "BRIDGE")
         chainage = _num(pm, "chainage_km", 0.0)
@@ -159,7 +166,8 @@ def build(project):
             f"TOTAL LENGTH {facts['total_len']:.3f} m  |  "
             f"OVERALL WIDTH {facts['overall_w']:.3f} m  |  "
             f"CARRIAGEWAY {facts['carriageway']:.3f} m",
-            x0, 514.0,
+            x0,
+            514.0,
         )
 
     # ── the schedule ───────────────────────────────────────────────────────
@@ -168,30 +176,45 @@ def build(project):
 
     # ── column grid, dimensioned (a schedule whose widths are a standard) ──
     with cv.on("DIM"):
-        cv.dimension((x0, bottom), (x0 + width, bottom),
-                     base=(x0 + width / 2.0, bottom - cv.height * 2.0),
-                     text=f"SCHEDULE WIDTH {width:.0f}")
-        cv.dimension((x0, bottom), (x0 + _COLUMNS[0][1] + _COLUMNS[1][1], bottom),
-                     base=(x0 + (_COLUMNS[0][1] + _COLUMNS[1][1]) / 2.0,
-                           bottom - cv.height * 4.0),
-                     text="DESCRIPTION")
-        cv.dimension((x0 + sum(w for _, w in _COLUMNS[:3]), bottom),
-                     (x0 + sum(w for _, w in _COLUMNS[:5]), bottom),
-                     base=(x0 + sum(w for _, w in _COLUMNS[:4]), bottom - cv.height * 4.0),
-                     text="QUANTITY + RATE")
-        cv.dimension((x0 + width, bottom), (x0 + width, y_top),
-                     base=(x0 + width + cv.height * 10.0, bottom), angle=90.0,
-                     text=f"{len(rows)} ROWS")
+        cv.dimension(
+            (x0, bottom),
+            (x0 + width, bottom),
+            base=(x0 + width / 2.0, bottom - cv.height * 2.0),
+            text=f"SCHEDULE WIDTH {width:.0f}",
+        )
+        cv.dimension(
+            (x0, bottom),
+            (x0 + _COLUMNS[0][1] + _COLUMNS[1][1], bottom),
+            base=(x0 + (_COLUMNS[0][1] + _COLUMNS[1][1]) / 2.0, bottom - cv.height * 4.0),
+            text="DESCRIPTION",
+        )
+        cv.dimension(
+            (x0 + sum(w for _, w in _COLUMNS[:3]), bottom),
+            (x0 + sum(w for _, w in _COLUMNS[:5]), bottom),
+            base=(x0 + sum(w for _, w in _COLUMNS[:4]), bottom - cv.height * 4.0),
+            text="QUANTITY + RATE",
+        )
+        cv.dimension(
+            (x0 + width, bottom),
+            (x0 + width, y_top),
+            base=(x0 + width + cv.height * 10.0, bottom),
+            angle=90.0,
+            text=f"{len(rows)} ROWS",
+        )
 
-    cv.note([
-        "NOTES:",
-        "1. Quantities are preliminary estimates for budget purposes only.",
-        "2. Final quantities to be measured as per IS:1200 / MORTH specifications.",
-        "3. Rate column reads TBC: pricing belongs to the priced BOQ, not this abstract.",
-        "4. Estimated lines carry their multiplier: formwork = concrete x 4.5,",
-        "   earthwork = plan area x 2.5, railing = deck edges + approach slab runs.",
-        "5. NOT CALCULATED marks a quantity the input model does not carry — not a zero.",
-        "6. 15% contingency to be added for unforeseen items.",
-    ], x0, bottom - cv.height * 6.0)
+    cv.note(
+        [
+            "NOTES:",
+            "1. Quantities are preliminary estimates for budget purposes only.",
+            "2. Final quantities to be measured as per IS:1200 / MORTH specifications.",
+            "3. Rate column reads TBC: pricing belongs to the priced BOQ, not this abstract.",
+            "4. Estimated lines carry their multiplier: formwork = concrete x 4.5,",
+            "   earthwork = plan area x 2.5, railing = deck edges + approach slab runs.",
+            "5. NOT CALCULATED marks a quantity the input model does not carry — not a zero.",
+            "6. 15% contingency to be added for unforeseen items.",
+        ],
+        x0,
+        bottom - cv.height * 6.0,
+    )
 
     return cv.doc

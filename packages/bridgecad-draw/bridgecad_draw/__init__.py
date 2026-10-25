@@ -16,5 +16,4 @@ from .dxf_engine import CoordMapper, new_sheet, save
 from .layers import LAYER_REGISTRY, setup_layers
 
 __version__ = "0.1.0-rc1"
-__all__ = ["LAYER_REGISTRY", "setup_layers", "new_sheet", "CoordMapper",
-           "save", "generate_package"]
+__all__ = ["LAYER_REGISTRY", "setup_layers", "new_sheet", "CoordMapper", "save", "generate_package"]

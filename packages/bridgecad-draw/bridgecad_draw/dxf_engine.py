@@ -12,6 +12,7 @@ Drawing-space convention
 - ``hpos(x_m)`` → x_m * 1000  (metres → mm in model space)
 - ``vpos(y_rl)`` → (y_rl - datum_rl) * 1000  (RL → mm offset from datum)
 """
+
 from __future__ import annotations
 
 import contextlib
@@ -20,6 +21,7 @@ from typing import Any
 
 try:
     import ezdxf
+
     _EZDXF_OK = True
 except ImportError:
     _EZDXF_OK = False
@@ -64,7 +66,7 @@ def _setup_text_styles(doc: Any) -> None:
     """Register standard text styles."""
     styles = doc.styles
     for name, font in [
-        ("BRIDGE_STD",  "Arial.ttf"),
+        ("BRIDGE_STD", "Arial.ttf"),
         ("BRIDGE_BOLD", "Arial Bold.ttf"),
         ("BRIDGE_MONO", "Courier New.ttf"),
     ]:
@@ -77,12 +79,12 @@ def _setup_linetypes(doc: Any) -> None:
     """Register common non-standard linetypes if missing."""
     lts = doc.linetypes
     defs = {
-        "CENTER":   "A,.75,-.25,.25,-.25",
-        "CENTER2":  "A,.375,-.125,.125,-.125",
-        "DASHED":   "A,.375,-.125",
-        "DASHED2":  "A,.1875,-.0625",
-        "HIDDEN":   "A,.1875,-.0625",
-        "PHANTOM":  "A,.625,-.125,.125,-.125,.125,-.125",
+        "CENTER": "A,.75,-.25,.25,-.25",
+        "CENTER2": "A,.375,-.125,.125,-.125",
+        "DASHED": "A,.375,-.125",
+        "DASHED2": "A,.1875,-.0625",
+        "HIDDEN": "A,.1875,-.0625",
+        "PHANTOM": "A,.625,-.125,.125,-.125,.125,-.125",
     }
     for name, pattern in defs.items():
         if not lts.has_entry(name):
@@ -93,6 +95,7 @@ def _setup_linetypes(doc: Any) -> None:
 # ---------------------------------------------------------------------------
 # Coordinate mapper
 # ---------------------------------------------------------------------------
+
 
 class CoordMapper:
     """Maps real-world metres + RL values to drawing mm units.
@@ -123,12 +126,12 @@ class CoordMapper:
         x_offset: float = 0.0,
         y_offset: float = 0.0,
     ) -> None:
-        self.datum_rl  = datum_rl
+        self.datum_rl = datum_rl
         self.origin_ch = origin_ch
-        self.h_scale   = h_scale
-        self.v_scale   = v_scale
-        self.x_offset  = x_offset
-        self.y_offset  = y_offset
+        self.h_scale = h_scale
+        self.v_scale = v_scale
+        self.x_offset = x_offset
+        self.y_offset = y_offset
 
     def hpos(self, ch_m: float) -> float:
         """Chainage in metres → drawing X in mm."""
@@ -154,6 +157,7 @@ class CoordMapper:
 # ---------------------------------------------------------------------------
 # Save helpers
 # ---------------------------------------------------------------------------
+
 
 def save(doc: Any, output_path: str | Path) -> Path:
     """Save the DXF document and return the resolved path."""

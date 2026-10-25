@@ -196,8 +196,18 @@ from .types import (
 # Helper: Pydantic typing shortcuts
 # ===========================================================================
 
-def DField(desc=None, ge=None, le=None, dp=3, md=12,
-           description=None, decimal_places=None, max_digits=None, **_kw):
+
+def DField(
+    desc=None,
+    ge=None,
+    le=None,
+    dp=3,
+    md=12,
+    description=None,
+    decimal_places=None,
+    max_digits=None,
+    **_kw,
+):
     """``Decimal`` :class:`~pydantic.Field` for engineering measurements.
 
     Parameters
@@ -244,8 +254,9 @@ def IField(desc=None, ge=None, le=None, description=None, **_kw):
     )
 
 
-def SField(desc=None, maxlen=255, pattern=None, default=None,
-           description=None, max_length=None, **_kw):
+def SField(
+    desc=None, maxlen=255, pattern=None, default=None, description=None, max_length=None, **_kw
+):
     """``str`` :class:`~pydantic.Field` for identifiers / freeform text.
 
     Parameters
@@ -328,7 +339,9 @@ class ProjectMaster(BaseModel):
     )
     chainage_km: Decimal | None = DM(
         "Central bridge chainage in kilometres (e.g. 24.350)",
-        ge=0, le=9999, dp=6,
+        ge=0,
+        le=9999,
+        dp=6,
     )
     package_no: str | None = DS(
         "Contract package number from tender",
@@ -374,11 +387,15 @@ class ProjectMaster(BaseModel):
     )
     road_level_rl_m: Decimal | None = DM(
         "Formation / road level Reduced Level at bridge centreline, m",
-        ge=-100, le=9000, dp=4,
+        ge=-100,
+        le=9000,
+        dp=4,
     )
     ground_level_rl_m: Decimal | None = DM(
         "Existing ground level Reduced Level at abutment, m",
-        ge=-100, le=9000, dp=4,
+        ge=-100,
+        le=9000,
+        dp=4,
     )
     survey_date: date | None = Field(
         default=None,
@@ -396,15 +413,22 @@ class ProjectMaster(BaseModel):
     )
     latitude_deg: Decimal | None = DM(
         "Site centre latitude, decimal degrees (WGS-84)",
-        ge=Decimal("6.0"), le=Decimal("36.0"), dp=7,
+        ge=Decimal("6.0"),
+        le=Decimal("36.0"),
+        dp=7,
     )
     longitude_deg: Decimal | None = DM(
         "Site centre longitude, decimal degrees (WGS-84)",
-        ge=Decimal("68.0"), le=Decimal("98.0"), dp=7,
+        ge=Decimal("68.0"),
+        le=Decimal("98.0"),
+        dp=7,
     )
     total_estimated_cost_inr: Decimal | None = DM(
         "Total project (works) estimated cost, INR",
-        ge=0, le=Decimal("1E12"), dp=2, md=18,
+        ge=0,
+        le=Decimal("1E12"),
+        dp=2,
+        md=18,
     )
     tender_no: str | None = DS(
         "Tender reference identifier / RFP number",
@@ -465,7 +489,9 @@ class BridgeSelection(BaseModel):
         description="Simply supported / continuous / cantilever / cable-stayed etc.",
     )
     span_count: int = Field(
-        default=1, ge=1, le=100,
+        default=1,
+        ge=1,
+        le=100,
         description="Total number of spans in the bridge",
     )
     carriageway_config: CarriagewayLaneConfig = Field(
@@ -530,7 +556,9 @@ class GeometryInput(BaseModel):
 
     # --- Spans ---
     span_count: int = Field(
-        default=1, ge=1, le=100,
+        default=1,
+        ge=1,
+        le=100,
         description="Number of spans (matches len(span_lengths_m))",
     )
     span_lengths_m: list[Decimal] = Field(
@@ -552,11 +580,15 @@ class GeometryInput(BaseModel):
     )
     horizontal_curve_R_m: Decimal | None = DM(
         "Horizontal circular curve radius, m (None = straight)",
-        ge=Decimal("15"), le=Decimal("30000"), dp=3,
+        ge=Decimal("15"),
+        le=Decimal("30000"),
+        dp=3,
     )
     gradient_pct: Decimal | None = DM(
         "Longitudinal gradient, % (+ = rise, - = fall)",
-        ge=Decimal("-8"), le=Decimal("8"), dp=3,
+        ge=Decimal("-8"),
+        le=Decimal("8"),
+        dp=3,
     )
     vertical_alignment: VerticalAlignmentType | None = Field(
         default=None,
@@ -564,64 +596,96 @@ class GeometryInput(BaseModel):
     )
     vertical_curve_passing_R_m: Decimal | None = DM(
         "Passing vertical curve radius (crest) for OSD, m",
-        ge=Decimal("50"), le=Decimal("100000"), dp=3,
+        ge=Decimal("50"),
+        le=Decimal("100000"),
+        dp=3,
     )
     # --- Cross-section widths ---
     carriageway_width_m: Decimal = DM(
         "Through carriageway width, metres (curb-face to curb-face)",
-        ge=Decimal("3.5"), le=Decimal("30"), dp=3,
+        ge=Decimal("3.5"),
+        le=Decimal("30"),
+        dp=3,
     )
     footpath_left_m: Decimal | None = DM(
         "Left (CH-increasing) footpath width, m",
-        ge=0, le=Decimal("10"), dp=3,
+        ge=0,
+        le=Decimal("10"),
+        dp=3,
     )
     footpath_right_m: Decimal | None = DM(
         "Right (CH-decreasing) footpath width, m",
-        ge=0, le=Decimal("10"), dp=3,
+        ge=0,
+        le=Decimal("10"),
+        dp=3,
     )
     crash_barrier_width_left_m: Decimal | None = DM(
         "Left crash barrier system width, m",
-        ge=0, le=Decimal("2"), dp=3,
+        ge=0,
+        le=Decimal("2"),
+        dp=3,
     )
     crash_barrier_width_right_m: Decimal | None = DM(
         "Right crash barrier system width, m",
-        ge=0, le=Decimal("2"), dp=3,
+        ge=0,
+        le=Decimal("2"),
+        dp=3,
     )
     kerb_width_left_m: Decimal | None = DM(
         "Left kerb / channeliser width, m",
-        ge=0, le=Decimal("2"), dp=3,
+        ge=0,
+        le=Decimal("2"),
+        dp=3,
     )
     kerb_width_right_m: Decimal | None = DM(
         "Right kerb / channeliser width, m",
-        ge=0, le=Decimal("2"), dp=3,
+        ge=0,
+        le=Decimal("2"),
+        dp=3,
     )
     median_width_m: Decimal | None = DM(
         "Central median width, m (0 = undivided)",
-        ge=0, le=Decimal("12"), dp=3,
+        ge=0,
+        le=Decimal("12"),
+        dp=3,
     )
     median_barrier_width_m: Decimal | None = DM(
         "Median barrier width, m (0 = no barrier on median)",
-        ge=0, le=Decimal("2"), dp=3,
+        ge=0,
+        le=Decimal("2"),
+        dp=3,
     )
     left_ditch_width_m: Decimal | None = DM(
         "Left roadside drain / side-ditch width, m",
-        ge=0, le=Decimal("6"), dp=3,
+        ge=0,
+        le=Decimal("6"),
+        dp=3,
     )
     right_ditch_width_m: Decimal | None = DM(
         "Right roadside drain / side-ditch width, m",
-        ge=0, le=Decimal("6"), dp=3,
+        ge=0,
+        le=Decimal("6"),
+        dp=3,
     )
     service_road_left_m: Decimal | None = DM(
         "Left frontage / service road carriageway width, m",
-        ge=0, le=Decimal("15"), dp=3,
+        ge=0,
+        le=Decimal("15"),
+        dp=3,
     )
     service_road_right_m: Decimal | None = DM(
         "Right frontage / service road carriageway width, m",
-        ge=0, le=Decimal("15"), dp=3,
+        ge=0,
+        le=Decimal("15"),
+        dp=3,
     )
     # --- Skew & curve ---
     skew_angle_deg: Decimal = Field(
-        default=Decimal("0.0"), ge=0, le=Decimal("60"), max_digits=5, decimal_places=2,
+        default=Decimal("0.0"),
+        ge=0,
+        le=Decimal("60"),
+        max_digits=5,
+        decimal_places=2,
         description="Angle between normal to alignment and pier line, degrees (0..60 IRC limit)",
     )
     skew_direction: SkewDirection = Field(
@@ -633,7 +697,9 @@ class GeometryInput(BaseModel):
     )
     curve_radius_m: Decimal | None = DM(
         "Radius of curve at deck centroid if curved_bridge_flag = True",
-        ge=Decimal("30"), le=Decimal("30000"), dp=3,
+        ge=Decimal("30"),
+        le=Decimal("30000"),
+        dp=3,
     )
     widening_on_curve: WideningTypeOnCurve | None = Field(
         default=None,
@@ -642,7 +708,8 @@ class GeometryInput(BaseModel):
     # --- Camber / Superelevation ---
     camber_mm: int | None = DI(
         "Design pre-camber (crown) height at deck centreline, millimetres",
-        ge=0, le=500,
+        ge=0,
+        le=500,
     )
     camber_method: CamberMethod | None = Field(
         default=None,
@@ -650,7 +717,9 @@ class GeometryInput(BaseModel):
     )
     superelevation_pct: Decimal | None = DM(
         "Applied superelevation cross-slope, % (max 7% urban, 10% rural IRC:73)",
-        ge=Decimal("-10"), le=Decimal("10"), dp=3,
+        ge=Decimal("-10"),
+        le=Decimal("10"),
+        dp=3,
     )
     superelevation_rotation_axis: SuperelevationRotationAxis | None = Field(
         default=None,
@@ -659,11 +728,13 @@ class GeometryInput(BaseModel):
     # --- Pavement crust ---
     pavement_thickness_total_mm: int | None = DI(
         "Total crust (bituminous + granular sub-base) thickness, mm",
-        ge=0, le=1500,
+        ge=0,
+        le=1500,
     )
     crust_layer_count: int | None = DI(
         "Number of distinct crust layers in pavement cross-section",
-        ge=0, le=10,
+        ge=0,
+        le=10,
     )
     pavement_crust_composition: PavementCrustComposition | None = Field(
         default=None,
@@ -676,16 +747,22 @@ class GeometryInput(BaseModel):
     )
     chainage_start_km: Decimal | None = DM(
         "Starting chainage of abutment-1, km",
-        ge=0, le=Decimal("9999"), dp=6,
+        ge=0,
+        le=Decimal("9999"),
+        dp=6,
     )
     chainage_end_km: Decimal | None = DM(
         "Ending chainage of abutment-2, km",
-        ge=0, le=Decimal("9999"), dp=6,
+        ge=0,
+        le=Decimal("9999"),
+        dp=6,
     )
     # --- Bearing pad spacing ---
     bearing_pad_spacing_m: Decimal | None = DM(
         "Clear spacing between bearing pads (on one pier cap), m",
-        ge=Decimal("0.5"), le=Decimal("20"), dp=3,
+        ge=Decimal("0.5"),
+        le=Decimal("20"),
+        dp=3,
     )
     # --- Sight distance ---
     minimum_curve_speed_check_required: bool = DB(
@@ -726,12 +803,20 @@ class GeometryInput(BaseModel):
     @property
     def overall_width_m(self) -> Decimal:
         parts = [self.carriageway_width_m]
-        for w in [self.footpath_left_m, self.footpath_right_m,
-                  self.crash_barrier_width_left_m, self.crash_barrier_width_right_m,
-                  self.kerb_width_left_m, self.kerb_width_right_m,
-                  self.median_width_m, self.median_barrier_width_m,
-                  self.left_ditch_width_m, self.right_ditch_width_m,
-                  self.service_road_left_m, self.service_road_right_m]:
+        for w in [
+            self.footpath_left_m,
+            self.footpath_right_m,
+            self.crash_barrier_width_left_m,
+            self.crash_barrier_width_right_m,
+            self.kerb_width_left_m,
+            self.kerb_width_right_m,
+            self.median_width_m,
+            self.median_barrier_width_m,
+            self.left_ditch_width_m,
+            self.right_ditch_width_m,
+            self.service_road_left_m,
+            self.service_road_right_m,
+        ]:
             parts.append(w if w is not None else Decimal("0"))
         return Decimal(sum(Decimal(str(p)) for p in parts))
 
@@ -743,9 +828,7 @@ class GeometryInput(BaseModel):
             )
         for i, L in enumerate(self.span_lengths_m, 1):
             if not (Decimal("1") <= L <= Decimal("150")):
-                raise ValueError(
-                    f"span_lengths_m[{i}]={L} out of IRC allowed range [1m, 150m]"
-                )
+                raise ValueError(f"span_lengths_m[{i}]={L} out of IRC allowed range [1m, 150m]")
         return self
 
 
@@ -760,7 +843,9 @@ class Superstructure(BaseModel):
     type: SuperstructureType = Field(description="Primary framing system")
     deck_material: ConcreteGrade = Field(description="Deck slab concrete grade")
     deck_thickness_mm: int = Field(
-        default=220, ge=100, le=1500,
+        default=220,
+        ge=100,
+        le=1500,
         description="Deck slab nominal thickness mm (excluding wearing coat). Solid-slab decks commonly 200–1200 mm.",
     )
     wearing_coat_type: WearingCoatType | None = Field(
@@ -773,11 +858,14 @@ class Superstructure(BaseModel):
     )
     wearing_coat_thickness_mm: int | None = DI(
         "Wearing coat compacted thickness, millimetres",
-        ge=0, le=500,
+        ge=0,
+        le=500,
     )
     wearing_coat_slope_pct: Decimal | None = DM(
         "Cross-fall slope on carriageway wearing coat, % (typically 2.0)",
-        ge=Decimal("-4"), le=Decimal("4"), dp=3,
+        ge=Decimal("-4"),
+        le=Decimal("4"),
+        dp=3,
     )
     drainage_type: DrainageType | None = Field(
         default=None,
@@ -785,7 +873,9 @@ class Superstructure(BaseModel):
     )
     drainage_spacing_m: Decimal | None = DM(
         "Longitudinal spacing of deck drainage outlets, metres",
-        ge=Decimal("3"), le=Decimal("50"), dp=3,
+        ge=Decimal("3"),
+        le=Decimal("50"),
+        dp=3,
     )
     drainage_crossfall: DrainageCrossfallType | None = Field(
         default=None,
@@ -793,7 +883,8 @@ class Superstructure(BaseModel):
     )
     camber_mm: int | None = DI(
         "Parabolic deck camber height at centreline, millimetres",
-        ge=0, le=600,
+        ge=0,
+        le=600,
     )
     camber_method: CamberMethod | None = Field(
         default=None,
@@ -805,15 +896,19 @@ class Superstructure(BaseModel):
     )
     girder_depth_mm: int | None = DI(
         "Nominal girder depth (excluding deck), millimetres (0 = NA for slab/culvert)",
-        ge=0, le=8000,
+        ge=0,
+        le=8000,
     )
     girder_spacing_m: Decimal | None = DM(
         "Centre-to-centre girder spacing, m (0 = NA for box/slab/culvert)",
-        ge=0, le=Decimal("10"), dp=3,
+        ge=0,
+        le=Decimal("10"),
+        dp=3,
     )
     girders_per_deck_count: int | None = DI(
         "Number of longitudinal girders per deck (cross-section count, 0 = NA)",
-        ge=0, le=30,
+        ge=0,
+        le=30,
     )
     slab_type: SlabType | None = Field(
         default=None,
@@ -828,7 +923,8 @@ class Superstructure(BaseModel):
     )
     parapet_height_mm: int | None = DI(
         "Parapet top-to-deck height, millimetres (min 1100 for pedestrian)",
-        ge=600, le=2500,
+        ge=600,
+        le=2500,
     )
     railing_type: RailingType | None = Field(
         default=None,
@@ -840,45 +936,59 @@ class Superstructure(BaseModel):
     )
     cantilever_overhang_left_m: Decimal | None = DM(
         "Left cantilever overhang (from girder CL to deck edge), m",
-        ge=0, le=Decimal("5"), dp=3,
+        ge=0,
+        le=Decimal("5"),
+        dp=3,
     )
     cantilever_overhang_right_m: Decimal | None = DM(
         "Right cantilever overhang (from girder CL to deck edge), m",
-        ge=0, le=Decimal("5"), dp=3,
+        ge=0,
+        le=Decimal("5"),
+        dp=3,
     )
     bearing_shelf_width_m: Decimal | None = DM(
         "Minimum bearing shelf width on diaphragm, m",
-        ge=Decimal("0.2"), le=Decimal("3"), dp=3,
+        ge=Decimal("0.2"),
+        le=Decimal("3"),
+        dp=3,
     )
     kerb_elevation_mm: int | None = DI(
         "Raised kerb mount height above deck, millimetres",
-        ge=0, le=600,
+        ge=0,
+        le=600,
     )
     footpath_elevation_mm: int | None = DI(
         "Footpath top elevation above deck wearing coat, millimetres",
-        ge=0, le=500,
+        ge=0,
+        le=500,
     )
     crash_barrier_reinforcement_required: bool = DB(
         "True = crash barrier has dedicated reinforcement cage separate from deck slab",
     )
     transverse_diaphragm_spacing_m: Decimal | None = DM(
         "Longitudinal spacing between transverse diaphragms, m",
-        ge=Decimal("1"), le=Decimal("30"), dp=3,
+        ge=Decimal("1"),
+        le=Decimal("30"),
+        dp=3,
     )
     continuity_slab_thickness_mm: int | None = DI(
         "Continuity slab topping over pier, millimetres (for continuous systems)",
-        ge=0, le=1000,
+        ge=0,
+        le=1000,
     )
     haunch_height_mm: int | None = DI(
         "Girder-deck haunch depth (initial bedding layer), millimetres",
-        ge=0, le=400,
+        ge=0,
+        le=400,
     )
     cable_duct_required: bool = DB(
         "True = embed cable / service ducts through deck slab (electrical / telecom)",
     )
     stay_sag_ratio_for_cable: Decimal | None = DM(
         "Cable-stayed: f/L sag ratio for stay cables",
-        ge=Decimal("0.001"), le=Decimal("0.3"), dp=4,
+        ge=Decimal("0.001"),
+        le=Decimal("0.3"),
+        dp=4,
     )
     superstructure_segmentation: SuperstructureSegmentation | None = Field(
         default=None,
@@ -930,18 +1040,35 @@ class Superstructure(BaseModel):
         return self.deck_thickness_mm + wc
 
     # --- Conditional validators --------------------------------------------
-    _GIRDER_SST = frozenset({
-        "RCC_TBEAM", "PSC_IGIRDER", "PSC_U_GIRDER", "PSC_I_GIRDER_COMPOSITE",
-        "STEEL_PLATE_GIRDER", "STEEL_TRUSS", "STEEL_COMPOSITE",
-        "BALANCED_CANTILEVER", "INCREMENTALLY_LAUNCHED",
-    })
-    _BOX_SST = frozenset({
-        "PSC_BOX_GIRDER", "STEEL_BOX_GIRDER",
-    })
-    _CULVERT_SST = frozenset({
-        "BOX_CULVERT", "PIPE_CULVERT_SINGLE", "PIPE_CULVERT_MULTI",
-        "SLAB_CULVERT", "ARCH_CULVERT", "RCC_FRAME_CULVERT",
-    })
+    _GIRDER_SST = frozenset(
+        {
+            "RCC_TBEAM",
+            "PSC_IGIRDER",
+            "PSC_U_GIRDER",
+            "PSC_I_GIRDER_COMPOSITE",
+            "STEEL_PLATE_GIRDER",
+            "STEEL_TRUSS",
+            "STEEL_COMPOSITE",
+            "BALANCED_CANTILEVER",
+            "INCREMENTALLY_LAUNCHED",
+        }
+    )
+    _BOX_SST = frozenset(
+        {
+            "PSC_BOX_GIRDER",
+            "STEEL_BOX_GIRDER",
+        }
+    )
+    _CULVERT_SST = frozenset(
+        {
+            "BOX_CULVERT",
+            "PIPE_CULVERT_SINGLE",
+            "PIPE_CULVERT_MULTI",
+            "SLAB_CULVERT",
+            "ARCH_CULVERT",
+            "RCC_FRAME_CULVERT",
+        }
+    )
 
     @model_validator(mode="after")
     def _conditional_girder_floors(self):
@@ -977,7 +1104,9 @@ class Substructure(BaseModel):
     pier_material: ConcreteGrade = Field(description="Pier concrete grade")
     pier_height_typical_m: Decimal | None = DM(
         "Typical pier height (GL to bearing base), m (range 2..50 IRC)",
-        ge=Decimal("2"), le=Decimal("50"), dp=3,
+        ge=Decimal("2"),
+        le=Decimal("50"),
+        dp=3,
     )
     pier_cap_type: PierCapType | None = Field(
         default=None,
@@ -985,15 +1114,21 @@ class Substructure(BaseModel):
     )
     pier_cap_width_m: Decimal | None = DM(
         "Pier cap width (along bridge), m",
-        ge=Decimal("0.5"), le=Decimal("20"), dp=3,
+        ge=Decimal("0.5"),
+        le=Decimal("20"),
+        dp=3,
     )
     pier_cap_length_m: Decimal | None = DM(
         "Pier cap length (transverse to alignment), m",
-        ge=Decimal("1"), le=Decimal("50"), dp=3,
+        ge=Decimal("1"),
+        le=Decimal("50"),
+        dp=3,
     )
     pier_cap_depth_m: Decimal | None = DM(
         "Pier cap vertical depth, m",
-        ge=Decimal("0.3"), le=Decimal("6"), dp=3,
+        ge=Decimal("0.3"),
+        le=Decimal("6"),
+        dp=3,
     )
     pier_shaft_shape: PierShaftShape | None = Field(
         default=None,
@@ -1001,19 +1136,27 @@ class Substructure(BaseModel):
     )
     pier_shaft_width_m: Decimal | None = DM(
         "Pier shaft width (along bridge), m",
-        ge=Decimal("0.3"), le=Decimal("10"), dp=3,
+        ge=Decimal("0.3"),
+        le=Decimal("10"),
+        dp=3,
     )
     pier_shaft_length_m: Decimal | None = DM(
         "Pier shaft cross-section length (transverse), m",
-        ge=Decimal("0.3"), le=Decimal("15"), dp=3,
+        ge=Decimal("0.3"),
+        le=Decimal("15"),
+        dp=3,
     )
     pier_diameter_m: Decimal | None = DM(
         "For round/octagonal piers: shaft diameter, m",
-        ge=Decimal("0.5"), le=Decimal("10"), dp=3,
+        ge=Decimal("0.5"),
+        le=Decimal("10"),
+        dp=3,
     )
     pier_pedestal_height_m: Decimal | None = DM(
         "Pier pedestal (height from cap soffit to bearing plate), m",
-        ge=Decimal("0.05"), le=Decimal("3"), dp=3,
+        ge=Decimal("0.05"),
+        le=Decimal("3"),
+        dp=3,
     )
     pier_tie_beam_location: PierTieBeamLocationType | None = Field(
         default=None,
@@ -1024,19 +1167,25 @@ class Substructure(BaseModel):
     )
     pier_hammerhead_overhang_m: Decimal | None = DM(
         "Hammerhead cantilever overhang beyond shaft face, m",
-        ge=0, le=Decimal("8"), dp=3,
+        ge=0,
+        le=Decimal("8"),
+        dp=3,
     )
     bearings_per_pier: int | None = DI(
         "Number of bearings supported on a single pier",
-        ge=1, le=60,
+        ge=1,
+        le=60,
     )
     well_cap_width_m: Decimal | None = DM(
         "Well / Caisson top cap (steining cover) width, m",
-        ge=Decimal("1"), le=Decimal("15"), dp=3,
+        ge=Decimal("1"),
+        le=Decimal("15"),
+        dp=3,
     )
     pile_cap_thickness_mm: int | None = DI(
         "Pile cap thickness, millimetres",
-        ge=300, le=6000,
+        ge=300,
+        le=6000,
     )
     # --- Abutments ---
     abutment_type: AbutmentType = Field(
@@ -1045,15 +1194,21 @@ class Substructure(BaseModel):
     abutment_material: ConcreteGrade = Field(description="Abutment concrete grade")
     abutment_width_m: Decimal | None = DM(
         "Abutment width (along alignment direction), m",
-        ge=Decimal("0.3"), le=Decimal("20"), dp=3,
+        ge=Decimal("0.3"),
+        le=Decimal("20"),
+        dp=3,
     )
     abutment_length_m: Decimal | None = DM(
         "Abutment transverse length (road width +), m",
-        ge=Decimal("3"), le=Decimal("60"), dp=3,
+        ge=Decimal("3"),
+        le=Decimal("60"),
+        dp=3,
     )
     abutment_height_m: Decimal | None = DM(
         "Abutment height (GL to deck soffit), m",
-        ge=Decimal("0.5"), le=Decimal("25"), dp=3,
+        ge=Decimal("0.5"),
+        le=Decimal("25"),
+        dp=3,
     )
     abutment_pedestal_type: AbutmentPedestalType | None = Field(
         default=None,
@@ -1061,11 +1216,14 @@ class Substructure(BaseModel):
     )
     abutment_pedestal_height_m: Decimal | None = DM(
         "Abutment pedestal height (abutment top to bearing plate bottom), m",
-        ge=Decimal("0.05"), le=Decimal("2"), dp=3,
+        ge=Decimal("0.05"),
+        le=Decimal("2"),
+        dp=3,
     )
     bearings_per_abutment: int | None = DI(
         "Number of bearings at a single abutment",
-        ge=1, le=60,
+        ge=1,
+        le=60,
     )
     # --- Wings / Returns ---
     return_wall_type: ReturnWallType | None = Field(
@@ -1074,11 +1232,15 @@ class Substructure(BaseModel):
     )
     return_wall_length_m: Decimal | None = DM(
         "Return wall length along embankment, m",
-        ge=0, le=Decimal("20"), dp=3,
+        ge=0,
+        le=Decimal("20"),
+        dp=3,
     )
     return_wall_height_m: Decimal | None = DM(
         "Return wall height (top to base), m",
-        ge=0, le=Decimal("12"), dp=3,
+        ge=0,
+        le=Decimal("12"),
+        dp=3,
     )
     wing_wall_type: WingWallType | None = Field(
         default=None,
@@ -1086,15 +1248,21 @@ class Substructure(BaseModel):
     )
     wing_wall_angle_deg: Decimal | None = DM(
         "Splay angle of wing walls relative to abutment face, degrees",
-        ge=0, le=Decimal("90"), dp=2,
+        ge=0,
+        le=Decimal("90"),
+        dp=2,
     )
     wing_wall_splay_length_m: Decimal | None = DM(
         "Wing wall splay run-out length, m",
-        ge=0, le=Decimal("25"), dp=3,
+        ge=0,
+        le=Decimal("25"),
+        dp=3,
     )
     wing_wall_height_m: Decimal | None = DM(
         "Wing wall max height, m",
-        ge=0, le=Decimal("12"), dp=3,
+        ge=0,
+        le=Decimal("12"),
+        dp=3,
     )
     # --- Backfill / Approach slab ---
     abutment_backfill_spec: AbutmentBackfillSpecificationType | None = Field(
@@ -1107,11 +1275,14 @@ class Substructure(BaseModel):
     )
     approach_slab_length_m: Decimal | None = DM(
         "Approach / transition slab length, m (typically 3m, 5m or 6m)",
-        ge=0, le=Decimal("15"), dp=3,
+        ge=0,
+        le=Decimal("15"),
+        dp=3,
     )
     approach_slab_thickness_mm: int | None = DI(
         "Approach slab thickness, mm (typical 200-250)",
-        ge=0, le=600,
+        ge=0,
+        le=600,
     )
 
 
@@ -1143,15 +1314,19 @@ class FoundationDetails(BaseModel):
     )
     pile_diameter_mm: int | None = DI(
         "Pile shaft diameter, millimetres (range 400..2000 IRC typical; 0 = NA for open/well)",
-        ge=0, le=3000,
+        ge=0,
+        le=3000,
     )
     pile_length_m: Decimal | None = DM(
         "Pile length (cut-off to tip), m (5..60 m range IRC; 0 = NA for open/well)",
-        ge=0, le=Decimal("120"), dp=3,
+        ge=0,
+        le=Decimal("120"),
+        dp=3,
     )
     piles_per_pier: int | None = DI(
         "Number of piles supporting a single pier cap (0 = NA for open/well)",
-        ge=0, le=100,
+        ge=0,
+        le=100,
     )
     pile_group_config: str | None = DS(
         "Pile group layout string e.g. 3x3, 4x2, 6x2@2.5m c/c",
@@ -1159,15 +1334,20 @@ class FoundationDetails(BaseModel):
     )
     pile_spacing_m: Decimal | None = DM(
         "Centre-to-centre pile spacing (typically 2.5 x diameter), m",
-        ge=0, le=Decimal("10"), dp=3,
+        ge=0,
+        le=Decimal("10"),
+        dp=3,
     )
     pile_cap_thickness_mm: int | None = DI(
         "Pile cap thickness, millimetres (>= 1.5x pile_diameter; 0 = NA)",
-        ge=0, le=6000,
+        ge=0,
+        le=6000,
     )
     pile_cutoff_level_m: Decimal | None = DM(
         "Pile cut-off level (RL), m",
-        ge=Decimal("-100"), le=Decimal("9000"), dp=4,
+        ge=Decimal("-100"),
+        le=Decimal("9000"),
+        dp=4,
     )
     under_ream_count: UnderReamCount | None = Field(
         default=None,
@@ -1176,7 +1356,9 @@ class FoundationDetails(BaseModel):
     # --- Wells / Caissons ---
     well_diameter_m: Decimal | None = DM(
         "Well (Caisson) outer diameter, m",
-        ge=Decimal("1"), le=Decimal("20"), dp=3,
+        ge=Decimal("1"),
+        le=Decimal("20"),
+        dp=3,
     )
     well_steining_type: WellSteiningType | None = Field(
         default=None,
@@ -1184,11 +1366,14 @@ class FoundationDetails(BaseModel):
     )
     well_steining_tmm: int | None = DI(
         "Well steining wall thickness, millimetres",
-        ge=200, le=2500,
+        ge=200,
+        le=2500,
     )
     well_depth_below_bed_m: Decimal | None = DM(
         "Depth of well founding below river bed level, m",
-        ge=Decimal("0.5"), le=Decimal("80"), dp=3,
+        ge=Decimal("0.5"),
+        le=Decimal("80"),
+        dp=3,
     )
     well_curb_type: WellCurbType | None = Field(
         default=None,
@@ -1196,7 +1381,9 @@ class FoundationDetails(BaseModel):
     )
     well_curb_height_m: Decimal | None = DM(
         "Cutting curb section height, m",
-        ge=Decimal("0.3"), le=Decimal("3"), dp=3,
+        ge=Decimal("0.3"),
+        le=Decimal("3"),
+        dp=3,
     )
     well_cutting_edge_shape: WellCuttingEdgeShape | None = Field(
         default=None,
@@ -1204,11 +1391,15 @@ class FoundationDetails(BaseModel):
     )
     well_sump_depth_m: Decimal | None = DM(
         "Well plug / sump depth inside curb, m",
-        ge=0, le=Decimal("10"), dp=3,
+        ge=0,
+        le=Decimal("10"),
+        dp=3,
     )
     well_cap_width_m: Decimal | None = DM(
         "Well top cap (steining cover block) width, m",
-        ge=Decimal("1"), le=Decimal("20"), dp=3,
+        ge=Decimal("1"),
+        le=Decimal("20"),
+        dp=3,
     )
     # --- Open foundation ---
     open_foundation_depth: OpenFoundationDepth | None = Field(
@@ -1217,15 +1408,21 @@ class FoundationDetails(BaseModel):
     )
     open_width_m: Decimal | None = DM(
         "Open footing width (transverse), m",
-        ge=Decimal("0.5"), le=Decimal("30"), dp=3,
+        ge=Decimal("0.5"),
+        le=Decimal("30"),
+        dp=3,
     )
     open_length_m: Decimal | None = DM(
         "Open footing length (along alignment), m",
-        ge=Decimal("0.5"), le=Decimal("30"), dp=3,
+        ge=Decimal("0.5"),
+        le=Decimal("30"),
+        dp=3,
     )
     open_depth_m: Decimal | None = DM(
         "Open footing founding depth below GL, m",
-        ge=Decimal("0.5"), le=Decimal("15"), dp=3,
+        ge=Decimal("0.5"),
+        le=Decimal("15"),
+        dp=3,
     )
     open_stepped_flag: bool = DB(
         "True = stepped open footing on sloping rock",
@@ -1237,20 +1434,26 @@ class FoundationDetails(BaseModel):
     )
     raft_thickness_mm: int | None = DI(
         "Raft slab thickness, millimetres",
-        ge=300, le=6000,
+        ge=300,
+        le=6000,
     )
     raft_reinforcement_dia_mm: int | None = DI(
         "Principal raft reinforcement bar diameter, mm",
-        ge=8, le=50,
+        ge=8,
+        le=50,
     )
     # --- Combined footing ---
     combined_footing_length_m: Decimal | None = DM(
         "Combined footing length (along), m",
-        ge=Decimal("0.5"), le=Decimal("40"), dp=3,
+        ge=Decimal("0.5"),
+        le=Decimal("40"),
+        dp=3,
     )
     combined_footing_width_m: Decimal | None = DM(
         "Combined footing width (transverse), m",
-        ge=Decimal("0.5"), le=Decimal("40"), dp=3,
+        ge=Decimal("0.5"),
+        le=Decimal("40"),
+        dp=3,
     )
     sheet_pile_type: SheetPileType | None = Field(
         default=None,
@@ -1259,11 +1462,15 @@ class FoundationDetails(BaseModel):
     # --- Bearing capacity ---
     factor_of_safety_on_bearing: Decimal | None = DM(
         "Factor of safety against bearing failure (>=2.5 IRC)",
-        ge=Decimal("1.0"), le=Decimal("10"), dp=3,
+        ge=Decimal("1.0"),
+        le=Decimal("10"),
+        dp=3,
     )
     bearing_capacity_kpa: Decimal | None = DM(
         "Allowable bearing pressure at founding level, kPa",
-        ge=0, le=Decimal("20000"), dp=2,
+        ge=0,
+        le=Decimal("20000"),
+        dp=2,
     )
     bearing_capacity_soil_class: BearingCapacitySoilType | None = Field(
         default=None,
@@ -1289,11 +1496,15 @@ class Approaches(BaseModel):
 
     left_approach_length_m: Decimal | None = DM(
         "Left (A1-side) approach length from abutment toe, m",
-        ge=0, le=Decimal("1000"), dp=3,
+        ge=0,
+        le=Decimal("1000"),
+        dp=3,
     )
     right_approach_length_m: Decimal | None = DM(
         "Right (A2-side) approach length from abutment toe, m",
-        ge=0, le=Decimal("1000"), dp=3,
+        ge=0,
+        le=Decimal("1000"),
+        dp=3,
     )
     retaining_wall_type: RetainingWallModeType | None = Field(
         default=None,
@@ -1301,7 +1512,9 @@ class Approaches(BaseModel):
     )
     retaining_wall_height_m: Decimal | None = DM(
         "Retaining wall retained height, m",
-        ge=0, le=Decimal("20"), dp=3,
+        ge=0,
+        le=Decimal("20"),
+        dp=3,
     )
     type_of_embankment: str | None = DS(
         "Embankment fill type description e.g. 'Granular Moorum / Sand / Select / Boulders'",
@@ -1309,19 +1522,27 @@ class Approaches(BaseModel):
     )
     soil_embankment_unit_weight_kN_m3: Decimal | None = DM(
         "Design unit weight of embankment, kN/m^3 (usually 18-22)",
-        ge=Decimal("10"), le=Decimal("30"), dp=3,
+        ge=Decimal("10"),
+        le=Decimal("30"),
+        dp=3,
     )
     approach_slope_width_m: Decimal | None = DM(
         "Embankment side slope run (1V:2H -> 2.0) for a 1 m drop, m/m",
-        ge=Decimal("1"), le=Decimal("6"), dp=3,
+        ge=Decimal("1"),
+        le=Decimal("6"),
+        dp=3,
     )
     shoulder_width_left_m: Decimal | None = DM(
         "Left paved / unpaved shoulder width, m",
-        ge=0, le=Decimal("6"), dp=3,
+        ge=0,
+        le=Decimal("6"),
+        dp=3,
     )
     shoulder_width_right_m: Decimal | None = DM(
         "Right paved / unpaved shoulder width, m",
-        ge=0, le=Decimal("6"), dp=3,
+        ge=0,
+        le=Decimal("6"),
+        dp=3,
     )
     guide_rail_required: bool = DB(
         "Flag: approach guide / safety rail installed on embankment top edge",
@@ -1331,11 +1552,14 @@ class Approaches(BaseModel):
     )
     speed_limit_on_approach_kmph: int | None = DI(
         "Posted regulatory speed limit, km/h (0 = no signage)",
-        ge=0, le=180,
+        ge=0,
+        le=180,
     )
     transition_curve_length_m: Decimal | None = DM(
         "Length of superelevation / widening transition on approach, m",
-        ge=0, le=Decimal("500"), dp=3,
+        ge=0,
+        le=Decimal("500"),
+        dp=3,
     )
     vertical_alignment_type: VerticalAlignmentType | None = Field(
         default=None,
@@ -1343,11 +1567,14 @@ class Approaches(BaseModel):
     )
     approach_gradient_pct: Decimal | None = DM(
         "Approach longitudinal gradient, % (abs <= 6 MORTH)",
-        ge=Decimal("-10"), le=Decimal("10"), dp=3,
+        ge=Decimal("-10"),
+        le=Decimal("10"),
+        dp=3,
     )
     pavement_thickness_mm: int | None = DI(
         "Approach carriageway crust thickness, mm",
-        ge=0, le=2000,
+        ge=0,
+        le=2000,
     )
     approach_wearing_coat_grade: WearingCoatGrade | None = Field(
         default=None,
@@ -1378,7 +1605,9 @@ class HydraulicData(BaseModel):
     # --- Discharge ---
     design_discharge_cumecs: Decimal | None = DM(
         "Design flood discharge Q, m3/s (at chosen return period)",
-        ge=0, le=Decimal("500000"), dp=3,
+        ge=0,
+        le=Decimal("500000"),
+        dp=3,
     )
     discharge_measurement_method: DischargeMeasurementMethod | None = Field(
         default=None,
@@ -1387,23 +1616,33 @@ class HydraulicData(BaseModel):
     # --- Water levels ---
     hfl_m: Decimal | None = DM(
         "High Flood Level (RL), m",
-        ge=Decimal("-100"), le=Decimal("9000"), dp=4,
+        ge=Decimal("-100"),
+        le=Decimal("9000"),
+        dp=4,
     )
     lwl_m: Decimal | None = DM(
         "Low / Summer Water Level (RL), m",
-        ge=Decimal("-100"), le=Decimal("9000"), dp=4,
+        ge=Decimal("-100"),
+        le=Decimal("9000"),
+        dp=4,
     )
     normal_wl_m: Decimal | None = DM(
         "Normal / Average annual water level (RL), m",
-        ge=Decimal("-100"), le=Decimal("9000"), dp=4,
+        ge=Decimal("-100"),
+        le=Decimal("9000"),
+        dp=4,
     )
     scour_level_m: Decimal | None = DM(
         "Design scour level (RL) after applying safety margin, m",
-        ge=Decimal("-100"), le=Decimal("9000"), dp=4,
+        ge=Decimal("-100"),
+        le=Decimal("9000"),
+        dp=4,
     )
     design_scour_depth_m: Decimal | None = DM(
         "Computed design scour depth (below bed), m",
-        ge=0, le=Decimal("30"), dp=3,
+        ge=0,
+        le=Decimal("30"),
+        dp=3,
     )
     scour_regime: ScourRegimeType | None = Field(
         default=None,
@@ -1419,12 +1658,17 @@ class HydraulicData(BaseModel):
     )
     freeboard_m: Decimal = Field(
         default=Decimal("2.0"),
-        max_digits=8, decimal_places=3, ge=Decimal("0.3"), le=Decimal("10"),
+        max_digits=8,
+        decimal_places=3,
+        ge=Decimal("0.3"),
+        le=Decimal("10"),
         description="Freeboard to be maintained above HFL to deck soffit (m)",
     )
     actual_soffit_level_m: Decimal | None = DM(
         "Actual deck soffit RL at minimum span, m",
-        ge=Decimal("-100"), le=Decimal("9000"), dp=4,
+        ge=Decimal("-100"),
+        le=Decimal("9000"),
+        dp=4,
     )
     freeboard_addition_factor: FreeboardAdditionFactorType | None = Field(
         default=None,
@@ -1433,11 +1677,15 @@ class HydraulicData(BaseModel):
     # --- Waterway ---
     waterway_required_m2: Decimal | None = DM(
         "Required (Lacey regime) waterway area, m^2",
-        ge=0, le=Decimal("100000"), dp=3,
+        ge=0,
+        le=Decimal("100000"),
+        dp=3,
     )
     waterway_provided_m2: Decimal | None = DM(
         "Provided clear waterway area between abutments, m^2",
-        ge=0, le=Decimal("100000"), dp=3,
+        ge=0,
+        le=Decimal("100000"),
+        dp=3,
     )
     regime_waterway_coeff: LaceyRegimeFactorType | None = Field(
         default=None,
@@ -1449,28 +1697,40 @@ class HydraulicData(BaseModel):
     )
     lacey_silt_factor: Decimal | None = DM(
         "Lacey silt factor f = 1.76 sqrt(d50 mm)",
-        ge=Decimal("0.1"), le=Decimal("10"), dp=4,
+        ge=Decimal("0.1"),
+        le=Decimal("10"),
+        dp=4,
     )
     regime_perimeter_m: Decimal | None = DM(
         "Lacey regime wetted perimeter P = 4.75 sqrt(Q) (m)",
-        ge=0, le=Decimal("5000"), dp=3,
+        ge=0,
+        le=Decimal("5000"),
+        dp=3,
     )
     regime_depth_m: Decimal | None = DM(
         "Lacey regime depth R = 0.478 (Q/f^2)^(1/3) metres",
-        ge=0, le=Decimal("50"), dp=3,
+        ge=0,
+        le=Decimal("50"),
+        dp=3,
     )
     regime_velocity_mps: Decimal | None = DM(
         "Regime mean flow velocity V = 10.8 R^(2/3) S^(1/3) ??? or Lacey V = (Q f^2 / 140)^(1/6), m/s",
-        ge=0, le=Decimal("10"), dp=4,
+        ge=0,
+        le=Decimal("10"),
+        dp=4,
     )
     # --- Afflux ---
     afflux_m: Decimal | None = DM(
         "Computed afflux (heading-up) at bridge, m",
-        ge=0, le=Decimal("5"), dp=4,
+        ge=0,
+        le=Decimal("5"),
+        dp=4,
     )
     max_afflux_allowable_m: Decimal | None = DM(
         "Maximum allowable afflux per IRC:5, m (typical 0.3 m)",
-        ge=0, le=Decimal("3"), dp=3,
+        ge=0,
+        le=Decimal("3"),
+        dp=3,
     )
     afflux_formula_type: AffluxEstimationFormulaType | None = Field(
         default=None,
@@ -1491,11 +1751,15 @@ class HydraulicData(BaseModel):
     )
     river_bed_slope_m_per_km: Decimal | None = DM(
         "Longitudinal bed slope, m/km",
-        ge=0, le=Decimal("500"), dp=4,
+        ge=0,
+        le=Decimal("500"),
+        dp=4,
     )
     catchment_area_sqkm: Decimal | None = DM(
         "Catchment / drainage area up to site, km^2",
-        ge=0, le=Decimal("1000000"), dp=3,
+        ge=0,
+        le=Decimal("1000000"),
+        dp=3,
     )
     return_period_yr: FloodReturnPeriodDesign | None = Field(
         default=None,
@@ -1514,7 +1778,8 @@ class HydraulicData(BaseModel):
     )
     highest_recorded_flood_year: int | None = DI(
         "Year of highest recorded flood in historical data",
-        ge=1800, le=2200,
+        ge=1800,
+        le=2200,
     )
     river_geomorphology: RiverGeomorphologyType | None = Field(
         default=None,
@@ -1603,7 +1868,9 @@ class Materials(BaseModel):
     # --- Concrete ---
     concrete_superstructure: ConcreteGrade = Field(description="Superstructure concrete grade")
     concrete_substructure: ConcreteGrade = Field(description="Pier / abutment concrete grade")
-    concrete_foundation: ConcreteGrade = Field(description="Pile / well / open-footing concrete grade")
+    concrete_foundation: ConcreteGrade = Field(
+        description="Pile / well / open-footing concrete grade"
+    )
     concrete_aggregate: ConcreteAggregateType | None = Field(
         default=None,
         description="Aggregate source / rock type",
@@ -1646,7 +1913,9 @@ class Materials(BaseModel):
         default=None,
         description="Rebar family (HYSD Fe415 / TMT Fe500 / Fe500D / Epoxy / Galv)",
     )
-    reinforcement_steel_grade: SteelGrade = Field(description="Rebar strength grade (Fe415/500/550)")
+    reinforcement_steel_grade: SteelGrade = Field(
+        description="Rebar strength grade (Fe415/500/550)"
+    )
     rebar_coupler_type: RebarCouplerType | None = Field(
         default=None,
         description="Mechanical splice / coupler type if used",
@@ -1746,7 +2015,9 @@ class BearingScheduleRow(BaseModel):
     size_y_mm: int | None = DI("Bearing pad / pot dimension Y, mm", ge=50, le=5000)
     design_load_kn: Decimal | None = DM(
         "Design vertical load (Serviceability), kN",
-        ge=0, le=Decimal("100000"), dp=2,
+        ge=0,
+        le=Decimal("100000"),
+        dp=2,
     )
     fixed_or_guide_or_free: str | None = DS(
         "Movement constraint flag: FIXED / GUIDED_X / GUIDED_Y / FREE / POT_FIX / POT_GUIDE",
@@ -1754,24 +2025,31 @@ class BearingScheduleRow(BaseModel):
     )
     elastomeric_layers_count: int | None = DI(
         "Number of rubber layers for elastomeric pad",
-        ge=1, le=30,
+        ge=1,
+        le=30,
     )
     steel_back_bool: bool = DB(
         "True = steel-backed elastomeric bearing plate",
     )
     pot_pressure_mpa: Decimal | None = DM(
         "For POT bearing: elastomer compressive pressure, MPa",
-        ge=Decimal("10"), le=Decimal("60"), dp=2,
+        ge=Decimal("10"),
+        le=Decimal("60"),
+        dp=2,
     )
     spherical_rotation_rad: Decimal | None = DM(
         "Spherical bearing design rotation magnitude, rad",
-        ge=0, le=Decimal("0.1"), dp=5,
+        ge=0,
+        le=Decimal("0.1"),
+        dp=5,
     )
     ptfe_sliding_surface_flag: bool = DB(
         "True = sliding plane PTFE / UHMWPE against stainless steel",
     )
     quantity: int = Field(
-        default=1, ge=1, le=1000,
+        default=1,
+        ge=1,
+        le=1000,
         description="Number of identical bearings in this row location",
     )
 
@@ -1788,15 +2066,18 @@ class ExpansionJointScheduleRow(BaseModel):
     joint_type: ExpansionJointType = Field(description="Expansion joint system class")
     width_mm: int | None = DI(
         "Joint finished open width (along deck), mm",
-        ge=10, le=2000,
+        ge=10,
+        le=2000,
     )
     movement_range_mm: int | None = DI(
         "± total movement capacity, mm",
-        ge=0, le=3000,
+        ge=0,
+        le=3000,
     )
     gap_mm: int | None = DI(
         "Initial installation gap between deck ends, mm",
-        ge=0, le=1000,
+        ge=0,
+        le=1000,
     )
     sealant_type: JointSealantType | None = Field(
         default=None,
@@ -1804,14 +2085,19 @@ class ExpansionJointScheduleRow(BaseModel):
     )
     anchor_spacing_mm: int | None = DI(
         "Edge anchor bar centre-to-centre spacing along joint, mm",
-        ge=50, le=2000,
+        ge=50,
+        le=2000,
     )
     transverse_length_m: Decimal | None = DM(
         "Total joint length (full road width), m",
-        ge=Decimal("0.5"), le=Decimal("100"), dp=3,
+        ge=Decimal("0.5"),
+        le=Decimal("100"),
+        dp=3,
     )
     quantity: int = Field(
-        default=1, ge=1, le=100,
+        default=1,
+        ge=1,
+        le=100,
         description="Number of identical joints with this configuration",
     )
 
@@ -1950,13 +2236,14 @@ class ComponentsLib(BaseModel):
     )
     drainage_spout_spacing_m: Decimal | None = DM(
         "Drainage spout spacing in metres",
-        ge=Decimal("0"), le=Decimal("1000"), dp=3,
+        ge=Decimal("0"),
+        le=Decimal("1000"),
+        dp=3,
     )
     railing_type: str | None = DS(
         "Railing type",
         maxlen=60,
     )
-
 
     # --- Additional standard component drawing references (added for E2E fixture compatibility) ---
     standard_crash_barrier_drawing_no: str | None = DS(
@@ -1977,13 +2264,14 @@ class ComponentsLib(BaseModel):
     )
     standard_drainage_spout_spacing_m: Decimal | None = DM(
         "Drainage spout spacing in metres",
-        ge=Decimal("0"), le=Decimal("1000"), dp=3,
+        ge=Decimal("0"),
+        le=Decimal("1000"),
+        dp=3,
     )
     standard_railing_type: str | None = DS(
         "Railing type",
         maxlen=60,
     )
-
 
 
 # ===========================================================================
@@ -2025,17 +2313,22 @@ class DrawingControl(BaseModel):
     gen_approach_road_sheet: bool = DB("Generate Approach Road typicals sheet")
     # --- Transformation ---
     drawing_rotation_deg: Decimal = Field(
-        default=Decimal("0.0"), max_digits=6, decimal_places=2,
-        ge=Decimal("-180"), le=Decimal("180"),
+        default=Decimal("0.0"),
+        max_digits=6,
+        decimal_places=2,
+        ge=Decimal("-180"),
+        le=Decimal("180"),
         description="Plot rotation angle (degrees, CCW positive)",
     )
     north_arrow_size_mm: int | None = DI(
         "North arrow symbol plot size, mm",
-        ge=3, le=300,
+        ge=3,
+        le=300,
     )
     scale_bar_length_mm: int | None = DI(
         "Graphic scale bar length, mm",
-        ge=20, le=800,
+        ge=20,
+        le=800,
     )
     # --- Standards ---
     layer_standard: LayerStandard = Field(
@@ -2051,7 +2344,8 @@ class DrawingControl(BaseModel):
     )
     dimension_precision_mm: int | None = DI(
         "Dimension decimal / rounding precision, millimetres (e.g. 1, 5, 10)",
-        ge=0, le=100,
+        ge=0,
+        le=100,
     )
     dimension_style: DimensionStyleClass | None = Field(
         default=None,
@@ -2059,11 +2353,15 @@ class DrawingControl(BaseModel):
     )
     text_height_scale_factor: Decimal | None = DM(
         "Plot-scale multiplier applied to text height table (e.g. 1.2 = 20% larger)",
-        ge=Decimal("0.5"), le=Decimal("3"), dp=3,
+        ge=Decimal("0.5"),
+        le=Decimal("3"),
+        dp=3,
     )
     lineweight_scale_factor: Decimal | None = DM(
         "Lineweight scale multiplier across all layers",
-        ge=Decimal("0.5"), le=Decimal("3"), dp=3,
+        ge=Decimal("0.5"),
+        le=Decimal("3"),
+        dp=3,
     )
     line_weight_default: LineWeightCode | None = Field(
         default=None,
@@ -2095,11 +2393,13 @@ class DrawingControl(BaseModel):
     )
     drawing_border_inside_mm: int | None = DI(
         "Inside margin (frame to content border), mm",
-        ge=0, le=200,
+        ge=0,
+        le=200,
     )
     revision_block_count: int | None = DI(
         "Max number of revision rows rendered in title block",
-        ge=0, le=20,
+        ge=0,
+        le=20,
     )
     legend_sheet_required: bool = DB(
         "Legends / symbols / abbreviations sheet is mandatory for tender issue",
@@ -2124,75 +2424,99 @@ class Calculations(BaseModel):
 
     total_length_m: Decimal | None = DM(
         "Total bridge length = sum of spans, m",
-        ge=0, le=Decimal("10000"), dp=3,
+        ge=0,
+        le=Decimal("10000"),
+        dp=3,
     )
     span_count: int | None = DI(
         "Span count (repeated here for cross-check with GI)",
-        ge=1, le=100,
+        ge=1,
+        le=100,
     )
     span_depth_ratio: Decimal | None = DM(
         "Span / girder-depth ratio check value (e.g. 20 for T-beam, 30 for PSC Box)",
-        ge=Decimal("5"), le=Decimal("80"), dp=3,
+        ge=Decimal("5"),
+        le=Decimal("80"),
+        dp=3,
     )
     deck_area_sqm: Decimal | None = DM(
         "Deck plan area (overall width x length), m^2",
-        ge=0, le=Decimal("100000"), dp=3,
+        ge=0,
+        le=Decimal("100000"),
+        dp=3,
     )
     overall_width_check_ok: bool | None = DB(
         "Overall width >= carriageway + kerbs + barriers + footpaths check passed"
     )
     concrete_volume_superstructure_cum: Decimal | None = DM(
         "Estimated superstructure concrete volume (deck + girders + diaphragms), m^3",
-        ge=0, le=Decimal("100000"), dp=3,
+        ge=0,
+        le=Decimal("100000"),
+        dp=3,
     )
     concrete_volume_substructure_cum: Decimal | None = DM(
         "Estimated pier + abutment concrete volume, m^3",
-        ge=0, le=Decimal("100000"), dp=3,
+        ge=0,
+        le=Decimal("100000"),
+        dp=3,
     )
     concrete_volume_foundation_cum: Decimal | None = DM(
         "Estimated pile / well / open / raft concrete, m^3",
-        ge=0, le=Decimal("100000"), dp=3,
+        ge=0,
+        le=Decimal("100000"),
+        dp=3,
     )
     rebar_weight_tonnes_approx: Decimal | None = DM(
         "Approx total reinforcement tonnage (super+sub+found), tonnes",
-        ge=0, le=Decimal("100000"), dp=3,
+        ge=0,
+        le=Decimal("100000"),
+        dp=3,
     )
     prestress_tonnes_approx: Decimal | None = DM(
         "Approx total prestress steel (strands + ducts, tonnes)",
-        ge=0, le=Decimal("10000"), dp=3,
+        ge=0,
+        le=Decimal("10000"),
+        dp=3,
     )
     bearing_count: int | None = DI(
         "Total bearings in the bridge",
-        ge=0, le=10000,
+        ge=0,
+        le=10000,
     )
     expansion_joint_count: int | None = DI(
         "Total expansion joint assemblies",
-        ge=0, le=200,
+        ge=0,
+        le=200,
     )
     total_estimated_quantity_cost_inr: Decimal | None = DM(
         "Rough estimate: sum(vol × unit rates) works cost, INR",
-        ge=0, le=Decimal("1E14"), dp=2, md=20,
+        ge=0,
+        le=Decimal("1E14"),
+        dp=2,
+        md=20,
     )
     design_scour_vs_foundation_cover_ok: bool | None = DB(
         "Foundation founding level safely below design scour + margin"
     )
-    waterway_check_pass: bool | None = DB(
-        "Provided waterway >= required regime waterway"
-    )
-    afflux_ok: bool | None = DB(
-        "Computed afflux <= allowable afflux"
-    )
+    waterway_check_pass: bool | None = DB("Provided waterway >= required regime waterway")
+    afflux_ok: bool | None = DB("Computed afflux <= allowable afflux")
     freeboard_actual_m: Decimal | None = DM(
         "Achieved freeboard = (soffit - HFL), m",
-        ge=Decimal("-5"), le=Decimal("30"), dp=4,
+        ge=Decimal("-5"),
+        le=Decimal("30"),
+        dp=4,
     )
     minimum_vertical_clearance_m: Decimal | None = DM(
         "Minimum vertical clearance under deck, m (rail/navigable/road)",
-        ge=0, le=Decimal("80"), dp=3,
+        ge=0,
+        le=Decimal("80"),
+        dp=3,
     )
     horizontal_clearance_m: Decimal | None = DM(
         "Horizontal clearance from edge carriageway to pier face, m",
-        ge=0, le=Decimal("30"), dp=3,
+        ge=0,
+        le=Decimal("30"),
+        dp=3,
     )
     impact_factor_applied: ImpactFactorCoeff | None = Field(
         default=None,
@@ -2200,11 +2524,15 @@ class Calculations(BaseModel):
     )
     seismic_coeff_applied: Decimal | None = DM(
         "Seismic zone factor / base shear coefficient used, Ah",
-        ge=0, le=Decimal("1"), dp=5,
+        ge=0,
+        le=Decimal("1"),
+        dp=5,
     )
     deflection_check_ratio_live_load: Decimal | None = DM(
         "Actual / allowable live-load deflection ratio (<= 1 PASS)",
-        ge=0, le=Decimal("5"), dp=4,
+        ge=0,
+        le=Decimal("5"),
+        dp=4,
     )
     load_combination_set: LoadCombination | None = Field(
         default=None,
@@ -2245,45 +2573,66 @@ class ValidationModel(BaseModel):
         description="Worst severity across all triggered rules",
     )
     critical_fail_count: int = Field(
-        default=0, ge=0, le=10000,
+        default=0,
+        ge=0,
+        le=10000,
         description="Number of CRITICAL / BLOCKER rules fired",
     )
     warning_count: int = Field(
-        default=0, ge=0, le=10000,
+        default=0,
+        ge=0,
+        le=10000,
         description="Number of WARNING / HIGH rules fired",
     )
     info_count: int = Field(
-        default=0, ge=0, le=10000,
+        default=0,
+        ge=0,
+        le=10000,
         description="Number of INFO / SUGGESTION / HINT rules fired",
     )
     score_0_to_100: Decimal = Field(
         default=Decimal("100.0"),
-        max_digits=6, decimal_places=2, ge=0, le=100,
+        max_digits=6,
+        decimal_places=2,
+        ge=0,
+        le=100,
         description="Composite quality score 0..100 (100 = perfect)",
     )
     score_irc05: Decimal | None = DM(
         "IRC:5 Hydrology / Scour sub-score, 0..100",
-        ge=0, le=100, dp=2,
+        ge=0,
+        le=100,
+        dp=2,
     )
     score_irc21: Decimal | None = DM(
         "IRC:21 Concrete sub-structure sub-score, 0..100",
-        ge=0, le=100, dp=2,
+        ge=0,
+        le=100,
+        dp=2,
     )
     score_ircsp55: Decimal | None = DM(
         "IRC:SP:55 GAD Drawing Standards sub-score, 0..100",
-        ge=0, le=100, dp=2,
+        ge=0,
+        le=100,
+        dp=2,
     )
     score_structural: Decimal | None = DM(
         "Structural adequacy sub-score, 0..100",
-        ge=0, le=100, dp=2,
+        ge=0,
+        le=100,
+        dp=2,
     )
     score_hydraulic: Decimal | None = DM(
         "Hydraulic adequacy sub-score, 0..100",
-        ge=0, le=100, dp=2,
+        ge=0,
+        le=100,
+        dp=2,
     )
     score_drawing_standards: Decimal | None = DM(
         "Drawing / CAD standards conformance sub-score, 0..100",
-        ge=0, le=100, dp=2,
+        ge=0,
+        le=100,
+        dp=2,
     )
     report_html_or_pdf_generated_flag: bool = DB(
         "True = validation report artefact generated as HTML or PDF file"
@@ -2298,19 +2647,25 @@ class ValidationModel(BaseModel):
     )
     rules_run_count: int | None = DI(
         "Number of rule checks actually executed in last run",
-        ge=0, le=100000,
+        ge=0,
+        le=100000,
     )
     rules_skipped_count: int | None = DI(
         "Number of checks skipped due to pre-condition / missing data",
-        ge=0, le=100000,
+        ge=0,
+        le=100000,
     )
     score_materials: Decimal | None = DM(
         "Materials spec conformance sub-score, 0..100",
-        ge=0, le=100, dp=2,
+        ge=0,
+        le=100,
+        dp=2,
     )
     score_geometry: Decimal | None = DM(
         "Geometry & alignment conformance sub-score, 0..100",
-        ge=0, le=100, dp=2,
+        ge=0,
+        le=100,
+        dp=2,
     )
 
 
@@ -2355,9 +2710,21 @@ class BridgeProject(BaseModel):
 
 
 __all__ = [
-    "ProjectMaster", "BridgeSelection", "GeometryInput", "Superstructure",
-    "Substructure", "FoundationDetails", "Approaches", "HydraulicData",
-    "Materials", "BearingScheduleRow", "ExpansionJointScheduleRow",
-    "BearingsJoints", "ComponentsLib", "DrawingControl",
-    "Calculations", "ValidationModel", "BridgeProject",
+    "ProjectMaster",
+    "BridgeSelection",
+    "GeometryInput",
+    "Superstructure",
+    "Substructure",
+    "FoundationDetails",
+    "Approaches",
+    "HydraulicData",
+    "Materials",
+    "BearingScheduleRow",
+    "ExpansionJointScheduleRow",
+    "BearingsJoints",
+    "ComponentsLib",
+    "DrawingControl",
+    "Calculations",
+    "ValidationModel",
+    "BridgeProject",
 ]

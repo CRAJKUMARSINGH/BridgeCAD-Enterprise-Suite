@@ -60,6 +60,7 @@ from bridgecad_core.types import (
 # Shared helpers — every field must match actual Pydantic schema exactly
 # ==========================================================================
 
+
 def _common_project_master(**overrides) -> ProjectMaster:
     base = {
         "project_title": "Minor Bridge across Nala at KM 24+350",
@@ -183,6 +184,7 @@ def _common_drawing_control(**overrides) -> DrawingControl:
 # Fixture 1 — 12 m valid minor bridge
 # ==========================================================================
 
+
 def build_sample_minor_12m_valid() -> BridgeProject:
     return BridgeProject(
         project_master=_common_project_master(),
@@ -214,6 +216,7 @@ SAMPLE_MINOR_12M_VALID: BridgeProject = build_sample_minor_12m_valid()
 # ==========================================================================
 # Fixture 2 — 12 m minor bridge with seeded failures for Warning/Info tests
 # ==========================================================================
+
 
 def build_sample_minor_12m_with_bugs() -> BridgeProject:
     return BridgeProject(
@@ -270,6 +273,7 @@ SAMPLE_MINOR_12M_WITH_BUGS: BridgeProject = build_sample_minor_12m_with_bugs()
 # ==========================================================================
 # Fixture 3 — 3 × 12 m = 36 m continuous PSC I-Girder major bridge
 # ==========================================================================
+
 
 def build_sample_major_3x12m() -> BridgeProject:
     return BridgeProject(
@@ -333,6 +337,7 @@ SAMPLE_MAJOR_3X12M: BridgeProject = build_sample_major_3x12m()
 # ==========================================================================
 # Fixture 4 — 8 m Box Culvert
 # ==========================================================================
+
 
 def build_sample_culvert_8m_box() -> BridgeProject:
     return BridgeProject(

@@ -1,4 +1,5 @@
 """Day 3 acceptance verifier: models schema size, valid fixture, bad-value ValidationErrors."""
+
 from __future__ import annotations
 
 import json
@@ -198,7 +199,7 @@ SAMPLE_MINOR_12M_VALID: dict = {
     "foundation_details": {
         "type": FoundationType.PILE,
         "pile_type": PileType.BORED_CAST_IN_SITU,
-        "pile_shape": "CIRCULAR" if not hasattr(__builtins__, '_x') else None,
+        "pile_shape": "CIRCULAR" if not hasattr(__builtins__, "_x") else None,
         "pile_diameter_mm": 1200,
         "pile_length_m": Decimal("18.00"),
         "piles_per_pier": 6,
@@ -423,8 +424,12 @@ def run_checks():
         results["C2_schema_ge_40KB"] = size_ok
         status = "PASS" if size_ok else "FAIL"
         schema_kb = schema_bytes / 1024.0
-        print(f"  [{status}] C2: model_json_schema() size = {schema_bytes} bytes ({schema_kb:.1f} KB) >= 40 KB")
-        print(f"  [{status}] {f'C2: schema size = {schema_bytes} bytes ({schema_kb:.1f}KB >= 40.0KB)': <{pad-10}} {status}]")
+        print(
+            f"  [{status}] C2: model_json_schema() size = {schema_bytes} bytes ({schema_kb:.1f} KB) >= 40 KB"
+        )
+        print(
+            f"  [{status}] {f'C2: schema size = {schema_bytes} bytes ({schema_kb:.1f}KB >= 40.0KB)': <{pad-10}} {status}]"
+        )
     except Exception as exc:
         print(f"  [FAIL] C2: schema generation: {exc}")
         results["C2_schema_ge_40KB"] = False
@@ -436,7 +441,10 @@ def run_checks():
         # Bad 2: negative span length
         ("negative_span_length", {"geometry_input": {"span_lengths_m": [Decimal("-1.0")]}}),
         # Bad 3: span_count mismatch lengths
-        ("span_count_mismatch", {"geometry_input": {"span_count": 3, "span_lengths_m": [Decimal("12.0")]}}),
+        (
+            "span_count_mismatch",
+            {"geometry_input": {"span_count": 3, "span_lengths_m": [Decimal("12.0")]}},
+        ),
         # Bad 4: skew_angle > 60° IRC limit
         ("skew_too_large", {"geometry_input": {"skew_angle_deg": Decimal("75")}}),
         # Bad 5: pile_diameter out of range
@@ -446,7 +454,14 @@ def run_checks():
         # Bad 7: carriageway_width 0 -> not > 0
         ("carriageway_zero", {"geometry_input": {"carriageway_width_m": Decimal("-0.1")}}),
         # Bad 8: bearing_schedule missing required location
-        ("bearing_row_no_location", {"bearings_joints": {"bearing_schedule": [{"bearing_type": "POT_PTFE", "size_x_mm": 400}]}}),
+        (
+            "bearing_row_no_location",
+            {
+                "bearings_joints": {
+                    "bearing_schedule": [{"bearing_type": "POT_PTFE", "size_x_mm": 400}]
+                }
+            },
+        ),
         # Bad 9: decimal pier_height out of declared range (0)
         ("pier_height_zero", {"substructure": {"pier_height_typical_m": Decimal("0.5")}}),
         # Bad 10: freeboard below 0.3 minimum
@@ -458,6 +473,7 @@ def run_checks():
         json.loads(json.dumps(SAMPLE_MINOR_12M_VALID, default=str))
         # Recreate decimals better: deep copy dict manually with overlay
         from copy import deepcopy
+
         data = deepcopy(SAMPLE_MINOR_12M_VALID)
         for k, v in bad_overlay.items():
             if isinstance(v, dict) and isinstance(data.get(k), dict):
@@ -470,7 +486,9 @@ def run_checks():
         except ValidationError as _ve:
             bad_pass_count += 1
         except Exception as _oth:
-            bad_failures_log.append(f"    [{name}] raised non-ValidationError: {type(_oth).__name__}: {_oth}")
+            bad_failures_log.append(
+                f"    [{name}] raised non-ValidationError: {type(_oth).__name__}: {_oth}"
+            )
     results["C3_10bad_all_raise"] = bad_pass_count == len(BAD_CASES)
     status = "PASS" if results["C3_10bad_all_raise"] else "FAIL"
     label = f"C3: 10/10 bad values raise ValidationError ({bad_pass_count}/{len(BAD_CASES)})"
@@ -480,6 +498,7 @@ def run_checks():
 
     # (4) py_compile models.py (run separately, but re-check via import)
     import py_compile
+
     try:
         models_path = Path(__file__).resolve().parent / "bridgecad_core" / "models.py"
         py_compile.compile(str(models_path), doraise=True)
@@ -493,6 +512,7 @@ def run_checks():
     total_fields = 0
     per_model_counts = []
     from pydantic import BaseModel
+
     SHEET_CLASSES: list[tuple[str, type[BaseModel]]] = [
         ("ProjectMaster", models.ProjectMaster),
         ("BridgeSelection", models.BridgeSelection),
@@ -514,8 +534,10 @@ def run_checks():
         total_fields += own_fields_count
         per_model_counts.append((cls_name, own_fields_count))
     # Plus schedule rows
-    for cls_name, cls in [("BearingScheduleRow", models.BearingScheduleRow),
-                           ("ExpansionJointScheduleRow", models.ExpansionJointScheduleRow)]:
+    for cls_name, cls in [
+        ("BearingScheduleRow", models.BearingScheduleRow),
+        ("ExpansionJointScheduleRow", models.ExpansionJointScheduleRow),
+    ]:
         per_model_counts.append((cls_name, len(cls.model_fields)))
     print()
     print("  FIELD-COUNT BREAKDOWN PER MODEL:")
@@ -529,10 +551,24 @@ def run_checks():
     # (6) Computed fields sanity check
     comp_checks = [
         ("total_length_m", lambda p: p.geometry_input.total_length_m == Decimal("12.0")),
-        ("overall_width_m", lambda p: p.geometry_input.overall_width_m == Decimal("7.50")+Decimal("1.50")+Decimal("1.50")+Decimal("0.50")+Decimal("0.50")+Decimal("0.25")+Decimal("0.25")),
-        ("freeboard_actual_m", lambda p: p.hydraulic_data.freeboard_actual_m == Decimal("563.000")-Decimal("560.750")),
-        ("total_bearings", lambda p: p.bearings_joints.total_bearings_quantity == 4+4),
-        ("total_joints", lambda p: p.bearings_joints.total_joints_quantity == 1+1),
+        (
+            "overall_width_m",
+            lambda p: p.geometry_input.overall_width_m
+            == Decimal("7.50")
+            + Decimal("1.50")
+            + Decimal("1.50")
+            + Decimal("0.50")
+            + Decimal("0.50")
+            + Decimal("0.25")
+            + Decimal("0.25"),
+        ),
+        (
+            "freeboard_actual_m",
+            lambda p: p.hydraulic_data.freeboard_actual_m
+            == Decimal("563.000") - Decimal("560.750"),
+        ),
+        ("total_bearings", lambda p: p.bearings_joints.total_bearings_quantity == 4 + 4),
+        ("total_joints", lambda p: p.bearings_joints.total_joints_quantity == 1 + 1),
         ("agg_total_length", lambda p: p.total_bridge_length_m == Decimal("12.000")),
     ]
     comp_pass = 0
@@ -550,7 +586,9 @@ def run_checks():
 
     # (7) Extra forbid check: unknown field
     try:
-        BridgeProject(project_master={**SAMPLE_MINOR_12M_VALID["project_master"], "nonexistent_field_xyz": 1})
+        BridgeProject(
+            project_master={**SAMPLE_MINOR_12M_VALID["project_master"], "nonexistent_field_xyz": 1}
+        )
         results["C7_extra_forbid"] = False
         print("  [FAIL] C7: extra='forbid' did not fire on unknown field")
     except ValidationError:

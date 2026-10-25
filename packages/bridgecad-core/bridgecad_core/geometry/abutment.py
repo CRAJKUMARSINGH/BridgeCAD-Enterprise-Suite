@@ -141,9 +141,11 @@ def _splay_deg(project: Any) -> Decimal:
     A drafting override on the drawing control wins; otherwise the project's
     direct value; otherwise the substructure's declared wing wall angle.
     """
-    for holder, name in ((_attr(project, "drawing_control"), "splay_deg"),
-                         (project, "splay_deg"),
-                         (_attr(project, "substructure"), "wing_wall_angle_deg")):
+    for holder, name in (
+        (_attr(project, "drawing_control"), "splay_deg"),
+        (project, "splay_deg"),
+        (_attr(project, "substructure"), "wing_wall_angle_deg"),
+    ):
         value = _dec(_attr(holder, name))
         if value is not None:
             return value
@@ -204,6 +206,9 @@ def wing_wall_geometry(project: Any) -> list[WingWall]:
 
 
 __all__ = [
-    "LADDER", "TERMINAL_DEFAULT_M", "WingWall",
-    "resolve_abtl", "wing_wall_geometry",
+    "LADDER",
+    "TERMINAL_DEFAULT_M",
+    "WingWall",
+    "resolve_abtl",
+    "wing_wall_geometry",
 ]

@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 # Public dataclass
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class BridgePlanGeometry:
     """Plan-view coordinate set derived from a BridgeProject.
@@ -57,6 +58,7 @@ class BridgePlanGeometry:
 # Factory function
 # ---------------------------------------------------------------------------
 
+
 def _rotate(x: float, y: float, theta_rad: float) -> tuple[float, float]:
     """Rotate point (x, y) by theta_rad counter-clockwise."""
     cos_t = math.cos(theta_rad)
@@ -80,22 +82,22 @@ def compute_plan_geometry(project: BridgeProject) -> BridgePlanGeometry:
     gi = project.geometry_input
     ss = project.superstructure
 
-    total_len = float(gi.total_length_m)          # computed field
-    overall_w = float(gi.overall_width_m)          # computed field
+    total_len = float(gi.total_length_m)  # computed field
+    overall_w = float(gi.overall_width_m)  # computed field
     skew_deg = float(gi.skew_angle_deg)
     span_lengths = [float(s) for s in gi.span_lengths_m]
 
     half_w = overall_w / 2.0
-    theta = -math.radians(skew_deg)               # skew rotates deck clockwise
+    theta = -math.radians(skew_deg)  # skew rotates deck clockwise
 
     # ---- deck corners (pre-rotation) -------------------------------------
     # A1: x=0,  A2: x=total_len
     # Left side: y = +half_w,  Right side: y = -half_w  (IRC convention)
     raw_corners = [
-        (0.0,         +half_w),   # A1-left
-        (0.0,         -half_w),   # A1-right
-        (total_len,   -half_w),   # A2-right
-        (total_len,   +half_w),   # A2-left
+        (0.0, +half_w),  # A1-left
+        (0.0, -half_w),  # A1-right
+        (total_len, -half_w),  # A2-right
+        (total_len, +half_w),  # A2-left
     ]
     deck_corners = [_rotate(x, y, theta) for x, y in raw_corners]
 
@@ -103,7 +105,7 @@ def compute_plan_geometry(project: BridgeProject) -> BridgePlanGeometry:
     # Simply-supported: pier between every pair of adjacent spans (N-1 piers)
     pier_centrelines: list[tuple[float, float]] = []
     cumulative = 0.0
-    for i, slen in enumerate(span_lengths[:-1]):   # no pier after last span
+    for i, slen in enumerate(span_lengths[:-1]):  # no pier after last span
         cumulative += slen
         px, py = _rotate(cumulative, 0.0, theta)
         pier_centrelines.append((px, py))
@@ -114,13 +116,11 @@ def compute_plan_geometry(project: BridgeProject) -> BridgePlanGeometry:
 
     # Number of bearings per support cross-line
     girder_count = getattr(ss, "girders_per_deck_count", None) or 4
-    girder_spacing = float(getattr(ss, "girder_spacing_m", None) or
-                           (overall_w / (girder_count + 1)))
+    girder_spacing = float(
+        getattr(ss, "girder_spacing_m", None) or (overall_w / (girder_count + 1))
+    )
 
-    y_offsets = [
-        (i - (girder_count - 1) / 2.0) * girder_spacing
-        for i in range(girder_count)
-    ]
+    y_offsets = [(i - (girder_count - 1) / 2.0) * girder_spacing for i in range(girder_count)]
 
     # A1 abutment bearings (x=0)
     for yo in y_offsets:

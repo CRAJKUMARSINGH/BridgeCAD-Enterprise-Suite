@@ -3,6 +3,7 @@ bridgecad_infra.cache — In-memory LRU cache with optional Redis backend.
 
 Falls back gracefully to in-memory when Redis is unavailable.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -17,8 +18,8 @@ class LRUCache:
 
     def __init__(self, maxsize: int = 256, ttl_seconds: int = 3600) -> None:
         self._cache: OrderedDict[str, tuple[Any, float]] = OrderedDict()
-        self._maxsize  = maxsize
-        self._ttl      = ttl_seconds
+        self._maxsize = maxsize
+        self._ttl = ttl_seconds
 
     def _key(self, *args, **kwargs) -> str:
         raw = json.dumps({"a": args, "k": kwargs}, sort_keys=True, default=str)
@@ -56,14 +57,21 @@ class LRUCache:
 
 
 # Module-level singleton caches
-_qa_cache      = LRUCache(maxsize=128, ttl_seconds=1800)   # QA reports (30 min)
-_boq_cache     = LRUCache(maxsize=64,  ttl_seconds=3600)   # BOQ (1 hr)
-_drawing_cache = LRUCache(maxsize=32,  ttl_seconds=7200)   # DXF paths (2 hr)
+_qa_cache = LRUCache(maxsize=128, ttl_seconds=1800)  # QA reports (30 min)
+_boq_cache = LRUCache(maxsize=64, ttl_seconds=3600)  # BOQ (1 hr)
+_drawing_cache = LRUCache(maxsize=32, ttl_seconds=7200)  # DXF paths (2 hr)
 
 
-def get_qa_cache()      -> LRUCache: return _qa_cache
-def get_boq_cache()     -> LRUCache: return _boq_cache
-def get_drawing_cache() -> LRUCache: return _drawing_cache
+def get_qa_cache() -> LRUCache:
+    return _qa_cache
+
+
+def get_boq_cache() -> LRUCache:
+    return _boq_cache
+
+
+def get_drawing_cache() -> LRUCache:
+    return _drawing_cache
 
 
 __all__ = ["LRUCache", "get_qa_cache", "get_boq_cache", "get_drawing_cache"]

@@ -5,6 +5,7 @@ bridge. All three are worth knowing, and none of them is resolved by widening a
 tolerance. Open conflicts are counted and printed; a conflict closed without a
 note is a conflict nobody learned from.
 """
+
 import json
 from dataclasses import dataclass, field
 from datetime import date
@@ -19,7 +20,7 @@ class Conflict:
     generated: str
     stated: str
     citation_ref: str
-    resolved_as: str | None = None      # code_wrong | ref_wrong | different_bridge | tolerance
+    resolved_as: str | None = None  # code_wrong | ref_wrong | different_bridge | tolerance
     note: str | None = None
     raised_on: str = field(default_factory=lambda: date.today().isoformat())
 
@@ -32,5 +33,5 @@ def open_conflicts() -> list[Conflict]:
         if not line.strip():
             continue
         c = Conflict(**json.loads(line))
-        seen[c.key] = c          # later line wins, so a resolution appends
+        seen[c.key] = c  # later line wins, so a resolution appends
     return [c for c in seen.values() if c.resolved_as is None]

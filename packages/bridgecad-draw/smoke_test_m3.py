@@ -1,4 +1,5 @@
 """M3 smoke test — generate 8-sheet GAD package for a simple 12m bridge."""
+
 from __future__ import annotations
 
 import logging
@@ -105,7 +106,8 @@ SIMPLE_12M = BridgeProject(
         foundation_type=FoundationType.PILE,
     ),
     geometry_input=GeometryInput(
-        span_count=1, span_lengths_m=[Decimal("12.000")],
+        span_count=1,
+        span_lengths_m=[Decimal("12.000")],
         alignment_type=AlignmentType.STRAIGHT,
         gradient_pct=Decimal("0.5"),
         carriageway_width_m=Decimal("7.50"),
@@ -168,7 +170,8 @@ SIMPLE_12M = BridgeProject(
         backfill_type="SELECT MOORUM",
         approach_slab_length_m=Decimal("3.50"),
         approach_slab_thickness_mm=200,
-        bearings_per_pier=4, bearings_per_abutment=4,
+        bearings_per_pier=4,
+        bearings_per_abutment=4,
     ),
     foundation_details=FoundationDetails(
         type=FoundationType.PILE,
@@ -237,7 +240,8 @@ SIMPLE_12M = BridgeProject(
             BearingScheduleRow(
                 location="A1-Bearing",
                 bearing_type=BearingType.ELASTOMERIC_NEOPRENE,
-                size_x_mm=350, size_y_mm=350,
+                size_x_mm=350,
+                size_y_mm=350,
                 design_load_kn=Decimal("350.0"),
                 fixed_or_guide_or_free="FREE",
                 quantity=4,
@@ -245,7 +249,8 @@ SIMPLE_12M = BridgeProject(
             BearingScheduleRow(
                 location="A2-Bearing",
                 bearing_type=BearingType.ELASTOMERIC_NEOPRENE,
-                size_x_mm=350, size_y_mm=350,
+                size_x_mm=350,
+                size_y_mm=350,
                 design_load_kn=Decimal("350.0"),
                 fixed_or_guide_or_free="FREE",
                 quantity=4,
@@ -255,14 +260,20 @@ SIMPLE_12M = BridgeProject(
             ExpansionJointScheduleRow(
                 location="A1-End",
                 joint_type=ExpansionJointType.COMPRESSION_SEAL,
-                width_mm=40, movement_range_mm=20, gap_mm=12,
-                transverse_length_m=Decimal("8.90"), quantity=1,
+                width_mm=40,
+                movement_range_mm=20,
+                gap_mm=12,
+                transverse_length_m=Decimal("8.90"),
+                quantity=1,
             ),
             ExpansionJointScheduleRow(
                 location="A2-End",
                 joint_type=ExpansionJointType.COMPRESSION_SEAL,
-                width_mm=40, movement_range_mm=20, gap_mm=12,
-                transverse_length_m=Decimal("8.90"), quantity=1,
+                width_mm=40,
+                movement_range_mm=20,
+                gap_mm=12,
+                transverse_length_m=Decimal("8.90"),
+                quantity=1,
             ),
         ],
     ),
@@ -278,12 +289,18 @@ SIMPLE_12M = BridgeProject(
         autocad_version=AcadVersion.R2018,
         sheet_size=SheetSize.A1,
         drawing_scale=DrawingScale.S100,
-        gen_plan_sheet=True, gen_long_section_sheet=True,
-        gen_cross_section_sheet=True, gen_foundation_sheet=True,
-        gen_reinforcement_sheet=False, gen_pier_details_sheet=True,
-        gen_abutment_details_sheet=True, gen_bearings_joints_sheet=True,
-        gen_boq_sheet=True, gen_cover_sheet=True,
-        gen_legends_sheet=True, gen_hydraulics_sheet=True,
+        gen_plan_sheet=True,
+        gen_long_section_sheet=True,
+        gen_cross_section_sheet=True,
+        gen_foundation_sheet=True,
+        gen_reinforcement_sheet=False,
+        gen_pier_details_sheet=True,
+        gen_abutment_details_sheet=True,
+        gen_bearings_joints_sheet=True,
+        gen_boq_sheet=True,
+        gen_cover_sheet=True,
+        gen_legends_sheet=True,
+        gen_hydraulics_sheet=True,
         layer_standard=LayerStandard.IRC,
         title_block_style=TitleBlockStyle.STANDARD,
         dimension_precision_mm=1,
@@ -294,7 +311,8 @@ SIMPLE_12M = BridgeProject(
         legend_sheet_required=True,
     ),
     calculations=Calculations(
-        total_length_m=Decimal("12.000"), span_count=1,
+        total_length_m=Decimal("12.000"),
+        span_count=1,
         span_depth_ratio=Decimal("13.3"),
         deck_area_sqm=Decimal("105.0"),
         overall_width_check_ok=True,
@@ -302,17 +320,21 @@ SIMPLE_12M = BridgeProject(
         concrete_volume_substructure_cum=Decimal("58.0"),
         concrete_volume_foundation_cum=Decimal("78.0"),
         rebar_weight_tonnes_approx=Decimal("18.5"),
-        bearing_count=8, expansion_joint_count=2,
+        bearing_count=8,
+        expansion_joint_count=2,
         total_estimated_quantity_cost_inr=Decimal("9500000"),
         design_scour_vs_foundation_cover_ok=True,
-        waterway_check_pass=True, afflux_ok=True,
+        waterway_check_pass=True,
+        afflux_ok=True,
         freeboard_actual_m=Decimal("1.80"),
         minimum_vertical_clearance_m=Decimal("4.50"),
         horizontal_clearance_m=Decimal("1.00"),
     ),
     validation=ValidationModel(
-        overall_status="OK_PASS", critical_fail_count=0,
-        warning_count=0, info_count=3,
+        overall_status="OK_PASS",
+        critical_fail_count=0,
+        warning_count=0,
+        info_count=3,
         score_0_to_100=Decimal("96.0"),
         check_version_tag="1.0.0-m3-smoke",
     ),
@@ -336,16 +358,16 @@ def main() -> int:
     for p in sheets:
         sz = p.stat().st_size
         total_bytes += sz
-        ok = sz > 10_000   # each sheet > 10 KB
+        ok = sz > 10_000  # each sheet > 10 KB
         status = "PASS" if ok else "FAIL"
         if not ok:
             all_pass = False
         print(f"    [{status}] {p.name:<50s}  {sz/1024:.1f} KB")
 
     # Smoke criteria: at least 2 sheets generated, each > 10 KB
-    gen_ok   = len(sheets) >= 2
-    size_ok  = all_pass
-    total_ok = total_bytes > 50_000   # total package > 50 KB
+    gen_ok = len(sheets) >= 2
+    size_ok = all_pass
+    total_ok = total_bytes > 50_000  # total package > 50 KB
 
     print()
     print(f"  Sheets generated : {len(sheets)} / 8  {'PASS' if gen_ok else 'FAIL'}")

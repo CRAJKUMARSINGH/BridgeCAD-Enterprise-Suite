@@ -13,6 +13,7 @@ Usage
     from bridgecad_draw.layers import LAYER_REGISTRY, setup_layers
     setup_layers(doc)   # registers all layers on an ezdxf Drawing
 """
+
 from __future__ import annotations
 
 import contextlib
@@ -23,99 +24,99 @@ from typing import Any
 @dataclass(frozen=True)
 class LayerDef:
     name: str
-    color: int          # ACI colour index
-    linetype: str       # DXF linetype name
-    lineweight: int     # 1/100 mm  (e.g. 25 = 0.25 mm)
+    color: int  # ACI colour index
+    linetype: str  # DXF linetype name
+    lineweight: int  # 1/100 mm  (e.g. 25 = 0.25 mm)
     description: str
 
 
 # ---------------------------------------------------------------------------
 # IRC SP:55-2019 layer definitions (Annex F)
 # ---------------------------------------------------------------------------
-LAYER_REGISTRY: dict[str, LayerDef] = {ld.name: ld for ld in [
-    # ── Structural outline ──────────────────────────────────────────────────
-    LayerDef("STRUC-OUTLINE",    1,  "Continuous", 50,  "Primary structural outline — deck, piers, abutments"),
-    LayerDef("STRUC-HIDDEN",     8,  "HIDDEN",     25,  "Hidden structural lines"),
-    LayerDef("STRUC-CENTRE",     6,  "CENTER",     18,  "Centrelines and axis lines"),
-    LayerDef("STRUC-SECTION",    2,  "Continuous", 40,  "Section cut boundaries"),
-    LayerDef("STRUC-HATCHING",   8,  "Continuous", 18,  "Section hatching (concrete, soil)"),
-    LayerDef("STRUC-DETAIL",     4,  "Continuous", 30,  "Detail view outlines (scale 1:20 or finer)"),
-
-    # ── Civil / ground ───────────────────────────────────────────────────────
-    LayerDef("CIVIL-GROUND",     3,  "Continuous", 35,  "Existing ground profile (EG polyline)"),
-    LayerDef("CIVIL-HFL",        5,  "DASHED",     25,  "Highest Flood Level line"),
-    LayerDef("CIVIL-LWL",        4,  "DASHED",     18,  "Low Water Level line"),
-    LayerDef("CIVIL-SCOUR",      1,  "DASHED2",    18,  "Design scour level"),
-    LayerDef("CIVIL-ROAD",       7,  "Continuous", 25,  "Approach road alignment and surface"),
-    LayerDef("CIVIL-CHAINAGE",   7,  "Continuous", 18,  "Chainage markers along alignment"),
-    LayerDef("CIVIL-CONTOUR",   30,  "Continuous", 13,  "Site contour lines"),
-
-    # ── Foundation ───────────────────────────────────────────────────────────
-    LayerDef("FOUND-PILE",       4,  "Continuous", 40,  "Pile circles and cap outline"),
-    LayerDef("FOUND-CAP",        2,  "Continuous", 35,  "Pile cap / raft / footing outline"),
-    LayerDef("FOUND-WELL",       4,  "Continuous", 35,  "Well steining circles"),
-    LayerDef("FOUND-OPEN",       2,  "Continuous", 30,  "Open foundation stepped outline"),
-    LayerDef("FOUND-SOIL",      34,  "Continuous", 18,  "Soil stratigraphy (hatch + label)"),
-
-    # ── Substructure ─────────────────────────────────────────────────────────
-    LayerDef("SUB-PIER",         2,  "Continuous", 40,  "Pier shaft and cap outline"),
-    LayerDef("SUB-ABUT",         3,  "Continuous", 40,  "Abutment wall and wing wall outline"),
-    LayerDef("SUB-BEARING",      5,  "Continuous", 25,  "Bearing pad outlines and schedule"),
-    LayerDef("SUB-EXPJOINT",     6,  "Continuous", 25,  "Expansion joint locations"),
-    LayerDef("SUB-BACKFILL",    34,  "Continuous", 18,  "Backfill hatch (earth/granular)"),
-
-    # ── Superstructure ───────────────────────────────────────────────────────
-    LayerDef("SUPER-DECK",       2,  "Continuous", 50,  "Deck slab top and bottom face"),
-    LayerDef("SUPER-GIRDER",     1,  "Continuous", 40,  "Girder webs and flanges"),
-    LayerDef("SUPER-PARAPET",    2,  "Continuous", 35,  "Parapet and railing outline"),
-    LayerDef("SUPER-WEARING",    8,  "Continuous", 25,  "Wearing coat cross-section"),
-    LayerDef("SUPER-CAMBER",     6,  "DASHED",     18,  "Pre-camber reference profile"),
-    LayerDef("SUPER-KERB",       7,  "Continuous", 25,  "Kerb cross-section"),
-    LayerDef("SUPER-FOOTPATH",   7,  "Continuous", 25,  "Footpath / pedestrian zone"),
-    LayerDef("SUPER-CRASH",      1,  "Continuous", 30,  "Crash barrier / median barrier"),
-    LayerDef("SUPER-DRAINAGE",   4,  "Continuous", 20,  "Deck drainage scupper and pipes"),
-
-    # ── Dimensions & annotations ─────────────────────────────────────────────
-    LayerDef("DIM-LINEAR",       3,  "Continuous", 18,  "Linear dimension strings"),
-    LayerDef("DIM-LEADER",       3,  "Continuous", 18,  "Leader lines and callouts"),
-    LayerDef("DIM-LEVEL",        3,  "Continuous", 18,  "Level / RL annotation arrows"),
-    LayerDef("DIM-CHAINAGE",     3,  "Continuous", 18,  "Chainage annotation"),
-    LayerDef("DIM-SLOPE",        3,  "Continuous", 18,  "Slope / gradient ratio labels"),
-
-    # ── Text ─────────────────────────────────────────────────────────────────
-    LayerDef("TEXT-GENERAL",     7,  "Continuous", 18,  "General notes and labels"),
-    LayerDef("TEXT-TITLE",       7,  "Continuous", 25,  "Title block text"),
-    LayerDef("TEXT-HEADER",      7,  "Continuous", 25,  "Sheet header / zone label"),
-    LayerDef("TEXT-LEVEL",       5,  "Continuous", 18,  "Reduced level tags (+RL)"),
-    LayerDef("TEXT-SPEC",        7,  "Continuous", 13,  "Specification notes (small)"),
-
-    # ── Title block & border ─────────────────────────────────────────────────
-    LayerDef("BORDER-OUTER",     7,  "Continuous", 70,  "Sheet outer border"),
-    LayerDef("BORDER-INNER",     7,  "Continuous", 35,  "Sheet inner border / margin"),
-    LayerDef("TITLEBLK-BOX",     7,  "Continuous", 50,  "Title block cell outlines"),
-    LayerDef("TITLEBLK-TEXT",    7,  "Continuous", 18,  "Title block text fields"),
-    LayerDef("TITLEBLK-LOGO",    7,  "Continuous", 25,  "Client / consultant logo area"),
-
-    # ── Symbols & references ─────────────────────────────────────────────────
-    LayerDef("SYM-NORTHARROW",   7,  "Continuous", 18,  "North arrow symbol"),
-    LayerDef("SYM-SECTIONMARK",  1,  "Continuous", 18,  "Section A-A cut markers"),
-    LayerDef("SYM-REVISION",     6,  "Continuous", 18,  "Revision cloud / delta markers"),
-    LayerDef("SYM-SCALE",        7,  "Continuous", 13,  "Graphic scale bar"),
-
-    # ── Miscellaneous ────────────────────────────────────────────────────────
-    LayerDef("MISC-GRID",        8,  "DASHED",     13,  "Construction grid / reference"),
-    LayerDef("MISC-SETOUT",      5,  "CENTER2",    13,  "Set-out points and traverse"),
-    LayerDef("MISC-DEFPOINTS",   7,  "Continuous",  0,  "Definition points (non-printing)"),
-    LayerDef("0",                7,  "Continuous", 25,  "Default layer (ezdxf baseline)"),
-]}
+LAYER_REGISTRY: dict[str, LayerDef] = {
+    ld.name: ld
+    for ld in [
+        # ── Structural outline ──────────────────────────────────────────────────
+        LayerDef(
+            "STRUC-OUTLINE",
+            1,
+            "Continuous",
+            50,
+            "Primary structural outline — deck, piers, abutments",
+        ),
+        LayerDef("STRUC-HIDDEN", 8, "HIDDEN", 25, "Hidden structural lines"),
+        LayerDef("STRUC-CENTRE", 6, "CENTER", 18, "Centrelines and axis lines"),
+        LayerDef("STRUC-SECTION", 2, "Continuous", 40, "Section cut boundaries"),
+        LayerDef("STRUC-HATCHING", 8, "Continuous", 18, "Section hatching (concrete, soil)"),
+        LayerDef("STRUC-DETAIL", 4, "Continuous", 30, "Detail view outlines (scale 1:20 or finer)"),
+        # ── Civil / ground ───────────────────────────────────────────────────────
+        LayerDef("CIVIL-GROUND", 3, "Continuous", 35, "Existing ground profile (EG polyline)"),
+        LayerDef("CIVIL-HFL", 5, "DASHED", 25, "Highest Flood Level line"),
+        LayerDef("CIVIL-LWL", 4, "DASHED", 18, "Low Water Level line"),
+        LayerDef("CIVIL-SCOUR", 1, "DASHED2", 18, "Design scour level"),
+        LayerDef("CIVIL-ROAD", 7, "Continuous", 25, "Approach road alignment and surface"),
+        LayerDef("CIVIL-CHAINAGE", 7, "Continuous", 18, "Chainage markers along alignment"),
+        LayerDef("CIVIL-CONTOUR", 30, "Continuous", 13, "Site contour lines"),
+        # ── Foundation ───────────────────────────────────────────────────────────
+        LayerDef("FOUND-PILE", 4, "Continuous", 40, "Pile circles and cap outline"),
+        LayerDef("FOUND-CAP", 2, "Continuous", 35, "Pile cap / raft / footing outline"),
+        LayerDef("FOUND-WELL", 4, "Continuous", 35, "Well steining circles"),
+        LayerDef("FOUND-OPEN", 2, "Continuous", 30, "Open foundation stepped outline"),
+        LayerDef("FOUND-SOIL", 34, "Continuous", 18, "Soil stratigraphy (hatch + label)"),
+        # ── Substructure ─────────────────────────────────────────────────────────
+        LayerDef("SUB-PIER", 2, "Continuous", 40, "Pier shaft and cap outline"),
+        LayerDef("SUB-ABUT", 3, "Continuous", 40, "Abutment wall and wing wall outline"),
+        LayerDef("SUB-BEARING", 5, "Continuous", 25, "Bearing pad outlines and schedule"),
+        LayerDef("SUB-EXPJOINT", 6, "Continuous", 25, "Expansion joint locations"),
+        LayerDef("SUB-BACKFILL", 34, "Continuous", 18, "Backfill hatch (earth/granular)"),
+        # ── Superstructure ───────────────────────────────────────────────────────
+        LayerDef("SUPER-DECK", 2, "Continuous", 50, "Deck slab top and bottom face"),
+        LayerDef("SUPER-GIRDER", 1, "Continuous", 40, "Girder webs and flanges"),
+        LayerDef("SUPER-PARAPET", 2, "Continuous", 35, "Parapet and railing outline"),
+        LayerDef("SUPER-WEARING", 8, "Continuous", 25, "Wearing coat cross-section"),
+        LayerDef("SUPER-CAMBER", 6, "DASHED", 18, "Pre-camber reference profile"),
+        LayerDef("SUPER-KERB", 7, "Continuous", 25, "Kerb cross-section"),
+        LayerDef("SUPER-FOOTPATH", 7, "Continuous", 25, "Footpath / pedestrian zone"),
+        LayerDef("SUPER-CRASH", 1, "Continuous", 30, "Crash barrier / median barrier"),
+        LayerDef("SUPER-DRAINAGE", 4, "Continuous", 20, "Deck drainage scupper and pipes"),
+        # ── Dimensions & annotations ─────────────────────────────────────────────
+        LayerDef("DIM-LINEAR", 3, "Continuous", 18, "Linear dimension strings"),
+        LayerDef("DIM-LEADER", 3, "Continuous", 18, "Leader lines and callouts"),
+        LayerDef("DIM-LEVEL", 3, "Continuous", 18, "Level / RL annotation arrows"),
+        LayerDef("DIM-CHAINAGE", 3, "Continuous", 18, "Chainage annotation"),
+        LayerDef("DIM-SLOPE", 3, "Continuous", 18, "Slope / gradient ratio labels"),
+        # ── Text ─────────────────────────────────────────────────────────────────
+        LayerDef("TEXT-GENERAL", 7, "Continuous", 18, "General notes and labels"),
+        LayerDef("TEXT-TITLE", 7, "Continuous", 25, "Title block text"),
+        LayerDef("TEXT-HEADER", 7, "Continuous", 25, "Sheet header / zone label"),
+        LayerDef("TEXT-LEVEL", 5, "Continuous", 18, "Reduced level tags (+RL)"),
+        LayerDef("TEXT-SPEC", 7, "Continuous", 13, "Specification notes (small)"),
+        # ── Title block & border ─────────────────────────────────────────────────
+        LayerDef("BORDER-OUTER", 7, "Continuous", 70, "Sheet outer border"),
+        LayerDef("BORDER-INNER", 7, "Continuous", 35, "Sheet inner border / margin"),
+        LayerDef("TITLEBLK-BOX", 7, "Continuous", 50, "Title block cell outlines"),
+        LayerDef("TITLEBLK-TEXT", 7, "Continuous", 18, "Title block text fields"),
+        LayerDef("TITLEBLK-LOGO", 7, "Continuous", 25, "Client / consultant logo area"),
+        # ── Symbols & references ─────────────────────────────────────────────────
+        LayerDef("SYM-NORTHARROW", 7, "Continuous", 18, "North arrow symbol"),
+        LayerDef("SYM-SECTIONMARK", 1, "Continuous", 18, "Section A-A cut markers"),
+        LayerDef("SYM-REVISION", 6, "Continuous", 18, "Revision cloud / delta markers"),
+        LayerDef("SYM-SCALE", 7, "Continuous", 13, "Graphic scale bar"),
+        # ── Miscellaneous ────────────────────────────────────────────────────────
+        LayerDef("MISC-GRID", 8, "DASHED", 13, "Construction grid / reference"),
+        LayerDef("MISC-SETOUT", 5, "CENTER2", 13, "Set-out points and traverse"),
+        LayerDef("MISC-DEFPOINTS", 7, "Continuous", 0, "Definition points (non-printing)"),
+        LayerDef("0", 7, "Continuous", 25, "Default layer (ezdxf baseline)"),
+    ]
+}
 
 # Short aliases used by drawing modules
-L = LAYER_REGISTRY   # e.g.  L["STRUC-OUTLINE"]
+L = LAYER_REGISTRY  # e.g.  L["STRUC-OUTLINE"]
 
 # Grouped sets for quick access
 STRUCTURAL_LAYERS = {k: v for k, v in L.items() if k.startswith("STRUC")}
 ANNOTATION_LAYERS = {k: v for k, v in L.items() if k.startswith(("DIM", "TEXT"))}
-TITLEBLOCK_LAYERS  = {k: v for k, v in L.items() if k.startswith(("BORDER", "TITLEBLK"))}
+TITLEBLOCK_LAYERS = {k: v for k, v in L.items() if k.startswith(("BORDER", "TITLEBLK"))}
 
 
 def setup_layers(doc: Any) -> None:
@@ -143,20 +144,30 @@ def setup_layers(doc: Any) -> None:
 # Short-name layers used by the sheet builders and the DXF contract tests.
 # These are additive aliases: the IRC SP:55 long names above remain canonical.
 # ---------------------------------------------------------------------------
-LAYER_REGISTRY.update({
-    "DECK": LayerDef("DECK", 7,  "Continuous", 50,  "Deck line on sections and elevations"),
-    "GRND": LayerDef("GRND", 8,  "DASHED",     18,  "Natural ground profile"),
-    "TEXT": LayerDef("TEXT", 7,  "Continuous", 13,  "Generic annotation text"),
-    "GRID": LayerDef("GRID", 8,  "DASHED",     13,  "Construction grid / reference lines"),
-    "CL":   LayerDef("CL",   6,  "CENTER",     18,  "Centre lines (piers, axes)"),
-    "HIDD": LayerDef("HIDD", 8,  "HIDDEN",     18,  "Hidden / below-section-plane lines"),
-    "DIM":  LayerDef("DIM",  3,  "Continuous", 18,  "Dimension strings"),
-    "HTCH": LayerDef("HTCH", 8,  "Continuous", 18,  "Hatching (concrete, soil, section)"),
-    "TABL": LayerDef("TABL", 7,  "Continuous", 18,  "Schedule / table outlines and text"),
-})
+LAYER_REGISTRY.update(
+    {
+        "DECK": LayerDef("DECK", 7, "Continuous", 50, "Deck line on sections and elevations"),
+        "GRND": LayerDef("GRND", 8, "DASHED", 18, "Natural ground profile"),
+        "TEXT": LayerDef("TEXT", 7, "Continuous", 13, "Generic annotation text"),
+        "GRID": LayerDef("GRID", 8, "DASHED", 13, "Construction grid / reference lines"),
+        "CL": LayerDef("CL", 6, "CENTER", 18, "Centre lines (piers, axes)"),
+        "HIDD": LayerDef("HIDD", 8, "HIDDEN", 18, "Hidden / below-section-plane lines"),
+        "DIM": LayerDef("DIM", 3, "Continuous", 18, "Dimension strings"),
+        "HTCH": LayerDef("HTCH", 8, "Continuous", 18, "Hatching (concrete, soil, section)"),
+        "TABL": LayerDef("TABL", 7, "Continuous", 18, "Schedule / table outlines and text"),
+    }
+)
 
 # Alias exported for the tests' layer registry lookups.
 LAYERS = LAYER_REGISTRY
 
-__all__ = ["LayerDef", "LAYER_REGISTRY", "LAYERS", "L", "setup_layers",
-           "STRUCTURAL_LAYERS", "ANNOTATION_LAYERS", "TITLEBLOCK_LAYERS"]
+__all__ = [
+    "LayerDef",
+    "LAYER_REGISTRY",
+    "LAYERS",
+    "L",
+    "setup_layers",
+    "STRUCTURAL_LAYERS",
+    "ANNOTATION_LAYERS",
+    "TITLEBLOCK_LAYERS",
+]

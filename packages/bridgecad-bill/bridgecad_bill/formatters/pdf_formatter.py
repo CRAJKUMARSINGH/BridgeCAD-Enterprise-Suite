@@ -5,6 +5,7 @@ containing project identification, the section summary, and a prominent "TO BE
 ISSUED" banner so the booklet pipeline never raises `NotImplementedError` and
 the end-user sees an informative output during M5 development.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -74,42 +75,50 @@ def format_pdf(boq: Any, output_path: str | Path) -> Path:
     )
 
     styles = getSampleStyleSheet()
-    styles.add(ParagraphStyle(
-        name="Banner",
-        parent=styles["Title"],
-        fontSize=28,
-        leading=34,
-        textColor=colors.HexColor("#C0392B"),
-        alignment=1,
-        spaceAfter=6 * mm,
-    ))
-    styles.add(ParagraphStyle(
-        name="Hdr",
-        parent=styles["Heading2"],
-        fontSize=12,
-        leading=15,
-        textColor=colors.HexColor("#2C3E50"),
-        spaceAfter=2 * mm,
-    ))
-    styles.add(ParagraphStyle(
-        name="Cell",
-        parent=styles["Normal"],
-        fontSize=9,
-        leading=11,
-    ))
+    styles.add(
+        ParagraphStyle(
+            name="Banner",
+            parent=styles["Title"],
+            fontSize=28,
+            leading=34,
+            textColor=colors.HexColor("#C0392B"),
+            alignment=1,
+            spaceAfter=6 * mm,
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="Hdr",
+            parent=styles["Heading2"],
+            fontSize=12,
+            leading=15,
+            textColor=colors.HexColor("#2C3E50"),
+            spaceAfter=2 * mm,
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="Cell",
+            parent=styles["Normal"],
+            fontSize=9,
+            leading=11,
+        )
+    )
 
     story: list[Any] = []
 
     story.append(Paragraph("BILL OF QUANTITIES", styles["Banner"]))
-    story.append(Paragraph(
-        "<para align=center spaceb=12>"
-        "<b>STATUS: &nbsp;TO BE ISSUED</b><br/>"
-        "<font size=9 color='#555555'>"
-        "Detailed rate analysis, break-ups and approved schedule of rates "
-        "are under preparation and will be issued in a subsequent revision."
-        "</font></para>",
-        styles["Normal"],
-    ))
+    story.append(
+        Paragraph(
+            "<para align=center spaceb=12>"
+            "<b>STATUS: &nbsp;TO BE ISSUED</b><br/>"
+            "<font size=9 color='#555555'>"
+            "Detailed rate analysis, break-ups and approved schedule of rates "
+            "are under preparation and will be issued in a subsequent revision."
+            "</font></para>",
+            styles["Normal"],
+        )
+    )
     story.append(Spacer(1, 6 * mm))
 
     n_items = _count_items(boq)
@@ -117,22 +126,29 @@ def format_pdf(boq: Any, output_path: str | Path) -> Path:
     project_tbl = Table(
         [
             ["Project Name:", str(getattr(boq, "project_name", "") or "—")],
-            ["Bridge Name:",  str(getattr(boq, "bridge_name",  "") or "—")],
-            ["Chainage km:",  str(getattr(boq, "chainage_km", "") or getattr(boq, "chainage", "") or "—")],
-            ["Sections:",     str(len(_call(getattr(boq, "sections", []), [])))],
-            ["Items:",        str(n_items)],
+            ["Bridge Name:", str(getattr(boq, "bridge_name", "") or "—")],
+            [
+                "Chainage km:",
+                str(getattr(boq, "chainage_km", "") or getattr(boq, "chainage", "") or "—"),
+            ],
+            ["Sections:", str(len(_call(getattr(boq, "sections", []), [])))],
+            ["Items:", str(n_items)],
         ],
         colWidths=[40 * mm, 120 * mm],
     )
-    project_tbl.setStyle(TableStyle([
-        ("FONT", (0, 0), (-1, -1), "Helvetica", 10),
-        ("FONT", (0, 0), (0, -1), "Helvetica-Bold", 10),
-        ("TEXTCOLOR", (0, 0), (0, -1), colors.HexColor("#34495E")),
-        ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#ECF0F1")),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
-        ("TOPPADDING",    (0, 0), (-1, -1), 5),
-        ("LINEBELOW", (0, 0), (-1, -1), 0.25, colors.HexColor("#BDC3C7")),
-    ]))
+    project_tbl.setStyle(
+        TableStyle(
+            [
+                ("FONT", (0, 0), (-1, -1), "Helvetica", 10),
+                ("FONT", (0, 0), (0, -1), "Helvetica-Bold", 10),
+                ("TEXTCOLOR", (0, 0), (0, -1), colors.HexColor("#34495E")),
+                ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#ECF0F1")),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+                ("TOPPADDING", (0, 0), (-1, -1), 5),
+                ("LINEBELOW", (0, 0), (-1, -1), 0.25, colors.HexColor("#BDC3C7")),
+            ]
+        )
+    )
     story.append(project_tbl)
     story.append(Spacer(1, 8 * mm))
 
@@ -150,19 +166,21 @@ def format_pdf(boq: Any, output_path: str | Path) -> Path:
         sec_items = _call(getattr(sec, "items", []), [])
         if not sec_items:
             sec_items = _call(getattr(sec, "all_items", []), [])
-        summary_rows.append([
-            str(i),
-            str(getattr(sec, "section_code", "")),
-            Paragraph(str(getattr(sec, "title", "") or "—"), styles["Cell"]),
-            str(len(sec_items)),
-            total_str,
-        ])
+        summary_rows.append(
+            [
+                str(i),
+                str(getattr(sec, "section_code", "")),
+                Paragraph(str(getattr(sec, "title", "") or "—"), styles["Cell"]),
+                str(len(sec_items)),
+                total_str,
+            ]
+        )
 
     try:
-        subtotal_f    = float(_call(getattr(boq, "subtotal", 0), 0) or 0)
+        subtotal_f = float(_call(getattr(boq, "subtotal", 0), 0) or 0)
         contingency_f = float(_call(getattr(boq, "contingency_amount", 0), 0) or 0)
-        grand_f       = float(_call(getattr(boq, "grand_total", 0), 0) or 0)
-        cont_pct      = float(_call(getattr(boq, "contingency_pct", 15), 15) or 15)
+        grand_f = float(_call(getattr(boq, "grand_total", 0), 0) or 0)
+        cont_pct = float(_call(getattr(boq, "contingency_pct", 15), 15) or 15)
     except Exception:
         subtotal_f = contingency_f = grand_f = 0.0
         cont_pct = 15
@@ -182,35 +200,44 @@ def format_pdf(boq: Any, output_path: str | Path) -> Path:
         repeatRows=1,
     )
     n_body = len(summary_rows) - 3
-    summary_tbl.setStyle(TableStyle([
-        ("FONT", (0, 0), (-1, 0), "Helvetica-Bold", 9),
-        ("FONT", (0, 1), (-1, -1), "Helvetica", 9),
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2C3E50")),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("ALIGN", (3, 0), (4, -1), "RIGHT"),
-        ("ALIGN", (0, 0), (1, -1), "CENTER"),
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("ROWBACKGROUNDS", (0, 1), (-1, n_body),
-         [colors.white, colors.HexColor("#F8F9FA")]),
-        ("LINEBELOW", (0, 0), (-1, 0), 0.5, colors.HexColor("#2C3E50")),
-        ("LINEABOVE", (0, n_body + 1), (-1, n_body + 1), 0.25,
-         colors.HexColor("#7F8C8D")),
-        ("LINEABOVE", (0, -1), (-1, -1), 1.0, colors.HexColor("#2C3E50")),
-        ("FONT", (2, -3), (-1, -1), "Helvetica-Bold", 9),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
-        ("TOPPADDING",    (0, 0), (-1, -1), 4),
-    ]))
+    summary_tbl.setStyle(
+        TableStyle(
+            [
+                ("FONT", (0, 0), (-1, 0), "Helvetica-Bold", 9),
+                ("FONT", (0, 1), (-1, -1), "Helvetica", 9),
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2C3E50")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("ALIGN", (3, 0), (4, -1), "RIGHT"),
+                ("ALIGN", (0, 0), (1, -1), "CENTER"),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                (
+                    "ROWBACKGROUNDS",
+                    (0, 1),
+                    (-1, n_body),
+                    [colors.white, colors.HexColor("#F8F9FA")],
+                ),
+                ("LINEBELOW", (0, 0), (-1, 0), 0.5, colors.HexColor("#2C3E50")),
+                ("LINEABOVE", (0, n_body + 1), (-1, n_body + 1), 0.25, colors.HexColor("#7F8C8D")),
+                ("LINEABOVE", (0, -1), (-1, -1), 1.0, colors.HexColor("#2C3E50")),
+                ("FONT", (2, -3), (-1, -1), "Helvetica-Bold", 9),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                ("TOPPADDING", (0, 0), (-1, -1), 4),
+            ]
+        )
+    )
     story.append(summary_tbl)
 
     story.append(Spacer(1, 15 * mm))
-    story.append(Paragraph(
-        "<para align=center><i>"
-        "This BOQ sheet is a placeholder — not for final tender issue.<br/>"
-        "Schedule of rates, item-wise analysis, item code cross-references and "
-        "detailed measurements will be appended in the next revision."
-        "</i></para>",
-        styles["Italic"],
-    ))
+    story.append(
+        Paragraph(
+            "<para align=center><i>"
+            "This BOQ sheet is a placeholder — not for final tender issue.<br/>"
+            "Schedule of rates, item-wise analysis, item code cross-references and "
+            "detailed measurements will be appended in the next revision."
+            "</i></para>",
+            styles["Italic"],
+        )
+    )
 
     doc.build(story)
     return p

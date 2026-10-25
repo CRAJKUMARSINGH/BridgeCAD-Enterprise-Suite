@@ -11,6 +11,7 @@ triage problems instead of seeing a single opaque "something failed" warning:
 * Any other ``Exception`` — runtime / logic / data bug (regression in one of
   the generators).  These are logged with full traceback.
 """
+
 from __future__ import annotations
 
 import logging
@@ -20,7 +21,7 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
-BASE = Path(__file__).parents[4]   # repo root
+BASE = Path(__file__).parents[4]  # repo root
 
 
 def _core_path():
@@ -29,9 +30,9 @@ def _core_path():
         sys.path.insert(0, str(p))
 
 
-def _stage_failure(stage: str, exc: Exception, *,
-                   results_key: str,
-                   results: dict[str, list[Path]]) -> None:
+def _stage_failure(
+    stage: str, exc: Exception, *, results_key: str, results: dict[str, list[Path]]
+) -> None:
     """Record a pipeline-stage failure with structured log data.
 
     Uses ``logger.exception`` for any unexpected ``Exception`` so the full
@@ -43,17 +44,23 @@ def _stage_failure(stage: str, exc: Exception, *,
 
     if import_err:
         logger.warning(
-            "%s skipped — package not importable: %s", stage, exc,
+            "%s skipped — package not importable: %s",
+            stage,
+            exc,
         )
     elif io_err:
         logger.warning(
             "%s failed — filesystem error (%s): %s",
-            stage, type(exc).__name__, exc,
+            stage,
+            type(exc).__name__,
+            exc,
         )
     else:
         logger.exception(
             "%s failed — %s: %s  (traceback captured)",
-            stage, type(exc).__name__, exc,
+            stage,
+            type(exc).__name__,
+            exc,
         )
     results[results_key] = []
 
@@ -61,9 +68,9 @@ def _stage_failure(stage: str, exc: Exception, *,
 def export_all(
     project: Any,
     output_dir: str | Path,
-    prefix: str       = "GAD",
+    prefix: str = "GAD",
     state: str | None = None,
-    scale_denom: int  = 100,
+    scale_denom: int = 100,
 ) -> Path:
     """Run the full export pipeline and return path to the ZIP bundle.
 
@@ -93,13 +100,12 @@ def export_all(
         draw_out = out / "drawings"
         sys.path.insert(0, str(BASE / "packages" / "bridgecad-draw"))
         from bridgecad_draw.booklet import generate_package
-        dxf_files = generate_package(project, draw_out, prefix=prefix,
-                                     scale_denom=scale_denom)
+
+        dxf_files = generate_package(project, draw_out, prefix=prefix, scale_denom=scale_denom)
         results["dxf"] = dxf_files
         logger.info("DXF: %d sheets generated", len(dxf_files))
     except Exception as exc:
-        _stage_failure("DXF generation", exc,
-                       results_key="dxf", results=results)
+        _stage_failure("DXF generation", exc, results_key="dxf", results=results)
 
     # ── Step 2: Bill of Quantities ────────────────────────────────────────
     try:
@@ -110,16 +116,15 @@ def export_all(
         from bridgecad_bill.formatters.excel_formatter import format_excel
         from bridgecad_bill.formatters.pdf_formatter import format_pdf
         from bridgecad_bill.processor import extract_and_price
+
         boq = extract_and_price(project, state=state)
         xlsx_path = format_excel(boq, bill_out / f"{prefix}_BOQ.xlsx")
-        csv_path  = format_csv(boq,   bill_out / f"{prefix}_BOQ.csv")
-        pdf_path  = format_pdf(boq,   bill_out / f"{prefix}_BOQ.pdf")
+        csv_path = format_csv(boq, bill_out / f"{prefix}_BOQ.csv")
+        pdf_path = format_pdf(boq, bill_out / f"{prefix}_BOQ.pdf")
         results["bill"] = [xlsx_path, csv_path, pdf_path]
-        logger.info("BOQ: grand total INR %s  (xlsx+csv+pdf)",
-                    f"{float(boq.grand_total):,.0f}")
+        logger.info("BOQ: grand total INR %s  (xlsx+csv+pdf)", f"{float(boq.grand_total):,.0f}")
     except Exception as exc:
-        _stage_failure("BOQ generation", exc,
-                       results_key="bill", results=results)
+        _stage_failure("BOQ generation", exc, results_key="bill", results=results)
 
     # ── Step 3: QA report ─────────────────────────────────────────────────
     try:
@@ -127,23 +132,23 @@ def export_all(
         qa_out.mkdir(exist_ok=True)
         sys.path.insert(0, str(BASE / "packages" / "bridgecad-core"))
         from bridgecad_core.validation import run_all
+
         report = run_all(project)
 
         sys.path.insert(0, str(BASE / "packages" / "bridgecad-qa"))
         from bridgecad_qa.reports import generate_html_report
+
         html_path = generate_html_report(report, qa_out / f"{prefix}_QA.html", project)
         results["qa"] = [html_path]
-        logger.info("QA: score=%d  critical_fails=%d",
-                    report.score, report.critical_fail_count)
+        logger.info("QA: score=%d  critical_fails=%d", report.score, report.critical_fail_count)
     except Exception as exc:
-        _stage_failure("QA report", exc,
-                       results_key="qa", results=results)
+        _stage_failure("QA report", exc, results_key="qa", results=results)
 
     # ── Step 4: ZIP bundle ────────────────────────────────────────────────
     from .bundler import create_bundle
+
     bundle_path = create_bundle(out, prefix, results)
-    logger.info("Bundle: %s  (%.1f KB)", bundle_path.name,
-                bundle_path.stat().st_size / 1024)
+    logger.info("Bundle: %s  (%.1f KB)", bundle_path.name, bundle_path.stat().st_size / 1024)
     return bundle_path
 
 

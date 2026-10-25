@@ -21,6 +21,7 @@ THE CONTRACT — every clause is asserted in tests/draw/test_coordinates.py
  7. NOTHING DRAWS AT (0, 0) BY ACCIDENT. Geometry outside the declared frame
     fails the test, which is how a mis-signed offset gets caught.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -47,6 +48,7 @@ TITLE_BLOCK = {"width_mm": 180.0, "height_mm": 60.0, "corner": "bottom_right"}
 @dataclass(frozen=True)
 class SheetFrame:
     """Where a sheet's geometry is allowed to live."""
+
     size: str
     origin_chainage_m: float
     origin_level_m: float
@@ -64,9 +66,11 @@ class SheetFrame:
     def drawing_region_mm(self) -> tuple[float, float, float, float]:
         """(x0, y0, x1, y1) excluding the title block corner."""
         tb_w, tb_h = TITLE_BLOCK["width_mm"], TITLE_BLOCK["height_mm"]
-        return (0.0, tb_h, self.width_mm, self.height_mm) \
-            if TITLE_BLOCK["corner"] == "bottom_right" else \
-            (0.0, 0.0, self.width_mm - tb_w, self.height_mm)
+        return (
+            (0.0, tb_h, self.width_mm, self.height_mm)
+            if TITLE_BLOCK["corner"] == "bottom_right"
+            else (0.0, 0.0, self.width_mm - tb_w, self.height_mm)
+        )
 
 
 # Every sheet must appear. Sheet 1's datum is the reference all others share.
@@ -123,9 +127,7 @@ def paper_size_mm(sheet: str, size_mm: tuple[float, float]) -> tuple[float, floa
 def check_declared(sheet: str) -> SheetFrame:
     """Raise rather than silently defaulting to a (0,0) origin."""
     if sheet not in FRAMES:
-        raise KeyError(
-            f"sheet {sheet!r} has no declared frame — add it to coordinates.FRAMES"
-        )
+        raise KeyError(f"sheet {sheet!r} has no declared frame — add it to coordinates.FRAMES")
     frame = FRAMES[sheet]
     if frame.plot_scale not in PLOT_SCALES:
         raise ValueError(f"{sheet}: non-standard plot scale 1:{frame.plot_scale}")

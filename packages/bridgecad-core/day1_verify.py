@@ -1,7 +1,8 @@
 """M1 Week 1 Day 1 verification script - comprehensive."""
+
 import sys
 
-sys.path.insert(0, '.')
+sys.path.insert(0, ".")
 from collections import defaultdict
 
 from bridgecad_core import types
@@ -18,41 +19,107 @@ print(f"  Result: {enum_count} enums (target 86) -> {'PASS' if c1_pass else 'FAI
 
 # === CRITERION 2: dir(types) shows all new classes ===
 print("\n📋 ACCEPTANCE C2: from bridgecad_core import types; dir(types) shows all")
-dir_items = [x for x in dir(types) if not x.startswith('_')]
+dir_items = [x for x in dir(types) if not x.startswith("_")]
 registered_names = set(types.ENUM_REGISTRY.keys())
 dir_names = set(dir_items)
 missing_from_dir = registered_names - dir_names
 c2_pass = len(missing_from_dir) == 0
 print(f"  dir(types) has {len(dir_items)} public items")
-print(f"  ENUM_REGISTRY names missing from dir(types): {missing_from_dir if missing_from_dir else 'NONE'}")
+print(
+    f"  ENUM_REGISTRY names missing from dir(types): {missing_from_dir if missing_from_dir else 'NONE'}"
+)
 print(f"  -> {'PASS' if c2_pass else 'FAIL'}")
 
 # === CRITERION 3: No duplicate member values across sibling enum classes ===
 print("\n📋 ACCEPTANCE C3: No duplicate member values across sibling enum classes")
 
 sibling_groups = {
-    "S1 Project/Client": ["ClientType", "ConsultantType", "ContractorType", "ProjectPhase", "Currency",
-      "RevisionTag", "Language", "IndianStateCode", "SurveyAgency", "TenderType",
-      "FundingSourceType", "WorkStatusType"],
-    "S2 Bridge Selection": ["BridgeCategory", "SuperstructureType", "SpanConfiguration",
-      "CarriagewayLaneConfig", "BridgeSubcategory", "CarriagewaySkewConfig",
-      "UsageIntensityType", "WaterwayCrossingType", "InterchangeGradeSeparationType"],
-    "S3 Geometry": ["SkewDirection", "AlignmentType", "KerbType", "FootpathType", "MedianType",
-      "CrashBarrierType", "ChainageUnit", "RotationDirection",
-      "PavementCrustComposition", "TransitionCurveType", "VerticalAlignmentType",
-      "DrainageCrossfallType", "SuperelevationRotationAxis", "WideningTypeOnCurve",
-      "HorizontalCurveTransitionType", "SightDistanceCategory"],
-    "S4 Superstructure": ["WearingCoatType", "ParapetType", "RailingType", "DrainageType", "GirderType",
-      "SlabType", "CamberMethod", "CantileverOverhangType", "SuperstructureSegmentation",
-      "DeckJointSpacing", "WebOpenCutoutType", "PrecastSegmentJointType",
-      "DeckPourSequenceMethod"],
-    "S5 Substructure": ["PierType", "PierCapType", "PierShaftShape", "AbutmentType", "ReturnWallType",
-      "WingWallType", "AbutmentPedestalType", "WellSteiningType", "PierTieBeamLocationType",
-      "AbutmentBackfillSpecificationType"],
-    "S6 Foundation": ["FoundationType", "PileType", "PileShape", "PileBaseType", "WellCurbType",
-      "WellCuttingEdgeShape", "UnderReamCount", "RaftMatType", "OpenFoundationDepth",
-      "SheetPileType", "BearingCapacitySoilType", "GroundImprovementType",
-      "PileInstallationMethodType", "SettlementCriterionCategoryType"],
+    "S1 Project/Client": [
+        "ClientType",
+        "ConsultantType",
+        "ContractorType",
+        "ProjectPhase",
+        "Currency",
+        "RevisionTag",
+        "Language",
+        "IndianStateCode",
+        "SurveyAgency",
+        "TenderType",
+        "FundingSourceType",
+        "WorkStatusType",
+    ],
+    "S2 Bridge Selection": [
+        "BridgeCategory",
+        "SuperstructureType",
+        "SpanConfiguration",
+        "CarriagewayLaneConfig",
+        "BridgeSubcategory",
+        "CarriagewaySkewConfig",
+        "UsageIntensityType",
+        "WaterwayCrossingType",
+        "InterchangeGradeSeparationType",
+    ],
+    "S3 Geometry": [
+        "SkewDirection",
+        "AlignmentType",
+        "KerbType",
+        "FootpathType",
+        "MedianType",
+        "CrashBarrierType",
+        "ChainageUnit",
+        "RotationDirection",
+        "PavementCrustComposition",
+        "TransitionCurveType",
+        "VerticalAlignmentType",
+        "DrainageCrossfallType",
+        "SuperelevationRotationAxis",
+        "WideningTypeOnCurve",
+        "HorizontalCurveTransitionType",
+        "SightDistanceCategory",
+    ],
+    "S4 Superstructure": [
+        "WearingCoatType",
+        "ParapetType",
+        "RailingType",
+        "DrainageType",
+        "GirderType",
+        "SlabType",
+        "CamberMethod",
+        "CantileverOverhangType",
+        "SuperstructureSegmentation",
+        "DeckJointSpacing",
+        "WebOpenCutoutType",
+        "PrecastSegmentJointType",
+        "DeckPourSequenceMethod",
+    ],
+    "S5 Substructure": [
+        "PierType",
+        "PierCapType",
+        "PierShaftShape",
+        "AbutmentType",
+        "ReturnWallType",
+        "WingWallType",
+        "AbutmentPedestalType",
+        "WellSteiningType",
+        "PierTieBeamLocationType",
+        "AbutmentBackfillSpecificationType",
+    ],
+    "S6 Foundation": [
+        "FoundationType",
+        "PileType",
+        "PileShape",
+        "PileBaseType",
+        "WellCurbType",
+        "WellCuttingEdgeShape",
+        "UnderReamCount",
+        "RaftMatType",
+        "OpenFoundationDepth",
+        "SheetPileType",
+        "BearingCapacitySoilType",
+        "GroundImprovementType",
+        "PileInstallationMethodType",
+        "SettlementCriterionCategoryType",
+    ],
 }
 
 all_duplicates_found = []
@@ -73,7 +140,9 @@ c3_pass = len(all_duplicates_found) == 0
 if c3_pass:
     print("  No duplicate member values across sibling groups -> PASS")
 else:
-    print(f"  WARNING: {len(all_duplicates_found)} potential duplicates found (some may be intentional):")
+    print(
+        f"  WARNING: {len(all_duplicates_found)} potential duplicates found (some may be intentional):"
+    )
     for group, val, ens in all_duplicates_found[:20]:
         print(f"    [{group}] '{val}' appears in: {ens}")
     if len(all_duplicates_found) > 20:
@@ -95,7 +164,7 @@ print(f"  -> {'PASS' if c4_pass else 'FAIL'}")
 print("\n📋 ACCEPTANCE C5: ENUM_REGISTRY structure")
 is_dict = isinstance(types.ENUM_REGISTRY, dict)
 all_keys_str = all(isinstance(k, str) for k in types.ENUM_REGISTRY)
-all_vals_enum = all(callable(v) and hasattr(v, '__members__') for v in types.ENUM_REGISTRY.values())
+all_vals_enum = all(callable(v) and hasattr(v, "__members__") for v in types.ENUM_REGISTRY.values())
 c5_pass = is_dict and all_keys_str and all_vals_enum
 print(f"  Is dict: {is_dict}, All keys str: {all_keys_str}, All values enums: {all_vals_enum}")
 print(f"  -> {'PASS' if c5_pass else 'FAIL'}")
@@ -125,7 +194,9 @@ print("=" * 70)
 all_pass = c1_pass and c2_pass and c4_pass and c5_pass
 print(f"  C1 Registry >= 86:    {'✅ PASS' if c1_pass else '❌ FAIL'} ({enum_count})")
 print(f"  C2 dir(types) exports: {'✅ PASS' if c2_pass else '❌ FAIL'}")
-print(f"  C3 No dup values:      {'✅ PASS' if c3_pass else '⚠️  WARN'} ({len(all_duplicates_found)} flagged)")
+print(
+    f"  C3 No dup values:      {'✅ PASS' if c3_pass else '⚠️  WARN'} ({len(all_duplicates_found)} flagged)"
+)
 print(f"  C4 All 5 mixins:       {'✅ PASS' if c4_pass else '❌ FAIL'}")
 print(f"  C5 Registry structure: {'✅ PASS' if c5_pass else '❌ FAIL'}")
 print(f"\n  OVERALL: {'✅ DAY 1 ACCEPTED' if all_pass else '⚠️  NEEDS ATTENTION'}")

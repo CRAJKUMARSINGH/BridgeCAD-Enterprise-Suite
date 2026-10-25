@@ -6,6 +6,7 @@ Hierarchy:
     └── BillSection  (e.g. "1000 EARTHWORK", "1700 CONCRETE WORKS")
           └── BillItem     (one line in the schedule)
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -15,14 +16,15 @@ from decimal import Decimal
 @dataclass
 class BillItem:
     """One line item in a Bill of Quantities."""
-    item_code:   str            # e.g. "1701.1"
+
+    item_code: str  # e.g. "1701.1"
     description: str
-    unit:        str            # e.g. "CUM", "MT", "SQM", "RM", "EACH", "LS"
-    quantity:    Decimal        = Decimal("0")
-    rate:        Decimal | None = None       # INR per unit
-    amount:      Decimal | None = None       # quantity × rate
-    ref:         str            = ""            # MORTH clause reference
-    remarks:     str            = ""
+    unit: str  # e.g. "CUM", "MT", "SQM", "RM", "EACH", "LS"
+    quantity: Decimal = Decimal("0")
+    rate: Decimal | None = None  # INR per unit
+    amount: Decimal | None = None  # quantity × rate
+    ref: str = ""  # MORTH clause reference
+    remarks: str = ""
 
     def compute_amount(self) -> Decimal | None:
         if self.rate is not None and self.quantity > 0:
@@ -34,9 +36,10 @@ class BillItem:
 @dataclass
 class BillSection:
     """A chapter / section group in the BOQ."""
-    section_code: str           # e.g. "1700"
-    title:        str           # e.g. "CONCRETE AND REINFORCEMENT WORKS"
-    items:        list[BillItem] = field(default_factory=list)
+
+    section_code: str  # e.g. "1700"
+    title: str  # e.g. "CONCRETE AND REINFORCEMENT WORKS"
+    items: list[BillItem] = field(default_factory=list)
 
     def add(self, item: BillItem) -> None:
         self.items.append(item)
@@ -52,11 +55,12 @@ class BillSection:
 @dataclass
 class BillOfQuantities:
     """Complete hierarchical Bill of Quantities for a bridge project."""
-    project_name:  str                   = ""
-    bridge_name:   str                   = ""
-    chainage_km:   str                   = ""
-    sections:      list[BillSection]     = field(default_factory=list)
-    contingency_pct: Decimal             = Decimal("15")
+
+    project_name: str = ""
+    bridge_name: str = ""
+    chainage_km: str = ""
+    sections: list[BillSection] = field(default_factory=list)
+    contingency_pct: Decimal = Decimal("15")
 
     def add_section(self, section: BillSection) -> None:
         self.sections.append(section)
@@ -80,11 +84,12 @@ class BillOfQuantities:
 @dataclass
 class Deviation:
     """A variation/deviation from the abstract BOQ."""
+
     ref_item_code: str
-    description:   str
-    original_qty:  Decimal = Decimal("0")
-    revised_qty:   Decimal = Decimal("0")
-    reason:        str     = ""
+    description: str
+    original_qty: Decimal = Decimal("0")
+    revised_qty: Decimal = Decimal("0")
+    reason: str = ""
 
     @property
     def qty_change(self) -> Decimal:

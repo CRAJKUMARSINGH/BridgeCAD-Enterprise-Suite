@@ -10,6 +10,7 @@ THE SET-OUT OFFSET
     *upstream* of it. Drawing them at true chainage would put them at negative x,
     off the sheet; the offset is stated once, here, and nothing else is moved.
 """
+
 from __future__ import annotations
 
 import itertools
@@ -78,18 +79,19 @@ def build(project):
         return setout + cv.x(chainage_m)
 
     half_l, half_r = cv.mm(w["half_left"]), cv.mm(w["half_right"])
-    yc = cv.frame_h * 0.58                        # bridge centreline
+    yc = cv.frame_h * 0.58  # bridge centreline
     y_left, y_right = yc - half_l, yc + half_r
-    y_top = cv.frame_h * 0.88                     # chainage band
-    y_span = cv.frame_h * 0.30                    # per-span dimension band
-    y_over = cv.frame_h * 0.22                    # overall dimension band
+    y_top = cv.frame_h * 0.88  # chainage band
+    y_span = cv.frame_h * 0.30  # per-span dimension band
+    y_over = cv.frame_h * 0.22  # overall dimension band
 
     # ── deck outline, then the faces inside it ──────────────────────────────
     with cv.on("STRUC-OUTLINE"):
-        cv.poly([(X(0.0), y_left), (X(total), y_left),
-                 (X(total), y_right), (X(0.0), y_right)], close=True)
-        for kerb, sign in ((w["kerb_half_left"], -1.0),
-                           (w["kerb_half_right"], 1.0)):
+        cv.poly(
+            [(X(0.0), y_left), (X(total), y_left), (X(total), y_right), (X(0.0), y_right)],
+            close=True,
+        )
+        for kerb, sign in ((w["kerb_half_left"], -1.0), (w["kerb_half_right"], 1.0)):
             y_kerb = yc + sign * cv.mm(kerb)
             cv.line((X(0.0), y_kerb), (X(total), y_kerb))
     with cv.on("CIVIL-ROAD"):
@@ -109,8 +111,7 @@ def build(project):
     # ── abutments ──────────────────────────────────────────────────────────
     with cv.on("SUB-ABUT"):
         for end in (0.0, total):
-            cv.rect(X(end) - cv.mm(abt_l) / 2.0, y_left, cv.mm(abt_l),
-                    y_right - y_left)
+            cv.rect(X(end) - cv.mm(abt_l) / 2.0, y_left, cv.mm(abt_l), y_right - y_left)
     with cv.on("STRUC-SECTION"):
         for end in (0.0, total):
             cv.line((X(end), y_left - cv.height), (X(end), y_right + cv.height))
@@ -122,18 +123,30 @@ def build(project):
         for end, outward in ((0.0, -1.0), (total, 1.0)):
             base = y_right if wall.side == "left" else y_left
             nose = (X(end), base)
-            toe = (X(end) + outward * cv.mm(float(wall.return_m)),
-                   base + direction * cv.mm(float(wall.face_run_m)))
+            toe = (
+                X(end) + outward * cv.mm(float(wall.return_m)),
+                base + direction * cv.mm(float(wall.face_run_m)),
+            )
             off = (0.0, direction * thickness)
             with cv.on("SUB-ABUT"):
-                cv.poly([nose, toe,
-                         (toe[0] + off[0], toe[1] + off[1]),
-                         (nose[0] + off[0], nose[1] + off[1])], close=True)
+                cv.poly(
+                    [
+                        nose,
+                        toe,
+                        (toe[0] + off[0], toe[1] + off[1]),
+                        (nose[0] + off[0], nose[1] + off[1]),
+                    ],
+                    close=True,
+                )
             with cv.on("STRUC-HATCHING"):
-                cv.hatch(min(nose[0], toe[0]), min(nose[1], toe[1]),
-                         abs(toe[0] - nose[0]) or thickness,
-                         abs(toe[1] - nose[1]) or thickness,
-                         pattern="ANSI31", scale=thickness * 0.2)
+                cv.hatch(
+                    min(nose[0], toe[0]),
+                    min(nose[1], toe[1]),
+                    abs(toe[0] - nose[0]) or thickness,
+                    abs(toe[1] - nose[1]) or thickness,
+                    pattern="ANSI31",
+                    scale=thickness * 0.2,
+                )
 
     # ── piers, then the bearings that sit on them ──────────────────────────
     pt = cv.mm(_pier_thickness(project))
@@ -144,8 +157,7 @@ def build(project):
         for p in piers:
             for side in (-1.0, 1.0):
                 y = yc + side * cv.mm(w["carriageway"] / 2.0)
-                cv.rect(X(p) - pt / 2.0, y - cv.height * 0.4,
-                        pt, cv.height * 0.8)
+                cv.rect(X(p) - pt / 2.0, y - cv.height * 0.4, pt, cv.height * 0.8)
     with cv.on("CL"):
         for p in piers:
             cv.line((X(p), y_left - cv.height), (X(p), y_right + cv.height))
@@ -171,53 +183,93 @@ def build(project):
     # ── annotation ─────────────────────────────────────────────────────────
     with cv.on("TEXT-HEADER"):
         cv.text("PLAN", X(total) / 2.0, y_right + cv.height * 5, halign="CENTER")
-        cv.text(f"TOTAL LENGTH {total:.3f} m", X(total) / 2.0,
-                y_right + cv.height * 2.4, halign="CENTER")
+        cv.text(
+            f"TOTAL LENGTH {total:.3f} m",
+            X(total) / 2.0,
+            y_right + cv.height * 2.4,
+            halign="CENTER",
+        )
     with cv.on("TEXT"):
         cv.text("A1", X(0.0) - cv.mm(abt_l), y_left - cv.height * 4.0)
         cv.text("A2", X(total) + cv.mm(abt_l) * 0.2, y_left - cv.height * 4.0)
     north_arrow(cv.ms, X(total) + cv.height * 8, y_top, size=cv.height * 0.9)
-    scale_bar(cv.ms, X(0.0), cv.frame_h * 0.14, cv.scale,
-              segments=4, seg_len_m=cv.mm(5.0), text_height=cv.height)
+    scale_bar(
+        cv.ms,
+        X(0.0),
+        cv.frame_h * 0.14,
+        cv.scale,
+        segments=4,
+        seg_len_m=cv.mm(5.0),
+        text_height=cv.height,
+    )
 
     # ── dimensions: overall, per span, then the widths ─────────────────────
     dim_x = X(total) + cv.height * 4
     bounds = [0.0, *piers, total]
     with cv.on("DIM"):
-        cv.dimension((X(0.0), y_over), (X(total), y_over),
-                     base=(X(total) / 2.0, y_over - cv.height * 2.5),
-                     text=f"{total:.3f} m")
+        cv.dimension(
+            (X(0.0), y_over),
+            (X(total), y_over),
+            base=(X(total) / 2.0, y_over - cv.height * 2.5),
+            text=f"{total:.3f} m",
+        )
         for a, b in itertools.pairwise(bounds):
-            cv.dimension((X(a), y_span), (X(b), y_span),
-                         base=(X((a + b) / 2.0), y_span - cv.height * 2.0),
-                         text=f"{b - a:.3f}")
-        cv.dimension((dim_x, yc - cv.mm(w["carriageway"] / 2.0)),
-                     (dim_x, yc + cv.mm(w["carriageway"] / 2.0)),
-                     base=(dim_x + cv.height * 3, yc), angle=90.0,
-                     text=f"CARRIAGEWAY {w['carriageway']:.2f} m")
-        cv.dimension((dim_x, y_left), (dim_x, y_right),
-                     base=(dim_x + cv.height * 8, yc), angle=90.0,
-                     text=f"DECK {w['half_left'] + w['half_right']:.2f} m")
-        for label, half, sign in (("HALF L", w["half_left"], -1.0),
-                                  ("HALF R", w["half_right"], 1.0)):
-            cv.dimension((dim_x, yc), (dim_x, yc + sign * cv.mm(half)),
-                         base=(dim_x + cv.height * 13, yc), angle=90.0,
-                         text=f"{label} {half:.2f} m")
-        for label, half, sign in (("KERB L", w["kerb_half_left"], -1.0),
-                                  ("KERB R", w["kerb_half_right"], 1.0)):
+            cv.dimension(
+                (X(a), y_span),
+                (X(b), y_span),
+                base=(X((a + b) / 2.0), y_span - cv.height * 2.0),
+                text=f"{b - a:.3f}",
+            )
+        cv.dimension(
+            (dim_x, yc - cv.mm(w["carriageway"] / 2.0)),
+            (dim_x, yc + cv.mm(w["carriageway"] / 2.0)),
+            base=(dim_x + cv.height * 3, yc),
+            angle=90.0,
+            text=f"CARRIAGEWAY {w['carriageway']:.2f} m",
+        )
+        cv.dimension(
+            (dim_x, y_left),
+            (dim_x, y_right),
+            base=(dim_x + cv.height * 8, yc),
+            angle=90.0,
+            text=f"DECK {w['half_left'] + w['half_right']:.2f} m",
+        )
+        for label, half, sign in (
+            ("HALF L", w["half_left"], -1.0),
+            ("HALF R", w["half_right"], 1.0),
+        ):
+            cv.dimension(
+                (dim_x, yc),
+                (dim_x, yc + sign * cv.mm(half)),
+                base=(dim_x + cv.height * 13, yc),
+                angle=90.0,
+                text=f"{label} {half:.2f} m",
+            )
+        for label, half, sign in (
+            ("KERB L", w["kerb_half_left"], -1.0),
+            ("KERB R", w["kerb_half_right"], 1.0),
+        ):
             y_edge = yc + sign * cv.mm(w["carriageway"] / 2.0)
             y_face = yc + sign * cv.mm(half)
-            cv.dimension((dim_x, y_edge), (dim_x, y_face),
-                         base=(dim_x + cv.height * 18, yc), angle=90.0,
-                         text=label)
+            cv.dimension(
+                (dim_x, y_edge),
+                (dim_x, y_face),
+                base=(dim_x + cv.height * 18, yc),
+                angle=90.0,
+                text=label,
+            )
 
     # ── notes ──────────────────────────────────────────────────────────────
-    cv.note([
-        "1. All dimensions in metres unless stated otherwise.",
-        f"2. Plot scale 1:{cv.scale}. Model space is millimetres at 1:1.",
-        f"3. Span configuration: {len(bounds) - 1} span(s), {len(piers)} intermediate pier(s).",
-        "4. Wing walls splayed as detailed on sheet 5.",
-        "5. Approach slabs and kerbs as per typical cross-section, sheet 3.",
-    ], X(total) + cv.height * 14, y_top)
+    cv.note(
+        [
+            "1. All dimensions in metres unless stated otherwise.",
+            f"2. Plot scale 1:{cv.scale}. Model space is millimetres at 1:1.",
+            f"3. Span configuration: {len(bounds) - 1} span(s), {len(piers)} intermediate pier(s).",
+            "4. Wing walls splayed as detailed on sheet 5.",
+            "5. Approach slabs and kerbs as per typical cross-section, sheet 3.",
+        ],
+        X(total) + cv.height * 14,
+        y_top,
+    )
 
     return cv.doc

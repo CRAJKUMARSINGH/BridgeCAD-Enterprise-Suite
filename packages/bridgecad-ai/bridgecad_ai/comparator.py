@@ -6,6 +6,7 @@ Compares two BridgeProject instances across 6 dimensions and produces:
   - Radar chart data (for plotting with matplotlib / plotly)
   - Plain-text summary
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -15,19 +16,20 @@ from typing import Any
 @dataclass
 class ComparisonResult:
     """Side-by-side comparison of two bridge designs."""
-    label_a:    str
-    label_b:    str
+
+    label_a: str
+    label_b: str
     dimensions: list[str]
-    values_a:   list[float]
-    values_b:   list[float]
-    pct_diff:   list[float]    # (B-A)/A × 100
-    summary:    str
+    values_a: list[float]
+    values_b: list[float]
+    pct_diff: list[float]  # (B-A)/A × 100
+    summary: str
 
     def better(self, dim: str) -> str:
         """Return 'A' or 'B' for the dimension with lower value (cost/vol) or 'equal'."""
         if dim not in self.dimensions:
             return "unknown"
-        i  = self.dimensions.index(dim)
+        i = self.dimensions.index(dim)
         va = self.values_a[i]
         vb = self.values_b[i]
         if abs(va - vb) < 0.01 * max(abs(va), abs(vb), 1):
@@ -42,27 +44,29 @@ _DIMS = [
     "concrete_vol_approx_cum",
     "rebar_mt",
     "span_depth_ratio",
-    "estimated_cost_inr_M",    # in crores/millions for readability
+    "estimated_cost_inr_M",  # in crores/millions for readability
 ]
 
 
 def _extract_metrics(project: Any) -> list[float]:
     """Pull comparison metrics from a BridgeProject."""
-    gi   = project.geometry_input
+    gi = project.geometry_input
     calc = project.calculations
-    ss   = project.superstructure
+    ss = project.superstructure
 
-    total_len   = float(gi.total_length_m)
-    overall_w   = float(gi.overall_width_m)
-    conc_total  = sum([
-        float(getattr(calc, "concrete_volume_superstructure_cum", 0) or 0),
-        float(getattr(calc, "concrete_volume_substructure_cum",   0) or 0),
-        float(getattr(calc, "concrete_volume_foundation_cum",     0) or 0),
-    ])
-    rebar       = float(getattr(calc, "rebar_weight_tonnes_approx", 0) or 0)
-    girder_d_m  = float(getattr(ss, "girder_depth_mm", 900) or 900) / 1000.0
-    span_d      = (total_len / girder_d_m) if girder_d_m > 0 else 0.0
-    cost_m      = float(getattr(calc, "total_estimated_quantity_cost_inr", 0) or 0) / 1e7
+    total_len = float(gi.total_length_m)
+    overall_w = float(gi.overall_width_m)
+    conc_total = sum(
+        [
+            float(getattr(calc, "concrete_volume_superstructure_cum", 0) or 0),
+            float(getattr(calc, "concrete_volume_substructure_cum", 0) or 0),
+            float(getattr(calc, "concrete_volume_foundation_cum", 0) or 0),
+        ]
+    )
+    rebar = float(getattr(calc, "rebar_weight_tonnes_approx", 0) or 0)
+    girder_d_m = float(getattr(ss, "girder_depth_mm", 900) or 900) / 1000.0
+    span_d = (total_len / girder_d_m) if girder_d_m > 0 else 0.0
+    cost_m = float(getattr(calc, "total_estimated_quantity_cost_inr", 0) or 0) / 1e7
 
     return [total_len, overall_w, conc_total, rebar, span_d, cost_m]
 
@@ -93,8 +97,8 @@ def compare(
     # Summary narrative
     cost_dim = _DIMS.index("estimated_cost_inr_M")
     conc_dim = _DIMS.index("concrete_vol_approx_cum")
-    cheaper  = label_a if va[cost_dim] <= vb[cost_dim] else label_b
-    lighter  = label_a if va[conc_dim] <= vb[conc_dim] else label_b
+    cheaper = label_a if va[cost_dim] <= vb[cost_dim] else label_b
+    lighter = label_a if va[conc_dim] <= vb[conc_dim] else label_b
 
     summary = (
         f"Comparison: {label_a} vs {label_b}\n"
@@ -109,7 +113,8 @@ def compare(
     )
 
     return ComparisonResult(
-        label_a=label_a, label_b=label_b,
+        label_a=label_a,
+        label_b=label_b,
         dimensions=_DIMS,
         values_a=[round(v, 3) for v in va],
         values_b=[round(v, 3) for v in vb],
@@ -128,13 +133,13 @@ def radar_data(result: ComparisonResult) -> dict:
         normed_b.append(round(b / mx, 3))
     return {
         "dimensions": result.dimensions,
-        "label_a":    result.label_a,
-        "label_b":    result.label_b,
-        "values_a":   normed_a,
-        "values_b":   normed_b,
-        "raw_a":      result.values_a,
-        "raw_b":      result.values_b,
-        "pct_diff":   result.pct_diff,
+        "label_a": result.label_a,
+        "label_b": result.label_b,
+        "values_a": normed_a,
+        "values_b": normed_b,
+        "raw_a": result.values_a,
+        "raw_b": result.values_b,
+        "pct_diff": result.pct_diff,
     }
 
 

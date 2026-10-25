@@ -9,6 +9,7 @@ Levels are annotated as text rather than placed through ``Canvas.y``: sheet 4's
 declared datum is RL 0, and at 1:100 the founding level of a typical bridge is
 more than a sheet-height above that datum.
 """
+
 from __future__ import annotations
 
 from bridgecad_draw.primitives import circle as _circle
@@ -74,21 +75,32 @@ def build(project):
         cv.dash((x_a - cv.height * 4, y_pile_bot), (x_a + cap_w + cv.height * 4, y_pile_bot))
         cv.dash((x_a - cv.height * 4, y_bearing), (x_a + cap_w + cv.height * 4, y_bearing))
     with cv.on("CIVIL-SCOUR"):
-        cv.dash((x_a - cv.height * 6, y_cap_bot), (x_a + cap_w + cv.height * 6, y_cap_bot),
-                linetype="DASHED2")
+        cv.dash(
+            (x_a - cv.height * 6, y_cap_bot),
+            (x_a + cap_w + cv.height * 6, y_cap_bot),
+            linetype="DASHED2",
+        )
     with cv.on("CIVIL-HFL"):
-        cv.dash((x_a - cv.height * 6, y_cap_top + cv.height * 3),
-                (x_a + cap_w + cv.height * 6, y_cap_top + cv.height * 3))
+        cv.dash(
+            (x_a - cv.height * 6, y_cap_top + cv.height * 3),
+            (x_a + cap_w + cv.height * 6, y_cap_top + cv.height * 3),
+        )
     with cv.on("TEXT-LEVEL"):
         cv.text(f"SCOUR LEVEL RL {scour_rl:.3f}", x_a + cap_w + cv.height * 5, y_cap_bot)
-        cv.text(f"FOUNDATION LEVEL RL {scour_rl - pile_l_m - cap_t_mm / 1000.0:.3f}",
-                x_a + cap_w + cv.height * 5, y_pile_bot)
+        cv.text(
+            f"FOUNDATION LEVEL RL {scour_rl - pile_l_m - cap_t_mm / 1000.0:.3f}",
+            x_a + cap_w + cv.height * 5,
+            y_pile_bot,
+        )
         cv.text(f"BEARING LEVEL RL {bearing_rl:.3f}", x_a + cap_w + cv.height * 5, y_bearing)
-        cv.text(f"HFL RL {hfl_rl:.3f}", x_a + cap_w + cv.height * 5,
-                y_cap_top + cv.height * 3)
+        cv.text(f"HFL RL {hfl_rl:.3f}", x_a + cap_w + cv.height * 5, y_cap_top + cv.height * 3)
     with cv.on("TEXT-HEADER"):
-        cv.text("FOUNDATION ELEVATION — PIER", x_a + cap_w / 2.0,
-                y_bearing + cv.height * 3.5, halign="CENTER")
+        cv.text(
+            "FOUNDATION ELEVATION — PIER",
+            x_a + cap_w / 2.0,
+            y_bearing + cv.height * 3.5,
+            halign="CENTER",
+        )
 
     # ── panel B — foundation plan ──────────────────────────────────────────
     x_b = cv.mm(42.0)
@@ -98,8 +110,13 @@ def build(project):
         t_stein = cv.mm((float(field(fd, "well_steining_tmm", 800) or 800)) / 1000.0)
         with cv.on("FOUND-WELL"):
             _circle(cv.ms, x_b + r_out, y_b + r_out, r_out, layer=cv.ms.layer_name)
-            _circle(cv.ms, x_b + r_out, y_b + r_out, max(r_out - t_stein, r_out * 0.5),
-                    layer=cv.ms.layer_name)
+            _circle(
+                cv.ms,
+                x_b + r_out,
+                y_b + r_out,
+                max(r_out - t_stein, r_out * 0.5),
+                layer=cv.ms.layer_name,
+            )
         with cv.on("TEXT"):
             cv.text(f"WELL Ø {well_d_m:.2f} m", x_b, y_b + 2 * r_out + cv.height * 2.0)
     else:
@@ -115,37 +132,60 @@ def build(project):
                     cv.line((cxx - r * 2, cyy), (cxx + r * 2, cyy))
                     cv.line((cxx, cyy - r * 2), (cxx, cyy + r * 2))
         with cv.on("TEXT"):
-            cv.text(f"{n_piles} No. PILES Ø {pile_d_mm:.0f} mm", x_b,
-                    y_b + rows * cell + cv.height * 2.0)
+            cv.text(
+                f"{n_piles} No. PILES Ø {pile_d_mm:.0f} mm",
+                x_b,
+                y_b + rows * cell + cv.height * 2.0,
+            )
 
     # ── dimensions ─────────────────────────────────────────────────────────
     with cv.on("DIM"):
-        cv.dimension((x_a, y_cap_bot), (x_a + cap_w, y_cap_bot),
-                     base=(x_a + cap_w / 2.0, y_cap_bot - cv.height * 3.0),
-                     text=f"CAP {cap_w / 1000.0:.2f} m")
-        cv.dimension((x_a - cv.height * 3, y_cap_bot), (x_a - cv.height * 3, y_cap_top),
-                     base=(x_a - cv.height * 12, y_cap_bot), angle=90.0,
-                     text=f"CAP {cap_t_mm:.0f} mm")
-        cv.dimension((x_a + cap_w + cv.height * 3, y_pile_bot),
-                     (x_a + cap_w + cv.height * 3, y_cap_bot),
-                     base=(x_a + cap_w + cv.height * 12, y_pile_bot), angle=90.0,
-                     text=f"PILE {pile_l_m:.2f} m")
-        cv.dimension((x_a, y_cap_top), (x_a, y_bearing),
-                     base=(x_a - cv.height * 3.0, y_cap_top), angle=90.0,
-                     text="BEARING LEVEL")
+        cv.dimension(
+            (x_a, y_cap_bot),
+            (x_a + cap_w, y_cap_bot),
+            base=(x_a + cap_w / 2.0, y_cap_bot - cv.height * 3.0),
+            text=f"CAP {cap_w / 1000.0:.2f} m",
+        )
+        cv.dimension(
+            (x_a - cv.height * 3, y_cap_bot),
+            (x_a - cv.height * 3, y_cap_top),
+            base=(x_a - cv.height * 12, y_cap_bot),
+            angle=90.0,
+            text=f"CAP {cap_t_mm:.0f} mm",
+        )
+        cv.dimension(
+            (x_a + cap_w + cv.height * 3, y_pile_bot),
+            (x_a + cap_w + cv.height * 3, y_cap_bot),
+            base=(x_a + cap_w + cv.height * 12, y_pile_bot),
+            angle=90.0,
+            text=f"PILE {pile_l_m:.2f} m",
+        )
+        cv.dimension(
+            (x_a, y_cap_top),
+            (x_a, y_bearing),
+            base=(x_a - cv.height * 3.0, y_cap_top),
+            angle=90.0,
+            text="BEARING LEVEL",
+        )
         if well_d_m <= 0:
-            cv.dimension((x_b, y_b), (x_b + cols * cv.mm(spacing_m), y_b),
-                         base=(x_b + cols * cv.mm(spacing_m) / 2.0,
-                               y_b - cv.height * 3.0),
-                         text=f"PILE SPACING {spacing_m:.2f} m")
+            cv.dimension(
+                (x_b, y_b),
+                (x_b + cols * cv.mm(spacing_m), y_b),
+                base=(x_b + cols * cv.mm(spacing_m) / 2.0, y_b - cv.height * 3.0),
+                text=f"PILE SPACING {spacing_m:.2f} m",
+            )
 
-    cv.note([
-        "1. All dimensions in metres unless stated otherwise.",
-        f"2. Safe bearing capacity {cap_kpa:.0f} kPa at founding level "
-        f"RL {scour_rl - pile_l_m - cap_t_mm / 1000.0:.3f}.",
-        f"3. Pile cut-off level RL "
-        f"{float(field(fd, 'pile_cutoff_level_m', scour_rl) or scour_rl):.3f}.",
-        "4. Founding stratum to be confirmed by the geotechnical report.",
-    ], x_b, y_b + cv.mm(6.0))
+    cv.note(
+        [
+            "1. All dimensions in metres unless stated otherwise.",
+            f"2. Safe bearing capacity {cap_kpa:.0f} kPa at founding level "
+            f"RL {scour_rl - pile_l_m - cap_t_mm / 1000.0:.3f}.",
+            f"3. Pile cut-off level RL "
+            f"{float(field(fd, 'pile_cutoff_level_m', scour_rl) or scour_rl):.3f}.",
+            "4. Founding stratum to be confirmed by the geotechnical report.",
+        ],
+        x_b,
+        y_b + cv.mm(6.0),
+    )
 
     return cv.doc

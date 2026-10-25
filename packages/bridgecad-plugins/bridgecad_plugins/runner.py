@@ -14,6 +14,7 @@ Each plugin may optionally ship a ``draw_overrides.py`` module that exposes:
 
 All functions are optional; runner gracefully skips absent ones.
 """
+
 from __future__ import annotations
 
 import importlib
@@ -38,8 +39,7 @@ class PluginRunner:
             return self._module
         if self.manifest.plugin_dir is None:
             return None
-        mod_path = (self.manifest.plugin_dir /
-                    f"{self.manifest.draw_overrides_module}.py")
+        mod_path = self.manifest.plugin_dir / f"{self.manifest.draw_overrides_module}.py"
         if not mod_path.exists():
             return None
         spec = importlib.util.spec_from_file_location(
@@ -50,11 +50,10 @@ class PluginRunner:
             return None
         mod = importlib.util.module_from_spec(spec)
         try:
-            spec.loader.exec_module(mod)   # type: ignore[union-attr]
+            spec.loader.exec_module(mod)  # type: ignore[union-attr]
             self._module = mod
         except Exception as exc:
-            logger.warning("Plugin %s draw_overrides load failed: %s",
-                           self.manifest.plugin_id, exc)
+            logger.warning("Plugin %s draw_overrides load failed: %s", self.manifest.plugin_id, exc)
         return self._module
 
     def apply_defaults(self, project_dict: dict) -> dict:
@@ -64,8 +63,7 @@ class PluginRunner:
             try:
                 return mod.apply_defaults(project_dict)
             except Exception as exc:
-                logger.warning("apply_defaults failed in %s: %s",
-                               self.manifest.plugin_id, exc)
+                logger.warning("apply_defaults failed in %s: %s", self.manifest.plugin_id, exc)
         return project_dict
 
     def get_typical_values(self) -> dict:
@@ -75,8 +73,7 @@ class PluginRunner:
             try:
                 return mod.get_typical_values()
             except Exception as exc:
-                logger.warning("get_typical_values failed in %s: %s",
-                               self.manifest.plugin_id, exc)
+                logger.warning("get_typical_values failed in %s: %s", self.manifest.plugin_id, exc)
         return {}
 
     def describe(self) -> str:
@@ -98,18 +95,19 @@ class PluginRunner:
             return {}
         try:
             import yaml  # type: ignore[import]
+
             with yaml_path.open(encoding="utf-8") as f:
                 return yaml.safe_load(f) or {}
         except ImportError:
             # PyYAML not installed — read as JSON fallback
             import json
+
             json_path = yaml_path.with_suffix(".json")
             if json_path.exists():
                 with json_path.open() as f:
                     return json.load(f)
         except Exception as exc:
-            logger.warning("Could not load defaults for %s: %s",
-                           self.manifest.plugin_id, exc)
+            logger.warning("Could not load defaults for %s: %s", self.manifest.plugin_id, exc)
         return {}
 
 
@@ -122,11 +120,14 @@ def run_plugin(plugin_id: str, project_dict: dict) -> dict:
         Updated project_dict with plugin defaults merged in.
     """
     from .registry import get_registry
+
     registry = get_registry()
     manifest = registry.get(plugin_id)
     if manifest is None:
-        raise KeyError(f"Plugin not found: {plugin_id!r}. "
-                       f"Available: {[p.plugin_id for p in registry.all()]}")
+        raise KeyError(
+            f"Plugin not found: {plugin_id!r}. "
+            f"Available: {[p.plugin_id for p in registry.all()]}"
+        )
     runner = PluginRunner(manifest)
     return runner.apply_defaults(project_dict)
 

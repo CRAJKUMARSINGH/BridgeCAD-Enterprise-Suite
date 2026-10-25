@@ -66,27 +66,27 @@ def _name(enum) -> str:
 
 
 # ----- Rebar density & rule-of-thumb percentages (IRC/IS standard recipes) --
-_REBAR_DENSITY_TON_PER_M3 = 7.85          # ton / m3 steel  (≈ 7850 kg/m3)
+_REBAR_DENSITY_TON_PER_M3 = 7.85  # ton / m3 steel  (≈ 7850 kg/m3)
 
 # Rebar as % of gross concrete volume, per typical BOQ
 _REBAR_PCT = {
-    "deck_slab":      1.10,  # typical ~1.1% rebar in deck slab
-    "wearing_coat":   0.00,  # bituminous — no steel
-    "girders":        1.35,  # T/I-girder main steel + stirrups ~1.35%
-    "diaphragm":      0.80,
-    "pier_cap":       1.20,
-    "pier_shaft":     0.90,
-    "pier_pedestal":  1.00,
-    "abutment_body":  0.80,
-    "abutment_wing":  0.70,
-    "abutment_return":0.70,
-    "approach_slab":  1.00,
-    "pile_cap":       1.20,
-    "piles":          1.50,  # long spiral cages — higher %
-    "well_steining":  0.80,
-    "well_plugs":     0.60,
-    "footings":       0.40,  # raft/open footing — minimal steel
-    "raft":           0.60,
+    "deck_slab": 1.10,  # typical ~1.1% rebar in deck slab
+    "wearing_coat": 0.00,  # bituminous — no steel
+    "girders": 1.35,  # T/I-girder main steel + stirrups ~1.35%
+    "diaphragm": 0.80,
+    "pier_cap": 1.20,
+    "pier_shaft": 0.90,
+    "pier_pedestal": 1.00,
+    "abutment_body": 0.80,
+    "abutment_wing": 0.70,
+    "abutment_return": 0.70,
+    "approach_slab": 1.00,
+    "pile_cap": 1.20,
+    "piles": 1.50,  # long spiral cages — higher %
+    "well_steining": 0.80,
+    "well_plugs": 0.60,
+    "footings": 0.40,  # raft/open footing — minimal steel
+    "raft": 0.60,
 }
 
 
@@ -151,9 +151,11 @@ def _girders_cum(proj: BridgeProject) -> float:
         # Stem width = 0.35 m typical for T-beam stem; L includes all spans
         stem_w = min(0.45, max(0.25, D * 0.25))
         return L * D * stem_w * n_girders
-    if "I_GIRDER" in girder_shape or "IGIRDER" in girder_shape or sst in {
-        "PSC_IGIRDER", "PSC_I_GIRDER_COMPOSITE", "PSC_U_GIRDER"
-    }:
+    if (
+        "I_GIRDER" in girder_shape
+        or "IGIRDER" in girder_shape
+        or sst in {"PSC_IGIRDER", "PSC_I_GIRDER_COMPOSITE", "PSC_U_GIRDER"}
+    ):
         # I-girder: web rectangle + two flanges ~ 15%
         stem_w = min(0.35, max(0.18, D * 0.18))
         return L * D * stem_w * n_girders * 1.15
@@ -471,29 +473,42 @@ def extract_quantities(project: BridgeProject) -> BillOfQuantities:
         grade_num = int("".join(c for c in grade_str if c.isdigit()))
     except Exception:
         grade_num = 30
-    boq.add(BillItem(
-        code="SST-101",
-        description="RCC Deck Slab in-situ (M%d) including parapet upstands, haunches, bearing stiffeners." % grade_num,
-        unit="cum", qty=round(deck_cum, 3),
-    ))
-    boq.add(BillItem(
-        code="SST-101A",
-        description="Reinforcement steel for Deck Slab (kg, bundled & placed in forms).",
-        unit="kg", qty=round(_rebar_kg(deck_cum, "deck_slab"), 1),
-    ))
+    boq.add(
+        BillItem(
+            code="SST-101",
+            description="RCC Deck Slab in-situ (M%d) including parapet upstands, haunches, bearing stiffeners."
+            % grade_num,
+            unit="cum",
+            qty=round(deck_cum, 3),
+        )
+    )
+    boq.add(
+        BillItem(
+            code="SST-101A",
+            description="Reinforcement steel for Deck Slab (kg, bundled & placed in forms).",
+            unit="kg",
+            qty=round(_rebar_kg(deck_cum, "deck_slab"), 1),
+        )
+    )
 
     # ---- Wearing coat (bituminous) ----
     if wc_cum > 0 or wc_area > 0:
-        boq.add(BillItem(
-            code="SST-110",
-            description="Bituminous wearing course (BC/SMA/DBST as specified) — carriageway compacted thickness.",
-            unit="sqm", qty=round(wc_area, 2),
-        ))
-        boq.add(BillItem(
-            code="SST-110A",
-            description="Bituminous wearing course concrete volume (for rate / cum estimation).",
-            unit="cum", qty=round(wc_cum, 3),
-        ))
+        boq.add(
+            BillItem(
+                code="SST-110",
+                description="Bituminous wearing course (BC/SMA/DBST as specified) — carriageway compacted thickness.",
+                unit="sqm",
+                qty=round(wc_area, 2),
+            )
+        )
+        boq.add(
+            BillItem(
+                code="SST-110A",
+                description="Bituminous wearing course concrete volume (for rate / cum estimation).",
+                unit="cum",
+                qty=round(wc_cum, 3),
+            )
+        )
 
     # ---- Parapets (RCC): 2 sides × length × height × t_typical 0.25 m ----
     if getattr(ss, "parapet_height_mm", 0):
@@ -501,42 +516,61 @@ def extract_quantities(project: BridgeProject) -> BillOfQuantities:
         H = _f(ss.parapet_height_mm) / 1000.0
         t_par = 0.25
         par_cum = 2 * L * H * t_par
-        boq.add(BillItem(
-            code="SST-130",
-            description="RCC Parapet / Crash Barrier wall on both kerb lines, including weep holes, fixings, railing inserts.",
-            unit="cum", qty=round(par_cum, 3),
-        ))
-        boq.add(BillItem(
-            code="SST-130A",
-            description="Reinforcement steel for Parapets (kg).",
-            unit="kg", qty=round(_rebar_kg(par_cum, "deck_slab"), 1),
-        ))
+        boq.add(
+            BillItem(
+                code="SST-130",
+                description="RCC Parapet / Crash Barrier wall on both kerb lines, including weep holes, fixings, railing inserts.",
+                unit="cum",
+                qty=round(par_cum, 3),
+            )
+        )
+        boq.add(
+            BillItem(
+                code="SST-130A",
+                description="Reinforcement steel for Parapets (kg).",
+                unit="kg",
+                qty=round(_rebar_kg(par_cum, "deck_slab"), 1),
+            )
+        )
 
     # ---- Girders ----
     if gird_cum > 0:
-        boq.add(BillItem(
-            code="SST-210",
-            description="RCC / PSC %s longitudinal superstructure — girders (precast/cast-in-situ) with haunches & stirrups." % _name(ss.girder_type or sst),
-            unit="cum", qty=round(gird_cum, 3),
-        ))
-        boq.add(BillItem(
-            code="SST-210A",
-            description="Reinforcement / Prestressing steel (kg) for longitudinal girders.",
-            unit="kg", qty=round(_rebar_kg(gird_cum, "girders"), 1),
-        ))
+        boq.add(
+            BillItem(
+                code="SST-210",
+                description="RCC / PSC %s longitudinal superstructure — girders (precast/cast-in-situ) with haunches & stirrups."
+                % _name(ss.girder_type or sst),
+                unit="cum",
+                qty=round(gird_cum, 3),
+            )
+        )
+        boq.add(
+            BillItem(
+                code="SST-210A",
+                description="Reinforcement / Prestressing steel (kg) for longitudinal girders.",
+                unit="kg",
+                qty=round(_rebar_kg(gird_cum, "girders"), 1),
+            )
+        )
 
     # ---- Diaphragms ----
     if diaph_cum > 0:
-        boq.add(BillItem(
-            code="SST-220",
-            description="RCC Cross/Intermediate Diaphragms (including end diaphragms at all supports).",
-            unit="cum", qty=round(diaph_cum, 3),
-        ))
-        boq.add(BillItem(
-            code="SST-220A",
-            description="Reinforcement steel for diaphragms (kg).",
-            unit="kg", qty=round(_rebar_kg(diaph_cum, "diaphragm"), 1),
-        ))
+        boq.add(
+            BillItem(
+                code="SST-220",
+                description="RCC Cross/Intermediate Diaphragms (including end diaphragms at all supports).",
+                unit="cum",
+                qty=round(diaph_cum, 3),
+            )
+        )
+        boq.add(
+            BillItem(
+                code="SST-220A",
+                description="Reinforcement steel for diaphragms (kg).",
+                unit="kg",
+                qty=round(_rebar_kg(diaph_cum, "diaphragm"), 1),
+            )
+        )
 
     # =======================================================================
     # 2. SUBSTRUCTURE
@@ -546,59 +580,128 @@ def extract_quantities(project: BridgeProject) -> BillOfQuantities:
 
     # ---- Piers ----
     if cap_c > 0:
-        boq.add(BillItem(
-            code="SUB-110",
-            description="RCC Pier Caps (including bearing stiffeners & pedestals, dowels to pier shaft).",
-            unit="cum", qty=round(cap_c, 3),
-        ))
-        boq.add(BillItem(code="SUB-110A", description="Reinforcement steel for Pier Caps (kg).",
-                         unit="kg", qty=round(_rebar_kg(cap_c, "pier_cap"), 1)))
+        boq.add(
+            BillItem(
+                code="SUB-110",
+                description="RCC Pier Caps (including bearing stiffeners & pedestals, dowels to pier shaft).",
+                unit="cum",
+                qty=round(cap_c, 3),
+            )
+        )
+        boq.add(
+            BillItem(
+                code="SUB-110A",
+                description="Reinforcement steel for Pier Caps (kg).",
+                unit="kg",
+                qty=round(_rebar_kg(cap_c, "pier_cap"), 1),
+            )
+        )
     if shaft_c > 0:
-        boq.add(BillItem(
-            code="SUB-120",
-            description="RCC Pier shafts — %s section (all piers)." % _name(project.substructure.pier_shaft_shape or "WALL/RECTANGULAR"),
-            unit="cum", qty=round(shaft_c, 3),
-        ))
-        boq.add(BillItem(code="SUB-120A", description="Reinforcement steel for Pier Shafts (kg).",
-                         unit="kg", qty=round(_rebar_kg(shaft_c, "pier_shaft"), 1)))
+        boq.add(
+            BillItem(
+                code="SUB-120",
+                description="RCC Pier shafts — %s section (all piers)."
+                % _name(project.substructure.pier_shaft_shape or "WALL/RECTANGULAR"),
+                unit="cum",
+                qty=round(shaft_c, 3),
+            )
+        )
+        boq.add(
+            BillItem(
+                code="SUB-120A",
+                description="Reinforcement steel for Pier Shafts (kg).",
+                unit="kg",
+                qty=round(_rebar_kg(shaft_c, "pier_shaft"), 1),
+            )
+        )
     if ped_c > 0:
-        boq.add(BillItem(
-            code="SUB-130", description="RCC Bearing Pedestals on pier caps.",
-            unit="cum", qty=round(ped_c, 3),
-        ))
-        boq.add(BillItem(code="SUB-130A", description="Reinforcement steel for Bearing Pedestals (kg).",
-                         unit="kg", qty=round(_rebar_kg(ped_c, "pier_pedestal"), 1)))
+        boq.add(
+            BillItem(
+                code="SUB-130",
+                description="RCC Bearing Pedestals on pier caps.",
+                unit="cum",
+                qty=round(ped_c, 3),
+            )
+        )
+        boq.add(
+            BillItem(
+                code="SUB-130A",
+                description="Reinforcement steel for Bearing Pedestals (kg).",
+                unit="kg",
+                qty=round(_rebar_kg(ped_c, "pier_pedestal"), 1),
+            )
+        )
 
     # ---- Abutments ----
     if ab_body > 0:
-        boq.add(BillItem(
-            code="SUB-210",
-            description="RCC Abutment body — %s type (both abutments incl. bearings pedestals, weep holes, bearing shelf)." % _name(project.substructure.abutment_type),
-            unit="cum", qty=round(ab_body, 3),
-        ))
-        boq.add(BillItem(code="SUB-210A", description="Reinforcement steel for Abutment Body (kg).",
-                         unit="kg", qty=round(_rebar_kg(ab_body, "abutment_body"), 1)))
+        boq.add(
+            BillItem(
+                code="SUB-210",
+                description="RCC Abutment body — %s type (both abutments incl. bearings pedestals, weep holes, bearing shelf)."
+                % _name(project.substructure.abutment_type),
+                unit="cum",
+                qty=round(ab_body, 3),
+            )
+        )
+        boq.add(
+            BillItem(
+                code="SUB-210A",
+                description="Reinforcement steel for Abutment Body (kg).",
+                unit="kg",
+                qty=round(_rebar_kg(ab_body, "abutment_body"), 1),
+            )
+        )
     if ab_wing > 0:
-        boq.add(BillItem(
-            code="SUB-220", description="RCC Wing walls (splayed / tapered / parallel — 4 nos.).",
-            unit="cum", qty=round(ab_wing, 3),
-        ))
-        boq.add(BillItem(code="SUB-220A", description="Reinforcement steel for Wing walls (kg).",
-                         unit="kg", qty=round(_rebar_kg(ab_wing, "abutment_wing"), 1)))
+        boq.add(
+            BillItem(
+                code="SUB-220",
+                description="RCC Wing walls (splayed / tapered / parallel — 4 nos.).",
+                unit="cum",
+                qty=round(ab_wing, 3),
+            )
+        )
+        boq.add(
+            BillItem(
+                code="SUB-220A",
+                description="Reinforcement steel for Wing walls (kg).",
+                unit="kg",
+                qty=round(_rebar_kg(ab_wing, "abutment_wing"), 1),
+            )
+        )
     if ab_ret > 0:
-        boq.add(BillItem(
-            code="SUB-230", description="RCC Return / Rear walls behind abutments (2 nos.).",
-            unit="cum", qty=round(ab_ret, 3),
-        ))
-        boq.add(BillItem(code="SUB-230A", description="Reinforcement steel for Return walls (kg).",
-                         unit="kg", qty=round(_rebar_kg(ab_ret, "abutment_return"), 1)))
+        boq.add(
+            BillItem(
+                code="SUB-230",
+                description="RCC Return / Rear walls behind abutments (2 nos.).",
+                unit="cum",
+                qty=round(ab_ret, 3),
+            )
+        )
+        boq.add(
+            BillItem(
+                code="SUB-230A",
+                description="Reinforcement steel for Return walls (kg).",
+                unit="kg",
+                qty=round(_rebar_kg(ab_ret, "abutment_return"), 1),
+            )
+        )
     if ab_app > 0:
-        boq.add(BillItem(
-            code="SUB-240", description="RCC Approach / Transition Slab both ends (with joint filler, dowels to abutment).",
-            unit="cum", qty=round(ab_app, 3),
-        ))
-        boq.add(BillItem(code="SUB-240A", description="Reinforcement steel for Approach Slab (kg).",
-                         unit="kg", qty=round(_rebar_kg(ab_app, "approach_slab"), 1)))
+        boq.add(
+            BillItem(
+                code="SUB-240",
+                description="RCC Approach / Transition Slab both ends (with joint filler, dowels to abutment).",
+                unit="cum",
+                qty=round(ab_app, 3),
+            )
+        )
+        boq.add(
+            BillItem(
+                code="SUB-240A",
+                description="Reinforcement steel for Approach Slab (kg).",
+                unit="kg",
+                qty=round(_rebar_kg(ab_app, "approach_slab"), 1),
+            )
+        )
 
     # =======================================================================
     # 3. FOUNDATIONS
@@ -606,61 +709,122 @@ def extract_quantities(project: BridgeProject) -> BillOfQuantities:
     pil_c, capc_c, ws_c, wp_c, ft_c = _foundation_concrete(project)
 
     if pil_c > 0:
-        boq.add(BillItem(
-            code="FND-110",
-            description="Bored / Driven cast-in-situ RCC piles, incl. reinforcement cage placement & concreting under water (if required).",
-            unit="cum", qty=round(pil_c, 3),
-        ))
-        boq.add(BillItem(code="FND-110A", description="Reinforcement steel for Pile cages (kg).",
-                         unit="kg", qty=round(_rebar_kg(pil_c, "piles"), 1)))
+        boq.add(
+            BillItem(
+                code="FND-110",
+                description="Bored / Driven cast-in-situ RCC piles, incl. reinforcement cage placement & concreting under water (if required).",
+                unit="cum",
+                qty=round(pil_c, 3),
+            )
+        )
+        boq.add(
+            BillItem(
+                code="FND-110A",
+                description="Reinforcement steel for Pile cages (kg).",
+                unit="kg",
+                qty=round(_rebar_kg(pil_c, "piles"), 1),
+            )
+        )
     if capc_c > 0:
-        boq.add(BillItem(
-            code="FND-120", description="RCC Pile caps (with dowel starter bars, blinding concrete).",
-            unit="cum", qty=round(capc_c, 3),
-        ))
-        boq.add(BillItem(code="FND-120A", description="Reinforcement steel for Pile caps (kg).",
-                         unit="kg", qty=round(_rebar_kg(capc_c, "pile_cap"), 1)))
+        boq.add(
+            BillItem(
+                code="FND-120",
+                description="RCC Pile caps (with dowel starter bars, blinding concrete).",
+                unit="cum",
+                qty=round(capc_c, 3),
+            )
+        )
+        boq.add(
+            BillItem(
+                code="FND-120A",
+                description="Reinforcement steel for Pile caps (kg).",
+                unit="kg",
+                qty=round(_rebar_kg(capc_c, "pile_cap"), 1),
+            )
+        )
     if ws_c > 0:
-        boq.add(BillItem(
-            code="FND-210", description="RCC Well / Caisson steining (including curb, cutting edge, sinking).",
-            unit="cum", qty=round(ws_c, 3),
-        ))
-        boq.add(BillItem(code="FND-210A", description="Reinforcement steel for Well steining (kg).",
-                         unit="kg", qty=round(_rebar_kg(ws_c, "well_steining"), 1)))
+        boq.add(
+            BillItem(
+                code="FND-210",
+                description="RCC Well / Caisson steining (including curb, cutting edge, sinking).",
+                unit="cum",
+                qty=round(ws_c, 3),
+            )
+        )
+        boq.add(
+            BillItem(
+                code="FND-210A",
+                description="Reinforcement steel for Well steining (kg).",
+                unit="kg",
+                qty=round(_rebar_kg(ws_c, "well_steining"), 1),
+            )
+        )
     if wp_c > 0:
-        boq.add(BillItem(
-            code="FND-220", description="RCC Well bottom plug + top plug (plug concrete).",
-            unit="cum", qty=round(wp_c, 3),
-        ))
-        boq.add(BillItem(code="FND-220A", description="Reinforcement steel for Well plugs (kg).",
-                         unit="kg", qty=round(_rebar_kg(wp_c, "well_plugs"), 1)))
+        boq.add(
+            BillItem(
+                code="FND-220",
+                description="RCC Well bottom plug + top plug (plug concrete).",
+                unit="cum",
+                qty=round(wp_c, 3),
+            )
+        )
+        boq.add(
+            BillItem(
+                code="FND-220A",
+                description="Reinforcement steel for Well plugs (kg).",
+                unit="kg",
+                qty=round(_rebar_kg(wp_c, "well_plugs"), 1),
+            )
+        )
     if ft_c > 0:
-        boq.add(BillItem(
-            code="FND-310", description="RCC Open / Stepped / Raft / Mat footings (with blinding & anti-termite treatment).",
-            unit="cum", qty=round(ft_c, 3),
-        ))
-        boq.add(BillItem(code="FND-310A", description="Reinforcement steel for Footings (kg).",
-                         unit="kg", qty=round(_rebar_kg(ft_c, "footings"), 1)))
+        boq.add(
+            BillItem(
+                code="FND-310",
+                description="RCC Open / Stepped / Raft / Mat footings (with blinding & anti-termite treatment).",
+                unit="cum",
+                qty=round(ft_c, 3),
+            )
+        )
+        boq.add(
+            BillItem(
+                code="FND-310A",
+                description="Reinforcement steel for Footings (kg).",
+                unit="kg",
+                qty=round(_rebar_kg(ft_c, "footings"), 1),
+            )
+        )
 
     # =======================================================================
     # 4. EARTHWORK
     # =======================================================================
     ex_c, bf_c, gr_c = _earthwork(project)
     if ex_c > 0:
-        boq.add(BillItem(
-            code="EW-100", description="Earthwork in excavation for all foundations (including dewatering, shoring, disposal within lead).",
-            unit="cum", qty=round(ex_c, 1),
-        ))
+        boq.add(
+            BillItem(
+                code="EW-100",
+                description="Earthwork in excavation for all foundations (including dewatering, shoring, disposal within lead).",
+                unit="cum",
+                qty=round(ex_c, 1),
+            )
+        )
     if bf_c > 0:
-        boq.add(BillItem(
-            code="EW-200", description="Backfilling around foundations with approved moorum/sand/gravel in layers 250 mm incl. compaction.",
-            unit="cum", qty=round(bf_c, 1),
-        ))
+        boq.add(
+            BillItem(
+                code="EW-200",
+                description="Backfilling around foundations with approved moorum/sand/gravel in layers 250 mm incl. compaction.",
+                unit="cum",
+                qty=round(bf_c, 1),
+            )
+        )
     if gr_c > 0:
-        boq.add(BillItem(
-            code="EW-300", description="Blinding / Sand blanketing / Geotextile / Soling below footings & pile caps.",
-            unit="cum", qty=round(gr_c, 1),
-        ))
+        boq.add(
+            BillItem(
+                code="EW-300",
+                description="Blinding / Sand blanketing / Geotextile / Soling below footings & pile caps.",
+                unit="cum",
+                qty=round(gr_c, 1),
+            )
+        )
 
     # =======================================================================
     # 5. MISC. SUMMARY ITEMS
@@ -668,26 +832,39 @@ def extract_quantities(project: BridgeProject) -> BillOfQuantities:
     # Total concrete (excl. earthwork & bituminous) — for validation
     all_concrete_m3 = deck_cum + gird_cum + diaph_cum
     if getattr(ss, "parapet_height_mm", 0):
-        L = _f(gi.total_length_m); H = _f(ss.parapet_height_mm)/1000.0
-        all_concrete_m3 += 2*L*H*0.25
+        L = _f(gi.total_length_m)
+        H = _f(ss.parapet_height_mm) / 1000.0
+        all_concrete_m3 += 2 * L * H * 0.25
     all_concrete_m3 += cap_c + shaft_c + ped_c + ab_body + ab_wing + ab_ret + ab_app
     all_concrete_m3 += pil_c + capc_c + ws_c + wp_c + ft_c
     all_rebar_kg = sum(it.qty for it in boq.items if it.unit == "kg")
 
     if all_concrete_m3 > 0:
-        boq.add(BillItem(
-            code="SUM-100", description="Control total — gross RCC/PCC concrete volume (excl. bituminous).",
-            unit="cum", qty=round(all_concrete_m3, 2),
-        ))
+        boq.add(
+            BillItem(
+                code="SUM-100",
+                description="Control total — gross RCC/PCC concrete volume (excl. bituminous).",
+                unit="cum",
+                qty=round(all_concrete_m3, 2),
+            )
+        )
     if all_rebar_kg > 0:
-        boq.add(BillItem(
-            code="SUM-200", description="Control total — reinforcement / prestressing steel mass.",
-            unit="kg", qty=round(all_rebar_kg, 1),
-        ))
-        boq.add(BillItem(
-            code="SUM-201", description="Control total — reinforcement / prestressing steel mass (tonnes).",
-            unit="tonne", qty=round(all_rebar_kg / 1000.0, 3),
-        ))
+        boq.add(
+            BillItem(
+                code="SUM-200",
+                description="Control total — reinforcement / prestressing steel mass.",
+                unit="kg",
+                qty=round(all_rebar_kg, 1),
+            )
+        )
+        boq.add(
+            BillItem(
+                code="SUM-201",
+                description="Control total — reinforcement / prestressing steel mass (tonnes).",
+                unit="tonne",
+                qty=round(all_rebar_kg / 1000.0, 3),
+            )
+        )
 
     return boq
 

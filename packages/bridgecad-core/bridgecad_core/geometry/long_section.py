@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 # Public dataclass
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class LongSectionGeometry:
     """Longitudinal section level markers and profile points.
@@ -30,21 +31,21 @@ class LongSectionGeometry:
     """
 
     # ---- level markers (RL, metres) -------------------------------------
-    hfl_rl: float          = 0.0   # Highest Flood Level
-    lwl_rl: float          = 0.0   # Low Water Level
-    scour_level_rl: float  = 0.0   # Design scour level (bottom of scour hole)
-    soffit_rl: float       = 0.0   # Underside of deck / girder soffit
-    top_of_deck_rl: float  = 0.0   # Road formation / top-of-wearing-coat level
-    pile_tip_rl: float     = 0.0   # Bottom of longest pile
+    hfl_rl: float = 0.0  # Highest Flood Level
+    lwl_rl: float = 0.0  # Low Water Level
+    scour_level_rl: float = 0.0  # Design scour level (bottom of scour hole)
+    soffit_rl: float = 0.0  # Underside of deck / girder soffit
+    top_of_deck_rl: float = 0.0  # Road formation / top-of-wearing-coat level
+    pile_tip_rl: float = 0.0  # Bottom of longest pile
 
     # ---- chainage limits -----------------------------------------------
     chainage_start_m: float = 0.0
-    chainage_end_m: float   = 0.0
-    total_length_m: float   = 0.0
+    chainage_end_m: float = 0.0
+    total_length_m: float = 0.0
 
     # ---- span data (for drawing internal piers on the long section) -----
-    span_lengths_m: list[float]                  = field(default_factory=list)
-    pier_chainage_m: list[float]                 = field(default_factory=list)
+    span_lengths_m: list[float] = field(default_factory=list)
+    pier_chainage_m: list[float] = field(default_factory=list)
 
     # ---- ground profile -------------------------------------------------
     ground_profile_pts: list[tuple[float, float]] = field(default_factory=list)
@@ -103,6 +104,7 @@ class LongSectionGeometry:
 # Factory function
 # ---------------------------------------------------------------------------
 
+
 def compute_long_section_geometry(project: BridgeProject) -> LongSectionGeometry:
     """Derive longitudinal-section level markers from a validated BridgeProject.
 
@@ -116,40 +118,50 @@ def compute_long_section_geometry(project: BridgeProject) -> LongSectionGeometry
     LongSectionGeometry
         Populated dataclass with real-world RL metre values.
     """
-    pm  = project.project_master
-    gi  = project.geometry_input
-    hd  = project.hydraulic_data
-    fd  = project.foundation_details
-    ss  = project.superstructure
+    pm = project.project_master
+    gi = project.geometry_input
+    hd = project.hydraulic_data
+    fd = project.foundation_details
+    ss = project.superstructure
     sub = project.substructure
 
     # ---- level values ----------------------------------------------------
-    hfl_rl         = float(hd.hfl_m)
-    lwl_rl         = float(hd.lwl_m)
+    hfl_rl = float(hd.hfl_m)
+    lwl_rl = float(hd.lwl_m)
     scour_level_rl = float(hd.scour_level_m)
-    soffit_rl      = float(hd.actual_soffit_level_m)
+    soffit_rl = float(hd.actual_soffit_level_m)
 
     # Top-of-deck = road level from project master
-    top_of_deck_rl = float(pm.road_level_rl_m) if pm.road_level_rl_m is not None else (
-        soffit_rl
-        + (float(ss.girder_depth_mm) / 1000.0 if ss.girder_depth_mm else 0.0)
-        + (float(ss.deck_thickness_mm) / 1000.0 if ss.deck_thickness_mm else 0.0)
-        + (float(ss.wearing_coat_thickness_mm) / 1000.0 if ss.wearing_coat_thickness_mm else 0.0)
+    top_of_deck_rl = (
+        float(pm.road_level_rl_m)
+        if pm.road_level_rl_m is not None
+        else (
+            soffit_rl
+            + (float(ss.girder_depth_mm) / 1000.0 if ss.girder_depth_mm else 0.0)
+            + (float(ss.deck_thickness_mm) / 1000.0 if ss.deck_thickness_mm else 0.0)
+            + (
+                float(ss.wearing_coat_thickness_mm) / 1000.0
+                if ss.wearing_coat_thickness_mm
+                else 0.0
+            )
+        )
     )
 
     # Pile tip level
-    pile_cutoff = float(fd.pile_cutoff_level_m) if fd.pile_cutoff_level_m is not None else (
-        float(pm.ground_level_rl_m) if pm.ground_level_rl_m is not None else scour_level_rl
+    pile_cutoff = (
+        float(fd.pile_cutoff_level_m)
+        if fd.pile_cutoff_level_m is not None
+        else (float(pm.ground_level_rl_m) if pm.ground_level_rl_m is not None else scour_level_rl)
     )
     pile_len = float(fd.pile_length_m) if fd.pile_length_m is not None else 0.0
     pile_tip_rl = pile_cutoff - pile_len
 
     # ---- chainage / span data -------------------------------------------
-    total_len       = float(gi.total_length_m)
-    span_lengths    = [float(s) for s in gi.span_lengths_m]
+    total_len = float(gi.total_length_m)
+    span_lengths = [float(s) for s in gi.span_lengths_m]
 
     ch_start = float(gi.chainage_start_km) * 1000.0  # km → m absolute
-    ch_end   = float(gi.chainage_end_km)   * 1000.0
+    ch_end = float(gi.chainage_end_km) * 1000.0
 
     # Pier chainages along bridge (relative to A1)
     pier_ch: list[float] = []
@@ -159,9 +171,7 @@ def compute_long_section_geometry(project: BridgeProject) -> LongSectionGeometry
         pier_ch.append(cumul)
 
     # ---- ground profile (21-point linear interpolation) -----------------
-    ground_start = (
-        float(pm.ground_level_rl_m) if pm.ground_level_rl_m is not None else hfl_rl - 1.5
-    )
+    ground_start = float(pm.ground_level_rl_m) if pm.ground_level_rl_m is not None else hfl_rl - 1.5
     # Assume ground at A2 slightly lower by 1% gradient (approximation)
     gradient_frac = float(gi.gradient_pct) / 100.0 if gi.gradient_pct is not None else 0.0
     ground_end = ground_start - total_len * gradient_frac
@@ -170,7 +180,7 @@ def compute_long_section_geometry(project: BridgeProject) -> LongSectionGeometry
     ground_profile_pts: list[tuple[float, float]] = []
     for i in range(n_pts + 1):
         t = i / n_pts
-        ch_rel = t * total_len          # chainage from A1 face (0 → total_len)
+        ch_rel = t * total_len  # chainage from A1 face (0 → total_len)
         rl = ground_start + t * (ground_end - ground_start)
         ground_profile_pts.append((ch_rel, rl))
 
@@ -180,11 +190,11 @@ def compute_long_section_geometry(project: BridgeProject) -> LongSectionGeometry
     # ---- plan-northern-edge datum + pier T.O.C. values ------------------
     plan_northern_edge_reference_rl = top_of_deck_rl
 
-    pedestal_h = float(sub.pier_pedestal_height_m) if sub.pier_pedestal_height_m is not None else 0.20
+    pedestal_h = (
+        float(sub.pier_pedestal_height_m) if sub.pier_pedestal_height_m is not None else 0.20
+    )
     pier_cap_depth_m = float(sub.pier_cap_depth_m) if sub.pier_cap_depth_m is not None else 0.80
-    pier_top_of_cap_rl_m: list[float] = [
-        soffit_rl - pedestal_h - pier_cap_depth_m for _ in pier_ch
-    ]
+    pier_top_of_cap_rl_m: list[float] = [soffit_rl - pedestal_h - pier_cap_depth_m for _ in pier_ch]
 
     abutment_top_of_rail_rl_m = top_of_deck_rl
 
@@ -211,6 +221,7 @@ def compute_long_section_geometry(project: BridgeProject) -> LongSectionGeometry
 # ---------------------------------------------------------------------------
 # Span / pier loops — the one place the counts are defined
 # ---------------------------------------------------------------------------
+
 
 def span_lengths_m(project: BridgeProject) -> list[float]:
     """Span lengths in metres, in order along increasing chainage.
@@ -251,6 +262,9 @@ def pier_positions(project: BridgeProject) -> list[float]:
 
 
 __all__ = [
-    "LongSectionGeometry", "compute_long_section_geometry",
-    "span_lengths_m", "span_boundaries", "pier_positions",
+    "LongSectionGeometry",
+    "compute_long_section_geometry",
+    "span_lengths_m",
+    "span_boundaries",
+    "pier_positions",
 ]

@@ -9,6 +9,7 @@ Usage:
     log = get_logger("bridgecad.draw")
     log.info("sheet_generated", sheet=1, size_kb=48)
 """
+
 from __future__ import annotations
 
 import logging
@@ -17,13 +18,14 @@ from typing import Any
 
 try:
     import structlog
+
     _STRUCTLOG = True
 except ImportError:
     _STRUCTLOG = False
 
 
 def configure(
-    level: str     = "INFO",
+    level: str = "INFO",
     json_output: bool = False,
 ) -> None:
     """Configure application-wide logging. Call once at startup."""

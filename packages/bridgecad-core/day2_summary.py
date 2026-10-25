@@ -5,25 +5,80 @@ from bridgecad_core.types import ENUM_REGISTRY
 from bridgecad_core.validation_registry import ALL_RULES
 
 total_members = sum(len(list(c)) for c in ENUM_REGISTRY.values())
-S7_names = ['RiverBankType','SoilClass','RegimeConstantKValue','RiverGeomorphologyType','WaterSurfaceProfileType','ScourProtectionSubtype','SedimentYieldClassification','RiverCrossingClass']
-S8_names = ['ConcreteAggregateType','CementType','AdmixtureType','WeldType','BearingMaterial','JointSealantType','WearingCoatGrade','ReinforcementBarType','RebarCouplerType','ConcreteSurfaceFinishClass','FormworkPanelType','FormworkReleaseAgentType','WaterproofingMembraneType','AntiCorrosionProtectionType','PaintCoatSystemType']
-S9_names = ['LayerGroup','LineWeightCode','HatchPatternCode','FontStyle','ArrowStyle','ScaleDenominatorSet','LineStyleCode','DimensionStyleClass','ViewTypeClassification','CrossSectionViewTypeCode','TitleBlockRevisionClass','PlotterPaperClass']
-S10_names = ['SeismicImportanceFactor','WindImportanceFactor','WindSpeedBasic_ms','LoadCombination','ImpactFactorCoeff','TemperatureLoadDeltaT','PrestressLossTypeEnum','CreepShrinkageFactorClass','FrictionCoeffBearingPadType','DampingRatioTypeEnum','ResponseSpectrumCategory','FatigueDetailCategorySteel','DuctilityClassLink','RetainingWallModeType']
+S7_names = [
+    "RiverBankType",
+    "SoilClass",
+    "RegimeConstantKValue",
+    "RiverGeomorphologyType",
+    "WaterSurfaceProfileType",
+    "ScourProtectionSubtype",
+    "SedimentYieldClassification",
+    "RiverCrossingClass",
+]
+S8_names = [
+    "ConcreteAggregateType",
+    "CementType",
+    "AdmixtureType",
+    "WeldType",
+    "BearingMaterial",
+    "JointSealantType",
+    "WearingCoatGrade",
+    "ReinforcementBarType",
+    "RebarCouplerType",
+    "ConcreteSurfaceFinishClass",
+    "FormworkPanelType",
+    "FormworkReleaseAgentType",
+    "WaterproofingMembraneType",
+    "AntiCorrosionProtectionType",
+    "PaintCoatSystemType",
+]
+S9_names = [
+    "LayerGroup",
+    "LineWeightCode",
+    "HatchPatternCode",
+    "FontStyle",
+    "ArrowStyle",
+    "ScaleDenominatorSet",
+    "LineStyleCode",
+    "DimensionStyleClass",
+    "ViewTypeClassification",
+    "CrossSectionViewTypeCode",
+    "TitleBlockRevisionClass",
+    "PlotterPaperClass",
+]
+S10_names = [
+    "SeismicImportanceFactor",
+    "WindImportanceFactor",
+    "WindSpeedBasic_ms",
+    "LoadCombination",
+    "ImpactFactorCoeff",
+    "TemperatureLoadDeltaT",
+    "PrestressLossTypeEnum",
+    "CreepShrinkageFactorClass",
+    "FrictionCoeffBearingPadType",
+    "DampingRatioTypeEnum",
+    "ResponseSpectrumCategory",
+    "FatigueDetailCategorySteel",
+    "DuctilityClassLink",
+    "RetainingWallModeType",
+]
+
 
 def sec(names):
     return (
         sum(1 for n in names if n in ENUM_REGISTRY),
-        sum(len(list(ENUM_REGISTRY[n])) for n in names if n in ENUM_REGISTRY)
+        sum(len(list(ENUM_REGISTRY[n])) for n in names if n in ENUM_REGISTRY),
     )
+
 
 s7c, s7m = sec(S7_names)
 s8c, s8m = sec(S8_names)
 s9c, s9m = sec(S9_names)
 s10c, s10m = sec(S10_names)
 
-c_sev = sum(1 for r in ALL_RULES if r.severity.name == 'CRITICAL')
-w_sev = sum(1 for r in ALL_RULES if r.severity.name == 'WARNING')
-i_sev = sum(1 for r in ALL_RULES if r.severity.name == 'INFO')
+c_sev = sum(1 for r in ALL_RULES if r.severity.name == "CRITICAL")
+w_sev = sum(1 for r in ALL_RULES if r.severity.name == "WARNING")
+i_sev = sum(1 for r in ALL_RULES if r.severity.name == "INFO")
 
 all_dir = set(dir(types))
 C1 = len(ENUM_REGISTRY) >= 160
@@ -42,12 +97,12 @@ for grp in [S7_names, S8_names, S9_names, S10_names]:
 C3 = all(C3_all)
 
 try:
-    py_compile.compile('bridgecad_core/types.py', doraise=True)
+    py_compile.compile("bridgecad_core/types.py", doraise=True)
     C4 = True
 except Exception:
     C4 = False
 try:
-    py_compile.compile('bridgecad_core/validation_registry.py', doraise=True)
+    py_compile.compile("bridgecad_core/validation_registry.py", doraise=True)
     C5 = True
 except Exception:
     C5 = False
@@ -67,7 +122,10 @@ print("    S8 Materials       : %3d classes | %4d members" % (s8c, s8m))
 print("    S9 Drawing/CAD     : %3d classes | %4d members" % (s9c, s9m))
 print("    S10 Load/Seismic : %3d classes | %4d members" % (s10c, s10m))
 print("    ----------           : -----   | -----")
-print("    Day-2 NEW total      : %3d classes | %4d members" % (s7c+s8c+s9c+s10c, s7m+s8m+s9m+s10m))
+print(
+    "    Day-2 NEW total      : %3d classes | %4d members"
+    % (s7c + s8c + s9c + s10c, s7m + s8m + s9m + s10m)
+)
 print()
 print("  ENUM_REGISTRY total     : %d classes" % len(ENUM_REGISTRY))
 print("  Members (all enums)     : %d values" % total_members)
@@ -92,10 +150,12 @@ print("=" * 78)
 print("  ACCEPTANCE CRITERIA CHECKLIST")
 print("=" * 78)
 
+
 def row(label, ok):
     status = PASS if ok else FAIL
     pad = " " * (65 - len(label))
     print("    %s%s%s" % (label, pad, status))
+
 
 row("[C1] ENUM_REGISTRY count >= 160                              ", C1)
 row("[C2] dir(types) exports all 160 enum names                    ", C2)

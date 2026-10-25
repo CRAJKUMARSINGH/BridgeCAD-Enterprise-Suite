@@ -1,28 +1,44 @@
 """Day 2 audit - check Sections 7-10 enums."""
+
 import sys
 
-sys.path.insert(0, '.')
+sys.path.insert(0, ".")
 from bridgecad_core import types
 
 d2_required = {
     "S7 Hydraulic (plan)": [
-        "WaterSourceType", "ScourRegimeType", "HydrographShapeType",
-        "BankType", "SoilClass", "AffluxEstimationFormulaType",
-        "RegimeConstantKValue"
+        "WaterSourceType",
+        "ScourRegimeType",
+        "HydrographShapeType",
+        "BankType",
+        "SoilClass",
+        "AffluxEstimationFormulaType",
+        "RegimeConstantKValue",
     ],
     "S8 Materials (plan)": [
-        "ConcreteAggregateType", "CementType", "AdmixtureType",
-        "WeldType", "BearingMaterial", "JointSealantType",
-        "WearingCoatGrade"
+        "ConcreteAggregateType",
+        "CementType",
+        "AdmixtureType",
+        "WeldType",
+        "BearingMaterial",
+        "JointSealantType",
+        "WearingCoatGrade",
     ],
     "S9 Drawing (plan)": [
-        "LayerGroup", "LineWeightCode", "HatchPatternCode",
-        "FontStyle", "ArrowStyle", "ScaleDenominatorSet"
+        "LayerGroup",
+        "LineWeightCode",
+        "HatchPatternCode",
+        "FontStyle",
+        "ArrowStyle",
+        "ScaleDenominatorSet",
     ],
     "S10 Load/Seismic/Wind (plan)": [
-        "SeismicImportanceFactor", "WindImportanceFactor",
-        "WindSpeedBasic_ms", "LoadCombination",
-        "ImpactFactorCoeff", "TemperatureLoadDeltaT"
+        "SeismicImportanceFactor",
+        "WindImportanceFactor",
+        "WindSpeedBasic_ms",
+        "LoadCombination",
+        "ImpactFactorCoeff",
+        "TemperatureLoadDeltaT",
     ],
 }
 

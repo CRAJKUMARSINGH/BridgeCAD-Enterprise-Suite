@@ -16,6 +16,7 @@ THE CONTRACT
     7. The section total is the sum of calculated + estimated only, and says how
        much of the section is not_calculated.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

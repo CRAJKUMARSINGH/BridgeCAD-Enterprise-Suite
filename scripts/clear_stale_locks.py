@@ -12,6 +12,7 @@ success is not evidence that the file is gone.
 
 Run it as the first step of any commit script.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -38,7 +39,10 @@ def _git_dir(root: Path) -> Path | None:
     try:
         out = subprocess.run(
             ["git", "rev-parse", "--git-dir"],
-            cwd=root, capture_output=True, text=True, check=True,
+            cwd=root,
+            capture_output=True,
+            text=True,
+            check=True,
         ).stdout.strip()
     except (OSError, subprocess.CalledProcessError):
         return None
@@ -50,14 +54,21 @@ def _git_is_running() -> bool:
     """True when a git process is alive. A live git may legitimately hold a lock."""
     pgrep = shutil.which("pgrep")
     if pgrep:
-        return subprocess.run(
-            [pgrep, "-x", "git"], capture_output=True, check=False,
-        ).returncode == 0
+        return (
+            subprocess.run(
+                [pgrep, "-x", "git"],
+                capture_output=True,
+                check=False,
+            ).returncode
+            == 0
+        )
     if os.name == "nt":
         try:
             out = subprocess.run(
                 ["tasklist", "/FI", "IMAGENAME eq git.exe"],
-                capture_output=True, text=True, check=False,
+                capture_output=True,
+                text=True,
+                check=False,
             ).stdout
         except OSError:
             return False
@@ -69,8 +80,9 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--root", default=".", help="repo root (default: cwd)")
     ap.add_argument("--dry-run", action="store_true", help="report only")
-    ap.add_argument("--force", action="store_true",
-                    help="clear locks even when a git process is running")
+    ap.add_argument(
+        "--force", action="store_true", help="clear locks even when a git process is running"
+    )
     args = ap.parse_args(argv)
 
     root = Path(args.root).resolve()
@@ -101,8 +113,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"FAILED to remove {lock}: {exc}", file=sys.stderr)
             continue
         if lock.exists():
-            print(f"FAILED to remove {lock} — still present after unlink",
-                  file=sys.stderr)
+            print(f"FAILED to remove {lock} — still present after unlink", file=sys.stderr)
             continue
         print(f"removed {lock}")
         cleared += 1

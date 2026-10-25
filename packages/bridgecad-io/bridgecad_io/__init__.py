@@ -10,6 +10,7 @@ Public surface (AC-7: these 8 names re-exported at package top level):
 All submodules use LAZY import of bridgecad_core so `import bridgecad_io`
 always succeeds even if core is missing (important for package smoke tests).
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -34,40 +35,48 @@ if TYPE_CHECKING:  # pragma: no cover - Type hints only; never evaluated
 # Lazy import bridgecad_core + submodules (call-on-demand only)
 # ---------------------------------------------------------------------------
 
+
 def _bp_type() -> type:
     """Return the BridgeProject class without importing at top-level."""
     from bridgecad_core import BridgeProject  # (imported for caller)
+
     return BridgeProject
 
 
 def _er() -> Any:
     from . import excel_reader as _m
+
     return _m
 
 
 def _et() -> Any:
     from . import excel_template as _m
+
     return _m
 
 
 def _ew() -> Any:
     from . import excel_writer as _m
+
     return _m
 
 
 def _ja() -> Any:
     from . import json_adapter as _m
+
     return _m
 
 
 def _ca() -> Any:
     from . import csv_adapter as _m
+
     return _m
 
 
 # ---------------------------------------------------------------------------
 # Public API  (lazy — nothing heavy runs until someone calls these)
 # ---------------------------------------------------------------------------
+
 
 def read_excel(path: str | Path) -> Any:
     """Parse a 14-sheet BridgeCAD workbook → validated BridgeProject."""
@@ -79,16 +88,19 @@ def write_excel(project: Any, output_path: str | Path) -> Path:
     return _ew().write_excel(project, output_path)
 
 
-def generate_template(output_path: str | Path, project: Any = None,
-                      title: str = "BridgeCAD Enterprise — 14-Sheet GAD Workbook",
-                      _fast_mode: bool = False) -> Path:
+def generate_template(
+    output_path: str | Path,
+    project: Any = None,
+    title: str = "BridgeCAD Enterprise — 14-Sheet GAD Workbook",
+    _fast_mode: bool = False,
+) -> Path:
     """Generate a 14-sheet styled workbook; optionally pre-filled with *project*."""
-    return _et().generate_template(output_path, project=project, title=title,
-                                    _fast_mode=_fast_mode)
+    return _et().generate_template(output_path, project=project, title=title, _fast_mode=_fast_mode)
 
 
-def to_json(project: Any, path: str | Path | None = None, indent: int = 2,
-            exclude: set[str] | None = None) -> str:
+def to_json(
+    project: Any, path: str | Path | None = None, indent: int = 2, exclude: set[str] | None = None
+) -> str:
     """Dump BridgeProject → JSON (Decimal→string, Enum→value; stable ordering)."""
     return _ja().to_json(project, path=path, indent=indent, exclude=exclude)
 
@@ -110,9 +122,19 @@ def from_csv(in_dir: str | Path) -> Any:
 
 __all__ = [
     # public 8 names  (AC-7  (a) requires all 8 be present)
-    "read_excel", "write_excel", "generate_template",
-    "to_json", "from_json", "to_csv", "from_csv", "exceptions",
+    "read_excel",
+    "write_excel",
+    "generate_template",
+    "to_json",
+    "from_json",
+    "to_csv",
+    "from_csv",
+    "exceptions",
     # plus 5 public exception types re-exported for convenience
-    "BridgeCADError", "IOError", "ExcelParseError", "JsonParseError", "CsvParseError",
+    "BridgeCADError",
+    "IOError",
+    "ExcelParseError",
+    "JsonParseError",
+    "CsvParseError",
     "__version__",
 ]

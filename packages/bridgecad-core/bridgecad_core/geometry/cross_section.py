@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 # Public dataclass
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class CrossSectionGeometry:
     """Typical mid-span cross-section geometry of the bridge deck.
@@ -35,14 +36,14 @@ class CrossSectionGeometry:
     """
 
     # ---- overall dimensions (metres) ------------------------------------
-    carriageway_width_m: float    = 0.0
-    overall_width_m: float        = 0.0
-    median_width_m: float         = 0.0
-    footpath_left_m: float        = 0.0
-    footpath_right_m: float       = 0.0
-    kerb_width_left_m: float      = 0.0
-    kerb_width_right_m: float     = 0.0
-    crash_barrier_width_left_m: float  = 0.0
+    carriageway_width_m: float = 0.0
+    overall_width_m: float = 0.0
+    median_width_m: float = 0.0
+    footpath_left_m: float = 0.0
+    footpath_right_m: float = 0.0
+    kerb_width_left_m: float = 0.0
+    kerb_width_right_m: float = 0.0
+    crash_barrier_width_left_m: float = 0.0
     crash_barrier_width_right_m: float = 0.0
 
     # ---- camber ----------------------------------------------------------
@@ -57,9 +58,9 @@ class CrossSectionGeometry:
     """Zone name for each band between consecutive offsets."""
 
     # ---- deck levels (Y relative to top-of-wearing-coat at CL) ----------
-    top_of_wearing_coat_y: float = 0.0   # = camber_mm/1000 at CL
-    bottom_of_slab_y: float      = 0.0   # = -(deck_thickness_mm/1000)
-    bottom_of_girder_y: float    = 0.0   # = -(deck_thickness + girder_depth)/1000
+    top_of_wearing_coat_y: float = 0.0  # = camber_mm/1000 at CL
+    bottom_of_slab_y: float = 0.0  # = -(deck_thickness_mm/1000)
+    bottom_of_girder_y: float = 0.0  # = -(deck_thickness + girder_depth)/1000
 
     # ---- slope ----------------------------------------------------------
     deck_slope_pct: float = 2.0
@@ -77,7 +78,7 @@ class CrossSectionGeometry:
         if half_cw <= 0.0:
             return 0.0
         ratio = x_from_cl / half_cw
-        raw = self.camber_mm * (1.0 - ratio ** 2)
+        raw = self.camber_mm * (1.0 - ratio**2)
         return max(0.0, raw)
 
     def deck_surface_y_at_x(self, x_from_cl: float) -> float:
@@ -91,6 +92,7 @@ class CrossSectionGeometry:
 # ---------------------------------------------------------------------------
 # Factory function
 # ---------------------------------------------------------------------------
+
 
 def compute_cross_section_geometry(project: BridgeProject) -> CrossSectionGeometry:
     """Derive typical mid-span cross-section geometry from a validated BridgeProject.
@@ -109,23 +111,23 @@ def compute_cross_section_geometry(project: BridgeProject) -> CrossSectionGeomet
     ss = project.superstructure
 
     # ---- basic dimensions (float) ----------------------------------------
-    cw         = float(gi.carriageway_width_m)
-    median     = float(gi.median_width_m)      if gi.median_width_m      else 0.0
-    fp_left    = float(gi.footpath_left_m)     if gi.footpath_left_m     else 0.0
-    fp_right   = float(gi.footpath_right_m)    if gi.footpath_right_m    else 0.0
-    kerb_left  = float(gi.kerb_width_left_m)   if gi.kerb_width_left_m   else 0.0
-    kerb_right = float(gi.kerb_width_right_m)  if gi.kerb_width_right_m  else 0.0
-    cb_left    = float(gi.crash_barrier_width_left_m)  if gi.crash_barrier_width_left_m  else 0.0
-    cb_right   = float(gi.crash_barrier_width_right_m) if gi.crash_barrier_width_right_m else 0.0
-    overall_w  = float(gi.overall_width_m)     # computed field
+    cw = float(gi.carriageway_width_m)
+    median = float(gi.median_width_m) if gi.median_width_m else 0.0
+    fp_left = float(gi.footpath_left_m) if gi.footpath_left_m else 0.0
+    fp_right = float(gi.footpath_right_m) if gi.footpath_right_m else 0.0
+    kerb_left = float(gi.kerb_width_left_m) if gi.kerb_width_left_m else 0.0
+    kerb_right = float(gi.kerb_width_right_m) if gi.kerb_width_right_m else 0.0
+    cb_left = float(gi.crash_barrier_width_left_m) if gi.crash_barrier_width_left_m else 0.0
+    cb_right = float(gi.crash_barrier_width_right_m) if gi.crash_barrier_width_right_m else 0.0
+    overall_w = float(gi.overall_width_m)  # computed field
 
-    camber_mm  = float(gi.camber_mm) if gi.camber_mm else 0.0
+    camber_mm = float(gi.camber_mm) if gi.camber_mm else 0.0
 
     # ---- zone boundary half-widths from CL (left side, metres) ----------
     # Order from centreline outward:
     #   0.0 → median/2 → carriageway/2 → +kerb → +footpath → +crash_barrier → outer edge
     offsets: list[float] = [0.0]
-    labels:  list[str]  = []
+    labels: list[str] = []
 
     half_median = median / 2.0
     if half_median > 0.0:
@@ -155,16 +157,16 @@ def compute_cross_section_geometry(project: BridgeProject) -> CrossSectionGeomet
         labels.append("PARAPET/RAILING")
 
     # ---- deck levels (Y from top-of-wearing-coat at CL) ------------------
-    deck_t_mm    = float(ss.deck_thickness_mm)    if ss.deck_thickness_mm    else 230.0
+    deck_t_mm = float(ss.deck_thickness_mm) if ss.deck_thickness_mm else 230.0
     float(ss.wearing_coat_thickness_mm) if ss.wearing_coat_thickness_mm else 40.0
-    girder_d_mm  = float(ss.girder_depth_mm)       if ss.girder_depth_mm       else 0.0
+    girder_d_mm = float(ss.girder_depth_mm) if ss.girder_depth_mm else 0.0
 
-    top_of_wc_y      =  camber_mm / 1000.0     # CL crown height above edge
+    top_of_wc_y = camber_mm / 1000.0  # CL crown height above edge
     bottom_of_slab_y = -(deck_t_mm / 1000.0)
     bottom_of_girder = bottom_of_slab_y - girder_d_mm / 1000.0
 
     # ---- drainage cross-fall (default 2 %) --------------------------------
-    deck_slope_pct = 2.0   # IRC standard for bituminous deck (IRC:86 Clause 4.2)
+    deck_slope_pct = 2.0  # IRC standard for bituminous deck (IRC:86 Clause 4.2)
 
     return CrossSectionGeometry(
         carriageway_width_m=cw,

@@ -12,6 +12,7 @@ All subclasses accept (message, *, file=None, sheet=None, field=None,
 line=None, suggestion=None) and include every context item in the string
 representation so CLI users get actionable hints.
 """
+
 from __future__ import annotations
 
 from pathlib import Path

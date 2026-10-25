@@ -9,6 +9,7 @@ Sheets 1 and 3-7 need exactly that, so it lives here once rather than six times.
 Nothing here knows what a bridge is. Each sheet module supplies the geometry;
 this module supplies the frame, the pen and the paper sizes.
 """
+
 from __future__ import annotations
 
 from contextlib import contextmanager
@@ -54,16 +55,14 @@ class _Layered:
 
     def _stamp(self, dxfattribs):
         attribs = dict(dxfattribs or {})
-        attribs["layer"] = self.layer_name      # forced: the enclosing block wins
+        attribs["layer"] = self.layer_name  # forced: the enclosing block wins
         return attribs
 
     def add_line(self, start, end, dxfattribs=None, **kwargs):
-        return self._msp.add_line(start, end,
-                                  dxfattribs=self._stamp(dxfattribs), **kwargs)
+        return self._msp.add_line(start, end, dxfattribs=self._stamp(dxfattribs), **kwargs)
 
     def add_text(self, content, dxfattribs=None, **kwargs):
-        return self._msp.add_text(content,
-                                  dxfattribs=self._stamp(dxfattribs), **kwargs)
+        return self._msp.add_text(content, dxfattribs=self._stamp(dxfattribs), **kwargs)
 
     def __getattr__(self, name):
         return getattr(self._msp, name)
@@ -93,8 +92,15 @@ def field(obj, name: str, default=None):
 class Canvas:
     """One sheet under construction: its frame, its pen, its paper size."""
 
-    def __init__(self, sheet: str, title: str, index: int, *,
-                 total: int = TOTAL_SHEETS, text_mm: float = PAPER_TEXT_MM):
+    def __init__(
+        self,
+        sheet: str,
+        title: str,
+        index: int,
+        *,
+        total: int = TOTAL_SHEETS,
+        text_mm: float = PAPER_TEXT_MM,
+    ):
         frame = check_declared(sheet)
         self.sheet = sheet
         self.index = index
@@ -102,7 +108,8 @@ class Canvas:
         self.scale = frame.plot_scale
         self.doc, raw = new_sheet(title)
         self.frame_w, self.frame_h = draw_sheet_frame(
-            raw, sheet, sheet_index=index, total_sheets=total)
+            raw, sheet, sheet_index=index, total_sheets=total
+        )
         self.ms = _Layered(raw)
         #: Model height that plots at ``text_mm`` on paper: 2.5 mm at 1:100 is
         #: 250 mm of model, not 2.5 — see ``coordinates.model_text_height_mm``.
@@ -143,17 +150,21 @@ class Canvas:
         return polyline(self.ms, points, close=close, layer=self.ms.layer_name)
 
     def hatch(self, x, y, w, h, *, pattern: str = "ANSI31", scale: float = 6.0):
-        return hatch_rect(self.ms, x, y, w, h, pattern=pattern, scale=scale,
-                          layer=self.ms.layer_name)
+        return hatch_rect(
+            self.ms, x, y, w, h, pattern=pattern, scale=scale, layer=self.ms.layer_name
+        )
 
-    def text(self, content, x, y, *, height: float | None = None,
-             halign: str = "LEFT"):
-        return _text(self.ms, str(content), x, y,
-                     height=self.height if height is None else height,
-                     halign=halign)
+    def text(self, content, x, y, *, height: float | None = None, halign: str = "LEFT"):
+        return _text(
+            self.ms,
+            str(content),
+            x,
+            y,
+            height=self.height if height is None else height,
+            halign=halign,
+        )
 
-    def dimension(self, p1, p2, *, base, angle: float = 0.0, text=None,
-                  layer_name: str = "DIM"):
+    def dimension(self, p1, p2, *, base, angle: float = 0.0, text=None, layer_name: str = "DIM"):
         """A real DXF DIMENSION entity — the type the contract counts.
 
         ``primitives.dim_linear_*`` draws a line and a text label; those are not
@@ -164,7 +175,11 @@ class Canvas:
         along y.
         """
         dim = self.ms.add_linear_dim(
-            base=base, p1=p1, p2=p2, angle=angle, dimstyle=DIM_DIMSTYLE,
+            base=base,
+            p1=p1,
+            p2=p2,
+            angle=angle,
+            dimstyle=DIM_DIMSTYLE,
             dxfattribs={"layer": layer_name},
             override={"dimtxt": self.height * 0.6, "dimtxsty": "BRIDGE_STD"},
         )
@@ -173,8 +188,7 @@ class Canvas:
         dim.render()
         return dim
 
-    def note(self, lines, x, y, *, leading: float | None = None,
-             layer_name: str = "TEXT-SPEC"):
+    def note(self, lines, x, y, *, leading: float | None = None, layer_name: str = "TEXT-SPEC"):
         """A notes block, first line at *y*, each line below the last."""
         step = leading if leading is not None else self.height * 1.6
         with layer(self.ms, layer_name):
@@ -182,8 +196,9 @@ class Canvas:
                 self.text(line, x, y - i * step)
         return y - (len(lines) - 1) * step
 
-    def table(self, x, y_top, col_widths, rows, *, row_h: float | None = None,
-              layer_name: str = "TABL"):
+    def table(
+        self, x, y_top, col_widths, rows, *, row_h: float | None = None, layer_name: str = "TABL"
+    ):
         """A ruled schedule. ``rows[0]`` is the header; returns the bottom y."""
         step = row_h if row_h is not None else self.height * 2.2
         width = sum(col_widths)
@@ -199,17 +214,17 @@ class Canvas:
             for i, row in enumerate(rows):
                 yy = y_top - (i + 1) * step + (step - self.height) * 0.5
                 for j, cell in enumerate(row):
-                    self.text(cell, edges[j] + self.height * 0.3, yy,
-                              height=self.height * 0.85)
+                    self.text(cell, edges[j] + self.height * 0.3, yy, height=self.height * 0.85)
         return y_top - len(rows) * step
 
-    def level_staff(self, x, pairs, *, tick: float | None = None,
-                    layer_name: str = "DIM-LEVEL"):
+    def level_staff(self, x, pairs, *, tick: float | None = None, layer_name: str = "DIM-LEVEL"):
         """A stack of RL tags at *x*: ``pairs`` is [(name, level_m), ...]."""
         span = tick if tick is not None else self.height * 0.5
         with layer(self.ms, layer_name):
-            self.line((x, self.y(min(p[1] for p in pairs)) - span),
-                      (x, self.y(max(p[1] for p in pairs)) + span))
+            self.line(
+                (x, self.y(min(p[1] for p in pairs)) - span),
+                (x, self.y(max(p[1] for p in pairs)) + span),
+            )
             for name, lv in pairs:
                 yy = self.y(lv)
                 self.line((x - span, yy), (x + span, yy))

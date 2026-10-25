@@ -1,4 +1,5 @@
 """bridgecad_qa — QA compliance engine (M6)."""
+
 from .compliance import ComplianceScore, score
 from .reports import generate_html_report
 from .rules_engine import run_qa

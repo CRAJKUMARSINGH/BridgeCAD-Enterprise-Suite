@@ -11,6 +11,7 @@ Sheet manifest:
   Sheet 7  BILL OF QUANTITIES           sheet7_bill_of_quantities
   Sheet 8  SIDE & END ELEVATIONS        sheet8_side_elevations
 """
+
 from __future__ import annotations
 
 import logging
@@ -21,14 +22,14 @@ logger = logging.getLogger(__name__)
 
 # Each entry: (sheet_no, module_attr, filename_stem, default_scale)
 _SHEET_MANIFEST = [
-    (1, "sheet1_plan",                "Sheet1_Plan",           100),
-    (2, "sheet2_long_section",        "Sheet2_LongSection",    100),
-    (3, "sheet3_cross_section",       "Sheet3_CrossSection",    50),
-    (4, "sheet4_foundation",          "Sheet4_Foundation",      50),
-    (5, "sheet5_pier_abutment_details","Sheet5_PierAbutment",   50),
-    (6, "sheet6_bearings_joints",     "Sheet6_BearingsJoints",  20),
-    (7, "sheet7_bill_of_quantities",  "Sheet7_BOQ",              1),
-    (8, "sheet8_side_elevations",   "Sheet8_SideElevations", 50),
+    (1, "sheet1_plan", "Sheet1_Plan", 100),
+    (2, "sheet2_long_section", "Sheet2_LongSection", 100),
+    (3, "sheet3_cross_section", "Sheet3_CrossSection", 50),
+    (4, "sheet4_foundation", "Sheet4_Foundation", 50),
+    (5, "sheet5_pier_abutment_details", "Sheet5_PierAbutment", 50),
+    (6, "sheet6_bearings_joints", "Sheet6_BearingsJoints", 20),
+    (7, "sheet7_bill_of_quantities", "Sheet7_BOQ", 1),
+    (8, "sheet8_side_elevations", "Sheet8_SideElevations", 50),
 ]
 
 
@@ -66,10 +67,11 @@ def generate_package(
         out_path = out / f"{prefix}_{stem}.dxf"
         try:
             mod = importlib.import_module(f".{mod_attr}", package="bridgecad_draw")
-            p   = mod.generate(project, out_path, scale_denom=sc)
+            p = mod.generate(project, out_path, scale_denom=sc)
             results.append(p)
-            logger.info("Sheet %d (%s) → %s  (%d KB)",
-                        sheet_no, stem, p.name, p.stat().st_size // 1024)
+            logger.info(
+                "Sheet %d (%s) → %s  (%d KB)", sheet_no, stem, p.name, p.stat().st_size // 1024
+            )
         except Exception as exc:
             logger.warning("Sheet %d (%s) failed: %s", sheet_no, stem, exc)
 

@@ -29,6 +29,7 @@ TWO RE-BASINGS AGAINST THE WING-11 COORDINATE CONTRACT
     Both are the same correction: an anchor written for absolute space is re-based
     onto the shared frame. Nothing else in the body is altered.
 """
+
 from __future__ import annotations
 
 import itertools
@@ -56,7 +57,7 @@ class _Layered:
 
     def _stamp(self, dxfattribs):
         attribs = dict(dxfattribs or {})
-        attribs["layer"] = self.layer_name      # forced: the enclosing block wins
+        attribs["layer"] = self.layer_name  # forced: the enclosing block wins
         return attribs
 
     def add_line(self, start, end, dxfattribs=None, **kwargs):
@@ -109,11 +110,11 @@ def dim_linear(ms, p1, p2, *, text: str, height: float) -> None:
     (x1, y1), (x2, y2) = (float(p1[0]), float(p1[1])), (float(p2[0]), float(p2[1]))
     ms.add_line((x1, y1), (x2, y2))
     tick = height * 0.3
-    if abs(x2 - x1) >= abs(y2 - y1):                    # horizontal
+    if abs(x2 - x1) >= abs(y2 - y1):  # horizontal
         ms.add_line((x1, y1 - tick), (x1, y1 + tick))
         ms.add_line((x2, y2 - tick), (x2, y2 + tick))
         anchor = ((x1 + x2) / 2.0, y1 + height * 0.25)
-    else:                                               # vertical
+    else:  # vertical
         ms.add_line((x1 - tick, y1), (x1 + tick, y1))
         ms.add_line((x2 - tick, y2), (x2 + tick, y2))
         anchor = (x1 + height * 0.25, (y1 + y2) / 2.0)
@@ -131,8 +132,9 @@ def build(project):
 
     # ── deck line ────────────────────────────────────────────────────────────
     with layer(ms, "DECK"):
-        ms.add_line((X(0.0), Y(project.levels.deck_level_m)),
-                    (X(total), Y(project.levels.deck_level_m)))
+        ms.add_line(
+            (X(0.0), Y(project.levels.deck_level_m)), (X(total), Y(project.levels.deck_level_m))
+        )
 
     # ── water levels: line on GRID, label on TEXT ────────────────────────────
     # Label format is 3 dp. "HFL 104.5" is ambiguous on a section where 50 mm of
@@ -141,13 +143,19 @@ def build(project):
         with layer(ms, "GRID"):
             level_line(ms, X(0.0), X(total), Y(lv))
         with layer(ms, "TEXT"):
-            label(ms, (X(total) + h_text * 0.5, Y(lv) - h_text * 0.5),
-                  f"{name} {LABEL_FORMAT.format(lv)}", height=h_text)
+            label(
+                ms,
+                (X(total) + h_text * 0.5, Y(lv) - h_text * 0.5),
+                f"{name} {LABEL_FORMAT.format(lv)}",
+                height=h_text,
+            )
 
     # ── founding level, hidden because it is below the section plane ─────────
     with layer(ms, "HIDD"):
-        ms.add_line((X(0.0), Y(project.levels.founding_level_m)),
-                    (X(total), Y(project.levels.founding_level_m)))
+        ms.add_line(
+            (X(0.0), Y(project.levels.founding_level_m)),
+            (X(total), Y(project.levels.founding_level_m)),
+        )
 
     # ── natural ground, dashed ───────────────────────────────────────────────
     with layer(ms, "GRND"):
@@ -160,44 +168,72 @@ def build(project):
     piers = project.geometry.pier_positions()
     for idx, ch in enumerate(piers, start=1):
         with layer(ms, "CL"):
-            ms.add_line((X(ch), Y(project.levels.founding_level_m) - h_text * 2),
-                        (X(ch), Y(project.levels.deck_level_m) + h_text * 2))
+            ms.add_line(
+                (X(ch), Y(project.levels.founding_level_m) - h_text * 2),
+                (X(ch), Y(project.levels.deck_level_m) + h_text * 2),
+            )
         with layer(ms, "TEXT"):
-            label(ms, (X(ch) - h_text * 0.5, Y(project.levels.deck_level_m) + h_text * 2.5),
-                  f"P{idx}", height=h_text)
+            label(
+                ms,
+                (X(ch) - h_text * 0.5, Y(project.levels.deck_level_m) + h_text * 2.5),
+                f"P{idx}",
+                height=h_text,
+            )
 
     # ── chainage ticks along the deck ────────────────────────────────────────
     n_ticks = int(total // TICK_PITCH_M) + 1
     for i in range(n_ticks):
         ch = i * TICK_PITCH_M
         with layer(ms, "GRID"):
-            chainage_tick(ms, X(ch), Y(project.levels.deck_level_m),
-                          Y(project.levels.deck_level_m) + h_text * 1.5)
+            chainage_tick(
+                ms,
+                X(ch),
+                Y(project.levels.deck_level_m),
+                Y(project.levels.deck_level_m) + h_text * 1.5,
+            )
         with layer(ms, "TEXT"):
-            label(ms, (X(ch), Y(project.levels.deck_level_m) + h_text * 2.0),
-                  f"{LABEL_FORMAT.format(ch)}", height=h_text)
+            label(
+                ms,
+                (X(ch), Y(project.levels.deck_level_m) + h_text * 2.0),
+                f"{LABEL_FORMAT.format(ch)}",
+                height=h_text,
+            )
 
     # ── dimensions: overall, per span, and the three levels ──────────────────
     with layer(ms, "DIM"):
-        dim_linear(ms, (X(0.0), Y(project.levels.founding_level_m) - h_text * 5),
-                   (X(total), Y(project.levels.founding_level_m) - h_text * 5),
-                   text=f"{total:.3f} m", height=h_text)
+        dim_linear(
+            ms,
+            (X(0.0), Y(project.levels.founding_level_m) - h_text * 5),
+            (X(total), Y(project.levels.founding_level_m) - h_text * 5),
+            text=f"{total:.3f} m",
+            height=h_text,
+        )
         bounds = [0.0, *piers, total]
         for a, b in itertools.pairwise(bounds):
-            dim_linear(ms, (X(a), Y(project.levels.founding_level_m) - h_text * 3.5),
-                       (X(b), Y(project.levels.founding_level_m) - h_text * 3.5),
-                       text=f"{b - a:.3f}", height=h_text)
+            dim_linear(
+                ms,
+                (X(a), Y(project.levels.founding_level_m) - h_text * 3.5),
+                (X(b), Y(project.levels.founding_level_m) - h_text * 3.5),
+                text=f"{b - a:.3f}",
+                height=h_text,
+            )
         # The level staff sits just INSIDE the datum, not outside it. Under the
         # shared coordinate contract the datum is the frame corner (chainage 0 is
         # the paper's left edge), so a gutter to its left is off the sheet, and
         # clause 7 rejects it. The spec's `X(0.0) - h_text * 3` predates that
         # contract — see the module docstring.
         staff_x = X(0.0) + h_text * 0.5
-        for name, lv in (("DECK", project.levels.deck_level_m),
-                         ("HFL", project.levels.hfl_m),
-                         ("LWL", project.levels.lwl_m)):
-            dim_linear(ms, (staff_x, Y(project.levels.founding_level_m)),
-                       (staff_x, Y(lv)),
-                       text=f"{name} {LABEL_FORMAT.format(lv)}", height=h_text)
+        for name, lv in (
+            ("DECK", project.levels.deck_level_m),
+            ("HFL", project.levels.hfl_m),
+            ("LWL", project.levels.lwl_m),
+        ):
+            dim_linear(
+                ms,
+                (staff_x, Y(project.levels.founding_level_m)),
+                (staff_x, Y(lv)),
+                text=f"{name} {LABEL_FORMAT.format(lv)}",
+                height=h_text,
+            )
 
     return doc

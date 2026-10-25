@@ -9,6 +9,7 @@ Implements:
   - Freeboard requirements (IRC:5 / NHAI / MORTH)
   - Linear waterway formula (IRC:5 Clause 17)
 """
+
 from __future__ import annotations
 
 import math
@@ -17,6 +18,7 @@ from dataclasses import dataclass
 # ---------------------------------------------------------------------------
 # Lacey's Regime Method (IRC:5-2015 Clause 24)
 # ---------------------------------------------------------------------------
+
 
 def lacey_silt_factor(d50_mm: float) -> float:
     """Lacey's silt factor f = 1.76 × √(d50_mm).
@@ -76,7 +78,7 @@ def lacey_regime_depth(Q: float, f: float) -> float:
     """
     if Q <= 0 or f <= 0:
         return 0.0
-    return 0.477 * ((Q / (f ** 2)) ** (1.0 / 3.0))
+    return 0.477 * ((Q / (f**2)) ** (1.0 / 3.0))
 
 
 def lacey_regime_slope(f: float, Q: float) -> float:
@@ -167,10 +169,10 @@ def design_scour_depth(
     Reference : IRC:78-2014 Clause 7.3
     """
     MULT = {
-        "PIER":             2.00,
-        "ABUTMENT":         1.27,
-        "GUIDE_BUND_NOSE":  2.75,
-        "GUIDE_BUND_BODY":  1.50,
+        "PIER": 2.00,
+        "ABUTMENT": 1.27,
+        "GUIDE_BUND_NOSE": 2.75,
+        "GUIDE_BUND_BODY": 1.50,
     }
     mult = MULT.get(structure_type.upper(), 2.00)
 
@@ -178,7 +180,7 @@ def design_scour_depth(
         D_s = lacey_scour_depth(Q, f)
     else:
         # Rational: D_s = 1.34 × (q²/f)^(1/3)
-        D_s = 1.34 * ((q_per_m ** 2 / max(f, 0.01)) ** (1.0 / 3.0)) if q_per_m > 0 else 0.0
+        D_s = 1.34 * ((q_per_m**2 / max(f, 0.01)) ** (1.0 / 3.0)) if q_per_m > 0 else 0.0
 
     return mult * D_s
 
@@ -228,7 +230,7 @@ def afflux(
     if A_bridge <= 0 or A_nat <= 0 or V_nat <= 0:
         return 0.0
     ratio = A_nat / A_bridge
-    return (V_nat ** 2 / (2.0 * g)) * (ratio ** 2 - 1.0)
+    return (V_nat**2 / (2.0 * g)) * (ratio**2 - 1.0)
 
 
 def freeboard_min(
@@ -253,13 +255,13 @@ def freeboard_min(
     IRC:5-2015 Cl.22  |  MORTH 5th Rev Cl.704  |  NHAI Guidelines 2019
     """
     FB_MIN = {
-        "MAJOR":      1.00,   # IRC:5-2015 Cl.22.1 major bridge
-        "MINOR":      0.60,   # IRC:5-2015 Cl.22.2 minor bridge
-        "CULVERT":    0.30,   # IRC SP:13
-        "NHAI":       2.00,   # NHAI National corridor standard
-        "EXPRESSWAY": 2.00,   # Access-controlled expressway
-        "STATE_HWY":  1.50,   # State highway typical
-        "PMGSY":      0.60,   # PMGSY rural connectivity
+        "MAJOR": 1.00,  # IRC:5-2015 Cl.22.1 major bridge
+        "MINOR": 0.60,  # IRC:5-2015 Cl.22.2 minor bridge
+        "CULVERT": 0.30,  # IRC SP:13
+        "NHAI": 2.00,  # NHAI National corridor standard
+        "EXPRESSWAY": 2.00,  # Access-controlled expressway
+        "STATE_HWY": 1.50,  # State highway typical
+        "PMGSY": 0.60,  # PMGSY rural connectivity
     }
     return FB_MIN.get(structure_class.upper(), 1.00)
 
@@ -268,21 +270,23 @@ def freeboard_min(
 # Composite result dataclass
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class HydraulicDesignResult:
     """Summary of IRC:5 hydraulic calculations for a bridge site."""
-    Q_design_cumecs:    float
-    lacey_f:            float
-    regime_depth_m:     float
-    regime_velocity_mps:float
+
+    Q_design_cumecs: float
+    lacey_f: float
+    regime_depth_m: float
+    regime_velocity_mps: float
     regime_perimeter_m: float
-    regime_slope:       float
-    linear_waterway_m:  float
-    normal_scour_m:     float
-    design_scour_pier_m:float
-    design_scour_abut_m:float
-    afflux_m:           float
-    freeboard_required_m:float
+    regime_slope: float
+    linear_waterway_m: float
+    normal_scour_m: float
+    design_scour_pier_m: float
+    design_scour_abut_m: float
+    afflux_m: float
+    freeboard_required_m: float
 
 
 def compute_hydraulics(
@@ -306,21 +310,24 @@ def compute_hydraulics(
     -------
     HydraulicDesignResult
     """
-    R     = lacey_regime_depth(Q, f)
-    V     = lacey_regime_velocity(f, R)
-    P     = lacey_regime_perimeter(Q)
-    S     = lacey_regime_slope(f, Q)
-    Lw    = linear_waterway(Q)
-    Ds    = lacey_scour_depth(Q, f)
-    Dp    = design_scour_depth(Q, f, "PIER")
-    Da    = design_scour_depth(Q, f, "ABUTMENT")
+    R = lacey_regime_depth(Q, f)
+    V = lacey_regime_velocity(f, R)
+    P = lacey_regime_perimeter(Q)
+    S = lacey_regime_slope(f, Q)
+    Lw = linear_waterway(Q)
+    Ds = lacey_scour_depth(Q, f)
+    Dp = design_scour_depth(Q, f, "PIER")
+    Da = design_scour_depth(Q, f, "ABUTMENT")
     V_nat = (Q / A_nat) if A_nat > 0 else V
-    Ah    = afflux(Q, A_nat if A_nat > 0 else P * R, A_bridge if A_bridge > 0 else Lw * R, V_nat)
-    fb    = freeboard_min(structure_class)
+    Ah = afflux(Q, A_nat if A_nat > 0 else P * R, A_bridge if A_bridge > 0 else Lw * R, V_nat)
+    fb = freeboard_min(structure_class)
     return HydraulicDesignResult(
-        Q_design_cumecs=Q, lacey_f=round(f, 3),
-        regime_depth_m=round(R, 3), regime_velocity_mps=round(V, 3),
-        regime_perimeter_m=round(P, 2), regime_slope=round(S, 8),
+        Q_design_cumecs=Q,
+        lacey_f=round(f, 3),
+        regime_depth_m=round(R, 3),
+        regime_velocity_mps=round(V, 3),
+        regime_perimeter_m=round(P, 2),
+        regime_slope=round(S, 8),
         linear_waterway_m=round(Lw, 1),
         normal_scour_m=round(Ds, 3),
         design_scour_pier_m=round(Dp, 3),
@@ -331,8 +338,16 @@ def compute_hydraulics(
 
 
 __all__ = [
-    "lacey_silt_factor", "lacey_regime_velocity", "lacey_regime_depth",
-    "lacey_regime_slope", "lacey_regime_perimeter", "lacey_scour_depth",
-    "design_scour_depth", "linear_waterway", "afflux", "freeboard_min",
-    "HydraulicDesignResult", "compute_hydraulics",
+    "lacey_silt_factor",
+    "lacey_regime_velocity",
+    "lacey_regime_depth",
+    "lacey_regime_slope",
+    "lacey_regime_perimeter",
+    "lacey_scour_depth",
+    "design_scour_depth",
+    "linear_waterway",
+    "afflux",
+    "freeboard_min",
+    "HydraulicDesignResult",
+    "compute_hydraulics",
 ]

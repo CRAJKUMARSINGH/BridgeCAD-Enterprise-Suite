@@ -1,6 +1,7 @@
 """
 bridgecad_export.bundler — ZIP bundle creator with manifest.json.
 """
+
 from __future__ import annotations
 
 import json
@@ -31,9 +32,9 @@ def create_bundle(
     """
     bundle_path = output_dir / f"{prefix}_bundle.zip"
     manifest: dict[str, Any] = {
-        "generated_at":  datetime.now().isoformat(),
-        "prefix":        prefix,
-        "contents":      {},
+        "generated_at": datetime.now().isoformat(),
+        "prefix": prefix,
+        "contents": {},
     }
 
     all_files: list[Path] = []
@@ -69,6 +70,7 @@ def review_label(project) -> str:
     honestly, so the bundle cannot claim more than the sheets support.
     """
     from bridgecad_export.revisions import blockers_for, load, manifest_label
+
     register = load()
     purpose = register["purpose"]
     if blockers_for(purpose).ok:
@@ -84,8 +86,7 @@ def build_manifest(project) -> dict:
     """
     spec = json.loads(SPEC.read_text(encoding="utf-8"))
     scaffold_sheets = sorted(
-        sheet for sheet, entry in spec["sheets"].items()
-        if entry["status"] == "scaffold"
+        sheet for sheet, entry in spec["sheets"].items() if entry["status"] == "scaffold"
     )
     return {
         "scaffold_sheets": scaffold_sheets,

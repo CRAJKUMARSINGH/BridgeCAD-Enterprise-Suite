@@ -5,6 +5,7 @@ off ``project.bearings_joints`` — with a detail of each above. A schedule with
 rows is a blank where an auditor expects a quantity, so an unpopulated schedule
 still emits one row saying the design is not yet fixed.
 """
+
 from __future__ import annotations
 
 from bridgecad_draw.sheets._common import Canvas, field
@@ -20,29 +21,33 @@ ENLARGE = 4.0
 def _bearing_rows(bj) -> list[list[str]]:
     rows = []
     for item in list(field(bj, "bearing_schedule", []) or []):
-        rows.append([
-            str(field(item, "location", "-")),
-            str(field(item, "bearing_type", "-")).replace("_", " "),
-            f"{float(field(item, 'size_x_mm', 0) or 0):.0f}x"
-            f"{float(field(item, 'size_y_mm', 0) or 0):.0f}",
-            f"{float(field(item, 'design_load_kn', 0) or 0):.0f}",
-            str(field(item, "fixed_or_guide_or_free", "-")).upper(),
-            f"{int(field(item, 'quantity', 0) or 0)}",
-        ])
+        rows.append(
+            [
+                str(field(item, "location", "-")),
+                str(field(item, "bearing_type", "-")).replace("_", " "),
+                f"{float(field(item, 'size_x_mm', 0) or 0):.0f}x"
+                f"{float(field(item, 'size_y_mm', 0) or 0):.0f}",
+                f"{float(field(item, 'design_load_kn', 0) or 0):.0f}",
+                str(field(item, "fixed_or_guide_or_free", "-")).upper(),
+                f"{int(field(item, 'quantity', 0) or 0)}",
+            ]
+        )
     return rows or [["-", "NOT FIXED", "-", "-", "-", "-"]]
 
 
 def _joint_rows(bj) -> list[list[str]]:
     rows = []
     for item in list(field(bj, "expansion_joint_schedule", []) or []):
-        rows.append([
-            str(field(item, "location", "-")),
-            str(field(item, "joint_type", "-")).replace("_", " "),
-            f"{float(field(item, 'width_mm', 0) or 0):.0f}",
-            f"{float(field(item, 'movement_range_mm', 0) or 0):.0f}",
-            f"{float(field(item, 'gap_mm', 0) or 0):.0f}",
-            f"{int(field(item, 'quantity', 0) or 0)}",
-        ])
+        rows.append(
+            [
+                str(field(item, "location", "-")),
+                str(field(item, "joint_type", "-")).replace("_", " "),
+                f"{float(field(item, 'width_mm', 0) or 0):.0f}",
+                f"{float(field(item, 'movement_range_mm', 0) or 0):.0f}",
+                f"{float(field(item, 'gap_mm', 0) or 0):.0f}",
+                f"{int(field(item, 'quantity', 0) or 0)}",
+            ]
+        )
     return rows or [["-", "NOT FIXED", "-", "-", "-", "-"]]
 
 
@@ -71,8 +76,7 @@ def build(project):
     with cv.on("HTCH"):
         cv.hatch(x_d, y_d, pad_w, pad_t, pattern="ANSI31", scale=cv.height * 0.3)
     with cv.on("TEXT"):
-        cv.text(f"BEARING {sx:.0f} mm", x_d + pad_w + cv.height * 1.5,
-                y_d + pad_t * 0.4)
+        cv.text(f"BEARING {sx:.0f} mm", x_d + pad_w + cv.height * 1.5, y_d + pad_t * 0.4)
     with cv.on("TEXT-HEADER"):
         cv.text("BEARING DETAIL — ENLARGED 4X", x_d, y_d + pad_t + cv.height * 3.0)
 
@@ -88,55 +92,81 @@ def build(project):
         cv.rect(x_j + pad_w + gap, y_j, pad_w, slab_t)
         cv.rect(x_j + pad_w, y_j, gap, slab_t * 0.6)
     with cv.on("HTCH"):
-        cv.hatch(x_j + pad_w, y_j + slab_t * 0.6, gap, slab_t * 0.4,
-                 pattern="ANSI31", scale=cv.height * 0.3)
+        cv.hatch(
+            x_j + pad_w,
+            y_j + slab_t * 0.6,
+            gap,
+            slab_t * 0.4,
+            pattern="ANSI31",
+            scale=cv.height * 0.3,
+        )
     with cv.on("TEXT"):
-        cv.text(f"EXPANSION JOINT GAP {gap_mm:.0f} mm", x_j,
-                y_j - slab_t * 0.3 - cv.height * 3.0)
+        cv.text(f"EXPANSION JOINT GAP {gap_mm:.0f} mm", x_j, y_j - slab_t * 0.3 - cv.height * 3.0)
     with cv.on("TEXT-HEADER"):
-        cv.text("EXPANSION JOINT DETAIL — ENLARGED 4X", x_j,
-                y_j + slab_t + cv.height * 3.0)
+        cv.text("EXPANSION JOINT DETAIL — ENLARGED 4X", x_j, y_j + slab_t + cv.height * 3.0)
 
     # ── schedule 1 — bearings ──────────────────────────────────────────────
     y_t1 = cv.height * 70.0
     with cv.on("TEXT-HEADER"):
         cv.text("BEARING SCHEDULE", cv.mm(1.5), y_t1 + cv.height * 2.0)
-    cv.table(cv.mm(1.5), y_t1, [cv.mm(1.8), cv.mm(3.2), cv.mm(2.2),
-                                cv.mm(1.9), cv.mm(1.6), cv.mm(1.2)],
-             [["LOCATION", "TYPE", "SIZE (mm)", "LOAD (kN)", "FIXITY", "QTY"], *bearing_rows],
-             row_h=cv.height * 2.2)
+    cv.table(
+        cv.mm(1.5),
+        y_t1,
+        [cv.mm(1.8), cv.mm(3.2), cv.mm(2.2), cv.mm(1.9), cv.mm(1.6), cv.mm(1.2)],
+        [["LOCATION", "TYPE", "SIZE (mm)", "LOAD (kN)", "FIXITY", "QTY"], *bearing_rows],
+        row_h=cv.height * 2.2,
+    )
 
     # ── schedule 2 — expansion joints ──────────────────────────────────────
     y_t2 = cv.height * 40.0
     with cv.on("TEXT-HEADER"):
         cv.text("EXPANSION JOINT SCHEDULE", cv.mm(1.5), y_t2 + cv.height * 2.0)
-    cv.table(cv.mm(1.5), y_t2, [cv.mm(1.8), cv.mm(3.2), cv.mm(2.2),
-                                cv.mm(2.4), cv.mm(1.8), cv.mm(1.2)],
-             [["LOCATION", "TYPE", "WIDTH (mm)", "MOVEMENT (mm)", "GAP (mm)", "QTY"], *joint_rows],
-             row_h=cv.height * 2.2)
+    cv.table(
+        cv.mm(1.5),
+        y_t2,
+        [cv.mm(1.8), cv.mm(3.2), cv.mm(2.2), cv.mm(2.4), cv.mm(1.8), cv.mm(1.2)],
+        [["LOCATION", "TYPE", "WIDTH (mm)", "MOVEMENT (mm)", "GAP (mm)", "QTY"], *joint_rows],
+        row_h=cv.height * 2.2,
+    )
 
     # ── dimensions on the details ──────────────────────────────────────────
     with cv.on("DIM"):
-        cv.dimension((x_d, y_d), (x_d + pad_w, y_d),
-                     base=(x_d + pad_w / 2.0, y_d - plate_t - cv.height * 3.0),
-                     text=f"{sx:.0f} mm")
-        cv.dimension((x_d - cv.height * 2, y_d), (x_d - cv.height * 2, y_d + pad_t),
-                     base=(x_d - cv.height * 9.0, y_d), angle=90.0,
-                     text=f"{pad_t / ENLARGE:.0f} mm")
-        cv.dimension((x_j + pad_w, y_j + slab_t * 0.8),
-                     (x_j + pad_w + gap, y_j + slab_t * 0.8),
-                     base=(x_j + pad_w + gap / 2.0, y_j + slab_t * 1.6),
-                     text=f"GAP {gap_mm:.0f} mm")
-        cv.dimension((x_j, y_j + slab_t), (x_j + 2 * pad_w + gap, y_j + slab_t),
-                     base=(x_j + pad_w, y_j + slab_t + cv.height * 6.0),
-                     text=f"TRANSVERSE {2 * pad_w / ENLARGE / 1000.0:.2f} m")
+        cv.dimension(
+            (x_d, y_d),
+            (x_d + pad_w, y_d),
+            base=(x_d + pad_w / 2.0, y_d - plate_t - cv.height * 3.0),
+            text=f"{sx:.0f} mm",
+        )
+        cv.dimension(
+            (x_d - cv.height * 2, y_d),
+            (x_d - cv.height * 2, y_d + pad_t),
+            base=(x_d - cv.height * 9.0, y_d),
+            angle=90.0,
+            text=f"{pad_t / ENLARGE:.0f} mm",
+        )
+        cv.dimension(
+            (x_j + pad_w, y_j + slab_t * 0.8),
+            (x_j + pad_w + gap, y_j + slab_t * 0.8),
+            base=(x_j + pad_w + gap / 2.0, y_j + slab_t * 1.6),
+            text=f"GAP {gap_mm:.0f} mm",
+        )
+        cv.dimension(
+            (x_j, y_j + slab_t),
+            (x_j + 2 * pad_w + gap, y_j + slab_t),
+            base=(x_j + pad_w, y_j + slab_t + cv.height * 6.0),
+            text=f"TRANSVERSE {2 * pad_w / ENLARGE / 1000.0:.2f} m",
+        )
 
-    cv.note([
-        "1. All dimensions in millimetres unless stated otherwise.",
-        f"2. Bearings: {int(field(calc, 'bearing_count', 0) or 0)} Nos. total.",
-        f"3. Expansion joints: {int(field(calc, 'expansion_joint_count', 0) or 0)} Nos. total.",
-        f"4. Maximum bearing reaction {load_kn:.0f} kN (service).",
-        "5. Bearing and joint types to be confirmed against the approved design.",
-    ], cv.mm(9.0), cv.height * 24.0)
+    cv.note(
+        [
+            "1. All dimensions in millimetres unless stated otherwise.",
+            f"2. Bearings: {int(field(calc, 'bearing_count', 0) or 0)} Nos. total.",
+            f"3. Expansion joints: {int(field(calc, 'expansion_joint_count', 0) or 0)} Nos. total.",
+            f"4. Maximum bearing reaction {load_kn:.0f} kN (service).",
+            "5. Bearing and joint types to be confirmed against the approved design.",
+        ],
+        cv.mm(9.0),
+        cv.height * 24.0,
+    )
 
     return cv.doc

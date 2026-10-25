@@ -8,6 +8,7 @@ Plugins are discovered from two sources (in priority order):
 
 The registry maps ``plugin_id → PluginManifest``.
 """
+
 from __future__ import annotations
 
 import logging
@@ -77,13 +78,13 @@ class PluginRegistry:
 
     def find_for_type(self, bridge_type: str) -> list[PluginManifest]:
         """Return all plugins that declare support for *bridge_type*."""
-        return [p for p in self._plugins.values()
-                if bridge_type in p.bridge_types]
+        return [p for p in self._plugins.values() if bridge_type in p.bridge_types]
 
     def find_for_span(self, span_m: float) -> list[PluginManifest]:
         """Return all plugins whose span_range includes *span_m*."""
-        return [p for p in self._plugins.values()
-                if p.span_range_m[0] <= span_m <= p.span_range_m[1]]
+        return [
+            p for p in self._plugins.values() if p.span_range_m[0] <= span_m <= p.span_range_m[1]
+        ]
 
 
 # Module-level singleton

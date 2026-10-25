@@ -18,6 +18,7 @@ Manifest JSON schema:
   "requires_core": ">=0.1.0"
 }
 """
+
 from __future__ import annotations
 
 import json
@@ -28,17 +29,17 @@ from typing import Any
 
 @dataclass
 class PluginManifest:
-    plugin_id:             str
-    version:               str
-    name:                  str
-    description:           str
-    bridge_types:          list[str]          = field(default_factory=list)
-    span_range_m:          list[float]        = field(default_factory=lambda: [0, 999])
-    default_values_yaml:   str                = "defaults.yaml"
-    draw_overrides_module: str                = "draw_overrides"
-    author:                str                = ""
-    requires_core:         str                = ">=0.1.0"
-    plugin_dir:            Path | None        = field(default=None, compare=False)
+    plugin_id: str
+    version: str
+    name: str
+    description: str
+    bridge_types: list[str] = field(default_factory=list)
+    span_range_m: list[float] = field(default_factory=lambda: [0, 999])
+    default_values_yaml: str = "defaults.yaml"
+    draw_overrides_module: str = "draw_overrides"
+    author: str = ""
+    requires_core: str = ">=0.1.0"
+    plugin_dir: Path | None = field(default=None, compare=False)
 
     # ---- validation -------------------------------------------------------
     def validate(self) -> list[str]:
@@ -84,17 +85,17 @@ def load_manifest(path: str | Path) -> PluginManifest:
         data: dict[str, Any] = json.load(f)
 
     manifest = PluginManifest(
-        plugin_id             = data.get("plugin_id", ""),
-        version               = data.get("version", "0.0.0"),
-        name                  = data.get("name", ""),
-        description           = data.get("description", ""),
-        bridge_types          = data.get("bridge_types", []),
-        span_range_m          = data.get("span_range_m", [0, 999]),
-        default_values_yaml   = data.get("default_values_yaml", "defaults.yaml"),
-        draw_overrides_module = data.get("draw_overrides_module", "draw_overrides"),
-        author                = data.get("author", ""),
-        requires_core         = data.get("requires_core", ">=0.1.0"),
-        plugin_dir            = p.parent,
+        plugin_id=data.get("plugin_id", ""),
+        version=data.get("version", "0.0.0"),
+        name=data.get("name", ""),
+        description=data.get("description", ""),
+        bridge_types=data.get("bridge_types", []),
+        span_range_m=data.get("span_range_m", [0, 999]),
+        default_values_yaml=data.get("default_values_yaml", "defaults.yaml"),
+        draw_overrides_module=data.get("draw_overrides_module", "draw_overrides"),
+        author=data.get("author", ""),
+        requires_core=data.get("requires_core", ">=0.1.0"),
+        plugin_dir=p.parent,
     )
 
     errors = manifest.validate()

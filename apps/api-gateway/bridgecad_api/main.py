@@ -10,6 +10,7 @@ Routers:
   /plugins  — list / info
   /health   — liveness probe
 """
+
 from __future__ import annotations
 
 import sys
@@ -26,20 +27,27 @@ from pydantic import BaseModel
 
 # ── package path bootstrap ────────────────────────────────────────────────
 _SUITE = Path(__file__).parents[3]
-for _pkg in ["bridgecad-core", "bridgecad-io", "bridgecad-draw",
-             "bridgecad-bill", "bridgecad-qa", "bridgecad-export",
-             "bridgecad-plugins"]:
+for _pkg in [
+    "bridgecad-core",
+    "bridgecad-io",
+    "bridgecad-draw",
+    "bridgecad-bill",
+    "bridgecad-qa",
+    "bridgecad-export",
+    "bridgecad-plugins",
+]:
     _p = _SUITE / "packages" / _pkg
     if _p.exists() and str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
-__version__  = "0.1.0-rc1"
+__version__ = "0.1.0-rc1"
 __codename__ = "BRIDGECAD-OSS-1.0"
 
 
 # ---------------------------------------------------------------------------
 # Shared helpers
 # ---------------------------------------------------------------------------
+
 
 def _load_project_from_upload(data: bytes) -> Any:
     """Write upload bytes to a temp file, parse, return BridgeProject."""
@@ -48,6 +56,7 @@ def _load_project_from_upload(data: bytes) -> Any:
         tmp = Path(tf.name)
     try:
         from bridgecad_io.excel_reader import read_excel
+
         return read_excel(tmp)
     finally:
         tmp.unlink(missing_ok=True)
@@ -57,12 +66,12 @@ def _project_summary(project: Any) -> dict:
     pm = project.project_master
     gi = project.geometry_input
     return {
-        "project_title":  str(getattr(pm, "project_title", "") or ""),
-        "bridge_name":    str(getattr(pm, "bridge_name",   "") or ""),
-        "chainage_km":    float(getattr(pm, "chainage_km", 0) or 0),
+        "project_title": str(getattr(pm, "project_title", "") or ""),
+        "bridge_name": str(getattr(pm, "bridge_name", "") or ""),
+        "chainage_km": float(getattr(pm, "chainage_km", 0) or 0),
         "total_length_m": float(gi.total_length_m),
-        "span_count":     int(gi.span_count),
-        "overall_width_m":float(gi.overall_width_m),
+        "span_count": int(gi.span_count),
+        "overall_width_m": float(gi.overall_width_m),
     }
 
 
@@ -72,6 +81,7 @@ def _project_summary(project: Any) -> dict:
 
 # /bridges
 bridges_router = APIRouter(prefix="/bridges", tags=["Bridges"])
+
 
 @bridges_router.post("/parse", summary="Parse Excel → BridgeProject summary")
 async def parse_bridge(file: UploadFile = File(...)) -> dict:
@@ -92,25 +102,26 @@ async def validate_bridge(file: UploadFile = File(...)) -> dict:
         project = _load_project_from_upload(data)
         from bridgecad_core.validation import run_all
         from bridgecad_qa.compliance import score as _score
+
         report = run_all(project)
-        comp   = _score(report)
+        comp = _score(report)
         findings = [
             {
-                "check_id":    f.check_id,
-                "severity":    f.severity.name if hasattr(f.severity,"name") else str(f.severity),
-                "passed":      f.passed,
+                "check_id": f.check_id,
+                "severity": f.severity.name if hasattr(f.severity, "name") else str(f.severity),
+                "passed": f.passed,
                 "description": f.description,
-                "message":     f.message,
+                "message": f.message,
             }
             for f in report.findings
         ]
         return {
-            "status":         "ok",
-            "score":          comp.overall,
-            "grade":          comp.grade,
+            "status": "ok",
+            "score": comp.overall,
+            "grade": comp.grade,
             "critical_fails": comp.critical_fails,
-            "warning_fails":  comp.warning_fails,
-            "findings":       findings,
+            "warning_fails": comp.warning_fails,
+            "findings": findings,
         }
     except Exception as exc:
         raise HTTPException(422, detail=str(exc)) from exc
@@ -149,7 +160,7 @@ def _validate_prefix(prefix: str, *, max_len: int = 32) -> str:
     if any(ch in _UNSAFE_PREFIX_CHARS for ch in prefix):
         raise HTTPException(
             status_code=400,
-            detail="prefix must not contain path separators, control characters, or <>:\"|?*",
+            detail='prefix must not contain path separators, control characters, or <>:"|?*',
         )
     prefix = prefix.strip().replace(" ", "_")
     if len(prefix) > max_len:
@@ -172,6 +183,7 @@ def _staged_zip_response(
     try:
         staged.close()  # allow Windows to reopen via shutil.copy
         import shutil as _shutil
+
         _shutil.copyfile(source_zip, Path(staged.name))
         staged_path = Path(staged.name)
 
@@ -194,15 +206,16 @@ def _staged_zip_response(
 # /draw
 draw_router = APIRouter(prefix="/draw", tags=["Drawing"])
 
+
 @draw_router.post("/gad", summary="Generate 7-sheet GAD DXF package → ZIP download")
 async def draw_gad(
     background_tasks: BackgroundTasks,
-    file:   UploadFile = File(...),
-    scale:  int        = 100,
-    prefix: str        = "GAD",
+    file: UploadFile = File(...),
+    scale: int = 100,
+    prefix: str = "GAD",
 ) -> FileResponse:
     """Upload Excel, generate 7-sheet DXF package, return as ZIP."""
-    scale  = _validate_scale(scale)
+    scale = _validate_scale(scale)
     prefix = _validate_prefix(prefix)
     data = await file.read()
     try:
@@ -210,8 +223,8 @@ async def draw_gad(
         with tempfile.TemporaryDirectory() as td:
             out_dir = Path(td)
             from bridgecad_draw.booklet import generate_package
-            sheets = generate_package(project, out_dir,
-                                      prefix=prefix, scale_denom=scale)
+
+            sheets = generate_package(project, out_dir, prefix=prefix, scale_denom=scale)
             # Zip the sheets inside the TemporaryDirectory (auto-cleaned)
             zip_path = out_dir / f"{prefix}_drawings.zip"
             with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
@@ -232,9 +245,10 @@ async def draw_gad(
 # /bills
 bills_router = APIRouter(prefix="/bills", tags=["Bill of Quantities"])
 
+
 @bills_router.post("/generate", summary="Generate BOQ → JSON")
 async def generate_bill(
-    file:  UploadFile    = File(...),
+    file: UploadFile = File(...),
     state: str | None = None,
 ) -> dict:
     """Generate priced BOQ from uploaded Excel workbook."""
@@ -242,32 +256,37 @@ async def generate_bill(
     try:
         project = _load_project_from_upload(data)
         from bridgecad_bill.processor import extract_and_price
+
         boq = extract_and_price(project, state=state)
         sections = []
         for sec in boq.sections:
             items = []
             for item in sec.items:
-                items.append({
-                    "code":     item.item_code,
-                    "desc":     item.description,
-                    "unit":     item.unit,
-                    "qty":      float(item.quantity),
-                    "rate":     float(item.rate) if item.rate else None,
-                    "amount":   float(item.amount) if item.amount else 0,
-                })
-            sections.append({
-                "code":  sec.section_code,
-                "title": sec.title,
-                "total": float(sec.total),
-                "items": items,
-            })
+                items.append(
+                    {
+                        "code": item.item_code,
+                        "desc": item.description,
+                        "unit": item.unit,
+                        "qty": float(item.quantity),
+                        "rate": float(item.rate) if item.rate else None,
+                        "amount": float(item.amount) if item.amount else 0,
+                    }
+                )
+            sections.append(
+                {
+                    "code": sec.section_code,
+                    "title": sec.title,
+                    "total": float(sec.total),
+                    "items": items,
+                }
+            )
         return {
-            "project_name":       boq.project_name,
-            "subtotal":           float(boq.subtotal),
-            "contingency_pct":    float(boq.contingency_pct),
+            "project_name": boq.project_name,
+            "subtotal": float(boq.subtotal),
+            "contingency_pct": float(boq.contingency_pct),
             "contingency_amount": float(boq.contingency_amount),
-            "grand_total":        float(boq.grand_total),
-            "sections":           sections,
+            "grand_total": float(boq.grand_total),
+            "sections": sections,
         }
     except Exception as exc:
         raise HTTPException(422, detail=str(exc)) from exc
@@ -275,6 +294,7 @@ async def generate_bill(
 
 # /qa
 qa_router = APIRouter(prefix="/qa", tags=["QA"])
+
 
 @qa_router.post("/report", summary="Generate HTML QA report → download")
 async def qa_report(file: UploadFile = File(...)) -> HTMLResponse:
@@ -284,9 +304,9 @@ async def qa_report(file: UploadFile = File(...)) -> HTMLResponse:
         project = _load_project_from_upload(data)
         from bridgecad_core.validation import run_all
         from bridgecad_qa.reports import generate_html_report
-        report   = run_all(project)
-        with tempfile.NamedTemporaryFile(suffix=".html", delete=False,
-                                          mode="w") as tf:
+
+        report = run_all(project)
+        with tempfile.NamedTemporaryFile(suffix=".html", delete=False, mode="w") as tf:
             tmp = Path(tf.name)
         generate_html_report(report, tmp, project)
         html = tmp.read_text(encoding="utf-8")
@@ -299,12 +319,13 @@ async def qa_report(file: UploadFile = File(...)) -> HTMLResponse:
 # /exports
 exports_router = APIRouter(prefix="/exports", tags=["Export"])
 
+
 @exports_router.post("/bundle", summary="Full export → ZIP bundle download")
 async def export_bundle(
     background_tasks: BackgroundTasks,
-    file:   UploadFile    = File(...),
-    state:  str | None = None,
-    scale:  int           = 100,
+    file: UploadFile = File(...),
+    state: str | None = None,
+    scale: int = 100,
 ) -> FileResponse:
     """Upload Excel → full export (DXF + BOQ + QA) → ZIP bundle."""
     scale = _validate_scale(scale)
@@ -315,8 +336,8 @@ async def export_bundle(
         project = _load_project_from_upload(data)
         with tempfile.TemporaryDirectory() as td:
             from bridgecad_export.orchestrator import export_all
-            bundle = export_all(project, Path(td),
-                                prefix="export", state=state, scale_denom=scale)
+
+            bundle = export_all(project, Path(td), prefix="export", state=state, scale_denom=scale)
             return _staged_zip_response(
                 source_zip=Path(bundle),
                 download_name="bridgecad_bundle.zip",
@@ -331,17 +352,19 @@ async def export_bundle(
 # /plugins
 plugins_router = APIRouter(prefix="/plugins", tags=["Plugins"])
 
+
 @plugins_router.get("/", summary="List available plugins")
 async def list_plugins() -> dict:
     from bridgecad_plugins.registry import get_registry
+
     reg = get_registry()
     return {
         "count": len(reg),
         "plugins": [
             {
-                "id":          p.plugin_id,
-                "name":        p.name,
-                "version":     p.version,
+                "id": p.plugin_id,
+                "name": p.name,
+                "version": p.version,
                 "bridge_types": p.bridge_types,
                 "span_range_m": p.span_range_m,
                 "description": p.description,
@@ -350,19 +373,21 @@ async def list_plugins() -> dict:
         ],
     }
 
+
 @plugins_router.get("/{plugin_id}", summary="Plugin details")
 async def plugin_detail(plugin_id: str) -> dict:
     from bridgecad_plugins.registry import get_registry
     from bridgecad_plugins.runner import PluginRunner
+
     reg = get_registry()
-    m   = reg.get(plugin_id)
+    m = reg.get(plugin_id)
     if not m:
         raise HTTPException(404, f"Plugin not found: {plugin_id}")
     runner = PluginRunner(m)
     return {
-        "id":          m.plugin_id,
-        "name":        m.name,
-        "version":     m.version,
+        "id": m.plugin_id,
+        "name": m.name,
+        "version": m.version,
         "description": runner.describe(),
         "typical_values": runner.get_typical_values(),
     }
@@ -372,9 +397,10 @@ async def plugin_detail(plugin_id: str) -> dict:
 # App
 # ---------------------------------------------------------------------------
 
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    yield   # M8: init DB / cache / storage here
+    yield  # M8: init DB / cache / storage here
 
 
 app = FastAPI(
@@ -392,8 +418,10 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], allow_credentials=True,
-    allow_methods=["*"], allow_headers=["*"],
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Wire routers
@@ -407,21 +435,29 @@ app.include_router(plugins_router)
 
 # Health / meta
 class HealthResponse(BaseModel):
-    status:  str = "ok"
+    status: str = "ok"
     version: str
     packages_loaded: list[str] = []
+
 
 @app.get("/health", response_model=HealthResponse, tags=["meta"])
 async def health() -> HealthResponse:
     loaded = []
-    for pkg in ["bridgecad_core", "bridgecad_draw", "bridgecad_bill",
-                "bridgecad_qa",   "bridgecad_export", "bridgecad_plugins"]:
+    for pkg in [
+        "bridgecad_core",
+        "bridgecad_draw",
+        "bridgecad_bill",
+        "bridgecad_qa",
+        "bridgecad_export",
+        "bridgecad_plugins",
+    ]:
         try:
             __import__(pkg)
             loaded.append(pkg)
         except Exception:
             pass
     return HealthResponse(version=__version__, packages_loaded=loaded)
+
 
 @app.get("/version", tags=["meta"])
 async def version_endpoint() -> dict:

@@ -7,6 +7,7 @@ comma-separated "key:role" pairs, e.g.:
 
 Roles: admin > engineer > viewer
 """
+
 from __future__ import annotations
 
 import os
@@ -16,13 +17,16 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class ApiKey:
-    key:  str
-    role: str   # "admin" | "engineer" | "viewer"
+    key: str
+    role: str  # "admin" | "engineer" | "viewer"
 
     @property
-    def is_admin(self)    -> bool: return self.role == "admin"
+    def is_admin(self) -> bool:
+        return self.role == "admin"
+
     @property
-    def is_engineer(self) -> bool: return self.role in ("admin", "engineer")
+    def is_engineer(self) -> bool:
+        return self.role in ("admin", "engineer")
 
 
 _ROLE_ORDER = {"admin": 3, "engineer": 2, "viewer": 1}
@@ -64,9 +68,7 @@ def require_role(key: str, min_role: str = "viewer") -> ApiKey:
     if api_key is None:
         raise PermissionError("Invalid API key")
     if _ROLE_ORDER.get(api_key.role, 0) < _ROLE_ORDER.get(min_role, 0):
-        raise PermissionError(
-            f"Role '{api_key.role}' insufficient; need '{min_role}'"
-        )
+        raise PermissionError(f"Role '{api_key.role}' insufficient; need '{min_role}'")
     return api_key
 
 

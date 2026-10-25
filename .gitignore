@@ -120,6 +120,7 @@ site-wing/
 wing-report.json
 
 # MkDocs site output + root docs staged into docs/ by scripts/mkdocs_hooks.py
+# (STAGE in that file → these exact names; keep the two lists in step)
 site/
 site-api/
 docs/guide.md
@@ -129,3 +130,11 @@ docs/changelog.md
 docs/security.md
 docs/code-of-conduct.md
 docs/docs-index.md
+
+# Root-level throwaway probe scripts and their captures
+_probe_*.py
+_probe_out.txt
+
+# Security scanner re-run output. The tracked baseline is trufflehog_git.json;
+# the *_fresh.json files are working copies that churn on every scan.
+trufflehog_fresh.json

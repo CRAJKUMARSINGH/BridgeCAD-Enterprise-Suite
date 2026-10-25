@@ -13,7 +13,6 @@ Creates:
 from __future__ import annotations
 
 import argparse
-import json
 from pathlib import Path
 
 TEMPLATE_MANIFEST = """{{
@@ -65,8 +64,9 @@ typical:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Scaffold a new BridgeCAD plugin.")
     parser.add_argument("name", help="Plugin short name, e.g. flyover_bridge")
-    parser.add_argument("--output", "-o", type=Path, default=None,
-                        help="Output directory (default: plugins/<name>)")
+    parser.add_argument(
+        "--output", "-o", type=Path, default=None, help="Output directory (default: plugins/<name>)"
+    )
     args = parser.parse_args()
 
     outdir = args.output or (Path.cwd() / "plugins" / args.name)

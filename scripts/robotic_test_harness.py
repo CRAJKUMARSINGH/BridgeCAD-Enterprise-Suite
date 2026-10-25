@@ -11,27 +11,26 @@ Usage:
 """
 
 import argparse
+import contextlib
 import json
 import logging
 import sys
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 # Windows consoles are often cp1252; keep harness logs ASCII-safe.
 if hasattr(sys.stdout, "reconfigure"):
-    try:
+    with contextlib.suppress(Exception):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    except Exception:
-        pass
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from bridge_gad.bridge_generator import BridgeGADGenerator
-from bridge_gad.enhanced_io_utils import SmartInputProcessor
 from bridge_gad.calc_engine import CalcEngine
+from bridge_gad.enhanced_io_utils import SmartInputProcessor
 
 logging.basicConfig(
     level=logging.INFO,
@@ -44,10 +43,10 @@ logger = logging.getLogger(__name__)
 BUG_LOG = Path("BUG_FIX_LOG.json")
 
 
-def discover_inputs() -> List[Path]:
+def discover_inputs() -> list[Path]:
     """Auto-discover all test input files (TEST*, INPUT*, inputs/*.xlsx)."""
     candidates = []
-    root = Path(".")
+    root = Path()
     candidates.extend(root.glob("TEST*.xlsx"))
     candidates.extend(root.glob("INPUT*.xlsx"))
     candidates.extend(root.glob("inputs/*.xlsx"))
@@ -55,13 +54,13 @@ def discover_inputs() -> List[Path]:
     return sorted(set(candidates))
 
 
-def run_pipeline(input_file: Path, output_dir: Path) -> Dict[str, Any]:
+def run_pipeline(input_file: Path, output_dir: Path) -> dict[str, Any]:
     """Run full pipeline: ingestion → calculation → rendering → validation.
 
     Returns:
         Dict with keys: success, stage, error, output_file, metrics.
     """
-    result: Dict[str, Any] = {
+    result: dict[str, Any] = {
         "input": str(input_file),
         "success": False,
         "stage": "init",
@@ -116,20 +115,20 @@ def run_pipeline(input_file: Path, output_dir: Path) -> Dict[str, Any]:
     return result
 
 
-def log_bug(result: Dict[str, Any]) -> None:
+def log_bug(result: dict[str, Any]) -> None:
     """Append failure to BUG_FIX_LOG.json."""
     bugs = []
     if BUG_LOG.exists():
-        try:
+        with contextlib.suppress(Exception):
             bugs = json.loads(BUG_LOG.read_text())
-        except Exception:
-            pass
-    bugs.append({
-        "timestamp": datetime.now().isoformat(),
-        "input": result["input"],
-        "stage": result["stage"],
-        "error": result["error"],
-    })
+    bugs.append(
+        {
+            "timestamp": datetime.now().isoformat(),
+            "input": result["input"],
+            "stage": result["stage"],
+            "error": result["error"],
+        }
+    )
     BUG_LOG.write_text(json.dumps(bugs, indent=2))
     logger.info("  📝 Bug logged to %s", BUG_LOG)
 
@@ -155,7 +154,7 @@ def main():
     output_dir = Path("outputs")
     output_dir.mkdir(exist_ok=True)
 
-    results: List[Dict[str, Any]] = []
+    results: list[dict[str, Any]] = []
     for idx, inp in enumerate(inputs, 1):
         logger.info("[%d/%d] Testing: %s", idx, len(inputs), inp.name)
         result = run_pipeline(inp, output_dir)

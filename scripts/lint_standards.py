@@ -19,10 +19,10 @@ except ImportError:  # pragma: no cover
     sys.exit(0)
 
 REQUIRED = {
-    "irc_sp55_drawing.yaml":    ["scales", "text_heights_mm", "lineweights_mm"],
-    "irc_05_hydraulic.yaml":    ["scour", "waterway"],
-    "irc_21_structural.yaml":   ["span_depth_ratio", "load_dispersal"],
-    "morth_rates_2024.yaml":    ["items"],
+    "irc_sp55_drawing.yaml": ["scales", "text_heights_mm", "lineweights_mm"],
+    "irc_05_hydraulic.yaml": ["scour", "waterway"],
+    "irc_21_structural.yaml": ["span_depth_ratio", "load_dispersal"],
+    "morth_rates_2024.yaml": ["items"],
     "state_pwd_multipliers.yaml": [],
 }
 

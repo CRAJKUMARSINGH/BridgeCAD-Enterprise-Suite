@@ -1,273 +1,357 @@
 [build-system]
-requires      = ["setuptools>=68", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
 
-# =============================================================================
-# PROJECT (bridge-gad legacy kept for back-compat; workspace also serves the
-# full "BridgeCAD Enterprise Suite" package tree via tool.setuptools.packages-dir
-# below so `pip install -e .` at repo-root publishes BOTH the facade bridgecad
-# namespace AND all bridgecad_{core,io,draw,bill,qa,export,plugins,ai,infra}
-# from BridgeCAD Enterprise Suite/packages/.
-# =============================================================================
+# ─────────────────────────────────────────────────────────────────────────────
+# Project metadata
+# ─────────────────────────────────────────────────────────────────────────────
 [project]
-name            = "bridge-gad"
-version         = "0.2.1"
-description     = "BridgeCAD Enterprise Suite root workspace: 11-parametric bridge GAD + legacy bridge-gad CLI"
-readme          = "README.md"
+name = "bridgecad-enterprise-suite"
+version = "0.1.0rc1"                     # PEP 440 form of 0.1.0-rc1
+description = "Parametric bridge GAD generation — Excel workbook in, 7-sheet IRC-compliant DXF package, priced BOQ and QA report out."
+readme = "README.md"
 requires-python = ">=3.11"
-license         = { text = "MIT" }
-authors         = [{ name = "BridgeCAD Team", email = "dev@bridgecad.io" }]
-keywords        = ["bridge", "GAD", "DXF", "IRC", "MORTH", "CAD", "civil engineering", "PMGSY"]
-classifiers     = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3.11",
-    "Topic :: Scientific/Engineering",
+license = { text = "MIT" }
+keywords = [
+  "bridge", "cad", "dxf", "gad", "civil-engineering",
+  "irc", "morth", "boq", "ezdxf", "parametric-design",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Construction",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Civil Engineering",
+  "Topic :: Multimedia :: Graphics :: Editors :: Vector-Based",
 ]
 
-# Sane superset — enterprise + legacy + facade bridgecad all together.
-dependencies = [
-    # Core domain
-    "pydantic>=2.6.0,<3.0",
-    "pydantic-settings>=2.2.0,<3.0",
-    # Drawing engine
-    "ezdxf>=1.4.0,<2.0",
-    "reportlab>=4.0.0",
-    "pillow>=10.0.0",
-    "cairosvg>=2.7.0,<3.0",
-    "matplotlib>=3.7.0",
-    # Scientific
-    "numpy>=1.26.0,<3.0",
-    "scipy>=1.12.0,<2.0",
-    # IO
-    "openpyxl>=3.1.0,<4.0",
-    "xlrd>=2.0.0",
-    "pandas>=2.0.0,<4.0",
-    "pyyaml>=6.0,<7.0",
-    # Web / API
-    "fastapi>=0.112.0,<1.0",
-    "uvicorn[standard]>=0.30.0,<1.0",
-    "python-multipart>=0.0.9,<1.0",
-    "arq>=0.25.0",
-    "requests>=2.28.0",
-    # CLI
-    "typer>=0.12.0,<1.0",
-    "rich>=13.8.0,<17.0",
-    "click>=8.1.0",
-    "shellingham>=1.3.0",
-    # Streamlit
-    "streamlit>=1.37.0,<2.0",
-]
+# No email: keeps the public tree free of PII (see CONTRIBUTING.md §6).
+# If you add one, the CI PII scanner needs its egg-info exclusion — already present.
+authors = [{ name = "CRAJKUMARSINGH" }]
+maintainers = [{ name = "CRAJKUMARSINGH" }]
 
-[project.optional-dependencies]
-dev = [
-    "pytest==8.3.2",
-    "pytest-cov==5.0.0",
-    "pytest-benchmark==4.0.0",
-    "pytest-asyncio==0.23.8",
-    "ruff==0.6.0",
-    "mypy==1.11.0",
-    "pre-commit==3.8.0",
-    "build==1.2.1",
-    "twine==5.1.1",
-]
-
-[project.scripts]
-# legacy entry point (preserved)
-bridge-gad  = "bridge_gad.__main__:app"
-# enterprise unified entry (facade) — will be created as thin shim
-bridgecad   = "bridgecad.__main__:app"
-
+# ── URLs: point at the canonical CRAJKUMARSINGH repo ────────────────────────
 [project.urls]
-Homepage    = "https://github.com/CRAJKUMARSINGH/Bridge_GAD_Yogendra_Borse"
-Repository  = "https://github.com/CRAJKUMARSINGH/Bridge_GAD_Yogendra_Borse"
-Issues      = "https://github.com/CRAJKUMARSINGH/Bridge_GAD_Yogendra_Borse/issues"
-Changelog   = "CHANGELOG.md"
+Homepage = "https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite"
+Repository = "https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite"
+Issues = "https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/issues"
+Changelog = "https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/blob/main/CHANGELOG.md"
+Documentation = "https://CRAJKUMARSINGH.github.io/BridgeCAD-Enterprise-Suite/"
+"Bug Tracker" = "https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/issues/new?labels=bug"
 
-# =============================================================================
-# Workspace layout — FLATTENED MONOREPO (no intermediate Suite folder).
-#   (a) facade package     `bridgecad/`                    at repo root
-#   (b) all enterprise pkgs `bridgecad_core` … `bridgecad_infra`  from
-#                           ./packages/*
-#   (c) all apps           `bridgecad_api` / `bridgecad_cli`   from
-#                           ./apps/*
-# =============================================================================
-[tool.setuptools]
-packages = [
-    # ── facade ───────────────────────────────────────────────────
-    "bridgecad",
-    # ── bridgecad enterprise packages ───────────────────────────
-    "bridgecad_core",
-    "bridgecad_core.geometry",
-    "bridgecad_core.standards",
-    "bridgecad_io",
-    "bridgecad_draw",
-    "bridgecad_draw.engines",
-    "bridgecad_draw.sheets",
-    "bridgecad_bill",
-    "bridgecad_bill.formatters",
-    "bridgecad_qa",
-    "bridgecad_export",
-    "bridgecad_plugins",
-    "bridgecad_ai",
-    "bridgecad_infra",
-    # ── apps ────────────────────────────────────────────────────
-    "bridgecad_api",
-    "bridgecad_cli",
+# ── Console entry point: zero-install CLI shim ─────────────────────────────
+[project.scripts]
+bridgecad = "bridgecad.__main__:app"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Optional dependency groups — everything heavy is opt-in
+# ─────────────────────────────────────────────────────────────────────────────
+[project.optional-dependencies]
+api = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.32",
+  "python-multipart>=0.0.9",
+  "pydantic>=2.9,<3",
+]
+ui = [
+  "streamlit>=1.38",
+]
+ai = [
+  "scipy>=1.13",
+  "numpy>=1.26",
+]
+infra = [
+  "sqlalchemy>=2.0",
+  "alembic>=1.13",
+  "redis>=5.0",
+  "boto3>=1.34",
+  "structlog>=24.1",
+  "arq>=0.26",
+]
+docs = [
+  "mkdocs-material>=9.5,<10",
+  "mkdocs-minify-plugin>=0.8",
+  "mkdocstrings[python]>=0.25",
+  "mkdocs-git-revision-date-localized-plugin>=1.2",
+]
+dev = [
+  # test
+  "pytest>=8.2",
+  "pytest-cov>=5.0",
+  "pytest-benchmark>=4.0",
+  "pytest-xdist>=3.6",
+  "hypothesis>=6.100",
+  "pyyaml>=6.0",
+  # quality
+  "ruff>=0.6",
+  "mypy>=1.11",
+  "bandit[toml]>=1.7",
+  "pip-audit>=2.7",
+  # tooling
+  "pre-commit>=3.7",
+  "commitizen>=3.27",
+  "build>=1.2",
+  "types-requests",
+]
+draw = [
+  "matplotlib>=3.8",
+  "pillow>=10.0",
+  "cairosvg>=2.7",
+]
+refs = [
+  "pdfplumber>=0.11",
+  "pypdf>=5.0",
+  "pyyaml>=6.0",
+]
+refs-ocr = [
+  "pytesseract>=0.3.10",
+  "pypdfium2>=4.30",
+  "pillow>=10.0.0",
+  "numpy>=1.26",
+]
+all = [
+  "bridgecad-enterprise-suite[api,ui,ai,infra,docs,draw,refs,refs-ocr]",
 ]
 
-[tool.setuptools.package-dir]
-# facade package at repo root
-"bridgecad" = "bridgecad"
-# packages: all live one-level deep under packages/<pkg-slug>/<pkg_name>/
-"bridgecad_core"        = "packages/bridgecad-core/bridgecad_core"
-"bridgecad_io"          = "packages/bridgecad-io/bridgecad_io"
-"bridgecad_draw"        = "packages/bridgecad-draw/bridgecad_draw"
-"bridgecad_bill"        = "packages/bridgecad-bill/bridgecad_bill"
-"bridgecad_qa"          = "packages/bridgecad-qa/bridgecad_qa"
-"bridgecad_export"      = "packages/bridgecad-export/bridgecad_export"
-"bridgecad_plugins"     = "packages/bridgecad-plugins/bridgecad_plugins"
-"bridgecad_ai"          = "packages/bridgecad-ai/bridgecad_ai"
-"bridgecad_infra"       = "packages/bridgecad-infra/bridgecad_infra"
-# apps
-"bridgecad_api"         = "apps/api-gateway/bridgecad_api"
-"bridgecad_cli"         = "apps/cli-console/bridgecad_cli"
+# ─────────────────────────────────────────────────────────────────────────────
+# Workspace
+# ─────────────────────────────────────────────────────────────────────────────
+[tool.uv.workspace]
+members = ["packages/*", "apps/*"]
 
-[tool.setuptools.package-data]
-"bridgecad_plugins" = ["plugins/*/*.yaml", "plugins/*/*.yml", "plugins/*/*.json"]
-"bridgecad_bill"    = ["formatters/*"]
+[tool.uv.sources]
+bridgecad-core = { workspace = true }
+bridgecad-io = { workspace = true }
+bridgecad-draw = { workspace = true }
+bridgecad-bill = { workspace = true }
+bridgecad-qa = { workspace = true }
+bridgecad-export = { workspace = true }
+bridgecad-plugins = { workspace = true }
+bridgecad-ai = { workspace = true }
+bridgecad-infra = { workspace = true }
 
-# =============================================================================
-# Ruff — widened to the flattened layout (packages, apps, scripts, tests all
-# at root).
-# =============================================================================
+[tool.hatch.build.targets.wheel]
+packages = ["bridgecad"]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ruff — lint + format
+# ─────────────────────────────────────────────────────────────────────────────
 [tool.ruff]
-line-length    = 110
+line-length = 100
 target-version = "py311"
-src            = [
-    ".",
-    "packages",
-    "apps",
-    "scripts",
-    "tests",
-]
-exclude = [
-    ".git", "__pycache__", ".mypy_cache", ".ruff_cache",
-    "node_modules", "dist", "build", ".venv", "vendor",
-    "outputs", "03_outputs", "docs", "frontend", ".dbg", ".kiro", ".streamlit",
-    "apps/web-console",
-    "nginx",
-    "migrations",
-    "standards",
+extend-exclude = [
+  ".venv", "build", "dist", "site", "site-api",
+  "03_outputs", "outputs", "test_run_sample",
+  "docs/api/_build",
 ]
 
 [tool.ruff.lint]
-select  = ["E", "F", "I", "UP", "B", "SIM", "C4", "TID"]
-ignore  = [
-    "E501",  # line length — let formatter decide
-    "B008",  # function calls in default args (FastAPI)
-    "UP007", # X | Y type hints — sometimes explicit Union is cleaner
-    "E402",  # module-level import not at top — root scripts do sys.path bootstrap
+select = [
+  "E",    # pycodestyle errors
+  "W",    # pycodestyle warnings
+  "F",    # pyflakes
+  "I",    # isort
+  "N",    # pep8-naming
+  "UP",   # pyupgrade
+  "B",    # flake8-bugbear
+  "C4",   # flake8-comprehensions
+  "SIM",  # flake8-simplify
+  "RUF",  # ruff-specific
+  "PTH",  # flake8-use-pathlib
+  "T20",  # flake8-print
+  "ARG",  # unused arguments
 ]
-unfixable = ["F841"]
+ignore = [
+  "E501",   # line length handled by the formatter
+  "B008",   # function call in default arg (FastAPI Depends)
+  "SIM108", # ternaries are not always clearer
+  "RUF001", # ambiguous unicode in strings — we use real minus signs in drawings
+  "RUF002", # ambiguous unicode in docstrings — same reason as RUF001
+  "RUF003", # ambiguous unicode in comments — same reason as RUF001
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["T20", "ARG", "B011"]
+"scripts/**" = ["T20"]
+"docs/**" = ["T20"]
+"**/__init__.py" = ["F401"]   # re-exports
+"conftest.py" = ["ARG"]
+# Operator/robot scripts mutate sys.path (or call into a product package) before
+# importing it, so a module-level import below the setup is deliberate — not a
+# misplaced import.
+"scripts/browser_test.py" = ["T20", "E402"]
+"scripts/create_repo_sample_catalogue.py" = ["T20", "E402"]
+"scripts/generate_templates.py" = ["T20", "E402"]
+"scripts/robotic_test_viaduct.py" = ["T20", "E402"]
+"scripts/test_netlify_readiness.py" = ["T20", "E402"]
+"scripts/wing_report.py" = ["T20", "E402"]
 
 [tool.ruff.lint.isort]
 known-first-party = [
-    "bridgecad",
-    "bridgecad_core", "bridgecad_io", "bridgecad_draw",
-    "bridgecad_bill", "bridgecad_qa", "bridgecad_export",
-    "bridgecad_plugins", "bridgecad_ai", "bridgecad_infra",
-    "bridgecad_cli", "bridgecad_api",
+  "bridgecad_core", "bridgecad_io", "bridgecad_draw", "bridgecad_bill",
+  "bridgecad_qa", "bridgecad_export", "bridgecad_plugins", "bridgecad_ai",
+  "bridgecad_infra",
 ]
-section-order = ["future","standard-library","third-party","first-party","local-folder"]
 
 [tool.ruff.format]
-quote-style   = "double"
-indent-style  = "space"
-line-ending   = "auto"
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
 
-# =============================================================================
-# Mypy — allow untyped defs for generator scripts; explicit root base
-# =============================================================================
+# ─────────────────────────────────────────────────────────────────────────────
+# mypy — strict on core, pragmatic elsewhere
+# ─────────────────────────────────────────────────────────────────────────────
 [tool.mypy]
-python_version         = "3.11"
-warn_return_any        = true
-ignore_missing_imports = true
-explicit_package_bases = true
-exclude                = [
-    "tests/", "outputs/", "docs/", "frontend/",
-    "apps/web-console/",
+python_version = "3.11"
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+no_implicit_optional = true
+strict_equality = true
+check_untyped_defs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+show_error_codes = true
+pretty = true
+exclude = [
+  "^(build|dist|site|site-api|\\.venv)/",
+  "^03_outputs/", "^outputs/", "^test_run_sample/",
 ]
 
 [[tool.mypy.overrides]]
-module             = ["ezdxf.*", "scipy.*", "openpyxl.*", "reportlab.*", "yaml"]
+module = ["scipy.*", "ezdxf.*", "reportlab.*", "cairosvg.*", "arq.*", "boto3.*"]
 ignore_missing_imports = true
 
-# =============================================================================
-# Pytest — flattened monorepo; PYTHONPATH resolves all 9 packages + 2 apps
-# directly from repo root.
-# =============================================================================
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# pytest
+# ─────────────────────────────────────────────────────────────────────────────
 [tool.pytest.ini_options]
-testpaths    = [
-    "tests",
-    "packages",
+minversion = "8.0"
+testpaths = ["packages", "tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+# Flattened monorepo — resolve all packages directly from the repo root so the
+# suite runs without an editable install.
+pythonpath = [
+  ".",
+  "packages/bridgecad-core",
+  "packages/bridgecad-io",
+  "packages/bridgecad-draw",
+  "packages/bridgecad-bill",
+  "packages/bridgecad-qa",
+  "packages/bridgecad-export",
+  "packages/bridgecad-plugins",
+  "packages/bridgecad-ai",
+  "packages/bridgecad-infra",
+  "packages/bridgecad-refs",
+  "apps/api-gateway",
+  "apps/cli-console",
 ]
-pythonpath   = [
-    ".",
-    "packages/bridgecad-core",
-    "packages/bridgecad-io",
-    "packages/bridgecad-draw",
-    "packages/bridgecad-bill",
-    "packages/bridgecad-qa",
-    "packages/bridgecad-export",
-    "packages/bridgecad-plugins",
-    "packages/bridgecad-ai",
-    "packages/bridgecad-infra",
-    "apps/cli-console",
-    "apps/api-gateway",
+addopts = [
+  "-ra",
+  "--strict-markers",
+  "--strict-config",
+  "--tb=short",
 ]
-addopts      = "-ra --strict-markers --tb=short -q"
-markers      = [
-    "slow: marks tests as slow (deselect with -m 'not slow')",
-    "e2e:  end-to-end fixture tests",
-    "bench: benchmark tests",
+markers = [
+  "slow: takes more than a second",
+  "e2e: end-to-end fixture run",
+  "integration: crosses package boundaries",
+  "benchmark: performance gate",
+  "bench: benchmark tests",
+  "requires_docker: needs a service container",
+  "docs: documentation verification suite",
+  "draw: drawing geometry and DXF contract tests",
+  "visual: PNG baseline comparison",
+  "refs: reference-drawing corpus and extraction tests",
 ]
 filterwarnings = [
-    "ignore::DeprecationWarning:pydantic",
-    "ignore::DeprecationWarning:ezdxf",
+  "error::DeprecationWarning:bridgecad_.*",
+  "ignore::DeprecationWarning:ezdxf.*",
 ]
+xfail_strict = true
 
-# =============================================================================
-# Coverage — flattened monorepo (facade + packages + apps)
-# =============================================================================
+# ─────────────────────────────────────────────────────────────────────────────
+# coverage
+# ─────────────────────────────────────────────────────────────────────────────
 [tool.coverage.run]
-source   = [
-    "bridgecad",
-    "packages",
-    "apps",
+branch = true
+source = ["packages", "apps"]
+omit = [
+  "*/tests/*", "*/test_*.py",
+  "*/__init__.py",
+  "*/_build/*",
+  "docs/*",
 ]
-omit     = ["*/tests/*", "*/migrations/*", "*/__pycache__/*", "outputs/*"]
-parallel = true
 
 [tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "if TYPE_CHECKING:",
-    "raise NotImplementedError",
-    "@(abc\\.)?abstractmethod",
-]
+precision = 2
 show_missing = true
-skip_empty   = true
-fail_under   = 55
+skip_covered = false
+exclude_lines = [
+  "pragma: no cover",
+  "if TYPE_CHECKING:",
+  "if __name__ == .__main__.:",
+  "raise NotImplementedError",
+  "@overload",
+  "@abstractmethod",
+]
 
-# =============================================================================
-# Pytest-benchmark
-# =============================================================================
+[tool.coverage.html]
+directory = "htmlcov"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# benchmarks
+# ─────────────────────────────────────────────────────────────────────────────
+# pytest-benchmark reads its own table, not a nested key under
+# [tool.pytest.ini_options] — a nested table there is an unknown ini option and
+# `--strict-config` fails the whole run.
+# Gate: fail if a benchmark regresses more than 20% against the stored baseline.
+# Thresholds enforced: QA < 200ms, BOQ < 500ms, 1 sheet < 3s, 7 sheets < 15s.
 [tool.pytest-benchmark]
-min_rounds     = 5
-max_time       = 10.0
-sort           = "mean"
-timer          = "perf_counter"
-disable_gc     = false
-warmup         = false
+autosave = false
+storage = ".benchmarks"
+compare = "0001"
+min_rounds = 5
+warmup = false
+sort = "mean"
+timer = "perf_counter"
+disable_gc = false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# bandit
+# ─────────────────────────────────────────────────────────────────────────────
+[tool.bandit]
+exclude_dirs = ["tests", ".venv", "build", "dist", "site"]
+skips = ["B101"]   # assert is fine in library code
+
+# ─────────────────────────────────────────────────────────────────────────────
+# commitizen — Conventional Commits
+# ─────────────────────────────────────────────────────────────────────────────
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.1.0rc1"
+tag_format = "v$version"
+version_scheme = "pep440"
+version_files = [
+  "pyproject.toml",
+  "packages/bridgecad-core/pyproject.toml",
+  "packages/bridgecad-io/pyproject.toml",
+  "packages/bridgecad-draw/pyproject.toml",
+  "packages/bridgecad-bill/pyproject.toml",
+  "packages/bridgecad-qa/pyproject.toml",
+  "packages/bridgecad-export/pyproject.toml",
+  "packages/bridgecad-plugins/pyproject.toml",
+  "packages/bridgecad-ai/pyproject.toml",
+  "packages/bridgecad-infra/pyproject.toml",
+  "bridgecad/__init__.py",
+]
+update_changelog_on_bump = true

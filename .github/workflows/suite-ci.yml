@@ -1,11 +1,9 @@
 name: BridgeCAD Enterprise Suite — CI
 
 # Runs the Suite's own 6-job matrix (lint / typecheck / unit / e2e / rc1-smoke /
-# react-build) from the checked-out workspace root.  The nested workflow at
-#   "BridgeCAD Enterprise Suite/.github/workflows/ci.yml"
-# is NEVER executed by GitHub Actions because workflows must live at the repo
-# root .github/workflows/.  This file mirrors that workflow with correct
-# working-directory prefixes so the Suite is tested on every push/PR.
+# react-build). The Suite lives at the repo root — packages/, apps/, tests/,
+# scripts/ and rc1_smoke.py are all top-level — so every job runs with no
+# working-directory prefix, and apps/web-console paths are given in full.
 #
 # Legacy app tests continue to live in ci.yml (separately named jobs).
 # The two workflows DO NOT depend on each other; they run in parallel.
@@ -21,7 +19,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  SUITE_DIR: "BridgeCAD Enterprise Suite"
   PYTHON_VERSION: "3.11"
   NODE_VERSION:   "20"
 

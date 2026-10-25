@@ -1,0 +1,18 @@
+{
+  "sheet": "sheet5_pier_abutment_details",
+  "revision": "P2",
+  "reviewed_by": "@CRAJKUMARSINGH",
+  "reviewed_on": "2026-10-22",
+  "against": "raw/gad-borse-sheet5.pdf",
+  "compared": [
+    "Wing splay 45 deg against embankment batter 1:1.5",
+    "ABTL ladder value against the abutment length on the reference sheet",
+    "Wing wall return against the abutment face run",
+    "Bearing level callout against IRC:SP:55 abutment details"
+  ],
+  "geometry_sha": "5c0db213d61bfde9",
+  "outcome": "confirmed_with_exceptions",
+  "exceptions": [
+    "Toe offset is not yet checked against the actual abutment section."
+  ]
+}

@@ -8,13 +8,13 @@ page is sourced from one workbook already present in this repository.
 from __future__ import annotations
 
 import sys
+from itertools import pairwise
 from pathlib import Path
-from typing import Iterable, Sequence
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, landscape
-from reportlab.pdfgen import canvas
 from reportlab.lib.units import mm
+from reportlab.pdfgen import canvas
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
@@ -85,7 +85,7 @@ def draw_dxf_geometry(pdf: canvas.Canvas, doc, box: tuple[float, float, float, f
             points = [map_point(point) for point in entity.get_points("xy")]
             if len(points) >= 2:
                 pdf.setStrokeColor(TEAL)
-                for start, end in zip(points, points[1:]):
+                for start, end in pairwise(points):
                     pdf.line(*start, *end)
                 if entity.closed:
                     pdf.line(*points[-1], *points[0])
@@ -99,7 +99,9 @@ def draw_dxf_geometry(pdf: canvas.Canvas, doc, box: tuple[float, float, float, f
     return count
 
 
-def draw_page(pdf: canvas.Canvas, index: int, source: Path, dxf_path: Path, entity_count: int) -> None:
+def draw_page(
+    pdf: canvas.Canvas, index: int, source: Path, dxf_path: Path, entity_count: int
+) -> None:
     pdf.setFillColor(PAPER)
     pdf.rect(0, 0, PAGE_W, PAGE_H, fill=1, stroke=0)
     pdf.setStrokeColor(INK)
@@ -124,13 +126,25 @@ def draw_page(pdf: canvas.Canvas, index: int, source: Path, dxf_path: Path, enti
     pdf.setFillColor(MUTED)
     pdf.setFont("Helvetica", 8)
     pdf.drawString(22 * mm, PAGE_H - 53 * mm, f"Workbook: {source.as_posix()}")
-    pdf.drawString(22 * mm, PAGE_H - 60 * mm, f"Native generator output: {dxf_path.name} · DXF entities rendered: {entity_count}")
+    pdf.drawString(
+        22 * mm,
+        PAGE_H - 60 * mm,
+        f"Native generator output: {dxf_path.name} · DXF entities rendered: {entity_count}",
+    )
 
-    draw_dxf_geometry(pdf, dxf_path and ezdxf.readfile(dxf_path), (22 * mm, 45 * mm, PAGE_W - 44 * mm, PAGE_H - 115 * mm))
+    draw_dxf_geometry(
+        pdf,
+        dxf_path and ezdxf.readfile(dxf_path),
+        (22 * mm, 45 * mm, PAGE_W - 44 * mm, PAGE_H - 115 * mm),
+    )
 
     pdf.setFillColor(MUTED)
     pdf.setFont("Helvetica", 6.5)
-    pdf.drawString(22 * mm, 20 * mm, "Generated only from files already present in this repository. Review engineering inputs before construction use.")
+    pdf.drawString(
+        22 * mm,
+        20 * mm,
+        "Generated only from files already present in this repository. Review engineering inputs before construction use.",
+    )
     pdf.drawRightString(PAGE_W - 22 * mm, 20 * mm, "BRIDGE GAD · PDF EXPORT")
     pdf.showPage()
 
@@ -159,7 +173,9 @@ def build() -> int:
         entity_count = len(doc.modelspace())
         draw_page(pdf, index, source, dxf_path, entity_count)
     pdf.save()
-    print(f"Created {OUTPUT} from {len(generated)} repository workbooks ({OUTPUT.stat().st_size} bytes)")
+    print(
+        f"Created {OUTPUT} from {len(generated)} repository workbooks ({OUTPUT.stat().st_size} bytes)"
+    )
     return len(generated)
 
 

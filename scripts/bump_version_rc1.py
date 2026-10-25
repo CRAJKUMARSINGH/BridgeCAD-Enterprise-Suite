@@ -1,6 +1,6 @@
 """Bump all __version__ strings to 0.1.0-rc1 across the Enterprise Suite."""
+
 import re
-import sys
 from pathlib import Path
 
 SUITE = Path(__file__).parent.parent

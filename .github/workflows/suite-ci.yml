@@ -25,10 +25,6 @@ env:
   PYTHON_VERSION: "3.11"
   NODE_VERSION:   "20"
 
-defaults:
-  run:
-    working-directory: "BridgeCAD Enterprise Suite"
-
 jobs:
   # ──────────────────────────────────────────────────────────────────────────
   lint:
@@ -179,18 +175,22 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-          cache-dependency-path: "BridgeCAD Enterprise Suite/apps/web-console/package-lock.json"
+          cache-dependency-path: "apps/web-console/package-lock.json"
 
       - name: npm ci
-        working-directory: "BridgeCAD Enterprise Suite/apps/web-console"
+        working-directory: apps/web-console
         run: npm ci
 
       - name: TypeScript check
-        working-directory: "BridgeCAD Enterprise Suite/apps/web-console"
+        working-directory: apps/web-console
         run: npm run typecheck
 
+      - name: Unit tests
+        working-directory: apps/web-console
+        run: npm test
+
       - name: Vite build
-        working-directory: "BridgeCAD Enterprise Suite/apps/web-console"
+        working-directory: apps/web-console
         run: npm run build
         env:
           VITE_API_URL: http://localhost:8000
@@ -199,5 +199,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: web-console-dist
-          path: "BridgeCAD Enterprise Suite/apps/web-console/dist/"
+          path: "apps/web-console/dist/"
           retention-days: 7

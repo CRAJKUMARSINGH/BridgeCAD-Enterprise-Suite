@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SARASWATI Component > matches snapshot 1`] = `
+<figure>
+  <img
+    alt="Saraswati — BridgeCAD design assistant"
+    class="rounded-full border border-slate-200 bg-white object-cover shadow-sm"
+    height="96"
+    loading="lazy"
+    src="/saraswati.jpg"
+    style="width: 96px; height: 96px;"
+    width="96"
+  />
+</figure>
+`;

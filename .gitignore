@@ -56,6 +56,12 @@ acad.err
 # Node
 node_modules/
 
+# TS/Vite build byproducts (apps/web-console)
+*.tsbuildinfo
+apps/web-console/vite.config.js
+apps/web-console/vite.config.d.ts
+*.timestamp-*.mjs
+
 # Misc
 *.bak
 *.tmp
@@ -109,3 +115,17 @@ TEST_RUN_OUTPUT/
 # Local deps staging (bypass sandbox roaming-profile write guard; never commit wheels)
 .deps/
 vendor/
+
+site-wing/
+wing-report.json
+
+# MkDocs site output + root docs staged into docs/ by scripts/mkdocs_hooks.py
+site/
+site-api/
+docs/guide.md
+docs/index.md
+docs/contributing.md
+docs/changelog.md
+docs/security.md
+docs/code-of-conduct.md
+docs/docs-index.md

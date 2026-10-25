@@ -1,6 +1,7 @@
 import { useHealth } from '../hooks/useApi'
 import { useAppStore } from '../store/appStore'
 import { Link } from 'react-router-dom'
+import SaraswatiMascot from '../components/SaraswatiMascot'
 
 const CARDS = [
   { to: '/draw',    icon: '📐', title: 'Drawing Gen',  desc: 'Generate 7-sheet DXF GAD package',  color: 'blue'   },
@@ -50,6 +51,18 @@ export default function Dashboard() {
           Connecting to API...
         </div>
       )}
+
+      {/* Assistant guide */}
+      <div className="flex items-center gap-5 bg-white border border-slate-200 rounded-xl px-5 py-4 mb-8">
+        <SaraswatiMascot size={64} />
+        <div>
+          <div className="font-semibold text-slate-800 text-sm">Saraswati · your design guide</div>
+          <p className="text-sm text-slate-500 mt-0.5">
+            Start with <span className="font-medium text-slate-600">Projects</span> to upload a workbook, then generate
+            drawings, validate against IRC/MORTH and export the full bundle.
+          </p>
+        </div>
+      </div>
 
       {/* Feature cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">

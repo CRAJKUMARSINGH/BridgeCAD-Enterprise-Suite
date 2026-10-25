@@ -1,8 +1,10 @@
 """M1 Week 1 Day 1 verification script - comprehensive."""
 import sys
+
 sys.path.insert(0, '.')
-from bridgecad_core import types
 from collections import defaultdict
+
+from bridgecad_core import types
 
 print("=" * 70)
 print("M1 WEEK 1 - DAY 1 VERIFICATION REPORT")
@@ -92,7 +94,7 @@ print(f"  -> {'PASS' if c4_pass else 'FAIL'}")
 # === CRITERION 5: ENUM_REGISTRY is dict[str, type[Enum]] ===
 print("\n📋 ACCEPTANCE C5: ENUM_REGISTRY structure")
 is_dict = isinstance(types.ENUM_REGISTRY, dict)
-all_keys_str = all(isinstance(k, str) for k in types.ENUM_REGISTRY.keys())
+all_keys_str = all(isinstance(k, str) for k in types.ENUM_REGISTRY)
 all_vals_enum = all(callable(v) and hasattr(v, '__members__') for v in types.ENUM_REGISTRY.values())
 c5_pass = is_dict and all_keys_str and all_vals_enum
 print(f"  Is dict: {is_dict}, All keys str: {all_keys_str}, All values enums: {all_vals_enum}")

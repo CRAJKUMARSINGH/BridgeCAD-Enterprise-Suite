@@ -5,13 +5,15 @@ M0 scaffold. Implementation: M5 (full rates YAML DB live in standards/).
 
 from __future__ import annotations
 
-from .quantities import BillOfQuantities, BillItem
+from .quantities import BillOfQuantities
 
 
 class RateLookup:
     """Rate DB lookup with State-PWD override chain. M0 stub."""
 
-    def get(self, code: str, region: str | None = None) -> float | None:  # pragma: no cover
+    # Stub: the real chain consumes ``code`` and ``region``, but freezes the
+    # signature now so callers do not have to change when M5 lands.
+    def get(self, code: str, region: str | None = None) -> float | None:  # noqa: ARG002  # pragma: no cover
         return None
 
 

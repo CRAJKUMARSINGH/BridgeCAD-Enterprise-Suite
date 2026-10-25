@@ -15,14 +15,14 @@ from __future__ import annotations
 import sys
 import tempfile
 import zipfile
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
-from fastapi import FastAPI, UploadFile, File, HTTPException, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
-from pydantic import BaseModel, Field
+from fastapi.responses import FileResponse, HTMLResponse
+from pydantic import BaseModel
 
 # ── package path bootstrap ────────────────────────────────────────────────
 _SUITE = Path(__file__).parents[3]
@@ -69,7 +69,6 @@ def _project_summary(project: Any) -> dict:
 # ---------------------------------------------------------------------------
 # Routers
 # ---------------------------------------------------------------------------
-from fastapi import APIRouter
 
 # /bridges
 bridges_router = APIRouter(prefix="/bridges", tags=["Bridges"])
@@ -82,7 +81,7 @@ async def parse_bridge(file: UploadFile = File(...)) -> dict:
         project = _load_project_from_upload(data)
         return {"status": "ok", "project": _project_summary(project)}
     except Exception as exc:
-        raise HTTPException(422, detail=str(exc))
+        raise HTTPException(422, detail=str(exc)) from exc
 
 
 @bridges_router.post("/validate", summary="Validate Excel → QA report JSON")
@@ -92,7 +91,7 @@ async def validate_bridge(file: UploadFile = File(...)) -> dict:
     try:
         project = _load_project_from_upload(data)
         from bridgecad_core.validation import run_all
-        from bridgecad_qa.compliance   import score as _score
+        from bridgecad_qa.compliance import score as _score
         report = run_all(project)
         comp   = _score(report)
         findings = [
@@ -114,7 +113,7 @@ async def validate_bridge(file: UploadFile = File(...)) -> dict:
             "findings":       findings,
         }
     except Exception as exc:
-        raise HTTPException(422, detail=str(exc))
+        raise HTTPException(422, detail=str(exc)) from exc
 
 
 # ---------------------------------------------------------------------------
@@ -177,10 +176,8 @@ def _staged_zip_response(
         staged_path = Path(staged.name)
 
         def _cleanup(p: Path = staged_path) -> None:
-            try:
+            with suppress(OSError):
                 p.unlink(missing_ok=True)
-            except OSError:
-                pass
 
         background_tasks.add_task(_cleanup)
 
@@ -229,7 +226,7 @@ async def draw_gad(
     except HTTPException:
         raise
     except Exception as exc:
-        raise HTTPException(500, detail=str(exc))
+        raise HTTPException(500, detail=str(exc)) from exc
 
 
 # /bills
@@ -238,7 +235,7 @@ bills_router = APIRouter(prefix="/bills", tags=["Bill of Quantities"])
 @bills_router.post("/generate", summary="Generate BOQ → JSON")
 async def generate_bill(
     file:  UploadFile    = File(...),
-    state: Optional[str] = None,
+    state: str | None = None,
 ) -> dict:
     """Generate priced BOQ from uploaded Excel workbook."""
     data = await file.read()
@@ -273,7 +270,7 @@ async def generate_bill(
             "sections":           sections,
         }
     except Exception as exc:
-        raise HTTPException(422, detail=str(exc))
+        raise HTTPException(422, detail=str(exc)) from exc
 
 
 # /qa
@@ -286,7 +283,7 @@ async def qa_report(file: UploadFile = File(...)) -> HTMLResponse:
     try:
         project = _load_project_from_upload(data)
         from bridgecad_core.validation import run_all
-        from bridgecad_qa.reports       import generate_html_report
+        from bridgecad_qa.reports import generate_html_report
         report   = run_all(project)
         with tempfile.NamedTemporaryFile(suffix=".html", delete=False,
                                           mode="w") as tf:
@@ -296,7 +293,7 @@ async def qa_report(file: UploadFile = File(...)) -> HTMLResponse:
         tmp.unlink(missing_ok=True)
         return HTMLResponse(content=html, status_code=200)
     except Exception as exc:
-        raise HTTPException(422, detail=str(exc))
+        raise HTTPException(422, detail=str(exc)) from exc
 
 
 # /exports
@@ -306,7 +303,7 @@ exports_router = APIRouter(prefix="/exports", tags=["Export"])
 async def export_bundle(
     background_tasks: BackgroundTasks,
     file:   UploadFile    = File(...),
-    state:  Optional[str] = None,
+    state:  str | None = None,
     scale:  int           = 100,
 ) -> FileResponse:
     """Upload Excel → full export (DXF + BOQ + QA) → ZIP bundle."""
@@ -328,7 +325,7 @@ async def export_bundle(
     except HTTPException:
         raise
     except Exception as exc:
-        raise HTTPException(500, detail=str(exc))
+        raise HTTPException(500, detail=str(exc)) from exc
 
 
 # /plugins
@@ -356,7 +353,7 @@ async def list_plugins() -> dict:
 @plugins_router.get("/{plugin_id}", summary="Plugin details")
 async def plugin_detail(plugin_id: str) -> dict:
     from bridgecad_plugins.registry import get_registry
-    from bridgecad_plugins.runner   import PluginRunner
+    from bridgecad_plugins.runner import PluginRunner
     reg = get_registry()
     m   = reg.get(plugin_id)
     if not m:
@@ -376,7 +373,7 @@ async def plugin_detail(plugin_id: str) -> dict:
 # ---------------------------------------------------------------------------
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI):
     yield   # M8: init DB / cache / storage here
 
 

@@ -10,7 +10,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from decimal import Decimal
-from typing import Optional
 
 
 @dataclass
@@ -20,12 +19,12 @@ class BillItem:
     description: str
     unit:        str            # e.g. "CUM", "MT", "SQM", "RM", "EACH", "LS"
     quantity:    Decimal        = Decimal("0")
-    rate:        Optional[Decimal] = None       # INR per unit
-    amount:      Optional[Decimal] = None       # quantity × rate
+    rate:        Decimal | None = None       # INR per unit
+    amount:      Decimal | None = None       # quantity × rate
     ref:         str            = ""            # MORTH clause reference
     remarks:     str            = ""
 
-    def compute_amount(self) -> Optional[Decimal]:
+    def compute_amount(self) -> Decimal | None:
         if self.rate is not None and self.quantity > 0:
             self.amount = (self.quantity * self.rate).quantize(Decimal("0.01"))
             return self.amount

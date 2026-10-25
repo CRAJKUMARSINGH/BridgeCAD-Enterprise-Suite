@@ -13,9 +13,8 @@ Design notes
 """
 from __future__ import annotations
 
-import math
-from typing import Any, Sequence
-
+from collections.abc import Sequence
+from typing import Any
 
 # ---------------------------------------------------------------------------
 # Type aliases
@@ -403,7 +402,7 @@ class LayoutCursor:
     # ------------------------------------------------------------------
     # Absolute movement
     # ------------------------------------------------------------------
-    def move_to(self, x: float, y: float) -> "LayoutCursor":
+    def move_to(self, x: float, y: float) -> LayoutCursor:
         self._x = float(x)
         self._y = float(y)
         return self
@@ -411,27 +410,27 @@ class LayoutCursor:
     # ------------------------------------------------------------------
     # Relative movement
     # ------------------------------------------------------------------
-    def move(self, dx: float = 0.0, dy: float = 0.0) -> "LayoutCursor":
+    def move(self, dx: float = 0.0, dy: float = 0.0) -> LayoutCursor:
         self._x += float(dx)
         self._y += float(dy)
         return self
 
-    def advance_x(self, dx: float) -> "LayoutCursor":
+    def advance_x(self, dx: float) -> LayoutCursor:
         self._x += float(dx)
         return self
 
-    def advance_y(self, dy: float) -> "LayoutCursor":
+    def advance_y(self, dy: float) -> LayoutCursor:
         self._y += float(dy)
         return self
 
     # ------------------------------------------------------------------
     # Stack — save / restore cursor for nested sub-layouts
     # ------------------------------------------------------------------
-    def push(self) -> "LayoutCursor":
+    def push(self) -> LayoutCursor:
         self._stack.append((self._x, self._y))
         return self
 
-    def pop(self) -> "LayoutCursor":
+    def pop(self) -> LayoutCursor:
         if not self._stack:
             raise IndexError("LayoutCursor.pop() on empty push/pop stack")
         self._x, self._y = self._stack.pop()
@@ -443,7 +442,7 @@ class LayoutCursor:
     def rect(self, msp, w: float, h: float,
              layer: str = "STRUC-OUTLINE",
              color: int | None = None,
-             lw: int | None = None) -> "LayoutCursor":
+             lw: int | None = None) -> LayoutCursor:
         """Draw a rectangle with its BL corner at the current cursor position.
 
         The cursor is **not** advanced — callers explicitly chain
@@ -456,7 +455,7 @@ class LayoutCursor:
     def hatch(self, msp, w: float, h: float,
               pattern: str = "ANSI31", scale: float = 1.0,
               layer: str = "STRUC-HATCHING",
-              color: int | None = None) -> "LayoutCursor":
+              color: int | None = None) -> LayoutCursor:
         hatch_rect(msp, self._x, self._y, w, h, pattern=pattern,
                    scale=scale, layer=layer, color=color)
         return self
@@ -466,7 +465,7 @@ class LayoutCursor:
               layer: str = "TEXT-GENERAL",
               halign: str = "LEFT",
               color: int | None = None,
-              dx: float = 0.0, dy: float = 0.0) -> "LayoutCursor":
+              dx: float = 0.0, dy: float = 0.0) -> LayoutCursor:
         """Place text at cursor + (dx, dy) offset.  Cursor does not move."""
         text(msp, str(content), self._x + dx, self._y + dy,
              height=height, layer=layer, halign=halign, color=color)
@@ -475,7 +474,7 @@ class LayoutCursor:
     def line_to(self, msp, dx: float, dy: float,
                 layer: str = "STRUC-OUTLINE",
                 color: int | None = None,
-                lw: int | None = None) -> "LayoutCursor":
+                lw: int | None = None) -> LayoutCursor:
         """Draw a line from current cursor position to ``cursor + (dx, dy)``.
 
         Leaves the cursor at the **end** of the drawn line.

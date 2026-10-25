@@ -19,8 +19,6 @@ from __future__ import annotations
 import importlib
 import importlib.util
 import logging
-import sys
-from pathlib import Path
 from typing import Any
 
 from .manifest_schema import PluginManifest

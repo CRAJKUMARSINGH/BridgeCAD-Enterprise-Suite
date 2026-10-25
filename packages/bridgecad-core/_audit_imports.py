@@ -1,4 +1,6 @@
-import ast, os, re, sys
+import ast
+import os
+import re
 
 with open(os.path.join('bridgecad_core', 'models.py'), encoding='utf-8') as f:
     models_src = f.read()

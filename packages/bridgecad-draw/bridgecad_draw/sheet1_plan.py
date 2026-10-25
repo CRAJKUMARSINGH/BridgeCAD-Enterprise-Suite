@@ -20,15 +20,22 @@ import math
 from pathlib import Path
 from typing import Any
 
-from .dxf_engine import new_sheet, CoordMapper, save
+from .dxf_engine import new_sheet, save
 from .primitives import (
-    line, polyline, rectangle, circle, text, hatch_rect, hatch_poly,
-    dim_linear_h, dim_linear_v, north_arrow, scale_bar, chainage_tag,
+    chainage_tag,
+    circle,
+    dim_linear_h,
+    dim_linear_v,
+    hatch_rect,
+    line,
+    north_arrow,
+    polyline,
+    rectangle,
+    scale_bar,
     section_arrow,
+    text,
 )
-from .titleblocks import draw_border, draw_title_block, draw_revision_strip
-from .layers import L
-
+from .titleblocks import draw_border, draw_title_block
 
 # ---------------------------------------------------------------------------
 # Drawing constants (mm in model space)
@@ -86,7 +93,6 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
 
     gi  = project.geometry_input
     sub = project.substructure
-    ss  = project.superstructure
     pm  = project.project_master
 
     # ── Geometry calculation ─────────────────────────────────────────────

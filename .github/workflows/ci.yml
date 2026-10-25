@@ -193,3 +193,60 @@ jobs:
           from bridge_gad.bridge_generator import BridgeGADGenerator
           print('Container import OK')
           "
+
+  wing:
+    name: Wing geometry suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e ".[dev]" matplotlib pillow
+      - name: Structural + geometry (no baselines)
+        run: pytest tests/draw -v -m "draw and not visual"
+      - name: Visual baselines
+        run: pytest tests/draw -v -m visual
+
+  wing-report:
+    name: Wing review report
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e ".[dev]" matplotlib pillow
+      - name: Build report
+        run: python scripts/wing_report.py --html site-wing/wing-report.html --json wing-report.json
+      - name: Summary
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          p = pathlib.Path("wing-report.json")
+          if not p.exists():
+              raise SystemExit(0)
+          d = json.loads(p.read_text())
+          c = d["counts"]
+          print(f"### Wing geometry report — commit {d['commit']}")
+          print(f"| pass | scaffold | fail | signed off | deterministic |")
+          print(f"|---|---|---|---|---|")
+          print(f"| {c['pass']} | {c['scaffold']} | {c['fail']} | {d['signed_off']} | {d['deterministic']} |")
+          if c["fail"]:
+              print("\n**Failing sheet-cells:**")
+              for cell in d["cells"]:
+                  if cell["status"] == "fail":
+                      bad = [x["name"] for x in cell.get("checks", []) if x["status"] == "fail"]
+                      print(f"- `{cell['slug']}/{cell['sheet']}` — {', '.join(bad) or cell.get('error','')}")
+          print("\n**Blockers:**")
+          for b in d["blockers"]:
+              print(f"- {b}")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wing-report
+          path: |
+            site-wing/wing-report.html
+            wing-report.json

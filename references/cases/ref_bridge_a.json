@@ -1,0 +1,21 @@
+{
+  "id": "ref_bridge_a",
+  "note": "Reference bridge A, parameters read off the GAD set. Used to validate arithmetic against a drawing nobody wrote to match this code.",
+  "source_sheets": ["gad-borse-sheet2", "gad-borse-sheet5"],
+  "parameters": {
+    "nspan": 3,
+    "span_m": "12.0",
+    "carriageway_m": "8.0",
+    "abtl_m": "13.500",
+    "splay_deg": "45",
+    "deck_level_m": "108.200",
+    "hfl_m": "104.500",
+    "lwl_m": "99.200",
+    "founding_level_m": "96.00"
+  },
+  "stated_values": {
+    "pier_count": {"value": 2, "citation": {"ref": "gad-borse-sheet2", "page": 1, "quote": "P1  P2"}, "status": "verified"},
+    "wing_face_run_m": {"value": "2.750", "citation": {"ref": "gad-borse-sheet5", "page": 1, "quote": "2.750"}, "status": "verified"},
+    "wing_wall_length_m": {"value": "3.889", "citation": {"ref": "gad-borse-sheet5", "page": 1, "quote": "3.889"}, "status": "verified"}
+  }
+}

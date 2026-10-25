@@ -2,6 +2,7 @@
 bridgecad_qa.reports — Generate HTML QA compliance report.
 """
 from __future__ import annotations
+
 from pathlib import Path
 from typing import Any
 

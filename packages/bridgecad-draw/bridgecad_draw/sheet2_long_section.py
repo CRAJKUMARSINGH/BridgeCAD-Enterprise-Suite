@@ -21,14 +21,19 @@ import math
 from pathlib import Path
 from typing import Any
 
-from .dxf_engine import new_sheet, CoordMapper, save
+from .dxf_engine import CoordMapper, new_sheet, save
 from .primitives import (
-    line, polyline, rectangle, circle, text, hatch_rect, hatch_poly,
-    dim_linear_h, dim_linear_v, level_tag, chainage_tag,
-    north_arrow, scale_bar,
+    chainage_tag,
+    circle,
+    dim_linear_v,
+    hatch_rect,
+    level_tag,
+    line,
+    polyline,
+    rectangle,
+    text,
 )
-from .titleblocks import draw_border, draw_title_block, draw_revision_strip
-
+from .titleblocks import draw_border, draw_title_block
 
 # ---------------------------------------------------------------------------
 # Layout constants (A1 landscape, mm)
@@ -74,10 +79,8 @@ def _draw_long_section(msp: Any, project: Any,
 
     gi  = project.geometry_input
     sub = project.substructure
-    ss  = project.superstructure
     fd  = project.foundation_details
     pm  = project.project_master
-    hd  = project.hydraulic_data
 
     # ── Geometry ──────────────────────────────────────────────────────────
     ls = compute_long_section_geometry(project)
@@ -105,7 +108,7 @@ def _draw_long_section(msp: Any, project: Any,
     sc_h = draw_w / max(total_len, 0.1)           # horizontal
     sc_v = draw_h / max(rl_range, 0.1) / v_exag   # vertical (exaggerated)
 
-    cm = CoordMapper(
+    CoordMapper(
         datum_rl  = datum_rl,
         origin_ch = 0.0,
         h_scale   = sc_h / 1000.0,  # CoordMapper expects h_scale in m→unit
@@ -232,7 +235,7 @@ def _draw_long_section(msp: Any, project: Any,
     pier_w_mm  = float(sub.pier_shaft_width_m  or 1.5) * sc_h
     pier_cap_h = float(sub.pier_cap_depth_m    or 0.8) * sc_v * v_exag
     pier_ped_h = float(sub.pier_pedestal_height_m or 0.2) * sc_v * v_exag
-    pile_cap_h = float(fd.pile_cap_thickness_mm or 1500) / 1000.0 * sc_v * v_exag
+    float(fd.pile_cap_thickness_mm or 1500) / 1000.0 * sc_v * v_exag
 
     # FR-4: pull authoritative T.O.C. RLs from LongSectionGeometry (tie to
     # plan-northern-edge reference via same top-of-deck / soffit datum chain)
@@ -248,7 +251,6 @@ def _draw_long_section(msp: Any, project: Any,
         # old `soffit − pedestal − cap` manual in-place calc.  Pier cap sits
         # *below* this datum; pedestal above carries the soffit.
         py_toc   = vy(toc_rls[i]) if i < len(toc_rls) else (sof_y_mm - pier_ped_h - pier_cap_h)
-        py_cap_top = py_toc                      # T.O.C. = cap top surface
         py_cap_bot = py_toc - pier_cap_h         # cap bottom
         py_shaft_top = py_cap_bot                # pier shaft top = cap bottom
         py_bot   = vy(hfl_rl - float(sub.pier_height_typical_m or 8.0))
@@ -274,7 +276,7 @@ def _draw_long_section(msp: Any, project: Any,
         # so reader can verify alignment with plan's northern-edge reference RL.
         level_tag(msp, px + pier_w_mm + sc_h * 0.5, py_toc, toc_rls[i] if i < len(toc_rls) else (ls.soffit_rl - pier_ped_h - pier_cap_h),
                   text_height=th * 0.85)
-        toc_label_rl = toc_rls[i] if i < len(toc_rls) else (ls.soffit_rl - pier_ped_h - pier_cap_h)
+        toc_rls[i] if i < len(toc_rls) else (ls.soffit_rl - pier_ped_h - pier_cap_h)
         text(msp, f"T.O.C. P{i+1}", px + pier_w_mm + sc_h * 0.5 + th * 10, py_toc,
              height=th * 0.9, layer="TEXT-HEADER")
 
@@ -334,7 +336,7 @@ def _draw_long_section(msp: Any, project: Any,
         [(0.0, True), (total_len, True)]
         + [(sum(span_lens[:i+1]), False) for i in range(len(span_lens)-1)]
     ):
-        group_w = (cols - 1) * float(fd.pile_spacing_m or 2.4) * sc_h
+        (cols - 1) * float(fd.pile_spacing_m or 2.4) * sc_h
         for c in range(cols):
             offset = (c - (cols - 1) / 2.0) * float(fd.pile_spacing_m or 2.4) * sc_h
             px = hx(ch) + offset - pile_dia_mm / 2.0

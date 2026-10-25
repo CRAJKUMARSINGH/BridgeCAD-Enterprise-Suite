@@ -14,7 +14,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-
 # ---------------------------------------------------------------------------
 # Span / Depth Ratio limits — IRC:21-2000 Table 12 + IRC:112-2020 Annex J
 # ---------------------------------------------------------------------------
@@ -258,7 +257,6 @@ def check_structural_adequacy(
     -------
     StructuralCheckResult
     """
-    import math as _math
     ok, ratio, msg = check_span_depth_ratio(span_m, depth_mm, span_config, superstructure_type)
     return StructuralCheckResult(
         span_depth_ok       = ok,
@@ -272,7 +270,7 @@ def check_structural_adequacy(
     )
 
 
-import math   # needed for expansion_joint_gap_mm ceiling
+import math  # needed for expansion_joint_gap_mm ceiling
 
 __all__ = [
     "span_depth_limits", "check_span_depth_ratio",

@@ -84,7 +84,7 @@ def compare(
     vb = _extract_metrics(project_b)
 
     pct_diff = []
-    for a, b in zip(va, vb):
+    for a, b in zip(va, vb, strict=False):
         if abs(a) < 1e-9:
             pct_diff.append(0.0)
         else:
@@ -121,9 +121,8 @@ def compare(
 def radar_data(result: ComparisonResult) -> dict:
     """Return radar chart data dict compatible with matplotlib / Plotly."""
     # Normalise both datasets to 0–1 scale per dimension
-    import math
     normed_a, normed_b = [], []
-    for a, b in zip(result.values_a, result.values_b):
+    for a, b in zip(result.values_a, result.values_b, strict=False):
         mx = max(abs(a), abs(b), 1e-9)
         normed_a.append(round(a / mx, 3))
         normed_b.append(round(b / mx, 3))

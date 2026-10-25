@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from decimal import Decimal
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -65,7 +64,7 @@ def _rotate(x: float, y: float, theta_rad: float) -> tuple[float, float]:
     return (x * cos_t - y * sin_t, x * sin_t + y * cos_t)
 
 
-def compute_plan_geometry(project: "BridgeProject") -> BridgePlanGeometry:
+def compute_plan_geometry(project: BridgeProject) -> BridgePlanGeometry:
     """Derive plan-view geometry from a validated BridgeProject instance.
 
     Parameters
@@ -85,7 +84,6 @@ def compute_plan_geometry(project: "BridgeProject") -> BridgePlanGeometry:
     overall_w = float(gi.overall_width_m)          # computed field
     skew_deg = float(gi.skew_angle_deg)
     span_lengths = [float(s) for s in gi.span_lengths_m]
-    span_count = gi.span_count
 
     half_w = overall_w / 2.0
     theta = -math.radians(skew_deg)               # skew rotates deck clockwise

@@ -8,9 +8,8 @@ X is transverse (0 at bridge centreline, positive toward left when facing A2).
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass, field
-from typing import Callable, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bridgecad_core.models import BridgeProject
@@ -93,7 +92,7 @@ class CrossSectionGeometry:
 # Factory function
 # ---------------------------------------------------------------------------
 
-def compute_cross_section_geometry(project: "BridgeProject") -> CrossSectionGeometry:
+def compute_cross_section_geometry(project: BridgeProject) -> CrossSectionGeometry:
     """Derive typical mid-span cross-section geometry from a validated BridgeProject.
 
     Parameters
@@ -157,7 +156,7 @@ def compute_cross_section_geometry(project: "BridgeProject") -> CrossSectionGeom
 
     # ---- deck levels (Y from top-of-wearing-coat at CL) ------------------
     deck_t_mm    = float(ss.deck_thickness_mm)    if ss.deck_thickness_mm    else 230.0
-    wc_t_mm      = float(ss.wearing_coat_thickness_mm) if ss.wearing_coat_thickness_mm else 40.0
+    float(ss.wearing_coat_thickness_mm) if ss.wearing_coat_thickness_mm else 40.0
     girder_d_mm  = float(ss.girder_depth_mm)       if ss.girder_depth_mm       else 0.0
 
     top_of_wc_y      =  camber_mm / 1000.0     # CL crown height above edge

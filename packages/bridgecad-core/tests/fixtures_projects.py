@@ -51,132 +51,130 @@ from bridgecad_core.types import (
     SheetSize,
     SpanConfiguration,
     SteelGrade,
-    SuperstructureMaterial,
     SuperstructureType,
     TitleBlockStyle,
     WindSpeedBasic_ms,
 )
-
 
 # ==========================================================================
 # Shared helpers — every field must match actual Pydantic schema exactly
 # ==========================================================================
 
 def _common_project_master(**overrides) -> ProjectMaster:
-    base = dict(
-        project_title="Minor Bridge across Nala at KM 24+350",
-        project_code="PWD-2026-007",
-        bridge_name="Nala Bridge KM 24.350",
-        chainage_km=Decimal("24.350000"),
-        package_no="PKG-III-A",
-        client=ClientType.STATE_PWD,
-        revision=RevisionTag.R1,
-        date_issued=date(2026, 3, 15),
-        designed_by="Er. A. Kumar",
-        checked_by="Er. S. Patil",
-        approved_by="Er. M. Desai",
-        road_level_rl_m=Decimal("104.2500"),
-        ground_level_rl_m=Decimal("100.0000"),
-        survey_date=date(2026, 1, 10),
-        state_code=IndianStateCode.MH,
-        district_code="PUNE",
-        language=Language.EN,
-        latitude_deg=Decimal("18.5204000"),
-        longitude_deg=Decimal("73.8567000"),
-        total_estimated_cost_inr=Decimal("8500000.00"),
-        tender_no="PWD/PUNE/2025-26/112",
-        contract_no="PWD-CON-2026-018",
-        project_phase=ProjectPhase.DESIGN_GAD_60_PCT,
-    )
+    base = {
+        "project_title": "Minor Bridge across Nala at KM 24+350",
+        "project_code": "PWD-2026-007",
+        "bridge_name": "Nala Bridge KM 24.350",
+        "chainage_km": Decimal("24.350000"),
+        "package_no": "PKG-III-A",
+        "client": ClientType.STATE_PWD,
+        "revision": RevisionTag.R1,
+        "date_issued": date(2026, 3, 15),
+        "designed_by": "Er. A. Kumar",
+        "checked_by": "Er. S. Patil",
+        "approved_by": "Er. M. Desai",
+        "road_level_rl_m": Decimal("104.2500"),
+        "ground_level_rl_m": Decimal("100.0000"),
+        "survey_date": date(2026, 1, 10),
+        "state_code": IndianStateCode.MH,
+        "district_code": "PUNE",
+        "language": Language.EN,
+        "latitude_deg": Decimal("18.5204000"),
+        "longitude_deg": Decimal("73.8567000"),
+        "total_estimated_cost_inr": Decimal("8500000.00"),
+        "tender_no": "PWD/PUNE/2025-26/112",
+        "contract_no": "PWD-CON-2026-018",
+        "project_phase": ProjectPhase.DESIGN_GAD_60_PCT,
+    }
     base.update(overrides)
     return ProjectMaster(**base)
 
 
 def _common_bridge_selection(**overrides) -> BridgeSelection:
-    base = dict(
-        bridge_category=BridgeCategory.MINOR_BRIDGE,
-        bridge_type=SuperstructureType.SOLID_SLAB,
-        span_configuration=SpanConfiguration.SIMPLY_SUPPORTED,
-        span_count=1,
-        carriageway_config=CarriagewayLaneConfig.LANE_2,
-        design_code=DesignCode.IRC_SP_55_2019,
-        loading_class="IRC_CLASS_A",
-        seismic_zone=SeismicZone.ZONE_III,
-        wind_zone_ms=WindSpeedBasic_ms.VB_39_ms_ZONE_2,
-        foundation_type=FoundationType.WELL,
-    )
+    base = {
+        "bridge_category": BridgeCategory.MINOR_BRIDGE,
+        "bridge_type": SuperstructureType.SOLID_SLAB,
+        "span_configuration": SpanConfiguration.SIMPLY_SUPPORTED,
+        "span_count": 1,
+        "carriageway_config": CarriagewayLaneConfig.LANE_2,
+        "design_code": DesignCode.IRC_SP_55_2019,
+        "loading_class": "IRC_CLASS_A",
+        "seismic_zone": SeismicZone.ZONE_III,
+        "wind_zone_ms": WindSpeedBasic_ms.VB_39_ms_ZONE_2,
+        "foundation_type": FoundationType.WELL,
+    }
     base.update(overrides)
     return BridgeSelection(**base)
 
 
 def _common_geometry_input(**overrides) -> GeometryInput:
-    base = dict(
-        span_count=1,
-        span_lengths_m=[Decimal("12.0")],
-        carriageway_width_m=Decimal("7.00"),
-        footpath_left_m=Decimal("1.25"),
-        footpath_right_m=Decimal("1.25"),
-        skew_angle_deg=Decimal("0"),
-    )
+    base = {
+        "span_count": 1,
+        "span_lengths_m": [Decimal("12.0")],
+        "carriageway_width_m": Decimal("7.00"),
+        "footpath_left_m": Decimal("1.25"),
+        "footpath_right_m": Decimal("1.25"),
+        "skew_angle_deg": Decimal("0"),
+    }
     base.update(overrides)
     return GeometryInput(**base)
 
 
 def _common_superstructure(**overrides) -> Superstructure:
-    base = dict(
-        type=SuperstructureType.SOLID_SLAB,
-        deck_material=ConcreteGrade.M30,
-        deck_thickness_mm=350,
-        wearing_coat_thickness_mm=40,
-        girder_depth_mm=1200,
-        girder_spacing_m=Decimal("2.5"),
-        girders_per_deck_count=4,
-    )
+    base = {
+        "type": SuperstructureType.SOLID_SLAB,
+        "deck_material": ConcreteGrade.M30,
+        "deck_thickness_mm": 350,
+        "wearing_coat_thickness_mm": 40,
+        "girder_depth_mm": 1200,
+        "girder_spacing_m": Decimal("2.5"),
+        "girders_per_deck_count": 4,
+    }
     base.update(overrides)
     return Superstructure(**base)
 
 
 def _common_substructure(**overrides) -> Substructure:
-    base = dict(
-        pier_type=PierType.WALL,
-        pier_material=ConcreteGrade.M25,
-        abutment_type=AbutmentType.CANTILEVER,
-        abutment_material=ConcreteGrade.M25,
-        pier_height_typical_m=Decimal("4.0"),
-    )
+    base = {
+        "pier_type": PierType.WALL,
+        "pier_material": ConcreteGrade.M25,
+        "abutment_type": AbutmentType.CANTILEVER,
+        "abutment_material": ConcreteGrade.M25,
+        "pier_height_typical_m": Decimal("4.0"),
+    }
     base.update(overrides)
     return Substructure(**base)
 
 
 def _common_foundation(**overrides) -> FoundationDetails:
-    base = dict(
-        type=FoundationType.WELL,
-    )
+    base = {
+        "type": FoundationType.WELL,
+    }
     base.update(overrides)
     return FoundationDetails(**base)
 
 
 def _common_materials(**overrides) -> Materials:
-    base = dict(
-        concrete_superstructure=ConcreteGrade.M30,
-        concrete_substructure=ConcreteGrade.M25,
-        concrete_foundation=ConcreteGrade.M20,
-        reinforcement_steel_grade=SteelGrade.Fe415,
-        prestressing_steel=PrestressGrade.G1860,
-        bearing_type=BearingType.ELASTOMERIC_NEOPRENE,
-        expansion_joint_type=ExpansionJointType.STRIP_SEAL,
-        bearing_material=BearingMaterial.CR_NEOPRENE_CHLOROPRENE,
-    )
+    base = {
+        "concrete_superstructure": ConcreteGrade.M30,
+        "concrete_substructure": ConcreteGrade.M25,
+        "concrete_foundation": ConcreteGrade.M20,
+        "reinforcement_steel_grade": SteelGrade.Fe415,
+        "prestressing_steel": PrestressGrade.G1860,
+        "bearing_type": BearingType.ELASTOMERIC_NEOPRENE,
+        "expansion_joint_type": ExpansionJointType.STRIP_SEAL,
+        "bearing_material": BearingMaterial.CR_NEOPRENE_CHLOROPRENE,
+    }
     base.update(overrides)
     return Materials(**base)
 
 
 def _common_drawing_control(**overrides) -> DrawingControl:
-    base = dict(
-        sheet_size=SheetSize.A1,
-        drawing_scale=DrawingScale.S200,
-        title_block_style=TitleBlockStyle.STANDARD,
-    )
+    base = {
+        "sheet_size": SheetSize.A1,
+        "drawing_scale": DrawingScale.S200,
+        "title_block_style": TitleBlockStyle.STANDARD,
+    }
     base.update(overrides)
     return DrawingControl(**base)
 

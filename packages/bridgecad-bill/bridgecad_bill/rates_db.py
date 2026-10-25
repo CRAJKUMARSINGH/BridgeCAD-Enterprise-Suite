@@ -12,9 +12,10 @@ Usage:
 """
 from __future__ import annotations
 
+import re
 from decimal import Decimal
-from typing import Optional
 
+from .provenance import RateSource
 
 # ---------------------------------------------------------------------------
 # Seed rate table: (item_code, description, unit, base_rate_INR, morth_ref)
@@ -153,7 +154,7 @@ class RatesDB:
         self._state_overrides: dict[str, dict[str, Decimal]] = {}
 
     def get(self, item_code: str,
-            state: str | None = None) -> Optional[Decimal]:
+            state: str | None = None) -> Decimal | None:
         """Return rate for *item_code*, optionally using state override."""
         if state:
             override = self._state_overrides.get(state.upper(), {})
@@ -185,4 +186,45 @@ def get_rates_db() -> RatesDB:
     return _DB
 
 
-__all__ = ["RatesDB", "get_rates_db"]
+def _section_prefix(code: str) -> str | None:
+    """Return the MORTH chapter a code belongs to, e.g. "301.1" -> "30", "300" -> "30"."""
+    digits = re.match(r"\d+", code or "")
+    if not digits:
+        return None
+    return digits.group(0)[:2]
+
+
+def lookup_rate(code: str, state: str | None = None
+                ) -> tuple[Decimal | None, RateSource]:
+    """Resolve *code* to ``(rate, source)`` following the documented order.
+
+    Lookup order is a contract, not an implementation detail:
+        1. State PWD override  -> RateSource.PWD_OVERRIDE
+        2. MORTH base rate     -> RateSource.MORTH_2024_25
+        3. unknown             -> (None, RateSource.MISSING)
+
+    A bare chapter code ("300", "800") resolves to that chapter's first seeded
+    item so a section-level lookup still answers with a real, sourced rate.
+    """
+    db = _DB
+    code = (code or "").strip()
+
+    if state:
+        override = db._state_overrides.get(state.upper(), {})
+        if code in override:
+            return override[code], RateSource.PWD_OVERRIDE
+
+    base = db.get(code)
+    if base is not None:
+        return base, RateSource.MORTH_2024_25
+
+    if re.fullmatch(r"\d{3}", code):
+        prefix = _section_prefix(code)
+        for known in db.all_codes():
+            if _section_prefix(known) == prefix:
+                return db.get(known), RateSource.MORTH_2024_25
+
+    return None, RateSource.MISSING
+
+
+__all__ = ["RatesDB", "get_rates_db", "lookup_rate"]

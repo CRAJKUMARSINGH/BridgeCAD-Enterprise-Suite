@@ -1,0 +1,15 @@
+# Default — everything
+*                       @CRAJKUMARSINGH
+
+# Design invariants and standards need the strongest review
+/packages/bridgecad-core/       @CRAJKUMARSINGH
+/standards/                     @CRAJKUMARSINGH
+
+# Docs governance — one fact, one place
+/GUIDE.md                       @CRAJKUMARSINGH
+/DOCS_INDEX.md                  @CRAJKUMARSINGH
+/docs/                          @CRAJKUMARSINGH
+
+# CI and release
+/.github/                       @CRAJKUMARSINGH
+/pyproject.toml                 @CRAJKUMARSINGH

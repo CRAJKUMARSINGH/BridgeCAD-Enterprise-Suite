@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 
-from bridgecad_core.types import ValidationSeverity, ENUM_REGISTRY
+from bridgecad_core.types import ENUM_REGISTRY, ValidationSeverity
 
 
 @dataclass(frozen=True)
@@ -198,4 +199,74 @@ assert len(_INFO_RULES) == 50, f"I-group expected 50, got {len(_INFO_RULES)}"
 ALL_RULES: list[RuleSpec] = _CRITICAL_RULES + _WARNING_RULES + _INFO_RULES
 assert len(ALL_RULES) == 150, f"ALL_RULES expected 150, got {len(ALL_RULES)}"
 
-__all__ = ["RuleSpec", "ALL_RULES"]
+
+# ---------------------------------------------------------------------------
+# Wing-14 — QA registry integrity.
+#
+# ALL_RULES above is keyed by the design-code IDs (C01…I50). Downstream tooling
+# needs an identifier that survives renumbering and deprecation, a readable
+# tier, the standard / clause a rule cites, and an honest "is this really
+# wired up?" flag. RULES is that self-describing view: the same 150 rules,
+# re-keyed V001…V150 (never reused), in critical → warning → info order.
+# ---------------------------------------------------------------------------
+
+#: The original M1W1-D4 set — 25 critical + 5 warning checks — is the only part
+#: that has a live check function. Everything after it is a spec stub: counted
+#: and reported, deliberately not implemented.
+_IMPLEMENTED_COUNT = 30
+
+_TIER_BY_SEVERITY: dict[ValidationSeverity, str] = {
+    ValidationSeverity.CRITICAL: "critical",
+    ValidationSeverity.WARNING: "warning",
+    ValidationSeverity.INFO: "info",
+}
+
+#: Split "IRC SP-55 Clause 1.2" into ("IRC SP-55", "Clause 1.2"). References
+#: without a clause keyword keep the whole citation as both standard and clause.
+_CLAUSE_SPLIT = re.compile(
+    r"\s+(?=(?:Clause|Table|Annex|Fig\.?|Appendix|Article|Part|Section|Note)\b)",
+    re.IGNORECASE,
+)
+
+
+def _standard_and_clause(reference: str) -> tuple[str, str]:
+    parts = _CLAUSE_SPLIT.split(reference.strip(), maxsplit=1)
+    if len(parts) == 2 and parts[0].strip() and parts[1].strip():
+        return parts[0].strip(), parts[1].strip()
+    return reference.strip(), reference.strip()
+
+
+@dataclass(frozen=True)
+class RegistryRule:
+    id: str                 # stable V### identifier — never renumbered
+    tier: str               # "critical" | "warning" | "info"
+    standard: str           # code / standard the rule cites, e.g. "IRC SP-55"
+    clause: str             # the clause within it, e.g. "Clause 1.2"
+    source_rule_id: str     # the design-code ID in ALL_RULES, e.g. "C01"
+    implemented: bool       # True only when a live check_*() exists
+    deprecated: bool = False
+    deprecation_note: str | None = None
+
+
+def _build_rules() -> list[RegistryRule]:
+    rules: list[RegistryRule] = []
+    for n, spec in enumerate(ALL_RULES, start=1):
+        standard, clause = _standard_and_clause(spec.reference_clause)
+        rules.append(RegistryRule(
+            id=f"V{n:03d}",
+            tier=_TIER_BY_SEVERITY[spec.severity],
+            standard=standard,
+            clause=clause,
+            source_rule_id=spec.rule_id,
+            implemented=n <= _IMPLEMENTED_COUNT,
+        ))
+    return rules
+
+
+RULES: list[RegistryRule] = _build_rules()
+assert len(RULES) == 150, f"RULES expected 150, got {len(RULES)}"
+
+#: design-code ID ("C01") → stable registry ID ("V001"), for tagging findings.
+RULE_ID_BY_CHECK: dict[str, str] = {r.source_rule_id: r.id for r in RULES}
+
+__all__ = ["RuleSpec", "ALL_RULES", "RegistryRule", "RULES", "RULE_ID_BY_CHECK"]

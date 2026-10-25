@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "note": "Required content per sheet. `status` gates the assertion strength: scaffold sheets get the structural contract only; promoted sheets must satisfy `required` in full.",
+  "sheets": {
+    "sheet2_long_section": {
+      "status": "scaffold",
+      "required": {
+        "min_entities": 120,
+        "min_dimensions": 12,
+        "must_contain_text": ["CHAINAGE", "HFL", "LWL", "DECK LEVEL"],
+        "must_contain_layers": ["CL", "DIM", "GRID"],
+        "min_pier_centrelines": "nspan - 1",
+        "min_chainage_ticks": 4
+      }
+    },
+    "sheet3_cross_section": {
+      "status": "scaffold",
+      "required": {
+        "min_entities": 100,
+        "min_dimensions": 10,
+        "must_contain_text": ["CARRIAGEWAY", "KERB", "CAMBER", "CROSS FALL"],
+        "must_contain_layers": ["DIM", "HTCH"]
+      }
+    },
+    "sheet4_foundation": {
+      "status": "scaffold",
+      "required": {
+        "min_entities": 90,
+        "min_dimensions": 10,
+        "must_contain_text": ["SCOUR", "FOUNDATION", "BEARING LEVEL"],
+        "must_contain_layers": ["HIDD", "DIM"]
+      }
+    },
+    "sheet5_pier_abutment_details": {
+      "status": "promoted",
+      "required": {
+        "min_entities": 150,
+        "min_dimensions": 14,
+        "must_contain_text": ["ABTL", "WING WALL", "SPLAY", "BEARING"],
+        "must_contain_layers": ["DIM", "HTCH", "CL"],
+        "must_contain_wing_walls": true
+      }
+    },
+    "sheet6_bearings_joints": {
+      "status": "scaffold",
+      "required": {
+        "min_entities": 70,
+        "min_dimensions": 8,
+        "must_contain_text": ["BEARING SCHEDULE", "EXPANSION JOINT"],
+        "must_contain_layers": ["TABL", "DIM"]
+      }
+    },
+    "sheet7_bill_of_quantities": {
+      "status": "scaffold",
+      "required": {
+        "min_entities": 60,
+        "min_dimensions": 4,
+        "must_contain_text": ["BILL OF QUANTITIES", "RATE", "AMOUNT"],
+        "must_contain_layers": ["TABL"]
+      }
+    }
+  }
+}

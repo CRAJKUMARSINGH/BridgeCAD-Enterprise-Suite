@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "note": "Reference drawings used to cross-check formulas. This corpus is synthesised in-repo (no external source); `commit` is the full SHA-256 of the artifact, so provenance is content-addressed and verifiable from the bytes on disk.",
+  "references": [
+    {
+      "id": "gad-borse-sheet5",
+      "repo": "local://bridgecad/refs-corpus",
+      "commit": "c84a043984d97af9034edffa46246b92431602322abe56550d064788e689a19f",
+      "path": "raw/gad-borse-sheet5.pdf",
+      "sha256": "c84a043984d97af9",
+      "bytes": 1435,
+      "fetched_on": "2026-10-24",
+      "sheet_type": "sheet5_pier_abutment_details",
+      "pages": 1,
+      "text_layer": true,
+      "set_id": "gad-borse",
+      "bridge_id": "ref_bridge_a",
+      "licence": "synthesised in-repo for testing; contains no third-party content",
+      "notes": "Abutment/pier details; ABTL, splay and wing dimensions legible in the text layer."
+    },
+    {
+      "id": "gad-set-b-sheet5",
+      "repo": "local://bridgecad/refs-corpus",
+      "commit": "71bb9b6b497c80dfa8e3a1084228624bebd377d6be84557c1064c8c8ca9803b3",
+      "path": "raw/gad-set-b-sheet5.pdf",
+      "sha256": "71bb9b6b497c80df",
+      "bytes": 1433,
+      "fetched_on": "2026-10-24",
+      "sheet_type": "sheet5_pier_abutment_details",
+      "pages": 1,
+      "text_layer": true,
+      "set_id": "gad-set-b",
+      "bridge_id": "ref_bridge_b",
+      "licence": "synthesised in-repo for testing; contains no third-party content",
+      "notes": "Abutment/pier details; shallowest splay in the corpus."
+    },
+    {
+      "id": "gad-set-c-sheet5",
+      "repo": "local://bridgecad/refs-corpus",
+      "commit": "b5c78ec43edbf443f17d99d0506d01be7879be1a12f9882e1c206d2e26cd8670",
+      "path": "raw/gad-set-c-sheet5.pdf",
+      "sha256": "b5c78ec43edbf443",
+      "bytes": 1431,
+      "fetched_on": "2026-10-24",
+      "sheet_type": "sheet5_pier_abutment_details",
+      "pages": 1,
+      "text_layer": true,
+      "set_id": "gad-set-c",
+      "bridge_id": "ref_bridge_c",
+      "licence": "synthesised in-repo for testing; contains no third-party content",
+      "notes": "Abutment/pier details; steepest splay, widest carriageway."
+    },
+    {
+      "id": "gad-set-d-sheet5",
+      "repo": "local://bridgecad/refs-corpus",
+      "commit": "1eb2adb5cc2fa8066fd924246ddc8d20fe145d99c59e7046878696453840ba12",
+      "path": "raw/gad-set-d-sheet5.pdf",
+      "sha256": "1eb2adb5cc2fa806",
+      "bytes": 29417,
+      "fetched_on": "2026-10-24",
+      "sheet_type": "sheet5_pier_abutment_details",
+      "pages": 1,
+      "text_layer": false,
+      "set_id": "gad-set-d",
+      "bridge_id": "ref_bridge_d",
+      "licence": "synthesised in-repo for testing; contains no third-party content",
+      "notes": "Scanned abutment/pier details \u2014 no text layer, OCR route required."
+    }
+  ]
+}

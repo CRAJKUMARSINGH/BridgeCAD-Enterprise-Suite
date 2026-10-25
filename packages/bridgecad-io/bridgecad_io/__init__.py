@@ -15,9 +15,13 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from . import exceptions  # noqa: F401   # public package surface
-from .exceptions import (  # noqa: F401
-    BridgeCADError, IOError, ExcelParseError, JsonParseError, CsvParseError,
+from . import exceptions  # public package surface
+from .exceptions import (
+    BridgeCADError,
+    CsvParseError,
+    ExcelParseError,
+    IOError,
+    JsonParseError,
 )
 
 __version__ = "0.2.0-m2"
@@ -32,7 +36,7 @@ if TYPE_CHECKING:  # pragma: no cover - Type hints only; never evaluated
 
 def _bp_type() -> type:
     """Return the BridgeProject class without importing at top-level."""
-    from bridgecad_core import BridgeProject  # noqa: F401  (imported for caller)
+    from bridgecad_core import BridgeProject  # (imported for caller)
     return BridgeProject
 
 

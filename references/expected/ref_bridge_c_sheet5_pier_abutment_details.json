@@ -1,0 +1,101 @@
+{
+  "bridge_id": "ref_bridge_c",
+  "sheet_type": "sheet5_pier_abutment_details",
+  "values": [
+    {
+      "citation": {
+        "bbox": [
+          72.0,
+          62,
+          155.4,
+          74.5
+        ],
+        "page": 1,
+        "quote": "ABTL 15.500 m",
+        "ref": "gad-set-c-sheet5"
+      },
+      "key": "abtl",
+      "precision": 3,
+      "sheet_type": "sheet5_pier_abutment_details",
+      "status": "verified",
+      "unit": "m",
+      "value": "15.500"
+    },
+    {
+      "citation": {
+        "bbox": [
+          72.0,
+          90,
+          202.0,
+          102.5
+        ],
+        "page": 1,
+        "quote": "CARRIAGEWAY 11.0 m",
+        "ref": "gad-set-c-sheet5"
+      },
+      "key": "carriageway",
+      "precision": 1,
+      "sheet_type": "sheet5_pier_abutment_details",
+      "status": "proposed",
+      "unit": "m",
+      "value": "11.0"
+    },
+    {
+      "citation": {
+        "bbox": [
+          72.0,
+          118,
+          150.7,
+          130.5
+        ],
+        "page": 1,
+        "quote": "SPLAY 60 deg",
+        "ref": "gad-set-c-sheet5"
+      },
+      "key": "splay",
+      "precision": 0,
+      "sheet_type": "sheet5_pier_abutment_details",
+      "status": "verified",
+      "unit": "deg",
+      "value": "60"
+    },
+    {
+      "citation": {
+        "bbox": [
+          72.0,
+          146,
+          187.4,
+          158.5
+        ],
+        "page": 1,
+        "quote": "WING WALL 4.500 m",
+        "ref": "gad-set-c-sheet5"
+      },
+      "key": "wing_wall",
+      "precision": 3,
+      "sheet_type": "sheet5_pier_abutment_details",
+      "status": "verified",
+      "unit": "m",
+      "value": "4.500"
+    },
+    {
+      "citation": {
+        "bbox": [
+          72.0,
+          174,
+          213.4,
+          186.5
+        ],
+        "page": 1,
+        "quote": "BEARING LEVEL 112.900",
+        "ref": "gad-set-c-sheet5"
+      },
+      "key": "bearing_level_m",
+      "precision": 3,
+      "sheet_type": "sheet5_pier_abutment_details",
+      "status": "verified",
+      "unit": "m",
+      "value": "112.900"
+    }
+  ]
+}

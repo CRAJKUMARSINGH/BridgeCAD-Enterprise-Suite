@@ -13,8 +13,6 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import Optional
-
 
 # ---------------------------------------------------------------------------
 # Lacey's Regime Method (IRC:5-2015 Clause 24)
@@ -144,7 +142,7 @@ def design_scour_depth(
     f: float,
     structure_type: str = "PIER",
     regime_method: bool = True,
-    q_per_m: Optional[float] = None,
+    q_per_m: float | None = None,
 ) -> float:
     """IRC design scour depth with multiplier for structure type.
 

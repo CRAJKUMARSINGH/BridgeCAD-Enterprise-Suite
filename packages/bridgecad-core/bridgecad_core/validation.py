@@ -5,13 +5,11 @@ M1 Week 1 Day 4: 25 Critical + 5 Warning checks against BridgeProject.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from decimal import Decimal
-from typing import Callable, Iterable
 
 from .models import BridgeProject
-from .types import ValidationSeverity, ConcreteGrade
-
+from .types import ConcreteGrade, ValidationSeverity
 
 # ===========================================================================
 # Core data structures (unchanged from scaffold)
@@ -611,10 +609,11 @@ def check_elastomeric_pad_creep(p: BridgeProject) -> ValidationFinding:
     for r in rows:
         load = float(getattr(r, "load_kn", 0) or 0)
         btype = str(getattr(r, "bearing_type", "") or "").upper()
-        if "ELASTOMERIC" in btype or "NRB" in btype or "NEOPRENE" in btype:
-            if load > 700.0:
-                loc = str(getattr(r, "location", "") or "?")
-                fails.append(f"{loc}: load={load:.0f} kN > 700 kN")
+        if (
+            "ELASTOMERIC" in btype or "NRB" in btype or "NEOPRENE" in btype
+        ) and load > 700.0:
+            loc = str(getattr(r, "location", "") or "?")
+            fails.append(f"{loc}: load={load:.0f} kN > 700 kN")
     passed = len(fails) == 0
     return _f("W07", "Elastomeric bearing creep compression-set check",
               ValidationSeverity.WARNING, passed,
@@ -1040,7 +1039,7 @@ def check_eq_ultimate_overstrength_factor(p: BridgeProject) -> ValidationFinding
     passed = not (eq_found and not os_found)
     return _f("W43", "Overstrength Ω factor in ultimate EQ combination",
               ValidationSeverity.WARNING, passed,
-              f"EQ combo found but overstrength Ω missing — add 1.3 Ω to ULS EQ (IRC:6 Table 1)")
+              "EQ combo found but overstrength Ω missing — add 1.3 Ω to ULS EQ (IRC:6 Table 1)")
 
 
 def check_ptfe_stainless_steel_surface(p: BridgeProject) -> ValidationFinding:
@@ -1896,7 +1895,7 @@ def info_crz_clearance_within_500m_high_tide(p: BridgeProject) -> ValidationFind
     else:
         flag = dist < 500.0
     return _info_f("I49", "CRZ clearance if within 500 m HT line",
-                   not flag, f"within HT line zone — CRZ 2019 clearance application required")
+                   not flag, "within HT line zone — CRZ 2019 clearance application required")
 
 
 def info_epc_deliverable_integrated_gad_detailed(p: BridgeProject) -> ValidationFinding:
@@ -2076,6 +2075,46 @@ _ALL_CHECK_FNS: list[CheckFn] = [
     info_crz_clearance_within_500m_high_tide,  # I49
     info_epc_deliverable_integrated_gad_detailed,  # I50
 ]
+
+
+# ---------------------------------------------------------------------------
+# Wing-14 — stable V-ID aliases for the implemented rules.
+#
+# validation_registry.RULES keys the first 30 rules V001…V030 and marks them
+# implemented (C01–C25 + W01–W05). Each is re-exported under ``check_vNNN`` so
+# the registry's ``implemented`` flags can be proven against live check
+# functions rather than trusted. The remaining 120 registry rules are stubs.
+# ---------------------------------------------------------------------------
+check_v001 = check_project_stage_defined              # C01
+check_v002 = check_client_identity                    # C02
+check_v003 = check_bridge_category_assigned           # C03
+check_v004 = check_total_length_coherent              # C04
+check_v005 = check_width_does_not_exceed_deck         # C05
+check_v006 = check_horizontal_alignment               # C06
+check_v007 = check_vertical_gradient                  # C07
+check_v008 = check_superstructure_deck_combo          # C08
+check_v009 = check_pier_abutment_family               # C09
+check_v010 = check_bearing_schedule_not_empty         # C10
+check_v011 = check_expansion_joint_schedule           # C11
+check_v012 = check_return_period_set                  # C12
+check_v013 = check_scour_depth_positive               # C13
+check_v014 = check_soil_bearing_capacity              # C14
+check_v015 = check_concrete_grade_minimum             # C15
+check_v016 = check_seismic_zone_set                   # C16
+check_v017 = check_wind_speed_set                     # C17
+check_v018 = check_loading_class_set                  # C18
+check_v019 = check_chainage_set                       # C19
+check_v020 = check_fea_solver_soft_pass               # C20
+check_v021 = check_contract_package_phase             # C21
+check_v022 = check_safety_compliance_status           # C22
+check_v023 = check_quality_score_minimum              # C23
+check_v024 = check_lacey_silt_factor                  # C24
+check_v025 = check_vertical_curve_k                   # C25
+check_v026 = check_deck_width_over_15m                # W01
+check_v027 = check_pier_height_over_20m               # W02
+check_v028 = check_span_over_50m                      # W03
+check_v029 = check_steel_superstructure_fatigue       # W04
+check_v030 = check_concrete_grade_above_m60           # W05
 
 
 def _build_engine() -> RulesEngine:

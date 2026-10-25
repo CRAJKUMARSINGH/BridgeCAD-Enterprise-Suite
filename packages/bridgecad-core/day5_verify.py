@@ -1,42 +1,97 @@
 """M1 Week 1 Day 5 — Week-1 Sign-Off acceptance verifier (12 checks)."""
 from __future__ import annotations
+
+import py_compile
 import sys
 import traceback
-import py_compile
-from decimal import Decimal
 from datetime import date
+from decimal import Decimal
 from pathlib import Path
 
 from bridgecad_core import types as bc_types
-from bridgecad_core.models import (
-    BridgeProject, ProjectMaster, BridgeSelection, GeometryInput,
-    Superstructure, Substructure, FoundationDetails, Approaches,
-    HydraulicData, Materials, BearingsJoints, BearingScheduleRow,
-    ExpansionJointScheduleRow, ComponentsLib, DrawingControl,
-    Calculations, ValidationModel,
-)
-from bridgecad_core.geometry.plan import compute_plan_geometry
-from bridgecad_core.geometry.long_section import compute_long_section_geometry
 from bridgecad_core.geometry.cross_section import compute_cross_section_geometry
 from bridgecad_core.geometry.foundation import compute_pile_group_layout
-from bridgecad_core.validation import run_all
-from bridgecad_core.types import (
-    ClientType, ConsultantType, ContractorType, ProjectPhase, RevisionTag,
-    Currency, IndianStateCode, Language, BridgeCategory, SuperstructureType,
-    SpanConfiguration, CarriagewayLaneConfig, DesignCode, LoadClass,
-    SeismicZone, WindSpeedBasic_ms, FoundationType, SkewDirection,
-    ConcreteGrade, SteelGrade, PrestressGrade, BearingType, ExpansionJointType,
-    OutputFormat, AcadVersion, SheetSize, DrawingScale, LayerStandard,
-    TitleBlockStyle, KerbType, FootpathType, MedianType, CrashBarrierType,
-    ChainageUnit, AlignmentType, GirderType, WearingCoatType, DrainageType,
-    ParapetType, CamberMethod, PierType, PierCapType, AbutmentType,
-    ReturnWallType, WingWallType, PileType, PileShape, UnderReamCount,
-    WaterSourceType, FloodReturnPeriodDesign, SoilClass, WearingCoatGrade,
-    ValidationSeverity,
+from bridgecad_core.geometry.long_section import compute_long_section_geometry
+from bridgecad_core.geometry.plan import compute_plan_geometry
+from bridgecad_core.models import (
+    Approaches,
+    BearingScheduleRow,
+    BearingsJoints,
+    BridgeProject,
+    BridgeSelection,
+    Calculations,
+    ComponentsLib,
+    DrawingControl,
+    ExpansionJointScheduleRow,
+    FoundationDetails,
+    GeometryInput,
+    HydraulicData,
+    Materials,
+    ProjectMaster,
+    Substructure,
+    Superstructure,
+    ValidationModel,
 )
 from bridgecad_core.standards import (
-    irc_05, irc_21, irc_sp55, morth_specs,
+    irc_05,
+    irc_21,
+    irc_sp55,
+    morth_specs,
 )
+from bridgecad_core.types import (
+    AbutmentType,
+    AcadVersion,
+    AlignmentType,
+    BearingType,
+    BridgeCategory,
+    CamberMethod,
+    CarriagewayLaneConfig,
+    ChainageUnit,
+    ClientType,
+    ConcreteGrade,
+    ConsultantType,
+    ContractorType,
+    CrashBarrierType,
+    Currency,
+    DesignCode,
+    DrainageType,
+    DrawingScale,
+    ExpansionJointType,
+    FloodReturnPeriodDesign,
+    FootpathType,
+    FoundationType,
+    GirderType,
+    IndianStateCode,
+    KerbType,
+    Language,
+    LayerStandard,
+    LoadClass,
+    MedianType,
+    OutputFormat,
+    ParapetType,
+    PierCapType,
+    PierType,
+    PileShape,
+    PileType,
+    PrestressGrade,
+    ProjectPhase,
+    ReturnWallType,
+    RevisionTag,
+    SeismicZone,
+    SheetSize,
+    SkewDirection,
+    SpanConfiguration,
+    SteelGrade,
+    SuperstructureType,
+    TitleBlockStyle,
+    UnderReamCount,
+    WaterSourceType,
+    WearingCoatGrade,
+    WearingCoatType,
+    WindSpeedBasic_ms,
+    WingWallType,
+)
+from bridgecad_core.validation import run_all
 
 PKG_DIR = Path(__file__).resolve().parent
 CORE_DIR = PKG_DIR / "bridgecad_core"

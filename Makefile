@@ -1,67 +1,145 @@
-# Bridge GAD Generator — Unified task runner
-# Usage: make <target>
-# Requires: Python 3.11+, pip, docker (optional)
+.PHONY: help install dev lint format typecheck test test-e2e test-integration \
+        verify smoke bench build clean docker-up docker-down api ui web \
+        verify-docs verify-docs-fast test-docs mutate-docs prove prove-fast \
+        refs-extract refs-check refs-coverage refs-verify refs-verify-crops
 
-PYTHON   := python
-PIP      := pip
-APP      := streamlit_app_ultimate.py
-API_HOST := 127.0.0.1
-API_PORT := 8000
-UI_PORT  := 8501
+help:            ## Show this help
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
+		awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
 
-.PHONY: help dev build test worker docker lint fmt typecheck clean install
+install:         ## Editable install with dev extras
+	pip install -e ".[dev]"
+	pre-commit install
 
-help:
-	@echo ""
-	@echo "  Bridge GAD Generator — available targets"
-	@echo "  ─────────────────────────────────────────"
-	@echo "  make install    Install all dependencies"
-	@echo "  make dev        Run Streamlit UI (dev mode)"
-	@echo "  make api        Run FastAPI server"
-	@echo "  make worker     Run ARQ async worker"
-	@echo "  make build      Build Python package"
-	@echo "  make test       Run test suite"
-	@echo "  make lint       Run flake8 linter"
-	@echo "  make fmt        Run black formatter"
-	@echo "  make typecheck  Run mypy type checker"
-	@echo "  make docker     Build Docker image"
-	@echo "  make clean      Remove build artifacts"
-	@echo ""
+dev:             ## Smoke-check the workspace resolves
+	python -m bridgecad
 
-install:
-	$(PIP) install -e ".[dev]"
+lint:            ## ruff lint
+	ruff check .
 
-dev:
-	streamlit run $(APP) --server.port=$(UI_PORT) --server.address=0.0.0.0
+format:          ## ruff format + autofix
+	ruff format .
+	ruff check --fix .
 
-api:
-	uvicorn bridge_gad.api:app --host $(API_HOST) --port $(API_PORT) --reload
+typecheck:       ## mypy
+	mypy packages apps
 
-worker:
-	$(PYTHON) -m bridge_gad.worker
+test:            ## Unit tests
+	pytest packages tests/unit -q
 
-build:
-	$(PIP) install build
-	$(PYTHON) -m build
+test-integration: ## Full pipeline
+	pytest tests/integration -v
 
-test:
-	$(PYTHON) -m pytest test_ultimate_app.py -v --tb=short
+test-e2e:        ## 28 fixtures
+	python tests/e2e/run_e2e.py
 
-lint:
-	flake8 src/ --max-line-length=120 --ignore=E501,W503,E402 --count
+verify:          ## Acceptance verifiers
+	python -m bridgecad verify
 
-fmt:
-	black src/ streamlit_app_ultimate.py app_lean.py test_ultimate_app.py
+smoke:           ## Release gate
+	python rc1_smoke.py
 
-typecheck:
-	mypy src/bridge_gad/ --ignore-missing-imports --no-error-summary
+bench:           ## Benchmarks, 20% regression gate
+	pytest tests/benchmarks --benchmark-only
 
-docker:
-	docker build -t bridge-gad:latest .
+api:             ## Run the API
+	uvicorn bridgecad_api.main:app --reload --app-dir apps/api-gateway
+
+ui:              ## Run the Streamlit console
+	streamlit run apps/streamlit-ui/app.py
+
+web:             ## Run the React console
+	cd apps/web-console && npm run dev
+
+docker-up:
+	docker compose up -d
+
+docker-down:
+	docker compose down
+
+build:           ## Build distributions
+	python -m build
 
 clean:
-	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
-	find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
-	find . -type d -name dist -exec rm -rf {} + 2>/dev/null || true
-	find . -type d -name build -exec rm -rf {} + 2>/dev/null || true
-	find . -name "*.pyc" -delete 2>/dev/null || true
+	rm -rf build dist *.egg-info .pytest_cache .mypy_cache .ruff_cache
+	find . -name __pycache__ -type d -prune -exec rm -rf {} +
+
+labels:          ## Create or update repo labels (needs gh, authenticated)
+	python scripts/sync_labels.py
+
+wing:             ## Wing geometry suite
+	pytest tests/draw -v
+
+wing-fast:        ## Skip visual baselines
+	pytest tests/draw -v -m "draw and not visual"
+
+wing-rebaseline:  ## Regenerate PNG baselines
+	rm -f tests/draw/baselines/*.hash
+	pytest tests/draw -m visual
+
+wing-report:     ## Per-sheet review report (HTML + JSON)
+	python scripts/wing_report.py --html site-wing/wing-report.html --json wing-report.json
+
+wing-report-check: ## Report and fail on any structural failure
+	python scripts/wing_report.py --check
+
+wing-report-open:  ## Report, then open it
+	python scripts/wing_report.py
+	@python -c "import webbrowser,sys; webbrowser.open('site-wing/wing-report.html')"
+
+prove-draw:      ## Prove the Wing suite catches broken geometry (16/16)
+	python scripts/prove_draw_detection.py
+
+prove-draw-fast: ## Critical geometry mutations only
+	python scripts/prove_draw_detection.py --only G01,G02,G03,G05 --jobs 8
+
+links:           ## Check external + internal links
+	lychee --config .lychee.toml --no-progress '**/*.md'
+
+docpaths:        ## Check paths referenced in code blocks
+	python scripts/check_doc_paths.py
+
+docs-check: links docpaths  ## Both
+
+docs-serve:      ## Live docs site
+	mkdocs serve
+
+docs-build:      ## Strict build
+	mkdocs build --strict
+
+docs-clean:
+	rm -rf site site-api docs/guide.md docs/index.md docs/contributing.md \
+	       docs/changelog.md docs/security.md docs/code-of-conduct.md docs/docs-index.md
+
+verify-docs:     ## Full documentation verification (JSON)
+	python scripts/verify_docs.py --json
+
+verify-docs-fast: ## Integrity + path gates only
+	python scripts/verify_docs.py --only paths,integrity
+
+test-docs:       ## Doc test suite, verbose
+	pytest tests/docs -v
+
+mutate-docs:     ## Gate self-tests only — proves the guards fire
+	pytest tests/docs/test_gates_selfcheck.py -v
+
+prove:           ## Prove every defect is detectable (17/17)
+	python scripts/prove_detection.py
+
+prove-fast:      ## Critical defects only
+	python scripts/prove_detection.py --only D01,D02,D03,D04 --jobs 8
+
+refs-extract:      ## Pull facts off references (text layer + OCR)
+	python scripts/refs_extract.py
+
+refs-check:        ## Fail if extracted/ is stale against raw/ or the pipeline
+	python scripts/refs_extract.py --check
+
+refs-coverage:     ## Write and print the coverage report
+	python scripts/refs_coverage.py
+
+refs-verify:       ## Show proposed values with citations
+	python scripts/refs_verify.py
+
+refs-verify-crops: ## Write bbox crops so a human verifies OCR against pixels
+	python scripts/refs_verify.py --crop

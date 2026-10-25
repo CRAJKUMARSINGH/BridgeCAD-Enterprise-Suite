@@ -1,36 +1,80 @@
 """M3 smoke test — generate 8-sheet GAD package for a simple 12m bridge."""
 from __future__ import annotations
-import sys, logging
+
+import logging
+import sys
 from decimal import Decimal
-from datetime import date
 from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
 # ── Add bridgecad-core to path ────────────────────────────────────────────
-import os
 CORE = Path(__file__).parent.parent / "bridgecad-core"
 sys.path.insert(0, str(CORE))
 
 from bridgecad_core.models import (
-    BridgeProject, ProjectMaster, BridgeSelection, GeometryInput,
-    Superstructure, Substructure, FoundationDetails, Approaches,
-    HydraulicData, Materials, BearingsJoints, BearingScheduleRow,
-    ExpansionJointScheduleRow, ComponentsLib, DrawingControl,
-    Calculations, ValidationModel,
+    Approaches,
+    BearingScheduleRow,
+    BearingsJoints,
+    BridgeProject,
+    BridgeSelection,
+    Calculations,
+    ComponentsLib,
+    DrawingControl,
+    ExpansionJointScheduleRow,
+    FoundationDetails,
+    GeometryInput,
+    HydraulicData,
+    Materials,
+    ProjectMaster,
+    Substructure,
+    Superstructure,
+    ValidationModel,
 )
 from bridgecad_core.types import (
-    ClientType, ConsultantType, ContractorType, ProjectPhase, RevisionTag,
-    Currency, IndianStateCode, Language, BridgeCategory, SuperstructureType,
-    SpanConfiguration, CarriagewayLaneConfig, DesignCode, LoadClass,
-    SeismicZone, WindSpeedBasic_ms, FoundationType, SkewDirection,
-    ConcreteGrade, SteelGrade, PrestressGrade, BearingType, ExpansionJointType,
-    OutputFormat, AcadVersion, SheetSize, DrawingScale, LayerStandard,
-    TitleBlockStyle, KerbType, FootpathType, MedianType, CrashBarrierType,
-    ChainageUnit, AlignmentType, GirderType, WearingCoatType, DrainageType,
-    ParapetType, CamberMethod, PierType, PierCapType, AbutmentType,
-    ReturnWallType, WingWallType, PileType, PileShape, UnderReamCount,
-    WaterSourceType, FloodReturnPeriodDesign, SoilClass, WearingCoatGrade,
+    AbutmentType,
+    AcadVersion,
+    AlignmentType,
+    BearingType,
+    BridgeCategory,
+    CamberMethod,
+    CarriagewayLaneConfig,
+    ChainageUnit,
+    ClientType,
+    ConcreteGrade,
+    Currency,
+    DesignCode,
+    DrawingScale,
+    ExpansionJointType,
+    FloodReturnPeriodDesign,
+    FoundationType,
+    GirderType,
+    IndianStateCode,
+    Language,
+    LayerStandard,
+    LoadClass,
+    OutputFormat,
+    ParapetType,
+    PierCapType,
+    PierType,
+    PileShape,
+    PileType,
+    PrestressGrade,
+    ProjectPhase,
+    ReturnWallType,
+    RevisionTag,
+    SeismicZone,
+    SheetSize,
+    SkewDirection,
+    SpanConfiguration,
+    SteelGrade,
+    SuperstructureType,
+    TitleBlockStyle,
+    UnderReamCount,
+    WaterSourceType,
+    WearingCoatType,
+    WindSpeedBasic_ms,
+    WingWallType,
 )
 
 SIMPLE_12M = BridgeProject(

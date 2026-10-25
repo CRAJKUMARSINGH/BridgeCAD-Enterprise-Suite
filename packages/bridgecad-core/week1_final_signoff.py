@@ -73,17 +73,17 @@ def run_day_scripts() -> int:
             continue
         r = subprocess.run([sys.executable, str(p)],
                            capture_output=True, text=True, cwd=str(ROOT))
-        verdict_lines = [l.strip() for l in r.stdout.splitlines()
-                         if "VERDICT" in l or "ACCEPTED" in l or "SIGN-OFF" in l]
+        verdict_lines = [line.strip() for line in r.stdout.splitlines()
+                         if "VERDICT" in line or "ACCEPTED" in line or "SIGN-OFF" in line]
         for v in verdict_lines:
             print(f"     {v}")
         rc_icon = "OK" if r.returncode == 0 else "FAIL"
         print(f"     {rc_icon}  exit_code={r.returncode}")
         if r.returncode != 0:
             total_rc += 1
-            tail = [l for l in r.stdout.splitlines() if l.strip()][-10:]
-            for l in tail:
-                print(f"       | {l}")
+            tail = [line for line in r.stdout.splitlines() if line.strip()][-10:]
+            for line in tail:
+                print(f"       | {line}")
     return total_rc
 
 

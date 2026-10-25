@@ -12,8 +12,10 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
-from .models   import BillOfQuantities, BillSection, BillItem
+from .models import BillItem, BillOfQuantities, BillSection
+from .provenance import BoqLine, LineStatus, RateSource
 from .rates_db import get_rates_db
+
 
 # ── Bootstrap path so processor can import bridgecad_core ─────────────────
 def _ensure_core_importable():
@@ -44,7 +46,8 @@ def extract_and_price(
     """
     _ensure_core_importable()
 
-    from bridgecad_core.quantities import extract_quantities, BillItem as CoreItem
+    from bridgecad_core.quantities import BillItem as CoreItem
+    from bridgecad_core.quantities import extract_quantities
 
     db  = get_rates_db()
     pm  = project.project_master
@@ -104,7 +107,6 @@ def extract_and_price(
         wc_sqm = float(gi.total_length_m) * float(gi.carriageway_width_m)
 
     # ── Prestress (from model calculations) ──────────────────────────────────
-    from bridgecad_core.types import PrestressGrade
     ps_mt = float(getattr(project.calculations, "prestress_tonnes_approx", 0) or 0)
     has_prestress = ps_mt > 0
 
@@ -154,9 +156,9 @@ def extract_and_price(
         return it
 
     # ── Formwork area from core ────────────────────────────────────────────────
-    fw_sup  = float(getattr(project.calculations,
+    float(getattr(project.calculations,
                     "concrete_volume_superstructure_cum", sup_total_cum) or sup_total_cum) * 4.0
-    fw_sub  = sub_total_cum * 3.5
+    sub_total_cum * 3.5
 
     boq = BillOfQuantities(
         project_name    = str(getattr(pm, "project_title", "") or ""),
@@ -360,7 +362,7 @@ def extract_and_price(
                          f"Single modular expansion joint ±80mm movement ({getattr(ejr,'location','')})"))
         elif "MULTI_MODULAR" in ej_type:
             s6.add(_item("2801.4", ej_rm,
-                         f"Double/multi modular expansion joint ±160mm movement"))
+                         "Double/multi modular expansion joint ±160mm movement"))
         elif "STRIP" in ej_type:
             s6.add(_item("2801.2", ej_rm, f"Strip seal joint ±40mm ({getattr(ejr,'location','')})"))
         else:
@@ -427,4 +429,192 @@ def extract_and_price(
     return boq
 
 
-__all__ = ["extract_and_price"]
+# ── Wing-13: BOQ line provenance ─────────────────────────────────────────────
+#
+# `extract_and_price` produces the numbers; `build_boq` labels each line with
+# where its number came from. The multipliers stay multipliers — Wing-13 makes
+# them *labelled*, not derived. A line reading 42.0 must say whether it came
+# from a formula, a multiplier, or is not calculated at all.
+
+# Codes whose quantity is a parametric multiplier on another quantity or count.
+# Every other priced line is a direct measure and is labelled `calculated`.
+_ESTIMATED_CODES = {
+    "1702.1", "1702.2", "1702.3",        # formwork ratios on concrete volume
+    "1601.1",                            # reinforcement ratio on concrete volume
+    "1703.1",                            # duct length from prestress tonnage
+    "1801.7",                            # pile integrity test = 30% of pile count
+    "1810.2",                            # well cap = 30% of foundation concrete
+    "2601.3", "2601.4",                  # drainage counts from spacing
+    "QA.1", "QA.2", "QA.3", "QA.4",       # testing and survey allowances
+    "MISC.1",
+}
+
+# Single-factor codes: code -> (multiplier, source note).
+_MULTIPLIER = {
+    "1703.1": (1000.0 / 14.0,
+               "prestress duct length ≈ tonnage × 1000 / 14 MT-per-km (processor heuristic)"),
+    "1801.7": (0.30, "pile integrity testing = 30% of pile count (processor heuristic)"),
+    "1810.2": (0.30, "well cap ≈ 0.30 × foundation concrete volume (processor heuristic)"),
+    "2601.3": (2.00, "deck scuppers = 2 per drainage spacing over the deck (processor heuristic)"),
+    "2601.4": (4.00, "CI downpipe = 4 m average drop per scupper (processor heuristic)"),
+    "QA.1":   (0.20, "concrete cube sets = 1 per 5 CUM (processor heuristic)"),
+    "QA.2":   (0.10, "rebar tests = 1 per 10 MT (processor heuristic)"),
+    "QA.4":   (0.15, "pile integrity testing = 15% of pile count (processor heuristic)"),
+    "QA.3":   (1.00, "lump sum — one proof load test on the completed bridge"),
+    "MISC.1": (1.00, "lump sum — survey and setting out"),
+}
+
+# Codes that carry several ratios: the factor is keyed off the description.
+_FORMWORK_FACTORS = {
+    "1702.1": (("pile cap soffit", 3.2), ("footing", 3.0), ("pier shafts", 4.5),
+               ("abutment walls", 4.2), ("wing", 4.0), ("approach slab", 3.5),
+               ("parapet", 5.0)),
+    "1702.2": (("pier cap", 5.5), ("deck slab", 4.8), ("girder", 6.0)),
+    "1702.3": (("staging", 1.0),),
+}
+_REBAR_FACTORS = (("pile caps", 0.12), ("footing", 0.05), ("pier caps", 0.12),
+                  ("pier shafts", 0.09), ("abutments", 0.08), ("wings", 0.07),
+                  ("approach slab", 0.10), ("deck slab", 0.11),
+                  ("girders", 0.135), ("parapets", 0.12))
+
+# Direct-measure codes: code -> (formula, source fields read).
+_CALCULATED = {
+    "301.1": ("excavation volume = extract_quantities()[EW-100]", ["EW-100"]),
+    "301.2": ("backfill volume = extract_quantities()[EW-200]", ["EW-200"]),
+    "301.6": ("overall_width_m × 2 sides × 2", ["geometry_input.overall_width_m"]),
+    "1801.6": ("pile count = piles_per_pier × supports",
+               ["foundation_details.piles_per_pier", "geometry_input.span_count"]),
+    "1810.1": ("well steining = extract_quantities()[FND-210]", ["FND-210"]),
+    "1601.2": ("prestress tonnage = calculations.prestress_tonnes_approx",
+               ["calculations.prestress_tonnes_approx"]),
+    "2601.1": ("deck area = total_length_m × overall_width_m",
+               ["geometry_input.total_length_m", "geometry_input.overall_width_m"]),
+    "2901.3": ("backfill = overall_width_m × abutment_height_m × 2",
+               ["geometry_input.overall_width_m", "substructure.abutment_height_m"]),
+    "801.1":  ("barrier length = (total_length_m + 2 × approach_slab_length_m) × 2",
+               ["geometry_input.total_length_m", "substructure.approach_slab_length_m"]),
+    "801.3":  ("barrier length = (total_length_m + 2 × approach_slab_length_m) × 2",
+               ["geometry_input.total_length_m", "substructure.approach_slab_length_m"]),
+    "801.4":  ("marking length = total_length_m × 2", ["geometry_input.total_length_m"]),
+    "601.1":  ("stone pitching = total_length_m × 2.5", ["geometry_input.total_length_m"]),
+    "601.2":  ("apron = max(10, total_length_m × 0.08) × overall_width_m × 0.25",
+               ["geometry_input.total_length_m", "geometry_input.overall_width_m"]),
+    "601.4":  ("apron = max(10, total_length_m × 0.08) × overall_width_m × 0.15",
+               ["geometry_input.total_length_m", "geometry_input.overall_width_m"]),
+}
+for _pile_code in ("1801.1", "1801.2", "1801.3", "1801.4"):
+    _CALCULATED[_pile_code] = (
+        "pile running length = pile_length_m × piles_per_pier × supports",
+        ["foundation_details.pile_length_m", "foundation_details.piles_per_pier",
+         "geometry_input.span_count"],
+    )
+
+
+def _concrete_grade_known(project: Any) -> bool:
+    """True unless the drafting view has blanked the concrete grade.
+
+    ``DrawProject.materials.concrete_grade`` is the drafting name for the
+    model's ``concrete_superstructure``; a test that clears it is asking what
+    the BOQ does when a required input is missing.
+    """
+    materials = getattr(project, "materials", None)
+    if materials is None:
+        return True
+    if hasattr(materials, "concrete_grade"):
+        return materials.concrete_grade is not None
+    return getattr(materials, "concrete_superstructure", None) is not None
+
+
+def _estimated_factor(code: str, description: str) -> tuple[float, str]:
+    """Return (multiplier, source note) for a multiplier-derived line."""
+    low = description.lower()
+    if code in _FORMWORK_FACTORS:
+        for fragment, factor in _FORMWORK_FACTORS[code]:
+            if fragment in low:
+                return factor, (f"formwork area ≈ concrete volume × {factor}"
+                                " (processor heuristic)")
+        return 1.0, "formwork area ≈ concrete volume × ratio (processor heuristic)"
+    if code == "1601.1":
+        for fragment, factor in _REBAR_FACTORS:
+            if fragment in low:
+                return factor, (f"reinforcement ≈ concrete volume × {factor} t/cum"
+                                " (processor heuristic)")
+        return 1.0, "reinforcement ratio on concrete volume (processor heuristic)"
+    if code in _MULTIPLIER:
+        return _MULTIPLIER[code]
+    return 1.0, "parametric multiplier (processor heuristic)"
+
+
+def _calculated_formula(code: str, description: str) -> tuple[str, list[str]]:
+    if code in _CALCULATED:
+        return _CALCULATED[code]
+    return (
+        f"{description} — quantity from bridgecad_core.quantities.extract_quantities()",
+        ["bridgecad_core.quantities.extract_quantities"],
+    )
+
+
+def _provenance_line(item_no: str, item: BillItem,
+                     grade_known: bool) -> BoqLine:
+    code = item.item_code
+    desc = item.description
+    unit = item.unit
+    qty  = float(item.quantity) if item.quantity is not None else None
+    rate = float(item.rate) if item.rate is not None else None
+
+    if rate is None:
+        return BoqLine(
+            item_no, desc, unit, qty, None, None, LineStatus.NOT_CALCULATED,
+            rate_source=RateSource.MISSING,
+            reason=f"no MORTH 2024-25 rate for item {code} and no state override",
+        )
+
+    is_concrete = code.startswith("1701") or desc.lower().startswith("concrete")
+    if is_concrete and not grade_known:
+        return BoqLine(
+            item_no, desc, unit, qty, rate, None, LineStatus.NOT_CALCULATED,
+            rate_source=RateSource.MORTH_2024_25,
+            reason="concrete grade not specified (materials.concrete_grade is blank)",
+        )
+
+    amount = qty * rate
+
+    if code in _ESTIMATED_CODES:
+        multiplier, note = _estimated_factor(code, desc)
+        return BoqLine(
+            item_no, desc, unit, qty, rate, amount, LineStatus.ESTIMATED,
+            multiplier=multiplier, multiplier_source=note,
+            rate_source=RateSource.MORTH_2024_25,
+        )
+
+    formula, fields = _calculated_formula(code, desc)
+    return BoqLine(
+        item_no, desc, unit, qty, rate, amount, LineStatus.CALCULATED,
+        formula=formula, source_fields=fields,
+        rate_source=RateSource.MORTH_2024_25,
+    )
+
+
+def build_boq(project: Any, state: str | None = None) -> list[BoqLine]:
+    """Build BOQ lines, each carrying its own provenance.
+
+    Reuses :func:`extract_and_price` for the quantities and rates, then labels
+    every line: ``calculated`` (a formula and the fields it read), ``estimated``
+    (a multiplier and its source note), or ``not_calculated`` (a reason, never a
+    number). A missing input propagates to ``not_calculated`` — never a default.
+    """
+    boq = extract_and_price(project, state=state)
+    grade_known = _concrete_grade_known(project)
+
+    seen: dict[str, int] = {}
+    lines: list[BoqLine] = []
+    for section in boq.sections:
+        for item in section.items:
+            code = item.item_code
+            seen[code] = seen.get(code, 0) + 1
+            item_no = code if seen[code] == 1 else f"{code}.{seen[code]}"
+            lines.append(_provenance_line(item_no, item, grade_known))
+    return lines
+
+
+__all__ = ["extract_and_price", "build_boq"]

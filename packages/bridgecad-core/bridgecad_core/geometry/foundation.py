@@ -152,7 +152,7 @@ def _standard_pile_positions(
 # Factory function
 # ---------------------------------------------------------------------------
 
-def compute_pile_group_layout(project: "BridgeProject") -> PileGroupLayout:
+def compute_pile_group_layout(project: BridgeProject) -> PileGroupLayout:
     """Derive pile group geometry for the primary pier from a validated BridgeProject.
 
     Parameters
@@ -219,8 +219,8 @@ def compute_pile_group_layout(project: "BridgeProject") -> PileGroupLayout:
         )
 
     # ---- well (caisson) foundation --------------------------------------
-    from bridgecad_core.types import FoundationType as FT
-    if foundation_type in (FT.WELL, FT.WELL_PLUS_PILE):
+    from bridgecad_core.types import FoundationType
+    if foundation_type in (FoundationType.WELL, FoundationType.WELL_PLUS_PILE):
         # Well outer diameter inferred from pier shaft width (approx 2.5× shaft)
         pier_shaft_w = float(sub.pier_shaft_width_m) if sub.pier_shaft_width_m else 2.0
         outer_r = max(pier_shaft_w, 1.5)            # minimum 1.5 m outer radius

@@ -1,0 +1,21 @@
+{
+  "current": "P2",
+  "purpose": "TENDER",
+  "revisions": [
+    {
+      "code": "P1",
+      "date": "2026-09-14",
+      "purpose": "PRELIMINARY",
+      "description": "First issue for comment",
+      "sheets": ["sheet1_plan", "sheet2_long_section"]
+    },
+    {
+      "code": "P2",
+      "date": "2026-10-22",
+      "purpose": "PRELIMINARY",
+      "description": "Long section drawn; coordinate contract unified",
+      "sheets": ["sheet1_plan", "sheet2_long_section"],
+      "supersedes": "P1"
+    }
+  ]
+}

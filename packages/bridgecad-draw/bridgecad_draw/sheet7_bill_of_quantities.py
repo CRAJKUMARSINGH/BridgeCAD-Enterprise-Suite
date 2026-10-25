@@ -16,14 +16,13 @@ Unit rates are left blank (TBC by estimator) — this is the abstract BOQ,
 not the priced BOQ (that lives in bridgecad-bill).
 """
 from __future__ import annotations
-from decimal import Decimal
+
 from pathlib import Path
 from typing import Any
 
 from .dxf_engine import new_sheet, save
-from .primitives import line, rectangle, text, LayoutCursor
+from .primitives import LayoutCursor, rectangle, text
 from .titleblocks import draw_border, draw_title_block
-
 
 # MORTH chapter codes (schedule of rates reference)
 _BOQ_ITEMS = [
@@ -59,8 +58,6 @@ def _draw(msp: Any, project: Any) -> None:
     calc = project.calculations
     gi   = project.geometry_input
     sub  = project.substructure
-    ss   = project.superstructure
-    bj   = project.bearings_joints
 
     draw_border(msp, "A1")
     draw_title_block(
@@ -99,7 +96,6 @@ def _draw(msp: Any, project: Any) -> None:
     railing_rm     = total_len * 2 + app_slab_l * 4
     waterproof_sqm = total_len * overall_w
     earthwork      = total_len * overall_w * 2.5        # rough embankment
-    river_ls       = 1.0                                 # lump sum
 
     qty_map = {
         "earthwork_cum":     f"{earthwork:.1f}",
@@ -155,7 +151,7 @@ def _draw(msp: Any, project: Any) -> None:
 
     # -- Column headers (one row, columns advance LEFT → RIGHT per cell) --
     row_start_x = table.x
-    for hdr, cw in zip(headers, col_w):
+    for hdr, cw in zip(headers, col_w, strict=False):
         table.rect(msp, cw, row_h, layer="TITLEBLK-BOX")
         text(msp, hdr,
              table.x + cell_pad_x, table.y + cell_pad_y,
@@ -172,7 +168,7 @@ def _draw(msp: Any, project: Any) -> None:
         vals = [item_no, desc, unit, qty_str, "TBC", "", ref]
 
         row_save = table.x, table.y
-        for val, cw in zip(vals, col_w):
+        for val, cw in zip(vals, col_w, strict=False):
             table.rect(msp, cw, row_h, layer="TITLEBLK-BOX")
             text(msp, str(val)[:28],
                  table.x + cell_pad_x, table.y + cell_pad_y,

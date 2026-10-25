@@ -80,6 +80,7 @@ def _apply() -> None:
             ("bridgecad-plugins", "bridgecad_plugins"),
             ("bridgecad-ai",      "bridgecad_ai"),
             ("bridgecad-infra",   "bridgecad_infra"),
+            ("bridgecad-refs",    "bridgecad_refs"),
         ]:
             pkg_dir = packages_dir / pkg_meta[0]
             if pkg_dir.is_dir():

@@ -10,11 +10,12 @@ Draws:
   6. Title block + border (Sheet 6 of 7)
 """
 from __future__ import annotations
+
 from pathlib import Path
 from typing import Any
 
 from .dxf_engine import new_sheet, save
-from .primitives import line, rectangle, text, hatch_rect, circle, dim_linear_h, dim_linear_v
+from .primitives import circle, dim_linear_h, dim_linear_v, hatch_rect, rectangle, text
 from .titleblocks import draw_border, draw_title_block
 
 
@@ -67,7 +68,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 20) -> None:
             str(getattr(br, "quantity", 1)),
         ]
         x = tx
-        for val, cw in zip(vals, b_col_w):
+        for val, cw in zip(vals, b_col_w, strict=False):
             rectangle(msp, x, y, cw, row_h, layer="TITLEBLK-BOX")
             text(msp, str(val)[:12], x + 1.5, y + 2.5,
                  height=th * 0.85, layer="TEXT-GENERAL")
@@ -77,7 +78,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 20) -> None:
     bx, by = 530.0, 420.0
     sc = 15.0   # mm per 100mm
     bw = 450 * sc / 100
-    bd = 450 * sc / 100
+    450 * sc / 100
     bt = 60  * sc / 100
     # ── Audit-required STRUC-OUTLINE layer bounding box around bearing sketches ──
     rectangle(msp, bx - 15, by - 15, bw + 30, 250,
@@ -96,7 +97,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 20) -> None:
 
     # POT bearing sketch
     px2, py2 = 530.0, 330.0
-    pr = 25 * sc / 100
+    25 * sc / 100
     circle(msp, px2 + bw/2, py2 + bw/2, bw/2, layer="SUB-BEARING")
     circle(msp, px2 + bw/2, py2 + bw/2, bw/2 * 0.6, layer="SUB-BEARING")
     text(msp, "POT / PTFE BEARING — PLAN",
@@ -126,7 +127,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 20) -> None:
             str(getattr(er, "quantity", 1)),
         ]
         x = ej_tx
-        for val, cw in zip(vals, ej_col_w):
+        for val, cw in zip(vals, ej_col_w, strict=False):
             rectangle(msp, x, y, cw, row_h, layer="TITLEBLK-BOX")
             text(msp, str(val)[:12], x + 1.5, y + 2.5,
                  height=th * 0.85, layer="TEXT-GENERAL")
@@ -167,7 +168,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 20) -> None:
 
 def _table(msp, tx, ty, headers, col_w, row_h, th):
     x = tx
-    for h, cw in zip(headers, col_w):
+    for h, cw in zip(headers, col_w, strict=False):
         rectangle(msp, x, ty, cw, row_h, layer="TITLEBLK-BOX")
         text(msp, h.replace("\n", " "), x + 1.5, ty + 2.5,
              height=th * 0.85, layer="TEXT-GENERAL")

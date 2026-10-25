@@ -1,0 +1,113 @@
+{
+  "extraction": "text",
+  "extractor_version": 1,
+  "facts": [
+    {
+      "citation": {
+        "bbox": [
+          72.0,
+          62,
+          155.4,
+          74.5
+        ],
+        "page": 1,
+        "quote": "ABTL 13.500 m",
+        "ref": "gad-borse-sheet5"
+      },
+      "fact": {
+        "key": "abtl",
+        "kind": "dimension",
+        "precision": 3,
+        "raw": "ABTL 13.500 m",
+        "unit": "m",
+        "value": "13.500"
+      }
+    },
+    {
+      "citation": {
+        "bbox": [
+          72.0,
+          90,
+          195.4,
+          102.5
+        ],
+        "page": 1,
+        "quote": "CARRIAGEWAY 8.0 m",
+        "ref": "gad-borse-sheet5"
+      },
+      "fact": {
+        "key": "carriageway",
+        "kind": "dimension",
+        "precision": 1,
+        "raw": "CARRIAGEWAY 8.0 m",
+        "unit": "m",
+        "value": "8.0"
+      }
+    },
+    {
+      "citation": {
+        "bbox": [
+          72.0,
+          118,
+          150.7,
+          130.5
+        ],
+        "page": 1,
+        "quote": "SPLAY 45 deg",
+        "ref": "gad-borse-sheet5"
+      },
+      "fact": {
+        "key": "splay",
+        "kind": "dimension",
+        "precision": 0,
+        "raw": "SPLAY 45 deg",
+        "unit": "deg",
+        "value": "45"
+      }
+    },
+    {
+      "citation": {
+        "bbox": [
+          72.0,
+          146,
+          187.4,
+          158.5
+        ],
+        "page": 1,
+        "quote": "WING WALL 3.889 m",
+        "ref": "gad-borse-sheet5"
+      },
+      "fact": {
+        "key": "wing_wall",
+        "kind": "dimension",
+        "precision": 3,
+        "raw": "WING WALL 3.889 m",
+        "unit": "m",
+        "value": "3.889"
+      }
+    },
+    {
+      "citation": {
+        "bbox": [
+          72.0,
+          174,
+          213.4,
+          186.5
+        ],
+        "page": 1,
+        "quote": "BEARING LEVEL 104.750",
+        "ref": "gad-borse-sheet5"
+      },
+      "fact": {
+        "key": "bearing_level_m",
+        "kind": "level",
+        "precision": 3,
+        "raw": "BEARING LEVEL 104.750",
+        "unit": "m",
+        "value": "104.750"
+      }
+    }
+  ],
+  "id": "gad-borse-sheet5",
+  "sha256": "c84a043984d97af9"
+}

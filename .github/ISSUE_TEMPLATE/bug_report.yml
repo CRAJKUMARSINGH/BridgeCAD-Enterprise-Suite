@@ -1,108 +1,123 @@
-name: 🐛 Bug Report
-description: Report a bug or unexpected behavior
-title: "[Bug]: "
-labels: ["bug", "triage"]
+name: Bug report
+description: Something is broken or produces wrong output
+title: "[Bug] "
+labels: ["bug", "status:needs-repro"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to report a bug! Please fill out the form below.
+        Before filing, run `python -m bridgecad info` from the repo root and
+        paste the output below. It resolves the workspace paths and answers most
+        import questions immediately.
+
+        **First check [docs/troubleshooting.md](https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/blob/main/docs/troubleshooting.md) — it lists the known non-bugs.**
 
   - type: textarea
-    id: description
+    id: what-happened
     attributes:
-      label: Describe the bug
-      description: A clear and concise description of what the bug is.
-      placeholder: Tell us what went wrong
+      label: What happened
+      description: One or two sentences. Concrete, not "it doesn't work".
+      placeholder: Generating the 7-sheet package for a 3-span workbook produces an empty sheet 4.
     validations:
       required: true
 
   - type: textarea
-    id: reproduce
+    id: command
     attributes:
-      label: Steps to reproduce
-      description: Steps to reproduce the behavior
+      label: Exact command or request
+      description: Copy-paste, including flags. For API bugs include method, path and body.
+      render: shell
       placeholder: |
-        1. Go to '...'
-        2. Click on '...'
-        3. Upload file '...'
-        4. See error
+        bridgecad-cli draw booklet bridge.xlsx -o out/
     validations:
       required: true
 
   - type: textarea
     id: expected
     attributes:
-      label: Expected behavior
-      description: What did you expect to happen?
-      placeholder: Tell us what should have happened
+      label: Expected
     validations:
       required: true
 
   - type: textarea
     id: actual
     attributes:
-      label: Actual behavior
-      description: What actually happened?
-      placeholder: Tell us what actually happened
+      label: Actual
+      description: Include the full traceback. Do not truncate.
+      render: shell
     validations:
       required: true
 
   - type: textarea
-    id: screenshots
+    id: repro
     attributes:
-      label: Screenshots
-      description: If applicable, add screenshots to help explain your problem
-      placeholder: Drag and drop images here
+      label: Minimal reproduction
+      description: >
+        Attach the workbook if you can. If you cannot share it, say which
+        template it came from and which fields you changed.
+    validations:
+      required: true
 
   - type: dropdown
-    id: os
+    id: area
     attributes:
-      label: Operating System
-      description: What operating system are you using?
+      label: Area
+      multiple: true
       options:
-        - Windows 11
-        - Windows 10
-        - macOS (Intel)
-        - macOS (Apple Silicon)
-        - Ubuntu/Debian
-        - Other Linux
-        - Other
+        - core (models, geometry, validation)
+        - io (Excel, CSV, JSON)
+        - draw (DXF, sheets, layers)
+        - bill (BOQ, rates)
+        - qa (rules, compliance)
+        - export (bundle, manifest)
+        - plugins
+        - ai
+        - infra (db, cache, auth)
+        - cli
+        - api
+        - streamlit ui
+        - react console
+        - docs
     validations:
       required: true
 
-  - type: input
-    id: python-version
+  - type: dropdown
+    id: entry
     attributes:
-      label: Python Version
-      description: What version of Python are you using?
-      placeholder: "e.g., 3.11.5"
+      label: Which generation
+      options:
+        - BridgeCAD Enterprise Suite (repo root) — ACTIVE
+        - Ultimate Bridge GAD Generator (streamlit_app_ultimate.py) — legacy
+        - Lean app (app_lean.py)
+        - Not sure
     validations:
       required: true
-
-  - type: input
-    id: app-version
-    attributes:
-      label: App Version
-      description: What version of the app are you using?
-      placeholder: "e.g., 1.0.0 or commit hash"
 
   - type: textarea
-    id: additional
+    id: info
     attributes:
-      label: Additional context
-      description: Add any other context about the problem here
-      placeholder: Any other relevant information
+      label: Output of `python -m bridgecad info`
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: manifest
+    attributes:
+      label: manifest.json
+      description: >
+        If the bug is in generated output, paste the manifest. It carries
+        versions, standards version and input hash — the audit trail.
+      render: json
 
   - type: checkboxes
-    id: terms
+    id: checks
     attributes:
-      label: Checklist
-      description: Please confirm the following
+      label: Confirmed
       options:
-        - label: I have searched existing issues to avoid duplicates
+        - label: I read docs/troubleshooting.md and this is not a listed non-bug
           required: true
-        - label: I have tested with the latest version
-          required: false
-        - label: I can provide a minimal reproducible example
-          required: false
+        - label: I am running the Suite from the repo root, not the legacy app
+          required: true
+        - label: This is reproducible on a clean clone of main
+          required: true

@@ -9,11 +9,9 @@ Roles: admin > engineer > viewer
 """
 from __future__ import annotations
 
-import hashlib
 import os
 import secrets
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass(frozen=True)
@@ -52,7 +50,7 @@ def _load_keys() -> dict[str, ApiKey]:
 _KEYS: dict[str, ApiKey] = _load_keys()
 
 
-def verify_api_key(key: str) -> Optional[ApiKey]:
+def verify_api_key(key: str) -> ApiKey | None:
     """Return ApiKey if valid, None otherwise. Uses constant-time comparison."""
     for stored_key, api_key in _KEYS.items():
         if secrets.compare_digest(key, stored_key):

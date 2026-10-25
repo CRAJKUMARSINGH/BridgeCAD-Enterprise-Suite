@@ -1,5 +1,7 @@
 # Bridge GAD Output Generation Guide
 
+> **Scope note:** this guide targets the **legacy** src/bridge_gad/ output driver, not the Suite. For Suite output see GUIDE.md §5.
+
 ## Quick Start
 
 ### Generate All Drawings (Recommended)

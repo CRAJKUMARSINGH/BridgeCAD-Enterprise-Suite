@@ -1,4 +1,6 @@
-import ast, os, sys, re
+import ast
+import os
+import re
 
 with open(os.path.join('bridgecad_core', 'types.py'), encoding='utf-8') as f:
     types_src = f.read()
@@ -43,9 +45,9 @@ skip = {'Optional','Union','list','List','Dict','Tuple','Set','Date','datetime',
         'float','bool','LabeledEnum','RangeBoundedEnum','UnitHaverEnum','ModelComputedFieldInfo'}
 for name in sorted(used_typenames):
     if name and name[0].isupper() and name not in skip and name not in types_classnames:
-        alt1 = name.rstrip('Type') if name.endswith('Type') else name + 'Type'
-        alt2 = name.rstrip('Class') if name.endswith('Class') else name + 'Class'
-        alt3 = name.rstrip('Category') if name.endswith('Category') else name + 'Category'
+        alt1 = name.removesuffix('Type') if name.endswith('Type') else name + 'Type'
+        alt2 = name.removesuffix('Class') if name.endswith('Class') else name + 'Class'
+        alt3 = name.removesuffix('Category') if name.endswith('Category') else name + 'Category'
         found_alt = None
         for v in [alt1, alt2, alt3]:
             if v in types_classnames:

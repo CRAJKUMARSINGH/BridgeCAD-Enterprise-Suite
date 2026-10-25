@@ -1,5 +1,6 @@
 """CSV BOQ formatter — flat CSV for import into spreadsheets."""
 from __future__ import annotations
+
 import csv
 from pathlib import Path
 from typing import Any

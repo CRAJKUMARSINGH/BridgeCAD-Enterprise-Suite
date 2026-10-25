@@ -1,0 +1,68 @@
+name: Bridge type request
+description: A bridge type the plugin registry does not cover
+title: "[Plugin] "
+labels: ["enhancement", "plugin-request"]
+body:
+  - type: input
+    id: type
+    attributes:
+      label: Bridge type
+      placeholder: PSC box girder
+    validations:
+      required: true
+
+  - type: input
+    id: span
+    attributes:
+      label: Typical span range (metres)
+      placeholder: 20–45
+    validations:
+      required: true
+
+  - type: textarea
+    id: standards
+    attributes:
+      label: Governing standards
+      description: Which IRC clauses drive the geometry for this type.
+    validations:
+      required: true
+
+  - type: textarea
+    id: geometry
+    attributes:
+      label: How the geometry differs from the default
+      description: >
+        Which sheets need overrides and what changes. Cross-section shape,
+        bearing arrangement, foundation type — be specific.
+    validations:
+      required: true
+
+  - type: input
+    id: reference
+    attributes:
+      label: Reference drawing
+      description: A file in sample-gad-drawings/ if one exists.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Template category
+      options:
+        - minor_bridges
+        - major_bridges
+        - viaducts
+        - culverts
+        - robs_rubs_fobs
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: offer
+    attributes:
+      label: Contribution
+      options:
+        - label: I can write the plugin myself (see docs/plugin-authoring.md)
+        - label: I can supply reference drawings
+        - label: I need the maintainers to build it

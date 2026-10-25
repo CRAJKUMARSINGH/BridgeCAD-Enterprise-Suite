@@ -1,7 +1,8 @@
-from bridgecad_core import types, validation_registry
+import py_compile
+
+from bridgecad_core import types
 from bridgecad_core.types import ENUM_REGISTRY
 from bridgecad_core.validation_registry import ALL_RULES
-import py_compile
 
 total_members = sum(len(list(c)) for c in ENUM_REGISTRY.values())
 S7_names = ['RiverBankType','SoilClass','RegimeConstantKValue','RiverGeomorphologyType','WaterSurfaceProfileType','ScourProtectionSubtype','SedimentYieldClassification','RiverCrossingClass']

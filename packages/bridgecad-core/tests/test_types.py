@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import pytest
 
-from bridgecad_core import types, validation_registry
-from bridgecad_core.types import ENUM_REGISTRY, LabeledEnum, UnitHaverEnum
-from bridgecad_core.validation_registry import RuleSpec, ALL_RULES
-
+from bridgecad_core import validation_registry
+from bridgecad_core.types import ENUM_REGISTRY, LabeledEnum
+from bridgecad_core.validation_registry import ALL_RULES
 
 ALL_ENUM_CLASSES: list = sorted(ENUM_REGISTRY.values(), key=lambda c: c.__name__)
 
@@ -25,7 +24,7 @@ def test_all_enums_have_unique_member_names(cls) -> None:
 @pytest.mark.parametrize("cls", ALL_ENUM_CLASSES, ids=lambda c: c.__name__)
 def test_all_str_enums_value_equals_member_name_or_valid_string(cls) -> None:
     for member in cls:
-        assert isinstance(member.value, (str, int)), (
+        assert isinstance(member.value, str | int), (
             f"{cls.__name__}.{member.name} value is not str/int: {type(member.value)}"
         )
         if isinstance(member.value, str):
@@ -112,7 +111,7 @@ def test_wind_importance_factor_has_1_15() -> None:
 
 def test_load_combination_has_dl_only() -> None:
     cls = ENUM_REGISTRY["LoadCombination"]
-    names = set(m.name for m in cls)
+    names = {m.name for m in cls}
     assert "LC01_DL_DEAD_LOAD_ONLY" in names
 
 
@@ -122,7 +121,7 @@ def test_layer_group_has_centreline() -> None:
 
 def test_wearing_coat_grade_has_sma() -> None:
     cls = ENUM_REGISTRY["WearingCoatGrade"]
-    names = set(m.name for m in cls)
+    names = {m.name for m in cls}
     assert any(n.startswith("SMA_") for n in names)
 
 

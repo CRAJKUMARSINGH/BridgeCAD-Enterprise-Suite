@@ -1,0 +1,17 @@
+{
+  "id": "ref_bridge_d",
+  "set_id": "gad-set-d",
+  "note": "Three-span 10 m, scanned — no text layer. Values are OCR-sourced.",
+  "source_sheets": ["gad-set-d-sheet2", "gad-set-d-sheet5"],
+  "parameters": {
+    "nspan": 3, "span_m": "10.0", "carriageway_m": "7.5",
+    "abtl_m": "12.250", "splay_deg": "50.000",
+    "deck_level_m": "106.900", "hfl_m": "103.800", "lwl_m": "99.100",
+    "founding_level_m": "96.50"
+  },
+  "stated_values": {
+    "pier_count":         {"value": 2, "citation": {"ref": "gad-set-d-sheet2", "page": 1, "quote": "P1  P2"}, "status": "proposed"},
+    "wing_face_run_m":    {"value": "2.375", "citation": {"ref": "gad-set-d-sheet5", "page": 1, "quote": "2.375"}, "status": "proposed"},
+    "wing_wall_length_m": {"value": "3.695", "citation": {"ref": "gad-set-d-sheet5", "page": 1, "quote": "3.695"}, "status": "proposed"}
+  }
+}

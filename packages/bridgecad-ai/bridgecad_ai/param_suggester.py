@@ -7,7 +7,7 @@ recommended starting values (not enforced — user always overrides).
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass

@@ -1,0 +1,113 @@
+{
+  "extraction": "text",
+  "extractor_version": 1,
+  "facts": [
+    {
+      "citation": {
+        "bbox": [
+          72.0,
+          62,
+          155.4,
+          74.5
+        ],
+        "page": 1,
+        "quote": "ABTL 10.000 m",
+        "ref": "gad-set-b-sheet5"
+      },
+      "fact": {
+        "key": "abtl",
+        "kind": "dimension",
+        "precision": 3,
+        "raw": "ABTL 10.000 m",
+        "unit": "m",
+        "value": "10.000"
+      }
+    },
+    {
+      "citation": {
+        "bbox": [
+          72.0,
+          90,
+          195.4,
+          102.5
+        ],
+        "page": 1,
+        "quote": "CARRIAGEWAY 7.5 m",
+        "ref": "gad-set-b-sheet5"
+      },
+      "fact": {
+        "key": "carriageway",
+        "kind": "dimension",
+        "precision": 1,
+        "raw": "CARRIAGEWAY 7.5 m",
+        "unit": "m",
+        "value": "7.5"
+      }
+    },
+    {
+      "citation": {
+        "bbox": [
+          72.0,
+          118,
+          150.7,
+          130.5
+        ],
+        "page": 1,
+        "quote": "SPLAY 30 deg",
+        "ref": "gad-set-b-sheet5"
+      },
+      "fact": {
+        "key": "splay",
+        "kind": "dimension",
+        "precision": 0,
+        "raw": "SPLAY 30 deg",
+        "unit": "deg",
+        "value": "30"
+      }
+    },
+    {
+      "citation": {
+        "bbox": [
+          72.0,
+          146,
+          187.4,
+          158.5
+        ],
+        "page": 1,
+        "quote": "WING WALL 1.443 m",
+        "ref": "gad-set-b-sheet5"
+      },
+      "fact": {
+        "key": "wing_wall",
+        "kind": "dimension",
+        "precision": 3,
+        "raw": "WING WALL 1.443 m",
+        "unit": "m",
+        "value": "1.443"
+      }
+    },
+    {
+      "citation": {
+        "bbox": [
+          72.0,
+          174,
+          213.4,
+          186.5
+        ],
+        "page": 1,
+        "quote": "BEARING LEVEL 101.400",
+        "ref": "gad-set-b-sheet5"
+      },
+      "fact": {
+        "key": "bearing_level_m",
+        "kind": "level",
+        "precision": 3,
+        "raw": "BEARING LEVEL 101.400",
+        "unit": "m",
+        "value": "101.400"
+      }
+    }
+  ],
+  "id": "gad-set-b-sheet5",
+  "sha256": "71bb9b6b497c80df"
+}

@@ -1,0 +1,43 @@
+# Link integrity for all markdown. Runs in CI (docs-ci.yml) and via `make links`.
+#
+# Key names track the lychee version pinned in the workflow. Renaming or
+# reordering keys across versions silently disables them — bump deliberately.
+
+max_retries = 3
+retry_wait_time = 2
+timeout = 20
+max_concurrency = 8
+
+# 429 = rate limited but alive. 403 = bot-blocked but the page exists.
+accept = [200, 206, 429, 403]
+
+# Follow "#section" links and verify the anchor exists. This catches the case
+# where a heading is renamed and every link into it rots silently.
+include_fragments = true
+
+exclude_mail = true
+
+scheme = ["https", "http", "file"]
+
+# Nothing in here is maintained, and neither is anything generated.
+exclude_path = [
+  "archive/",
+  "node_modules/",
+  ".venv/",
+  "site/",
+  "site-api/",
+  "03_outputs/",
+  "outputs/",
+  "test_run_sample/",
+]
+
+exclude = [
+  "^https?://localhost",
+  "^https?://127\\.0\\.0\\.1",
+  "^https?://.*\\.local",
+  # badge endpoints rate-limit aggressively; they are covered by CI status itself
+  "^https://img\\.shields\\.io",
+  # add a flaky-but-real host here. Never delete the link.
+]
+
+cache = true

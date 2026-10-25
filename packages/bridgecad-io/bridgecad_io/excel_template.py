@@ -16,7 +16,6 @@ M2 Week 2 implementation.
 from __future__ import annotations
 
 import logging
-from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
@@ -25,7 +24,12 @@ logger = logging.getLogger(__name__)
 try:
     import openpyxl
     from openpyxl.styles import (
-        Font, PatternFill, Alignment, Border, Side, Protection,
+        Alignment,
+        Border,
+        Font,
+        PatternFill,
+        Protection,
+        Side,
     )
     from openpyxl.utils import get_column_letter
     from openpyxl.worksheet.datavalidation import DataValidation
@@ -48,42 +52,42 @@ _RED    = "FFC7CE"
 _WHITE  = "FFFFFF"
 _BLACK  = "000000"
 
-def _border(style: str = "thin") -> "Border":
+def _border(style: str = "thin") -> Border:
     s = Side(style=style)
     return Border(left=s, right=s, top=s, bottom=s)
 
 def _hdr_style() -> dict:
-    return dict(
-        font=Font(bold=True, color=_WHITE, size=11, name="Arial"),
-        fill=PatternFill("solid", fgColor=_NAVY),
-        alignment=Alignment(horizontal="center", vertical="center", wrap_text=True),
-        border=_border(),
-    )
+    return {
+        "font": Font(bold=True, color=_WHITE, size=11, name="Arial"),
+        "fill": PatternFill("solid", fgColor=_NAVY),
+        "alignment": Alignment(horizontal="center", vertical="center", wrap_text=True),
+        "border": _border(),
+    }
 
 def _sub_style() -> dict:
-    return dict(
-        font=Font(bold=True, size=10, name="Arial"),
-        fill=PatternFill("solid", fgColor=_LBLUE),
-        alignment=Alignment(horizontal="left", vertical="center"),
-        border=_border(),
-    )
+    return {
+        "font": Font(bold=True, size=10, name="Arial"),
+        "fill": PatternFill("solid", fgColor=_LBLUE),
+        "alignment": Alignment(horizontal="left", vertical="center"),
+        "border": _border(),
+    }
 
 def _input_style() -> dict:
-    return dict(
-        fill=PatternFill("solid", fgColor=_YELLOW),
-        alignment=Alignment(horizontal="left", vertical="center"),
-        border=_border(),
-        protection=Protection(locked=False),
-    )
+    return {
+        "fill": PatternFill("solid", fgColor=_YELLOW),
+        "alignment": Alignment(horizontal="left", vertical="center"),
+        "border": _border(),
+        "protection": Protection(locked=False),
+    }
 
 def _calc_style() -> dict:
-    return dict(
-        font=Font(italic=True, color="666666", name="Arial"),
-        fill=PatternFill("solid", fgColor=_GREY),
-        alignment=Alignment(horizontal="left", vertical="center"),
-        border=_border(),
-        protection=Protection(locked=True),
-    )
+    return {
+        "font": Font(italic=True, color="666666", name="Arial"),
+        "fill": PatternFill("solid", fgColor=_GREY),
+        "alignment": Alignment(horizontal="left", vertical="center"),
+        "border": _border(),
+        "protection": Protection(locked=True),
+    }
 
 def _apply(cell, style_dict: dict) -> None:
     for attr, val in style_dict.items():
@@ -495,7 +499,6 @@ def generate_template(
         ("standard_parapet_id",      "", "", "Parapet standard ID"),
         ("standard_expansion_joint_id","","","Expansion joint ID"),
     ], t)
-    dc = project.drawing_control if project else None
     _build_generic_sheet(wb, "DRAWING_CONTROL", "S12 — DRAWING CONTROL", [
         ("output_formats",           "DXF,PDF", "", "Comma-separated output formats"),
         ("autocad_version",          "R2018",   "", "DXF version"),

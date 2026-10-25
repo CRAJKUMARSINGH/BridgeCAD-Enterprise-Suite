@@ -1,6 +1,9 @@
 # Bridge_GAD Documentation System
 
-This directory contains the automated documentation generation system for Bridge_GAD.
+This directory holds the docs system for the Suite. For the authoritative map of
+every document in this repo — what it is and whether to trust it — see
+[DOCS_INDEX](../DOCS_INDEX.md). This page covers the generated user-manual
+tooling specifically.
 
 ## 📁 Structure
 

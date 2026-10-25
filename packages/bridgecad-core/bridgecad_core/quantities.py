@@ -20,7 +20,6 @@ from decimal import Decimal
 
 from .models import BridgeProject
 
-
 # ===========================================================================
 # Data classes
 # ===========================================================================
@@ -138,7 +137,7 @@ def _girders_cum(proj: BridgeProject) -> float:
         return 0.0
     L = _f(proj.geometry_input.total_length_m)
     D = _f(ss.girder_depth_mm) / 1000.0
-    s = _f(ss.girder_spacing_m)
+    _f(ss.girder_spacing_m)
     if D <= 0 or L <= 0:
         return 0.0
 

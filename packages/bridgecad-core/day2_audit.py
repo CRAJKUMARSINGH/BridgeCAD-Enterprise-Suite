@@ -1,5 +1,6 @@
 """Day 2 audit - check Sections 7-10 enums."""
 import sys
+
 sys.path.insert(0, '.')
 from bridgecad_core import types
 
@@ -46,5 +47,5 @@ for s, n in missing_all:
     print(f"  - [{s}] {n}")
 
 print(f"\nCurrent ENUM_REGISTRY count: {len(registered)}")
-print(f"D2 target: >= 160")
+print("D2 target: >= 160")
 print(f"Need at least: {max(0, 160 - len(registered))} new enums")

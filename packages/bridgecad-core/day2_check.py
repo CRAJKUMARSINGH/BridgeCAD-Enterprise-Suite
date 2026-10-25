@@ -1,6 +1,8 @@
 import sys
+
 sys.path.insert(0, '.')
 from bridgecad_core import types
+
 count = len(types.ENUM_REGISTRY)
 print(f'ENUM_REGISTRY count: {count}')
 target_pass = count >= 160

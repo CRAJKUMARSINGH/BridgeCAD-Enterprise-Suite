@@ -19,12 +19,11 @@ Usage
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
 
 import numpy as np
 
 try:
-    from scipy.optimize import minimize, OptimizeResult
+    from scipy.optimize import OptimizeResult, minimize
     _SCIPY_OK = True
 except ImportError:
     _SCIPY_OK = False
@@ -111,8 +110,11 @@ class BridgeOptimizer:
         self,
         total_length_m:       float,
         carriageway_width_m:  float  = 7.5,
-        hfl_m:                float  = 0.0,
-        soffit_clearance_m:   float  = 2.0,
+        # The hydraulic inputs are part of the published signature (see the module
+        # docstring) but this optimiser's variable set is (span, depth) only, so
+        # there is no soffit level to apply ``hfl_m + soffit_clearance_m`` against.
+        hfl_m:                float  = 0.0,   # noqa: ARG002
+        soffit_clearance_m:   float  = 2.0,   # noqa: ARG002
         girders_per_deck:     int    = 4,
         max_span_m:           float  = 30.0,
     ) -> OptimizationResult:

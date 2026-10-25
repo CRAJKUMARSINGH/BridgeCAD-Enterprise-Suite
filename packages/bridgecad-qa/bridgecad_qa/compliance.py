@@ -3,6 +3,7 @@ bridgecad_qa.compliance — Weighted 0–100 compliance scorer.
 Breaks the overall score into three IRC/MORTH sub-scores.
 """
 from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Any
 
@@ -19,6 +20,20 @@ class ComplianceScore:
 
 
 _GRADE = [(95,"A+"), (85,"A"), (75,"B"), (65,"C"), (55,"D"), (0,"F")]
+
+
+def grade_from_score(score: int, critical_count: int = 0) -> str:
+    """Letter grade for a 0–100 compliance score.
+
+    Bounded by ``_GRADE`` (100 → "A+", 0 → "F") and monotonic in ``score``. A
+    single critical finding is disqualifying for the top grade — you cannot earn
+    an "A+" with a critical outstanding — so any ``critical_count`` above zero
+    caps the grade at "A". Worse findings therefore never grade better.
+    """
+    grade = next(g for threshold, g in _GRADE if int(score) >= threshold)
+    if critical_count > 0 and grade == "A+":
+        return "A"
+    return grade
 
 
 def score(report: Any) -> ComplianceScore:
@@ -51,4 +66,4 @@ def score(report: Any) -> ComplianceScore:
     )
 
 
-__all__ = ["ComplianceScore", "score"]
+__all__ = ["ComplianceScore", "score", "grade_from_score"]

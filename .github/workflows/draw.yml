@@ -1,0 +1,104 @@
+name: drawings
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 3 * * *"      # nightly: proof + visual
+
+concurrency:
+  group: draw-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    name: draw contract (blocking)
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -e ".[dev,draw]"
+      - name: promoted sheets must pass in full
+        run: pytest tests/draw -m draw -q --tb=short -k "not scaffold_only"
+      - name: scaffold sheets — structural contract only (non-blocking)
+        continue-on-error: true
+        run: pytest tests/draw -m "draw and scaffold_only" -q --tb=short
+      - name: coordinate contract
+        run: pytest tests/draw/test_coordinates.py -q
+      - name: no stale reviews
+        run: pytest tests/draw/test_signoff.py -q -k "not scaffold"
+      - name: upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wing-report
+          path: wing_report.json
+      - name: promotion board in the summary
+        if: always()
+        run: python scripts/promote_sheet.py --status >> $GITHUB_STEP_SUMMARY
+
+  proof:
+    name: geometry mutation proof (nightly)
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -e ".[dev,draw]"
+      - name: prove the suite detects broken geometry
+        run: python scripts/prove_draw_detection.py --json --jobs 8 > proof.json
+      - name: fail if any mutation is undetected
+        run: python -c "import json,sys; d=json.load(open('proof.json')); sys.exit(0 if d['ok'] else 1)"
+      - uses: actions/upload-artifact@v4
+        with: { name: draw-proof, path: proof.json }
+
+  visual:
+    name: visual regression (nightly)
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -e ".[dev,draw]" && sudo apt-get install -y --no-install-recommends libcairo2
+      - run: pytest tests/draw -m visual -q
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: visual-diff, path: tests/draw/_artifacts/ }
+
+  refs:
+    name: reference corpus (blocking)
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -e ".[dev,refs]"
+      - run: python scripts/refs_extract.py --check
+      - run: python scripts/refs_coverage.py --check
+      - run: pytest tests/refs -q --tb=short
+      - run: pytest tests/draw/test_reference_cases.py tests/draw/test_formula_sweep.py -q
+
+  refs-ocr:
+    name: OCR route (nightly)
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: sudo apt-get install -y --no-install-recommends tesseract-ocr
+      - run: pip install -e ".[dev,refs,refs-ocr]"
+      - run: python scripts/refs_extract.py --only gad-set-d-sheet2 --only gad-set-d-sheet5
+      - run: python scripts/refs_verify.py --crop
+      - run: pytest tests/refs/test_ocr.py -q
+      - uses: actions/upload-artifact@v4
+        with: { name: ocr-crops, path: references/extracted/_crops/ }

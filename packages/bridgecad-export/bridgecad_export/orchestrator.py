@@ -12,6 +12,7 @@ triage problems instead of seeing a single opaque "something failed" warning:
   the generators).  These are logged with full traceback.
 """
 from __future__ import annotations
+
 import logging
 import sys
 from pathlib import Path
@@ -37,7 +38,7 @@ def _stage_failure(stage: str, exc: Exception, *,
     traceback is emitted into the application log, enabling post-mortem
     debugging without having to re-run the pipeline under a debugger.
     """
-    import_err = isinstance(exc, (ImportError, ModuleNotFoundError))
+    import_err = isinstance(exc, ImportError | ModuleNotFoundError)
     io_err = isinstance(exc, OSError)
 
     if import_err:
@@ -105,10 +106,10 @@ def export_all(
         bill_out = out / "bill"
         bill_out.mkdir(exist_ok=True)
         sys.path.insert(0, str(BASE / "packages" / "bridgecad-bill"))
-        from bridgecad_bill.processor import extract_and_price
+        from bridgecad_bill.formatters.csv_formatter import format_csv
         from bridgecad_bill.formatters.excel_formatter import format_excel
-        from bridgecad_bill.formatters.csv_formatter   import format_csv
-        from bridgecad_bill.formatters.pdf_formatter   import format_pdf
+        from bridgecad_bill.formatters.pdf_formatter import format_pdf
+        from bridgecad_bill.processor import extract_and_price
         boq = extract_and_price(project, state=state)
         xlsx_path = format_excel(boq, bill_out / f"{prefix}_BOQ.xlsx")
         csv_path  = format_csv(boq,   bill_out / f"{prefix}_BOQ.csv")

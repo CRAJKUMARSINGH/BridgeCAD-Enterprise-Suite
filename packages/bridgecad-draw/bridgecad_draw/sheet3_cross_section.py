@@ -18,18 +18,23 @@ Production-quality drawing:
 """
 from __future__ import annotations
 
-import math
 from pathlib import Path
 from typing import Any
 
-from .dxf_engine  import new_sheet, save, CoordMapper
-from .primitives  import (
-    line, polyline, rectangle, circle, text, hatch_rect, hatch_poly,
-    dim_linear_h, dim_linear_v, level_tag, scale_bar,
+from .dxf_engine import new_sheet, save
+from .primitives import (
+    dim_linear_h,
+    dim_linear_v,
+    hatch_poly,
+    hatch_rect,
+    level_tag,
+    line,
+    polyline,
+    rectangle,
+    scale_bar,
+    text,
 )
 from .titleblocks import draw_border, draw_title_block
-from .layers      import L
-
 
 # ── Constants ────────────────────────────────────────────────────────────────
 _SHEET_CX = 420.0     # A1 horizontal centre (mm)
@@ -46,7 +51,6 @@ def generate(project: Any, output_path: str | Path,
 
 def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     from bridgecad_core.geometry import compute_cross_section_geometry
-    from bridgecad_core.types   import SuperstructureType
 
     gi  = project.geometry_input
     ss  = project.superstructure
@@ -58,7 +62,6 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     is_t    = "T_BEAM" in sst or "TBEAM" in sst
     is_psc  = "PSC" in sst or "I_GIRDER" in sst
     is_slab = "SLAB" in sst and "VOID" not in sst
-    is_void = "VOID" in sst
 
     # ── Scale: fit overall width into 650 mm drawing width ───────────────────
     ow_m    = float(cs.overall_width_m)
@@ -124,8 +127,8 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         # PSC Mono Box Girder — top flange + two webs + bottom flange + haunches
         tw   = max(0.25, ow_m * 0.06) * sc   # web thickness (mm)
         bf_h = gd_m * 0.15 * sc              # bottom flange height
-        hc   = gd_m * 0.12 * sc              # haunch
-        inner_w = ow_m * 0.6 * sc            # inner void width
+        gd_m * 0.12 * sc              # haunch
+        ow_m * 0.6 * sc            # inner void width
         inner_h = (gd_m - deck_t_m - bf_h/sc) * sc * 0.88  # inner void height
 
         # Outer box outline

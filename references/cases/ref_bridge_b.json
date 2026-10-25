@@ -1,0 +1,17 @@
+{
+  "id": "ref_bridge_b",
+  "set_id": "gad-set-b",
+  "note": "Two-span 8 m. Smallest ABTL in the corpus, shallowest splay.",
+  "source_sheets": ["gad-set-b-sheet2", "gad-set-b-sheet5"],
+  "parameters": {
+    "nspan": 2, "span_m": "8.0", "carriageway_m": "7.5",
+    "abtl_m": "10.000", "splay_deg": "30.000",
+    "deck_level_m": "103.400", "hfl_m": "101.100", "lwl_m": "97.500",
+    "founding_level_m": "95.00"
+  },
+  "stated_values": {
+    "pier_count":         {"value": 1, "citation": {"ref": "gad-set-b-sheet2", "page": 1, "quote": "P1"}, "status": "verified"},
+    "wing_face_run_m":    {"value": "1.250", "citation": {"ref": "gad-set-b-sheet5", "page": 1, "quote": "1.250"}, "status": "proposed"},
+    "wing_wall_length_m": {"value": "1.443", "citation": {"ref": "gad-set-b-sheet5", "page": 1, "quote": "1.443"}, "status": "verified"}
+  }
+}

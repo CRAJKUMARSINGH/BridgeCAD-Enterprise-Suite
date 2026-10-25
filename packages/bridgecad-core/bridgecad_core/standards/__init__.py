@@ -1,8 +1,26 @@
 """bridgecad_core.standards — IRC/MORTH engineering standards (M1)."""
-from .irc_05    import compute_hydraulics, HydraulicDesignResult, lacey_scour_depth, design_scour_depth, freeboard_min
-from .irc_21    import check_structural_adequacy, StructuralCheckResult, span_depth_limits, impact_factor
-from .irc_sp55  import preferred_scale, text_height, lineweight_for_layer, sheet_spec, hatch_for_material, dimension_style
-from .morth_specs import concrete_spec, rebar_spec, contract_clause, TEST_FREQUENCIES
+from .irc_05 import (
+    HydraulicDesignResult,
+    compute_hydraulics,
+    design_scour_depth,
+    freeboard_min,
+    lacey_scour_depth,
+)
+from .irc_21 import (
+    StructuralCheckResult,
+    check_structural_adequacy,
+    impact_factor,
+    span_depth_limits,
+)
+from .irc_sp55 import (
+    dimension_style,
+    hatch_for_material,
+    lineweight_for_layer,
+    preferred_scale,
+    sheet_spec,
+    text_height,
+)
+from .morth_specs import TEST_FREQUENCIES, concrete_spec, contract_clause, rebar_spec
 
 __all__ = [
     # IRC:5

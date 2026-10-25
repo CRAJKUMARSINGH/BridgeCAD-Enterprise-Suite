@@ -8,7 +8,6 @@ All X values are chainage relative to A1 abutment face (metres).
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
@@ -104,7 +103,7 @@ class LongSectionGeometry:
 # Factory function
 # ---------------------------------------------------------------------------
 
-def compute_long_section_geometry(project: "BridgeProject") -> LongSectionGeometry:
+def compute_long_section_geometry(project: BridgeProject) -> LongSectionGeometry:
     """Derive longitudinal-section level markers from a validated BridgeProject.
 
     Parameters
@@ -209,4 +208,49 @@ def compute_long_section_geometry(project: "BridgeProject") -> LongSectionGeomet
     )
 
 
-__all__ = ["LongSectionGeometry", "compute_long_section_geometry"]
+# ---------------------------------------------------------------------------
+# Span / pier loops — the one place the counts are defined
+# ---------------------------------------------------------------------------
+
+def span_lengths_m(project: BridgeProject) -> list[float]:
+    """Span lengths in metres, in order along increasing chainage.
+
+    Reads the modelled list where present and falls back to nspan copies of a
+    single span length, so a drafting override cannot leave the two out of step.
+    """
+    gi = project.geometry_input
+    lengths = getattr(gi, "span_lengths_m", None)
+    if lengths:
+        return [float(x) for x in lengths]
+    nspan = int(getattr(gi, "span_count", 1) or 1)
+    single = getattr(gi, "span_length_m", None)
+    if single is None:
+        single = 12.0
+    return [float(single)] * nspan
+
+
+def span_boundaries(project: BridgeProject) -> list[float]:
+    """Chainages of every span boundary, relative to the first abutment.
+
+    CONTRACT: len(boundaries) == nspan + 1, monotonic, strictly increasing.
+    """
+    boundaries = [0.0]
+    cumulative = 0.0
+    for length in span_lengths_m(project):
+        cumulative += length
+        boundaries.append(cumulative)
+    return boundaries
+
+
+def pier_positions(project: BridgeProject) -> list[float]:
+    """Chainages of INTERMEDIATE piers only — abutments are not piers.
+
+    CONTRACT: len(piers) == max(nspan - 1, 0), each coincident with a boundary.
+    """
+    return span_boundaries(project)[1:-1]
+
+
+__all__ = [
+    "LongSectionGeometry", "compute_long_section_geometry",
+    "span_lengths_m", "span_boundaries", "pier_positions",
+]

@@ -1,0 +1,17 @@
+{
+  "id": "ref_bridge_c",
+  "set_id": "gad-set-c",
+  "note": "Four-span 16.5 m. Widest carriageway, steepest splay (60 deg).",
+  "source_sheets": ["gad-set-c-sheet2", "gad-set-c-sheet5"],
+  "parameters": {
+    "nspan": 4, "span_m": "16.5", "carriageway_m": "11.0",
+    "abtl_m": "15.500", "splay_deg": "60.000",
+    "deck_level_m": "114.750", "hfl_m": "110.200", "lwl_m": "104.000",
+    "founding_level_m": "99.50"
+  },
+  "stated_values": {
+    "pier_count":         {"value": 3, "citation": {"ref": "gad-set-c-sheet2", "page": 1, "quote": "P1 P2 P3"}, "status": "verified"},
+    "wing_face_run_m":    {"value": "2.250", "citation": {"ref": "gad-set-c-sheet5", "page": 1, "quote": "2.250"}, "status": "proposed"},
+    "wing_wall_length_m": {"value": "4.500", "citation": {"ref": "gad-set-c-sheet5", "page": 1, "quote": "4.500"}, "status": "verified"}
+  }
+}

@@ -26,9 +26,12 @@ import logging
 from datetime import date
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:  # real import is lazy, see _core()
+    from bridgecad_core.models import BridgeProject
 
 try:
     import openpyxl
@@ -40,7 +43,8 @@ except ImportError:
 # Lazy import of bridgecad_core so bridgecad_io can be imported even when
 # bridgecad_core is not yet installed (test environments, CI stub runs).
 def _core():
-    from bridgecad_core import models as _m, types as _t
+    from bridgecad_core import models as _m
+    from bridgecad_core import types as _t
     return _m, _t
 
 
@@ -584,7 +588,7 @@ _MODEL_KEYS = {
 # Public API
 # ---------------------------------------------------------------------------
 
-def read_excel(path: str | Path) -> "BridgeProject":  # type: ignore[name-defined]
+def read_excel(path: str | Path) -> BridgeProject:
     """Parse a 14-sheet BridgeCAD Excel workbook and return a BridgeProject.
 
     Parameters
@@ -673,12 +677,16 @@ def read_excel(path: str | Path) -> "BridgeProject":  # type: ignore[name-define
     if pm_kwargs.get("currency") is None:
         pm_kwargs["currency"] = t.Currency.INR
     # Lat/lon: blank template sends 0.0 which may fail ge constraint; keep as None
-    if "latitude_deg" in pm_kwargs and pm_kwargs["latitude_deg"] is not None:
-        if float(pm_kwargs["latitude_deg"]) == 0.0:
-            pm_kwargs["latitude_deg"] = None
-    if "longitude_deg" in pm_kwargs and pm_kwargs["longitude_deg"] is not None:
-        if float(pm_kwargs["longitude_deg"]) == 0.0:
-            pm_kwargs["longitude_deg"] = None
+    if (
+        pm_kwargs.get("latitude_deg") is not None
+        and float(pm_kwargs["latitude_deg"]) == 0.0
+    ):
+        pm_kwargs["latitude_deg"] = None
+    if (
+        pm_kwargs.get("longitude_deg") is not None
+        and float(pm_kwargs["longitude_deg"]) == 0.0
+    ):
+        pm_kwargs["longitude_deg"] = None
 
     bs_kwargs = kwargs.setdefault("bridge_selection", {})
     if bs_kwargs.get("bridge_category") is None:

@@ -2,6 +2,7 @@
 bridgecad_export.bundler — ZIP bundle creator with manifest.json.
 """
 from __future__ import annotations
+
 import json
 import zipfile
 from datetime import datetime
@@ -56,4 +57,40 @@ def create_bundle(
     return bundle_path
 
 
-__all__ = ["create_bundle"]
+# packages/bridgecad-export/bridgecad_export/bundler.py
+REPO = Path(__file__).resolve().parents[3]
+SPEC = REPO / "tests" / "draw" / "sheets.spec.json"
+
+
+def review_label(project) -> str:
+    """The export label for *project*, derived from the issue state.
+
+    Never typed by hand: a set that still has open blockers is labelled
+    honestly, so the bundle cannot claim more than the sheets support.
+    """
+    from bridgecad_export.revisions import blockers_for, load, manifest_label
+    register = load()
+    purpose = register["purpose"]
+    if blockers_for(purpose).ok:
+        return manifest_label(purpose)
+    return "Generated — not reviewed for construction"
+
+
+def build_manifest(project) -> dict:
+    """The manifest the bundle carries, derived from the spec and issue state.
+
+    ``scaffold_sheets`` is read from ``tests/draw/sheets.spec.json`` at runtime
+    so the manifest cannot drift from the single place scaffold status lives.
+    """
+    spec = json.loads(SPEC.read_text(encoding="utf-8"))
+    scaffold_sheets = sorted(
+        sheet for sheet, entry in spec["sheets"].items()
+        if entry["status"] == "scaffold"
+    )
+    return {
+        "scaffold_sheets": scaffold_sheets,
+        "review_label": review_label(project),
+    }
+
+
+__all__ = ["create_bundle", "review_label", "build_manifest"]

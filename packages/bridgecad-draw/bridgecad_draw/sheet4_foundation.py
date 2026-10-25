@@ -12,13 +12,20 @@ Draws for a typical pier:
   8. Title block + border (Sheet 4 of 7)
 """
 from __future__ import annotations
+
 from pathlib import Path
 from typing import Any
 
 from .dxf_engine import new_sheet, save
 from .primitives import (
-    line, polyline, rectangle, circle, text, hatch_rect, hatch_poly,
-    dim_linear_h, dim_linear_v, level_tag,
+    circle,
+    dim_linear_h,
+    dim_linear_v,
+    hatch_rect,
+    level_tag,
+    line,
+    rectangle,
+    text,
 )
 from .titleblocks import draw_border, draw_title_block
 
@@ -32,7 +39,6 @@ def generate(project: Any, output_path: str | Path,
 
 def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     from bridgecad_core.geometry import compute_pile_group_layout
-    from bridgecad_core.types import FoundationType
 
     fd  = project.foundation_details
     hd  = project.hydraulic_data
@@ -122,7 +128,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
 
     if layout.pile_positions:
         r_mm = layout.pile_diameter_m / 2.0 * sc * 1.5
-        cap_t = float(fd.pile_cap_thickness_mm or 1500) / 1000.0
+        float(fd.pile_cap_thickness_mm or 1500) / 1000.0
         # Pile cap elevation
         cap_y0 = evy(pile_cut)
         cap_y1 = evy(cap_top)
@@ -180,7 +186,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     ]
     # Header
     x = tx
-    for i, (h, w) in enumerate(zip(headers, col_w)):
+    for i, (h, w) in enumerate(zip(headers, col_w, strict=False)):
         rectangle(msp, x, ty, w, row_h, layer="TITLEBLK-BOX")
         text(msp, h, x + 1.5, ty + 2.0, height=th * 0.9, layer="TEXT-GENERAL")
         x += w
@@ -188,7 +194,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     for ri, (lbl, val, unit) in enumerate(rows):
         y = ty - (ri + 1) * row_h
         x = tx
-        for val_str, w in zip([lbl, val, unit], col_w):
+        for val_str, w in zip([lbl, val, unit], col_w, strict=False):
             rectangle(msp, x, y, w, row_h, layer="TITLEBLK-BOX")
             text(msp, val_str, x + 1.5, y + 2.0, height=th * 0.85,
                  layer="TEXT-GENERAL")

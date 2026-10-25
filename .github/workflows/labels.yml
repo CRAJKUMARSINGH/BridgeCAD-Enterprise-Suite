@@ -1,0 +1,22 @@
+name: Sync labels
+
+on:
+  workflow_dispatch:
+  push:
+    paths: ["scripts/sync_labels.py"]
+
+permissions:
+  issues: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python scripts/sync_labels.py
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}

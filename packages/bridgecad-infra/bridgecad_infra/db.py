@@ -13,13 +13,12 @@ Usage:
 from __future__ import annotations
 
 import os
+from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Generator
 
-from sqlalchemy import create_engine, event, text
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
-
 
 # ---------------------------------------------------------------------------
 # Database URL resolution
@@ -73,9 +72,9 @@ class Base(DeclarativeBase):
 # Tables
 # ---------------------------------------------------------------------------
 
-from sqlalchemy import Column, Integer, String, Float, DateTime, JSON, Text, ForeignKey
-from sqlalchemy.sql import func
+from sqlalchemy import JSON, Column, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 
 class ProjectRecord(Base):

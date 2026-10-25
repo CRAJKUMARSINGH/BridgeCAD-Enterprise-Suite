@@ -6,8 +6,11 @@ from __future__ import annotations
 from typing import Any
 
 from .db import (
-    get_session, ProjectRecord, BridgeRecord, GenerationHistory,
+    BridgeRecord,
+    GenerationHistory,
+    ProjectRecord,
     create_all_tables,
+    get_session,
 )
 
 

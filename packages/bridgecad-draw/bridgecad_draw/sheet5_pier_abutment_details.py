@@ -6,13 +6,20 @@ Right half: Abutment elevation + cross-section + wing wall
 Bottom: Pedestal / bearing seat details
 """
 from __future__ import annotations
+
 from pathlib import Path
 from typing import Any
 
 from .dxf_engine import new_sheet, save
 from .primitives import (
-    line, polyline, rectangle, circle, text, hatch_rect, hatch_poly,
-    dim_linear_h, dim_linear_v, level_tag,
+    dim_linear_h,
+    dim_linear_v,
+    hatch_poly,
+    hatch_rect,
+    line,
+    polyline,
+    rectangle,
+    text,
 )
 from .titleblocks import draw_border, draw_title_block
 
@@ -26,7 +33,6 @@ def generate(project: Any, output_path: str | Path,
 
 def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     sub = project.substructure
-    fd  = project.foundation_details
     hd  = project.hydraulic_data
     pm  = project.project_master
 
@@ -49,9 +55,9 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     pier_by   = 250.0     # base Y on sheet
     pier_h    = float(sub.pier_height_typical_m or 8.0)
     pier_sw   = float(sub.pier_shaft_width_m    or 1.5)
-    pier_sl   = float(sub.pier_shaft_length_m   or 11.5)
+    float(sub.pier_shaft_length_m   or 11.5)
     cap_w     = float(sub.pier_cap_width_m      or 2.0)
-    cap_l     = float(sub.pier_cap_length_m     or 11.5)
+    float(sub.pier_cap_length_m     or 11.5)
     cap_d     = float(sub.pier_cap_depth_m      or 0.8)
     ped_h     = float(sub.pier_pedestal_height_m or 0.2)
 
@@ -115,11 +121,11 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     abt_cx   = 560.0
     abt_by   = 250.0
     abt_w    = float(sub.abutment_width_m    or 1.2)
-    abt_l    = float(sub.abutment_length_m   or 11.8)
+    float(sub.abutment_length_m   or 11.8)
     abt_h    = float(sub.abutment_height_m   or 3.2)
     ww_l     = float(sub.wing_wall_splay_length_m or 3.0)
     ww_h     = float(sub.wing_wall_height_m  or 2.5)
-    ret_l    = float(sub.return_wall_length_m or 4.0)
+    float(sub.return_wall_length_m or 4.0)
 
     abt_w_mm = abt_w * sc
     abt_h_mm = abt_h * sc

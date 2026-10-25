@@ -15,6 +15,7 @@ Usage
 """
 from __future__ import annotations
 
+import contextlib
 from dataclasses import dataclass
 from typing import Any
 
@@ -133,13 +134,29 @@ def setup_layers(doc: Any) -> None:
             layer = layers.add(ld.name, color=ld.color, linetype=ld.linetype)
             layer.dxf.lineweight = ld.lineweight
         # Register linetype if non-standard
-        if ld.linetype not in ("Continuous",):
-            if not doc.linetypes.has_entry(ld.linetype):
-                try:
-                    doc.linetypes.add(ld.linetype)
-                except Exception:
-                    pass  # ezdxf may have it built-in; safe to ignore
+        if ld.linetype not in ("Continuous",) and not doc.linetypes.has_entry(ld.linetype):
+            with contextlib.suppress(Exception):  # ezdxf may have it built-in
+                doc.linetypes.add(ld.linetype)
 
 
-__all__ = ["LayerDef", "LAYER_REGISTRY", "L", "setup_layers",
+# ---------------------------------------------------------------------------
+# Short-name layers used by the sheet builders and the DXF contract tests.
+# These are additive aliases: the IRC SP:55 long names above remain canonical.
+# ---------------------------------------------------------------------------
+LAYER_REGISTRY.update({
+    "DECK": LayerDef("DECK", 7,  "Continuous", 50,  "Deck line on sections and elevations"),
+    "GRND": LayerDef("GRND", 8,  "DASHED",     18,  "Natural ground profile"),
+    "TEXT": LayerDef("TEXT", 7,  "Continuous", 13,  "Generic annotation text"),
+    "GRID": LayerDef("GRID", 8,  "DASHED",     13,  "Construction grid / reference lines"),
+    "CL":   LayerDef("CL",   6,  "CENTER",     18,  "Centre lines (piers, axes)"),
+    "HIDD": LayerDef("HIDD", 8,  "HIDDEN",     18,  "Hidden / below-section-plane lines"),
+    "DIM":  LayerDef("DIM",  3,  "Continuous", 18,  "Dimension strings"),
+    "HTCH": LayerDef("HTCH", 8,  "Continuous", 18,  "Hatching (concrete, soil, section)"),
+    "TABL": LayerDef("TABL", 7,  "Continuous", 18,  "Schedule / table outlines and text"),
+})
+
+# Alias exported for the tests' layer registry lookups.
+LAYERS = LAYER_REGISTRY
+
+__all__ = ["LayerDef", "LAYER_REGISTRY", "LAYERS", "L", "setup_layers",
            "STRUCTURAL_LAYERS", "ANNOTATION_LAYERS", "TITLEBLOCK_LAYERS"]

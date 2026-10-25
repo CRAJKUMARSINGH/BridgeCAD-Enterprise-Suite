@@ -12,15 +12,14 @@ Real commands:
 """
 from __future__ import annotations
 
-import sys
 import logging
+import sys
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
-from rich.table   import Table
-from rich.panel   import Panel
+from rich.panel import Panel
+from rich.table import Table
 
 # ── sys.path bootstrapping (dev install without pip editable) ─────────────
 _SUITE = Path(__file__).parents[3]
@@ -68,7 +67,7 @@ def _load_project(xlsx: Path):
     return read_excel(xlsx)
 
 
-def _resolve_output(output: Optional[Path], suffix: str) -> Path:
+def _resolve_output(output: Path | None, _suffix: str) -> Path:
     p = output or Path.cwd() / "output"
     p.mkdir(parents=True, exist_ok=True)
     return p
@@ -79,7 +78,7 @@ def _resolve_output(output: Optional[Path], suffix: str) -> Path:
 # ---------------------------------------------------------------------------
 
 @app.command("version")
-def version_cmd(verbose: bool = typer.Option(False, "--verbose", "-v")) -> None:
+def version_cmd(_verbose: bool = typer.Option(False, "--verbose", "-v")) -> None:
     """Show BridgeCAD version."""
     console.print(Panel(
         f"[bold cyan]{__codename__}[/]  [green]v{__version__}[/]\n"
@@ -120,17 +119,18 @@ def health_cmd() -> None:
 @app.command("validate")
 def validate_cmd(
     input_file: Path = typer.Argument(..., help="Path to BridgeCAD Excel workbook"),
-    report_html: Optional[Path] = typer.Option(None, "--report", "-r",
+    report_html: Path | None = typer.Option(None, "--report", "-r",
                                                help="Save HTML QA report here"),
 ) -> None:
     """Validate an Excel workbook against all 30 IRC/MORTH checks."""
     if not input_file.exists():
-        console.print(f"[red]File not found: {input_file}[/]"); raise typer.Exit(1)
+        console.print(f"[red]File not found: {input_file}[/]")
+        raise typer.Exit(1)
     with console.status("Loading workbook …"):
         project = _load_project(input_file)
     with console.status("Running 30 QA checks …"):
         from bridgecad_core.validation import run_all
-        from bridgecad_qa.compliance   import score as _score
+        from bridgecad_qa.compliance import score as _score
         report = run_all(project)
         comp   = _score(report)
 
@@ -178,7 +178,8 @@ def draw_gad_cmd(
 ) -> None:
     """Generate a 7-sheet GAD DXF package from an Excel workbook."""
     if not input_file.exists():
-        console.print(f"[red]Not found: {input_file}[/]"); raise typer.Exit(1)
+        console.print(f"[red]Not found: {input_file}[/]")
+        raise typer.Exit(1)
     with console.status("Loading workbook …"):
         project = _load_project(input_file)
     with console.status(f"Generating 7-sheet DXF package → {output_dir} …"):
@@ -206,19 +207,20 @@ def bill_gen_cmd(
     output_dir: Path          = typer.Option(Path("./output/bill"), "-o", "--output"),
     fmt:        str           = typer.Option("all",   "--format", "-f",
                                               help="all | excel | csv"),
-    state:      Optional[str] = typer.Option(None,    "--state",  "-S",
+    state:      str | None = typer.Option(None,    "--state",  "-S",
                                               help="State code for PWD rates (e.g. MH)"),
 ) -> None:
     """Extract quantities and generate priced Bill of Quantities."""
     if not input_file.exists():
-        console.print(f"[red]Not found: {input_file}[/]"); raise typer.Exit(1)
+        console.print(f"[red]Not found: {input_file}[/]")
+        raise typer.Exit(1)
     output_dir.mkdir(parents=True, exist_ok=True)
     with console.status("Loading workbook …"):
         project = _load_project(input_file)
     with console.status("Extracting quantities and pricing …"):
-        from bridgecad_bill.processor           import extract_and_price
+        from bridgecad_bill.formatters.csv_formatter import format_csv
         from bridgecad_bill.formatters.excel_formatter import format_excel
-        from bridgecad_bill.formatters.csv_formatter   import format_csv
+        from bridgecad_bill.processor import extract_and_price
         boq = extract_and_price(project, state=state)
 
     stem = input_file.stem
@@ -248,12 +250,13 @@ def bill_gen_cmd(
 def export_all_cmd(
     input_file: Path          = typer.Argument(..., help="BridgeCAD Excel workbook"),
     output_dir: Path          = typer.Option(Path("./output"), "-o", "--output"),
-    state:      Optional[str] = typer.Option(None, "--state", "-S"),
+    state:      str | None = typer.Option(None, "--state", "-S"),
     scale:      int           = typer.Option(100, "--scale", "-s"),
 ) -> None:
     """Full export: 7-sheet DXF + BOQ (xlsx+csv) + QA HTML → ZIP bundle."""
     if not input_file.exists():
-        console.print(f"[red]Not found: {input_file}[/]"); raise typer.Exit(1)
+        console.print(f"[red]Not found: {input_file}[/]")
+        raise typer.Exit(1)
     with console.status("Loading workbook …"):
         project = _load_project(input_file)
     with console.status("Running full export pipeline …"):
@@ -299,11 +302,12 @@ def plugin_info_cmd(
 ) -> None:
     """Show full details for a plugin."""
     from bridgecad_plugins.registry import get_registry
-    from bridgecad_plugins.runner   import PluginRunner
+    from bridgecad_plugins.runner import PluginRunner
     reg = get_registry()
     m   = reg.get(plugin_id)
     if not m:
-        console.print(f"[red]Plugin not found: {plugin_id}[/]"); raise typer.Exit(1)
+        console.print(f"[red]Plugin not found: {plugin_id}[/]")
+        raise typer.Exit(1)
     runner = PluginRunner(m)
     console.print(Panel(runner.describe(), title=f"🔌 {m.name}  [{m.plugin_id} v{m.version}]"))
 
@@ -331,7 +335,8 @@ def template_fill_cmd(
 ) -> None:
     """Round-trip: read Excel → BridgeProject → write back as styled template."""
     if not input_file.exists():
-        console.print(f"[red]Not found: {input_file}[/]"); raise typer.Exit(1)
+        console.print(f"[red]Not found: {input_file}[/]")
+        raise typer.Exit(1)
     out = output or input_file.parent / f"{input_file.stem}_styled.xlsx"
     with console.status("Loading …"):
         project = _load_project(input_file)

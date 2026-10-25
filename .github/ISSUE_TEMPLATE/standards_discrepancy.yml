@@ -1,0 +1,86 @@
+name: Standards discrepancy
+description: The engine's output disagrees with an IRC / MORTH clause
+title: "[Standards] "
+labels: ["bug", "standards-discrepancy", "status:needs-engineer-review"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this when the engine produces a value, dimension or drawing feature
+        that contradicts a code clause. **The reference drawing or the clause
+        wins** — the engine gets the bug report, not the standard.
+
+  - type: input
+    id: standard
+    attributes:
+      label: Standard and clause
+      placeholder: IRC:112, Clause 12.2
+    validations:
+      required: true
+
+  - type: textarea
+    id: clause
+    attributes:
+      label: What the clause requires
+      description: Quote it, or paraphrase precisely. Cite page/table if relevant.
+    validations:
+      required: true
+
+  - type: textarea
+    id: engine
+    attributes:
+      label: What the engine produces
+      description: The value or geometry, and which sheet / field / report line it appears on.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reference
+    attributes:
+      label: Reference drawing or project
+      description: >
+        Name the file in sample-gad-drawings/ if one covers this, plus the sheet.
+        A drawing beats an argument.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Critical — design fails, unsafe or non-compliant
+        - Warning — compliant but outside typical practice
+        - Info — advisory only
+    validations:
+      required: true
+
+  - type: dropdown
+    id: direction
+    attributes:
+      label: Direction of error
+      options:
+        - Engine is unsafe / under-designed
+        - Engine is over-conservative / wasteful
+        - Engine is geometrically wrong but not unsafe
+        - Naming, annotation or presentation only
+    validations:
+      required: true
+
+  - type: textarea
+    id: rule
+    attributes:
+      label: Affected rule IDs
+      description: >
+        If you know the rule ID (V001–V150) or its tier, say so. If no rule
+        covers this, say that too — a missing rule is the finding.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Confirmed
+      options:
+        - label: The clause is current, not superseded by an amendment
+          required: true
+        - label: This is a discrepancy, not the documented scaffold limitation on sheets 2–7
+          required: true

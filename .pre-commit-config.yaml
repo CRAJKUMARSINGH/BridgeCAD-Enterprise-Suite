@@ -107,6 +107,21 @@ repos:
         args: [--prose-wrap=preserve]
         exclude: ^(CHANGELOG\.md|\.github/|tests/)
 
+  - repo: local
+    hooks:
+      - id: doc-paths
+        name: doc code-block paths exist
+        entry: python scripts/check_doc_paths.py
+        language: system
+        files: \.md$
+
+      - id: doc-integrity-fast
+        name: doc integrity (fast)
+        entry: python scripts/verify_docs.py --only paths,integrity --quiet
+        language: system
+        pass_filenames: false
+        files: \.md$
+
 # ── CI configuration ─────────────────────────────────────────────────────────
 ci:
   autoupdate_schedule: monthly

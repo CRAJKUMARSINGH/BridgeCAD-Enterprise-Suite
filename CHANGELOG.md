@@ -212,5 +212,5 @@ delivery through CLI, FastAPI, Streamlit, and React interfaces.
 
 ---
 
-[0.1.0-rc1]: https://github.com/bridgecad/enterprise-suite/releases/tag/v0.1.0-rc1
-[0.0.1]: https://github.com/bridgecad/enterprise-suite/releases/tag/v0.0.1
+[0.1.0-rc1]: https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/releases/tag/v0.1.0-rc1
+[0.0.1]: https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/releases/tag/v0.0.1

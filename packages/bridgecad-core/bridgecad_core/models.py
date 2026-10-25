@@ -5,200 +5,192 @@ M1 Week 1 Day 3: 100% field coverage with typed constraints.
 
 from __future__ import annotations
 
-import re
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Optional
 
 from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
     computed_field,
-    field_validator,
     model_validator,
 )
 
 from .types import (
-    # --- S1 Project / Client ---
-    ClientType,
-    ConsultantType,
-    ContractorType,
-    ProjectPhase,
-    Currency,
-    RevisionTag,
-    IndianStateCode,
-    Language,
-    FundingSourceType,
-    TenderType,
-    ContractPackageType,
-    SurveyAgency,
-    WorkStatusType,
-    DesignFirmCategoryClass,
-    # --- S2 Bridge Selection ---
-    BridgeCategory,
-    BridgeSubcategory,
-    SpanConfiguration,
-    CarriagewayLaneConfig,
-    BridgeHydraulicOpeningType,
-    DesignCode,
-    LoadClass,
-    SeismicZone,
-    WindSpeedBasic_ms,
-    FoundationType,
-    UsageIntensityType,
-    InterchangeGradeSeparationType,
+    AbutmentBackfillSpecificationType,
+    AbutmentPedestalType,
+    AbutmentType,
+    AcadVersion,
+    AdmixtureType,
+    AffluxEstimationFormulaType,
     # --- S3 Geometry ---
     AlignmentType,
-    HorizontalCurveTransitionType,
-    TransitionCurveType,
-    VerticalAlignmentType,
-    KerbType,
-    FootpathType,
-    MedianType,
-    CrashBarrierType,
-    ChainageUnit,
-    RotationDirection,
-    SkewDirection,
-    SuperelevationRotationAxis,
-    SightDistanceCategory,
-    PavementCrustComposition,
-    # --- S4 Superstructure ---
-    SuperstructureType,
-    SuperstructureSegmentation,
-    DeckJointSpacing,
-    DeckPourSequenceMethod,
-    SlabType,
-    GirderType,
-    WearingCoatType,
-    WearingCoatGrade,
-    ParapetType,
-    RailingType,
-    DrainageType,
-    DrainageCrossfallType,
+    AntiCorrosionProtectionType,
+    ArchShapeType,
+    ArrowStyle,
+    BankErosionCategoryClass,
+    BankProtectionMethodType,
+    BearingCapacitySoilType,
+    BearingMaterial,
+    BearingType,
+    # --- S2 Bridge Selection ---
+    BridgeCategory,
+    BridgeHydraulicOpeningType,
+    BridgeSubcategory,
+    CableStayingSystemClass,
     CamberMethod,
     CantileverOverhangType,
-    PrecastSegmentJointType,
-    WebOpenCutoutType,
-    CableStayingSystemClass,
-    ArchShapeType,
-    TrussConfigurationClass,
-    # --- S5 Substructure ---
-    PierType,
+    CarriagewayLaneConfig,
+    CementType,
+    ChainageUnit,
+    # --- S1 Project / Client ---
+    ClientType,
+    ConcreteAggregateType,
+    ConcreteCoverNominalClass,
+    ConcreteCuringMethodType,
+    # --- S8 Materials ---
+    ConcreteGrade,
+    ConcreteSlumpClass,
+    ConcreteSurfaceFinishClass,
+    ConsultantType,
+    ContractorType,
+    ContractPackageType,
+    CrashBarrierType,
+    CreepShrinkageFactorClass,
+    CrossSectionViewTypeCode,
+    Currency,
+    DampingRatioTypeEnum,
+    DeckJointSpacing,
+    DeckPourSequenceMethod,
+    DesignCode,
+    DesignFirmCategoryClass,
+    DimensionStyleClass,
+    DischargeMeasurementMethod,
+    DrainageCrossfallType,
+    DrainageType,
+    DrawingScale,
+    DuctilityClassLink,
+    ExpansionJointType,
+    FatigueDetailCategorySteel,
+    FloodFrequencyAnalysisMethodType,
+    FloodReturnPeriodDesign,
+    FlowVelocityCategory,
+    FontStyle,
+    FootpathType,
+    FormworkPanelType,
+    FormworkReleaseAgentType,
+    FoundationType,
+    FreeboardAdditionFactorType,
+    FrictionCoeffBearingPadType,
+    FundingSourceType,
+    GirderType,
+    GradeControlStructureType,
+    GroundImprovementType,
+    HatchPatternCode,
+    HorizontalCurveTransitionType,
+    HydrographShapeType,
+    IceLoadType,
+    ImpactFactorCoeff,
+    IndianStateCode,
+    InterchangeGradeSeparationType,
+    JointSealantType,
+    KerbType,
+    LaceyRegimeFactorType,
+    Language,
+    LayerStandard,
+    LineStyleCode,
+    LineWeightCode,
+    LoadClass,
+    LoadCombination,
+    MedianType,
+    OpenFoundationDepth,
+    # --- S9 Drawing ---
+    OutputFormat,
+    PaintCoatSystemType,
+    ParapetType,
+    PavementCrustComposition,
     PierCapType,
     PierShaftShape,
     PierTieBeamLocationType,
-    AbutmentType,
-    AbutmentPedestalType,
-    AbutmentBackfillSpecificationType,
-    ReturnWallType,
-    WingWallType,
-    WellSteiningType,
-    WellCurbType,
-    WellCuttingEdgeShape,
-    # --- S6 Foundation ---
-    PileType,
-    PileShape,
+    # --- S5 Substructure ---
+    PierType,
     PileBaseType,
     PileInstallationMethodType,
-    RaftMatType,
-    OpenFoundationDepth,
-    SheetPileType,
-    UnderReamCount,
-    BearingCapacitySoilType,
-    GroundImprovementType,
-    SettlementCriterionCategoryType,
-    # --- S7 Hydraulic ---
-    WaterSourceType,
-    ScourRegimeType,
-    ScourMeasurementMethod,
-    HydrographShapeType,
-    RiverBankType,
-    RiverGeomorphologyType,
-    RiverCrossingClass,
-    RiverBedMaterialSizeType,
-    RiverTrainingWorkType,
-    BankProtectionMethodType,
-    BankErosionCategoryClass,
-    AffluxEstimationFormulaType,
-    FreeboardAdditionFactorType,
-    LaceyRegimeFactorType,
-    RegimeConstantKValue,
-    SoilClass,
-    SedimentLoadTransportType,
-    SedimentYieldClassification,
-    ScourProtectionSubtype,
-    WaterSurfaceProfileType,
-    FloodReturnPeriodDesign,
-    FloodFrequencyAnalysisMethodType,
-    DischargeMeasurementMethod,
-    WaterwayCrossingType,
-    FlowVelocityCategory,
-    GradeControlStructureType,
-    IceLoadType,
-    WaterQualityAggressiveType,
-    # --- S8 Materials ---
-    ConcreteGrade,
-    ConcreteAggregateType,
-    ConcreteCoverNominalClass,
-    ConcreteSlumpClass,
-    ConcreteCuringMethodType,
-    ConcreteSurfaceFinishClass,
-    CementType,
-    AdmixtureType,
-    ReinforcementBarType,
-    RebarCouplerType,
-    SteelGrade,
+    PileShape,
+    # --- S6 Foundation ---
+    PileType,
+    PlotterPaperClass,
+    PrecastSegmentJointType,
     PrestressGrade,
     PrestressLossTypeEnum,
-    CreepShrinkageFactorClass,
-    WeldType,
-    BearingMaterial,
-    BearingType,
-    FrictionCoeffBearingPadType,
-    ExpansionJointType,
-    JointSealantType,
-    WaterproofingMembraneType,
-    AntiCorrosionProtectionType,
-    PaintCoatSystemType,
-    WearingCoatType,
-    FormworkPanelType,
-    FormworkReleaseAgentType,
-    # --- S9 Drawing ---
-    OutputFormat,
-    AcadVersion,
-    SheetSize,
-    DrawingScale,
-    LayerStandard,
-    LayerGroup,
-    LineWeightCode,
-    LineStyleCode,
-    HatchPatternCode,
-    FontStyle,
-    ArrowStyle,
-    ScaleDenominatorSet,
-    DimensionStyleClass,
-    ViewTypeClassification,
-    CrossSectionViewTypeCode,
-    TitleBlockStyle,
-    TitleBlockRevisionClass,
-    PlotterPaperClass,
-    # --- S10 Load / Seismic / Wind ---
-    SeismicImportanceFactor,
-    WindImportanceFactor,
-    LoadCombination,
-    ImpactFactorCoeff,
-    TemperatureLoadDeltaT,
+    ProjectPhase,
+    RaftMatType,
+    RailingType,
+    RebarCouplerType,
+    RegimeConstantKValue,
+    ReinforcementBarType,
     ResponseSpectrumCategory,
-    FatigueDetailCategorySteel,
-    DuctilityClassLink,
     RetainingWallModeType,
-    DampingRatioTypeEnum,
-    WideningTypeOnCurve,
+    ReturnWallType,
+    RevisionTag,
+    RiverBankType,
+    RiverBedMaterialSizeType,
+    RiverCrossingClass,
+    RiverGeomorphologyType,
+    RiverTrainingWorkType,
+    RotationDirection,
+    ScaleDenominatorSet,
+    ScourMeasurementMethod,
+    ScourProtectionSubtype,
+    ScourRegimeType,
+    SedimentLoadTransportType,
+    SedimentYieldClassification,
+    # --- S10 Load / Seismic / Wind ---
+    SeismicZone,
+    SettlementCriterionCategoryType,
+    SheetPileType,
+    SheetSize,
+    SightDistanceCategory,
+    SkewDirection,
+    SlabType,
+    SoilClass,
+    SpanConfiguration,
+    SteelGrade,
+    SuperelevationRotationAxis,
+    SuperstructureSegmentation,
+    # --- S4 Superstructure ---
+    SuperstructureType,
+    SurveyAgency,
+    TemperatureLoadDeltaT,
+    TenderType,
+    TitleBlockRevisionClass,
+    TitleBlockStyle,
+    TransitionCurveType,
+    TrussConfigurationClass,
+    UnderReamCount,
+    UsageIntensityType,
     # --- Legacy / Validation ---
     ValidationSeverity,
+    VerticalAlignmentType,
+    ViewTypeClassification,
+    WaterproofingMembraneType,
+    WaterQualityAggressiveType,
+    # --- S7 Hydraulic ---
+    WaterSourceType,
+    WaterSurfaceProfileType,
+    WaterwayCrossingType,
+    WearingCoatGrade,
+    WearingCoatType,
+    WebOpenCutoutType,
+    WeldType,
+    WellCurbType,
+    WellCuttingEdgeShape,
+    WellSteiningType,
+    WideningTypeOnCurve,
+    WindSpeedBasic_ms,
+    WingWallType,
+    WorkStatusType,
 )
-
 
 # ===========================================================================
 # Helper: Pydantic typing shortcuts
@@ -334,91 +326,91 @@ class ProjectMaster(BaseModel):
         "Bridge / ROB / Culvert official name",
         maxlen=120,
     )
-    chainage_km: Optional[Decimal] = DM(
+    chainage_km: Decimal | None = DM(
         "Central bridge chainage in kilometres (e.g. 24.350)",
         ge=0, le=9999, dp=6,
     )
-    package_no: Optional[str] = DS(
+    package_no: str | None = DS(
         "Contract package number from tender",
         maxlen=40,
     )
     client: ClientType = Field(
         description="Primary client / employer organisation type",
     )
-    consultant: Optional[ConsultantType] = Field(
+    consultant: ConsultantType | None = Field(
         default=None,
         description="Detailed design consultant class",
     )
-    contractor: Optional[ContractorType] = Field(
+    contractor: ContractorType | None = Field(
         default=None,
         description="EPC / item-rate main contractor class",
     )
-    drawing_no: Optional[str] = DS(
+    drawing_no: str | None = DS(
         "Parent GAD drawing number as per title block",
         maxlen=50,
     )
-    drawing_title: Optional[str] = DS(
+    drawing_title: str | None = DS(
         "Drawing title appearing on title block",
         maxlen=150,
     )
     revision: RevisionTag = Field(
         description="Revision tag for this GAD iteration",
     )
-    date_issued: Optional[date] = Field(
+    date_issued: date | None = Field(
         default=None,
         description="Date the drawing package is issued for review",
     )
-    designed_by: Optional[str] = DS(
+    designed_by: str | None = DS(
         "Name of design engineer responsible",
         maxlen=80,
     )
-    checked_by: Optional[str] = DS(
+    checked_by: str | None = DS(
         "Name of checker / senior engineer",
         maxlen=80,
     )
-    approved_by: Optional[str] = DS(
+    approved_by: str | None = DS(
         "Name of approving authority / Engineer-in-Charge",
         maxlen=80,
     )
-    road_level_rl_m: Optional[Decimal] = DM(
+    road_level_rl_m: Decimal | None = DM(
         "Formation / road level Reduced Level at bridge centreline, m",
         ge=-100, le=9000, dp=4,
     )
-    ground_level_rl_m: Optional[Decimal] = DM(
+    ground_level_rl_m: Decimal | None = DM(
         "Existing ground level Reduced Level at abutment, m",
         ge=-100, le=9000, dp=4,
     )
-    survey_date: Optional[date] = Field(
+    survey_date: date | None = Field(
         default=None,
         description="Date of topographic / total-station site survey",
     )
     state_code: IndianStateCode = Field(
         description="India state / UT code per project location",
     )
-    district_code: Optional[str] = DS(
+    district_code: str | None = DS(
         "District name or short code (3-4 chars typical)",
         maxlen=40,
     )
     language: Language = Field(
         description="Primary drawing annotation language",
     )
-    latitude_deg: Optional[Decimal] = DM(
+    latitude_deg: Decimal | None = DM(
         "Site centre latitude, decimal degrees (WGS-84)",
         ge=Decimal("6.0"), le=Decimal("36.0"), dp=7,
     )
-    longitude_deg: Optional[Decimal] = DM(
+    longitude_deg: Decimal | None = DM(
         "Site centre longitude, decimal degrees (WGS-84)",
         ge=Decimal("68.0"), le=Decimal("98.0"), dp=7,
     )
-    total_estimated_cost_inr: Optional[Decimal] = DM(
+    total_estimated_cost_inr: Decimal | None = DM(
         "Total project (works) estimated cost, INR",
         ge=0, le=Decimal("1E12"), dp=2, md=18,
     )
-    tender_no: Optional[str] = DS(
+    tender_no: str | None = DS(
         "Tender reference identifier / RFP number",
         maxlen=60,
     )
-    contract_no: Optional[str] = DS(
+    contract_no: str | None = DS(
         "Executed contract / agreement number",
         maxlen=60,
     )
@@ -429,27 +421,27 @@ class ProjectMaster(BaseModel):
         default=Currency.INR,
         description="Reporting currency for all cost / BOQ fields",
     )
-    funding_source: Optional[FundingSourceType] = Field(
+    funding_source: FundingSourceType | None = Field(
         default=None,
         description="Primary funding authority / program",
     )
-    tender_type: Optional[TenderType] = Field(
+    tender_type: TenderType | None = Field(
         default=None,
         description="Procurement route (open / limited / single / EPC)",
     )
-    contract_package: Optional[ContractPackageType] = Field(
+    contract_package: ContractPackageType | None = Field(
         default=None,
         description="Deliverable package phase (DPR/GAD/Detail/AsBuilt)",
     )
-    survey_agency: Optional[SurveyAgency] = Field(
+    survey_agency: SurveyAgency | None = Field(
         default=None,
         description="Agency that carried out site survey works",
     )
-    work_status: Optional[WorkStatusType] = Field(
+    work_status: WorkStatusType | None = Field(
         default=None,
         description="Physical project progress status class",
     )
-    design_firm_class: Optional[DesignFirmCategoryClass] = Field(
+    design_firm_class: DesignFirmCategoryClass | None = Field(
         default=None,
         description="Design office capacity class per COE rules",
     )
@@ -494,35 +486,35 @@ class BridgeSelection(BaseModel):
     foundation_type: FoundationType = Field(
         description="Primary foundation system adopted",
     )
-    subcategory_tag: Optional[BridgeSubcategory] = Field(
+    subcategory_tag: BridgeSubcategory | None = Field(
         default=None,
         description="Optional BridgeSubcategory tag for quick classification",
     )
-    hydraulic_opening_type: Optional[BridgeHydraulicOpeningType] = Field(
+    hydraulic_opening_type: BridgeHydraulicOpeningType | None = Field(
         default=None,
         description="Opening classification (Bridge/Culvert/Aqueduct/Underpass)",
     )
-    custom_superstructure_note: Optional[str] = DS(
+    custom_superstructure_note: str | None = DS(
         "Free-form note for unusual superstructure materials or methods",
         maxlen=400,
     )
-    custom_substructure_note: Optional[str] = DS(
+    custom_substructure_note: str | None = DS(
         "Free-form note on substructure constraints (historic, aesthetic)",
         maxlen=400,
     )
-    climate_zone: Optional[str] = DS(
+    climate_zone: str | None = DS(
         "Climate classification (e.g. Tropical Wet/Dry, Arid, Mountain)",
         maxlen=60,
     )
-    terrain_category: Optional[str] = DS(
+    terrain_category: str | None = DS(
         "IS:875 terrain category (1/2/3/4) for wind height factor k1",
         maxlen=40,
     )
-    corridor_type: Optional[UsageIntensityType] = Field(
+    corridor_type: UsageIntensityType | None = Field(
         default=None,
         description="Traffic usage intensity class along this corridor",
     )
-    grade_separation: Optional[InterchangeGradeSeparationType] = Field(
+    grade_separation: InterchangeGradeSeparationType | None = Field(
         default=None,
         description="Grade separation type (ROB/RUB/Flyover/Interchange)",
     )
@@ -550,27 +542,27 @@ class GeometryInput(BaseModel):
         default=AlignmentType.STRAIGHT,
         description="Horizontal alignment type (Straight/Circular/Spiral/Compound)",
     )
-    horizontal_curve_transition: Optional[HorizontalCurveTransitionType] = Field(
+    horizontal_curve_transition: HorizontalCurveTransitionType | None = Field(
         default=None,
         description="Transition curve method before/after circular arc",
     )
-    transition_curve_type: Optional[TransitionCurveType] = Field(
+    transition_curve_type: TransitionCurveType | None = Field(
         default=None,
         description="Spiral / clothoid transition shape class",
     )
-    horizontal_curve_R_m: Optional[Decimal] = DM(
+    horizontal_curve_R_m: Decimal | None = DM(
         "Horizontal circular curve radius, m (None = straight)",
         ge=Decimal("15"), le=Decimal("30000"), dp=3,
     )
-    gradient_pct: Optional[Decimal] = DM(
+    gradient_pct: Decimal | None = DM(
         "Longitudinal gradient, % (+ = rise, - = fall)",
         ge=Decimal("-8"), le=Decimal("8"), dp=3,
     )
-    vertical_alignment: Optional[VerticalAlignmentType] = Field(
+    vertical_alignment: VerticalAlignmentType | None = Field(
         default=None,
         description="Sag / Crest / Straight vertical profile",
     )
-    vertical_curve_passing_R_m: Optional[Decimal] = DM(
+    vertical_curve_passing_R_m: Decimal | None = DM(
         "Passing vertical curve radius (crest) for OSD, m",
         ge=Decimal("50"), le=Decimal("100000"), dp=3,
     )
@@ -579,51 +571,51 @@ class GeometryInput(BaseModel):
         "Through carriageway width, metres (curb-face to curb-face)",
         ge=Decimal("3.5"), le=Decimal("30"), dp=3,
     )
-    footpath_left_m: Optional[Decimal] = DM(
+    footpath_left_m: Decimal | None = DM(
         "Left (CH-increasing) footpath width, m",
         ge=0, le=Decimal("10"), dp=3,
     )
-    footpath_right_m: Optional[Decimal] = DM(
+    footpath_right_m: Decimal | None = DM(
         "Right (CH-decreasing) footpath width, m",
         ge=0, le=Decimal("10"), dp=3,
     )
-    crash_barrier_width_left_m: Optional[Decimal] = DM(
+    crash_barrier_width_left_m: Decimal | None = DM(
         "Left crash barrier system width, m",
         ge=0, le=Decimal("2"), dp=3,
     )
-    crash_barrier_width_right_m: Optional[Decimal] = DM(
+    crash_barrier_width_right_m: Decimal | None = DM(
         "Right crash barrier system width, m",
         ge=0, le=Decimal("2"), dp=3,
     )
-    kerb_width_left_m: Optional[Decimal] = DM(
+    kerb_width_left_m: Decimal | None = DM(
         "Left kerb / channeliser width, m",
         ge=0, le=Decimal("2"), dp=3,
     )
-    kerb_width_right_m: Optional[Decimal] = DM(
+    kerb_width_right_m: Decimal | None = DM(
         "Right kerb / channeliser width, m",
         ge=0, le=Decimal("2"), dp=3,
     )
-    median_width_m: Optional[Decimal] = DM(
+    median_width_m: Decimal | None = DM(
         "Central median width, m (0 = undivided)",
         ge=0, le=Decimal("12"), dp=3,
     )
-    median_barrier_width_m: Optional[Decimal] = DM(
+    median_barrier_width_m: Decimal | None = DM(
         "Median barrier width, m (0 = no barrier on median)",
         ge=0, le=Decimal("2"), dp=3,
     )
-    left_ditch_width_m: Optional[Decimal] = DM(
+    left_ditch_width_m: Decimal | None = DM(
         "Left roadside drain / side-ditch width, m",
         ge=0, le=Decimal("6"), dp=3,
     )
-    right_ditch_width_m: Optional[Decimal] = DM(
+    right_ditch_width_m: Decimal | None = DM(
         "Right roadside drain / side-ditch width, m",
         ge=0, le=Decimal("6"), dp=3,
     )
-    service_road_left_m: Optional[Decimal] = DM(
+    service_road_left_m: Decimal | None = DM(
         "Left frontage / service road carriageway width, m",
         ge=0, le=Decimal("15"), dp=3,
     )
-    service_road_right_m: Optional[Decimal] = DM(
+    service_road_right_m: Decimal | None = DM(
         "Right frontage / service road carriageway width, m",
         ge=0, le=Decimal("15"), dp=3,
     )
@@ -639,41 +631,41 @@ class GeometryInput(BaseModel):
     curved_bridge_flag: bool = DB(
         "True if bridge lies on horizontal circular / spiral curve (not tangent)",
     )
-    curve_radius_m: Optional[Decimal] = DM(
+    curve_radius_m: Decimal | None = DM(
         "Radius of curve at deck centroid if curved_bridge_flag = True",
         ge=Decimal("30"), le=Decimal("30000"), dp=3,
     )
-    widening_on_curve: Optional[WideningTypeOnCurve] = Field(
+    widening_on_curve: WideningTypeOnCurve | None = Field(
         default=None,
         description="Inner/outer/none widening class on curved alignments",
     )
     # --- Camber / Superelevation ---
-    camber_mm: Optional[int] = DI(
+    camber_mm: int | None = DI(
         "Design pre-camber (crown) height at deck centreline, millimetres",
         ge=0, le=500,
     )
-    camber_method: Optional[CamberMethod] = Field(
+    camber_method: CamberMethod | None = Field(
         default=None,
         description="Camber shape (parabolic/linear/precamber)",
     )
-    superelevation_pct: Optional[Decimal] = DM(
+    superelevation_pct: Decimal | None = DM(
         "Applied superelevation cross-slope, % (max 7% urban, 10% rural IRC:73)",
         ge=Decimal("-10"), le=Decimal("10"), dp=3,
     )
-    superelevation_rotation_axis: Optional[SuperelevationRotationAxis] = Field(
+    superelevation_rotation_axis: SuperelevationRotationAxis | None = Field(
         default=None,
         description="Rotation axis for superelevation transition (centre/inner-edge)",
     )
     # --- Pavement crust ---
-    pavement_thickness_total_mm: Optional[int] = DI(
+    pavement_thickness_total_mm: int | None = DI(
         "Total crust (bituminous + granular sub-base) thickness, mm",
         ge=0, le=1500,
     )
-    crust_layer_count: Optional[int] = DI(
+    crust_layer_count: int | None = DI(
         "Number of distinct crust layers in pavement cross-section",
         ge=0, le=10,
     )
-    pavement_crust_composition: Optional[PavementCrustComposition] = Field(
+    pavement_crust_composition: PavementCrustComposition | None = Field(
         default=None,
         description="Crust recipe / type classification",
     )
@@ -682,16 +674,16 @@ class GeometryInput(BaseModel):
         default=ChainageUnit.METRE,
         description="Input chainage unit (METRE / KILOMETRE)",
     )
-    chainage_start_km: Optional[Decimal] = DM(
+    chainage_start_km: Decimal | None = DM(
         "Starting chainage of abutment-1, km",
         ge=0, le=Decimal("9999"), dp=6,
     )
-    chainage_end_km: Optional[Decimal] = DM(
+    chainage_end_km: Decimal | None = DM(
         "Ending chainage of abutment-2, km",
         ge=0, le=Decimal("9999"), dp=6,
     )
     # --- Bearing pad spacing ---
-    bearing_pad_spacing_m: Optional[Decimal] = DM(
+    bearing_pad_spacing_m: Decimal | None = DM(
         "Clear spacing between bearing pads (on one pier cap), m",
         ge=Decimal("0.5"), le=Decimal("20"), dp=3,
     )
@@ -699,27 +691,27 @@ class GeometryInput(BaseModel):
     minimum_curve_speed_check_required: bool = DB(
         "Flag: compute min curve speed & sight-distance envelope as part of geometry report",
     )
-    sight_distance_category: Optional[SightDistanceCategory] = Field(
+    sight_distance_category: SightDistanceCategory | None = Field(
         default=None,
         description="Stopping/Passing/Overtaking sight-distance class for design",
     )
-    kerb_type: Optional[KerbType] = Field(
+    kerb_type: KerbType | None = Field(
         default=None,
         description="Kerb cross-section shape type",
     )
-    footpath_type: Optional[FootpathType] = Field(
+    footpath_type: FootpathType | None = Field(
         default=None,
         description="Footpath / cycle-track / none",
     )
-    median_type: Optional[MedianType] = Field(
+    median_type: MedianType | None = Field(
         default=None,
         description="Central median type (rigid/flexible/none)",
     )
-    crash_barrier_type: Optional[CrashBarrierType] = Field(
+    crash_barrier_type: CrashBarrierType | None = Field(
         default=None,
         description="Metal beam / RCC wall / semi-rigid",
     )
-    rotation_direction: Optional[RotationDirection] = Field(
+    rotation_direction: RotationDirection | None = Field(
         default=None,
         description="Clockwise / Counter-clockwise (annotation / layout convention)",
     )
@@ -771,160 +763,160 @@ class Superstructure(BaseModel):
         default=220, ge=100, le=1500,
         description="Deck slab nominal thickness mm (excluding wearing coat). Solid-slab decks commonly 200–1200 mm.",
     )
-    wearing_coat_type: Optional[WearingCoatType] = Field(
+    wearing_coat_type: WearingCoatType | None = Field(
         default=None,
         description="Type of wearing surface (BC / SMA / MS / DBST / AC)",
     )
-    wearing_coat_grade: Optional[WearingCoatGrade] = Field(
+    wearing_coat_grade: WearingCoatGrade | None = Field(
         default=None,
         description="Wearing coat mix-grade class (MorTH Clause 500 series)",
     )
-    wearing_coat_thickness_mm: Optional[int] = DI(
+    wearing_coat_thickness_mm: int | None = DI(
         "Wearing coat compacted thickness, millimetres",
         ge=0, le=500,
     )
-    wearing_coat_slope_pct: Optional[Decimal] = DM(
+    wearing_coat_slope_pct: Decimal | None = DM(
         "Cross-fall slope on carriageway wearing coat, % (typically 2.0)",
         ge=Decimal("-4"), le=Decimal("4"), dp=3,
     )
-    drainage_type: Optional[DrainageType] = Field(
+    drainage_type: DrainageType | None = Field(
         default=None,
         description="Deck drainage outlet type (Scupper / InletPipe / EdgeChannel)",
     )
-    drainage_spacing_m: Optional[Decimal] = DM(
+    drainage_spacing_m: Decimal | None = DM(
         "Longitudinal spacing of deck drainage outlets, metres",
         ge=Decimal("3"), le=Decimal("50"), dp=3,
     )
-    drainage_crossfall: Optional[DrainageCrossfallType] = Field(
+    drainage_crossfall: DrainageCrossfallType | None = Field(
         default=None,
         description="Deck crossfall direction convention",
     )
-    camber_mm: Optional[int] = DI(
+    camber_mm: int | None = DI(
         "Parabolic deck camber height at centreline, millimetres",
         ge=0, le=600,
     )
-    camber_method: Optional[CamberMethod] = Field(
+    camber_method: CamberMethod | None = Field(
         default=None,
         description="Camber application method",
     )
-    girder_type: Optional[GirderType] = Field(
+    girder_type: GirderType | None = Field(
         default=None,
         description="Girder shape family (I / Box / T / Delta / Plate / Truss)",
     )
-    girder_depth_mm: Optional[int] = DI(
+    girder_depth_mm: int | None = DI(
         "Nominal girder depth (excluding deck), millimetres (0 = NA for slab/culvert)",
         ge=0, le=8000,
     )
-    girder_spacing_m: Optional[Decimal] = DM(
+    girder_spacing_m: Decimal | None = DM(
         "Centre-to-centre girder spacing, m (0 = NA for box/slab/culvert)",
         ge=0, le=Decimal("10"), dp=3,
     )
-    girders_per_deck_count: Optional[int] = DI(
+    girders_per_deck_count: int | None = DI(
         "Number of longitudinal girders per deck (cross-section count, 0 = NA)",
         ge=0, le=30,
     )
-    slab_type: Optional[SlabType] = Field(
+    slab_type: SlabType | None = Field(
         default=None,
         description="Deck slab structural behaviour (Solid / Voided / Ribbed / HollowCore)",
     )
     slab_effective_flange_width_check: bool = DB(
         "Flag: effective flange width check performed and recorded",
     )
-    parapet_type: Optional[ParapetType] = Field(
+    parapet_type: ParapetType | None = Field(
         default=None,
         description="Edge parapet / roadside barrier class",
     )
-    parapet_height_mm: Optional[int] = DI(
+    parapet_height_mm: int | None = DI(
         "Parapet top-to-deck height, millimetres (min 1100 for pedestrian)",
         ge=600, le=2500,
     )
-    railing_type: Optional[RailingType] = Field(
+    railing_type: RailingType | None = Field(
         default=None,
         description="Footpath / median railing sub-type",
     )
-    cantilever_overhang_type: Optional[CantileverOverhangType] = Field(
+    cantilever_overhang_type: CantileverOverhangType | None = Field(
         default=None,
         description="Cantilever deck slab overhang class",
     )
-    cantilever_overhang_left_m: Optional[Decimal] = DM(
+    cantilever_overhang_left_m: Decimal | None = DM(
         "Left cantilever overhang (from girder CL to deck edge), m",
         ge=0, le=Decimal("5"), dp=3,
     )
-    cantilever_overhang_right_m: Optional[Decimal] = DM(
+    cantilever_overhang_right_m: Decimal | None = DM(
         "Right cantilever overhang (from girder CL to deck edge), m",
         ge=0, le=Decimal("5"), dp=3,
     )
-    bearing_shelf_width_m: Optional[Decimal] = DM(
+    bearing_shelf_width_m: Decimal | None = DM(
         "Minimum bearing shelf width on diaphragm, m",
         ge=Decimal("0.2"), le=Decimal("3"), dp=3,
     )
-    kerb_elevation_mm: Optional[int] = DI(
+    kerb_elevation_mm: int | None = DI(
         "Raised kerb mount height above deck, millimetres",
         ge=0, le=600,
     )
-    footpath_elevation_mm: Optional[int] = DI(
+    footpath_elevation_mm: int | None = DI(
         "Footpath top elevation above deck wearing coat, millimetres",
         ge=0, le=500,
     )
     crash_barrier_reinforcement_required: bool = DB(
         "True = crash barrier has dedicated reinforcement cage separate from deck slab",
     )
-    transverse_diaphragm_spacing_m: Optional[Decimal] = DM(
+    transverse_diaphragm_spacing_m: Decimal | None = DM(
         "Longitudinal spacing between transverse diaphragms, m",
         ge=Decimal("1"), le=Decimal("30"), dp=3,
     )
-    continuity_slab_thickness_mm: Optional[int] = DI(
+    continuity_slab_thickness_mm: int | None = DI(
         "Continuity slab topping over pier, millimetres (for continuous systems)",
         ge=0, le=1000,
     )
-    haunch_height_mm: Optional[int] = DI(
+    haunch_height_mm: int | None = DI(
         "Girder-deck haunch depth (initial bedding layer), millimetres",
         ge=0, le=400,
     )
     cable_duct_required: bool = DB(
         "True = embed cable / service ducts through deck slab (electrical / telecom)",
     )
-    stay_sag_ratio_for_cable: Optional[Decimal] = DM(
+    stay_sag_ratio_for_cable: Decimal | None = DM(
         "Cable-stayed: f/L sag ratio for stay cables",
         ge=Decimal("0.001"), le=Decimal("0.3"), dp=4,
     )
-    superstructure_segmentation: Optional[SuperstructureSegmentation] = Field(
+    superstructure_segmentation: SuperstructureSegmentation | None = Field(
         default=None,
         description="Cast-in-place / Precast-balanced-cantilever / Precast-span-by-span",
     )
-    precast_segment_joint_type: Optional[PrecastSegmentJointType] = Field(
+    precast_segment_joint_type: PrecastSegmentJointType | None = Field(
         default=None,
         description="Precast segmental joint match-cast class",
     )
-    deck_joint_spacing: Optional[DeckJointSpacing] = Field(
+    deck_joint_spacing: DeckJointSpacing | None = Field(
         default=None,
         description="Longitudinal deck expansion joint spacing class",
     )
-    deck_pour_sequence_method: Optional[DeckPourSequenceMethod] = Field(
+    deck_pour_sequence_method: DeckPourSequenceMethod | None = Field(
         default=None,
         description="Concrete deck pour phasing (symmetric/balanced cantilever)",
     )
-    web_open_cutout_type: Optional[WebOpenCutoutType] = Field(
+    web_open_cutout_type: WebOpenCutoutType | None = Field(
         default=None,
         description="Service opening / cutout shape class in girder web",
     )
-    cable_staying_system: Optional[CableStayingSystemClass] = Field(
+    cable_staying_system: CableStayingSystemClass | None = Field(
         default=None,
         description="Cable stay arrangement class (Harp/Fan/Modified)",
     )
-    arch_shape_type: Optional[ArchShapeType] = Field(
+    arch_shape_type: ArchShapeType | None = Field(
         default=None,
         description="Arch rib shape type (Parabolic/Circular/Tied/Deck/Through)",
     )
-    truss_configuration: Optional[TrussConfigurationClass] = Field(
+    truss_configuration: TrussConfigurationClass | None = Field(
         default=None,
         description="Truss configuration (Warren/Pratt/Howe/Baltimore)",
     )
-    waterproofing_membrane: Optional[WaterproofingMembraneType] = Field(
+    waterproofing_membrane: WaterproofingMembraneType | None = Field(
         default=None,
         description="Deck waterproofing membrane product type",
     )
-    anti_corrosion_protection: Optional[AntiCorrosionProtectionType] = Field(
+    anti_corrosion_protection: AntiCorrosionProtectionType | None = Field(
         default=None,
         description="Steel / rebar anti-corrosion system",
     )
@@ -983,66 +975,66 @@ class Substructure(BaseModel):
     # --- Piers ---
     pier_type: PierType = Field(description="Pier family (Wall/Hammerhead/Round/Octagonal)")
     pier_material: ConcreteGrade = Field(description="Pier concrete grade")
-    pier_height_typical_m: Optional[Decimal] = DM(
+    pier_height_typical_m: Decimal | None = DM(
         "Typical pier height (GL to bearing base), m (range 2..50 IRC)",
         ge=Decimal("2"), le=Decimal("50"), dp=3,
     )
-    pier_cap_type: Optional[PierCapType] = Field(
+    pier_cap_type: PierCapType | None = Field(
         default=None,
         description="Pier cap: drop / non-drop / flared",
     )
-    pier_cap_width_m: Optional[Decimal] = DM(
+    pier_cap_width_m: Decimal | None = DM(
         "Pier cap width (along bridge), m",
         ge=Decimal("0.5"), le=Decimal("20"), dp=3,
     )
-    pier_cap_length_m: Optional[Decimal] = DM(
+    pier_cap_length_m: Decimal | None = DM(
         "Pier cap length (transverse to alignment), m",
         ge=Decimal("1"), le=Decimal("50"), dp=3,
     )
-    pier_cap_depth_m: Optional[Decimal] = DM(
+    pier_cap_depth_m: Decimal | None = DM(
         "Pier cap vertical depth, m",
         ge=Decimal("0.3"), le=Decimal("6"), dp=3,
     )
-    pier_shaft_shape: Optional[PierShaftShape] = Field(
+    pier_shaft_shape: PierShaftShape | None = Field(
         default=None,
         description="Pier shaft cross-section shape",
     )
-    pier_shaft_width_m: Optional[Decimal] = DM(
+    pier_shaft_width_m: Decimal | None = DM(
         "Pier shaft width (along bridge), m",
         ge=Decimal("0.3"), le=Decimal("10"), dp=3,
     )
-    pier_shaft_length_m: Optional[Decimal] = DM(
+    pier_shaft_length_m: Decimal | None = DM(
         "Pier shaft cross-section length (transverse), m",
         ge=Decimal("0.3"), le=Decimal("15"), dp=3,
     )
-    pier_diameter_m: Optional[Decimal] = DM(
+    pier_diameter_m: Decimal | None = DM(
         "For round/octagonal piers: shaft diameter, m",
         ge=Decimal("0.5"), le=Decimal("10"), dp=3,
     )
-    pier_pedestal_height_m: Optional[Decimal] = DM(
+    pier_pedestal_height_m: Decimal | None = DM(
         "Pier pedestal (height from cap soffit to bearing plate), m",
         ge=Decimal("0.05"), le=Decimal("3"), dp=3,
     )
-    pier_tie_beam_location: Optional[PierTieBeamLocationType] = Field(
+    pier_tie_beam_location: PierTieBeamLocationType | None = Field(
         default=None,
         description="Multi-column: tie-beam location (mid-height/top/bottom)",
     )
     pier_diaphragm_required: bool = DB(
         "True = pier diaphragm / cross-beam between shafts constructed",
     )
-    pier_hammerhead_overhang_m: Optional[Decimal] = DM(
+    pier_hammerhead_overhang_m: Decimal | None = DM(
         "Hammerhead cantilever overhang beyond shaft face, m",
         ge=0, le=Decimal("8"), dp=3,
     )
-    bearings_per_pier: Optional[int] = DI(
+    bearings_per_pier: int | None = DI(
         "Number of bearings supported on a single pier",
         ge=1, le=60,
     )
-    well_cap_width_m: Optional[Decimal] = DM(
+    well_cap_width_m: Decimal | None = DM(
         "Well / Caisson top cap (steining cover) width, m",
         ge=Decimal("1"), le=Decimal("15"), dp=3,
     )
-    pile_cap_thickness_mm: Optional[int] = DI(
+    pile_cap_thickness_mm: int | None = DI(
         "Pile cap thickness, millimetres",
         ge=300, le=6000,
     )
@@ -1051,73 +1043,73 @@ class Substructure(BaseModel):
         description="Abutment system: Cantilever / Counterfort / Wing-wall / Gravity",
     )
     abutment_material: ConcreteGrade = Field(description="Abutment concrete grade")
-    abutment_width_m: Optional[Decimal] = DM(
+    abutment_width_m: Decimal | None = DM(
         "Abutment width (along alignment direction), m",
         ge=Decimal("0.3"), le=Decimal("20"), dp=3,
     )
-    abutment_length_m: Optional[Decimal] = DM(
+    abutment_length_m: Decimal | None = DM(
         "Abutment transverse length (road width +), m",
         ge=Decimal("3"), le=Decimal("60"), dp=3,
     )
-    abutment_height_m: Optional[Decimal] = DM(
+    abutment_height_m: Decimal | None = DM(
         "Abutment height (GL to deck soffit), m",
         ge=Decimal("0.5"), le=Decimal("25"), dp=3,
     )
-    abutment_pedestal_type: Optional[AbutmentPedestalType] = Field(
+    abutment_pedestal_type: AbutmentPedestalType | None = Field(
         default=None,
         description="Abutment bearing pedestal sub-class",
     )
-    abutment_pedestal_height_m: Optional[Decimal] = DM(
+    abutment_pedestal_height_m: Decimal | None = DM(
         "Abutment pedestal height (abutment top to bearing plate bottom), m",
         ge=Decimal("0.05"), le=Decimal("2"), dp=3,
     )
-    bearings_per_abutment: Optional[int] = DI(
+    bearings_per_abutment: int | None = DI(
         "Number of bearings at a single abutment",
         ge=1, le=60,
     )
     # --- Wings / Returns ---
-    return_wall_type: Optional[ReturnWallType] = Field(
+    return_wall_type: ReturnWallType | None = Field(
         default=None,
         description="Return (rear) wall at abutment: Cantilever / Buttress / None",
     )
-    return_wall_length_m: Optional[Decimal] = DM(
+    return_wall_length_m: Decimal | None = DM(
         "Return wall length along embankment, m",
         ge=0, le=Decimal("20"), dp=3,
     )
-    return_wall_height_m: Optional[Decimal] = DM(
+    return_wall_height_m: Decimal | None = DM(
         "Return wall height (top to base), m",
         ge=0, le=Decimal("12"), dp=3,
     )
-    wing_wall_type: Optional[WingWallType] = Field(
+    wing_wall_type: WingWallType | None = Field(
         default=None,
         description="Wing-wall arrangement: Parallel / Perpendicular / Splayed / Tapered",
     )
-    wing_wall_angle_deg: Optional[Decimal] = DM(
+    wing_wall_angle_deg: Decimal | None = DM(
         "Splay angle of wing walls relative to abutment face, degrees",
         ge=0, le=Decimal("90"), dp=2,
     )
-    wing_wall_splay_length_m: Optional[Decimal] = DM(
+    wing_wall_splay_length_m: Decimal | None = DM(
         "Wing wall splay run-out length, m",
         ge=0, le=Decimal("25"), dp=3,
     )
-    wing_wall_height_m: Optional[Decimal] = DM(
+    wing_wall_height_m: Decimal | None = DM(
         "Wing wall max height, m",
         ge=0, le=Decimal("12"), dp=3,
     )
     # --- Backfill / Approach slab ---
-    abutment_backfill_spec: Optional[AbutmentBackfillSpecificationType] = Field(
+    abutment_backfill_spec: AbutmentBackfillSpecificationType | None = Field(
         default=None,
         description="Backfill material gradation class behind abutment",
     )
-    backfill_type: Optional[str] = DS(
+    backfill_type: str | None = DS(
         "Free-form: selected backfill material (Moorum / Sand / Gravel / Crusher dust)",
         maxlen=120,
     )
-    approach_slab_length_m: Optional[Decimal] = DM(
+    approach_slab_length_m: Decimal | None = DM(
         "Approach / transition slab length, m (typically 3m, 5m or 6m)",
         ge=0, le=Decimal("15"), dp=3,
     )
-    approach_slab_thickness_mm: Optional[int] = DI(
+    approach_slab_thickness_mm: int | None = DI(
         "Approach slab thickness, mm (typical 200-250)",
         ge=0, le=600,
     )
@@ -1133,105 +1125,105 @@ class FoundationDetails(BaseModel):
 
     type: FoundationType = Field(description="Primary foundation system")
     # --- Piles ---
-    pile_type: Optional[PileType] = Field(
+    pile_type: PileType | None = Field(
         default=None,
         description="Pile installation family (Bored/Driven/Under-reamed/Micro/Compaction)",
     )
-    pile_shape: Optional[PileShape] = Field(
+    pile_shape: PileShape | None = Field(
         default=None,
         description="Pile cross-section shape: Circular / Square / Octagonal",
     )
-    pile_base_type: Optional[PileBaseType] = Field(
+    pile_base_type: PileBaseType | None = Field(
         default=None,
         description="Pile toe / base detail class",
     )
-    pile_installation_method: Optional[PileInstallationMethodType] = Field(
+    pile_installation_method: PileInstallationMethodType | None = Field(
         default=None,
         description="Installation method sub-type",
     )
-    pile_diameter_mm: Optional[int] = DI(
+    pile_diameter_mm: int | None = DI(
         "Pile shaft diameter, millimetres (range 400..2000 IRC typical; 0 = NA for open/well)",
         ge=0, le=3000,
     )
-    pile_length_m: Optional[Decimal] = DM(
+    pile_length_m: Decimal | None = DM(
         "Pile length (cut-off to tip), m (5..60 m range IRC; 0 = NA for open/well)",
         ge=0, le=Decimal("120"), dp=3,
     )
-    piles_per_pier: Optional[int] = DI(
+    piles_per_pier: int | None = DI(
         "Number of piles supporting a single pier cap (0 = NA for open/well)",
         ge=0, le=100,
     )
-    pile_group_config: Optional[str] = DS(
+    pile_group_config: str | None = DS(
         "Pile group layout string e.g. 3x3, 4x2, 6x2@2.5m c/c",
         maxlen=80,
     )
-    pile_spacing_m: Optional[Decimal] = DM(
+    pile_spacing_m: Decimal | None = DM(
         "Centre-to-centre pile spacing (typically 2.5 x diameter), m",
         ge=0, le=Decimal("10"), dp=3,
     )
-    pile_cap_thickness_mm: Optional[int] = DI(
+    pile_cap_thickness_mm: int | None = DI(
         "Pile cap thickness, millimetres (>= 1.5x pile_diameter; 0 = NA)",
         ge=0, le=6000,
     )
-    pile_cutoff_level_m: Optional[Decimal] = DM(
+    pile_cutoff_level_m: Decimal | None = DM(
         "Pile cut-off level (RL), m",
         ge=Decimal("-100"), le=Decimal("9000"), dp=4,
     )
-    under_ream_count: Optional[UnderReamCount] = Field(
+    under_ream_count: UnderReamCount | None = Field(
         default=None,
         description="Number of under-ream bulbs (0/1/2/3) for under-reamed piles",
     )
     # --- Wells / Caissons ---
-    well_diameter_m: Optional[Decimal] = DM(
+    well_diameter_m: Decimal | None = DM(
         "Well (Caisson) outer diameter, m",
         ge=Decimal("1"), le=Decimal("20"), dp=3,
     )
-    well_steining_type: Optional[WellSteiningType] = Field(
+    well_steining_type: WellSteiningType | None = Field(
         default=None,
         description="Well steining material / construction type",
     )
-    well_steining_tmm: Optional[int] = DI(
+    well_steining_tmm: int | None = DI(
         "Well steining wall thickness, millimetres",
         ge=200, le=2500,
     )
-    well_depth_below_bed_m: Optional[Decimal] = DM(
+    well_depth_below_bed_m: Decimal | None = DM(
         "Depth of well founding below river bed level, m",
         ge=Decimal("0.5"), le=Decimal("80"), dp=3,
     )
-    well_curb_type: Optional[WellCurbType] = Field(
+    well_curb_type: WellCurbType | None = Field(
         default=None,
         description="Well cutting curb: RCC / steel-shod",
     )
-    well_curb_height_m: Optional[Decimal] = DM(
+    well_curb_height_m: Decimal | None = DM(
         "Cutting curb section height, m",
         ge=Decimal("0.3"), le=Decimal("3"), dp=3,
     )
-    well_cutting_edge_shape: Optional[WellCuttingEdgeShape] = Field(
+    well_cutting_edge_shape: WellCuttingEdgeShape | None = Field(
         default=None,
         description="Cutting edge: straight chamfer / conical",
     )
-    well_sump_depth_m: Optional[Decimal] = DM(
+    well_sump_depth_m: Decimal | None = DM(
         "Well plug / sump depth inside curb, m",
         ge=0, le=Decimal("10"), dp=3,
     )
-    well_cap_width_m: Optional[Decimal] = DM(
+    well_cap_width_m: Decimal | None = DM(
         "Well top cap (steining cover block) width, m",
         ge=Decimal("1"), le=Decimal("20"), dp=3,
     )
     # --- Open foundation ---
-    open_foundation_depth: Optional[OpenFoundationDepth] = Field(
+    open_foundation_depth: OpenFoundationDepth | None = Field(
         default=None,
         description="Open foundation depth category (Shallow / Deep / Stepped)",
     )
-    open_width_m: Optional[Decimal] = DM(
+    open_width_m: Decimal | None = DM(
         "Open footing width (transverse), m",
         ge=Decimal("0.5"), le=Decimal("30"), dp=3,
     )
-    open_length_m: Optional[Decimal] = DM(
+    open_length_m: Decimal | None = DM(
         "Open footing length (along alignment), m",
         ge=Decimal("0.5"), le=Decimal("30"), dp=3,
     )
-    open_depth_m: Optional[Decimal] = DM(
+    open_depth_m: Decimal | None = DM(
         "Open footing founding depth below GL, m",
         ge=Decimal("0.5"), le=Decimal("15"), dp=3,
     )
@@ -1239,49 +1231,49 @@ class FoundationDetails(BaseModel):
         "True = stepped open footing on sloping rock",
     )
     # --- Raft ---
-    raft_type: Optional[RaftMatType] = Field(
+    raft_type: RaftMatType | None = Field(
         default=None,
         description="Raft / mat foundation class (solid/ribbed/piled-raft)",
     )
-    raft_thickness_mm: Optional[int] = DI(
+    raft_thickness_mm: int | None = DI(
         "Raft slab thickness, millimetres",
         ge=300, le=6000,
     )
-    raft_reinforcement_dia_mm: Optional[int] = DI(
+    raft_reinforcement_dia_mm: int | None = DI(
         "Principal raft reinforcement bar diameter, mm",
         ge=8, le=50,
     )
     # --- Combined footing ---
-    combined_footing_length_m: Optional[Decimal] = DM(
+    combined_footing_length_m: Decimal | None = DM(
         "Combined footing length (along), m",
         ge=Decimal("0.5"), le=Decimal("40"), dp=3,
     )
-    combined_footing_width_m: Optional[Decimal] = DM(
+    combined_footing_width_m: Decimal | None = DM(
         "Combined footing width (transverse), m",
         ge=Decimal("0.5"), le=Decimal("40"), dp=3,
     )
-    sheet_pile_type: Optional[SheetPileType] = Field(
+    sheet_pile_type: SheetPileType | None = Field(
         default=None,
         description="Sheet pile temporary / permanent type",
     )
     # --- Bearing capacity ---
-    factor_of_safety_on_bearing: Optional[Decimal] = DM(
+    factor_of_safety_on_bearing: Decimal | None = DM(
         "Factor of safety against bearing failure (>=2.5 IRC)",
         ge=Decimal("1.0"), le=Decimal("10"), dp=3,
     )
-    bearing_capacity_kpa: Optional[Decimal] = DM(
+    bearing_capacity_kpa: Decimal | None = DM(
         "Allowable bearing pressure at founding level, kPa",
         ge=0, le=Decimal("20000"), dp=2,
     )
-    bearing_capacity_soil_class: Optional[BearingCapacitySoilType] = Field(
+    bearing_capacity_soil_class: BearingCapacitySoilType | None = Field(
         default=None,
         description="Soil classification for bearing purpose",
     )
-    ground_improvement: Optional[GroundImprovementType] = Field(
+    ground_improvement: GroundImprovementType | None = Field(
         default=None,
         description="Ground improvement method if adopted",
     )
-    settlement_criterion: Optional[SettlementCriterionCategoryType] = Field(
+    settlement_criterion: SettlementCriterionCategoryType | None = Field(
         default=None,
         description="Settlement limitation class adopted",
     )
@@ -1295,39 +1287,39 @@ class Approaches(BaseModel):
 
     model_config = ConfigDict(validate_assignment=True, extra="forbid")
 
-    left_approach_length_m: Optional[Decimal] = DM(
+    left_approach_length_m: Decimal | None = DM(
         "Left (A1-side) approach length from abutment toe, m",
         ge=0, le=Decimal("1000"), dp=3,
     )
-    right_approach_length_m: Optional[Decimal] = DM(
+    right_approach_length_m: Decimal | None = DM(
         "Right (A2-side) approach length from abutment toe, m",
         ge=0, le=Decimal("1000"), dp=3,
     )
-    retaining_wall_type: Optional[RetainingWallModeType] = Field(
+    retaining_wall_type: RetainingWallModeType | None = Field(
         default=None,
         description="Retaining wall: Gravity / Cantilever / Counterfort / Mechanically Stabilised Earth",
     )
-    retaining_wall_height_m: Optional[Decimal] = DM(
+    retaining_wall_height_m: Decimal | None = DM(
         "Retaining wall retained height, m",
         ge=0, le=Decimal("20"), dp=3,
     )
-    type_of_embankment: Optional[str] = DS(
+    type_of_embankment: str | None = DS(
         "Embankment fill type description e.g. 'Granular Moorum / Sand / Select / Boulders'",
         maxlen=120,
     )
-    soil_embankment_unit_weight_kN_m3: Optional[Decimal] = DM(
+    soil_embankment_unit_weight_kN_m3: Decimal | None = DM(
         "Design unit weight of embankment, kN/m^3 (usually 18-22)",
         ge=Decimal("10"), le=Decimal("30"), dp=3,
     )
-    approach_slope_width_m: Optional[Decimal] = DM(
+    approach_slope_width_m: Decimal | None = DM(
         "Embankment side slope run (1V:2H -> 2.0) for a 1 m drop, m/m",
         ge=Decimal("1"), le=Decimal("6"), dp=3,
     )
-    shoulder_width_left_m: Optional[Decimal] = DM(
+    shoulder_width_left_m: Decimal | None = DM(
         "Left paved / unpaved shoulder width, m",
         ge=0, le=Decimal("6"), dp=3,
     )
-    shoulder_width_right_m: Optional[Decimal] = DM(
+    shoulder_width_right_m: Decimal | None = DM(
         "Right paved / unpaved shoulder width, m",
         ge=0, le=Decimal("6"), dp=3,
     )
@@ -1337,39 +1329,39 @@ class Approaches(BaseModel):
     sign_gantry_required: bool = DB(
         "Flag: overhead sign gantry installed on approaches",
     )
-    speed_limit_on_approach_kmph: Optional[int] = DI(
+    speed_limit_on_approach_kmph: int | None = DI(
         "Posted regulatory speed limit, km/h (0 = no signage)",
         ge=0, le=180,
     )
-    transition_curve_length_m: Optional[Decimal] = DM(
+    transition_curve_length_m: Decimal | None = DM(
         "Length of superelevation / widening transition on approach, m",
         ge=0, le=Decimal("500"), dp=3,
     )
-    vertical_alignment_type: Optional[VerticalAlignmentType] = Field(
+    vertical_alignment_type: VerticalAlignmentType | None = Field(
         default=None,
         description="Approach road vertical alignment type",
     )
-    approach_gradient_pct: Optional[Decimal] = DM(
+    approach_gradient_pct: Decimal | None = DM(
         "Approach longitudinal gradient, % (abs <= 6 MORTH)",
         ge=Decimal("-10"), le=Decimal("10"), dp=3,
     )
-    pavement_thickness_mm: Optional[int] = DI(
+    pavement_thickness_mm: int | None = DI(
         "Approach carriageway crust thickness, mm",
         ge=0, le=2000,
     )
-    approach_wearing_coat_grade: Optional[WearingCoatGrade] = Field(
+    approach_wearing_coat_grade: WearingCoatGrade | None = Field(
         default=None,
         description="Approach wearing coat mix-grade",
     )
-    approach_kerb_type: Optional[KerbType] = Field(
+    approach_kerb_type: KerbType | None = Field(
         default=None,
         description="Approach kerb shape type",
     )
-    approach_drainage_type: Optional[DrainageType] = Field(
+    approach_drainage_type: DrainageType | None = Field(
         default=None,
         description="Approach carriageway drainage method",
     )
-    approach_median_type: Optional[MedianType] = Field(
+    approach_median_type: MedianType | None = Field(
         default=None,
         description="Approach median type (if divided)",
     )
@@ -1384,44 +1376,44 @@ class HydraulicData(BaseModel):
     model_config = ConfigDict(validate_assignment=True, extra="forbid")
 
     # --- Discharge ---
-    design_discharge_cumecs: Optional[Decimal] = DM(
+    design_discharge_cumecs: Decimal | None = DM(
         "Design flood discharge Q, m3/s (at chosen return period)",
         ge=0, le=Decimal("500000"), dp=3,
     )
-    discharge_measurement_method: Optional[DischargeMeasurementMethod] = Field(
+    discharge_measurement_method: DischargeMeasurementMethod | None = Field(
         default=None,
         description="How Q was obtained (rating-curve / Gumbel / Rational / 1D model / 2D)",
     )
     # --- Water levels ---
-    hfl_m: Optional[Decimal] = DM(
+    hfl_m: Decimal | None = DM(
         "High Flood Level (RL), m",
         ge=Decimal("-100"), le=Decimal("9000"), dp=4,
     )
-    lwl_m: Optional[Decimal] = DM(
+    lwl_m: Decimal | None = DM(
         "Low / Summer Water Level (RL), m",
         ge=Decimal("-100"), le=Decimal("9000"), dp=4,
     )
-    normal_wl_m: Optional[Decimal] = DM(
+    normal_wl_m: Decimal | None = DM(
         "Normal / Average annual water level (RL), m",
         ge=Decimal("-100"), le=Decimal("9000"), dp=4,
     )
-    scour_level_m: Optional[Decimal] = DM(
+    scour_level_m: Decimal | None = DM(
         "Design scour level (RL) after applying safety margin, m",
         ge=Decimal("-100"), le=Decimal("9000"), dp=4,
     )
-    design_scour_depth_m: Optional[Decimal] = DM(
+    design_scour_depth_m: Decimal | None = DM(
         "Computed design scour depth (below bed), m",
         ge=0, le=Decimal("30"), dp=3,
     )
-    scour_regime: Optional[ScourRegimeType] = Field(
+    scour_regime: ScourRegimeType | None = Field(
         default=None,
         description="Scour analysis model: Lacey / Regime / USGS / Pelton",
     )
-    scour_measurement_method: Optional[ScourMeasurementMethod] = Field(
+    scour_measurement_method: ScourMeasurementMethod | None = Field(
         default=None,
         description="Scour method on site / in report",
     )
-    scour_protection: Optional[ScourProtectionSubtype] = Field(
+    scour_protection: ScourProtectionSubtype | None = Field(
         default=None,
         description="Scour countermeasure adopted (Launching apron / Rip-rap / Mattress etc.)",
     )
@@ -1430,153 +1422,153 @@ class HydraulicData(BaseModel):
         max_digits=8, decimal_places=3, ge=Decimal("0.3"), le=Decimal("10"),
         description="Freeboard to be maintained above HFL to deck soffit (m)",
     )
-    actual_soffit_level_m: Optional[Decimal] = DM(
+    actual_soffit_level_m: Decimal | None = DM(
         "Actual deck soffit RL at minimum span, m",
         ge=Decimal("-100"), le=Decimal("9000"), dp=4,
     )
-    freeboard_addition_factor: Optional[FreeboardAdditionFactorType] = Field(
+    freeboard_addition_factor: FreeboardAdditionFactorType | None = Field(
         default=None,
         description="Extra freeboard factor applied (wave / boat / wind setup)",
     )
     # --- Waterway ---
-    waterway_required_m2: Optional[Decimal] = DM(
+    waterway_required_m2: Decimal | None = DM(
         "Required (Lacey regime) waterway area, m^2",
         ge=0, le=Decimal("100000"), dp=3,
     )
-    waterway_provided_m2: Optional[Decimal] = DM(
+    waterway_provided_m2: Decimal | None = DM(
         "Provided clear waterway area between abutments, m^2",
         ge=0, le=Decimal("100000"), dp=3,
     )
-    regime_waterway_coeff: Optional[LaceyRegimeFactorType] = Field(
+    regime_waterway_coeff: LaceyRegimeFactorType | None = Field(
         default=None,
         description="Lacey regime waterway coefficient category",
     )
-    regime_constant_k: Optional[RegimeConstantKValue] = Field(
+    regime_constant_k: RegimeConstantKValue | None = Field(
         default=None,
         description="Lacey's regime constant K (depends on silt factor)",
     )
-    lacey_silt_factor: Optional[Decimal] = DM(
+    lacey_silt_factor: Decimal | None = DM(
         "Lacey silt factor f = 1.76 sqrt(d50 mm)",
         ge=Decimal("0.1"), le=Decimal("10"), dp=4,
     )
-    regime_perimeter_m: Optional[Decimal] = DM(
+    regime_perimeter_m: Decimal | None = DM(
         "Lacey regime wetted perimeter P = 4.75 sqrt(Q) (m)",
         ge=0, le=Decimal("5000"), dp=3,
     )
-    regime_depth_m: Optional[Decimal] = DM(
+    regime_depth_m: Decimal | None = DM(
         "Lacey regime depth R = 0.478 (Q/f^2)^(1/3) metres",
         ge=0, le=Decimal("50"), dp=3,
     )
-    regime_velocity_mps: Optional[Decimal] = DM(
+    regime_velocity_mps: Decimal | None = DM(
         "Regime mean flow velocity V = 10.8 R^(2/3) S^(1/3) ??? or Lacey V = (Q f^2 / 140)^(1/6), m/s",
         ge=0, le=Decimal("10"), dp=4,
     )
     # --- Afflux ---
-    afflux_m: Optional[Decimal] = DM(
+    afflux_m: Decimal | None = DM(
         "Computed afflux (heading-up) at bridge, m",
         ge=0, le=Decimal("5"), dp=4,
     )
-    max_afflux_allowable_m: Optional[Decimal] = DM(
+    max_afflux_allowable_m: Decimal | None = DM(
         "Maximum allowable afflux per IRC:5, m (typical 0.3 m)",
         ge=0, le=Decimal("3"), dp=3,
     )
-    afflux_formula_type: Optional[AffluxEstimationFormulaType] = Field(
+    afflux_formula_type: AffluxEstimationFormulaType | None = Field(
         default=None,
         description="Afflux formula: Kindsvater-Carter / Yarnell / Mavis",
     )
     # --- Site properties ---
-    water_source_type: Optional[WaterSourceType] = Field(
+    water_source_type: WaterSourceType | None = Field(
         default=None,
         description="Water source: River / Nala / Drain / Culvert / Rainfall / Tidal",
     )
-    soil_class_bed: Optional[SoilClass] = Field(
+    soil_class_bed: SoilClass | None = Field(
         default=None,
         description="Dominant river-bed soil classification",
     )
-    river_bank_type: Optional[RiverBankType] = Field(
+    river_bank_type: RiverBankType | None = Field(
         default=None,
         description="River bank protection / geotechnical class",
     )
-    river_bed_slope_m_per_km: Optional[Decimal] = DM(
+    river_bed_slope_m_per_km: Decimal | None = DM(
         "Longitudinal bed slope, m/km",
         ge=0, le=Decimal("500"), dp=4,
     )
-    catchment_area_sqkm: Optional[Decimal] = DM(
+    catchment_area_sqkm: Decimal | None = DM(
         "Catchment / drainage area up to site, km^2",
         ge=0, le=Decimal("1000000"), dp=3,
     )
-    return_period_yr: Optional[FloodReturnPeriodDesign] = Field(
+    return_period_yr: FloodReturnPeriodDesign | None = Field(
         default=None,
         description="Return period used for design flood (25 / 50 / 100 / PMF)",
     )
-    flood_analysis_method: Optional[FloodFrequencyAnalysisMethodType] = Field(
+    flood_analysis_method: FloodFrequencyAnalysisMethodType | None = Field(
         default=None,
         description="Flood frequency analysis technique",
     )
-    hydrograph_shape: Optional[HydrographShapeType] = Field(
+    hydrograph_shape: HydrographShapeType | None = Field(
         default=None,
         description="Design hydrograph shape / unit hydrograph class",
     )
     any_regime_equation_not_applied_flag: bool = DB(
         "Flag: True = site conditions cause regime equations to not apply; justify in notes",
     )
-    highest_recorded_flood_year: Optional[int] = DI(
+    highest_recorded_flood_year: int | None = DI(
         "Year of highest recorded flood in historical data",
         ge=1800, le=2200,
     )
-    river_geomorphology: Optional[RiverGeomorphologyType] = Field(
+    river_geomorphology: RiverGeomorphologyType | None = Field(
         default=None,
         description="River reach geomorphology type (straight/meandering/braided/anastomosing)",
     )
-    river_crossing_class: Optional[RiverCrossingClass] = Field(
+    river_crossing_class: RiverCrossingClass | None = Field(
         default=None,
         description="Major / Medium / Minor river crossing class",
     )
-    river_bed_material: Optional[RiverBedMaterialSizeType] = Field(
+    river_bed_material: RiverBedMaterialSizeType | None = Field(
         default=None,
         description="Bed material size class",
     )
-    river_training_work: Optional[RiverTrainingWorkType] = Field(
+    river_training_work: RiverTrainingWorkType | None = Field(
         default=None,
         description="River training / bank protection works class",
     )
-    bank_protection_method: Optional[BankProtectionMethodType] = Field(
+    bank_protection_method: BankProtectionMethodType | None = Field(
         default=None,
         description="Bank protection method adopted (riprap/geo-bag/CC block)",
     )
-    bank_erosion_category: Optional[BankErosionCategoryClass] = Field(
+    bank_erosion_category: BankErosionCategoryClass | None = Field(
         default=None,
         description="Bank erosion hazard class",
     )
-    waterway_crossing_type: Optional[WaterwayCrossingType] = Field(
+    waterway_crossing_type: WaterwayCrossingType | None = Field(
         default=None,
         description="Crossing mode (through over / under / aqueduct)",
     )
-    flow_velocity_category: Optional[FlowVelocityCategory] = Field(
+    flow_velocity_category: FlowVelocityCategory | None = Field(
         default=None,
         description="Design velocity magnitude class",
     )
-    grade_control_structure: Optional[GradeControlStructureType] = Field(
+    grade_control_structure: GradeControlStructureType | None = Field(
         default=None,
         description="Grade control structure (check dam / weir / sill) if any",
     )
-    sediment_load_transport: Optional[SedimentLoadTransportType] = Field(
+    sediment_load_transport: SedimentLoadTransportType | None = Field(
         default=None,
         description="Sediment load class (wash/bed/suspended)",
     )
-    sediment_yield_class: Optional[SedimentYieldClassification] = Field(
+    sediment_yield_class: SedimentYieldClassification | None = Field(
         default=None,
         description="Annual sediment yield classification",
     )
-    water_surface_profile: Optional[WaterSurfaceProfileType] = Field(
+    water_surface_profile: WaterSurfaceProfileType | None = Field(
         default=None,
         description="Gradually-varied flow profile class",
     )
-    water_quality_aggressive_class: Optional[WaterQualityAggressiveType] = Field(
+    water_quality_aggressive_class: WaterQualityAggressiveType | None = Field(
         default=None,
         description="Concrete aggressivity classification of water",
     )
-    ice_load_type: Optional[IceLoadType] = Field(
+    ice_load_type: IceLoadType | None = Field(
         default=None,
         description="Ice / floe load class if applicable (hilly terrain)",
     )
@@ -1584,16 +1576,19 @@ class HydraulicData(BaseModel):
     # --- Computed ------------------------------------------------------------
     @computed_field
     @property
-    def freeboard_actual_m(self) -> Optional[Decimal]:
+    def freeboard_actual_m(self) -> Decimal | None:
         if self.actual_soffit_level_m is None or self.hfl_m is None:
             return None
         return Decimal(self.actual_soffit_level_m) - Decimal(self.hfl_m)
 
     @model_validator(mode="after")
     def _hfl_exceeds_lwl_when_set(self):
-        if self.hfl_m is not None and self.lwl_m is not None:
-            if Decimal(self.hfl_m) < Decimal(self.lwl_m):
-                raise ValueError(f"hfl_m ({self.hfl_m}) must be >= lwl_m ({self.lwl_m})")
+        if (
+            self.hfl_m is not None
+            and self.lwl_m is not None
+            and Decimal(self.hfl_m) < Decimal(self.lwl_m)
+        ):
+            raise ValueError(f"hfl_m ({self.hfl_m}) must be >= lwl_m ({self.lwl_m})")
         return self
 
 
@@ -1609,126 +1604,126 @@ class Materials(BaseModel):
     concrete_superstructure: ConcreteGrade = Field(description="Superstructure concrete grade")
     concrete_substructure: ConcreteGrade = Field(description="Pier / abutment concrete grade")
     concrete_foundation: ConcreteGrade = Field(description="Pile / well / open-footing concrete grade")
-    concrete_aggregate: Optional[ConcreteAggregateType] = Field(
+    concrete_aggregate: ConcreteAggregateType | None = Field(
         default=None,
         description="Aggregate source / rock type",
     )
-    concrete_cover_superstructure_mm: Optional[ConcreteCoverNominalClass] = Field(
+    concrete_cover_superstructure_mm: ConcreteCoverNominalClass | None = Field(
         default=None,
         description="Nominal cover class for deck / superstructure",
     )
-    concrete_cover_substructure_mm: Optional[ConcreteCoverNominalClass] = Field(
+    concrete_cover_substructure_mm: ConcreteCoverNominalClass | None = Field(
         default=None,
         description="Nominal cover class for substructure",
     )
-    concrete_cover_foundation_mm: Optional[ConcreteCoverNominalClass] = Field(
+    concrete_cover_foundation_mm: ConcreteCoverNominalClass | None = Field(
         default=None,
         description="Nominal cover class for foundation",
     )
-    concrete_slump_class: Optional[ConcreteSlumpClass] = Field(
+    concrete_slump_class: ConcreteSlumpClass | None = Field(
         default=None,
         description="Workability / slump class (S1..S5)",
     )
-    concrete_curing_method: Optional[ConcreteCuringMethodType] = Field(
+    concrete_curing_method: ConcreteCuringMethodType | None = Field(
         default=None,
         description="Post-pour curing method class",
     )
-    concrete_surface_finish: Optional[ConcreteSurfaceFinishClass] = Field(
+    concrete_surface_finish: ConcreteSurfaceFinishClass | None = Field(
         default=None,
         description="Fair-faced / Plastered / Paint-grade finish",
     )
     # --- Cement / Admixtures ---
-    cement_type: Optional[CementType] = Field(
+    cement_type: CementType | None = Field(
         default=None,
         description="Cement type (OPC/PPC/PSC/SRC/RHPC etc.)",
     )
-    admixture_required: Optional[AdmixtureType] = Field(
+    admixture_required: AdmixtureType | None = Field(
         default=None,
         description="Primary concrete admixture (water-reducer / retarder / accelerator)",
     )
     # --- Reinforcement ---
-    reinforcement_bar_type: Optional[ReinforcementBarType] = Field(
+    reinforcement_bar_type: ReinforcementBarType | None = Field(
         default=None,
         description="Rebar family (HYSD Fe415 / TMT Fe500 / Fe500D / Epoxy / Galv)",
     )
     reinforcement_steel_grade: SteelGrade = Field(description="Rebar strength grade (Fe415/500/550)")
-    rebar_coupler_type: Optional[RebarCouplerType] = Field(
+    rebar_coupler_type: RebarCouplerType | None = Field(
         default=None,
         description="Mechanical splice / coupler type if used",
     )
     # --- Prestress ---
     prestressing_steel: PrestressGrade = Field(description="Prestress strand / wire grade class")
-    prestress_loss_class: Optional[PrestressLossTypeEnum] = Field(
+    prestress_loss_class: PrestressLossTypeEnum | None = Field(
         default=None,
         description="Prestress loss estimation class",
     )
-    creep_shrinkage_class: Optional[CreepShrinkageFactorClass] = Field(
+    creep_shrinkage_class: CreepShrinkageFactorClass | None = Field(
         default=None,
         description="Creep & shrinkage factor environment class",
     )
     # --- Bearings / Expansion joints ---
     bearing_type: BearingType = Field(description="Primary bearing type class")
-    bearing_material: Optional[BearingMaterial] = Field(
+    bearing_material: BearingMaterial | None = Field(
         default=None,
         description="Elastomer / pad material type",
     )
-    bearing_friction_pad_class: Optional[FrictionCoeffBearingPadType] = Field(
+    bearing_friction_pad_class: FrictionCoeffBearingPadType | None = Field(
         default=None,
         description="PTFE / Stainless / Elastomeric friction class",
     )
     expansion_joint_type: ExpansionJointType = Field(description="Expansion joint system class")
-    joint_sealant_type: Optional[JointSealantType] = Field(
+    joint_sealant_type: JointSealantType | None = Field(
         default=None,
         description="Expansion joint sealant substance type",
     )
     # --- Wearing coat ---
-    wearing_coat_material_type: Optional[WearingCoatType] = Field(
+    wearing_coat_material_type: WearingCoatType | None = Field(
         default=None,
         description="Wearing coat surfacing type",
     )
-    wearing_coat_grade: Optional[WearingCoatGrade] = Field(
+    wearing_coat_grade: WearingCoatGrade | None = Field(
         default=None,
         description="Wearing coat mix-design grade",
     )
     # --- Welding & metal ---
-    weld_type_for_steel: Optional[WeldType] = Field(
+    weld_type_for_steel: WeldType | None = Field(
         default=None,
         description="Principal weld process for steel components",
     )
-    paint_coat_system: Optional[PaintCoatSystemType] = Field(
+    paint_coat_system: PaintCoatSystemType | None = Field(
         default=None,
         description="Paint / coating system class",
     )
-    anti_corrosion_protection: Optional[AntiCorrosionProtectionType] = Field(
+    anti_corrosion_protection: AntiCorrosionProtectionType | None = Field(
         default=None,
         description="Corrosion protection system (HDG / Paint / Metalized / Duplex)",
     )
     # --- Misc ---
-    brick_type_for_return_walls: Optional[str] = DS(
+    brick_type_for_return_walls: str | None = DS(
         "Brick / block type for return / wing wall masonry",
         maxlen=80,
     )
-    mortar_type: Optional[str] = DS(
+    mortar_type: str | None = DS(
         "Mortar mix ratio (e.g. 1:4 CM, 1:6 CM) for non-structural masonry",
         maxlen=40,
     )
-    backfill_material: Optional[str] = DS(
+    backfill_material: str | None = DS(
         "Backfill gradation / material spec",
         maxlen=80,
     )
-    metal_parapet_finish: Optional[str] = DS(
+    metal_parapet_finish: str | None = DS(
         "Metal parapet finish description (Hot-dip galvanized + paint / powder coated)",
         maxlen=120,
     )
-    formwork_panel_type: Optional[FormworkPanelType] = Field(
+    formwork_panel_type: FormworkPanelType | None = Field(
         default=None,
         description="Formwork panel face material (Plywood / Steel / Plastic / Aluminium)",
     )
-    formwork_release_agent: Optional[FormworkReleaseAgentType] = Field(
+    formwork_release_agent: FormworkReleaseAgentType | None = Field(
         default=None,
         description="Formwork release agent / barrier class",
     )
-    waterproofing_membrane: Optional[WaterproofingMembraneType] = Field(
+    waterproofing_membrane: WaterproofingMembraneType | None = Field(
         default=None,
         description="Deck / substructure waterproofing product",
     )
@@ -1747,28 +1742,28 @@ class BearingScheduleRow(BaseModel):
         max_length=40,
     )
     bearing_type: BearingType = Field(description="Bearing system used")
-    size_x_mm: Optional[int] = DI("Bearing pad / pot dimension X, mm", ge=50, le=5000)
-    size_y_mm: Optional[int] = DI("Bearing pad / pot dimension Y, mm", ge=50, le=5000)
-    design_load_kn: Optional[Decimal] = DM(
+    size_x_mm: int | None = DI("Bearing pad / pot dimension X, mm", ge=50, le=5000)
+    size_y_mm: int | None = DI("Bearing pad / pot dimension Y, mm", ge=50, le=5000)
+    design_load_kn: Decimal | None = DM(
         "Design vertical load (Serviceability), kN",
         ge=0, le=Decimal("100000"), dp=2,
     )
-    fixed_or_guide_or_free: Optional[str] = DS(
+    fixed_or_guide_or_free: str | None = DS(
         "Movement constraint flag: FIXED / GUIDED_X / GUIDED_Y / FREE / POT_FIX / POT_GUIDE",
         maxlen=30,
     )
-    elastomeric_layers_count: Optional[int] = DI(
+    elastomeric_layers_count: int | None = DI(
         "Number of rubber layers for elastomeric pad",
         ge=1, le=30,
     )
     steel_back_bool: bool = DB(
         "True = steel-backed elastomeric bearing plate",
     )
-    pot_pressure_mpa: Optional[Decimal] = DM(
+    pot_pressure_mpa: Decimal | None = DM(
         "For POT bearing: elastomer compressive pressure, MPa",
         ge=Decimal("10"), le=Decimal("60"), dp=2,
     )
-    spherical_rotation_rad: Optional[Decimal] = DM(
+    spherical_rotation_rad: Decimal | None = DM(
         "Spherical bearing design rotation magnitude, rad",
         ge=0, le=Decimal("0.1"), dp=5,
     )
@@ -1791,27 +1786,27 @@ class ExpansionJointScheduleRow(BaseModel):
         maxlen=40,
     )
     joint_type: ExpansionJointType = Field(description="Expansion joint system class")
-    width_mm: Optional[int] = DI(
+    width_mm: int | None = DI(
         "Joint finished open width (along deck), mm",
         ge=10, le=2000,
     )
-    movement_range_mm: Optional[int] = DI(
+    movement_range_mm: int | None = DI(
         "± total movement capacity, mm",
         ge=0, le=3000,
     )
-    gap_mm: Optional[int] = DI(
+    gap_mm: int | None = DI(
         "Initial installation gap between deck ends, mm",
         ge=0, le=1000,
     )
-    sealant_type: Optional[JointSealantType] = Field(
+    sealant_type: JointSealantType | None = Field(
         default=None,
         description="Joint sealant material class",
     )
-    anchor_spacing_mm: Optional[int] = DI(
+    anchor_spacing_mm: int | None = DI(
         "Edge anchor bar centre-to-centre spacing along joint, mm",
         ge=50, le=2000,
     )
-    transverse_length_m: Optional[Decimal] = DM(
+    transverse_length_m: Decimal | None = DM(
         "Total joint length (full road width), m",
         ge=Decimal("0.5"), le=Decimal("100"), dp=3,
     )
@@ -1834,11 +1829,11 @@ class BearingsJoints(BaseModel):
         default_factory=list,
         description="One entry per distinct expansion joint location",
     )
-    notes_bearings: Optional[str] = DS(
+    notes_bearings: str | None = DS(
         "General notes on bearing selection, maintenance, installation",
         maxlen=600,
     )
-    notes_joints: Optional[str] = DS(
+    notes_joints: str | None = DS(
         "General notes on expansion joint sequencing, sealing type",
         maxlen=600,
     )
@@ -1863,132 +1858,132 @@ class ComponentsLib(BaseModel):
 
     model_config = ConfigDict(validate_assignment=True, extra="allow")
 
-    standard_pier_tag: Optional[str] = DS(
+    standard_pier_tag: str | None = DS(
         "Catalogued pier key from pier library",
         maxlen=60,
     )
-    standard_abutment_tag: Optional[str] = DS(
+    standard_abutment_tag: str | None = DS(
         "Catalogued abutment key from abutment library",
         maxlen=60,
     )
-    standard_foundation_tag: Optional[str] = DS(
+    standard_foundation_tag: str | None = DS(
         "Foundation template identifier",
         maxlen=60,
     )
-    typical_girder_library_key: Optional[str] = DS(
+    typical_girder_library_key: str | None = DS(
         "Girder / superstructure standard library key",
         maxlen=60,
     )
-    standard_parapet_id: Optional[str] = DS(
+    standard_parapet_id: str | None = DS(
         "Parapet assembly standard ID",
         maxlen=60,
     )
-    standard_railing_id: Optional[str] = DS(
+    standard_railing_id: str | None = DS(
         "Railing system standard ID (pedestrian / cycle)",
         maxlen=60,
     )
-    standard_retaining_wall_id: Optional[str] = DS(
+    standard_retaining_wall_id: str | None = DS(
         "Retaining wall type key from standards library",
         maxlen=60,
     )
-    standard_kerb_id: Optional[str] = DS(
+    standard_kerb_id: str | None = DS(
         "Kerb cross-section standard ID",
         maxlen=60,
     )
-    standard_crash_barrier_id: Optional[str] = DS(
+    standard_crash_barrier_id: str | None = DS(
         "Road safety crash barrier standard ID (WB1/WB2/H1/H2 etc.)",
         maxlen=60,
     )
-    standard_bearing_typical_pair_id: Optional[str] = DS(
+    standard_bearing_typical_pair_id: str | None = DS(
         "Standard pair (fixed + free) bearing ID",
         maxlen=60,
     )
-    standard_expansion_joint_id: Optional[str] = DS(
+    standard_expansion_joint_id: str | None = DS(
         "Expansion joint standard product / catalog ID",
         maxlen=60,
     )
-    standard_drainage_outlet_id: Optional[str] = DS(
+    standard_drainage_outlet_id: str | None = DS(
         "Deck scupper / drainage outlet standard ID",
         maxlen=60,
     )
-    standard_pile_group_template_id: Optional[str] = DS(
+    standard_pile_group_template_id: str | None = DS(
         "Pile-group standard arrangement key (e.g. 3x3-PIER, 4x2-ABUT)",
         maxlen=60,
     )
-    standard_wing_wall_id: Optional[str] = DS(
+    standard_wing_wall_id: str | None = DS(
         "Wing wall standard assembly key",
         maxlen=60,
     )
-    standard_return_wall_id: Optional[str] = DS(
+    standard_return_wall_id: str | None = DS(
         "Return wall standard assembly key",
         maxlen=60,
     )
-    standard_approach_slab_id: Optional[str] = DS(
+    standard_approach_slab_id: str | None = DS(
         "Approach / transition slab standard key",
         maxlen=60,
     )
-    standard_drawing_sheet_template_id: Optional[str] = DS(
+    standard_drawing_sheet_template_id: str | None = DS(
         "CAD sheet border / title block template ID",
         maxlen=60,
     )
-    standard_bill_of_quantities_template_id: Optional[str] = DS(
+    standard_bill_of_quantities_template_id: str | None = DS(
         "BOQ standard schedule template key",
         maxlen=60,
     )
 
     # --- Additional component drawing references (added for E2E fixture compatibility) ---
-    crash_barrier_drawing_no: Optional[str] = DS(
+    crash_barrier_drawing_no: str | None = DS(
         "Crash barrier drawing number",
         maxlen=60,
     )
-    wearing_coat_drawing_no: Optional[str] = DS(
+    wearing_coat_drawing_no: str | None = DS(
         "Wearing coat drawing number",
         maxlen=60,
     )
-    expansion_joint_drawing_no: Optional[str] = DS(
+    expansion_joint_drawing_no: str | None = DS(
         "Expansion joint drawing number",
         maxlen=60,
     )
-    drainage_spout_type: Optional[str] = DS(
+    drainage_spout_type: str | None = DS(
         "Drainage spout type",
         maxlen=60,
     )
-    drainage_spout_spacing_m: Optional[Decimal] = DM(
+    drainage_spout_spacing_m: Decimal | None = DM(
         "Drainage spout spacing in metres",
         ge=Decimal("0"), le=Decimal("1000"), dp=3,
     )
-    railing_type: Optional[str] = DS(
+    railing_type: str | None = DS(
         "Railing type",
         maxlen=60,
     )
-    
+
 
     # --- Additional standard component drawing references (added for E2E fixture compatibility) ---
-    standard_crash_barrier_drawing_no: Optional[str] = DS(
+    standard_crash_barrier_drawing_no: str | None = DS(
         "Crash barrier drawing number",
         maxlen=60,
     )
-    standard_wearing_coat_drawing_no: Optional[str] = DS(
+    standard_wearing_coat_drawing_no: str | None = DS(
         "Wearing coat drawing number",
         maxlen=60,
     )
-    standard_expansion_joint_drawing_no: Optional[str] = DS(
+    standard_expansion_joint_drawing_no: str | None = DS(
         "Expansion joint drawing number",
         maxlen=60,
     )
-    standard_drainage_spout_type: Optional[str] = DS(
+    standard_drainage_spout_type: str | None = DS(
         "Drainage spout type",
         maxlen=60,
     )
-    standard_drainage_spout_spacing_m: Optional[Decimal] = DM(
+    standard_drainage_spout_spacing_m: Decimal | None = DM(
         "Drainage spout spacing in metres",
         ge=Decimal("0"), le=Decimal("1000"), dp=3,
     )
-    standard_railing_type: Optional[str] = DS(
+    standard_railing_type: str | None = DS(
         "Railing type",
         maxlen=60,
     )
-    
+
 
 
 # ===========================================================================
@@ -2009,7 +2004,7 @@ class DrawingControl(BaseModel):
     )
     sheet_size: SheetSize = Field(description="ISO / ANSI sheet size selection")
     drawing_scale: DrawingScale = Field(description="Default nominal plotting scale")
-    scale_denominator_set: Optional[ScaleDenominatorSet] = Field(
+    scale_denominator_set: ScaleDenominatorSet | None = Field(
         default=None,
         description="Alternate scale set identifier for drawing series",
     )
@@ -2034,11 +2029,11 @@ class DrawingControl(BaseModel):
         ge=Decimal("-180"), le=Decimal("180"),
         description="Plot rotation angle (degrees, CCW positive)",
     )
-    north_arrow_size_mm: Optional[int] = DI(
+    north_arrow_size_mm: int | None = DI(
         "North arrow symbol plot size, mm",
         ge=3, le=300,
     )
-    scale_bar_length_mm: Optional[int] = DI(
+    scale_bar_length_mm: int | None = DI(
         "Graphic scale bar length, mm",
         ge=20, le=800,
     )
@@ -2050,70 +2045,70 @@ class DrawingControl(BaseModel):
     title_block_style: TitleBlockStyle = Field(
         description="Title block frame style",
     )
-    title_block_revision_class: Optional[TitleBlockRevisionClass] = Field(
+    title_block_revision_class: TitleBlockRevisionClass | None = Field(
         default=None,
         description="Revision history block class (A/B/C issue vs tender / construction)",
     )
-    dimension_precision_mm: Optional[int] = DI(
+    dimension_precision_mm: int | None = DI(
         "Dimension decimal / rounding precision, millimetres (e.g. 1, 5, 10)",
         ge=0, le=100,
     )
-    dimension_style: Optional[DimensionStyleClass] = Field(
+    dimension_style: DimensionStyleClass | None = Field(
         default=None,
         description="Dimension line / arrow / text style class",
     )
-    text_height_scale_factor: Optional[Decimal] = DM(
+    text_height_scale_factor: Decimal | None = DM(
         "Plot-scale multiplier applied to text height table (e.g. 1.2 = 20% larger)",
         ge=Decimal("0.5"), le=Decimal("3"), dp=3,
     )
-    lineweight_scale_factor: Optional[Decimal] = DM(
+    lineweight_scale_factor: Decimal | None = DM(
         "Lineweight scale multiplier across all layers",
         ge=Decimal("0.5"), le=Decimal("3"), dp=3,
     )
-    line_weight_default: Optional[LineWeightCode] = Field(
+    line_weight_default: LineWeightCode | None = Field(
         default=None,
         description="Default contour / line weight code (0.25/0.35/0.5 mm)",
     )
-    line_style_default: Optional[LineStyleCode] = Field(
+    line_style_default: LineStyleCode | None = Field(
         default=None,
         description="Default line style (Continuous / Dashed / Center / Phantom)",
     )
-    hatch_pattern_standard: Optional[HatchPatternCode] = Field(
+    hatch_pattern_standard: HatchPatternCode | None = Field(
         default=None,
         description="Default hatch pattern for concrete/earth/steel sections",
     )
-    font_style: Optional[FontStyle] = Field(
+    font_style: FontStyle | None = Field(
         default=None,
         description="Annotation font family style (ISOCP / ROMANS / etc.)",
     )
-    arrow_style: Optional[ArrowStyle] = Field(
+    arrow_style: ArrowStyle | None = Field(
         default=None,
         description="Dimension / leader arrow head class",
     )
-    plot_style_used: Optional[str] = DS(
+    plot_style_used: str | None = DS(
         "CTB/STB plot style table name for monochrome or colour plots",
         maxlen=60,
     )
-    plotter_paper_class: Optional[PlotterPaperClass] = Field(
+    plotter_paper_class: PlotterPaperClass | None = Field(
         default=None,
         description="Plotter paper type / size class",
     )
-    drawing_border_inside_mm: Optional[int] = DI(
+    drawing_border_inside_mm: int | None = DI(
         "Inside margin (frame to content border), mm",
         ge=0, le=200,
     )
-    revision_block_count: Optional[int] = DI(
+    revision_block_count: int | None = DI(
         "Max number of revision rows rendered in title block",
         ge=0, le=20,
     )
     legend_sheet_required: bool = DB(
         "Legends / symbols / abbreviations sheet is mandatory for tender issue",
     )
-    default_view_type: Optional[ViewTypeClassification] = Field(
+    default_view_type: ViewTypeClassification | None = Field(
         default=None,
         description="Primary view category on first sheet (Plan / Elevation / 3D)",
     )
-    default_cross_section_view: Optional[CrossSectionViewTypeCode] = Field(
+    default_cross_section_view: CrossSectionViewTypeCode | None = Field(
         default=None,
         description="Cross-section rendering class (Half-symmetric / Full / Cut / Staged)",
     )
@@ -2127,111 +2122,111 @@ class Calculations(BaseModel):
 
     model_config = ConfigDict(validate_assignment=True, extra="forbid")
 
-    total_length_m: Optional[Decimal] = DM(
+    total_length_m: Decimal | None = DM(
         "Total bridge length = sum of spans, m",
         ge=0, le=Decimal("10000"), dp=3,
     )
-    span_count: Optional[int] = DI(
+    span_count: int | None = DI(
         "Span count (repeated here for cross-check with GI)",
         ge=1, le=100,
     )
-    span_depth_ratio: Optional[Decimal] = DM(
+    span_depth_ratio: Decimal | None = DM(
         "Span / girder-depth ratio check value (e.g. 20 for T-beam, 30 for PSC Box)",
         ge=Decimal("5"), le=Decimal("80"), dp=3,
     )
-    deck_area_sqm: Optional[Decimal] = DM(
+    deck_area_sqm: Decimal | None = DM(
         "Deck plan area (overall width x length), m^2",
         ge=0, le=Decimal("100000"), dp=3,
     )
-    overall_width_check_ok: Optional[bool] = DB(
+    overall_width_check_ok: bool | None = DB(
         "Overall width >= carriageway + kerbs + barriers + footpaths check passed"
     )
-    concrete_volume_superstructure_cum: Optional[Decimal] = DM(
+    concrete_volume_superstructure_cum: Decimal | None = DM(
         "Estimated superstructure concrete volume (deck + girders + diaphragms), m^3",
         ge=0, le=Decimal("100000"), dp=3,
     )
-    concrete_volume_substructure_cum: Optional[Decimal] = DM(
+    concrete_volume_substructure_cum: Decimal | None = DM(
         "Estimated pier + abutment concrete volume, m^3",
         ge=0, le=Decimal("100000"), dp=3,
     )
-    concrete_volume_foundation_cum: Optional[Decimal] = DM(
+    concrete_volume_foundation_cum: Decimal | None = DM(
         "Estimated pile / well / open / raft concrete, m^3",
         ge=0, le=Decimal("100000"), dp=3,
     )
-    rebar_weight_tonnes_approx: Optional[Decimal] = DM(
+    rebar_weight_tonnes_approx: Decimal | None = DM(
         "Approx total reinforcement tonnage (super+sub+found), tonnes",
         ge=0, le=Decimal("100000"), dp=3,
     )
-    prestress_tonnes_approx: Optional[Decimal] = DM(
+    prestress_tonnes_approx: Decimal | None = DM(
         "Approx total prestress steel (strands + ducts, tonnes)",
         ge=0, le=Decimal("10000"), dp=3,
     )
-    bearing_count: Optional[int] = DI(
+    bearing_count: int | None = DI(
         "Total bearings in the bridge",
         ge=0, le=10000,
     )
-    expansion_joint_count: Optional[int] = DI(
+    expansion_joint_count: int | None = DI(
         "Total expansion joint assemblies",
         ge=0, le=200,
     )
-    total_estimated_quantity_cost_inr: Optional[Decimal] = DM(
+    total_estimated_quantity_cost_inr: Decimal | None = DM(
         "Rough estimate: sum(vol × unit rates) works cost, INR",
         ge=0, le=Decimal("1E14"), dp=2, md=20,
     )
-    design_scour_vs_foundation_cover_ok: Optional[bool] = DB(
+    design_scour_vs_foundation_cover_ok: bool | None = DB(
         "Foundation founding level safely below design scour + margin"
     )
-    waterway_check_pass: Optional[bool] = DB(
+    waterway_check_pass: bool | None = DB(
         "Provided waterway >= required regime waterway"
     )
-    afflux_ok: Optional[bool] = DB(
+    afflux_ok: bool | None = DB(
         "Computed afflux <= allowable afflux"
     )
-    freeboard_actual_m: Optional[Decimal] = DM(
+    freeboard_actual_m: Decimal | None = DM(
         "Achieved freeboard = (soffit - HFL), m",
         ge=Decimal("-5"), le=Decimal("30"), dp=4,
     )
-    minimum_vertical_clearance_m: Optional[Decimal] = DM(
+    minimum_vertical_clearance_m: Decimal | None = DM(
         "Minimum vertical clearance under deck, m (rail/navigable/road)",
         ge=0, le=Decimal("80"), dp=3,
     )
-    horizontal_clearance_m: Optional[Decimal] = DM(
+    horizontal_clearance_m: Decimal | None = DM(
         "Horizontal clearance from edge carriageway to pier face, m",
         ge=0, le=Decimal("30"), dp=3,
     )
-    impact_factor_applied: Optional[ImpactFactorCoeff] = Field(
+    impact_factor_applied: ImpactFactorCoeff | None = Field(
         default=None,
         description="Impact factor I class applied for governing span",
     )
-    seismic_coeff_applied: Optional[Decimal] = DM(
+    seismic_coeff_applied: Decimal | None = DM(
         "Seismic zone factor / base shear coefficient used, Ah",
         ge=0, le=Decimal("1"), dp=5,
     )
-    deflection_check_ratio_live_load: Optional[Decimal] = DM(
+    deflection_check_ratio_live_load: Decimal | None = DM(
         "Actual / allowable live-load deflection ratio (<= 1 PASS)",
         ge=0, le=Decimal("5"), dp=4,
     )
-    load_combination_set: Optional[LoadCombination] = Field(
+    load_combination_set: LoadCombination | None = Field(
         default=None,
         description="Governing analysis load-combination identifier",
     )
-    temperature_load_delta: Optional[TemperatureLoadDeltaT] = Field(
+    temperature_load_delta: TemperatureLoadDeltaT | None = Field(
         default=None,
         description="Temperature rise/fall load case class used",
     )
-    damping_ratio_class: Optional[DampingRatioTypeEnum] = Field(
+    damping_ratio_class: DampingRatioTypeEnum | None = Field(
         default=None,
         description="Damping ratio class used in seismic analysis",
     )
-    response_spectrum_category: Optional[ResponseSpectrumCategory] = Field(
+    response_spectrum_category: ResponseSpectrumCategory | None = Field(
         default=None,
         description="Site response spectrum (soil) category used",
     )
-    fatigue_detail_category_steel: Optional[FatigueDetailCategorySteel] = Field(
+    fatigue_detail_category_steel: FatigueDetailCategorySteel | None = Field(
         default=None,
         description="Fatigue detail curve category for steel joints",
     )
-    ductility_class_link: Optional[DuctilityClassLink] = Field(
+    ductility_class_link: DuctilityClassLink | None = Field(
         default=None,
         description="Ductility class (OMF/IMF/SMF ductility demand) at piers",
     )
@@ -2266,54 +2261,54 @@ class ValidationModel(BaseModel):
         max_digits=6, decimal_places=2, ge=0, le=100,
         description="Composite quality score 0..100 (100 = perfect)",
     )
-    score_irc05: Optional[Decimal] = DM(
+    score_irc05: Decimal | None = DM(
         "IRC:5 Hydrology / Scour sub-score, 0..100",
         ge=0, le=100, dp=2,
     )
-    score_irc21: Optional[Decimal] = DM(
+    score_irc21: Decimal | None = DM(
         "IRC:21 Concrete sub-structure sub-score, 0..100",
         ge=0, le=100, dp=2,
     )
-    score_ircsp55: Optional[Decimal] = DM(
+    score_ircsp55: Decimal | None = DM(
         "IRC:SP:55 GAD Drawing Standards sub-score, 0..100",
         ge=0, le=100, dp=2,
     )
-    score_structural: Optional[Decimal] = DM(
+    score_structural: Decimal | None = DM(
         "Structural adequacy sub-score, 0..100",
         ge=0, le=100, dp=2,
     )
-    score_hydraulic: Optional[Decimal] = DM(
+    score_hydraulic: Decimal | None = DM(
         "Hydraulic adequacy sub-score, 0..100",
         ge=0, le=100, dp=2,
     )
-    score_drawing_standards: Optional[Decimal] = DM(
+    score_drawing_standards: Decimal | None = DM(
         "Drawing / CAD standards conformance sub-score, 0..100",
         ge=0, le=100, dp=2,
     )
     report_html_or_pdf_generated_flag: bool = DB(
         "True = validation report artefact generated as HTML or PDF file"
     )
-    last_validated_at_iso_datetime: Optional[datetime] = Field(
+    last_validated_at_iso_datetime: datetime | None = Field(
         default=None,
         description="ISO-8601 UTC timestamp of last validation engine run",
     )
-    check_version_tag: Optional[str] = DS(
+    check_version_tag: str | None = DS(
         "Validation rule-set semantic version tag (e.g. 1.4.2-day3)",
         maxlen=40,
     )
-    rules_run_count: Optional[int] = DI(
+    rules_run_count: int | None = DI(
         "Number of rule checks actually executed in last run",
         ge=0, le=100000,
     )
-    rules_skipped_count: Optional[int] = DI(
+    rules_skipped_count: int | None = DI(
         "Number of checks skipped due to pre-condition / missing data",
         ge=0, le=100000,
     )
-    score_materials: Optional[Decimal] = DM(
+    score_materials: Decimal | None = DM(
         "Materials spec conformance sub-score, 0..100",
         ge=0, le=100, dp=2,
     )
-    score_geometry: Optional[Decimal] = DM(
+    score_geometry: Decimal | None = DM(
         "Geometry & alignment conformance sub-score, 0..100",
         ge=0, le=100, dp=2,
     )

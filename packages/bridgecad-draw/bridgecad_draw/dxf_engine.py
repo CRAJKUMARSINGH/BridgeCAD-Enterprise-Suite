@@ -14,18 +14,17 @@ Drawing-space convention
 """
 from __future__ import annotations
 
+import contextlib
 from pathlib import Path
 from typing import Any
 
 try:
     import ezdxf
-    from ezdxf.enums import TextEntityAlignment
     _EZDXF_OK = True
 except ImportError:
     _EZDXF_OK = False
 
 from .layers import setup_layers
-
 
 # ---------------------------------------------------------------------------
 # Document factory
@@ -70,10 +69,8 @@ def _setup_text_styles(doc: Any) -> None:
         ("BRIDGE_MONO", "Courier New.ttf"),
     ]:
         if not styles.has_entry(name):
-            try:
+            with contextlib.suppress(Exception):
                 styles.add(name, font=font)
-            except Exception:
-                pass
 
 
 def _setup_linetypes(doc: Any) -> None:
@@ -89,10 +86,8 @@ def _setup_linetypes(doc: Any) -> None:
     }
     for name, pattern in defs.items():
         if not lts.has_entry(name):
-            try:
+            with contextlib.suppress(Exception):
                 lts.add(name, pattern=pattern)
-            except Exception:
-                pass
 
 
 # ---------------------------------------------------------------------------

@@ -67,7 +67,8 @@ st.divider()
 def _load_project_bytes(data: bytes):
     from bridgecad_io.excel_reader import read_excel
     with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tf:
-        tf.write(data); tmp = Path(tf.name)
+        tf.write(data)
+        tmp = Path(tf.name)
     try:
         return read_excel(tmp)
     finally:
@@ -154,7 +155,7 @@ elif selected == "✅ Validate":
         project = _load_project_bytes(data)
         with st.spinner("Running 30 checks …"):
             from bridgecad_core.validation import run_all
-            from bridgecad_qa.compliance   import score as _score
+            from bridgecad_qa.compliance import score as _score
             report = run_all(project)
             comp   = _score(report)
 
@@ -202,17 +203,16 @@ elif selected == "📐 Drawing Gen":
     if uploaded and st.button("Generate 7-Sheet DXF Package 🚀"):
         data    = uploaded.read()
         project = _load_project_bytes(data)
-        with st.spinner("Generating drawings …"):
-            with tempfile.TemporaryDirectory() as td:
-                from bridgecad_draw.booklet import generate_package
-                sheets = generate_package(project, Path(td),
-                                          prefix=prefix, scale_denom=scale)
-                # ZIP for download
-                zip_buf = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
-                with zipfile.ZipFile(zip_buf.name, "w", zipfile.ZIP_DEFLATED) as zf:
-                    for s in sheets:
-                        zf.write(s, s.name)
-                zip_bytes = Path(zip_buf.name).read_bytes()
+        with st.spinner("Generating drawings …"), tempfile.TemporaryDirectory() as td:
+            from bridgecad_draw.booklet import generate_package
+            sheets = generate_package(project, Path(td),
+                                      prefix=prefix, scale_denom=scale)
+            # ZIP for download
+            zip_buf = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
+            with zipfile.ZipFile(zip_buf.name, "w", zipfile.ZIP_DEFLATED) as zf:
+                for s in sheets:
+                    zf.write(s, s.name)
+            zip_bytes = Path(zip_buf.name).read_bytes()
         st.success(f"✅ {len(sheets)}/7 sheets generated!")
         total_kb = sum(s.stat().st_size for s in sheets) // 1024
         st.metric("Total DXF size", f"{total_kb} KB")
@@ -235,7 +235,7 @@ elif selected == "📊 QA Report":
         project = _load_project_bytes(data)
         with st.spinner("Generating QA HTML report …"):
             from bridgecad_core.validation import run_all
-            from bridgecad_qa.reports       import generate_html_report
+            from bridgecad_qa.reports import generate_html_report
             report = run_all(project)
             with tempfile.NamedTemporaryFile(suffix=".html", delete=False) as tf:
                 tmp = Path(tf.name)
@@ -261,9 +261,9 @@ elif selected == "💰 BOQ Generator":
         project = _load_project_bytes(data)
         state_code = state if state != "None" else None
         with st.spinner("Extracting quantities and pricing …"):
-            from bridgecad_bill.processor                  import extract_and_price
+            from bridgecad_bill.formatters.csv_formatter import format_csv
             from bridgecad_bill.formatters.excel_formatter import format_excel
-            from bridgecad_bill.formatters.csv_formatter   import format_csv
+            from bridgecad_bill.processor import extract_and_price
             boq = extract_and_price(project, state=state_code)
             with tempfile.TemporaryDirectory() as td:
                 xlsx_p = format_excel(boq, Path(td) / "BOQ.xlsx")
@@ -307,16 +307,18 @@ elif selected == "📦 Export Bundle":
     if uploaded and st.button("Run Full Export ⚡"):
         data    = uploaded.read()
         project = _load_project_bytes(data)
-        with st.spinner("Running full pipeline: DXF + BOQ + QA → ZIP …"):
-            with tempfile.TemporaryDirectory() as td:
-                from bridgecad_export.orchestrator import export_all
-                bundle = export_all(
-                    project, Path(td),
-                    prefix=uploaded.name.replace(".xlsx",""),
-                    state=state if state != "None" else None,
-                    scale_denom=scale,
-                )
-                zip_bytes = bundle.read_bytes()
+        with (
+            st.spinner("Running full pipeline: DXF + BOQ + QA → ZIP …"),
+            tempfile.TemporaryDirectory() as td,
+        ):
+            from bridgecad_export.orchestrator import export_all
+            bundle = export_all(
+                project, Path(td),
+                prefix=uploaded.name.replace(".xlsx",""),
+                state=state if state != "None" else None,
+                scale_denom=scale,
+            )
+            zip_bytes = bundle.read_bytes()
         size_kb = len(zip_bytes) // 1024
         st.success(f"✅ Bundle ready! {size_kb} KB")
         st.download_button("⬇ Download ZIP Bundle",
@@ -330,7 +332,7 @@ elif selected == "📦 Export Bundle":
 # ===========================================================================
 elif selected == "🔌 Plugins":
     from bridgecad_plugins.registry import get_registry
-    from bridgecad_plugins.runner   import PluginRunner
+    from bridgecad_plugins.runner import PluginRunner
     reg = get_registry()
     st.metric("Installed plugins", len(reg))
     for p in reg.all():
@@ -375,10 +377,10 @@ elif selected == "🏗️ Geometry":
         data    = uploaded.read()
         project = _load_project_bytes(data)
         from bridgecad_core.geometry import (
-            compute_plan_geometry,
-            compute_long_section_geometry,
             compute_cross_section_geometry,
+            compute_long_section_geometry,
             compute_pile_group_layout,
+            compute_plan_geometry,
         )
         plan  = compute_plan_geometry(project)
         ls    = compute_long_section_geometry(project)

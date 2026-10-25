@@ -1,95 +1,48 @@
-name: ✨ Feature Request
-description: Suggest a new feature or enhancement
-title: "[Feature]: "
-labels: ["enhancement", "triage"]
+name: Feature request
+description: A capability gap in the Suite
+title: "[Feature] "
+labels: ["enhancement"]
 body:
-  - type: markdown
-    attributes:
-      value: |
-        Thanks for suggesting a feature! Please fill out the form below.
-
   - type: textarea
     id: problem
     attributes:
-      label: Is your feature request related to a problem?
-      description: A clear and concise description of what the problem is
-      placeholder: "I'm always frustrated when..."
+      label: The problem
+      description: What are you unable to do today? Describe the problem, not the solution.
     validations:
       required: true
 
   - type: textarea
-    id: solution
+    id: proposal
     attributes:
-      label: Describe the solution you'd like
-      description: A clear and concise description of what you want to happen
-      placeholder: Tell us what you want
+      label: Proposed solution
     validations:
       required: true
 
   - type: textarea
     id: alternatives
     attributes:
-      label: Describe alternatives you've considered
-      description: Any alternative solutions or features you've considered
-      placeholder: Other ways to solve this
+      label: Alternatives considered
+      description: Including "do nothing" — say what it costs.
 
   - type: dropdown
-    id: category
+    id: area
     attributes:
-      label: Feature Category
-      description: What type of feature is this?
+      label: Area
+      multiple: true
       options:
-        - New bridge template
-        - Export format (PDF, SVG, PNG, etc.)
-        - Validation/Standards checking
-        - UI/UX improvement
-        - Performance optimization
-        - Documentation
-        - API/Integration
-        - Other
+        - core, io, draw, bill, qa, export, plugins, ai, infra
+        - cli, api, streamlit ui, react console, docs
     validations:
       required: true
 
-  - type: dropdown
-    id: priority
+  - type: checkboxes
+    id: impact
     attributes:
-      label: Priority
-      description: How important is this feature to you?
+      label: Impact
       options:
-        - Critical (blocking my work)
-        - High (would save significant time)
-        - Medium (nice to have)
-        - Low (minor improvement)
+        - label: This would change the Excel workbook schema (breaking for existing workbooks)
+        - label: This would change generated output for existing projects
+        - label: This is additive and backward compatible
+        - label: This touches a design invariant in GUIDE.md §3
     validations:
       required: true
-
-  - type: textarea
-    id: additional
-    attributes:
-      label: Additional context
-      description: Add any other context, mockups, or screenshots about the feature request
-      placeholder: Any other relevant information
-
-  - type: checkboxes
-    id: implementation
-    attributes:
-      label: Implementation
-      description: Would you like to help implement this feature?
-      options:
-        - label: I would like to implement this feature myself
-          required: false
-        - label: I can help test this feature
-          required: false
-        - label: I can provide domain expertise
-          required: false
-
-  - type: checkboxes
-    id: terms
-    attributes:
-      label: Checklist
-      description: Please confirm the following
-      options:
-        - label: I have searched existing issues to avoid duplicates
-          required: true
-        - label: This feature aligns with the project's lean philosophy
-          required: false

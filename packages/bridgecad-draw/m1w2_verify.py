@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import logging
 import sys
-from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
@@ -25,9 +24,9 @@ CORE = HERE.parent / "bridgecad-core"
 sys.path.insert(0, str(CORE))
 sys.path.insert(0, str(HERE))
 
-from smoke_test_m3 import SIMPLE_12M   # reuses the same M3 fixture
-from bridgecad_draw.booklet import generate_package
+from smoke_test_m3 import SIMPLE_12M  # reuses the same M3 fixture
 
+from bridgecad_draw.booklet import generate_package
 
 # ── Sheet layout constants (match sheet1_plan / sheet2_long_section) ────────
 _SHEET_W = 841.0
@@ -210,7 +209,7 @@ def ac3_pier_labels_north(s1_path: Path) -> tuple[bool, str]:
     abut_labels = _find_text(s1_path, "A1") + _find_text(s1_path, "A2")
     if not abut_labels:
         return False, "No A1/A2 abutment labels found (0-pier bridge must have them)"
-    label_y_mean = sum(y for _, _, y, _ in abut_labels) / len(abut_labels)
+    sum(y for _, _, y, _ in abut_labels) / len(abut_labels)
     ok = True  # no pier labels to verify; abutments in expected loc
     evidence = f"max_deck_north_y={max_deck_y:.2f}, n_abut_labels={len(abut_labels)}"
     return ok, evidence
@@ -231,7 +230,7 @@ def ac4_pier_toc_matches_plan_ref(project: Any) -> tuple[bool, str]:
     ped_h      = float(sub.pier_pedestal_height_m or 0.2)
     cap_d      = float(sub.pier_cap_depth_m     or 0.8)
 
-    expected_toc_from_top = tod_rl - gd_m - deck_t_m - wc_t_m - ped_h - cap_d
+    tod_rl - gd_m - deck_t_m - wc_t_m - ped_h - cap_d
     expected_toc_from_sof = sof_rl - ped_h - cap_d
     ref = ls.plan_northern_edge_reference_rl
 
@@ -363,7 +362,6 @@ def ac10_irc_text_heights(s8_path: Path, s1_path: Path, s2_path: Path) -> tuple[
     """Rubric AC-10 (0–3): IRC SP:55 text hierarchy on Sheet 8 (and S1/S2 titles).
     Titles ≥ 4.0mm A1, subtitles 3.0–3.5mm, dims 2.5±0.3mm, all labels ≥1.8mm.
     Score 3 = ALL pass, 2 = most pass, 1 = 2+ devs <0.5mm, 0 = non-compliant."""
-    probes: list[tuple[str, float, float]] = []  # (desc, min_ok, max_ok)
     sample_heights: list[float] = []
     for p in (s8_path, s1_path, s2_path):
         for txt, x, y, h in _collect_text_entities(p):
@@ -379,7 +377,6 @@ def ac10_irc_text_heights(s8_path: Path, s1_path: Path, s2_path: Path) -> tuple[
 
     # Metrics
     pass_cnt = 0
-    total = 3
     # 1) Titles ≥ 4.0
     if any(h >= 4.0 for h in top_titles[:3]): pass_cnt += 1
     # 2) Subtitles 3.0–3.5
@@ -410,7 +407,7 @@ def main() -> int:
     out_dir = HERE / "smoke_output_simple_12m"
     prefix  = "m1w2_verify"
     print(f"\n{'='*72}")
-    print(f"  M1 WEEK-2 ACCEPTANCE VERIFIER  (simple_12m fixture)")
+    print("  M1 WEEK-2 ACCEPTANCE VERIFIER  (simple_12m fixture)")
     print(f"{'='*72}")
     print(f"  Output dir : {out_dir}")
     print(f"  Prefix     : {prefix}")
@@ -441,7 +438,7 @@ def main() -> int:
 
     rule_pass_cnt = 0
     rule_total = len(checks)
-    print(f"  ── RULE ACs (binary pass/fail) ──")
+    print("  ── RULE ACs (binary pass/fail) ──")
     for name, ok, evidence in checks:
         mark = "✅ PASS" if ok else "❌ FAIL"
         line = f"    {mark}  {name}  —  {evidence}"
@@ -453,7 +450,7 @@ def main() -> int:
             rule_pass_cnt += 1
 
     print()
-    print(f"  ── RUBRIC ACs (0–3 score; thresholds ≥ 2 to pass intent) ──")
+    print("  ── RUBRIC ACs (0–3 score; thresholds ≥ 2 to pass intent) ──")
     rubrics: list[tuple[str, int, str]] = []
     if s1 and s2 and s8:
         ac9_score, ac9_ev = ac9_page_space_economy(s1, s2)
@@ -481,11 +478,11 @@ def main() -> int:
 
     verdict = overall_rules
     if verdict:
-        print(f"  ★★★ M1 WEEK-2 VERDICT: ★ ACCEPTED ★ ★★★")
+        print("  ★★★ M1 WEEK-2 VERDICT: ★ ACCEPTED ★ ★★★")
         print(f"{'='*72}\n")
         return 0
     else:
-        print(f"  ✗✗✗ M1 WEEK-2 VERDICT: REJECTED (one or more rule ACs failed)")
+        print("  ✗✗✗ M1 WEEK-2 VERDICT: REJECTED (one or more rule ACs failed)")
         print(f"{'='*72}\n")
         return 1
 

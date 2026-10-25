@@ -1,0 +1,19 @@
+# Blank issues are off — every inbound item gets a template and therefore labels.
+blank_issues_enabled: false
+
+contact_links:
+  - name: Usage question or general support
+    url: https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/discussions
+    about: How do I do X, is Y supported, which template should I pick. Tag `support`.
+
+  - name: Professional services / legal enquiry (RKS LEGAL)
+    url: https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/issues/new?labels=rks-legal
+    about: Commercial engagement, statutory review, contract documentation. Tag `rks-legal`.
+
+  - name: Security vulnerability
+    url: https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/security/advisories/new
+    about: Do not open a public issue for a vulnerability — see SECURITY.md.
+
+  - name: Reference GAD drawings and standards corpus
+    url: https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/tree/main/sample-gad-drawings
+    about: The 28 reference drawings the E2E fixtures derive from.

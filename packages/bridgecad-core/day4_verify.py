@@ -1,33 +1,88 @@
 """Day 4 acceptance verifier — geometry modules + validation engine (8 checks)."""
 from __future__ import annotations
-import sys, traceback
-from decimal import Decimal
+
+import sys
+import traceback
 from datetime import date
-from bridgecad_core.models import (
-    BridgeProject, ProjectMaster, BridgeSelection, GeometryInput,
-    Superstructure, Substructure, FoundationDetails, Approaches,
-    HydraulicData, Materials, BearingsJoints, BearingScheduleRow,
-    ExpansionJointScheduleRow, ComponentsLib, DrawingControl,
-    Calculations, ValidationModel,
-)
-from bridgecad_core.types import (
-    ClientType, ConsultantType, ContractorType, ProjectPhase, RevisionTag,
-    Currency, IndianStateCode, Language, BridgeCategory, SuperstructureType,
-    SpanConfiguration, CarriagewayLaneConfig, DesignCode, LoadClass,
-    SeismicZone, WindSpeedBasic_ms, FoundationType, SkewDirection,
-    ConcreteGrade, SteelGrade, PrestressGrade, BearingType, ExpansionJointType,
-    OutputFormat, AcadVersion, SheetSize, DrawingScale, LayerStandard,
-    TitleBlockStyle, KerbType, FootpathType, MedianType, CrashBarrierType,
-    ChainageUnit, AlignmentType, GirderType, WearingCoatType, DrainageType,
-    ParapetType, CamberMethod, PierType, PierCapType, AbutmentType,
-    ReturnWallType, WingWallType, PileType, PileShape, UnderReamCount,
-    WaterSourceType, FloodReturnPeriodDesign, SoilClass, WearingCoatGrade,
-    ValidationSeverity,
-)
-from bridgecad_core.geometry.plan import compute_plan_geometry
-from bridgecad_core.geometry.long_section import compute_long_section_geometry
+from decimal import Decimal
+
 from bridgecad_core.geometry.cross_section import compute_cross_section_geometry
 from bridgecad_core.geometry.foundation import compute_pile_group_layout
+from bridgecad_core.geometry.long_section import compute_long_section_geometry
+from bridgecad_core.geometry.plan import compute_plan_geometry
+from bridgecad_core.models import (
+    Approaches,
+    BearingScheduleRow,
+    BearingsJoints,
+    BridgeProject,
+    BridgeSelection,
+    Calculations,
+    ComponentsLib,
+    DrawingControl,
+    ExpansionJointScheduleRow,
+    FoundationDetails,
+    GeometryInput,
+    HydraulicData,
+    Materials,
+    ProjectMaster,
+    Substructure,
+    Superstructure,
+    ValidationModel,
+)
+from bridgecad_core.types import (
+    AbutmentType,
+    AcadVersion,
+    AlignmentType,
+    BearingType,
+    BridgeCategory,
+    CamberMethod,
+    CarriagewayLaneConfig,
+    ChainageUnit,
+    ClientType,
+    ConcreteGrade,
+    ConsultantType,
+    ContractorType,
+    CrashBarrierType,
+    Currency,
+    DesignCode,
+    DrainageType,
+    DrawingScale,
+    ExpansionJointType,
+    FloodReturnPeriodDesign,
+    FootpathType,
+    FoundationType,
+    GirderType,
+    IndianStateCode,
+    KerbType,
+    Language,
+    LayerStandard,
+    LoadClass,
+    MedianType,
+    OutputFormat,
+    ParapetType,
+    PierCapType,
+    PierType,
+    PileShape,
+    PileType,
+    PrestressGrade,
+    ProjectPhase,
+    ReturnWallType,
+    RevisionTag,
+    SeismicZone,
+    SheetSize,
+    SkewDirection,
+    SpanConfiguration,
+    SteelGrade,
+    SuperstructureType,
+    TitleBlockStyle,
+    UnderReamCount,
+    ValidationSeverity,
+    WaterSourceType,
+    WearingCoatGrade,
+    WearingCoatType,
+    WindSpeedBasic_ms,
+    WingWallType,
+)
 from bridgecad_core.validation import run_all
 
 # ── Day-3 SAMPLE fixture reconstructed ──────────────────────────────────────

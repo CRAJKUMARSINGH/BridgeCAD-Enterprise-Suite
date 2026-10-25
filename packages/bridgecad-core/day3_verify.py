@@ -4,28 +4,66 @@ from __future__ import annotations
 import json
 import sys
 import traceback
-from decimal import Decimal
 from datetime import date
+from decimal import Decimal
 from pathlib import Path
 
 from pydantic import ValidationError
 
-from bridgecad_core import models as M
-from bridgecad_core.types import (
-    ClientType, ConsultantType, ContractorType, ProjectPhase, RevisionTag,
-    Currency, IndianStateCode, Language, BridgeCategory, SuperstructureType,
-    SpanConfiguration, CarriagewayLaneConfig, DesignCode, LoadClass,
-    SeismicZone, WindSpeedBasic_ms, FoundationType, SkewDirection,
-    ConcreteGrade, SteelGrade, PrestressGrade, BearingType, ExpansionJointType,
-    OutputFormat, AcadVersion, SheetSize, DrawingScale, LayerStandard,
-    TitleBlockStyle, KerbType, FootpathType, MedianType, CrashBarrierType,
-    ChainageUnit, AlignmentType, GirderType, WearingCoatType, DrainageType,
-    ParapetType, CamberMethod, PierType, PierCapType, AbutmentType,
-    ReturnWallType, WingWallType, PileType, UnderReamCount, WaterSourceType,
-    FloodReturnPeriodDesign, SoilClass, WearingCoatGrade,
-)
+from bridgecad_core import models
 from bridgecad_core.models import BridgeProject
-
+from bridgecad_core.types import (
+    AbutmentType,
+    AcadVersion,
+    AlignmentType,
+    BearingType,
+    BridgeCategory,
+    CamberMethod,
+    CarriagewayLaneConfig,
+    ChainageUnit,
+    ClientType,
+    ConcreteGrade,
+    ConsultantType,
+    ContractorType,
+    CrashBarrierType,
+    Currency,
+    DesignCode,
+    DrainageType,
+    DrawingScale,
+    ExpansionJointType,
+    FloodReturnPeriodDesign,
+    FootpathType,
+    FoundationType,
+    GirderType,
+    IndianStateCode,
+    KerbType,
+    Language,
+    LayerStandard,
+    LoadClass,
+    MedianType,
+    OutputFormat,
+    ParapetType,
+    PierCapType,
+    PierType,
+    PileType,
+    PrestressGrade,
+    ProjectPhase,
+    ReturnWallType,
+    RevisionTag,
+    SeismicZone,
+    SheetSize,
+    SkewDirection,
+    SpanConfiguration,
+    SteelGrade,
+    SuperstructureType,
+    TitleBlockStyle,
+    UnderReamCount,
+    WaterSourceType,
+    WearingCoatGrade,
+    WearingCoatType,
+    WindSpeedBasic_ms,
+    WingWallType,
+)
 
 # =========================================================================
 # VALID FIXTURE: Minor ROB 12m single span
@@ -349,6 +387,7 @@ SAMPLE_MINOR_12M_VALID: dict = {
 
 # Fix: PileShape was assigned a string incorrectly above
 from bridgecad_core.types import PileShape
+
 SAMPLE_MINOR_12M_VALID["foundation_details"]["pile_shape"] = PileShape.CIRCULAR_ROUND
 
 
@@ -370,7 +409,7 @@ def run_checks():
         proj = BridgeProject(**SAMPLE_MINOR_12M_VALID)
         results["C1_valid_fixture_constructs"] = True
         print("  [PASS] C1: BridgeProject(**SAMPLE_MINOR_12M_VALID) validates OK")
-    except Exception as exc:
+    except Exception:
         results["C1_valid_fixture_constructs"] = False
         print("  [FAIL] C1: BridgeProject invalid fixture?")
         traceback.print_exc()
@@ -416,7 +455,7 @@ def run_checks():
     bad_pass_count = 0
     bad_failures_log: list[str] = []
     for name, bad_overlay in BAD_CASES:
-        bad_dict = json.loads(json.dumps(SAMPLE_MINOR_12M_VALID, default=str))
+        json.loads(json.dumps(SAMPLE_MINOR_12M_VALID, default=str))
         # Recreate decimals better: deep copy dict manually with overlay
         from copy import deepcopy
         data = deepcopy(SAMPLE_MINOR_12M_VALID)
@@ -453,30 +492,30 @@ def run_checks():
     # (5) Count total fields across the 14 sheet models
     total_fields = 0
     per_model_counts = []
-    from pydantic import BaseModel as _BM
-    SHEET_CLASSES: list[tuple[str, type[_BM]]] = [
-        ("ProjectMaster", M.ProjectMaster),
-        ("BridgeSelection", M.BridgeSelection),
-        ("GeometryInput", M.GeometryInput),
-        ("Superstructure", M.Superstructure),
-        ("Substructure", M.Substructure),
-        ("FoundationDetails", M.FoundationDetails),
-        ("Approaches", M.Approaches),
-        ("HydraulicData", M.HydraulicData),
-        ("Materials", M.Materials),
-        ("BearingsJoints", M.BearingsJoints),
-        ("ComponentsLib", M.ComponentsLib),
-        ("DrawingControl", M.DrawingControl),
-        ("Calculations", M.Calculations),
-        ("ValidationModel", M.ValidationModel),
+    from pydantic import BaseModel
+    SHEET_CLASSES: list[tuple[str, type[BaseModel]]] = [
+        ("ProjectMaster", models.ProjectMaster),
+        ("BridgeSelection", models.BridgeSelection),
+        ("GeometryInput", models.GeometryInput),
+        ("Superstructure", models.Superstructure),
+        ("Substructure", models.Substructure),
+        ("FoundationDetails", models.FoundationDetails),
+        ("Approaches", models.Approaches),
+        ("HydraulicData", models.HydraulicData),
+        ("Materials", models.Materials),
+        ("BearingsJoints", models.BearingsJoints),
+        ("ComponentsLib", models.ComponentsLib),
+        ("DrawingControl", models.DrawingControl),
+        ("Calculations", models.Calculations),
+        ("ValidationModel", models.ValidationModel),
     ]
     for cls_name, cls in SHEET_CLASSES:
         own_fields_count = len(cls.model_fields)
         total_fields += own_fields_count
         per_model_counts.append((cls_name, own_fields_count))
     # Plus schedule rows
-    for cls_name, cls in [("BearingScheduleRow", M.BearingScheduleRow),
-                           ("ExpansionJointScheduleRow", M.ExpansionJointScheduleRow)]:
+    for cls_name, cls in [("BearingScheduleRow", models.BearingScheduleRow),
+                           ("ExpansionJointScheduleRow", models.ExpansionJointScheduleRow)]:
         per_model_counts.append((cls_name, len(cls.model_fields)))
     print()
     print("  FIELD-COUNT BREAKDOWN PER MODEL:")

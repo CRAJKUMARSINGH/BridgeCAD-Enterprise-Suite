@@ -12,7 +12,6 @@ from dataclasses import dataclass
 from enum import Enum, IntEnum
 from typing import Any
 
-
 # ===========================================================================
 # Fuzzy normalisation for enum name/value matching
 # ===========================================================================
@@ -48,7 +47,7 @@ class StrEnum(str, Enum):
     def __get_pydantic_core_schema__(cls, source_type: Any, handler: Any) -> Any:
         from pydantic_core import core_schema
 
-        def _coerce(v: Any) -> "StrEnum":
+        def _coerce(v: Any) -> StrEnum:
             if isinstance(v, cls):
                 return v
             if v is None:
@@ -130,7 +129,7 @@ class IntEnumStrict(IntEnum):
     def __get_pydantic_core_schema__(cls, source_type: Any, handler: Any) -> Any:
         from pydantic_core import core_schema
 
-        def _coerce(v: Any) -> "IntEnumStrict":
+        def _coerce(v: Any) -> IntEnumStrict:
             if isinstance(v, cls):
                 return v
             try:
@@ -191,7 +190,7 @@ class UnitHaverEnum(LabeledEnum):
 
     unit: str
 
-    def __new__(cls, value: str, unit: str | None = None) -> "UnitHaverEnum":
+    def __new__(cls, value: str, unit: str | None = None) -> UnitHaverEnum:
         obj = str.__new__(cls, value)
         obj._value_ = value
         obj.unit = unit or ""
@@ -209,7 +208,7 @@ class RangeBoundedEnum(LabeledEnum):
         min_v: float | None = None,
         max_v: float | None = None,
         unit: str | None = None,
-    ) -> "RangeBoundedEnum":
+    ) -> RangeBoundedEnum:
         obj = str.__new__(cls, value)
         obj._value_ = value
         obj.bounds = _Range(min=float(min_v if min_v is not None else float("-inf")),
@@ -3672,8 +3671,4 @@ for _cls in list(ENUM_REGISTRY.values()):
 # ===========================================================================
 
 
-__all__ = [
-    "StrEnum", "IntEnumStrict",
-    "LabeledEnum", "UnitHaverEnum", "RangeBoundedEnum",
-    "ENUM_REGISTRY",
-] + __all_extras
+__all__ = ["StrEnum", "IntEnumStrict", "LabeledEnum", "UnitHaverEnum", "RangeBoundedEnum", "ENUM_REGISTRY", *__all_extras]

@@ -170,14 +170,37 @@ ignore = [
   "RUF001", # ambiguous unicode in strings — we use real minus signs in drawings
   "RUF002", # ambiguous unicode in docstrings — same reason as RUF001
   "RUF003", # ambiguous unicode in comments — same reason as RUF001
+  # ── Engineering notation ──────────────────────────────────────────────────
+  # Quantities, the standards tables and the section-property helpers use the
+  # symbols the codes use: L, W, D, H as locals and as parameters, DField/IField
+  # as field constructors, and class-scope names that keep their unit suffix
+  # (fy_MPa, fpk_MPa, horizontal_curve_R_m). Lower-casing them would break the
+  # one-to-one mapping between the code, the clause it implements and the text
+  # printed on the drawing — a bigger cost than the naming rule saves.
+  "N806",   # non-lowercase variable in function
+  "N803",   # non-lowercase argument name
+  "N802",   # non-lowercase function name
+  "N815",   # mixed-case variable in class scope
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["T20", "ARG", "B011"]
+"**/tests/**" = ["T20", "ARG", "B011", "E402"]
 "scripts/**" = ["T20"]
 "docs/**" = ["T20"]
 "**/__init__.py" = ["F401"]   # re-exports
 "conftest.py" = ["ARG"]
+# Hand-run verification/audit scripts sit at the *package* root rather than
+# inside an importable package (dayN_verify.py, weekN_final_signoff.py,
+# _audit_*.py, smoke_test_*.py, check_*.py). They print a status report for a
+# human and are written as dense one-liners, so the output, one-liner layout and
+# path-style rules do not apply — the same precedent as scripts/ above. Bugbear
+# and pyflakes stay on: those catch real mistakes, not style.
+"packages/*/*.py" = ["T20", "E701", "E702", "E402", "ARG001", "PTH118", "PTH123", "UP031", "B007"]
+# The IS 875 wind-speed enum keeps its unit suffix in the class name
+# (``WindSpeedBasic_ms``) because the code reads the zone table one-to-one;
+# renaming it would desync 20+ call sites from the clause it implements.
+"packages/bridgecad-core/bridgecad_core/types.py" = ["N801"]
 # Operator/robot scripts mutate sys.path (or call into a product package) before
 # importing it, so a module-level import below the setup is deliberate — not a
 # misplaced import.

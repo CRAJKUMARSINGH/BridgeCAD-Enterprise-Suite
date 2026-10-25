@@ -1,0 +1,9 @@
+{
+  "extraction": "ocr",
+  "extractor_version": 1,
+  "facts": [],
+  "id": "gad-set-d-sheet5",
+  "note": "tesseract not installed \u2014 pip install '.[refs-ocr]'",
+  "ocr_pipeline": 1,
+  "sha256": "1eb2adb5cc2fa806"
+}

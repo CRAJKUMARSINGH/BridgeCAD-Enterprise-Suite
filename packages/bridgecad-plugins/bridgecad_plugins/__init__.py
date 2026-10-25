@@ -10,9 +10,9 @@ Quick start:
     from bridgecad_plugins.runner import run_plugin
     updated = run_plugin("rcc_tbeam", project_dict)
 """
-from .registry import get_registry, PluginRegistry
-from .runner   import PluginRunner, run_plugin
 from .manifest_schema import PluginManifest, load_manifest
+from .registry import PluginRegistry, get_registry
+from .runner import PluginRunner, run_plugin
 
 __version__ = "0.1.0-rc1"
 __all__ = [

@@ -1,0 +1,86 @@
+name: Docs verification
+
+on:
+  push:
+    branches: [main]
+    paths: ["**/*.md", "tests/docs/**", "scripts/*doc*", "mkdocs.yml", ".lychee.toml"]
+  pull_request:
+    paths: ["**/*.md", "tests/docs/**", "scripts/*doc*", "mkdocs.yml", ".lychee.toml"]
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: |
+          pip install -e ".[dev]"
+          pip install -r docs/requirements-docs.txt
+          curl -sSfL https://raw.githubusercontent.com/lycheeverse/lychee/main/install.sh | sh -s -- -b /usr/local/bin
+      - name: Layer 1 + 2 — integrity and gate self-tests
+        run: pytest tests/docs -v
+      - name: Layer 3 — full verification
+        run: python scripts/verify_docs.py --json | tee verify.json
+      - name: Summary
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          p = pathlib.Path("verify.json")
+          if not p.exists():
+              raise SystemExit(0)
+          d = json.loads(p.read_text())
+          s = d["summary"]
+          print(f"### Docs verification: {'OK' if d['ok'] else 'FAILED'}")
+          print(f"{s['pass']} passed, {s['fail']} failed, {s['skip']} skipped")
+          for c in d["checks"]:
+              if c["status"] == "fail":
+                  print(f"\n**{c['name']}**\n```\n{c['detail']}\n```")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: docs-verify
+          path: verify.json
+
+  detection-proof:
+    name: Every defect is detectable
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e ".[dev]"
+      - run: python scripts/prove_detection.py --json --jobs 4 | tee proof.json
+      - name: Summary
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          p = pathlib.Path("proof.json")
+          if not p.exists():
+              raise SystemExit(0)
+          d = json.loads(p.read_text())
+          print(f"### Detection proof: {d['detected']}/{d['total']}")
+          print(f"Control run: {'passed' if d['control_passed'] else 'FAILED'}")
+          if d["undetected"]:
+              print("\n**Guards with holes:**")
+              for r in d["results"]:
+                  if not r["detected"]:
+                      print(f"- `{r['id']}` {r['defect']} — {r['guard']}")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: detection-proof
+          path: proof.json

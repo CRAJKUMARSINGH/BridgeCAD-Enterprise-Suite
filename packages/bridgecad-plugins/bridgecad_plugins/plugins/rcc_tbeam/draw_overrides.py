@@ -34,7 +34,7 @@ def get_typical_values() -> dict:
 
 def apply_defaults(project_dict: dict) -> dict:
     """Merge RCC T-Beam defaults into *project_dict* without overwriting existing values."""
-    typical = get_typical_values()
+    get_typical_values()
     # Shallow merge: only set keys that are absent or None
     for section, key, value in [
         ("superstructure", "deck_thickness_mm",      200),

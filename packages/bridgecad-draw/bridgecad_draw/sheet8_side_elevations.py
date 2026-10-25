@@ -27,18 +27,23 @@ patterns used on sheets 1–7.  Drawing title matches IRC example naming.
 """
 from __future__ import annotations
 
-import math
 from pathlib import Path
 from typing import Any
 
-from .dxf_engine  import new_sheet, save
-from .primitives  import (
-    line, polyline, rectangle, circle, text, hatch_rect, hatch_poly,
-    dim_linear_h, dim_linear_v, level_tag, scale_bar,
+from .dxf_engine import new_sheet, save
+from .primitives import (
+    circle,
+    dim_linear_h,
+    hatch_poly,
+    hatch_rect,
+    level_tag,
+    line,
+    polyline,
+    rectangle,
+    scale_bar,
+    text,
 )
 from .titleblocks import draw_border, draw_title_block
-from .layers      import L
-
 
 # ── Sheet constants (A1 landscape, mm model-space) ──────────────────────────
 _SHEET_W = 841.0
@@ -64,7 +69,6 @@ def generate(project: Any, output_path: str | Path,
 
 def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     from bridgecad_core.geometry import compute_long_section_geometry
-    from bridgecad_core.types   import SuperstructureType, FoundationType
 
     gi  = project.geometry_input
     ss  = project.superstructure
@@ -72,7 +76,6 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     fd  = project.foundation_details
     hd  = project.hydraulic_data
     pm  = project.project_master
-    bj  = project.bearings_joints
 
     span_count = int(getattr(gi, "span_count", len(getattr(gi, "span_lengths_m", [1.0]))))
     has_internal_pier = span_count > 1
@@ -269,7 +272,7 @@ def _draw_abutment_endface(
          height=th * 1.45, layer="TEXT-HEADER", halign="CENTER")
 
     # ── Parapets ───────────────────────────────────────────────────────────
-    par_w_m = max(cb_l, 0.25)
+    max(cb_l, 0.25)
     for side, sign, par_w_actual in [("L", -1, max(cb_l, 0.25)),
                                        ("R", +1, max(cb_r, 0.25))]:
         xp = vhx(sign * (half_cw + kerb_l + fp_l if sign == -1 else
@@ -662,7 +665,7 @@ def _draw_pier_transverse(
     # ── Pier cap ──────────────────────────────────────────────────────────
     cap_y_top = ped_y_bot
     cap_y_bot = vvy(sof_rl - pier_ped_h_m - pier_cap_d_m)
-    cap_half_w = pier_cap_w_m / 2.0
+    pier_cap_w_m / 2.0
     cap_half_l = pier_shaft_l_m / 2.0
     rectangle(msp, vhx(-cap_half_l), cap_y_bot,
               vhx(cap_half_l) - vhx(-cap_half_l), cap_y_top - cap_y_bot,

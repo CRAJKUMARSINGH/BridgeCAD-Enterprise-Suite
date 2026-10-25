@@ -1,10 +1,10 @@
 # BridgeCAD Enterprise Suite — SKELETON (M0 Scaffold)
 
-> Auto-generated. Root: `BridgeCAD Enterprise Suite/`
+> Auto-generated. Root: `repo root` (the Suite was flattened from its own directory)
 > Exit criteria M0: `make lint`, `make test`, `make dev` run (exit 0).
 
 ```
-BridgeCAD Enterprise Suite/
+repo root/
 ├── 00_REPORT_Trust_Assessment_and_Synthesis.md      ✅  (saved draft report)
 ├── 01_ACTION_PLAN_M0_to_M10.md                      ✅  (saved action plan)
 ├── pyproject.toml                                    ✅  (monorepo root / tooling)
@@ -197,7 +197,7 @@ BridgeCAD Enterprise Suite/
 ### M0 Health Check (run after cloning)
 
 ```bash
-cd "BridgeCAD Enterprise Suite"
+cd BridgeCAD-Enterprise-Suite  # repo root — no subdirectory
 
 # 1. Verify scaffold tree (match above)
 find . -maxdepth 3 -type d | sort           # on *nix

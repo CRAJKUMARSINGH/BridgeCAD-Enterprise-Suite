@@ -15,7 +15,6 @@ import logging
 import sys
 from typing import Any
 
-
 try:
     import structlog
     _STRUCTLOG = True

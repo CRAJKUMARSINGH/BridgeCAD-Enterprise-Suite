@@ -13,9 +13,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from .primitives import rectangle, text, line
-from .layers import L
-
+from .coordinates import TITLE_BLOCK, check_declared
+from .primitives import rectangle, text
 
 # ---------------------------------------------------------------------------
 # Sheet size constants (mm)
@@ -32,6 +31,10 @@ _MARGIN  = 10.0   # mm outer margin
 _TB_H    = 55.0   # title block height mm
 _TB_W    = 185.0  # title block width mm
 _REV_W   = 45.0   # revision strip width mm
+
+#: Legible text height on PAPER, in millimetres. Model-space text is this
+#: multiplied by the sheet's plot scale — see ``draw_sheet_frame``.
+TEXT_HEIGHT_MM = 2.5
 
 
 def draw_border(msp: Any, sheet_size: str = "A1") -> tuple[float, float]:
@@ -84,7 +87,7 @@ def draw_title_block(
 
     tb_x0 = sw - m - _TB_W
     tb_y0 = m
-    tb_x1 = sw - m
+    sw - m
     tb_y1 = m + _TB_H
 
     # Outer box — heavy border
@@ -177,5 +180,78 @@ def draw_revision_strip(
         y -= row_h
 
 
+def draw_sheet_frame(
+    msp: Any,
+    sheet: str,
+    *,
+    drawing_no: str = "GAD-001",
+    drawing_title: str = "GENERAL ARRANGEMENT DRAWING",
+    sheet_index: int = 1,
+    total_sheets: int = 7,
+    revision: str = "R0",
+    date_str: str = "",
+    drawn_by: str = "",
+    checked_by: str = "",
+    approved_by: str = "",
+    project_title: str = "BRIDGE PROJECT",
+    bridge_name: str = "",
+    client: str = "",
+    consultant: str = "",
+) -> tuple[float, float]:
+    """Draw the border and title block for *sheet*, in MODEL millimetres.
+
+    THE UNIT RULE
+        Model space is 1:1 millimetre, so a 1:100 sheet draws 100 mm of model
+        per paper millimetre. Every length here is therefore a paper length
+        multiplied by ``frame.plot_scale`` — the frame, the margin, the title
+        block, and every text height. Getting this backwards is invisible on
+        screen and unreadable in print.
+
+    Returns ``(frame_w, frame_h)`` in model millimetres: the usable frame is the
+    declared drawing region, ``width`` x ``height - title block height``.
+    """
+    frame = check_declared(sheet)
+    s = float(frame.plot_scale)
+    th = TEXT_HEIGHT_MM * s
+
+    w = frame.width_mm * s
+    h = (frame.height_mm - TITLE_BLOCK["height_mm"]) * s
+
+    rectangle(msp, 0.0, 0.0, w, h, layer="BORDER-OUTER")
+    margin = _MARGIN * s
+    rectangle(msp, margin, margin, w - 2 * margin, h - 2 * margin,
+              layer="BORDER-INNER")
+
+    tb_w = TITLE_BLOCK["width_mm"] * s
+    tb_h = TITLE_BLOCK["height_mm"] * s
+    tb_x0 = w - margin - tb_w
+    tb_y0 = margin
+
+    rectangle(msp, tb_x0, tb_y0, tb_w, tb_h, layer="TITLEBLK-BOX", lw=50)
+
+    rows = (
+        f"PROJECT: {project_title}",
+        f"BRIDGE: {bridge_name}" if bridge_name else "BRIDGE: -",
+        f"DRAWING TITLE: {drawing_title}",
+        f"DRG: {drawing_no}",
+        f"REVISION: {revision}",
+        f"DATE: {date_str or '-'}",
+        f"SHEET {sheet_index} OF {total_sheets}",
+        f"SCALE: 1:{frame.plot_scale}",
+        f"DRAWN: {drawn_by or '-'}",
+        f"CHECKED: {checked_by or '-'}",
+        f"APPROVED: {approved_by or '-'}",
+        f"CLIENT: {client or '-'}",
+        f"CONSULTANT: {consultant or '-'}",
+    )
+    row_h = tb_h / len(rows)
+    for i, label in enumerate(rows):
+        y = tb_y0 + tb_h - (i + 1) * row_h + (row_h - th) / 2
+        text(msp, label, tb_x0 + th * 0.4, y, height=th,
+             layer="TITLEBLK-TEXT", halign="LEFT")
+
+    return w, h
+
+
 __all__ = ["draw_border", "draw_title_block", "draw_revision_strip",
-           "_SHEET_SIZES"]
+           "draw_sheet_frame", "TEXT_HEIGHT_MM", "_SHEET_SIZES"]

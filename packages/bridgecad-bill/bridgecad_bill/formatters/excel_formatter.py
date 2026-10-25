@@ -1,7 +1,9 @@
 """Excel BOQ formatter — outputs a professional styled .xlsx workbook."""
 from __future__ import annotations
+
 from pathlib import Path
 from typing import Any
+
 
 def format_excel(boq: Any, output_path: str | Path) -> Path:
     """Write *boq* to a styled Excel workbook.
@@ -10,10 +12,10 @@ def format_excel(boq: Any, output_path: str | Path) -> Path:
     """
     try:
         import openpyxl
-        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+        from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
         from openpyxl.utils import get_column_letter
     except ImportError:
-        raise ImportError("openpyxl required: pip install openpyxl")
+        raise ImportError("openpyxl required: pip install openpyxl") from None
 
     p = Path(output_path)
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -58,7 +60,7 @@ def format_excel(boq: Any, output_path: str | Path) -> Path:
     headers = ["Item", "Description", "Unit", "Quantity",
                "Rate (INR)", "Amount (INR)", "MORTH Ref", "Remarks", ""]
     col_w   = [10, 60, 10, 14, 16, 18, 14, 20, 5]
-    for c, (h, w) in enumerate(zip(headers, col_w), 1):
+    for c, (h, w) in enumerate(zip(headers, col_w, strict=False), 1):
         cell = ws.cell(row=3, column=c, value=h)
         cell.font = hdr_font
         cell.fill = hdr_fill

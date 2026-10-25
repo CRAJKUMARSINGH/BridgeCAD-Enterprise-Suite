@@ -1,0 +1,25 @@
+{
+  "slug": "pp05_30m_psc",
+  "fixture": "tests/e2e/fixtures/pp05_30m_psc.json",
+  "source_drawing": "sample-gad-drawings/<name>.pdf",
+  "class": "minor_bridge",
+  "expected": {
+    "span_count": 1,
+    "total_length_m": 30.0,
+    "overall_width_m": 7.5,
+    "intermediate_piers": 0,
+    "abtl_m": 13.0,
+    "abtl_source": "default",
+    "splay_deg": 45.0,
+    "wing_face_run_m": 2.75,
+    "wing_length_m": 3.889087296526011,
+    "wing_return_m": 2.75
+  },
+  "provenance": {
+    "pinned_on": "2026-10-25",
+    "pinned_by": "harness",
+    "reviewed_by": null,
+    "reviewed_on": null,
+    "review_note": "NOT reviewed — values are internally consistent, not engineer-confirmed"
+  }
+}

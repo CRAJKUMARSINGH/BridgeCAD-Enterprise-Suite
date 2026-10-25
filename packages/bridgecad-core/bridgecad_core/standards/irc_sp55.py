@@ -13,9 +13,7 @@ Implements:
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Any
-
+from dataclasses import dataclass
 
 # ---------------------------------------------------------------------------
 # Drawing Scales — IRC SP:55-2019 Annex G / Clause 11.1

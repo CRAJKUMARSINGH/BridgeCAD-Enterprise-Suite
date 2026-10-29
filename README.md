@@ -101,7 +101,7 @@ Streamlit (15 tabs) · React console (6 pages)
 
 **Standards** — IRC 5 · 6 · 21 · 83 · SP:55 · SP:114 · MORTH 2024-25 rates
 
-Architecture and invariants → **[GUIDE.md §3](GUIDE.md)**
+Architecture and invariants → **[ARCHITECTURE.md](ARCHITECTURE.md)** · in depth → **[GUIDE.md §3](GUIDE.md)**
 
 ---
 

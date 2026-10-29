@@ -6,6 +6,12 @@
 > **Week 1 Objective:** Types + Model Schema Layer + Validation Wiring + Unit Test Framework
 > **Exit Criteria:** 200 enum target met, 14 Pydantic sub-models fully field-populated with constraints, 25 critical QA checks (V001–V025) passing, 100+ pytest cases, types + models coverage ≥ 85%
 
+> **STATUS — ✅ COMPLETE (verified 2026-10-29).** Evidence:
+> `packages/bridgecad-core/day1_verify.py` (C1 registry 184 PASS → "DAY 1 ACCEPTED"),
+> `day2_check.py` (exit 0), `day5_verify.py` (12/12 → "★ M1W1 SIGN-OFF ACCEPTED ★"),
+> `week1_final_signoff.py` ("★ ACCEPTED ★"). The `[ ]` boxes below are the
+> original sprint plan, retained as a record — do not read them as pending work.
+
 ---
 
 ## Gap Audit (before Week 1)

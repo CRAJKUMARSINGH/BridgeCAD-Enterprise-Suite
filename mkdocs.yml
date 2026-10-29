@@ -109,9 +109,11 @@ nav:
   - Home: index.md
   - Master guide: guide.md
   - Getting started: getting-started.md
+  - How to use (video): how-to-use-video.md
   - Reference:
       - Excel contract: excel-contract.md
       - Standards: standards.md
+      - Drafting standard: drafting-standard.md
       - Plugin authoring: plugin-authoring.md
       - API reference: api-reference.md
   - Operations:

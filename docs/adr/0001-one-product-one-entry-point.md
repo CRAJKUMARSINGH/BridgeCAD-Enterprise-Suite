@@ -1,6 +1,6 @@
 # ADR-0001 · One product, one entry point
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-26
 - **Phase:** 1 / W01
 
@@ -11,18 +11,20 @@ Ultimate Bridge GAD Generator (`streamlit_app_ultimate.py`, `ci.yml`).
 A newcomer cannot tell which to run, and README instructions are wrong.
 
 ## Decision
-<!-- Pick ONE and delete the rest -->
 
-### Option A — archive to a branch (recommended)
-`git branch legacy/ultimate-gad`, then remove the legacy tree from `main`.
-Delete `.github/workflows/ci.yml`. Cheapest, cleanest.
+**Option A — archive to a branch.** `git branch legacy/ultimate-gad`, then
+remove the legacy tree from `main`. Cheapest, cleanest. Until the removal PR
+lands, the legacy generations are *fenced* — labelled LEGACY / SIDE TOOL in
+[README.md](../../README.md) and kept out of the documented entry point.
 
-### Option B — keep as a fenced subfolder
-Move to `legacy/ultimate-gad/` with its own README, `ci.yml` scoped by path
-filter, and an explicit "not maintained" banner.
+<details>
+<summary>Alternatives considered</summary>
 
-### Option C — submodule
-Split to its own repo, reference as a submodule. Most work, most isolation.
+- **Option B — keep as a fenced subfolder.** Move to `legacy/ultimate-gad/`
+  with its own README and a path-filtered CI job.
+- **Option C — submodule.** Split to its own repo. Most work, most isolation.
+
+</details>
 
 ## Consequences
 - **Good:** one clone, one command, one CI file, one thing to keep green.

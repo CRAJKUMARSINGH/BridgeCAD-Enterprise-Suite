@@ -51,6 +51,32 @@ def test_scaffold_sheets_meet_the_structural_bar(sheet: str):
     dxf_assert.assert_finite_extents(doc, sheet)
 
 
+#: Two materially different projects: one 12 m span vs three. A drawing that is
+#: byte-for-byte the same for both is not reading its project at all.
+_RESPONSIVENESS_PAIR = ("simple_12m", "continuous_3x12m")
+
+
+@pytest.mark.parametrize("sheet", sorted(SHEETS))
+def test_every_sheet_responds_to_its_input(sheet: str):
+    """DEBUG_REPORT §3.2: sheets 2–7 produced near-identical DXF sizes for a
+    1-span 12 m bridge and an 11-span 110 m one — entity counts never scaled.
+
+    A scaffold may be incomplete; it may not be *static*. Build the sheet for a
+    single-span bridge and for a three-span one and require the geometry — entity
+    count or fingerprint — to differ, so a placeholder cannot silently ship as a
+    finished drawing. The spec's `required` block is the promotion target, not a
+    scaffold floor, so this is the strongest bar a scaffold can be held to today.
+    """
+    first, second = _RESPONSIVENESS_PAIR
+    a = contract.build_sheet(contract.make_project(first), sheet)
+    b = contract.build_sheet(contract.make_project(second), sheet)
+    count_a, count_b = dxf_assert.entity_count(a), dxf_assert.entity_count(b)
+    assert (count_a, dxf_assert.fingerprint(a)) != (count_b, dxf_assert.fingerprint(b)), (
+        f"{sheet}: identical geometry ({count_a} entities) for {first} and {second} — "
+        "the sheet ignores its input and would ship as a placeholder"
+    )
+
+
 @pytest.mark.parametrize("sheet", PROMOTED)
 def test_promoted_sheets_meet_the_full_spec(sheet: str):
     """This is what 'promoted' means. If it fails, either fix the sheet or set

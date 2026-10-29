@@ -96,6 +96,42 @@ def draw_dxf_geometry(pdf: canvas.Canvas, doc, box: tuple[float, float, float, f
             pdf.setStrokeColor(AMBER)
             pdf.circle(center[0], center[1], max(radius, 0.4), stroke=1, fill=0)
             count += 1
+        elif kind == "ARC":
+            center = map_point(entity.dxf.center)
+            radius = float(entity.dxf.radius) * scale
+            pdf.setStrokeColor(TEAL)
+            pdf.arc(
+                center[0] - radius,
+                center[1] - radius,
+                center[0] + radius,
+                center[1] + radius,
+                float(entity.dxf.start_angle),
+                float(entity.dxf.end_angle) - float(entity.dxf.start_angle),
+            )
+            count += 1
+        elif kind == "TEXT":
+            label = str(entity.dxf.text).strip()
+            if not label:
+                continue
+            x_pt, y_pt = map_point(entity.dxf.insert)
+            size = min(max(float(entity.dxf.height) * scale, 2.6), 9.0)
+            pdf.setFillColor(MUTED)
+            pdf.setFont("Helvetica", size)
+            pdf.drawString(x_pt, y_pt, label[:120])
+            count += 1
+        elif kind == "DIMENSION":
+            # Render the dimension's generated geometry as annotation line work.
+            try:
+                dim = entity.get_geometry_block()
+            except Exception:  # - unrenderable dimension is skipped, not fatal
+                dim = None
+            if dim is not None:
+                pdf.setStrokeColor(AMBER)
+                pdf.setLineWidth(0.3)
+                for sub in dim:
+                    if sub.dxftype() == "LINE":
+                        pdf.line(*map_point(sub.dxf.start), *map_point(sub.dxf.end))
+                count += 1
     return count
 
 

@@ -1,11 +1,16 @@
 /**
  * BridgeCAD API client — typed wrappers around all FastAPI endpoints.
- * Base URL defaults to http://localhost:8000 (override via VITE_API_URL).
+ *
+ * Requests go to a same-origin `/api` prefix by default, which is proxied to
+ * the FastAPI gateway in every environment (Vite dev server, and the nginx
+ * reverse proxy in production). Override with VITE_API_URL only when the API
+ * lives on a different origin.
  */
 
 import axios, { type AxiosInstance, type AxiosProgressEvent } from 'axios'
+import { useAppStore } from '../store/appStore'
 
-export const BASE_URL = (import.meta.env.VITE_API_URL as string) || 'http://localhost:8000'
+export const BASE_URL = (import.meta.env.VITE_API_URL as string) || '/api'
 
 const http: AxiosInstance = axios.create({
   baseURL: BASE_URL,
@@ -13,9 +18,9 @@ const http: AxiosInstance = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
-/** Attach API-key header when stored in localStorage */
+/** Attach API-key header when one is stored in the app store */
 http.interceptors.request.use((config) => {
-  const key = localStorage.getItem('bridgecad_api_key')
+  const key = useAppStore.getState().apiKey
   if (key) config.headers['X-API-Key'] = key
   return config
 })

@@ -30,7 +30,7 @@ export default function Dashboard() {
 
       {/* API status banner */}
       {health ? (
-        <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-5 py-3 mb-8">
+        <div className="rise-in flex items-center gap-3 glass-panel border-green-200/70 px-5 py-3 mb-8">
           <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
           <div>
             <span className="font-semibold text-green-800 text-sm">API Online</span>
@@ -43,7 +43,7 @@ export default function Dashboard() {
           </div>
         </div>
       ) : isError ? (
-        <div className="bg-red-50 border border-red-200 rounded-xl px-5 py-3 mb-8 text-red-700 text-sm">
+        <div className="rise-in bg-red-50 border border-red-200 rounded-xl px-5 py-3 mb-8 text-red-700 text-sm">
           ⚠️ API offline — start it with <code className="bg-red-100 px-1 rounded">make api</code>
         </div>
       ) : (
@@ -53,7 +53,7 @@ export default function Dashboard() {
       )}
 
       {/* Assistant guide */}
-      <div className="flex items-center gap-5 bg-white border border-slate-200 rounded-xl px-5 py-4 mb-8">
+      <div className="rise-in flex items-center gap-5 glass-panel px-5 py-4 mb-8">
         <SaraswatiMascot size={64} />
         <div>
           <div className="font-semibold text-slate-800 text-sm">Saraswati · your design guide</div>
@@ -70,7 +70,7 @@ export default function Dashboard() {
           <Link
             key={c.to}
             to={c.to}
-            className={`block border-2 rounded-xl p-5 transition-all ${COLOR[c.color]}`}
+            className={`block border-2 rounded-xl p-5 lift transition-all hover:shadow-lg ${COLOR[c.color]}`}
           >
             <div className="text-2xl mb-2">{c.icon}</div>
             <div className="font-semibold text-slate-800">{c.title}</div>
@@ -87,7 +87,7 @@ export default function Dashboard() {
           { label: 'DXF sheets',      value: '7'    },
           { label: 'MORTH rate items',value: '90'   },
         ].map((s) => (
-          <div key={s.label} className="bg-white border border-slate-200 rounded-xl px-5 py-4 text-center">
+          <div key={s.label} className="neu-tile px-5 py-4 text-center">
             <div className="text-2xl font-bold text-blue-600">{s.value}</div>
             <div className="text-xs text-slate-500 mt-1">{s.label}</div>
           </div>

@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bridgecad-plugins"
-version = "0.1.0"
+version = "0.1.0rc1"
 description = "BridgeCAD Enterprise — Plugin registry: 10 per-bridge-type plugins with installer"
 requires-python = ">=3.11"
 dependencies = [
   "importlib-metadata>=7.0",
   "pluggy>=1.4.0",
-  "bridgecad-core @ file://../bridgecad-core",
-  "bridgecad-draw @ file://../bridgecad-draw"
+  "bridgecad-core",
+  "bridgecad-draw"
 ]
 
 [tool.setuptools]

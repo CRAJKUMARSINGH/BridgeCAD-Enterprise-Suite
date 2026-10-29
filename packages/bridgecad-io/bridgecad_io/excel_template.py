@@ -97,31 +97,31 @@ def _calc_style() -> dict:
     }
 
 
-def _apply(cell, style_dict: dict) -> None:
+def _apply(cell: Any, style_dict: dict) -> None:
     for attr, val in style_dict.items():
         setattr(cell, attr, val)
 
 
-def _set_widths(ws, widths: list[float]) -> None:
+def _set_widths(ws: Any, widths: list[float]) -> None:
     for i, w in enumerate(widths, 1):
         ws.column_dimensions[get_column_letter(i)].width = w
 
 
-def _title_row(ws, row: int, title: str, ncols: int = 4) -> None:
+def _title_row(ws: Any, row: int, title: str, ncols: int = 4) -> None:
     ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=ncols)
     c = ws.cell(row=row, column=1, value=title)
     _apply(c, _hdr_style())
     ws.row_dimensions[row].height = 22
 
 
-def _header_row(ws, row: int, headers: list[str]) -> None:
+def _header_row(ws: Any, row: int, headers: list[str]) -> None:
     for col, h in enumerate(headers, 1):
         c = ws.cell(row=row, column=col, value=h)
         _apply(c, _sub_style())
 
 
 def _field_row(
-    ws,
+    ws: Any,
     row: int,
     label: str,
     value: Any = "",
@@ -140,7 +140,7 @@ def _field_row(
     dc.border = _border()
 
 
-def _dropdown(ws, cell_ref: str, options: list[str], prompt: str = "Select") -> None:
+def _dropdown(ws: Any, cell_ref: str, options: list[str], prompt: str = "Select") -> None:
     if not options:
         return
     # Excel limit: comma-separated list in formula1 max ~255 chars
@@ -152,7 +152,7 @@ def _dropdown(ws, cell_ref: str, options: list[str], prompt: str = "Select") -> 
     dv.add(cell_ref)
 
 
-def _numeric_dv(ws, cell_ref: str, min_v: float, max_v: float) -> None:
+def _numeric_dv(ws: Any, cell_ref: str, min_v: float, max_v: float) -> None:
     dv = DataValidation(
         type="decimal",
         operator="between",
@@ -169,7 +169,7 @@ def _numeric_dv(ws, cell_ref: str, min_v: float, max_v: float) -> None:
 # ---------------------------------------------------------------------------
 # Enum option helpers (lazy import to avoid circular at import time)
 # ---------------------------------------------------------------------------
-def _enum_options(enum_cls) -> list[str]:
+def _enum_options(enum_cls: Any) -> list[str]:
     return [m.name for m in enum_cls]
 
 
@@ -178,7 +178,7 @@ def _enum_options(enum_cls) -> list[str]:
 # ---------------------------------------------------------------------------
 
 
-def _build_project_master(wb, t, project=None):
+def _build_project_master(wb: Any, t: Any, project: Any = None) -> Any:
     ws = wb.create_sheet("PROJECT_MASTER")
     _title_row(ws, 1, "S01 — PROJECT MASTER DATA")
     _header_row(ws, 2, ["Field", "Value", "Unit", "Description"])
@@ -289,7 +289,7 @@ def _build_project_master(wb, t, project=None):
     return ws
 
 
-def _build_bridge_selection(wb, t, project=None):
+def _build_bridge_selection(wb: Any, t: Any, project: Any = None) -> Any:
     ws = wb.create_sheet("BRIDGE_SELECTION")
     _title_row(ws, 1, "S02 — BRIDGE TYPE SELECTION")
     _header_row(ws, 2, ["Parameter", "Value", "Options", "Description"])
@@ -366,7 +366,7 @@ def _build_bridge_selection(wb, t, project=None):
     return ws
 
 
-def _build_geometry_input(wb, t, project=None):
+def _build_geometry_input(wb: Any, t: Any, project: Any = None) -> Any:
     ws = wb.create_sheet("GEOMETRY_INPUT")
     _title_row(ws, 1, "S03 — GEOMETRY INPUT")
     _header_row(ws, 2, ["Field", "Value", "Unit", "Description"])
@@ -475,7 +475,7 @@ def _build_geometry_input(wb, t, project=None):
     return ws
 
 
-def _build_generic_sheet(wb, sheet_name: str, title: str, fields: list[tuple], t) -> None:
+def _build_generic_sheet(wb: Any, sheet_name: str, title: str, fields: list[tuple], t: Any) -> Any:
     """Generic 4-column field sheet builder."""
     ws = wb.create_sheet(sheet_name)
     _title_row(ws, 1, title)
@@ -488,7 +488,7 @@ def _build_generic_sheet(wb, sheet_name: str, title: str, fields: list[tuple], t
     return ws
 
 
-def _build_bearings_joints(wb, t, project=None):
+def _build_bearings_joints(wb: Any, t: Any, project: Any = None) -> Any:
     """S10 — bearings schedule + expansion joint schedule tabular blocks."""
     ws = wb.create_sheet("BEARINGS_JOINTS")
     _title_row(ws, 1, "S10 — BEARINGS AND EXPANSION JOINTS", ncols=9)
@@ -509,6 +509,9 @@ def _build_bearings_joints(wb, t, project=None):
         "fixed_or_guide_or_free",
         "elastomeric_layers_count",
         "steel_back_bool",
+        "pot_pressure_mpa",
+        "spherical_rotation_rad",
+        "ptfe_sliding_surface_flag",
         "quantity",
     ]
     for col, h in enumerate(bear_headers, 1):
@@ -517,6 +520,8 @@ def _build_bearings_joints(wb, t, project=None):
     row += 1
     bearing_rows = getattr(bj, "bearing_schedule", []) if bj else []
     for br in bearing_rows:
+        pot_p = getattr(br, "pot_pressure_mpa", None)
+        rot = getattr(br, "spherical_rotation_rad", None)
         vals = [
             getattr(br, "location", ""),
             getattr(getattr(br, "bearing_type", None), "name", "") if br else "",
@@ -526,6 +531,9 @@ def _build_bearings_joints(wb, t, project=None):
             getattr(br, "fixed_or_guide_or_free", ""),
             getattr(br, "elastomeric_layers_count", None),
             getattr(br, "steel_back_bool", False),
+            float(pot_p) if pot_p is not None else None,
+            float(rot) if rot is not None else None,
+            getattr(br, "ptfe_sliding_surface_flag", False),
             getattr(br, "quantity", 1),
         ]
         for col, v in enumerate(vals, 1):
@@ -573,7 +581,7 @@ def _build_bearings_joints(wb, t, project=None):
     for col in range(1, len(expj_headers) + 1):
         _apply(ws.cell(row=row, column=col, value=""), _input_style())
 
-    for col_w, w in enumerate([28, 22, 12, 18, 10, 18, 20, 14, 10], 1):
+    for col_w, w in enumerate([28, 22, 12, 18, 10, 18, 20, 14, 16, 16, 14, 10], 1):
         ws.column_dimensions[get_column_letter(col_w)].width = w
     return ws
 
@@ -840,7 +848,7 @@ def generate_template(
     )
 
     # S07–S09: approaches, hydraulics, materials (abbreviated)
-    for sheet_name, title_str, fields in [
+    generic_sheets: list[tuple[str, str, list[tuple]]] = [
         (
             "APPROACHES",
             "S07 — APPROACHES",
@@ -880,7 +888,8 @@ def generate_template(
                 ("expansion_joint_type", "STRIP_SEAL", "", "Joint type"),
             ],
         ),
-    ]:
+    ]
+    for sheet_name, title_str, fields in generic_sheets:
         _build_generic_sheet(
             wb, sheet_name, title_str, [(f[0], f[1], f[2], f[3]) for f in fields], t
         )

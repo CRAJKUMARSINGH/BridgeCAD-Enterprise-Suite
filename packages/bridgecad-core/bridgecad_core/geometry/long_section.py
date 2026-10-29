@@ -126,10 +126,10 @@ def compute_long_section_geometry(project: BridgeProject) -> LongSectionGeometry
     sub = project.substructure
 
     # ---- level values ----------------------------------------------------
-    hfl_rl = float(hd.hfl_m)
-    lwl_rl = float(hd.lwl_m)
-    scour_level_rl = float(hd.scour_level_m)
-    soffit_rl = float(hd.actual_soffit_level_m)
+    hfl_rl = float(hd.hfl_m) if hd.hfl_m is not None else 0.0
+    lwl_rl = float(hd.lwl_m) if hd.lwl_m is not None else 0.0
+    scour_level_rl = float(hd.scour_level_m) if hd.scour_level_m is not None else 0.0
+    soffit_rl = float(hd.actual_soffit_level_m) if hd.actual_soffit_level_m is not None else 0.0
 
     # Top-of-deck = road level from project master
     top_of_deck_rl = (
@@ -160,8 +160,9 @@ def compute_long_section_geometry(project: BridgeProject) -> LongSectionGeometry
     total_len = float(gi.total_length_m)
     span_lengths = [float(s) for s in gi.span_lengths_m]
 
-    ch_start = float(gi.chainage_start_km) * 1000.0  # km → m absolute
-    ch_end = float(gi.chainage_end_km) * 1000.0
+    # km → m absolute
+    ch_start = float(gi.chainage_start_km) * 1000.0 if gi.chainage_start_km is not None else 0.0
+    ch_end = float(gi.chainage_end_km) * 1000.0 if gi.chainage_end_km is not None else 0.0
 
     # Pier chainages along bridge (relative to A1)
     pier_ch: list[float] = []

@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from decimal import Decimal
+from typing import Any, Self
 
 from pydantic import (
     BaseModel,
@@ -198,16 +199,16 @@ from .types import (
 
 
 def DField(
-    desc=None,
-    ge=None,
-    le=None,
-    dp=3,
-    md=12,
-    description=None,
-    decimal_places=None,
-    max_digits=None,
-    **_kw,
-):
+    desc: str | None = None,
+    ge: Decimal | float | str | None = None,
+    le: Decimal | float | str | None = None,
+    dp: int = 3,
+    md: int = 12,
+    description: str | None = None,
+    decimal_places: int | None = None,
+    max_digits: int | None = None,
+    **_kw: Any,
+) -> Any:
     """``Decimal`` :class:`~pydantic.Field` for engineering measurements.
 
     Parameters
@@ -235,7 +236,13 @@ def DField(
     )
 
 
-def IField(desc=None, ge=None, le=None, description=None, **_kw):
+def IField(
+    desc: str | None = None,
+    ge: int | None = None,
+    le: int | None = None,
+    description: str | None = None,
+    **_kw: Any,
+) -> Any:
     """``int`` :class:`~pydantic.Field` for counts / ordinals / discrete codes.
 
     Parameters
@@ -255,8 +262,14 @@ def IField(desc=None, ge=None, le=None, description=None, **_kw):
 
 
 def SField(
-    desc=None, maxlen=255, pattern=None, default=None, description=None, max_length=None, **_kw
-):
+    desc: str | None = None,
+    maxlen: int = 255,
+    pattern: str | None = None,
+    default: Any = None,
+    description: str | None = None,
+    max_length: int | None = None,
+    **_kw: Any,
+) -> Any:
     """``str`` :class:`~pydantic.Field` for identifiers / freeform text.
 
     Parameters
@@ -280,7 +293,7 @@ def SField(
     )
 
 
-def BField(desc=None, description=None, **_kw):
+def BField(desc: str | None = None, description: str | None = None, **_kw: Any) -> Any:
     """``bool`` :class:`~pydantic.Field` for boolean flags (default ``False``).
 
     Parameters
@@ -292,7 +305,12 @@ def BField(desc=None, description=None, **_kw):
     return Field(default=False, description=_desc)
 
 
-def LField(desc=None, inner_cls=None, description=None, **_kw):
+def LField(
+    desc: str | None = None,
+    inner_cls: type | None = None,
+    description: str | None = None,
+    **_kw: Any,
+) -> Any:
     """``list[inner_cls]`` :class:`~pydantic.Field` with ``default_factory=list``.
 
     Parameters
@@ -821,7 +839,7 @@ class GeometryInput(BaseModel):
         return Decimal(sum(Decimal(str(p)) for p in parts))
 
     @model_validator(mode="after")
-    def _span_count_matches_lengths(self):
+    def _span_count_matches_lengths(self) -> Self:
         if len(self.span_lengths_m) != self.span_count:
             raise ValueError(
                 f"span_count ({self.span_count}) must equal len(span_lengths_m) ({len(self.span_lengths_m)})"
@@ -1071,7 +1089,7 @@ class Superstructure(BaseModel):
     )
 
     @model_validator(mode="after")
-    def _conditional_girder_floors(self):
+    def _conditional_girder_floors(self) -> Self:
         sst = self.type.name if hasattr(self.type, "name") else str(self.type)
         # Girder-bearing superstructures must have positive girder params
         if sst in self._GIRDER_SST:
@@ -1847,7 +1865,7 @@ class HydraulicData(BaseModel):
         return Decimal(self.actual_soffit_level_m) - Decimal(self.hfl_m)
 
     @model_validator(mode="after")
-    def _hfl_exceeds_lwl_when_set(self):
+    def _hfl_exceeds_lwl_when_set(self) -> Self:
         if (
             self.hfl_m is not None
             and self.lwl_m is not None
@@ -2677,18 +2695,21 @@ class BridgeProject(BaseModel):
 
     model_config = ConfigDict(validate_assignment=True, extra="forbid")
 
-    project_master: ProjectMaster = Field(default_factory=ProjectMaster)
-    bridge_selection: BridgeSelection = Field(default_factory=BridgeSelection)
+    # `default_factory=<Model>` is correct at runtime; mypy 2.x cannot infer the
+    # `Field()` overload's type parameter here and reports arg-type (the pydantic
+    # plugin does not model this case), so the seven affected lines are ignored.
+    project_master: ProjectMaster = Field(default_factory=ProjectMaster)  # type: ignore[arg-type]
+    bridge_selection: BridgeSelection = Field(default_factory=BridgeSelection)  # type: ignore[arg-type]
     geometry_input: GeometryInput = Field(default_factory=GeometryInput)
-    superstructure: Superstructure = Field(default_factory=Superstructure)
-    substructure: Substructure = Field(default_factory=Substructure)
-    foundation_details: FoundationDetails = Field(default_factory=FoundationDetails)
+    superstructure: Superstructure = Field(default_factory=Superstructure)  # type: ignore[arg-type]
+    substructure: Substructure = Field(default_factory=Substructure)  # type: ignore[arg-type]
+    foundation_details: FoundationDetails = Field(default_factory=FoundationDetails)  # type: ignore[arg-type]
     approaches: Approaches = Field(default_factory=Approaches)
     hydraulic_data: HydraulicData = Field(default_factory=HydraulicData)
-    materials: Materials = Field(default_factory=Materials)
+    materials: Materials = Field(default_factory=Materials)  # type: ignore[arg-type]
     bearings_joints: BearingsJoints = Field(default_factory=BearingsJoints)
     components_lib: ComponentsLib = Field(default_factory=ComponentsLib)
-    drawing_control: DrawingControl = Field(default_factory=DrawingControl)
+    drawing_control: DrawingControl = Field(default_factory=DrawingControl)  # type: ignore[arg-type]
     calculations: Calculations = Field(default_factory=Calculations)
     validation: ValidationModel = Field(default_factory=ValidationModel)
 

@@ -43,16 +43,61 @@ _SPAN_DEPTH_LIMITS: dict[tuple[str, str], tuple[float, float, str]] = {
 }
 
 
+# Superstructure types whose load path is not a single flexural span/depth
+# ratio — rigid-frame culverts and arched decks. The indicative L/d band does
+# not govern them (IRC SP:13 / IRC:112 Annex J), so it is reported as advisory.
+_NON_FLEXURAL_MARKERS: tuple[str, ...] = ("ARCH", "CULVERT")
+
+
 def span_depth_limits(
     span_config: str,
     superstructure_type: str,
 ) -> tuple[float, float, str]:
     """Return (L/d_min, L/d_max, reference) for a span/type combination.
 
-    Falls back to (10, 20, 'IRC default') if combination not found.
+    Falls back to (10, 20, 'IRC general guidance') if combination not found.
     """
     key = (span_config.upper(), superstructure_type.upper())
     return _SPAN_DEPTH_LIMITS.get(key, (10.0, 20.0, "IRC general guidance"))
+
+
+def classify_span_depth(
+    span_m: float,
+    depth_mm: float,
+    span_config: str,
+    superstructure_type: str,
+) -> tuple[str, float, float, float, str]:
+    """Classify a span/depth ratio against the IRC indicative band.
+
+    Returns ``(status, ratio, lo, hi, reference)`` where *status* is one of:
+
+    ``IN_BAND``      ratio sits inside the registered IRC band.
+    ``TOO_SHALLOW``  ratio is above the band — member shallower than IRC
+                     guidance, i.e. a deflection risk (the only compliance
+                     failure).
+    ``TOO_DEEP``     ratio is below the band — member deeper than IRC
+                     guidance. Conservative (stiffer → less deflection) and
+                     therefore advisory, not a non-compliance.
+    ``ADVISORY``     non-flexural structure (arch / culvert) or a span/type
+                     combination with no registered band — the flexural L/d
+                     band does not govern.
+    ``INVALID``      depth ≤ 0 — cannot compute a ratio.
+    """
+    if depth_mm <= 0:
+        return "INVALID", 0.0, 0.0, 0.0, ""
+    ratio = round(span_m / (depth_mm / 1000.0), 1)
+    stype = (superstructure_type or "").upper()
+    if any(marker in stype for marker in _NON_FLEXURAL_MARKERS):
+        return "ADVISORY", ratio, 0.0, 0.0, "IRC SP:13 / arch action — flexural L/d band not governing"
+    key = ((span_config or "").upper(), stype)
+    if key not in _SPAN_DEPTH_LIMITS:
+        return "ADVISORY", ratio, 0.0, 0.0, "no IRC L/d band registered for this span/type"
+    lo, hi, ref = _SPAN_DEPTH_LIMITS[key]
+    if ratio > hi:
+        return "TOO_SHALLOW", ratio, lo, hi, ref
+    if ratio < lo:
+        return "TOO_DEEP", ratio, lo, hi, ref
+    return "IN_BAND", ratio, lo, hi, ref
 
 
 def check_span_depth_ratio(
@@ -279,6 +324,7 @@ import math  # needed for expansion_joint_gap_mm ceiling
 
 __all__ = [
     "span_depth_limits",
+    "classify_span_depth",
     "check_span_depth_ratio",
     "min_deck_slab_thickness_mm",
     "nominal_cover_mm",

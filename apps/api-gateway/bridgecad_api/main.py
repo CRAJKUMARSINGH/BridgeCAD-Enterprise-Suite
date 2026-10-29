@@ -25,6 +25,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
 
+from bridgecad_api.problems import enforce_upload_limits, install_problem_handlers
+
 # ── package path bootstrap ────────────────────────────────────────────────
 _SUITE = Path(__file__).parents[3]
 for _pkg in [
@@ -86,7 +88,7 @@ bridges_router = APIRouter(prefix="/bridges", tags=["Bridges"])
 @bridges_router.post("/parse", summary="Parse Excel → BridgeProject summary")
 async def parse_bridge(file: UploadFile = File(...)) -> dict:
     """Upload a BridgeCAD Excel workbook; returns project metadata."""
-    data = await file.read()
+    data = await enforce_upload_limits(file)
     try:
         project = _load_project_from_upload(data)
         return {"status": "ok", "project": _project_summary(project)}
@@ -97,7 +99,7 @@ async def parse_bridge(file: UploadFile = File(...)) -> dict:
 @bridges_router.post("/validate", summary="Validate Excel → QA report JSON")
 async def validate_bridge(file: UploadFile = File(...)) -> dict:
     """Parse and run all 30 QA checks; returns score + findings list."""
-    data = await file.read()
+    data = await enforce_upload_limits(file)
     try:
         project = _load_project_from_upload(data)
         from bridgecad_core.validation import run_all
@@ -217,7 +219,7 @@ async def draw_gad(
     """Upload Excel, generate 7-sheet DXF package, return as ZIP."""
     scale = _validate_scale(scale)
     prefix = _validate_prefix(prefix)
-    data = await file.read()
+    data = await enforce_upload_limits(file)
     try:
         project = _load_project_from_upload(data)
         with tempfile.TemporaryDirectory() as td:
@@ -252,7 +254,7 @@ async def generate_bill(
     state: str | None = None,
 ) -> dict:
     """Generate priced BOQ from uploaded Excel workbook."""
-    data = await file.read()
+    data = await enforce_upload_limits(file)
     try:
         project = _load_project_from_upload(data)
         from bridgecad_bill.processor import extract_and_price
@@ -299,7 +301,7 @@ qa_router = APIRouter(prefix="/qa", tags=["QA"])
 @qa_router.post("/report", summary="Generate HTML QA report → download")
 async def qa_report(file: UploadFile = File(...)) -> HTMLResponse:
     """Upload Excel, run QA, return styled HTML report."""
-    data = await file.read()
+    data = await enforce_upload_limits(file)
     try:
         project = _load_project_from_upload(data)
         from bridgecad_core.validation import run_all
@@ -331,7 +333,7 @@ async def export_bundle(
     scale = _validate_scale(scale)
     if state is not None and (len(state) > 16 or any(c in _UNSAFE_PREFIX_CHARS for c in state)):
         raise HTTPException(400, detail="state must be a short safe label (<=16 chars)")
-    data = await file.read()
+    data = await enforce_upload_limits(file)
     try:
         project = _load_project_from_upload(data)
         with tempfile.TemporaryDirectory() as td:
@@ -423,6 +425,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# RFC 7807 application/problem+json error bodies (GUIDE.md §8).
+install_problem_handlers(app)
 
 # Wire routers
 app.include_router(bridges_router)

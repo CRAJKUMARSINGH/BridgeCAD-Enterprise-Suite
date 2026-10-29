@@ -1,4 +1,10 @@
-name: CI
+name: CI (legacy app)
+
+# Legacy `src/bridge_gad` pipeline, repo-wide hygiene guards, container smoke.
+#
+# The `wing` / `wing-report` jobs that used to live here ran tests/draw against
+# the same tests as draw.yml but with different strictness — that is how the two
+# workflows drifted. They now live in draw.yml only.
 
 on:
   push:
@@ -10,16 +16,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-suite
         with:
-          python-version: "3.11"
-          cache: "pip"
+          extras: dev
 
-      - name: Install dependencies
-        run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -e ".[dev]"
+      # requirements.txt is the LEGACY app's loose pin set; requirements.lock is
+      # the pinned Suite set. If these two now conflict, that is the finding.
+      - name: Install legacy pins
+        run: pip install -r requirements.txt
 
       # ── Guard: no duplicate requirements ─────────────────────────────────
       - name: Check for duplicate requirements
@@ -30,7 +34,7 @@ jobs:
           for line in open("requirements.txt"):
               line = line.strip()
               if line and not line.startswith("#"):
-                  name = re.split(r"[>=<!;\[]", line)[0].lower().replace("-","_")
+                  name = re.split(r"[>=<!;\[\]]", line)[0].lower().replace("-","_")
                   pkgs.append(name)
           dupes = [p for p in set(pkgs) if pkgs.count(p) > 1]
           if dupes:
@@ -42,8 +46,6 @@ jobs:
       # ── Guard: no PII in source ───────────────────────────────────────────
       # Scan ONLY git-tracked source files (never build-generated artifacts
       # such as *.egg-info/, which repeat the author email from pyproject).
-      # Use `git grep` + a manual fallback for shallow-checkout edge cases,
-      # explicitly excluding .egg-info/, dist/, build/, and vendor/.
       - name: Check for PII in tracked source
         run: |
           PII_PATTERNS='@hotmail\|@gmail\|+91[0-9]\{10\}'
@@ -67,7 +69,6 @@ jobs:
               echo "[PII] git grep exit=$EXIT_CODE; falling back to find + grep"
             fi
           fi
-          # Fallback scan (also runs when shallow checkout lacks .git)
           EXIT_CODE=0
           find . -type f \
             \( -name "*.py" -o -name "*.md" -o -name "*.txt" -o -name "*.yaml" -o -name "*.yml" -o -name "*.json" -o -name "*.sh" -o -name "*.ps1" -o -name "*.toml" \) \
@@ -128,11 +129,7 @@ jobs:
       - name: Lint
         run: flake8 src/ --max-line-length=120 --ignore=E501,W503,E402 --count
 
-      # ── Type check ────────────────────────────────────────────────────────
-      # NOTE: legacy app still has many `Any`-annotated call sites; we run
-      # mypy but do NOT fail the build here. Use a separate "legacy-mypy"
-      # job if you want enforcement. The Suite's mypy gate lives in
-      # suite-ci.yml and DOES fail on real regressions.
+      # ── Type check (advisory; the Suite gate is in suite-ci.yml) ──────────
       - name: Type check (legacy — advisory only)
         run: |
           set +e
@@ -184,6 +181,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
+      # REQUIRES a root Dockerfile — see below. Without it this job cannot pass.
       - name: Build Docker image
         run: docker build -t bridge-gad:ci .
       - name: Smoke test container
@@ -193,60 +191,3 @@ jobs:
           from bridge_gad.bridge_generator import BridgeGADGenerator
           print('Container import OK')
           "
-
-  wing:
-    name: Wing geometry suite
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - run: pip install -e ".[dev]" matplotlib pillow
-      - name: Structural + geometry (no baselines)
-        run: pytest tests/draw -v -m "draw and not visual"
-      - name: Visual baselines
-        run: pytest tests/draw -v -m visual
-
-  wing-report:
-    name: Wing review report
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - run: pip install -e ".[dev]" matplotlib pillow
-      - name: Build report
-        run: python scripts/wing_report.py --html site-wing/wing-report.html --json wing-report.json
-      - name: Summary
-        if: always()
-        run: |
-          python - <<'PY'
-          import json, pathlib
-          p = pathlib.Path("wing-report.json")
-          if not p.exists():
-              raise SystemExit(0)
-          d = json.loads(p.read_text())
-          c = d["counts"]
-          print(f"### Wing geometry report — commit {d['commit']}")
-          print(f"| pass | scaffold | fail | signed off | deterministic |")
-          print(f"|---|---|---|---|---|")
-          print(f"| {c['pass']} | {c['scaffold']} | {c['fail']} | {d['signed_off']} | {d['deterministic']} |")
-          if c["fail"]:
-              print("\n**Failing sheet-cells:**")
-              for cell in d["cells"]:
-                  if cell["status"] == "fail":
-                      bad = [x["name"] for x in cell.get("checks", []) if x["status"] == "fail"]
-                      print(f"- `{cell['slug']}/{cell['sheet']}` — {', '.join(bad) or cell.get('error','')}")
-          print("\n**Blockers:**")
-          for b in d["blockers"]:
-              print(f"- {b}")
-          PY
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: wing-report
-          path: |
-            site-wing/wing-report.html
-            wing-report.json

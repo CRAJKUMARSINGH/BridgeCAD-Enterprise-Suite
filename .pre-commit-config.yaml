@@ -72,6 +72,14 @@ repos:
     hooks:
       - id: gitleaks
 
+  # ── GitHub Actions workflow schema ───────────────────────────────────────────
+  # A `secrets` context in `jobs.<job_id>.steps.if` made release.yml unloadable
+  # for every push (0 jobs, no duration). actionlint catches that in 5 seconds.
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.7
+    hooks:
+      - id: actionlint
+
   # ── Python compile check ─────────────────────────────────────────────────────
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
@@ -121,6 +129,17 @@ repos:
         language: system
         pass_filenames: false
         files: \.md$
+
+      # ── Version single-source (release gate parity with suite-ci) ───────────
+      # The root [project].version is the only version. A member pyproject or a
+      # package __version__ that drifts from it fails here, at commit time,
+      # rather than at release time.
+      - id: version-consistency
+        name: version consistency (single source)
+        entry: python scripts/check_version_consistency.py
+        language: system
+        pass_filenames: false
+        files: (pyproject[.]toml|__init__[.]py|main[.]py)$
 
 # ── CI configuration ─────────────────────────────────────────────────────────
 ci:

@@ -11,6 +11,17 @@ package, priced Bill of Quantities, and QA compliance report out.**
 Built on IRC 5 / 6 / 21 / 83 / SP:55 / SP:114 and the MORTH 2024-25 schedule of
 rates. Runs as a CLI, an HTTP API, a Streamlit console, and a React web app.
 
+**Why it's different**
+
+- 🧾 **The workbook is the only contract.** One Excel template is the whole input
+  surface — no bespoke config, no per-project scripts. → [docs/excel-contract.md](docs/excel-contract.md)
+- 📐 **Traceable, not generated-and-forgotten.** Every BOQ line carries its
+  inputs and every export manifest states plainly that output is
+  *"Generated — not reviewed for construction."*
+- 🔍 **Gated by proof, not by promise.** Golden models are pinned byte-for-byte,
+  architecture invariants are enforced by import-linter, and each documentation
+  guard is itself proven able to fail.
+
 > **Read [GUIDE.md](GUIDE.md) next.** It is the authoritative document. If
 > anything here contradicts it, the guide wins.
 
@@ -114,6 +125,8 @@ make lint && make test
 | [docs/getting-started.md](docs/getting-started.md) | [docs/excel-contract.md](docs/excel-contract.md) |
 | [docs/standards.md](docs/standards.md) | [docs/plugin-authoring.md](docs/plugin-authoring.md) |
 | [docs/deployment.md](docs/deployment.md) | [docs/troubleshooting.md](docs/troubleshooting.md) |
+| [MASTER_ROADMAP.md](MASTER_ROADMAP.md) — plan-level status | [CHANGELOG.md](CHANGELOG.md) — released history |
+| [CREAT.md](CREAT.md) — rolling 24h hand-off log | [README_RAJKUMAR.md](README_RAJKUMAR.md) — operator handbook |
 
 ---
 
@@ -129,6 +142,24 @@ docker compose -f docker-compose.prod.yml up -d   # full prod stack
 
 ---
 
+## 🧭 Continuity
+
+Working-session hand-off lives in **[CREAT.md](CREAT.md)** and keeps only the
+last 24 hours — append the new entry, delete the stale portion. `Attached_Folder/`,
+`Test_Files/`, and any "how to use" guide are exempt from duplicate-file removal.
+Durable history belongs in [CHANGELOG.md](CHANGELOG.md).
+
+---
+
+## 🙏 Shout-outs
+
+Standing on: **Pydantic** and **FastAPI** (contracts and gateway) · **ezdxf**
+(DXF authoring) · **Typer** and **Rich** (CLI) · **Streamlit**, **React**,
+**Vite** and **Tailwind** (the two consoles) · **pytest** and **mypy** (the
+gates) · **import-linter** (the architecture invariants).
+
+---
+
 ## 🤝 Contributing · 📞 Support · 📜 Licence
 
 See **[CONTRIBUTING.md](CONTRIBUTING.md)**.
@@ -137,3 +168,8 @@ Issues: https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/issues —
 tag `support` for help, `rks-legal` for professional-services enquiries.
 
 MIT — see [LICENSE](LICENSE).
+
+---
+
+**⭐ If this saves you a drawing set, star the repo — it is the fastest way to
+help another bridge engineer find it.**

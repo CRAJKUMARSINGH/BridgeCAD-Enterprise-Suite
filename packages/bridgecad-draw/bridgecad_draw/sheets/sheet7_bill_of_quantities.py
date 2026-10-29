@@ -201,6 +201,16 @@ def build(project):
             angle=90.0,
             text=f"{len(rows)} ROWS",
         )
+        col_edges = [x0]
+        for _, w in _COLUMNS:
+            col_edges.append(col_edges[-1] + w)
+        for i, name in ((0, "ITEM"), (2, "UNIT"), (5, "AMOUNT"), (6, "MORTH REF")):
+            cv.dimension(
+                (col_edges[i], bottom),
+                (col_edges[i + 1], bottom),
+                base=((col_edges[i] + col_edges[i + 1]) / 2.0, bottom - cv.height * 6.0),
+                text=name,
+            )
 
     cv.note(
         [
@@ -214,7 +224,7 @@ def build(project):
             "6. 15% contingency to be added for unforeseen items.",
         ],
         x0,
-        bottom - cv.height * 6.0,
+        bottom - cv.height * 10.0,
     )
 
     return cv.doc

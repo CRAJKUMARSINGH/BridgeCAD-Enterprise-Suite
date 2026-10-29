@@ -83,7 +83,7 @@
       "wearing_coat_grade": "BC_GRADE_1_MARSHALL_30_6",
       "wearing_coat_thickness_mm": 65,
       "girder_type": "T_BEAM_RCC",
-      "girder_depth_mm": 900,
+      "girder_depth_mm": 1350,
       "girder_spacing_m": 2.0,
       "girders_per_deck_count": 4,
       "parapet_type": "RCC_PARAPET_FULL_HEIGHT",

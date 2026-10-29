@@ -156,6 +156,36 @@ def build(project):
             base=(x_j + pad_w, y_j + slab_t + cv.height * 6.0),
             text=f"TRANSVERSE {2 * pad_w / ENLARGE / 1000.0:.2f} m",
         )
+        # masonry plate width under the bearing pad
+        cv.dimension(
+            (x_d - cv.height, y_d - plate_t),
+            (x_d + pad_w + cv.height, y_d - plate_t),
+            base=(x_d + pad_w / 2.0, y_d - plate_t - cv.height * 7.0),
+            text=f"PLATE {pad_w / ENLARGE + 200:.0f} mm",
+        )
+        # bearing pad thickness
+        cv.dimension(
+            (x_d + pad_w + cv.height * 3.0, y_d),
+            (x_d + pad_w + cv.height * 3.0, y_d + pad_t),
+            base=(x_d + pad_w + cv.height * 10.0, y_d),
+            angle=90.0,
+            text=f"PAD {pad_t / ENLARGE:.0f} mm",
+        )
+        # joint slab thickness
+        cv.dimension(
+            (x_j + pad_w * 1.5, y_j),
+            (x_j + pad_w * 1.5, y_j + slab_t),
+            base=(x_j + pad_w * 1.5 - cv.height * 7.0, y_j),
+            angle=90.0,
+            text=f"SLAB {slab_t / ENLARGE:.0f} mm",
+        )
+        # joint slab width
+        cv.dimension(
+            (x_j, y_j - slab_t * 0.5),
+            (x_j + pad_w, y_j - slab_t * 0.5),
+            base=(x_j + pad_w / 2.0, y_j - slab_t * 0.5 - cv.height * 3.0),
+            text=f"{pad_w / ENLARGE:.0f} mm",
+        )
 
     cv.note(
         [

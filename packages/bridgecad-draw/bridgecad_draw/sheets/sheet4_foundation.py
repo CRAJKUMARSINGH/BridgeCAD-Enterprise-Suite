@@ -47,6 +47,7 @@ def build(project):
     cap_t_mm = float(field(fd, "pile_cap_thickness_mm", 1200) or 1200)
     spacing_m = float(field(fd, "pile_spacing_m", 2.0) or 2.0)
     cap_kpa = float(field(fd, "bearing_capacity_kpa", 0.0) or 0.0)
+    rebar_note = f"T{float(field(fd, 'main_bar_diameter_mm', 25) or 25):.0f} @ 150 mm"
     rows, cols = _pile_grid(fd)
     n_piles = rows * cols
 
@@ -138,6 +139,56 @@ def build(project):
                 y_b + rows * cell + cv.height * 2.0,
             )
 
+    # ── panel C — pile cap reinforcement section ───────────────────────────
+    x_c = cv.mm(22.0)
+    y_c = cv.mm(5.0)
+    det_w = cap_w
+    det_h = cap_t
+    with cv.on("STRUC-DETAIL"):
+        cv.rect(x_c, y_c, det_w, det_h)
+    with cv.on("HTCH"):
+        cv.hatch(x_c, y_c, det_w, det_h, pattern="ANSI31", scale=cv.height * 0.4)
+    with cv.on("FOUND-CAP"):
+        cv.line((x_c, y_c + det_h * 0.82), (x_c + det_w, y_c + det_h * 0.82))
+        cv.line((x_c, y_c + det_h * 0.18), (x_c + det_w, y_c + det_h * 0.18))
+        n_st = 5
+        for i in range(n_st):
+            sx = x_c + det_w * (i + 0.5) / n_st
+            cv.line((sx, y_c + det_h * 0.18), (sx, y_c + det_h * 0.82))
+    with cv.on("FOUND-PILE"):
+        for c in range(cols):
+            hx = x_c + det_w * (c + 0.5) / cols - pile_w / 2.0
+            cv.rect(hx, y_c - cv.height * 1.4, pile_w, cv.height * 1.4)
+    with cv.on("TEXT-HEADER"):
+        cv.text(
+            "PILE CAP REINFORCEMENT DETAIL",
+            x_c + det_w / 2.0,
+            y_c + det_h + cv.height * 3.0,
+            halign="CENTER",
+        )
+    with cv.on("TEXT"):
+        cv.text(f"BOTTOM MAT {rebar_note} c/c", x_c + det_w + cv.height * 1.5, y_c + det_h * 0.18)
+        cv.text(f"TOP MAT {rebar_note} c/c", x_c + det_w + cv.height * 1.5, y_c + det_h * 0.82)
+        cv.text(
+            f"{n_piles} No. PILE HEADS",
+            x_c + det_w + cv.height * 1.5,
+            y_c - cv.height * 1.0,
+        )
+
+    # ── panel D — pile schedule ────────────────────────────────────────────
+    cv.table(
+        cv.mm(60.0),
+        cv.mm(22.0),
+        [cv.height * 5.0, cv.height * 5.0, cv.height * 5.0],
+        [
+            ["MARK", "PILE DIAMETER", "LENGTH"],
+            ["P1", f"{pile_d_mm:.0f} mm", f"{pile_l_m:.2f} m"],
+            ["P2", f"{pile_d_mm:.0f} mm", f"{pile_l_m:.2f} m"],
+            ["P3", f"{pile_d_mm:.0f} mm", f"{pile_l_m:.2f} m"],
+            ["P4", f"{pile_d_mm:.0f} mm", f"{pile_l_m:.2f} m"],
+        ],
+    )
+
     # ── dimensions ─────────────────────────────────────────────────────────
     with cv.on("DIM"):
         cv.dimension(
@@ -174,6 +225,42 @@ def build(project):
                 base=(x_b + cols * cv.mm(spacing_m) / 2.0, y_b - cv.height * 3.0),
                 text=f"PILE SPACING {spacing_m:.2f} m",
             )
+        cv.dimension(
+            (x_a, y_pile_bot),
+            (x_a, y_bearing),
+            base=(x_a + cap_w + cv.height * 18.0, y_pile_bot),
+            angle=90.0,
+            text="OVERALL DEPTH",
+        )
+        if well_d_m <= 0:
+            cv.dimension(
+                (x_b - cv.height * 3.0, y_b),
+                (x_b - cv.height * 3.0, y_b + rows * cv.mm(spacing_m)),
+                base=(x_b - cv.height * 12.0, y_b),
+                angle=90.0,
+                text="PLAN WIDTH",
+            )
+        # panel C — reinforcement detail dimensions
+        cv.dimension(
+            (x_c, y_c),
+            (x_c + det_w, y_c),
+            base=(x_c + det_w / 2.0, y_c - cv.height * 3.5),
+            text=f"CAP {cap_w / 1000.0:.2f} m",
+        )
+        cv.dimension(
+            (x_c - cv.height * 3.0, y_c),
+            (x_c - cv.height * 3.0, y_c + det_h),
+            base=(x_c - cv.height * 12.0, y_c),
+            angle=90.0,
+            text=f"CAP {cap_t_mm:.0f} mm",
+        )
+        cv.dimension(
+            (x_c + det_w + cv.height * 3.0, y_c),
+            (x_c + det_w + cv.height * 3.0, y_c + det_h * 0.18),
+            base=(x_c + det_w + cv.height * 12.0, y_c),
+            angle=90.0,
+            text="COVER 75 mm",
+        )
 
     cv.note(
         [

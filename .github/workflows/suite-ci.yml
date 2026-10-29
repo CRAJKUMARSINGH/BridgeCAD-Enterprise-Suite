@@ -1,12 +1,15 @@
 name: BridgeCAD Enterprise Suite — CI
 
-# Runs the Suite's own 6-job matrix (lint / typecheck / unit / e2e / rc1-smoke /
-# react-build). The Suite lives at the repo root — packages/, apps/, tests/,
-# scripts/ and rc1_smoke.py are all top-level — so every job runs with no
-# working-directory prefix, and apps/web-console paths are given in full.
+# The Suite's own matrix: lint / import-linter / typecheck / unit / e2e /
+# rc1-smoke / react-build.
+# Every Python install goes through .github/actions/setup-suite so member + root
+# installs cannot drift between jobs.
 #
-# Legacy app tests continue to live in ci.yml (separately named jobs).
-# The two workflows DO NOT depend on each other; they run in parallel.
+# OWNERSHIP: tests/draw and tests/refs belong to draw.yml (it models the
+# promoted-vs-scaffold split correctly). The unit job here excludes them rather
+# than running the scaffold gate blocking.
+#
+# Legacy app jobs live in ci.yml. The two workflows run in parallel.
 
 on:
   push:
@@ -23,47 +26,78 @@ env:
   NODE_VERSION:   "20"
 
 jobs:
-  # ──────────────────────────────────────────────────────────────────────────
-  lint:
-    name: "[Suite] Lint & Format"
+  # Runs first and gates everything: the 2026-10 `setuptools → hatchling`
+  # migration shipped an invalid Trove classifier that broke metadata
+  # generation and reddened ~14 jobs across 6 workflows. `python -m build`
+  # reproduces that class of failure in seconds, before anything expensive runs.
+  metadata:
+    name: "[Suite] Package metadata"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
+      - run: pip install build twine
+      # Single-source guard: a member pyproject or package __version__ that
+      # drifts from the root [project].version fails here, before a release tag
+      # can carry the wrong number.
+      - name: Version consistency (single source)
+        run: python scripts/check_version_consistency.py
+      - run: python -m build --wheel
+      - run: twine check dist/*
 
+  lint:
+    name: "[Suite] Lint & Format"
+    runs-on: ubuntu-latest
+    needs: metadata
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
       - name: Install ruff
         run: pip install ruff==0.6.0
-
       - name: Ruff lint
         run: ruff check packages/ apps/ scripts/
-
       - name: Ruff format check
         run: ruff format --check packages/ apps/ scripts/
 
-  # ──────────────────────────────────────────────────────────────────────────
+  import-linter:
+    name: "[Suite] Architecture Invariants"
+    runs-on: ubuntu-latest
+    needs: metadata
+    steps:
+      - uses: actions/checkout@v4
+      # The workspace must be importable: the contracts analyse the real
+      # import graph (GUIDE.md §3), not the file layout.
+      - uses: ./.github/actions/setup-suite
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          extras: dev
+          extra-pip: "import-linter"
+      - name: Check architecture invariants (GUIDE.md §3)
+        run: lint-imports --config import_linter_contract.ini
+
   typecheck:
     name: "[Suite] Mypy Type Check"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-suite
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
+          extras: dev
+          # NOTE: the old line was `pip install mypy pydantic>=2.6 scipy numpy`.
+          # Bash split the unquoted `>=` and redirected stdout into a file named
+          # `=2.6`, so the pydantic floor was silently dropped.
+          extra-pip: "mypy 'pydantic>=2.6' scipy numpy"
 
-      - name: Install packages + mypy
-        run: |
-          pip install --upgrade pip
-          for pkg in packages/*/pyproject.toml; do
-            pip install -e "${pkg%/pyproject.toml}" --quiet
-          done
-          pip install mypy pydantic>=2.6 scipy numpy
-
+      # NOTE: `--no-strict-optional` is a mypy 1.x flag. mypy exits 2 (blocking
+      # error, not type errors) if it has been removed in your installed version.
+      # Verify before the first green run; drop it if mypy rejects it.
       - name: mypy bridgecad_core
         run: mypy packages/bridgecad-core/bridgecad_core --ignore-missing-imports --no-strict-optional
 
@@ -73,32 +107,30 @@ jobs:
       - name: mypy bridgecad_bill
         run: mypy packages/bridgecad-bill/bridgecad_bill --ignore-missing-imports --no-strict-optional
 
-  # ──────────────────────────────────────────────────────────────────────────
   unit:
     name: "[Suite] Unit Tests"
     runs-on: ubuntu-latest
     needs: lint
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-suite
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
-
-      - name: Install all packages
-        run: |
-          pip install --upgrade pip
-          for pkg in packages/*/pyproject.toml; do
-            pip install -e "${pkg%/pyproject.toml}" --quiet
-          done
-          pip install pytest pytest-cov openpyxl ezdxf scipy numpy pyyaml
+          extras: dev
+          extra-pip: "pytest pytest-cov openpyxl pyyaml"
 
       - name: Run unit + integration tests
+        # `-m "not slow"`: the mutation harness (tests/docs/test_detection_proof.py)
+        # copies the whole repo per mutation and is owned by docs-verify.yml's
+        # dedicated `detection-proof` job. Running it here duplicates ~20 min of
+        # work and makes the unit job a hostage to file-I/O contention.
         run: |
           pytest tests/ \
             --ignore=tests/e2e \
             --ignore=tests/benchmarks \
+            --ignore=tests/draw \
+            --ignore=tests/refs \
+            -m "not slow" \
             -v --tb=short \
             --cov=packages \
             --cov-report=xml \
@@ -110,88 +142,60 @@ jobs:
           files: ./coverage.xml
           fail_ci_if_error: false
 
-  # ──────────────────────────────────────────────────────────────────────────
   e2e:
     name: "[Suite] E2E Fixtures (5 bridge types)"
     runs-on: ubuntu-latest
     needs: unit
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-suite
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
-
-      - name: Install all packages
-        run: |
-          pip install --upgrade pip
-          for pkg in packages/*/pyproject.toml; do
-            pip install -e "${pkg%/pyproject.toml}" --quiet
-          done
-          pip install openpyxl ezdxf scipy numpy pyyaml
-
+          extras: dev
+          extra-pip: "openpyxl ezdxf scipy numpy pyyaml"
       - name: Run E2E fixture suite
         run: python tests/e2e/run_e2e.py
-
       - name: Run integration smoke
         run: python tests/integration/test_full_pipeline.py
 
-  # ──────────────────────────────────────────────────────────────────────────
   rc1-smoke:
     name: "[Suite] RC1 Release Smoke"
     runs-on: ubuntu-latest
     needs: [unit, e2e]
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-suite
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
-
-      - name: Install
-        run: |
-          pip install --upgrade pip
-          for pkg in packages/*/pyproject.toml; do
-            pip install -e "${pkg%/pyproject.toml}" --quiet
-          done
-          pip install openpyxl ezdxf scipy numpy sqlalchemy pyyaml
-
+          extras: dev
+          extra-pip: "openpyxl ezdxf scipy numpy sqlalchemy pyyaml"
       - name: RC1 Smoke
         run: python rc1_smoke.py
 
-  # ──────────────────────────────────────────────────────────────────────────
   react-build:
     name: "[Suite] React TypeCheck + Build"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: "apps/web-console/package-lock.json"
-
       - name: npm ci
         working-directory: apps/web-console
         run: npm ci
-
       - name: TypeScript check
         working-directory: apps/web-console
         run: npm run typecheck
-
       - name: Unit tests
         working-directory: apps/web-console
         run: npm test
-
       - name: Vite build
         working-directory: apps/web-console
         run: npm run build
         env:
           VITE_API_URL: http://localhost:8000
-
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:

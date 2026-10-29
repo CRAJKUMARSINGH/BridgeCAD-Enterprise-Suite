@@ -193,10 +193,7 @@ def generate_all_drawings(
         # 4) Phase 2 7-sheet package DXF + per-sheet PDF + booklet PDF
         pkg_base = tree["dxfs_pkg"] / f"{tpl_idx:02d}_{tpl_key}_Sheet.dxf"
         ok2 = bool(dsg.generate_phase_two_package(enriched, pkg_base))
-        produced = sorted(
-            pkg_base.parent.glob(f"{pkg_base.stem[:-len('Sheet')]}*.dxf")
-        )
-        # The generator names as {stem}_Sheet1..Sheet7; correct glob pattern:
+        # The generator names each sheet {stem}Sheet1..Sheet7; glob on that.
         produced = sorted(pkg_base.parent.glob(
             f"{pkg_base.stem.replace('Sheet', '')}Sheet*.dxf"
         ))

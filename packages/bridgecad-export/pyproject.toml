@@ -4,17 +4,17 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bridgecad-export"
-version = "0.1.0"
+version = "0.1.0rc1"
 description = "BridgeCAD Enterprise — Unified export pipeline: orchestrator, ZIP bundler, PDF booklet, versioner"
 requires-python = ">=3.11"
 dependencies = [
   "ezdxf>=1.4.0",
   "reportlab>=4.0.0",
   "cairosvg>=2.7.0",
-  "bridgecad-core @ file://../bridgecad-core",
-  "bridgecad-draw @ file://../bridgecad-draw",
-  "bridgecad-bill @ file://../bridgecad-bill",
-  "bridgecad-qa @ file://../bridgecad-qa"
+  "bridgecad-core",
+  "bridgecad-draw",
+  "bridgecad-bill",
+  "bridgecad-qa"
 ]
 
 [tool.setuptools]

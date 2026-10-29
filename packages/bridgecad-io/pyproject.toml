@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bridgecad-io"
-version = "0.1.0"
+version = "0.1.0rc1"
 description = "BridgeCAD Enterprise — Excel / CSV / JSON ↔ BridgeProject serialization"
 requires-python = ">=3.11"
 dependencies = [
   "pandas>=2.0.0",
   "openpyxl>=3.1.0",
   "pyyaml>=6.0",
-  "bridgecad-core @ file://../bridgecad-core"
+  "bridgecad-core"
 ]
 
 [tool.setuptools]

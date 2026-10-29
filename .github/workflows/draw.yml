@@ -18,24 +18,41 @@ jobs:
     timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.12", cache: pip }
-      - run: pip install -e ".[dev,draw]"
+      - uses: ./.github/actions/setup-suite
+        with:
+          extras: dev,draw
+
+      # Name-based selection, not marker-based. `scaffold_only` was referenced in
+      # `-m` but never registered nor applied, so the old expression collected
+      # ZERO tests and exited 5 — which continue-on-error hid.
       - name: promoted sheets must pass in full
-        run: pytest tests/draw -m draw -q --tb=short -k "not scaffold_only"
+        run: pytest tests/draw -m draw -q --tb=short -k "not scaffold_sheets_meet_the_structural_bar"
+
+      # Non-blocking by design: sheets 2-4, 6, 7 are documented scaffolds
+      # (tests/draw/sheets.spec.json). This lane is the only place they run.
       - name: scaffold sheets — structural contract only (non-blocking)
         continue-on-error: true
-        run: pytest tests/draw -m "draw and scaffold_only" -q --tb=short
+        run: pytest tests/draw -q --tb=short -k "scaffold_sheets_meet_the_structural_bar"
+
       - name: coordinate contract
         run: pytest tests/draw/test_coordinates.py -q
+
       - name: no stale reviews
         run: pytest tests/draw/test_signoff.py -q -k "not scaffold"
+
+      # This job always uploaded wing_report.json and the artifact was always
+      # missing — nothing here produced it. Generate it.
+      - name: wing report
+        if: always()
+        run: python scripts/wing_report.py --json wing_report.json
+
       - name: upload report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: wing-report
           path: wing_report.json
+
       - name: promotion board in the summary
         if: always()
         run: python scripts/promote_sheet.py --status >> $GITHUB_STEP_SUMMARY
@@ -47,9 +64,9 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.12", cache: pip }
-      - run: pip install -e ".[dev,draw]"
+      - uses: ./.github/actions/setup-suite
+        with:
+          extras: dev,draw
       - name: prove the suite detects broken geometry
         run: python scripts/prove_draw_detection.py --json --jobs 8 > proof.json
       - name: fail if any mutation is undetected
@@ -64,9 +81,13 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.12", cache: pip }
-      - run: pip install -e ".[dev,draw]" && sudo apt-get install -y --no-install-recommends libcairo2
+      - uses: ./.github/actions/setup-suite
+        with:
+          extras: dev,draw
+      - name: system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libcairo2
       - run: pytest tests/draw -m visual -q
       - uses: actions/upload-artifact@v4
         if: always()
@@ -78,9 +99,9 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.12", cache: pip }
-      - run: pip install -e ".[dev,refs]"
+      - uses: ./.github/actions/setup-suite
+        with:
+          extras: dev,refs
       - run: python scripts/refs_extract.py --check
       - run: python scripts/refs_coverage.py --check
       - run: pytest tests/refs -q --tb=short
@@ -93,10 +114,13 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.12", cache: pip }
-      - run: sudo apt-get install -y --no-install-recommends tesseract-ocr
-      - run: pip install -e ".[dev,refs,refs-ocr]"
+      - name: tesseract
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends tesseract-ocr
+      - uses: ./.github/actions/setup-suite
+        with:
+          extras: dev,refs,refs-ocr
       - run: python scripts/refs_extract.py --only gad-set-d-sheet2 --only gad-set-d-sheet5
       - run: python scripts/refs_verify.py --crop
       - run: pytest tests/refs/test_ocr.py -q

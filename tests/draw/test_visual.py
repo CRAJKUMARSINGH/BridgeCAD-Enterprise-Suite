@@ -62,21 +62,32 @@ def test_a_parameter_change_changes_the_fingerprint():
     assert fa != fb, "changing the span length did not change the geometry"
 
 
-@pytest.mark.parametrize("sheet", ["sheet1_plan", "sheet5_pier_abutment_details"])
-def test_visual_baseline(sheet: str):
-    project = contract.make_project("simple_12m")
+#: Golden visual set. Sheet 2 (Long Section) is the Week-1 enrichment target, so
+#: baselining it for both a single-span and a three-span bridge keeps the
+#: elevation from silently regressing.
+BASELINE_CASES = [
+    ("simple_12m", "sheet1_plan"),
+    ("simple_12m", "sheet5_pier_abutment_details"),
+    ("simple_12m", "sheet2_long_section"),
+    ("continuous_3x12m", "sheet2_long_section"),
+]
+
+
+@pytest.mark.parametrize(("slug", "sheet"), BASELINE_CASES)
+def test_visual_baseline(slug: str, sheet: str):
+    project = contract.make_project(slug)
     doc = contract.build_sheet(project, sheet)
     actual = _dhash(_render_png(doc))
 
-    ref_file = BASELINE / f"simple_12m__{sheet}.hash"
+    ref_file = BASELINE / f"{slug}__{sheet}.hash"
     if not ref_file.exists():
         ref_file.parent.mkdir(parents=True, exist_ok=True)
         ref_file.write_text(str(actual), encoding="utf-8")
-        pytest.skip(f"baseline created for {sheet} — re-run to compare")
+        pytest.skip(f"baseline created for {slug}/{sheet} — re-run to compare")
 
     expected = int(ref_file.read_text(encoding="utf-8").strip())
     distance = bin(actual ^ expected).count("1")
     assert distance <= TOLERANCE, (
-        f"{sheet}: visual drift {distance}/{64} (tolerance {TOLERANCE}). "
+        f"{slug}/{sheet}: visual drift {distance}/{64} (tolerance {TOLERANCE}). "
         f"Run `make wing-rebaseline` if the change is intended."
     )

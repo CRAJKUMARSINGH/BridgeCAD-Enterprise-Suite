@@ -35,7 +35,15 @@ def format_excel(boq: Any, output_path: str | Path) -> Path:
     thin = Side(style="thin")
     bdr = Border(left=thin, right=thin, top=thin, bottom=thin)
 
-    def _cell(r, c, val, bold=False, fill=None, align=None, num_fmt=None):
+    def _cell(
+        r: int,
+        c: int,
+        val: Any,
+        bold: bool = False,
+        fill: Any = None,
+        align: Any = None,
+        num_fmt: str | None = None,
+    ) -> Any:
         cell = ws.cell(row=r, column=c, value=val)
         if bold:
             cell.font = Font(bold=True, name="Arial")

@@ -3673,7 +3673,7 @@ class SurveyGridZone(LabeledEnum):
 # ===========================================================================
 
 
-_ENUM_ORDER = [
+_ENUM_ORDER: list[type[Enum]] = [
     # Section 1 — Project / Client
     ClientType,
     ConsultantType,
@@ -3856,7 +3856,7 @@ _ENUM_ORDER = [
 ]
 
 # Include the M0 legacy enums still defined today where no replacement created yet:
-_M0_LEGACY = [
+_M0_LEGACY: list[type[Enum]] = [
     ConcreteGrade,
     SteelGrade,
     PrestressGrade,
@@ -3874,10 +3874,7 @@ _M0_LEGACY = [
     ValidationSeverity,
 ]
 
-ENUM_REGISTRY: dict[str, type[Enum]] = {
-    e.__name__: e
-    for e in (_ENUM_ORDER + _M0_LEGACY)  # type: ignore[arg-type]
-}
+ENUM_REGISTRY: dict[str, type[Enum]] = {e.__name__: e for e in (_ENUM_ORDER + _M0_LEGACY)}
 
 __all_extras: list[str] = []
 for _cls in list(ENUM_REGISTRY.values()):

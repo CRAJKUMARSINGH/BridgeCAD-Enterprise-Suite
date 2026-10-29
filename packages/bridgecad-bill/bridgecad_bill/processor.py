@@ -19,7 +19,7 @@ from .rates_db import get_rates_db
 
 
 # ── Bootstrap path so processor can import bridgecad_core ─────────────────
-def _ensure_core_importable():
+def _ensure_core_importable() -> None:
     core_dir = Path(__file__).parents[3] / "bridgecad-core"
     if core_dir.exists() and str(core_dir) not in sys.path:
         sys.path.insert(0, str(core_dir))
@@ -143,8 +143,8 @@ def extract_and_price(
             "M55": "1701.9",
         }.get(grade_name, "1701.4")
 
-    def _name(enum_or_none) -> str:
-        return getattr(enum_or_none, "name", str(enum_or_none)).upper()
+    def _name(enum_or_none: object) -> str:
+        return str(getattr(enum_or_none, "name", enum_or_none)).upper()
 
     sup_grade = _name(project.materials.concrete_superstructure)
     sub_grade = _name(project.materials.concrete_substructure)
@@ -163,7 +163,10 @@ def extract_and_price(
 
     # ── Rate helper ───────────────────────────────────────────────────────────
     def _item(
-        code: str, qty: float, desc_override: str | None = None, unit_override: str | None = None
+        code: str,
+        qty: float | Decimal,
+        desc_override: str | None = None,
+        unit_override: str | None = None,
     ) -> BillItem:
         m = db.meta(code)
         desc = desc_override or (m[0] if m else code)

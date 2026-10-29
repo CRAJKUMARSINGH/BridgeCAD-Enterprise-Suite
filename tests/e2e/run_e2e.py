@@ -28,6 +28,11 @@ for _pkg in ["bridgecad-core", "bridgecad-io", "bridgecad-draw",
 
 SEP = "=" * 72
 
+#: Every generated sheet must carry real geometry. A sheet that is only a title
+#: block — the DEF-3.2 scaffold failure mode — has fewer than this and must not
+#: ship silently. Complements the byte-size floor in E5.
+MIN_SHEET_ENTITIES = 20
+
 
 # ---------------------------------------------------------------------------
 # Fixture → BridgeProject builder
@@ -378,8 +383,9 @@ def _run_fixture(fixture_path: Path) -> tuple[str, bool, list[str]]:
     except Exception as exc:
         errors.append(f"QA check failed: {exc}")
 
-    # E5 — 7 DXF sheets + size check
+    # E5 — DXF sheets + size + entity-count check
     try:
+        import ezdxf
         from bridgecad_draw.booklet import generate_package
         with tempfile.TemporaryDirectory() as td:
             sheets = generate_package(project, Path(td), prefix=fid, scale_denom=100)
@@ -388,6 +394,14 @@ def _run_fixture(fixture_path: Path) -> tuple[str, bool, list[str]]:
                 errors.append(f"dxf_sheets={len(sheets)} < {expected['dxf_sheets']}")
             if total_kb < expected["dxf_total_kb_min"]:
                 errors.append(f"dxf_total={total_kb}KB < min {expected['dxf_total_kb_min']}KB")
+            # A scaffolded sheet (title block only) cannot ship: count real
+            # modelspace entities per sheet, not just bytes.
+            for s in sheets:
+                n = len(list(ezdxf.readfile(str(s)).modelspace()))
+                if n < MIN_SHEET_ENTITIES:
+                    errors.append(
+                        f"{s.name}: only {n} entities (< {MIN_SHEET_ENTITIES}) — scaffold sheet"
+                    )
     except Exception as exc:
         errors.append(f"DXF gen failed: {exc}"); traceback.print_exc()
 

@@ -14,7 +14,7 @@ always succeeds even if core is missing (important for package smoke tests).
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from . import exceptions  # public package surface
 from .exceptions import (
@@ -25,10 +25,10 @@ from .exceptions import (
     JsonParseError,
 )
 
-__version__ = "0.2.0-m2"
+__version__ = "0.1.0-rc1"
 
 if TYPE_CHECKING:  # pragma: no cover - Type hints only; never evaluated
-    from bridgecad_core import BridgeProject  # type: ignore[import-not-found]
+    from bridgecad_core import BridgeProject
 
 
 # ---------------------------------------------------------------------------
@@ -40,7 +40,7 @@ def _bp_type() -> type:
     """Return the BridgeProject class without importing at top-level."""
     from bridgecad_core import BridgeProject  # (imported for caller)
 
-    return BridgeProject
+    return cast(type, BridgeProject)
 
 
 def _er() -> Any:
@@ -85,7 +85,7 @@ def read_excel(path: str | Path) -> Any:
 
 def write_excel(project: Any, output_path: str | Path) -> Path:
     """Write BridgeProject → 14-sheet canonical Excel workbook."""
-    return _ew().write_excel(project, output_path)
+    return cast(Path, _ew().write_excel(project, output_path))
 
 
 def generate_template(
@@ -95,14 +95,17 @@ def generate_template(
     _fast_mode: bool = False,
 ) -> Path:
     """Generate a 14-sheet styled workbook; optionally pre-filled with *project*."""
-    return _et().generate_template(output_path, project=project, title=title, _fast_mode=_fast_mode)
+    return cast(
+        Path,
+        _et().generate_template(output_path, project=project, title=title, _fast_mode=_fast_mode),
+    )
 
 
 def to_json(
     project: Any, path: str | Path | None = None, indent: int = 2, exclude: set[str] | None = None
 ) -> str:
     """Dump BridgeProject → JSON (Decimal→string, Enum→value; stable ordering)."""
-    return _ja().to_json(project, path=path, indent=indent, exclude=exclude)
+    return cast(str, _ja().to_json(project, path=path, indent=indent, exclude=exclude))
 
 
 def from_json(src: str | Path) -> Any:
@@ -112,7 +115,7 @@ def from_json(src: str | Path) -> Any:
 
 def to_csv(project: Any, out_dir: str | Path) -> list[Path]:
     """Write 14 sub-model CSVs + 2 schedule CSVs → returns list of paths."""
-    return _ca().to_csv(project, out_dir)
+    return cast(list[Path], _ca().to_csv(project, out_dir))
 
 
 def from_csv(in_dir: str | Path) -> Any:

@@ -10,6 +10,7 @@ from .irc_05 import (
 from .irc_21 import (
     StructuralCheckResult,
     check_structural_adequacy,
+    classify_span_depth,
     impact_factor,
     span_depth_limits,
 )
@@ -34,6 +35,7 @@ __all__ = [
     "check_structural_adequacy",
     "StructuralCheckResult",
     "span_depth_limits",
+    "classify_span_depth",
     "impact_factor",
     # IRC SP:55
     "preferred_scale",

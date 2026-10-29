@@ -93,7 +93,7 @@ class RulesEngine:
                 if isinstance(result, ValidationFinding):
                     findings.append(result)
                 else:
-                    findings.extend(result)  # type: ignore[arg-type]
+                    findings.extend(result)
             except Exception as exc:
                 findings.append(
                     ValidationFinding(
@@ -566,8 +566,15 @@ def check_skew_over_30(p: BridgeProject) -> ValidationFinding:
 
 
 def check_span_depth_ratio_irc112(p: BridgeProject) -> ValidationFinding:
-    """C26 — IRC:112 Annex J span/depth ratio within prescribed band."""
-    from bridgecad_core.standards.irc_21 import check_span_depth_ratio
+    """C26 — IRC:112 Annex J span/depth ratio band (band-aware severity).
+
+    The indicative L/d band governs flexural members. Only a member *shallower*
+    than the band (L/d above the upper bound) is a CRITICAL deflection risk. A
+    member *deeper* than the band is conservative (stiffer → less deflection)
+    and is reported as an INFO advisory. Rigid-frame culverts / arched decks,
+    and span/type combinations with no registered IRC band, are advisory too.
+    """
+    from bridgecad_core.standards.irc_21 import classify_span_depth
 
     spans = [float(s) for s in p.geometry_input.span_lengths_m]
     max_span = max(spans) if spans else 0.0
@@ -589,14 +596,37 @@ def check_span_depth_ratio_irc112(p: BridgeProject) -> ValidationFinding:
             False,
             "structural depth is 0 (girder_depth_mm / deck_thickness_mm) — must be > 0 for L/d check",
         )
-    ok, ratio, msg = check_span_depth_ratio(max_span, depth_mm, config, stype)
+
+    status, ratio, lo, hi, ref = classify_span_depth(max_span, depth_mm, config, stype)
+    geom = f"max_span={max_span:.1f}m  depth={depth_mm:.0f}mm  config={config}  type={stype}"
+
+    if status == "IN_BAND":
+        return _f(
+            "C26",
+            f"IRC:112 L/d = {ratio:.1f} in band [{lo}–{hi}] per {ref}",
+            ValidationSeverity.CRITICAL,
+            True,
+        )
+    if status == "TOO_SHALLOW":
+        return _f(
+            "C26",
+            f"IRC:112 L/d = {ratio:.1f} above band [{lo}–{hi}] per {ref}",
+            ValidationSeverity.CRITICAL,
+            False,
+            f"L/d = {ratio:.1f} > {hi} — shallower than IRC guidance, deflection risk: "
+            f"deepen or verify deflection per IRC:112 §12.4  ({geom})",
+        )
+    # TOO_DEEP / ADVISORY — conservative or non-governing: no score deduction.
+    if status == "TOO_DEEP":
+        note = f"L/d = {ratio:.1f} below band [{lo}–{hi}] per {ref} — deeper than IRC guidance (conservative, stiffer); no compliance action required"
+    else:
+        note = f"L/d = {ratio:.1f} — {ref}; flexural L/d band not governing, advisory only"
     return _f(
         "C26",
-        f"IRC:112 L/d ratio in-band [{msg}]",
-        ValidationSeverity.CRITICAL,
-        ok,
-        f"L/d = {ratio:.1f} outside IRC limits — max_span={max_span:.1f}m  depth={depth_mm:.0f}mm  "
-        f"config={config}  type={stype}",
+        f"IRC:112 L/d = {ratio:.1f} advisory",
+        ValidationSeverity.INFO,
+        False,
+        f"{note}  ({geom})",
     )
 
 
@@ -1116,12 +1146,12 @@ def check_street_lighting_dual_luminaire(p: BridgeProject) -> ValidationFinding:
 def check_launching_apron_stone_weight(p: BridgeProject) -> ValidationFinding:
     """W26 — Launching apron protection needs stone weight sized against design flow velocity."""
     scour = (
-        getattr(p.hydraulic_data.scour_protection_subtype, "name", "")
-        or str(p.hydraulic_data.scour_protection_subtype)
+        getattr(p.hydraulic_data.scour_protection, "name", "")
+        or str(p.hydraulic_data.scour_protection)
         or ""
     ).upper()
     apron = "APRON" in scour or "LAUNCHING" in scour or "RIPRAP" in scour
-    v = float(p.hydraulic_data.design_velocity_mps or 0)
+    v = float(p.hydraulic_data.regime_velocity_mps or 0)
     if apron and v > 0:
         required_kg = round(0.023 * (v**3), 1)  # ISO recommended stone mass
         passed = required_kg <= 100.0
@@ -1141,8 +1171,8 @@ def check_launching_apron_stone_weight(p: BridgeProject) -> ValidationFinding:
 def check_braided_meandering_2d_model(p: BridgeProject) -> ValidationFinding:
     """W27 — Braided / meandering river reach requires 2D hydraulic model note."""
     geo = (
-        getattr(p.hydraulic_data.river_geomorphology_type, "name", "")
-        or str(p.hydraulic_data.river_geomorphology_type)
+        getattr(p.hydraulic_data.river_geomorphology, "name", "")
+        or str(p.hydraulic_data.river_geomorphology)
         or ""
     ).upper()
     complex_2d = any(k in geo for k in ("BRAIDED", "MEANDER", "ANABRANCHED", "ISLAND"))
@@ -1159,8 +1189,8 @@ def check_braided_meandering_2d_model(p: BridgeProject) -> ValidationFinding:
 def check_backwater_afflux_bund_heights(p: BridgeProject) -> ValidationFinding:
     """W28 — Backwater-affected profile must include afflux bund heights."""
     wsp = (
-        getattr(p.hydraulic_data.water_surface_profile_type, "name", "")
-        or str(p.hydraulic_data.water_surface_profile_type)
+        getattr(p.hydraulic_data.water_surface_profile, "name", "")
+        or str(p.hydraulic_data.water_surface_profile)
         or ""
     ).upper()
     backwater = "BACKWATER" in wsp or "AFFLUX" in wsp or "MILD_SLOPE" in wsp
@@ -1178,14 +1208,22 @@ def check_return_period_pmf_overlay(p: BridgeProject) -> ValidationFinding:
     """W29 — Return period > 100 yr requires PMF probable-maximum-flood overlay."""
     rp_raw = getattr(p.hydraulic_data, "return_period_yr", None)
     rp = 0.0
-    try:
-        rp = float(rp_raw)
-    except (ValueError, TypeError):
-        # Enum / non-numeric return-period tag — try to extract a leading number
-        tag = str(getattr(rp_raw, "value", rp_raw) or "")
-        digits = "".join(ch for ch in tag if ch.isdigit())
-        if digits:
-            rp = float(digits)
+    if rp_raw is not None:
+        try:
+            rp = float(rp_raw)
+        except (ValueError, TypeError):
+            # Enum / non-numeric return-period tag — extract the first contiguous
+            # numeric run (e.g. "Q50_MAJOR_BRIDGE_STANDARD_2pct_MORTH" -> 50), NOT
+            # every digit concatenated (which would wrongly collapse to "502").
+            tag = str(getattr(rp_raw, "value", rp_raw) or "")
+            run = ""
+            for ch in tag:
+                if ch.isdigit():
+                    run += ch
+                elif run:
+                    break
+            if run:
+                rp = float(run)
     passed = rp <= 100.0 or rp == 0.0
     return _f(
         "W29",
@@ -1199,8 +1237,8 @@ def check_return_period_pmf_overlay(p: BridgeProject) -> ValidationFinding:
 def check_short_duration_storm_culvert_peak(p: BridgeProject) -> ValidationFinding:
     """W30 — Short-duration 10-min flash storm needs culvert peak discharge review."""
     storm = (
-        getattr(p.hydraulic_data.rainfall_intensity_storm_type, "name", "")
-        or str(p.hydraulic_data.rainfall_intensity_storm_type)
+        getattr(getattr(p.hydraulic_data, "rainfall_intensity_storm_type", None), "name", "")
+        or str(getattr(p.hydraulic_data, "rainfall_intensity_storm_type", None))
         or ""
     ).upper()
     flash = any(k in storm for k in ("FLASH", "10MIN", "SHORT", "STORM_10"))
@@ -1230,8 +1268,8 @@ def check_hfl_near_soffit_deck_raise(p: BridgeProject) -> ValidationFinding:
 def check_high_sediment_desilting(p: BridgeProject) -> ValidationFinding:
     """W32 — High sediment yield river needs annual desilting provisions note."""
     sed = (
-        getattr(p.hydraulic_data.sediment_yield_classification, "name", "")
-        or str(p.hydraulic_data.sediment_yield_classification)
+        getattr(p.hydraulic_data.sediment_yield_class, "name", "")
+        or str(p.hydraulic_data.sediment_yield_class)
         or ""
     ).upper()
     high = any(k in sed for k in ("HIGH", "VERY_HIGH", "EXTREME", "SEVERE"))
@@ -1305,7 +1343,9 @@ def check_zone_v_ductility_dcl(p: BridgeProject) -> ValidationFinding:
 def check_site_class_cd_response_spectrum(p: BridgeProject) -> ValidationFinding:
     """W36 — Site class C/D soil requires site-specific response spectrum."""
     soil = (
-        getattr(p.hydraulic_data.soil_class, "name", "") or str(p.hydraulic_data.soil_class) or ""
+        getattr(p.hydraulic_data.soil_class_bed, "name", "")
+        or str(p.hydraulic_data.soil_class_bed)
+        or ""
     ).upper()
     cd = any(
         k in soil for k in ("CLAY", "SILT", "MEDIUM", "SOFT", "TYPE_III", "CLASS_C", "CLASS_D")
@@ -1411,7 +1451,9 @@ def check_creep_shrinkage_low_humidity_1_3x(p: BridgeProject) -> ValidationFindi
 
 def check_temperature_gradient_nonlinear(p: BridgeProject) -> ValidationFinding:
     """W41 — Temperature differential > 20 °C requires non-linear through-depth gradient."""
-    dT = float(getattr(p.bridge_selection.temperature_load_delta_t, "value", 0) or 0)
+    dT = float(
+        getattr(getattr(p.bridge_selection, "temperature_load_delta_t", None), "value", 0) or 0
+    )
     try:
         dT_f = float(dT)
     except (ValueError, TypeError):
@@ -1428,7 +1470,7 @@ def check_temperature_gradient_nonlinear(p: BridgeProject) -> ValidationFinding:
 
 def check_impact_factor_daf_check(p: BridgeProject) -> ValidationFinding:
     """W42 — Impact factor above 0.33 needs dynamic amplification factor check."""
-    imp = getattr(p.bridge_selection.impact_factor_coeff, "value", 0) or 0
+    imp = getattr(getattr(p.bridge_selection, "impact_factor_coeff", None), "value", 0) or 0
     try:
         imp_f = float(imp)
     except (ValueError, TypeError):
@@ -1477,15 +1519,15 @@ def check_ptfe_stainless_steel_surface(p: BridgeProject) -> ValidationFinding:
         "Stainless-steel mating surface for PTFE μ < 0.08",
         ValidationSeverity.WARNING,
         passed,
-        f"{fails[0]} — specify 316L SS mating surface Ra ≤ 0.8 μm (IRC:83 Part II)",
+        f"{fails[0] if fails else ''} — specify 316L SS mating surface Ra ≤ 0.8 μm (IRC:83 Part II)",
     )
 
 
 def check_low_damping_tmd_feasibility(p: BridgeProject) -> ValidationFinding:
     """W45 — Damping ratio < 2% for steel superstructure requires TMD feasibility note."""
     damp = (
-        getattr(p.bridge_selection.damping_ratio_type_enum, "name", "")
-        or str(p.bridge_selection.damping_ratio_type_enum)
+        getattr(getattr(p.bridge_selection, "damping_ratio_type_enum", None), "name", "")
+        or str(getattr(p.bridge_selection, "damping_ratio_type_enum", None))
         or ""
     ).upper()
     low = any(k in damp for k in ("0_5_PCT", "1_PCT", "LOW", "STEEL_0_02")) or "1" in damp
@@ -1626,8 +1668,8 @@ def check_isometric_dim_true_length(p: BridgeProject) -> ValidationFinding:
 def check_chained_dimension_tolerance(p: BridgeProject) -> ValidationFinding:
     """W53 — Chained dimension style needs ± cumulative tolerance statement."""
     dim = (
-        getattr(p.drawing_control.dimension_style_class, "name", "")
-        or str(p.drawing_control.dimension_style_class)
+        getattr(p.drawing_control.dimension_style, "name", "")
+        or str(p.drawing_control.dimension_style)
         or ""
     ).upper()
     chained = "CHAIN" in dim or "CHAINED" in dim or "CONTINUOUS" in dim
@@ -1681,8 +1723,8 @@ def check_jumbo_paper_plotter_inventory(p: BridgeProject) -> ValidationFinding:
 def check_half_symmetric_section_cut_plane(p: BridgeProject) -> ValidationFinding:
     """W56 — Half-symmetric cross-section — verify section cut-plane is noted."""
     vtype = (
-        getattr(p.drawing_control.cross_section_view_type_code, "name", "")
-        or str(p.drawing_control.cross_section_view_type_code)
+        getattr(p.drawing_control.default_cross_section_view, "name", "")
+        or str(p.drawing_control.default_cross_section_view)
         or ""
     ).upper()
     half = any(k in vtype for k in ("HALF", "HALF_SYMMETRIC", "HALF_VIEW", "SYMMETRIC_HALF"))
@@ -1984,8 +2026,8 @@ def check_polymer_overlay_deck_age(p: BridgeProject) -> ValidationFinding:
 def check_cable_stay_dehumidification(p: BridgeProject) -> ValidationFinding:
     """W72 — Cable-stay system class — specify dehumidification monitoring note."""
     stay = (
-        getattr(p.superstructure.cable_staying_system_class, "name", "")
-        or str(p.superstructure.cable_staying_system_class)
+        getattr(p.superstructure.cable_staying_system, "name", "")
+        or str(p.superstructure.cable_staying_system)
         or ""
     ).upper()
     cable = any(k in stay for k in ("CABLE", "STAY", "FAN", "HARPA", "RADIAL"))
@@ -2020,8 +2062,8 @@ def check_tied_arch_hanger_fatigue(p: BridgeProject) -> ValidationFinding:
 def check_warren_truss_without_verticals(p: BridgeProject) -> ValidationFinding:
     """W74 — Warren truss class without verticals — check secondary bending in chords."""
     truss = (
-        getattr(p.superstructure.truss_configuration_class, "name", "")
-        or str(p.superstructure.truss_configuration_class)
+        getattr(p.superstructure.truss_configuration, "name", "")
+        or str(p.superstructure.truss_configuration)
         or ""
     ).upper()
     warren_no_v = ("WARREN" in truss) and ("VERTICAL" not in truss) and ("MODIFIED" not in truss)
@@ -2116,8 +2158,8 @@ def info_morth_nhai_clause_101_1_docs(p: BridgeProject) -> ValidationFinding:
 def info_item_rate_dbo_boq_cross_reference(p: BridgeProject) -> ValidationFinding:
     """I04 — Item-rate DBO packages require BOQ cross-reference in drawing notes."""
     pkg = (
-        getattr(p.project_master.contract_package_type, "name", "")
-        or str(p.project_master.contract_package_type)
+        getattr(p.project_master.contract_package, "name", "")
+        or str(p.project_master.contract_package)
         or ""
     ).upper()
     dbo = any(k in pkg for k in ("DBO", "DBOT", "EPC", "ITEM_RATE", "ITEMRATE", "BOT"))
@@ -2132,8 +2174,8 @@ def info_item_rate_dbo_boq_cross_reference(p: BridgeProject) -> ValidationFindin
 def info_class_a_firm_licensed_engineer_seal(p: BridgeProject) -> ValidationFinding:
     """I05 — Class-A firm must provide licensed engineer seal per state bye-law."""
     firm = (
-        getattr(p.project_master.design_firm_category_class, "name", "")
-        or str(p.project_master.design_firm_category_class)
+        getattr(p.project_master.design_firm_class, "name", "")
+        or str(p.project_master.design_firm_class)
         or ""
     ).upper()
     aclass = (
@@ -2280,8 +2322,8 @@ def info_tangent_alignment_simplifies_bearings(p: BridgeProject) -> ValidationFi
 def info_sag_vertical_curve_deck_drainage(p: BridgeProject) -> ValidationFinding:
     """I16 — Sag vertical curve under deck — add deck drainage extra slope."""
     v = (
-        getattr(p.geometry_input.vertical_alignment_type, "name", "")
-        or str(p.geometry_input.vertical_alignment_type)
+        getattr(p.geometry_input.vertical_alignment, "name", "")
+        or str(p.geometry_input.vertical_alignment)
         or ""
     ).upper()
     sag = "SAG" in v or "VALLEY" in v or "SUMMIT" in v or "CREST" in v
@@ -2354,9 +2396,7 @@ def info_pt_box_girder_30_to_60m_spans(p: BridgeProject) -> ValidationFinding:
 def info_cast_in_situ_rc_slab_simply_supported_i_girder(p: BridgeProject) -> ValidationFinding:
     """I21 — Cast-in-situ RC slab standard for simply supported I-girder decks."""
     slb = (
-        getattr(p.superstructure.deck_slab_type, "name", "")
-        or str(p.superstructure.deck_slab_type)
-        or ""
+        getattr(p.superstructure.slab_type, "name", "") or str(p.superstructure.slab_type) or ""
     ).upper()
     cast = "CAST_IN_SITU" in slb or "MONOLITHIC" in slb
     return _info_f(
@@ -2370,8 +2410,8 @@ def info_cast_in_situ_rc_slab_simply_supported_i_girder(p: BridgeProject) -> Val
 def info_in_situ_rcc_substructure_piers_under_25m(p: BridgeProject) -> ValidationFinding:
     """I22 — In-situ RCC substructure common for piers under 25 m height."""
     sub_mat = (
-        getattr(p.substructure.substructure_material, "name", "")
-        or str(p.substructure.substructure_material)
+        getattr(getattr(p.substructure, "substructure_material", None), "name", "")
+        or str(getattr(p.substructure, "substructure_material", None))
         or ""
     ).upper()
     h = float(p.substructure.pier_height_typical_m or 0)
@@ -2533,8 +2573,8 @@ def info_class_m2_lighting_urban_interchanges(p: BridgeProject) -> ValidationFin
 def info_wgs84_utm_zone_morth(p: BridgeProject) -> ValidationFinding:
     """I32 — WGS-84 / UTM zone required for MORTH highway geo-referencing."""
     grid = (
-        getattr(p.project_master.survey_grid_zone, "name", "")
-        or str(p.project_master.survey_grid_zone)
+        getattr(getattr(p.project_master, "survey_grid_zone", None), "name", "")
+        or str(getattr(p.project_master, "survey_grid_zone", None))
         or ""
     ).upper()
     utm = any(k in grid for k in ("WGS84", "UTM", "WGS_84", "GLOBAL"))
@@ -2549,8 +2589,8 @@ def info_wgs84_utm_zone_morth(p: BridgeProject) -> ValidationFinding:
 def info_cumulative_chainage_avoid_reset(p: BridgeProject) -> ValidationFinding:
     """I33 — Cumulative chainage across project — avoid reset at structures."""
     ch = (
-        getattr(p.project_master.chainage_reference_system, "name", "")
-        or str(p.project_master.chainage_reference_system)
+        getattr(getattr(p.project_master, "chainage_reference_system", None), "name", "")
+        or str(getattr(p.project_master, "chainage_reference_system", None))
         or ""
     ).upper()
     cum = "CUMULATIVE" in ch or "PROJECT" in ch or "CONTINUOUS" in ch
@@ -2601,8 +2641,8 @@ def info_one_bore_per_pier_plus_2_per_abutment(p: BridgeProject) -> ValidationFi
 def info_sap2000_midas_civil_commonly_accepted(p: BridgeProject) -> ValidationFinding:
     """I36 — CSI SAP2000 / MIDAS Civil most commonly accepted under MORTH."""
     soft = (
-        getattr(p.project_master.structural_analysis_software, "name", "")
-        or str(p.project_master.structural_analysis_software)
+        getattr(getattr(p.project_master, "structural_analysis_software", None), "name", "")
+        or str(getattr(p.project_master, "structural_analysis_software", None))
         or ""
     ).upper()
     accepted = any(k in soft for k in ("SAP", "MIDAS", "CSI", "STAAD", "CIVIL", "ANSYS", "ABAQUS"))
@@ -2617,8 +2657,8 @@ def info_sap2000_midas_civil_commonly_accepted(p: BridgeProject) -> ValidationFi
 def info_sparse_direct_solver_large_frames(p: BridgeProject) -> ValidationFinding:
     """I37 — Sparse direct solver recommended for large frame models."""
     solver = (
-        getattr(p.project_master.fea_model_solver_class, "name", "")
-        or str(p.project_master.fea_model_solver_class)
+        getattr(getattr(p.project_master, "fea_model_solver_class", None), "name", "")
+        or str(getattr(p.project_master, "fea_model_solver_class", None))
         or ""
     ).upper()
     sparse = any(k in solver for k in ("SPARSE", "DIRECT", "PARDISO", "SUPERLU"))
@@ -2735,8 +2775,8 @@ def info_bs_1192_iso_19650_layer_naming(p: BridgeProject) -> ValidationFinding:
 def info_dual_dimension_mm_plus_m_large_layouts(p: BridgeProject) -> ValidationFinding:
     """I44 — Dual dimension unit (mm + m) recommended for large layout plans."""
     dim = (
-        getattr(p.drawing_control.dimension_style_class, "name", "")
-        or str(p.drawing_control.dimension_style_class)
+        getattr(p.drawing_control.dimension_style, "name", "")
+        or str(p.drawing_control.dimension_style)
         or ""
     ).upper()
     dual = "DUAL" in dim or "MM_AND_M" in dim or "BOTH" in dim

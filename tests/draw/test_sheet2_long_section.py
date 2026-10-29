@@ -129,3 +129,20 @@ def test_rendering_is_deterministic(project):
     a = contract.serialise(contract.build_sheet(project, SHEET))
     b = contract.serialise(contract.build_sheet(project, SHEET))
     assert a == b
+
+
+def test_long_section_entity_count_scales_with_spans():
+    """WEEK1 D2 — a real elevation grows with the number of supports.
+
+    A scaffold that emits a fixed entity count for one span and for three is
+    not reading its input. Bearings, per-support annotations and the pier
+    centrelines all scale with the span count, so the growth is structural
+    rather than incidental.
+    """
+    counts = {
+        slug: dxf_assert.entity_count(contract.build_sheet(contract.make_project(slug), SHEET))
+        for slug in ("simple_12m", "continuous_3x12m")
+    }
+    assert counts["continuous_3x12m"] > counts["simple_12m"], counts
+    assert counts["continuous_3x12m"] - counts["simple_12m"] >= 10, counts
+

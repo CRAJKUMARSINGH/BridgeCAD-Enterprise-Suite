@@ -61,8 +61,8 @@ def _f(x: Decimal | float | int | None, default: float = 0.0) -> float:
         return default
 
 
-def _name(enum) -> str:
-    return getattr(enum, "name", str(enum)).upper()
+def _name(enum: object) -> str:
+    return str(getattr(enum, "name", enum)).upper()
 
 
 # ----- Rebar density & rule-of-thumb percentages (IRC/IS standard recipes) --
@@ -398,8 +398,8 @@ def _earthwork(proj: BridgeProject) -> tuple[float, float, float]:
         cutoff = 1.5  # 1.5 m below GL cutoff level typical
         # HFL scour: try hydraulic data
         try:
-            hyd = proj.hydraulic_design
-            scour = _f(getattr(hyd, "scour_depth_m", 0))
+            hyd = proj.hydraulic_data
+            scour = _f(getattr(hyd, "design_scour_depth_m", 0))
             embed_m = max(cutoff, scour + 0.5)
         except Exception:
             embed_m = cutoff

@@ -4,19 +4,19 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bridgecad-streamlit-ui"
-version = "0.1.0"
+version = "0.1.0rc1"
 description = "BridgeCAD Enterprise — Streamlit Ultimate UI (15 tabs)"
 requires-python = ">=3.11"
 dependencies = [
   "streamlit>=1.32.0",
-  "bridgecad-core @ file://../../packages/bridgecad-core",
-  "bridgecad-io @ file://../../packages/bridgecad-io",
-  "bridgecad-draw @ file://../../packages/bridgecad-draw",
-  "bridgecad-bill @ file://../../packages/bridgecad-bill",
-  "bridgecad-qa @ file://../../packages/bridgecad-qa",
-  "bridgecad-export @ file://../../packages/bridgecad-export",
-  "bridgecad-ai @ file://../../packages/bridgecad-ai",
-  "bridgecad-infra @ file://../../packages/bridgecad-infra",
+  "bridgecad-core",
+  "bridgecad-io",
+  "bridgecad-draw",
+  "bridgecad-bill",
+  "bridgecad-qa",
+  "bridgecad-export",
+  "bridgecad-ai",
+  "bridgecad-infra",
   "ezdxf>=1.4.0",
   "matplotlib>=3.7.0",
   "plotly>=5.17.0",
@@ -25,7 +25,11 @@ dependencies = [
 ]
 
 [tool.setuptools]
-packages = ["bridgecad_streamlit"]
+# The Streamlit UI is a single-file application (app.py), not a library package:
+# there is no bridgecad_streamlit/ directory. The old
+# packages = ["bridgecad_streamlit"] made `pip install apps/streamlit-ui`
+# fail with "package directory does not exist". Ship the module instead.
+py-modules = ["app"]
 
 [tool.setuptools.package-dir]
 "" = "."

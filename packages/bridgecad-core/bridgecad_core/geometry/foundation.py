@@ -227,10 +227,9 @@ def compute_pile_group_layout(project: BridgeProject) -> PileGroupLayout:
         outer_r = max(pier_shaft_w, 1.5)  # minimum 1.5 m outer radius
         inner_r = outer_r * 0.55  # steining thickness ≈ 0.45 × outer_r
         # Depth from scour level to pile cutoff (approximate)
-        pile_cut = (
-            float(project.foundation_details.pile_cutoff_level_m) if fd.pile_cutoff_level_m else 0.0
-        )
-        well_depth = max(0.0, float(project.hydraulic_data.scour_level_m) - pile_cut + 5.0)
+        scour_m = project.hydraulic_data.scour_level_m
+        pile_cut = float(fd.pile_cutoff_level_m) if fd.pile_cutoff_level_m else 0.0
+        well_depth = max(0.0, (float(scour_m) if scour_m is not None else 0.0) - pile_cut + 5.0)
 
         return PileGroupLayout(
             well_outer_radius_m=outer_r,

@@ -12,8 +12,10 @@ RUN npm ci --prefer-offline
 
 COPY apps/web-console/ .
 
-# Inject API URL at build time (overrideable via --build-arg)
-ARG VITE_API_URL=http://localhost:8000
+# Inject API URL at build time (overrideable via --build-arg).
+# Defaults to a same-origin /api prefix, which the production nginx reverse
+# proxy routes to the API service (see nginx/prod.conf).
+ARG VITE_API_URL=/api
 ENV VITE_API_URL=$VITE_API_URL
 
 RUN npm run build

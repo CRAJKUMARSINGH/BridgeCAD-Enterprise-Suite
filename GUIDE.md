@@ -21,11 +21,13 @@ root. There is no subfolder to descend into.
 | Ultimate Bridge GAD Generator | `streamlit_app_ultimate.py` + `src/bridge_gad/` | 🏛️ LEGACY | `streamlit run streamlit_app_ultimate.py` |
 | Lean Bridge GAD Generator | `app_lean.py` | 🧪 SIDE TOOL | `streamlit run app_lean.py` |
 
-> ⚠️ **Older docs are wrong.** `README.md`, `SKELETON.md` and
-> `GAPS_OPPORTUNITIES_FIXES.md` all tell you to `cd` into a legacy
-> `BridgeCAD Enterprise Suite` directory.
-> That directory no longer exists on `main`. All Suite code — `packages/`,
-> `apps/`, `standards/`, `templates/`, `tests/` — lives at the repo root.
+> ⚠️ **One historical doc is still wrong.** The 2026-10-03 audit report
+> (`archive/GAPS_OPPORTUNITIES_FIXES.md`) still says to `cd` into a
+> `BridgeCAD Enterprise Suite` directory. That directory no longer exists on
+> `main`; the report carries a post-dated correction note. `README.md`,
+> `SKELETON.md` and `docs/getting-started.md` have since been corrected and are
+> safe to follow. All Suite code — `packages/`, `apps/`, `standards/`,
+> `templates/`, `tests/` — lives at the repo root.
 
 **Start with the Suite.** The two Streamlit apps are preserved for reference and
 are still smoke-tested, but no new engineering features land in them.
@@ -325,8 +327,10 @@ Viaduct BR-187 8×25 m, GAD 24.75 m, CH 2+100, 14583-E PSC box 4×25 m, Basantar
 well layout, PP-05 30 m PSC, SRCTIP DOR 4×20 m, launching apron 10.1 m,
 MR-5-LC-29 4×30 m, GAD 3×18 m skew 15°.
 
-**Benchmark gates** (`bench.yml`, weekly, 20% regression tolerance): QA < 200 ms,
-BOQ < 500 ms, single sheet < 3 s, 7 sheets < 15 s.
+**Benchmark budgets** are declared in `tests/benchmarks/budgets.json` and wired to
+the `[tool.pytest-benchmark]` table in `pyproject.toml`: single-sheet render
+5 s / 512 MB, BOQ export 2 s, 100-sheet batch 60 s. There is **no scheduled
+`bench.yml`** — benchmarks run on demand via `pytest tests/benchmarks`.
 
 **CI:** `.github/workflows/suite-ci.yml` (6 jobs: lint, typecheck, unit, e2e,
 rc1-smoke, react-build) and `.github/workflows/ci.yml` (legacy app). Both run in
@@ -346,7 +350,11 @@ with SSL termination, WebSocket upgrade for Streamlit, 50 MB upload limit.
 Multi-arch images (linux/amd64 + linux/arm64), 2-stage builds, non-root users,
 healthchecks on api and streamlit.
 
-`release.yml` builds and pushes to ghcr.io and cuts a GitHub Release with wheels.
+`release.yml` is a **legacy Windows PyInstaller build for `src/bridge_gad`** (the
+pre-Suite `Bridge_GAD` GUI), triggered only on `v*` tags. It does **not** push to
+ghcr.io and does **not** build wheels. It has never run — the repo has 0 tags —
+and its `build` job still installs a `requirements-dev.txt` that is not in the
+repo, so it would fail at the install step the first time a tag is pushed.
 
 ---
 
@@ -448,3 +456,4 @@ MIT — see `LICENSE`.
 | Date | Verified against commit | What changed |
 |---|---|---|
 | 2026-10-22 | `main` | Initial authoritative guide; consolidated the scattered, drifted docs into one master document. |
+| 2026-10-26 | `2acef08` | §9: replaced the non-existent weekly `bench.yml` with the real budget file (`tests/benchmarks/budgets.json`). §10: replaced the ghcr.io/wheels claim with the real `release.yml` — a legacy Windows PyInstaller build for `src/bridge_gad`. |

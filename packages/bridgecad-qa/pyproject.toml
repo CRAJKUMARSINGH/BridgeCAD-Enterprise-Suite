@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bridgecad-qa"
-version = "0.1.0"
+version = "0.1.0rc1"
 description = "BridgeCAD Enterprise — QA compliance: 150 rules engine, 0-100 scoring, reports, recommendations"
 requires-python = ">=3.11"
 dependencies = [
   "reportlab>=4.0.0",
   "jinja2>=3.1.0",
-  "bridgecad-core @ file://../bridgecad-core"
+  "bridgecad-core"
 ]
 
 [tool.setuptools]

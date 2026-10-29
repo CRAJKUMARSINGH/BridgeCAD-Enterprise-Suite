@@ -20,6 +20,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       # Pinned: config keys are version-sensitive.
+      # `fail: false` — external link rot (vendor docs moved, DOI redirects) must
+      # not redden main. Internal/relative links are still enforced by
+      # tests/docs/test_doc_integrity.py and scripts/check_doc_paths.py.
       - uses: lycheeverse/lychee-action@v2
         with:
           args: >-
@@ -27,7 +30,7 @@ jobs:
             --no-progress
             --verbose
             '**/*.md'
-          fail: true
+          fail: false
 
   path-audit:
     name: Paths inside code blocks

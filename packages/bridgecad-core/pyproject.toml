@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bridgecad-core"
-version = "0.1.0"
+version = "0.1.0rc1"
 description = "BridgeCAD Enterprise — Core Domain: types, models, geometry, standards, validation, quantities, costs"
 requires-python = ">=3.11"
 dependencies = [
@@ -14,8 +14,12 @@ dependencies = [
   "scipy>=1.12.0",
 ]
 
-[tool.setuptools]
-packages = ["bridgecad_core"]
+[tool.setuptools.packages.find]
+# Discover the package *and* its subpackages (geometry/, standards/). An explicit
+# packages = ["bridgecad_core"] list silently dropped them from the wheel, so an
+# installed (non-editable) bridgecad-core could not import
+# bridgecad_core.geometry.* or bridgecad_core.standards.*.
+include = ["bridgecad_core*"]
 
 [tool.setuptools.package-dir]
 "" = "."

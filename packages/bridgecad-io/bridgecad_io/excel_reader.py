@@ -24,10 +24,11 @@ M2 Week 2 implementation.
 from __future__ import annotations
 
 import logging
+import re
 from datetime import date
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +46,7 @@ except ImportError:
 
 # Lazy import of bridgecad_core so bridgecad_io can be imported even when
 # bridgecad_core is not yet installed (test environments, CI stub runs).
-def _core():
+def _core() -> tuple[Any, Any]:
     from bridgecad_core import models as _m
     from bridgecad_core import types as _t
 
@@ -57,7 +58,7 @@ def _core():
 # ---------------------------------------------------------------------------
 
 
-def _cell_value(ws, row: int, col: int) -> Any:
+def _cell_value(ws: Any, row: int, col: int) -> Any:
     """Return the value of a cell, stripping leading/trailing whitespace."""
     v = ws.cell(row=row, column=col).value
     if isinstance(v, str):
@@ -65,7 +66,7 @@ def _cell_value(ws, row: int, col: int) -> Any:
     return v
 
 
-def _sheet_to_dict(ws) -> dict[str, Any]:
+def _sheet_to_dict(ws: Any) -> dict[str, Any]:
     """Read a 3-column (Field / Value / Notes) sheet into a plain dict."""
     result: dict[str, Any] = {}
     for row in ws.iter_rows(min_row=1, values_only=True):
@@ -115,7 +116,7 @@ def _coerce(value: Any, python_type: type) -> Any:
     return value
 
 
-def _lookup_enum(enum_cls, raw: Any) -> Any:
+def _lookup_enum(enum_cls: Any, raw: Any) -> Any:
     """Find an enum member by name or value; return None if not found."""
     if raw is None:
         return None
@@ -137,7 +138,7 @@ def _lookup_enum(enum_cls, raw: Any) -> Any:
 # ---------------------------------------------------------------------------
 
 
-def _parse_project_master(ws, m, t) -> dict:
+def _parse_project_master(ws: Any, m: Any, t: Any) -> dict:
     d = _sheet_to_dict(ws)
     return {
         "project_title": _coerce(d.get("project_title"), str),
@@ -171,7 +172,7 @@ def _parse_project_master(ws, m, t) -> dict:
     }
 
 
-def _parse_bridge_selection(ws, m, t) -> dict:
+def _parse_bridge_selection(ws: Any, m: Any, t: Any) -> dict:
     d = _sheet_to_dict(ws)
     return {
         "bridge_category": _lookup_enum(t.BridgeCategory, d.get("bridge_category")),
@@ -187,7 +188,7 @@ def _parse_bridge_selection(ws, m, t) -> dict:
     }
 
 
-def _parse_geometry_input(ws, m, t) -> dict:
+def _parse_geometry_input(ws: Any, m: Any, t: Any) -> dict:
     d = _sheet_to_dict(ws)
     # span_lengths_m may be comma-separated or individual keys span_length_1 .. N
     spans_raw = d.get("span_lengths_m", "")
@@ -242,7 +243,7 @@ def _parse_geometry_input(ws, m, t) -> dict:
     }
 
 
-def _parse_superstructure(ws, m, t) -> dict:
+def _parse_superstructure(ws: Any, m: Any, t: Any) -> dict:
     d = _sheet_to_dict(ws)
     return {
         "type": _lookup_enum(t.SuperstructureType, d.get("type")),
@@ -270,7 +271,7 @@ def _parse_superstructure(ws, m, t) -> dict:
     }
 
 
-def _parse_substructure(ws, m, t) -> dict:
+def _parse_substructure(ws: Any, m: Any, t: Any) -> dict:
     d = _sheet_to_dict(ws)
     return {
         "pier_type": _lookup_enum(t.PierType, d.get("pier_type")),
@@ -305,7 +306,7 @@ def _parse_substructure(ws, m, t) -> dict:
     }
 
 
-def _parse_foundation_details(ws, m, t) -> dict:
+def _parse_foundation_details(ws: Any, m: Any, t: Any) -> dict:
     d = _sheet_to_dict(ws)
     return {
         "type": _lookup_enum(t.FoundationType, d.get("type")),
@@ -324,7 +325,7 @@ def _parse_foundation_details(ws, m, t) -> dict:
     }
 
 
-def _parse_approaches(ws, m, t) -> dict:
+def _parse_approaches(ws: Any, m: Any, t: Any) -> dict:
     d = _sheet_to_dict(ws)
     return {
         "left_approach_length_m": _coerce(d.get("left_approach_length_m"), Decimal),
@@ -343,7 +344,7 @@ def _parse_approaches(ws, m, t) -> dict:
     }
 
 
-def _parse_hydraulic_data(ws, m, t) -> dict:
+def _parse_hydraulic_data(ws: Any, m: Any, t: Any) -> dict:
     d = _sheet_to_dict(ws)
     return {
         "design_discharge_cumecs": _coerce(d.get("design_discharge_cumecs"), Decimal),
@@ -373,7 +374,7 @@ def _parse_hydraulic_data(ws, m, t) -> dict:
     }
 
 
-def _parse_materials(ws, m, t) -> dict:
+def _parse_materials(ws: Any, m: Any, t: Any) -> dict:
     d = _sheet_to_dict(ws)
     return {
         "concrete_superstructure": _lookup_enum(t.ConcreteGrade, d.get("concrete_superstructure")),
@@ -390,7 +391,7 @@ def _parse_materials(ws, m, t) -> dict:
     }
 
 
-def _parse_bearings_joints(ws, m, t) -> dict:
+def _parse_bearings_joints(ws: Any, m: Any, t: Any) -> dict:
     """Parse S10 — bearing_schedule and expansion_joint_schedule tabular blocks."""
     bearing_rows: list[dict] = []
     expansion_rows: list[dict] = []
@@ -431,7 +432,7 @@ def _parse_bearings_joints(ws, m, t) -> dict:
                     expansion_rows.append(rec)
 
     def _mk_bearing(r: dict) -> dict:
-        return {
+        out = {
             "location": _coerce(r.get("location"), str),
             "bearing_type": _lookup_enum(t.BearingType, r.get("bearing_type")),
             "size_x_mm": _coerce(r.get("size_x_mm"), int),
@@ -444,6 +445,9 @@ def _parse_bearings_joints(ws, m, t) -> dict:
             "ptfe_sliding_surface_flag": _coerce(r.get("ptfe_sliding_surface_flag"), bool),
             "quantity": _coerce(r.get("quantity"), int) or 1,
         }
+        # A blank cell yields None; drop it so the model default (False for the
+        # bool flags) applies instead of a None that fails Pydantic validation.
+        return {k: v for k, v in out.items() if v is not None}
 
     def _mk_expansion(r: dict) -> dict:
         return {
@@ -462,12 +466,12 @@ def _parse_bearings_joints(ws, m, t) -> dict:
     }
 
 
-def _parse_components_lib(ws, m, t) -> dict:
+def _parse_components_lib(ws: Any, m: Any, t: Any) -> dict:
     d = _sheet_to_dict(ws)
     return {k: _coerce(v, str) for k, v in d.items()}
 
 
-def _parse_drawing_control(ws, m, t) -> dict:
+def _parse_drawing_control(ws: Any, m: Any, t: Any) -> dict:
     d = _sheet_to_dict(ws)
     # output_formats may be comma-separated
     fmt_raw = d.get("output_formats", "")
@@ -504,7 +508,7 @@ def _parse_drawing_control(ws, m, t) -> dict:
     }
 
 
-def _parse_calculations(ws, m, t) -> dict:
+def _parse_calculations(ws: Any, m: Any, t: Any) -> dict:
     d = _sheet_to_dict(ws)
     return {
         "total_length_m": _coerce(d.get("total_length_m"), Decimal),
@@ -537,7 +541,7 @@ def _parse_calculations(ws, m, t) -> dict:
     }
 
 
-def _parse_validation_sheet(ws, m, t) -> dict:
+def _parse_validation_sheet(ws: Any, m: Any, t: Any) -> dict:
     d = _sheet_to_dict(ws)
     return {
         "overall_status": _coerce(d.get("overall_status"), str),
@@ -636,12 +640,158 @@ _MODEL_KEYS = {
 
 
 # ---------------------------------------------------------------------------
+# Legacy (pre-14-sheet) workbook support
+# ---------------------------------------------------------------------------
+# The suite contract is the 14-sheet workbook. Older workbooks — and the
+# workbooks shipped under ``public/samples/`` — use the legacy single-sheet
+# layout the original GAD app wrote: three columns ``Value, Variable,
+# Description`` with ALL-CAPS parameter codes (NSPAN, SKEW, LBRIDGE, ...).
+# Those are not silently accepted as a canonical workbook; they are recognised
+# and translated by the small, explicit map below, so a legacy file still
+# yields a BridgeProject instead of a hard failure.
+
+_CANONICAL_SHEET_NAMES = (
+    "PROJECT_MASTER",
+    "BRIDGE_SELECTION",
+    "GEOMETRY_INPUT",
+    "SUPERSTRUCTURE",
+    "SUBSTRUCTURE",
+    "FOUNDATION_DETAILS",
+    "APPROACHES",
+    "HYDRAULIC_DATA",
+    "MATERIALS",
+    "BEARINGS_JOINTS",
+    "COMPONENTS_LIB",
+    "DRAWING_CONTROL",
+    "CALCULATIONS",
+    "VALIDATION",
+)
+
+#: Legacy parameter codes that must be present before a workbook is treated as
+#: the legacy layout. A workbook of random `A1 / B2` pairs is not a bridge.
+_LEGACY_MARKER_CODES = frozenset({"NSPAN", "LBRIDGE", "SPAN1", "SKEW", "RTL", "SOFL", "TOPRL"})
+
+_LEGACY_CODE_RE = re.compile(r"^[A-Z][A-Z0-9_]*$")
+
+
+def _no_sheets_error(path: Path) -> str:
+    """The message a workbook that is neither canonical nor legacy receives."""
+    return (
+        f"No recognised BridgeCAD sheets found in '{path.name}'. "
+        f"Expected a 14-sheet workbook named: {', '.join(_CANONICAL_SHEET_NAMES)}. "
+        "See docs/excel-contract.md, or generate a template with "
+        "`bridgecad-cli template new`. Older 1-4 sheet workbooks are only "
+        "supported through legacy mode (Value / Variable / Description)."
+    )
+
+
+def _legacy_code_map(wb: Any) -> dict[str, Any]:
+    """Read a legacy workbook into ``{CODE: value}`` from its code/value rows.
+
+    Two column orders are accepted: the GAD app's ``Value, Variable`` order and
+    the LISP-export ``Parameter, Value`` order. A row counts only when exactly
+    one of the first two cells is an ALL-CAPS parameter code, so the
+    ``Span_No, Length, ...`` and ``Value, Variable, Description`` header rows are
+    skipped rather than mistaken for data.
+    """
+    out: dict[str, Any] = {}
+    for ws in wb.worksheets:
+        for row in ws.iter_rows(values_only=True):
+            if not row or len(row) < 2:
+                continue
+            first, second = row[0], row[1]
+            if isinstance(second, str) and _LEGACY_CODE_RE.match(second.strip()):
+                code, value = second.strip(), first
+            elif isinstance(first, str) and _LEGACY_CODE_RE.match(first.strip()):
+                code, value = first.strip(), second
+            else:
+                continue
+            if value is not None and value != "":
+                out[code] = value
+    return out
+
+
+def _legacy_kwargs(wb: Any, t: Any) -> dict[str, Any] | None:
+    """Translate a legacy workbook into BridgeProject kwargs, or None.
+
+    Only the codes the legacy GAD app actually writes are mapped, and only onto
+    fields the core model owns. Everything else is left to the same IRC-derived
+    defaults a blank 14-sheet workbook gets, so nothing is invented.
+    """
+    codes = _legacy_code_map(wb)
+    if not _LEGACY_MARKER_CODES.intersection(codes):
+        return None
+
+    kwargs: dict[str, Any] = {}
+
+    def _put(section: str, **fields: Any) -> None:
+        target = kwargs.setdefault(section, {})
+        for key, val in fields.items():
+            if val is not None:
+                target[key] = val
+
+    span_count = _coerce(codes.get("NSPAN"), int)
+
+    span_lengths: list[Decimal] = []
+    index = 1
+    while f"SPAN{index}" in codes:
+        val = _coerce(codes[f"SPAN{index}"], Decimal)
+        if val is not None:
+            span_lengths.append(val)
+        index += 1
+
+    # Legacy files often carry only SPAN1 (the first span) next to a multi-digit
+    # NSPAN. An explicit list that disagrees with the count is rejected by the
+    # model, so drop it and divide the total length across the span count instead.
+    if span_count and len(span_lengths) != span_count:
+        span_lengths = []
+    if not span_lengths and span_count:
+        total = _coerce(codes.get("LBRIDGE"), Decimal)
+        if total is not None:
+            span_lengths = [(total / span_count).quantize(Decimal("0.001"))] * span_count
+
+    road_level = codes.get("RTL")
+    if road_level is None:
+        road_level = codes.get("TOPRL")
+
+    _put("bridge_selection", span_count=span_count)
+    _put(
+        "geometry_input",
+        span_count=span_count or (len(span_lengths) or None),
+        span_lengths_m=span_lengths or None,
+        skew_angle_deg=_coerce(codes.get("SKEW"), Decimal),
+    )
+    _put(
+        "project_master",
+        road_level_rl_m=_coerce(road_level, Decimal),
+        ground_level_rl_m=_coerce(codes.get("DATUM"), Decimal),
+    )
+    _put("hydraulic_data", actual_soffit_level_m=_coerce(codes.get("SOFL"), Decimal))
+    # Legacy workbooks have no superstructure block. These three mirror the
+    # template generator's own prefill so a girder base type validates; every
+    # other value is left to the shared IRC-derived defaults below.
+    _put(
+        "superstructure",
+        girder_depth_mm=1200,
+        girder_spacing_m=Decimal("2.5"),
+        girders_per_deck_count=4,
+    )
+
+    logger.info("Legacy workbook: mapped %d parameter code(s)", len(codes))
+    return kwargs
+
+
+# ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
 
 
 def read_excel(path: str | Path) -> BridgeProject:
-    """Parse a 14-sheet BridgeCAD Excel workbook and return a BridgeProject.
+    """Parse a BridgeCAD Excel workbook and return a BridgeProject.
+
+    The canonical input is a 14-sheet workbook (see ``docs/excel-contract.md``).
+    A legacy single-sheet ``Value / Variable / Description`` workbook is also
+    accepted and translated through a small, explicit code map.
 
     Parameters
     ----------
@@ -660,7 +810,8 @@ def read_excel(path: str | Path) -> BridgeProject:
     FileNotFoundError
         If the workbook does not exist.
     ValueError
-        If the workbook contains no recognisable BridgeCAD sheets.
+        If the workbook is neither a 14-sheet contract workbook nor a
+        recognisable legacy workbook.
     """
     if not _OPENPYXL_AVAILABLE:
         raise ImportError("openpyxl is required: pip install openpyxl")
@@ -679,32 +830,36 @@ def read_excel(path: str | Path) -> BridgeProject:
         if key:
             sheet_map[key] = ws
 
-    if not sheet_map:
-        raise ValueError(
-            f"No recognised BridgeCAD sheets found in '{path.name}'. "
-            "Expected sheets named PROJECT_MASTER, BRIDGE_SELECTION, etc."
-        )
-
-    # Parse each found sheet; fall back to empty dict for missing ones
-    parsed: dict[str, dict] = {}
-    for sid, parser in _PARSERS.items():
-        ws = sheet_map.get(sid)
-        if ws is not None:
-            try:
-                parsed[sid] = parser(ws, m, t)
-            except Exception as exc:
-                logger.warning("Error parsing sheet %s: %s", sid, exc)
-                parsed[sid] = {}
-        else:
-            logger.info("Sheet %s not found in workbook — using defaults", sid)
-            parsed[sid] = {}
-
-    # Build BridgeProject kwargs, stripping None values so Pydantic defaults apply
     kwargs: dict[str, Any] = {}
-    for sid, model_key in _MODEL_KEYS.items():
-        sheet_data = {k: v for k, v in parsed[sid].items() if v is not None}
-        if sheet_data:
-            kwargs[model_key] = sheet_data
+    if sheet_map:
+        # Parse each found sheet; fall back to empty dict for missing ones
+        parsed: dict[str, dict] = {}
+        for sid, parser in _PARSERS.items():
+            ws = sheet_map.get(sid)
+            if ws is not None:
+                try:
+                    parsed[sid] = parser(ws, m, t)
+                except Exception as exc:
+                    logger.warning("Error parsing sheet %s: %s", sid, exc)
+                    parsed[sid] = {}
+            else:
+                logger.info("Sheet %s not found in workbook — using defaults", sid)
+                parsed[sid] = {}
+
+        # Build BridgeProject kwargs, stripping None values so Pydantic defaults apply
+        for sid, model_key in _MODEL_KEYS.items():
+            sheet_data = {k: v for k, v in parsed[sid].items() if v is not None}
+            if sheet_data:
+                kwargs[model_key] = sheet_data
+    else:
+        # Not a 14-sheet workbook — try the legacy layout before failing.
+        legacy = _legacy_kwargs(wb, t)
+        if legacy is None:
+            raise ValueError(_no_sheets_error(path))
+        logger.warning(
+            "Workbook '%s' is not the 14-sheet contract — parsed in legacy mode", path.name
+        )
+        kwargs = legacy
 
     # ── Inject defaults for required fields missing from blank templates ───
     # These are Pydantic "required" fields with no default — blank workbooks
@@ -884,7 +1039,7 @@ def read_excel(path: str | Path) -> BridgeProject:
         if hd_kwargs.get(field) is None:
             hd_kwargs[field] = default
 
-    return m.BridgeProject(**kwargs)
+    return cast("BridgeProject", m.BridgeProject(**kwargs))
 
 
 __all__ = ["read_excel"]

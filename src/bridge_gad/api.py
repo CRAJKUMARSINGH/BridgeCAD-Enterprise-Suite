@@ -9,7 +9,7 @@ Phase 7 upgrades:
   - Pydantic v2 response models
 
 Security fixes (retained):
-  KERO-001 — CORS: allow_credentials=False with wildcard origin
+  KERO-001 — CORS: origins from API_CORS_ORIGINS; wildcard refused in production
   KERO-003 — Path traversal: sanitise uploaded filename with Path.name
   REPLIT-004 — Correct MIME types per format
 """
@@ -60,10 +60,31 @@ app = FastAPI(
     version=__version__,
 )
 
-# KERO-001: wildcard origin + no credentials
+# KERO-001: origins come from API_CORS_ORIGINS (see .env.example); the wildcard
+# is refused in production so a misconfigured deploy cannot open the API to all.
+_DEV_ORIGINS = ["http://localhost:5173", "http://localhost:8501", "http://localhost:80"]
+
+
+def _cors_origins() -> list[str]:
+    """Resolve allowed CORS origins from the environment.
+
+    Falls back to local development origins outside production. In production
+    the origin list is mandatory and a wildcard is rejected at startup.
+    """
+    origins = [o.strip() for o in os.getenv("API_CORS_ORIGINS", "").split(",") if o.strip()]
+    is_prod = os.getenv("ENV", "dev").strip().lower() == "production"
+    if is_prod:
+        if not origins:
+            raise RuntimeError("API_CORS_ORIGINS must be set when ENV=production")
+        if "*" in origins:
+            raise RuntimeError("API_CORS_ORIGINS must not contain '*' when ENV=production")
+        return origins
+    return origins or _DEV_ORIGINS
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_cors_origins(),
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -45,7 +45,13 @@ jobs:
           python docs\build_manual.py
 
       - name: Sign Executables (if certificate available)
-        if: ${{ secrets.SIGNING_CERT != '' }}
+        # NOTE: `secrets` is NOT an available context in `jobs.<job_id>.steps.if`
+        # (see GitHub's context-availability table), so `if: ${{ secrets.X != '' }}`
+        # makes the whole workflow invalid to load. Promote the secret to an env
+        # var first — `env` IS available there — and test that instead.
+        if: ${{ env.SIGNING_CERT != '' }}
+        env:
+          SIGNING_CERT: ${{ secrets.SIGNING_CERT }}
         run: |
           # Decode the certificate from secrets
           echo "${{ secrets.SIGNING_CERT }}" | certutil -decode - signcert.pfx

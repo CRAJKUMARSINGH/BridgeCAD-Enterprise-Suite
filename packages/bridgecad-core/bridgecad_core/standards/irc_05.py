@@ -59,7 +59,7 @@ def lacey_regime_velocity(f: float, R: float) -> float:
     """
     if f <= 0 or R <= 0:
         return 0.0
-    return 0.44 * (f ** (1.0 / 3.0)) * (R ** (2.0 / 3.0))
+    return float(0.44 * (f ** (1.0 / 3.0)) * (R ** (2.0 / 3.0)))
 
 
 def lacey_regime_depth(Q: float, f: float) -> float:
@@ -78,7 +78,7 @@ def lacey_regime_depth(Q: float, f: float) -> float:
     """
     if Q <= 0 or f <= 0:
         return 0.0
-    return 0.477 * ((Q / (f**2)) ** (1.0 / 3.0))
+    return float(0.477 * ((Q / (f**2)) ** (1.0 / 3.0)))
 
 
 def lacey_regime_slope(f: float, Q: float) -> float:
@@ -97,7 +97,7 @@ def lacey_regime_slope(f: float, Q: float) -> float:
     """
     if f <= 0 or Q <= 0:
         return 0.0
-    return (f ** (5.0 / 3.0)) / (3340.0 * (Q ** (1.0 / 6.0)))
+    return float((f ** (5.0 / 3.0)) / (3340.0 * (Q ** (1.0 / 6.0))))
 
 
 def lacey_regime_perimeter(Q: float) -> float:

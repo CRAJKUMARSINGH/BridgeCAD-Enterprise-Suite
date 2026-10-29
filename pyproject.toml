@@ -18,12 +18,12 @@ keywords = [
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
   "Intended Audience :: Science/Research",
-  "Intended Audience :: Construction",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
-  "Topic :: Scientific/Engineering :: Civil Engineering",
+  "Topic :: Scientific/Engineering",
   "Topic :: Multimedia :: Graphics :: Editors :: Vector-Based",
 ]
 
@@ -96,6 +96,10 @@ dev = [
   "types-requests",
 ]
 draw = [
+  # ezdxf is the DXF writer every drawing path needs. Without it the zero-install
+  # path fails at the first generate_package call ("ezdxf is required"), so the
+  # drawing extra must pull it rather than leaving it to a manual install.
+  "ezdxf>=1.4",
   "matplotlib>=3.8",
   "pillow>=10.0",
   "cairosvg>=2.7",
@@ -228,6 +232,7 @@ docstring-code-format = true
 # ─────────────────────────────────────────────────────────────────────────────
 [tool.mypy]
 python_version = "3.11"
+disable_error_code = ["prop-decorator"]
 warn_unused_configs = true
 warn_redundant_casts = true
 warn_unused_ignores = true
@@ -295,6 +300,7 @@ markers = [
   "draw: drawing geometry and DXF contract tests",
   "visual: PNG baseline comparison",
   "refs: reference-drawing corpus and extraction tests",
+  "scaffold_only: scaffold-sheet structural contract lane",
 ]
 filterwarnings = [
   "error::DeprecationWarning:bridgecad_.*",

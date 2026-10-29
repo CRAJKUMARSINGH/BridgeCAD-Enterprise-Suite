@@ -17,22 +17,80 @@ Usage:
 
 from __future__ import annotations
 
+import ast
 import logging
 import math
+import operator
 from typing import Any, Callable, Dict, List, Optional, Set
 
 logger = logging.getLogger(__name__)
 
-# ── Safe builtins for formula sandbox ────────────────────────────────────────
-_SAFE_BUILTINS: Dict[str, Any] = {
-    "__builtins__": {},
+# ── Formula sandbox: AST whitelist (never `eval`) ────────────────────────────
+# Workbook formulas reach this path from uploaded Excel files, so the evaluator
+# walks the parsed AST and admits only arithmetic, known names and pure math
+# calls. Anything else raises ValueError rather than being executed.
+_BIN_OPS: Dict[type, Callable[[float, float], float]] = {
+    ast.Add: operator.add,
+    ast.Sub: operator.sub,
+    ast.Mult: operator.mul,
+    ast.Div: operator.truediv,
+    ast.FloorDiv: operator.floordiv,
+    ast.Mod: operator.mod,
+    ast.Pow: operator.pow,
+}
+_UNARY_OPS: Dict[type, Callable[[float], float]] = {
+    ast.UAdd: operator.pos,
+    ast.USub: operator.neg,
+}
+_SAFE_FUNCS: Dict[str, Callable[..., float]] = {
     "abs": abs, "round": round, "min": min, "max": max,
     "int": int, "float": float, "bool": bool,
     "sqrt": math.sqrt, "ceil": math.ceil, "floor": math.floor,
-    "pi": math.pi, "sin": math.sin, "cos": math.cos, "tan": math.tan,
+    "sin": math.sin, "cos": math.cos, "tan": math.tan,
     "log": math.log, "log10": math.log10, "exp": math.exp,
     "pow": math.pow,
 }
+_SAFE_CONSTANTS: Dict[str, float] = {"PI": math.pi, "E": math.e}
+
+
+def _eval_node(node: ast.AST, names: Dict[str, float]) -> float:
+    """Evaluate one whitelisted AST node. Raises ValueError on anything else."""
+    if isinstance(node, ast.Constant):
+        if isinstance(node.value, bool) or not isinstance(node.value, (int, float)):
+            raise ValueError(f"non-numeric constant: {node.value!r}")
+        return float(node.value)
+    if isinstance(node, ast.Name):
+        key = node.id.upper()
+        if key in _SAFE_CONSTANTS:
+            return _SAFE_CONSTANTS[key]
+        if key in names:
+            return float(names[key])
+        raise ValueError(f"unknown name: {node.id}")
+    if isinstance(node, ast.BinOp):
+        op = _BIN_OPS.get(type(node.op))
+        if op is None:
+            raise ValueError(f"operator not allowed: {type(node.op).__name__}")
+        return op(_eval_node(node.left, names), _eval_node(node.right, names))
+    if isinstance(node, ast.UnaryOp):
+        op = _UNARY_OPS.get(type(node.op))
+        if op is None:
+            raise ValueError(f"unary operator not allowed: {type(node.op).__name__}")
+        return op(_eval_node(node.operand, names))
+    if isinstance(node, ast.Call):
+        if not isinstance(node.func, ast.Name):
+            raise ValueError("only direct calls to sandbox functions are allowed")
+        fn = _SAFE_FUNCS.get(node.func.id.lower())
+        if fn is None:
+            raise ValueError(f"function not allowed: {node.func.id}")
+        if node.keywords:
+            raise ValueError("keyword arguments are not allowed")
+        return float(fn(*(_eval_node(a, names) for a in node.args)))
+    raise ValueError(f"expression not allowed: {type(node).__name__}")
+
+
+def _safe_eval(formula: str, names: Dict[str, float]) -> float:
+    """Evaluate a formula under the AST whitelist. Replacement for `eval()`."""
+    return float(_eval_node(ast.parse(formula, mode="eval").body, names))
 
 
 class CalcEngine:
@@ -140,9 +198,7 @@ class CalcEngine:
             if not formula:
                 continue
             try:
-                # Build eval namespace: current values + safe math
-                ns = {**_SAFE_BUILTINS, **{k: v for k, v in self._values.items()}}
-                result = float(eval(formula.upper(), ns))  # noqa: S307
+                result = _safe_eval(formula.upper(), self._values)
                 old = self._values.get(name)
                 self._values[name] = result
                 self._dirty.discard(name)

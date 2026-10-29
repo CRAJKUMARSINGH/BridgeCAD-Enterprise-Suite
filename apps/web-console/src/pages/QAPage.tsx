@@ -22,7 +22,7 @@ export default function QAPage() {
         Runs 30 checks (25 Critical + 5 Warning) mapped to IRC:5, IRC:112, IRC SP:55, MORTH.
       </p>
 
-      <FileDropzone onFile={(f) => { setFile(f) }} />
+      <FileDropzone file={file} onFile={(f) => { setFile(f) }} />
 
       <button
         disabled={!file || validate.isPending}

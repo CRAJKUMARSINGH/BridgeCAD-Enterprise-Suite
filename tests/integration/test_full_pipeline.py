@@ -1,5 +1,5 @@
 """
-Integration smoke test: Excel template → BridgeProject → 7-sheet DXF + BOQ + ZIP bundle.
+Integration smoke test: Excel template → BridgeProject → 8-sheet DXF + BOQ + ZIP bundle.
 
 Run:
     cd "BridgeCAD Enterprise Suite"
@@ -358,7 +358,7 @@ def run_integration_smoke() -> int:
     except Exception as exc:
         results.append(_fail("T03", str(exc)))
 
-    # ── T04: 7-sheet DXF package ─────────────────────────────────────────
+    # ── T04: 8-sheet DXF package ─────────────────────────────────────────
     dxf_sheets: list[Path] = []
     try:
         from bridgecad_draw.booklet import generate_package
@@ -373,10 +373,10 @@ def run_integration_smoke() -> int:
                 shutil.copy(s, dest)
                 dxf_sheets.append(dest)
         total_kb = sum(s.stat().st_size for s in dxf_sheets) // 1024
-        ok = len(dxf_sheets) == 7 and total_kb > 50
+        ok = len(dxf_sheets) == 8 and total_kb > 50
         results.append(
-            _ok("T04", f"{len(dxf_sheets)}/7 sheets  total {total_kb} KB")
-            if ok else _fail("T04", f"only {len(dxf_sheets)}/7 sheets or too small")
+            _ok("T04", f"{len(dxf_sheets)}/8 sheets  total {total_kb} KB")
+            if ok else _fail("T04", f"only {len(dxf_sheets)}/8 sheets or too small")
         )
     except Exception as exc:
         results.append(_fail("T04", str(exc))); traceback.print_exc()

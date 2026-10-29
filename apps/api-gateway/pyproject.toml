@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bridgecad-api-gateway"
-version = "0.1.0"
+version = "0.1.0rc1"
 description = "BridgeCAD Enterprise — FastAPI async gateway"
 requires-python = ">=3.11"
 dependencies = [
@@ -13,13 +13,13 @@ dependencies = [
   "pydantic>=2.6.0",
   "pydantic-settings>=2.2.0",
   "python-multipart>=0.0.9",
-  "bridgecad-core @ file://../../packages/bridgecad-core",
-  "bridgecad-io @ file://../../packages/bridgecad-io",
-  "bridgecad-draw @ file://../../packages/bridgecad-draw",
-  "bridgecad-bill @ file://../../packages/bridgecad-bill",
-  "bridgecad-qa @ file://../../packages/bridgecad-qa",
-  "bridgecad-export @ file://../../packages/bridgecad-export",
-  "bridgecad-infra @ file://../../packages/bridgecad-infra",
+  "bridgecad-core",
+  "bridgecad-io",
+  "bridgecad-draw",
+  "bridgecad-bill",
+  "bridgecad-qa",
+  "bridgecad-export",
+  "bridgecad-infra",
   "arq>=0.26.0",
 ]
 

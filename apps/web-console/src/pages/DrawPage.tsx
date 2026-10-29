@@ -15,7 +15,7 @@ export default function DrawPage() {
         Upload a BridgeCAD Excel workbook and download a 7-sheet DXF GAD package.
       </p>
 
-      <FileDropzone onFile={(f) => setFile(f)} />
+      <FileDropzone file={file} onFile={(f) => setFile(f)} />
 
       <div className="mt-5 grid grid-cols-2 gap-4">
         <label className="block">

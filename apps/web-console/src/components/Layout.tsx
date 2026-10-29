@@ -27,10 +27,10 @@ export default function Layout() {
   }, [health, setApiOnline, setApiVersion])
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
-      {/* ── Sidebar ─────────────────────────────────── */}
-      <aside className="w-56 bg-slate-900 flex flex-col shrink-0">
-        <div className="px-5 py-5 border-b border-slate-700">
+    <div className="flex h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/40 overflow-hidden">
+      {/* ── Sidebar (glassmorphism) ─────────────────── */}
+      <aside className="w-56 glass-panel-dark flex flex-col shrink-0">
+        <div className="px-5 py-5 border-b border-white/10">
           <div className="text-white font-bold text-lg leading-tight">🌉 BridgeCAD</div>
           <div className="text-slate-400 text-xs mt-0.5">Enterprise Suite</div>
         </div>
@@ -42,23 +42,27 @@ export default function Layout() {
               to={n.to}
               end={n.to === '/'}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+                `group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150
                 ${isActive
-                  ? 'bg-blue-600 text-white'
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40'
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white hover:translate-x-0.5'
                 }`
               }
             >
-              <span className="text-base">{n.icon}</span>
+              <span className="text-base transition-transform duration-150 group-hover:scale-110">
+                {n.icon}
+              </span>
               {n.label}
             </NavLink>
           ))}
         </nav>
 
         {/* API status badge */}
-        <div className="px-4 py-4 border-t border-slate-700">
+        <div className="px-4 py-4 border-t border-white/10">
           <div className="flex items-center gap-2">
-            <span className={`w-2 h-2 rounded-full ${online ? 'bg-green-400' : 'bg-red-400'}`} />
+            <span
+              className={`w-2 h-2 rounded-full ${online ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`}
+            />
             <span className="text-xs text-slate-400">
               API {online ? `v${version}` : 'offline'}
             </span>

@@ -17,7 +17,7 @@ export default function ExportPage() {
         One click: 7-sheet DXF drawings + priced BOQ (xlsx+csv) + QA HTML report → ZIP.
       </p>
 
-      <FileDropzone onFile={(f) => setFile(f)} />
+      <FileDropzone file={file} onFile={(f) => setFile(f)} />
 
       <div className="mt-4 grid grid-cols-2 gap-4">
         <label className="block">

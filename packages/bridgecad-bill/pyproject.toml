@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bridgecad-bill"
-version = "0.1.0"
+version = "0.1.0rc1"
 description = "BridgeCAD Enterprise — Statutory bill engine (MORTH rates, 4 formatters, statements)"
 requires-python = ">=3.11"
 dependencies = [
@@ -13,11 +13,15 @@ dependencies = [
   "pandas>=2.0.0",
   "pyyaml>=6.0",
   "jinja2>=3.1.0",
-  "bridgecad-core @ file://../bridgecad-core"
+  "bridgecad-core"
 ]
 
-[tool.setuptools]
-packages = ["bridgecad_bill"]
+[tool.setuptools.packages.find]
+# Discover the package *and* its subpackages (formatters/). An explicit
+# packages = ["bridgecad_bill"] list silently dropped them from the wheel, so an
+# installed (non-editable) bridgecad-bill could not import
+# bridgecad_bill.formatters.*.
+include = ["bridgecad_bill*"]
 
 [tool.setuptools.package-dir]
 "" = "."

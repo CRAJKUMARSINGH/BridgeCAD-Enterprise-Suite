@@ -121,14 +121,21 @@ check(
 section("6. No PII in tracked source files")
 
 result = subprocess.run(
-    ["git", "grep", "-l", r"@hotmail\|@gmail\|+91[0-9]"], cwd=ROOT, capture_output=True, text=True
+    ["git", "grep", "-l", r"@hotmail\|@gmail\|+91[0-9]\{10\}"],
+    cwd=ROOT,
+    capture_output=True,
+    text=True,
 )
-# Exclude: CI guard, this script itself, README/docs, and gitignored status MDs
+# Exclude: CI guard, this script itself, README/docs, and the defect-detection
+# harnesses that must carry the patterns verbatim as fixtures/definitions.
 _excluded_prefixes = (
     ".github/workflows/",  # CI guard contains the pattern as a literal string
     "README",
     "docs/",  # intentional contact info
     "scripts/test_netlify",  # this script contains the pattern as a grep arg
+    "scripts/prove_detection.py",  # mutation fixture injects the literal pattern
+    "tests/docs/test_doc_integrity.py",  # gate defines the literal patterns
+    ".agents/",  # audit artifacts/vendored diffs, not shipped source
 )
 pii_files = [
     f

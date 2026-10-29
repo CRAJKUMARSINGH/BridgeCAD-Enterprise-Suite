@@ -5,10 +5,12 @@ import type { ProjectSummary } from '../api/client'
 
 export default function Projects() {
   const parser = useParseBridge()
+  const [file, setFile] = useState<File | null>(null)
   const [summary, setSummary] = useState<ProjectSummary | null>(null)
 
-  const handleFile = (file: File) => {
-    parser.mutate(file, {
+  const handleFile = (f: File) => {
+    setFile(f)
+    parser.mutate(f, {
       onSuccess: (data) => setSummary(data.project),
     })
   }
@@ -18,19 +20,19 @@ export default function Projects() {
       <h1 className="text-xl font-bold text-slate-800 mb-1">📁 Projects</h1>
       <p className="text-slate-500 text-sm mb-6">Upload a BridgeCAD Excel workbook to inspect its metadata.</p>
 
-      <FileDropzone onFile={handleFile} label="Drop BridgeCAD .xlsx workbook here" />
+      <FileDropzone file={file} onFile={handleFile} label="Drop BridgeCAD .xlsx workbook here" />
 
       {parser.isPending && (
         <div className="mt-6 text-slate-500 text-sm animate-pulse">Parsing workbook…</div>
       )}
       {parser.isError && (
-        <div className="mt-6 bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
+        <div className="rise-in mt-6 bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
           ❌ {String(parser.error)}
         </div>
       )}
 
       {summary && (
-        <div className="mt-6 bg-white border border-slate-200 rounded-xl p-6 space-y-3">
+        <div className="rise-in mt-6 glass-panel p-6 space-y-3">
           <h2 className="font-semibold text-slate-800">✅ Project Parsed</h2>
           <dl className="grid grid-cols-2 gap-3 text-sm">
             {[

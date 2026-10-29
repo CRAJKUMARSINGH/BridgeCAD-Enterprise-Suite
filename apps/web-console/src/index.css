@@ -6,4 +6,95 @@
   html { @apply h-full; }
   body { @apply h-full bg-slate-50 text-slate-900 antialiased; }
   #root { @apply h-full; }
+
+  /* Accessibility: honour the OS "reduce motion" preference (WCAG 2.2 AA). */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* ── Glassmorphism — translucent surfaces over a blurred backdrop ─────── */
+  .glass-panel {
+    background-color: rgb(255 255 255 / 0.72);
+    border: 1px solid rgb(255 255 255 / 0.65);
+    @apply rounded-xl shadow-sm backdrop-blur-md;
+  }
+
+  .glass-panel-dark {
+    background-color: rgb(15 23 42 / 0.88);
+    border-right: 1px solid rgb(255 255 255 / 0.08);
+    @apply backdrop-blur-md;
+  }
+
+  /* ── Neumorphism — extruded soft-shadow surfaces and controls ─────────── */
+  .neu-tile {
+    background-color: #f8fafc;
+    box-shadow:
+      6px 6px 14px rgb(15 23 42 / 0.08),
+      -6px -6px 14px rgb(255 255 255 / 0.9);
+    @apply rounded-xl;
+  }
+
+  .neu-btn {
+    background-color: #f8fafc;
+    box-shadow:
+      4px 4px 10px rgb(15 23 42 / 0.1),
+      -4px -4px 10px rgb(255 255 255 / 0.95);
+    transition: box-shadow 150ms ease, transform 150ms ease;
+    @apply rounded-lg px-4 py-2 text-sm font-medium text-slate-700;
+  }
+
+  .neu-btn:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      6px 6px 14px rgb(15 23 42 / 0.13),
+      -6px -6px 14px rgb(255 255 255 / 1);
+  }
+
+  .neu-btn:active {
+    transform: translateY(0);
+    box-shadow:
+      inset 3px 3px 8px rgb(15 23 42 / 0.14),
+      inset -3px -3px 8px rgb(255 255 255 / 0.9);
+  }
+
+  .neu-btn:focus-visible {
+    @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+  }
+
+  /* ── Micro-interactions — lift on hover, settle on press ──────────────── */
+  .lift {
+    @apply transition-transform duration-200 ease-out will-change-transform;
+  }
+
+  .lift:hover {
+    transform: translateY(-3px);
+  }
+
+  .lift:active {
+    transform: translateY(-1px);
+  }
+
+  /* Entrance animation for panels that appear from data. */
+  .rise-in {
+    animation: rise-in 260ms ease-out both;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }

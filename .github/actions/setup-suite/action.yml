@@ -1,0 +1,44 @@
+name: Setup Suite
+description: >
+  Install the BridgeCAD workspace deterministically under pip: all workspace
+  members first (so intra-workspace deps resolve against the checkout), then the
+  root project with the requested extras. Fails loudly on the first bad install.
+
+inputs:
+  extras:
+    description: Comma-separated root extras, e.g. "dev,draw"
+    required: false
+    default: "dev"
+  python-version:
+    required: false
+    default: "3.11"
+  extra-pip:
+    description: Additional packages to install after the workspace
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: pip
+
+    # `set -e` is the whole point. The old `for pkg in packages/*/pyproject.toml`
+    # loop returned only the LAST iteration's status, so a failed member install
+    # (bridgecad-draw) was silently swallowed.
+    - name: Install workspace
+      shell: bash
+      run: |
+        set -euo pipefail
+        python -m pip install --upgrade pip
+        python -m pip install -e packages/bridgecad-core --quiet
+        for pkg in packages/*/; do
+          [ "$pkg" = "packages/bridgecad-core/" ] && continue
+          python -m pip install -e "$pkg" --quiet
+        done
+        python -m pip install -e ".[${{ inputs.extras }}]" --quiet
+        if [ -n "${{ inputs.extra-pip }}" ]; then
+          python -m pip install ${{ inputs.extra-pip }}
+        fi

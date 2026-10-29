@@ -29,7 +29,7 @@ export default function BOQPage() {
         Extract quantities and price against MORTH 2024-25 schedule rates.
       </p>
 
-      <FileDropzone onFile={(f) => setFile(f)} />
+      <FileDropzone file={file} onFile={(f) => setFile(f)} />
 
       <div className="mt-4 flex items-center gap-4">
         <label className="text-xs font-medium text-slate-600">

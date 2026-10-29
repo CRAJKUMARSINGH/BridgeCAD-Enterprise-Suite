@@ -108,14 +108,22 @@ jobs:
         run: mypy packages/bridgecad-bill/bridgecad_bill --ignore-missing-imports --no-strict-optional
 
   unit:
-    name: "[Suite] Unit Tests"
+    name: "[Suite] Unit Tests (py${{ matrix.python-version }})"
     runs-on: ubuntu-latest
     needs: lint
+    # W02 dependency discipline: the Suite must run on the floor (3.11) AND the
+    # next interpreter (3.12). A single-version job cannot catch a 3.12-only
+    # breakage until release day. fail-fast=false so one interpreter's failure
+    # still reports the other's result.
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-suite
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version: ${{ matrix.python-version }}
           extras: dev
           extra-pip: "pytest pytest-cov openpyxl pyyaml"
 

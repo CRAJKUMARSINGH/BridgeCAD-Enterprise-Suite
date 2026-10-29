@@ -31,8 +31,8 @@ Dimensions 1 and 5 are the current gap.
 ## Phase 1 · Foundation & truth-up
 
 ### W01 · Repo truth-up — 26 Oct – 1 Nov
-- [ ] `ARCHITECTURE.md` written
-- [ ] `ADR-0001` one product, one entry point (legacy archived or fenced)
+- [x] `ARCHITECTURE.md` written
+- [x] `ADR-0001` one product, one entry point (legacy archived or fenced)
 - [ ] README clone path, `cd` path and Issues link corrected
 - [ ] Folder renamed `bridgecad-suite`
 - [ ] `CODEOWNERS` + `main` branch protection
@@ -40,11 +40,13 @@ Dimensions 1 and 5 are the current gap.
 **DoD:** fresh clone on a clean machine runs with one documented command.
 
 ### W02 · Dependency discipline — 2 – 8 Nov
-- [ ] `pyproject.toml` (PEP 621) + committed lockfile
-- [ ] prod/dev extras split, no floating pins
-- [ ] Python 3.11 + 3.12 matrix
-- [ ] `pre-commit`: ruff format, ruff check, mypy, secret scan
-- [ ] Docker build from lockfile succeeds from scratch
+- [x] `pyproject.toml` (PEP 621) + committed lockfile
+- [x] prod/dev extras split, no floating pins
+- [x] Python 3.11 + 3.12 matrix
+- [x] `pre-commit`: ruff format, ruff check, mypy, secret scan
+- [ ] Docker build from lockfile succeeds from scratch — image now installs
+      `requirements.lock` and smoke-tests `bridgecad`; needs one green `main`
+      build to close
 
 **DoD:** pre-commit blocks a deliberately bad commit.
 

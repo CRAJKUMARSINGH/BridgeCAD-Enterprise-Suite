@@ -181,13 +181,15 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
-      # REQUIRES a root Dockerfile — see below. Without it this job cannot pass.
+      # ── Docker ────────────────────────────────────────────────────────────
+      # The image is built from requirements.lock (pinned Suite set). Its smoke
+      # test exercises the Suite facade `bridgecad` — the legacy bridge_gad
+      # surface is fenced (ADR-0001) and is no longer the container's contract.
       - name: Build Docker image
         run: docker build -t bridge-gad:ci .
       - name: Smoke test container
         run: |
           docker run --rm bridge-gad:ci python -c "
-          import sys; sys.path.insert(0,'src')
-          from bridge_gad.bridge_generator import BridgeGADGenerator
-          print('Container import OK')
+          import bridgecad as bc
+          print('Container import OK', bc.__version__)
           "

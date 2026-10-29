@@ -31,64 +31,52 @@ Introduced by the `CODE-JUNCTION/00 FOR ALL APPS` brief (Phase 2).
 
 ---
 
-## 2026-10-27
+## 2026-10-30
 
 ### Workspace
 
-- Removed the redundant nested clone (a stale copy at an identical commit with
-  none of the root's uncommitted work). Editor-level deletion was used because
-  shell directory deletion is silently reverted in this environment. Root is now
-  the single source of truth.
+- **Git write deadlock cleared.** `git add`/`commit`/`mv` were failing with
+  `Unable to create '.git/index.lock': File exists`. Diagnosis: no live `git`
+  process — the `.git/*.lock` files were leftovers from an interrupted
+  merge/checkout, and stale duplicate background `pytest -m slow` jobs were
+  competing for the same artifacts. Fix: stop the duplicates, then
+  `python scripts/clear_stale_locks.py --force` immediately before each write.
+- **CODE-JUNCTION retired.** The 52-week corpus plus the 10-day brief were read
+  and applied (wave 1) and the staged folder removed; the content now lives in
+  `docs/upgrade/` (`00-MASTER-PLAN.md`, `Q1..Q4`, `DEFECT-LEDGER.md`, …).
+- **Redundant trees deleted** (all regenerable): `TEST-28102026/`,
+  `tests/e2e/random_drawings/`, `.verify/`, `.bridge_repo_pdf_work/`,
+  `.vercel/`, `apps/web-console/audit_wc.json`, `_probe_*.py`. `.gitignore`
+  extended so `TEST-*/`, `.verify/`, `.bridge_repo_pdf_work/`, `.vercel/` and
+  `tests/e2e/random_drawings/` stay out of `git status`.
 
-### Enrichment applied from `CODE-JUNCTION/`
+### Roadmap
 
-- **KIMI-2610 (safe set).** RFC 7807 `application/problem+json` error bodies and
-  upload limits (50 MB cap, `.xlsx` allowlist) wired across the API endpoints;
-  the coordinate contract and structural DXF checks landed. The BOQ-provenance
-  and QA-rule scaffolds were skipped — they duplicate existing Wing-13/14 modules.
-- **GENSPARK-2610 (security + version).**
-  - `src/bridge_gad/calc_engine.py`: the repository's only live `eval()` was on
-    the workbook-formula path. Replaced with an AST whitelist walker that admits
-    arithmetic, known names and pure math calls only. Verified against seven
-    hostile payloads (`__import__("os")`, `SPAN1.__class__`, `open("x")`, lambda,
-    ternary, list literal, `;`-chaining) — all rejected.
-  - `src/bridge_gad/api.py`: CORS origins now come from `API_CORS_ORIGINS`; a
-    wildcard or an empty list is refused at startup when `ENV=production`.
-  - `packages/bridgecad-io/bridgecad_io/__init__.py`: version `0.2.0-m2` →
-    `0.1.0-rc1`, so `rc1_smoke.py` RC1-01 passes for all nine packages.
-- **Types.** All nine `mypy` `arg-type` errors in `bridgecad_core` fixed with
-  None-guarded `float()` reads. `mypy` is clean.
-- **Golden pins.** `scripts/pin_golden.py` lands the missing half of the golden
-  machinery: the hand-picked golden cases pin selected values, this pins the
-  **whole** model as canonical JSON with a sha256 drift diff. Five pins under
-  `tests/draw/golden/pins/`. Verify mode is 5/5; a tampered pin fails loudly.
-- **Architecture.** `import_linter_contract.ini` encodes the GUIDE.md §3
-  invariants and `suite-ci.yml` gained the import-linter job. All three contracts
-  are kept; a probe violation turns the gate red.
+- **W01 — repo truth-up.** `ARCHITECTURE.md`, ADR-0001 flipped to Accepted,
+  `docs/how-to-use-video.md` (video-form guide, wired into `mkdocs.yml` nav and
+  `DOCS_INDEX.md`), `README.md` link fixes, `TEST_DEPLOYMENT_SUMMARY.md` moved
+  under `archive/`. (The destructive "rename folder to bridgecad-suite" item was
+  deliberately skipped.)
+- **W02 — dependency discipline.** `suite-ci.yml` unit job now runs a
+  **Python 3.11 + 3.12 matrix**. The root `Dockerfile` builds from
+  `requirements.lock` (pinned) instead of the legacy loose `requirements.txt`,
+  and both the image `CMD` and the `ci.yml` container smoke now exercise the
+  Suite facade `bridgecad` — the legacy `src/bridge_gad` surface is fenced
+  (ADR-0001).
 
-### This session — `CODE-JUNCTION/00 FOR ALL APPS`
+### Verification
 
-- Scope taken: Phase 2 (continuity logging), Phase 9 (design trends),
-  Phases 11/13 (README polish, operator README).
-- `SARASWATI.test.tsx` and `SARASWATI.jpg` were **not** applied. The image is
-  already at `apps/web-console/public/saraswati.jpg`; the test duplicates
-  `apps/web-console/src/components/SaraswatiMascot.test.tsx` (which is a strict
-  superset) and its imports resolve to paths that do not exist here.
-- Phase 9 design layer, applied to `apps/web-console`:
-  - `src/index.css` — `glass-panel`, `glass-panel-dark`, `neu-tile`, `neu-btn`,
-    `lift`, `rise-in` plus a `prefers-reduced-motion` guard.
-  - `src/components/Layout.tsx` — glass sidebar, gradient canvas, nav lift/glow
-    micro-interactions, pulsing status dot.
-  - `src/pages/Dashboard.tsx` — glass panels, lifting feature cards, neumorphic
-    stat tiles.
-  - `src/components/FileDropzone.tsx`, `src/pages/Projects.tsx` — drag scale and
-    entrance feedback.
-- Verification: `npm run typecheck` clean · `npm test` 3/3 · `npm run build` OK
-  (958 modules, CSS 20.81 kB / 4.30 kB gzip).
+- `ruff check packages apps scripts` clean · `scripts/verify_docs.py --json`
+  pass 3 / fail 0 · fast suite `734 passed` (test_visual deselected) ·
+  slow mutation gate `16 passed` in 32:19 · Q1-W1 exit gate
+  `dump_dxf_facts.py --selftest` green.
+- GitHub repo page given a description + 14 topics; Streamlit console boots
+  (`/_stcore/health` → 200 `ok`).
 
 ### Not taken (explicitly out of scope this pass)
 
-- Phase 10 marketing set (`subscriptionService.ts`, `PricingPage.tsx`,
-  `WelcomeModal.tsx`, `UpgradeBanner.tsx`).
-- Phases 4–8 and 12: bug review, `AUDIT-REPORT-v1.0.md`, refactor, Web-Vitals
-  tuning, simulated-user QA (125 / 75 / 51), deploy configuration.
+- Roadmap W03+ (test-harness coverage ratchet, V&V framework, sheet coordinate
+  contract migration weeks 5–13).
+- Independent-engineer sign-off; Netlify link (needs `NETLIFY_AUTH_TOKEN`).
+- Rendering the actual `docs/assets/how-to-use.mp4` (storyboard + player only).
+

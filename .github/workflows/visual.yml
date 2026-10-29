@@ -1,0 +1,52 @@
+name: visual
+
+on:
+  pull_request:
+    paths:
+      - "packages/bridgecad-draw/**"
+      - "tests/draw/baselines/**"
+  workflow_dispatch:
+
+concurrency:
+  group: visual-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pixels:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]" pillow
+
+      - name: baseline count
+        id: base
+        run: |
+          n=$(find tests/draw/baselines -name '*.png' 2>/dev/null | wc -l)
+          echo "count=$n" >> "$GITHUB_OUTPUT"
+          if [ "$n" -eq 0 ]; then
+            echo "::notice::no baselines yet — visual gate is a no-op"
+          else
+            echo "comparing against $n baseline(s)"
+          fi
+
+      - name: compare
+        if: steps.base.outputs.count != '0'
+        run: pytest tests/draw/test_visual.py -q --tb=short
+
+      - name: diff images
+        if: failure() && steps.base.outputs.count != '0'
+        run: |
+          mkdir -p artifacts
+          pytest tests/draw/test_visual.py -q --tb=line || true
+          cp -r /tmp/bridgecad-visual/* artifacts/ 2>/dev/null || true
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: visual-diff
+          path: artifacts/
+          retention-days: 14

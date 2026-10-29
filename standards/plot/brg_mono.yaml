@@ -1,0 +1,23 @@
+# Lineweight policy, colour-indexed. Source of truth for BRG-MONO.ctb.
+# Values are hundredths of a millimetre, as in DXF lineweight.
+schema: plot-style/1
+name: BRG-MONO
+description: Monochrome bridge GAD plot style
+default:
+  color: 7
+  lineweight: 18
+  screening: 100
+by_layer_class:
+  BORDER: {lineweight: 70}
+  STRUC-OUTLINE: {lineweight: 50}
+  STRUC-SECTION: {lineweight: 35}
+  SUPER-DECK: {lineweight: 50}
+  SUPER-GIRDER: {lineweight: 40}
+  SUB-PIER: {lineweight: 40}
+  SUB-ABUT: {lineweight: 40}
+  FOUND-CAP: {lineweight: 40}
+  FOUND-PILE: {lineweight: 35}
+  STRUC-HIDDEN: {lineweight: 25, linetype: HIDDEN}
+  DIM: {lineweight: 18}
+  TEXT: {lineweight: 13}
+  HATCH: {lineweight: 13, screening: 60}

@@ -1,0 +1,83 @@
+# Standard drawing notes. Every entry cites a source. Clause numbers are
+# verified against the standard in week 45 — treat them as provisional until
+# that audit is signed.
+schema: notes/1
+
+groups:
+  general:
+    label: General
+  concrete:
+    label: Concrete
+  steel:
+    label: Reinforcement and prestress
+  drainage:
+    label: Drainage
+  protection:
+    label: River training and protection
+
+notes:
+  G-01:
+    group: general
+    text: "All dimensions are in metres unless stated otherwise. [IRC:SP:55-2019 Cl. 12.1]"
+    source: "IRC:SP:55-2019 Cl. 12.1"
+    sheets: [1, 2, 3, 4, 5, 6]
+  G-02:
+    group: general
+    text: "All levels are reduced levels in metres referenced to GTS benchmark. [IRC:SP:55-2019 Cl. 12.2]"
+    source: "IRC:SP:55-2019 Cl. 12.2"
+    sheets: [1, 2, 4, 5]
+  G-03:
+    group: general
+    text: "Do not scale the drawing. Work to figured dimensions only. [IRC:SP:55-2019 Cl. 12.3]"
+    source: "IRC:SP:55-2019 Cl. 12.3"
+    sheets: [1, 2, 3, 4, 5, 6]
+  G-04:
+    group: general
+    text: "Drawings to be read with the relevant structural design report and bar bending schedules. [IRC:SP:55-2019 Cl. 3.2]"
+    source: "IRC:SP:55-2019 Cl. 3.2"
+    sheets: [1, 2, 3, 4, 5, 6]
+  C-01:
+    group: concrete
+    text: "Concrete grade for deck and girders as scheduled; minimum cement content per IRC:112-2020 Table 6. [IRC:112-2020 Cl. 6.2]"
+    source: "IRC:112-2020 Cl. 6.2"
+    sheets: [3, 5]
+  C-02:
+    group: concrete
+    text: "Nominal cover to reinforcement as scheduled; not less than 40 mm for exposed faces. [IRC:112-2020 Cl. 15.2]"
+    source: "IRC:112-2020 Cl. 15.2"
+    sheets: [5]
+  C-03:
+    group: concrete
+    text: "Curing by ponding or wet hessian for not less than 14 days. [IRC:112-2020 Cl. 13.5]"
+    source: "IRC:112-2020 Cl. 13.5"
+    sheets: [5]
+  S-01:
+    group: steel
+    text: "Reinforcement to be Fe500D conforming to IS 1786; laps and anchorage per IRC:112-2020 Cl. 16. [IS:1786-2008]"
+    source: "IS:1786-2008 Cl. 5"
+    sheets: [5]
+  S-02:
+    group: steel
+    text: "Prestressing strand 12.7 mm low relaxation to IS 14268; stressing by load and extension. [IRC:112-2020 Cl. 12.4]"
+    source: "IRC:112-2020 Cl. 12.4"
+    sheets: [3, 6]
+  D-01:
+    group: drainage
+    text: "Deck drainage spouts at spacing shown, 150 mm dia, connected to downpipes. [IRC:SP:42-2014 Cl. 5]"
+    source: "IRC:SP:42-2014 Cl. 5"
+    sheets: [2, 3]
+  D-02:
+    group: drainage
+    text: "Cross-fall on carriageway as shown to drain to kerb outlets. [IRC:SP:42-2014 Cl. 4.2]"
+    source: "IRC:SP:42-2014 Cl. 4.2"
+    sheets: [3]
+  P-01:
+    group: protection
+    text: "Launching apron to be laid to design scour depth and maintained until the bed stabilises. [IRC:89-1997 Cl. 6.2]"
+    source: "IRC:89-1997 Cl. 6.2"
+    sheets: [2]
+  P-02:
+    group: protection
+    text: "Stone pitching on slopes to be 450 mm thick on a 150 mm granular filter. [IRC:89-1997 Cl. 7.1]"
+    source: "IRC:89-1997 Cl. 7.1"
+    sheets: [2]

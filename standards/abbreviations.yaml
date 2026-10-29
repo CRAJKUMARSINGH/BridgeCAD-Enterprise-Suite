@@ -1,0 +1,15 @@
+schema: abbreviations/1
+abbreviations:
+  CH: Chainage
+  CL: Centreline
+  CW: Carriageway
+  DIA: Diameter
+  FB: Freeboard
+  HFL: Highest Flood Level
+  LWL: Low Water Level
+  NTS: Not to Scale
+  OW: Overall Width
+  RL: Reduced Level
+  TOC: Top of Cap
+  WC: Wearing Coat
+  WW: Wing Wall

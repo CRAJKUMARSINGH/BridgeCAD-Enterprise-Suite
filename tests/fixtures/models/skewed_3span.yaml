@@ -1,0 +1,29 @@
+name: skewed_3span
+overall_width_m: 11.5
+span_lengths_m: [21.0, 28.0, 21.0]
+skew_angle_deg: 25.0
+gradient_pct: 0.8
+superelevation_pct: 3.0
+cross_fall_pct: 2.5
+camber_mm: 25.0
+deck_thickness_mm: 1200
+wearing_coat_thickness_mm: 65
+pier_pedestal_height_m: 0.15
+pile_cap_width_m: 2.0
+pile_cap_length_m: 9.0
+piles_per_pier: 6
+pile_spacing_m: 1.8
+design_scour_depth_m: 2.4
+pier_type: multi_column
+abutment_type: cantilever
+wing_wall_angle_deg: 45.0
+wing_wall_splay_length_m: 6.0
+deck_start_chainage_m: 1240.0
+section_marker_chainages_m: [14.0, 35.0]
+foundation:
+  type: pile
+  pile_diameter_mm: 1000
+  cutoff_level_m: -1.5
+  tip_level_m: -14.5
+  cap_bottom_level_m: 0.6
+  cap_top_level_m: 1.8

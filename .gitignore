@@ -113,6 +113,19 @@ BridgeCanvas/
 TEST_N_RUN/
 TEST_RUN_OUTPUT/
 
+# Generated drawing-corpus + local verification scratch trees (regenerable)
+# TEST-* is written by scripts/generate_test_corpus.py; the dot-dirs are written
+# by scripts/create_repo_sample_catalogue.py and ad-hoc verification runs.
+# tests/e2e/random_drawings/ is written by scripts/generate_random_drawings.py.
+TEST-*/
+tests/e2e/random_drawings/
+.verify/
+.bridge_repo_pdf_work/
+.vercel/
+
+# React console audit dump (local analysis artifact)
+apps/web-console/audit_wc.json
+
 # Local deps staging (bypass sandbox roaming-profile write guard; never commit wheels)
 .deps/
 vendor/

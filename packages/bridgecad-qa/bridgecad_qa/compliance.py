@@ -57,7 +57,9 @@ def score(report: Any) -> ComplianceScore:
     irc_sp55 = _subscore(drw_ids)
     irc21 = _subscore(str_ids)
 
-    grade = next(g for threshold, g in _GRADE if overall >= threshold)
+    # Grade through the single source of truth so a critical finding cannot
+    # leak an "A+" (grade_from_score caps it at "A").
+    grade = grade_from_score(overall, report.critical_fail_count)
 
     return ComplianceScore(
         overall=overall,

@@ -37,6 +37,7 @@ def app() -> int:
         "    python -m bridgecad verify              # Run Day3 + Day4 acceptance verifiers",
         "    python -m bridgecad generate 11span     # Generate the 11-span RCC Solid Slab GAD",
         "    python -m bridgecad qa  <project.json>  # Score QA Grade on a saved project",
+        "    python -m bridgecad calc-sheet --demo   # Render the clause-mapped calculation sheet",
         "    python -m bridgecad info                # Print Python / import layout",
         "",
         "  To invoke the full CLI (apps/cli-console):",
@@ -145,6 +146,11 @@ def app() -> int:
         else:
             print(f"  Notes    : {notes}")
         return 0
+
+    # ── calc-sheet ────────────────────────────────────────────────────
+    if cmd in {"calc-sheet", "calc_sheet", "calcsheet"}:
+        from bridgecad_cli.calc_sheet import main as _calc_sheet_main
+        return _calc_sheet_main(argv[1:])
 
     # ── info ──────────────────────────────────────────────────────────
     if cmd == "info":

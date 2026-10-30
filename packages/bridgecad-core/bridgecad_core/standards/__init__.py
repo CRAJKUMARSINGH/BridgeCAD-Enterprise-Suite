@@ -22,6 +22,17 @@ from .irc_sp55 import (
     sheet_spec,
     text_height,
 )
+from .load_combinations import (
+    EN1990_LOAD_CASES,
+    IRC6_LOAD_CASES,
+    Envelope,
+    LoadCase,
+    LoadCombination,
+    combinations_for,
+    en1990_combinations,
+    envelope,
+    irc6_combinations,
+)
 from .morth_specs import TEST_FREQUENCIES, concrete_spec, contract_clause, rebar_spec
 
 __all__ = [
@@ -49,4 +60,14 @@ __all__ = [
     "rebar_spec",
     "contract_clause",
     "TEST_FREQUENCIES",
+    # Load combinations (IRC:6-2017 / EN 1990:2002)
+    "LoadCase",
+    "LoadCombination",
+    "Envelope",
+    "IRC6_LOAD_CASES",
+    "EN1990_LOAD_CASES",
+    "irc6_combinations",
+    "en1990_combinations",
+    "combinations_for",
+    "envelope",
 ]

@@ -85,10 +85,10 @@ Dimensions 1 and 5 are the current gap.
 **DoD:** zero known silent-failure paths.
 
 ### W06 · Code compliance engine — 30 Nov – 6 Dec
-- [ ] Clause-level IRC / IS / AASHTO / EN mapping
-- [ ] Load-combination engine (IRC:6 / EN 1990)
-- [ ] Calc sheet export citing clauses, with utilisation ratios
-- [ ] Traceability matrix: check → clause → test → benchmark
+- [x] Clause-level IRC / IS / AASHTO / EN mapping
+- [x] Load-combination engine (IRC:6 / EN 1990)
+- [x] Calc sheet export citing clauses, with utilisation ratios
+- [x] Traceability matrix: check → clause → test → benchmark
 
 **DoD:** matrix has no gaps.
 

@@ -54,3 +54,9 @@ engine module under test; the `Tier` column is the tolerance tier from
 | VV-MOD-001 | `models` | A | `geometry_input.total_length_m == sum(span_lengths_m)` |
 | VV-MOD-002 | `models` | A | `overall_width_m == carriageway + footpaths + barriers + kerbs (+ others)` |
 | VV-MOD-003 | `models` | A | project length/width aliases mirror the geometry-input values |
+| VV-CMP-001 | `bridgecad_qa.compliance_engine` | A | `CC-001` demand == `round(span / depth, 1)`; utilisation == demand / capacity |
+| VV-CMP-002 | `bridgecad_qa.compliance_engine` | A | `CC-002` demand == 200 mm (IRC:21 Cl.304.7); capacity == provided slab thickness |
+| VV-CMP-003 | `bridgecad_qa.compliance_engine` | A | `CC-003` demand == `4.5 / (6 + L)`; capacity == 0.50 |
+| VV-CMP-004 | `bridgecad_qa.compliance_engine` | A | `CC-004` gap rounds to 5 mm; capacity == 100 mm |
+| VV-CMP-005 | `bridgecad_qa.compliance_engine` | A | `CC-005` demand == required freeboard; capacity == achieved soffit - HFL (3 dp) |
+| VV-CMP-006 | `bridgecad_qa.compliance_engine` | A | `CC-006` demand == 30 MPa; capacity == provided deck grade number |

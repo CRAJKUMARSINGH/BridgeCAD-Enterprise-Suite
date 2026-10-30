@@ -53,6 +53,7 @@ from bridgecad_core.types import (
 )
 from bridgecad_core.validation import ValidationFinding, ValidationReport
 from bridgecad_core.validation_registry import RULE_ID_BY_CHECK, RULES
+from bridgecad_qa.compliance_engine import ComplianceCheck, build_compliance_report
 
 # ---------------------------------------------------------------------------
 # Tier tolerances — mirrors TOLERANCE_POLICY.md.
@@ -578,6 +579,56 @@ def _check_length_propagation(ctx: BenchContext) -> None:
 
 
 # ===========================================================================
+# compliance_engine (W06) — clause-mapped demand / capacity / utilisation
+# ===========================================================================
+
+
+def _by_check_id(project: BridgeProject) -> dict[str, ComplianceCheck]:
+    return {check.check_id: check for check in build_compliance_report(project).checks}
+
+
+def _check_cc001_span_depth_band(ctx: BenchContext) -> None:
+    check = _by_check_id(ctx.project)["CC-001"]
+    span = max(float(length) for length in ctx.project.geometry_input.span_lengths_m)
+    depth_m = float(ctx.project.superstructure.girder_depth_mm) / 1000.0
+    assert_within_tier("A", check.demand, round(span / depth_m, 1))
+    assert_within_tier("A", check.utilisation, check.demand / check.capacity)
+    assert check.passed
+
+
+def _check_cc002_slab_thickness(ctx: BenchContext) -> None:
+    check = _by_check_id(ctx.project)["CC-002"]
+    assert_within_tier("A", check.demand, 200.0)  # IRC:21 Cl.304.7 for an RCC T-beam
+    assert_within_tier("A", check.capacity, float(ctx.project.superstructure.deck_thickness_mm))
+
+
+def _check_cc003_impact_factor(ctx: BenchContext) -> None:
+    check = _by_check_id(ctx.project)["CC-003"]
+    span = max(float(length) for length in ctx.project.geometry_input.span_lengths_m)
+    assert_within_tier("A", check.demand, 4.5 / (6.0 + span))
+    assert_within_tier("A", check.capacity, 0.50)
+
+
+def _check_cc004_expansion_joint(ctx: BenchContext) -> None:
+    check = _by_check_id(ctx.project)["CC-004"]
+    assert check.demand % 5.0 == 0.0  # gaps round up to the nearest 5 mm
+    assert_within_tier("A", check.capacity, 100.0)
+
+
+def _check_cc005_freeboard(ctx: BenchContext) -> None:
+    check = _by_check_id(ctx.project)["CC-005"]
+    geo = long_section.compute_long_section_geometry(ctx.project)
+    assert_within_tier("A", check.capacity, round(float(geo.freeboard_m), 3))
+    assert_within_tier("A", check.demand, round(float(ctx.project.hydraulic_data.freeboard_m), 3))
+
+
+def _check_cc006_deck_grade(ctx: BenchContext) -> None:
+    check = _by_check_id(ctx.project)["CC-006"]
+    assert_within_tier("A", check.demand, 30.0)  # IRC:112-2020 Cl.6.1 minimum
+    assert_within_tier("A", check.capacity, 30.0)
+
+
+# ===========================================================================
 # Registry — id / module / tier / description / assertion / check
 # ===========================================================================
 
@@ -968,6 +1019,55 @@ REGISTRY: list[Case] = [
         "Project aliases propagate geometry values",
         "total_bridge_length_m / overall_bridge_width_m == geometry_input values",
         _check_length_propagation,
+    ),
+    # ---- compliance_engine (W06) ----------------------------------------
+    Case(
+        "VV-CMP-001",
+        "bridgecad_qa.compliance_engine",
+        "A",
+        "Span/depth check uses the registered IRC band",
+        "CC-001 demand == round(span/depth, 1); utilisation == demand/capacity; passes",
+        _check_cc001_span_depth_band,
+    ),
+    Case(
+        "VV-CMP-002",
+        "bridgecad_qa.compliance_engine",
+        "A",
+        "Minimum deck slab thickness check",
+        "CC-002 demand == 200 mm (IRC:21 Cl.304.7); capacity == provided thickness",
+        _check_cc002_slab_thickness,
+    ),
+    Case(
+        "VV-CMP-003",
+        "bridgecad_qa.compliance_engine",
+        "A",
+        "Impact-factor check under the IRC:6 ceiling",
+        "CC-003 demand == 4.5 / (6 + L); capacity == 0.50",
+        _check_cc003_impact_factor,
+    ),
+    Case(
+        "VV-CMP-004",
+        "bridgecad_qa.compliance_engine",
+        "A",
+        "Expansion-joint gap rounds to 5 mm",
+        "CC-004 demand % 5 == 0; capacity == 100 mm",
+        _check_cc004_expansion_joint,
+    ),
+    Case(
+        "VV-CMP-005",
+        "bridgecad_qa.compliance_engine",
+        "A",
+        "Freeboard check: required vs soffit - HFL",
+        "CC-005 demand == required freeboard; capacity == achieved (round 3 dp)",
+        _check_cc005_freeboard,
+    ),
+    Case(
+        "VV-CMP-006",
+        "bridgecad_qa.compliance_engine",
+        "A",
+        "Deck concrete grade meets IRC:112 minimum",
+        "CC-006 demand == 30 MPa; capacity == provided grade number",
+        _check_cc006_deck_grade,
     ),
 ]
 

@@ -186,6 +186,21 @@ def validate_cmd(
     raise typer.Exit(0 if comp.critical_fails == 0 else 1)
 
 
+@app.command("calc-sheet")
+def calc_sheet_cmd(
+    input_file: Path | None = typer.Argument(None, help="BridgeCAD Excel workbook"),
+    demo: bool = typer.Option(False, "--demo", help="Use the bundled demo project"),
+    output: Path | None = typer.Option(None, "-o", "--output", help="Write markdown here"),
+) -> None:
+    """Render a clause-mapped calculation sheet (markdown) for a project."""
+    from bridgecad_cli.calc_sheet import main as _main
+
+    argv: list[str] = ["--demo"] if demo or input_file is None else [str(input_file)]
+    if output is not None:
+        argv += ["-o", str(output)]
+    raise typer.Exit(_main(argv))
+
+
 # ---------------------------------------------------------------------------
 # draw sub-commands
 # ---------------------------------------------------------------------------

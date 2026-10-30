@@ -125,7 +125,7 @@ def _import_facade(name: str) -> Any:
         "geometry":  ["plan", "long_section", "cross_section", "foundation"],
         "standards": ["irc_05", "irc_21", "irc_sp55", "morth_specs"],
         "export":    ["booklet", "bundler", "orchestrator", "versioner"],
-        "cli":       ["main"],
+        "cli":       ["main", "calc_sheet"],
         "api":       ["main"],
     }
     for sub in sub_imports.get(name, []):

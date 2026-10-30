@@ -46,14 +46,22 @@ def check_open_blockers() -> tuple[bool, str]:
 def check_signed_families() -> tuple[bool, str]:
     if not SIGNOFF.is_file():
         return False, "no SIGNOFF.md"
-    signed = len(re.findall(r"^\|\s*(simple_12m|continuous_3x12m|girder_4x18m|box_culvert_8m|skew_15deg)\s*\|.*\|\s*☑\s*\|", SIGNOFF.read_text(), re.M))
+    signed = len(
+        re.findall(
+            r"^\|\s*(simple_12m|continuous_3x12m|girder_4x18m|box_culvert_8m|skew_15deg)\s*\|.*\|\s*☑\s*\|",
+            SIGNOFF.read_text(),
+            re.M,
+        )
+    )
     if signed < MIN_SIGNED_FAMILIES:
         return False, f"{signed}/{MIN_SIGNED_FAMILIES} families signed"
     return True, f"{signed} families signed"
 
 
 def check_harness() -> tuple[bool, str]:
-    ok, out = _run([sys.executable, "-m", "pytest", "tests/draw", "-q", "--tb=no", "-p", "no:cacheprovider"])
+    ok, out = _run(
+        [sys.executable, "-m", "pytest", "tests/draw", "-q", "--tb=no", "-p", "no:cacheprovider"]
+    )
     if not ok:
         return False, "assertion harness failed"
     passed = re.search(r"(\d+) passed", out)
@@ -64,7 +72,9 @@ def check_harness() -> tuple[bool, str]:
 
 
 def check_visual() -> tuple[bool, str]:
-    ok, out = _run([sys.executable, "-m", "pytest", "tests/visual", "-q", "--tb=no", "-p", "no:cacheprovider"])
+    ok, out = _run(
+        [sys.executable, "-m", "pytest", "tests/visual", "-q", "--tb=no", "-p", "no:cacheprovider"]
+    )
     return (True, "visual regression green") if ok else (False, "visual regression failed")
 
 
@@ -109,12 +119,17 @@ def main() -> int:
 
     overall = all(r["ok"] for r in results)
     REPORT.parent.mkdir(parents=True, exist_ok=True)
-    REPORT.write_text(json.dumps({
-        "schema": "release-gate/1",
-        "generated_at": datetime.now(UTC).isoformat(),
-        "overall": "pass" if overall else "fail",
-        "checks": results,
-    }, indent=2))
+    REPORT.write_text(
+        json.dumps(
+            {
+                "schema": "release-gate/1",
+                "generated_at": datetime.now(UTC).isoformat(),
+                "overall": "pass" if overall else "fail",
+                "checks": results,
+            },
+            indent=2,
+        )
+    )
 
     print()
     print(f"  gate: {'*** PASS ***' if overall else 'FAIL'}")

@@ -88,7 +88,13 @@ def classify_span_depth(
     ratio = round(span_m / (depth_mm / 1000.0), 1)
     stype = (superstructure_type or "").upper()
     if any(marker in stype for marker in _NON_FLEXURAL_MARKERS):
-        return "ADVISORY", ratio, 0.0, 0.0, "IRC SP:13 / arch action — flexural L/d band not governing"
+        return (
+            "ADVISORY",
+            ratio,
+            0.0,
+            0.0,
+            "IRC SP:13 / arch action — flexural L/d band not governing",
+        )
     key = ((span_config or "").upper(), stype)
     if key not in _SPAN_DEPTH_LIMITS:
         return "ADVISORY", ratio, 0.0, 0.0, "no IRC L/d band registered for this span/type"

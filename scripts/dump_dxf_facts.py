@@ -121,9 +121,9 @@ def facts_for(path: Path) -> dict:
         "text_height_distinct": len(heights),
         "dimension_count": len(dim_handles),
         "dimstyle_lfac": dimlfac,
-        "dimensions_without_lfac_1000": sum(
-            1 for s in dimlfac.values() if abs(s - 1000.0) > 1e-9
-        ) if dim_handles else 0,
+        "dimensions_without_lfac_1000": sum(1 for s in dimlfac.values() if abs(s - 1000.0) > 1e-9)
+        if dim_handles
+        else 0,
         "duplicate_line_count": len(duplicates),
         "duplicate_lines": [
             {"layer": k[0], "a": list(k[1]), "b": list(k[2]), "n": line_keys[k]}

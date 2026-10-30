@@ -63,20 +63,51 @@ Introduced by the `CODE-JUNCTION/00 FOR ALL APPS` brief (Phase 2).
   and both the image `CMD` and the `ci.yml` container smoke now exercise the
   Suite facade `bridgecad` — the legacy `src/bridge_gad` surface is fenced
   (ADR-0001).
+- **W03 (partial) — test harness + CI baseline.** Seeded `tests/unit/` with
+  **109 pure-function tests** over `bridgecad_core` (coordinate transforms,
+  pile-group layouts, span/pier contract, quantities, validation scoring,
+  clause registry, costs, enums) plus **6 CORS tests** pinning the gateway's
+  KERO-001 hardening (115 in `tests/unit`). This also repairs `make test`,
+  whose target (`pytest packages tests/unit -q`) pointed at a directory that
+  did not exist. Coverage ratchet set: `[tool.coverage.report] fail_under = 75`
+  in `pyproject.toml`, and `[tool.coverage.run] source = ["packages"]` so a
+  bare `--cov` measures exactly what the CI job's `--cov=packages` does; the
+  CI unit selection measures **75.80%**. `ruff format --check` was failing on
+  18 files — a red `lint` job that gates the whole suite chain — and is now
+  clean. `make lint` / `make format` now use the CI scope (`packages apps
+  scripts`) instead of `ruff check .` (2387 phantom errors from fenced legacy
+  trees); new `make cov` target runs the CI unit selection with the ratchet.
+- **KERO-001 ported to the active gateway.** `apps/api-gateway/bridgecad_api/
+  main.py` shipped `allow_origins=["*"]` with `allow_credentials=True` —
+  insecure, browser-rejected, and contradicting `README_RAJKUMAR.md` §2
+  ("enforced in code"). The legacy `src/bridge_gad/api.py` hardening is now in
+  the Suite: origins come from `API_CORS_ORIGINS`, a wildcard is refused when
+  `ENV=production`, and `allow_credentials` is `False`.
+- **Reviewer briefs verified closed.** The `sample-gad-drawings/` patches'
+  concrete gaps are closed: PII scan uses `git grep` over tracked files (1),
+  `suite-ci.yml` is at repo root, not nested (2), `readme = "README.md"`
+  resolves (3), the README orientation table fences the legacy generation (6),
+  and the gateway ZIP path uses `NamedTemporaryFile` via `_staged_zip_response`
+  instead of `mktemp()` (7). Gaps 4–5 (sheet completeness, BOQ traceability) are
+  the roadmap weeks, tracked in `docs/upgrade/`.
 
 ### Verification
 
-- `ruff check packages apps scripts` clean · `scripts/verify_docs.py --json`
+- `ruff check packages apps scripts` clean · `ruff format --check packages apps
+  scripts` clean (was 18 files red) · `scripts/verify_docs.py --json`
   pass 3 / fail 0 · fast suite `734 passed` (test_visual deselected) ·
   slow mutation gate `16 passed` in 32:19 · Q1-W1 exit gate
   `dump_dxf_facts.py --selftest` green.
+- W03 evidence: `tests/unit` 115 passed · CI unit selection `156 passed`,
+  coverage **75.80% ≥ 75** ("Required test coverage of 75.0% reached") ·
+  `make test` 534 passed.
 - GitHub repo page given a description + 14 topics; Streamlit console boots
   (`/_stcore/health` → 200 `ok`).
 
 ### Not taken (explicitly out of scope this pass)
 
-- Roadmap W03+ (test-harness coverage ratchet, V&V framework, sheet coordinate
-  contract migration weeks 5–13).
+- Roadmap W03 remainder (mypy/ruff as *required* PR checks, one green `main`
+  run), V&V framework (W04+), sheet coordinate contract migration weeks 5–13.
 - Independent-engineer sign-off; Netlify link (needs `NETLIFY_AUTH_TOKEN`).
 - Rendering the actual `docs/assets/how-to-use.mp4` (storyboard + player only).
 

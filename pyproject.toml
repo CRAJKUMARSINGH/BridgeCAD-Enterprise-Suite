@@ -313,7 +313,11 @@ xfail_strict = true
 # ─────────────────────────────────────────────────────────────────────────────
 [tool.coverage.run]
 branch = true
-source = ["packages", "apps"]
+# Scope matches the CI unit job, which measures `--cov=packages`. Keeping the
+# source list identical means a bare `--cov` locally reports the same number the
+# floor is gated against in CI. `apps/` (the FastAPI gateway) is exercised by the
+# unit tests but measured by the api/e2e lanes, not this floor.
+source = ["packages"]
 omit = [
   "*/tests/*", "*/test_*.py",
   "*/__init__.py",
@@ -325,6 +329,11 @@ omit = [
 precision = 2
 show_missing = true
 skip_covered = false
+# W03 coverage ratchet. The floor is the level the CI unit job actually
+# measures (75.80% on the `tests/` selection that excludes draw/refs/e2e/
+# benchmarks), rounded down for interpreter-to-interpreter slack. It only ever
+# moves up: raising it is the whole point, lowering it needs a written reason.
+fail_under = 75
 exclude_lines = [
   "pragma: no cover",
   "if TYPE_CHECKING:",

@@ -16,8 +16,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).parents[1]
 for _pkg in (
-    "bridgecad-core", "bridgecad-io", "bridgecad-draw",
-    "bridgecad-bill", "bridgecad-qa", "bridgecad-export",
+    "bridgecad-core",
+    "bridgecad-io",
+    "bridgecad-draw",
+    "bridgecad-bill",
+    "bridgecad-qa",
+    "bridgecad-export",
 ):
     _p = ROOT / "packages" / _pkg
     if _p.exists() and str(_p) not in sys.path:

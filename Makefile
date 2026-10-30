@@ -1,4 +1,4 @@
-.PHONY: help install dev lint format typecheck test test-e2e test-integration \
+.PHONY: help install dev lint format typecheck test cov test-e2e test-integration \
         verify smoke bench build clean docker-up docker-down api ui web \
         verify-docs verify-docs-fast test-docs mutate-docs prove prove-fast \
         refs-extract refs-check refs-coverage refs-verify refs-verify-crops
@@ -14,18 +14,21 @@ install:         ## Editable install with dev extras
 dev:             ## Smoke-check the workspace resolves
 	python -m bridgecad
 
-lint:            ## ruff lint
-	ruff check .
+lint:            ## ruff lint (CI scope)
+	ruff check packages apps scripts
 
-format:          ## ruff format + autofix
-	ruff format .
-	ruff check --fix .
+format:          ## ruff format + autofix (CI scope)
+	ruff format packages apps scripts
+	ruff check --fix packages apps scripts
 
 typecheck:       ## mypy
 	mypy packages apps
 
 test:            ## Unit tests
 	pytest packages tests/unit -q
+
+cov:             ## CI unit job + coverage ratchet (floor in pyproject)
+	pytest tests/ --ignore=tests/e2e --ignore=tests/benchmarks --ignore=tests/draw --ignore=tests/refs -m "not slow" -q --cov --cov-report=term-missing
 
 test-integration: ## Full pipeline
 	pytest tests/integration -v

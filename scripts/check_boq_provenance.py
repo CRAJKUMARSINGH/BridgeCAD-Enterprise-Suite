@@ -35,8 +35,11 @@ def _audit_one(fid: str) -> tuple[list[str], dict[str, int]]:
     from tests.e2e.run_e2e import _build_from_fixture
 
     data = json.loads(
-        next(p for p in GOLDEN.glob("*.json")
-             if json.loads(p.read_text())["_meta"]["fixture_id"] == fid).read_text()
+        next(
+            p
+            for p in GOLDEN.glob("*.json")
+            if json.loads(p.read_text())["_meta"]["fixture_id"] == fid
+        ).read_text()
     )
     project = _build_from_fixture(data)
     lines = build_boq(project)
@@ -68,15 +71,17 @@ def _audit_one(fid: str) -> tuple[list[str], dict[str, int]]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--ceiling", type=float, default=None,
-                    help=f"max estimated fraction; default per stage {CEILING_BY_STAGE}")
+    ap.add_argument(
+        "--ceiling",
+        type=float,
+        default=None,
+        help=f"max estimated fraction; default per stage {CEILING_BY_STAGE}",
+    )
     ap.add_argument("--stage", choices=CEILING_BY_STAGE, default="q3")
     args = ap.parse_args()
     ceiling = args.ceiling if args.ceiling is not None else CEILING_BY_STAGE[args.stage]
 
-    fids = sorted(
-        json.loads(p.read_text())["_meta"]["fixture_id"] for p in GOLDEN.glob("*.json")
-    )
+    fids = sorted(json.loads(p.read_text())["_meta"]["fixture_id"] for p in GOLDEN.glob("*.json"))
     if not fids:
         print("  no golden fixtures")
         return 1
@@ -102,7 +107,9 @@ def main() -> int:
 
     print()
     print(f"  calculated     {total['calculated']:4d}  ({100*total['calculated']/grand:5.1f}%)")
-    print(f"  estimated      {total['estimated']:4d}  ({100*est_frac:5.1f}%)  ceiling {ceiling:.0%}")
+    print(
+        f"  estimated      {total['estimated']:4d}  ({100*est_frac:5.1f}%)  ceiling {ceiling:.0%}"
+    )
     print(f"  not_calculated {total['not_calculated']:4d}")
 
     failed = bool(all_errors) or est_frac > ceiling

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Week-2 tool: select golden fixtures, copy them, pin their input hashes.
 
-    python scripts/freeze_golden.py            # dry run, lists matches
-    python scripts/freeze_golden.py --write    # copy + write PINNED block
+python scripts/freeze_golden.py            # dry run, lists matches
+python scripts/freeze_golden.py --write    # copy + write PINNED block
 """
 
 from __future__ import annotations
@@ -42,8 +42,7 @@ def _locate(needle: str) -> Path:
         raise FileNotFoundError(f"no fixture filename contains {needle!r}")
     if len(hits) > 1:
         raise SystemExit(
-            f"{needle!r} is ambiguous: {[h.name for h in hits]}\n"
-            "narrow the needle in SELECT."
+            f"{needle!r} is ambiguous: {[h.name for h in hits]}\n" "narrow the needle in SELECT."
         )
     return hits[0]
 
@@ -84,9 +83,11 @@ def main() -> int:
         pins[fid] = _input_hash(dest)
 
     text = FROZEN_TEST.read_text(encoding="utf-8")
-    block = "PINNED: dict[str, str] = {\n" + "".join(
-        f'    "{k}": "{v}",\n' for k, v in sorted(pins.items())
-    ) + "}"
+    block = (
+        "PINNED: dict[str, str] = {\n"
+        + "".join(f'    "{k}": "{v}",\n' for k, v in sorted(pins.items()))
+        + "}"
+    )
     text = re.sub(r"PINNED: dict\[str, str\] = \{.*?\n\}", block, text, flags=re.S)
     FROZEN_TEST.write_text(text, encoding="utf-8")
 

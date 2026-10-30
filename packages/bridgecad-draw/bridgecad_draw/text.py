@@ -27,12 +27,12 @@ MIN_PAPER_MM = 2.5
 class TextClass(Enum):
     """Paper heights. Values are millimetres on the printed sheet."""
 
-    NOTE = 2.5      # general notes, specification lines
-    LABEL = 2.5     # element labels, leader callouts
-    DIM = 2.5       # dimension text
-    SUBHEAD = 3.5   # sub-view headings, table headers
-    HEAD = 5.0      # view titles (PLAN VIEW, SECTION A-A)
-    TITLE = 7.0     # sheet title in the title block
+    NOTE = 2.5  # general notes, specification lines
+    LABEL = 2.5  # element labels, leader callouts
+    DIM = 2.5  # dimension text
+    SUBHEAD = 3.5  # sub-view headings, table headers
+    HEAD = 5.0  # view titles (PLAN VIEW, SECTION A-A)
+    TITLE = 7.0  # sheet title in the title block
 
     @property
     def paper_mm(self) -> float:
@@ -52,7 +52,9 @@ def _validate() -> None:
     # semantically distinct at the same size.
     for cls in (TextClass.SUBHEAD, TextClass.HEAD, TextClass.TITLE):
         if cls.paper_mm in seen:
-            raise ValueError(f"{cls.name} duplicates {seen[cls.paper_mm].name} at {cls.paper_mm} mm")
+            raise ValueError(
+                f"{cls.name} duplicates {seen[cls.paper_mm].name} at {cls.paper_mm} mm"
+            )
         seen[cls.paper_mm] = cls
 
 

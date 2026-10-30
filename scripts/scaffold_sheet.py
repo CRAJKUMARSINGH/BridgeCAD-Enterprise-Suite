@@ -131,16 +131,20 @@ def _content_rows(title: str) -> str:
         ("D1", f"{title} view drawn at the declared scale", "MANUAL: content presence"),
         ("D2", "Every element traces to a model field", "MANUAL: traceability review"),
         ("D3", "Levels match the model within 1 mm", "MANUAL: level check"),
-        ("D4", "Section/plan orientation consistent with adjacent sheets", "MANUAL: orientation check"),
+        (
+            "D4",
+            "Section/plan orientation consistent with adjacent sheets",
+            "MANUAL: orientation check",
+        ),
     ]
-    return "\n".join(
-        f"| {i} | {r} | `{a}` | MANUAL | ☐ |" for i, r, a in rows
-    )
+    return "\n".join(f"| {i} | {r} | `{a}` | MANUAL | ☐ |" for i, r, a in rows)
 
 
 def _layer_rows(layers: list[str]) -> str:
-    return "\n".join(f"| L{i} | `{layer}` used and correctly populated | `layer_used` | AUTO | ☐ |"
-                     for i, layer in enumerate(layers, 1))
+    return "\n".join(
+        f"| L{i} | `{layer}` used and correctly populated | `layer_used` | AUTO | ☐ |"
+        for i, layer in enumerate(layers, 1)
+    )
 
 
 def main() -> int:
@@ -175,8 +179,11 @@ def main() -> int:
 
     dest.write_text(
         MODULE_TEMPLATE.format(
-            no=args.no, title=args.title, frame_key=frame_key,
-            today=date.today().isoformat(), layers=_layers_block(layers),
+            no=args.no,
+            title=args.title,
+            frame_key=frame_key,
+            today=date.today().isoformat(),
+            layers=_layers_block(layers),
         ),
         encoding="utf-8",
     )
@@ -190,17 +197,22 @@ def main() -> int:
         .replace("{SCALE}", f"1:{args.scale}")
         .replace("{CONTENT_ROWS}", _content_rows(args.title))
         .replace("{LAYER_ROWS}", _layer_rows(layers) or "| — | none | — | — | ☐ |")
-        .replace("{CROSS_ROWS}", "| X1 | Alignment with adjacent sheets | `cross_sheet_alignment` | AUTO | ☐ |"),
+        .replace(
+            "{CROSS_ROWS}",
+            "| X1 | Alignment with adjacent sheets | `cross_sheet_alignment` | AUTO | ☐ |",
+        ),
         encoding="utf-8",
     )
 
     _insert_after_marker(
-        COORDS, FRAMES_MARKER,
+        COORDS,
+        FRAMES_MARKER,
         f'    "{frame_key}": SheetFrame("A1", 1.0, 0.0, {args.scale}),',
         f'    "{frame_key}": SheetFrame("A1", 1.0, 0.0, {args.scale}),',
     )
     _insert_after_marker(
-        BOOKLET, MANIFEST_MARKER,
+        BOOKLET,
+        MANIFEST_MARKER,
         f'    ("{frame_key}", {args.no}, "{args.title}"),',
         f'    ("{frame_key}", {args.no}, "{args.title}"),',
     )

@@ -24,7 +24,9 @@ CHECKLISTS = ROOT / "docs" / "checklists"
 ASSERTS = ROOT / "tests" / "draw" / "dxf_assert.py"
 DRAW = ROOT / "packages" / "bridgecad-draw" / "bridgecad_draw"
 
-ROW_RE = re.compile(r"^\|\s*([A-Z]\d+)\s*\|\s*(.+?)\s*\|\s*`([^`]+)`\s*\|\s*(AUTO|SCRIPT|MANUAL)\s*\|", re.M)
+ROW_RE = re.compile(
+    r"^\|\s*([A-Z]\d+)\s*\|\s*(.+?)\s*\|\s*`([^`]+)`\s*\|\s*(AUTO|SCRIPT|MANUAL)\s*\|", re.M
+)
 LAYER_ROW_RE = re.compile(r"^\|\s*L\d+\s*\|\s*`([A-Z][A-Z0-9-]+)`", re.M)
 MODULE_LAYERS_RE = re.compile(r"LAYERS_USED[^=]*=\s*\((.*?)\)", re.S)
 LAYER_LIT_RE = re.compile(r'"([A-Z][A-Z0-9-]+)"')
@@ -91,8 +93,10 @@ def main() -> int:
         print(f"  [FAIL] {e}")
 
     print()
-    print(f"  checklists {len(checklists)} · assertions {len(known)} · "
-          f"covered {len(used_assertions)}")
+    print(
+        f"  checklists {len(checklists)} · assertions {len(known)} · "
+        f"covered {len(used_assertions)}"
+    )
     if errors:
         print(f"  checklists: FAIL ({len(errors)} issue(s))")
         return 1

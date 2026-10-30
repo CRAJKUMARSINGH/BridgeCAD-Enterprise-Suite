@@ -19,7 +19,9 @@ STANDARD = ROOT / "docs" / "drafting-standard.md"
 TEXT = DRAW / "text.py"
 LAYERS = DRAW / "layers.py"
 
-HEIGHT_ROW = re.compile(r"^\|\s*`(TITLE|SUBTITLE|SUBHEAD|NOTE|DIM|SMALL)`\s*\|\s*([\d.]+)\s*\|", re.M)
+HEIGHT_ROW = re.compile(
+    r"^\|\s*`(TITLE|SUBTITLE|SUBHEAD|NOTE|DIM|SMALL)`\s*\|\s*([\d.]+)\s*\|", re.M
+)
 WEIGHT_ROW = re.compile(r"^\|\s*([\d.]+)\s*\|\s*(.+?)\s*\|$", re.M)
 BACKTICK = re.compile(r"`([A-Z][A-Z0-9-]+)`")
 LAYER_WEIGHT = re.compile(r'"([A-Z][A-Z0-9-]+)"\s*:\s*([\d.]+)')
@@ -31,10 +33,13 @@ def _code_heights() -> dict[str, float]:
         if isinstance(node, ast.ClassDef) and node.name == "TextClass":
             out: dict[str, float] = {}
             for stmt in node.body:
-                if (isinstance(stmt, ast.Assign) and len(stmt.targets) == 1
-                        and isinstance(stmt.targets[0], ast.Name)
-                        and isinstance(stmt.value, ast.Constant)
-                        and isinstance(stmt.value.value, float)):
+                if (
+                    isinstance(stmt, ast.Assign)
+                    and len(stmt.targets) == 1
+                    and isinstance(stmt.targets[0], ast.Name)
+                    and isinstance(stmt.value, ast.Constant)
+                    and isinstance(stmt.value.value, float)
+                ):
                     out[stmt.targets[0].id] = stmt.value.value
             return out
     raise SystemExit("TextClass not found in text.py")
@@ -62,8 +67,9 @@ def main() -> int:
     if len(declared) != 6:
         errors.append(f"standard declares {len(declared)} distinct heights, not 6")
 
-    doc_weights = {name: float(w) for w, names in WEIGHT_ROW.findall(doc)
-                   for name in BACKTICK.findall(names)}
+    doc_weights = {
+        name: float(w) for w, names in WEIGHT_ROW.findall(doc) for name in BACKTICK.findall(names)
+    }
     code_weights = _code_weights()
     for layer, weight in sorted(doc_weights.items()):
         if layer not in code_weights:

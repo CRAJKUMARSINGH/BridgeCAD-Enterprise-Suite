@@ -43,7 +43,10 @@ def _commits() -> dict[str, str]:
     try:
         log = subprocess.run(
             ["git", "log", "--pretty=%H%x00%s"],
-            cwd=ROOT, capture_output=True, text=True, check=True,
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
         ).stdout
     except (subprocess.CalledProcessError, FileNotFoundError):
         return {}

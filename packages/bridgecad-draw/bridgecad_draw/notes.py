@@ -67,8 +67,11 @@ def _load_abbreviations() -> list[Abbreviation]:
 
 def notes_for(sheet_no: int, group: str | None = None) -> list[Note]:
     return sorted(
-        (n for n in _load_notes().values()
-         if sheet_no in n.sheets and (group is None or n.group == group)),
+        (
+            n
+            for n in _load_notes().values()
+            if sheet_no in n.sheets and (group is None or n.group == group)
+        ),
         key=lambda n: n.id,
     )
 

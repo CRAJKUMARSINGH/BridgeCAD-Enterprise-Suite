@@ -36,8 +36,7 @@ def main() -> int:
     text = MATRIX.read_text(encoding="utf-8")
     documented = set(ROW_RE.findall(text))
     verified = {
-        m.group(1)
-        for m in re.finditer(r"^\|\s*`?([A-Z][A-Z0-9-]+)`?\|.*\|\s*☑\s*\|", text, re.M)
+        m.group(1) for m in re.finditer(r"^\|\s*`?([A-Z][A-Z0-9-]+)`?\|.*\|\s*☑\s*\|", text, re.M)
     }
 
     drawn = drawn_layers()

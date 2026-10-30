@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Validate the notes library and that drawn notes are sourced.
 
-  1. every entry in standards/notes.yaml has `text`, `source` and `sheets`
-  2. every `source` cites a standard code and a clause
-  3. every note drawn on a golden sheet carries a bracketed source
-  4. no note is drawn on a sheet its entry does not list
+1. every entry in standards/notes.yaml has `text`, `source` and `sheets`
+2. every `source` cites a standard code and a clause
+3. every note drawn on a golden sheet carries a bracketed source
+4. no note is drawn on a sheet its entry does not list
 
-    python scripts/check_notes.py
+  python scripts/check_notes.py
 """
 
 from __future__ import annotations

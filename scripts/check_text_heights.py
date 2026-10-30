@@ -28,7 +28,11 @@ class Visitor(ast.NodeVisitor):
         for kw in node.keywords:
             if kw.arg != "height":
                 continue
-            if isinstance(kw.value, ast.Constant) and isinstance(kw.value.value, int | float) or isinstance(kw.value, ast.UnaryOp):
+            if (
+                isinstance(kw.value, ast.Constant)
+                and isinstance(kw.value.value, int | float)
+                or isinstance(kw.value, ast.UnaryOp)
+            ):
                 self.hits.append((kw.value.lineno, ast.unparse(kw.value)))
         self.generic_visit(node)
 

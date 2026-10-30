@@ -51,8 +51,13 @@ Dimensions 1 and 5 are the current gap.
 **DoD:** pre-commit blocks a deliberately bad commit.
 
 ### W03 · Test harness + CI baseline — 9 – 15 Nov
-- [ ] pytest seeded with ~100 pure-function tests
-- [ ] Coverage floor set, ratchet enforced
+- [x] pytest seeded with ~100 pure-function tests (`tests/unit/` — 109 tests over
+      `bridgecad_core`: coordinates, pile layouts, span contract, quantities,
+      validation scoring, clause registry, costs, enums)
+- [x] Coverage floor set, ratchet enforced — `[tool.coverage.report] fail_under = 75`
+      in `pyproject.toml`; the CI unit job measures **75.80%** on its `tests/`
+      selection. `ruff format --check` was red on 18 files and is now clean, so
+      the `lint` job no longer blocks the chain.
 - [ ] ruff + mypy blocking, required checks on PRs
 - [ ] CI green, under 10 minutes
 
@@ -168,12 +173,16 @@ Dimensions 1 and 5 are the current gap.
 
 | Metric | W03 | W08 | W15 |
 |---|---|---|---|
-| Coverage (core / overall) | 30% / 20% | 60% / 45% | 85% / 70% |
+| Coverage (core / overall) | 75% floor / 75.8% measured | 60% / 45% | 85% / 70% |
 | V&V benchmarks passing | 0 | 15 | 30+, in tolerance |
 | CI runtime | < 10 min | < 12 min | < 12 min |
 | High/critical CVEs | unknown | 0 | 0 |
 | Fresh clone → running | broken | one command | one command |
 | Clause-cited checks | 0% | 50% | 100% |
+
+> W03 coverage floor is enforced by `fail_under` in `pyproject.toml` and only
+> ratchets upward (operating rule 4). Measured on the CI unit-job selection
+> (`tests/` minus draw/refs/e2e/benchmarks, `-m "not slow"`).
 
 ## Trim order if behind
 

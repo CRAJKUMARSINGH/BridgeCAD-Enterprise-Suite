@@ -22,6 +22,7 @@ Usage:
     python scripts/generate_test_corpus.py --only fixtures --limit 2
     python scripts/generate_test_corpus.py --out TEST-28102026 --seed 20261028
 """
+
 from __future__ import annotations
 
 import argparse
@@ -37,8 +38,14 @@ from typing import Any, cast
 
 # ── path bootstrap ─────────────────────────────────────────────────────────
 _SUITE = Path(__file__).resolve().parents[1]
-for _pkg in ["bridgecad-core", "bridgecad-io", "bridgecad-draw",
-             "bridgecad-bill", "bridgecad-qa", "bridgecad-export"]:
+for _pkg in [
+    "bridgecad-core",
+    "bridgecad-io",
+    "bridgecad-draw",
+    "bridgecad-bill",
+    "bridgecad-qa",
+    "bridgecad-export",
+]:
     _p = _SUITE / "packages" / _pkg
     if _p.exists() and str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
@@ -83,6 +90,7 @@ def _rel(p: Path) -> str:
 # Suite engine — 8-sheet GAD package
 # ---------------------------------------------------------------------------
 
+
 def _render_suite_case(case_dir: Path, data: dict, prefix: str) -> dict:
     """Build a BridgeProject from *data* and render the 8-sheet DXF package."""
     from bridgecad_draw.booklet import generate_package
@@ -95,6 +103,7 @@ def _render_suite_case(case_dir: Path, data: dict, prefix: str) -> dict:
     qa_score = None
     try:
         from bridgecad_core.validation import run_all
+
         qa_score = float(run_all(project).score)
     except Exception:
         pass
@@ -124,12 +133,14 @@ def run_fixtures(out_root: Path, stamp: str, limit: int | None) -> list[dict]:
             case_dir = base_dir / f"{fid}__{stamp}"
             case_dir.mkdir(parents=True, exist_ok=True)
             res = _render_suite_case(case_dir, data, fid)
-            entry.update({
-                "id": fid,
-                "dir": _rel(case_dir),
-                "status": "OK" if res["sheets"] else "NO_SHEETS",
-                **res,
-            })
+            entry.update(
+                {
+                    "id": fid,
+                    "dir": _rel(case_dir),
+                    "status": "OK" if res["sheets"] else "NO_SHEETS",
+                    **res,
+                }
+            )
             print(f"  [{res['sheets']}/8] {fid}  ({res['total_kb']} KB)")
         except Exception as exc:
             entry.update({"status": "FAILED", "error": str(exc)})
@@ -152,8 +163,12 @@ def run_design_families(out_root: Path, stamp: str, seed: int) -> list[dict]:
         # Pin the family so the shared randomiser draws only within it.
         rg.FAMILIES = [fam]
         for i in range(FAMILY_CASES_PER_FAMILY):
-            entry: dict = {"engine": "suite", "group": "design-families",
-                           "family": fam["type"], "seed": seed + i}
+            entry: dict = {
+                "engine": "suite",
+                "group": "design-families",
+                "family": fam["type"],
+                "seed": seed + i,
+            }
             try:
                 rng = random.Random(seed + i)
                 data = rg.randomize(base_fixture, rng, i)
@@ -170,17 +185,21 @@ def run_design_families(out_root: Path, stamp: str, seed: int) -> list[dict]:
                 case_dir = base_dir / fam["type"] / f"{case_id}__{stamp}"
                 case_dir.mkdir(parents=True, exist_ok=True)
                 res = _render_suite_case(case_dir, data, case_id)
-                entry.update({
-                    "id": case_id,
-                    "dir": _rel(case_dir),
-                    "status": "OK" if res["sheets"] else "NO_SHEETS",
-                    "carriageway_width_m": gi["carriageway_width_m"],
-                    "skew_angle_deg": gi["skew_angle_deg"],
-                    "span_count": int(data["project"]["geometry_input"]["span_count"]),
-                    **res,
-                })
-                print(f"  [{res['sheets']}/8] {fam['type']:<16} {case_id}"
-                      f"  cw={gi['carriageway_width_m']:.1f} skew={gi['skew_angle_deg']:.0f}")
+                entry.update(
+                    {
+                        "id": case_id,
+                        "dir": _rel(case_dir),
+                        "status": "OK" if res["sheets"] else "NO_SHEETS",
+                        "carriageway_width_m": gi["carriageway_width_m"],
+                        "skew_angle_deg": gi["skew_angle_deg"],
+                        "span_count": int(data["project"]["geometry_input"]["span_count"]),
+                        **res,
+                    }
+                )
+                print(
+                    f"  [{res['sheets']}/8] {fam['type']:<16} {case_id}"
+                    f"  cw={gi['carriageway_width_m']:.1f} skew={gi['skew_angle_deg']:.0f}"
+                )
             except Exception as exc:
                 entry.update({"status": "FAILED", "error": str(exc)})
                 print(f"  [FAILED] {fam['type']} #{i}: {exc}")
@@ -192,6 +211,7 @@ def run_design_families(out_root: Path, stamp: str, seed: int) -> list[dict]:
 # ---------------------------------------------------------------------------
 # Legacy bridge_gad engine — single GAD + phase-two 7-sheet package
 # ---------------------------------------------------------------------------
+
 
 def run_legacy_gad(out_root: Path, stamp: str) -> list[dict]:
     from bridge_gad.bridge_canvas_features import BRIDGE_TEMPLATES
@@ -206,25 +226,32 @@ def run_legacy_gad(out_root: Path, stamp: str) -> list[dict]:
             case_dir = base_dir / f"{key}__{stamp}"
             case_dir.mkdir(parents=True, exist_ok=True)
             (case_dir / "input.json").write_text(
-                json.dumps({"template": key, "name": tpl.get("name"),
-                            "parameters": tpl.get("parameters")}, indent=2),
-                encoding="utf-8")
-            res = generate_all_drawings(case_dir, templates=[(key, tpl)],
-                                        progress_log=False)
+                json.dumps(
+                    {"template": key, "name": tpl.get("name"), "parameters": tpl.get("parameters")},
+                    indent=2,
+                ),
+                encoding="utf-8",
+            )
+            res = generate_all_drawings(case_dir, templates=[(key, tpl)], progress_log=False)
             stats = res["stats"]
             n_files = sum(1 for _ in case_dir.rglob("*") if _.is_file())
-            entry.update({
-                "id": key,
-                "dir": _rel(case_dir),
-                "status": "OK",
-                "dxf_count": stats["single_gad_dxfs"] + stats["phase_two_sheet_dxfs"],
-                "pdf_count": stats["single_pdfs"] + stats["pkg_pdfs"]
-                             + stats["per_template_booklets"],
-                "files": n_files,
-                "master_pdf": _rel(res["master_pdf"]),
-            })
-            print(f"  [OK] {key:<20} dxf={entry['dxf_count']} pdf={entry['pdf_count']} "
-                  f"files={n_files}")
+            entry.update(
+                {
+                    "id": key,
+                    "dir": _rel(case_dir),
+                    "status": "OK",
+                    "dxf_count": stats["single_gad_dxfs"] + stats["phase_two_sheet_dxfs"],
+                    "pdf_count": stats["single_pdfs"]
+                    + stats["pkg_pdfs"]
+                    + stats["per_template_booklets"],
+                    "files": n_files,
+                    "master_pdf": _rel(res["master_pdf"]),
+                }
+            )
+            print(
+                f"  [OK] {key:<20} dxf={entry['dxf_count']} pdf={entry['pdf_count']} "
+                f"files={n_files}"
+            )
         except Exception as exc:
             entry.update({"status": "FAILED", "error": str(exc)})
             print(f"  [FAILED] {key}: {exc}")
@@ -235,12 +262,21 @@ def run_legacy_gad(out_root: Path, stamp: str) -> list[dict]:
 
 # ---------------------------------------------------------------------------
 
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Generate the full BridgeCAD drawing corpus.")
-    ap.add_argument("--out", type=Path, default=_SUITE / "TEST-28102026",
-                    help="root output directory (default TEST-28102026)")
-    ap.add_argument("--only", choices=["fixtures", "families", "legacy"], default=None,
-                    help="run only one pipeline")
+    ap.add_argument(
+        "--out",
+        type=Path,
+        default=_SUITE / "TEST-28102026",
+        help="root output directory (default TEST-28102026)",
+    )
+    ap.add_argument(
+        "--only",
+        choices=["fixtures", "families", "legacy"],
+        default=None,
+        help="run only one pipeline",
+    )
     ap.add_argument("--limit", type=int, default=None, help="limit fixtures (smoke test)")
     ap.add_argument("--seed", type=int, default=20261028, help="seed for design-family sweep")
     args = ap.parse_args()

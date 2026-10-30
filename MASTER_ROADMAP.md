@@ -66,18 +66,21 @@ Dimensions 1 and 5 are the current gap.
 ## Phase 2 · Engineering correctness & V&V
 
 ### W04 · V&V framework — 16 – 22 Nov
-- [ ] `docs/verification/` skeleton
-- [ ] 25+ benchmark cases as golden files
-- [ ] Tolerance policy published
-- [ ] Independent-tool cross-checks (STAAD / MIDAS / CSI)
+- [x] `docs/verification/` skeleton — `README.md`, `TOLERANCE_POLICY.md`, `BENCHMARKS.md`
+- [x] 25+ benchmark cases as golden files — 45 cases over 9 core modules in
+      `tests/verification/cases.py`
+- [x] Tolerance policy published — tiers A–E, `TOLERANCE_POLICY.md`
+- [ ] Independent-tool cross-checks (STAAD / MIDAS / CSI) — Tier D protocol
+      defined; tool runs blocked on licences
 
 **DoD:** every benchmark maps to a module and fails the build on drift.
 
 ### W05 · Formula correctness — 23 – 29 Nov
-- [ ] Hypothesis property tests on all formula modules
-- [ ] SI/FPS unit-system guards
-- [ ] Significant-figure + rounding rules encoded
-- [ ] Input domain validation
+- [x] Hypothesis property tests on all formula modules — `tests/properties/`
+- [x] SI/FPS unit-system guards — `bridgecad_core.units`, `require_unit_system`
+- [x] Significant-figure + rounding rules encoded — `round_sig`, `round_engineering`
+- [x] Input domain validation — `tests/properties/test_properties.py`
+- [x] Inventory doc: every formula → test → benchmark — `docs/verification/FORMULA_INVENTORY.md`
 
 **DoD:** zero known silent-failure paths.
 

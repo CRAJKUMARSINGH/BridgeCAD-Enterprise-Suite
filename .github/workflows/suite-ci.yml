@@ -5,9 +5,9 @@ name: BridgeCAD Enterprise Suite — CI
 # Every Python install goes through .github/actions/setup-suite so member + root
 # installs cannot drift between jobs.
 #
-# OWNERSHIP: tests/draw and tests/refs belong to draw.yml (it models the
-# promoted-vs-scaffold split correctly). The unit job here excludes them rather
-# than running the scaffold gate blocking.
+# OWNERSHIP: tests/draw, tests/drawings and tests/refs belong to draw.yml (it
+# models the promoted-vs-scaffold split correctly). The unit job here excludes
+# them rather than running the scaffold gate blocking.
 #
 # Legacy app jobs live in ci.yml. The two workflows run in parallel.
 
@@ -137,6 +137,7 @@ jobs:
             --ignore=tests/e2e \
             --ignore=tests/benchmarks \
             --ignore=tests/draw \
+            --ignore=tests/drawings \
             --ignore=tests/refs \
             -m "not slow" \
             -v --tb=short \

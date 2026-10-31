@@ -57,6 +57,23 @@ jobs:
         if: always()
         run: python scripts/promote_sheet.py --status >> $GITHUB_STEP_SUMMARY
 
+  drawing-standards:
+    name: drawing standards & CAD output (blocking)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-suite
+        with:
+          extras: dev,draw
+
+      - name: layer audit (ISO 13567-2 / ISO 128)
+        run: python scripts/audit_layers.py
+
+      # W07 verification command, verbatim.
+      - name: drawing-output regression lane
+        run: pytest -q tests/drawings --regression --tb=short
+
   proof:
     name: geometry mutation proof (nightly)
     if: github.event_name == 'schedule'

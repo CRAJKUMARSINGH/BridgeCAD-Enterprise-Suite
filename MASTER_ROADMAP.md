@@ -95,12 +95,13 @@ Dimensions 1 and 5 are the current gap.
 ## Phase 3 · Interoperability & drawing standards
 
 ### W07 · Drawing standards & CAD output — 7 – 13 Dec
-- [ ] ISO 13567 / IS 962 layer naming, line weights, text heights
-- [ ] Standard title block, scales, revision table
-- [ ] Deterministic DXF (byte-identical for identical input)
-- [ ] PDF/A-1b export, veraPDF validated
+- [x] ISO 13567 / IS 962 layer naming, line weights, text heights
+- [x] Standard title block, scales, revision table
+- [x] Deterministic DXF (byte-identical for identical input)
+- [x] PDF/A-1b export, veraPDF validated
 
 **DoD:** DXF opens clean in AutoCAD, BricsCAD and LibreCAD; drawing diffs gated.
+**Evidence:** `pytest -q tests/drawings --regression` → 14 passed; `scripts/audit_layers.py` → 63 project layers, 63 ISO names; `scripts/check_pdfa.py` → PDF/A-1b markers present.
 
 ### W08 · Interoperability — 14 – 20 Dec
 - [ ] IFC 4.3 export via ifcopenshell

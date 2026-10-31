@@ -103,6 +103,9 @@ draw = [
   "matplotlib>=3.8",
   "pillow>=10.0",
   "cairosvg>=2.7",
+  # PDF/A-1b archival export (W07) renders through ezdxf's PyMuPDF backend and
+  # then writes the OutputIntent/XMP markers with PyMuPDF itself.
+  "pymupdf>=1.24",
 ]
 refs = [
   "pdfplumber>=0.11",
@@ -301,6 +304,7 @@ markers = [
   "visual: PNG baseline comparison",
   "refs: reference-drawing corpus and extraction tests",
   "scaffold_only: scaffold-sheet structural contract lane",
+  "regression: W07 drawing-output regression lane (tests/drawings)",
 ]
 filterwarnings = [
   "error::DeprecationWarning:bridgecad_.*",

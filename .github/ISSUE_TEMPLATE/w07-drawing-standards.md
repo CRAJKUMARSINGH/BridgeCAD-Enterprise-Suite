@@ -12,18 +12,18 @@ labels: "roadmap,phase-3,w07"
 Output that a CAD draughtsman accepts without rebuilding it.
 
 ## Deliverables
-- [ ] ISO 13567 / IS 962 layer naming scheme
-- [ ] Line weights, text heights, sheet sizes, scale bars, north arrow
-- [ ] Standard title block + revision table
-- [ ] Deterministic DXF generation (byte-identical for identical input)
-- [ ] PDF/A-1b archival export, veraPDF-validated
-- [ ] Drawing diff regression tests
+- [x] ISO 13567 / IS 962 layer naming scheme
+- [x] Line weights, text heights, sheet sizes, scale bars, north arrow
+- [x] Standard title block + revision table
+- [x] Deterministic DXF generation (byte-identical for identical input)
+- [x] PDF/A-1b archival export, veraPDF-validated
+- [x] Drawing diff regression tests
 
 ## Definition of done
-- [ ] DXF opens clean in AutoCAD, BricsCAD and LibreCAD — zero repair prompts
-- [ ] Layer audit script passes
-- [ ] PDF/A validation passes
-- [ ] Two renders of the same input produce identical bytes
+- [x] DXF opens clean in AutoCAD, BricsCAD and LibreCAD — zero repair prompts
+- [x] Layer audit script passes
+- [x] PDF/A validation passes
+- [x] Two renders of the same input produce identical bytes
 
 ## Verification
 ```bash

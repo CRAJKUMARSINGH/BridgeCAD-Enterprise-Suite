@@ -1,7 +1,8 @@
 .PHONY: help install dev lint format typecheck test cov test-e2e test-integration \
         verify smoke bench build clean docker-up docker-down api ui web \
         verify-docs verify-docs-fast test-docs mutate-docs prove prove-fast \
-        refs-extract refs-check refs-coverage refs-verify refs-verify-crops
+        refs-extract refs-check refs-coverage refs-verify refs-verify-crops \
+        drawing-standards
 
 help:            ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -28,7 +29,7 @@ test:            ## Unit tests
 	pytest packages tests/unit -q
 
 cov:             ## CI unit job + coverage ratchet (floor in pyproject)
-	pytest tests/ --ignore=tests/e2e --ignore=tests/benchmarks --ignore=tests/draw --ignore=tests/refs -m "not slow" -q --cov --cov-report=term-missing
+	pytest tests/ --ignore=tests/e2e --ignore=tests/benchmarks --ignore=tests/draw --ignore=tests/drawings --ignore=tests/refs -m "not slow" -q --cov --cov-report=term-missing
 
 test-integration: ## Full pipeline
 	pytest tests/integration -v
@@ -95,6 +96,9 @@ prove-draw:      ## Prove the Wing suite catches broken geometry (16/16)
 
 prove-draw-fast: ## Critical geometry mutations only
 	python scripts/prove_draw_detection.py --only G01,G02,G03,G05 --jobs 8
+
+drawing-standards: ## W07 — layer audit, deterministic DXF, PDF/A-1b gates
+	pytest -q tests/drawings --regression
 
 links:           ## Check external + internal links
 	lychee --config .lychee.toml --no-progress '**/*.md'

@@ -142,4 +142,27 @@ Newest entries go at the bottom.
 - Gates green after the roadmap edit: `check_doc_paths.py` → OK;
   `verify_docs.py --json` → `ok: true` (3 pass / 0 fail / 3 skip).
 
+## 2026-11-01 11:40 IST — committed (two focused commits)
+
+- `1dcebf5` — `docs: fold launch guide into getting-started, retire launch.md`
+  (docs/getting-started.md, DOCS_INDEX.md, mkdocs.yml, CHATLOG.md).
+- `a0104a2` — `docs(roadmap): add green-close contract to Operating rules`
+  (MASTER_ROADMAP.md).
+- Unrelated working-tree changes were left untouched; both commits are by
+  pathspec.
+
+### Environment note — recurring git lock litter
+
+- Committing was blocked by stale `.git/*.lock` files (index, HEAD, AUTO_MERGE,
+  packed-refs) dated from a previous session. No git process was running.
+- `scripts/clear_stale_locks.py` and PowerShell `Remove-Item` both reported
+  failure or silently did nothing — a Windows handle (consistent with Defender's
+  `MpCopyAccelerator`) blocks deletion, so git leaves fresh locks behind after
+  each write.
+- Working remedy: delete the lock with the editor-level delete tool (which
+  succeeds) **immediately** before the git write. Residue was cleared afterwards;
+  `.git` now reports 0 lock files.
+- Follow-up worth a script fix: `clear_stale_locks.py` should fall back to a
+  rename-with-unique-suffix when `unlink()` does not actually remove the file.
+
 <!-- Append new ~15-minute entries below this line, newest last. -->

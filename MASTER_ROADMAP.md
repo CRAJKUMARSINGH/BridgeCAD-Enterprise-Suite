@@ -14,6 +14,25 @@
 4. **Ratchet only.** Coverage, type strictness, performance budgets go up and never come down.
 5. **Friday = demo + retro.** Ten minutes, written, in the week's issue.
 
+### Green-close contract
+
+A week is **green-closed** only when all six hold:
+
+1. The week's checklist below is ticked, each box with evidence.
+2. The week's PR is merged to `main`.
+3. CI is green on the merge commit.
+4. The week's DoD commands succeed on a clean clone.
+5. The week's GitHub issue (label `roadmap`) is closed.
+6. [docs/ROADMAP_STATUS.md](docs/ROADMAP_STATUS.md) is updated.
+
+The close ritual, in order: open the roadmap issue → tick the checklist with
+evidence → PR to `main` with the DoD in the body → verify green CI → merge →
+demo the artifact on `main` → write the 10-line Friday retro → close the issue.
+
+**Ratchet floor.** Coverage never drops below **75 %** — the
+`[tool.coverage.report] fail_under` value in `pyproject.toml`. The floor goes
+up, never down. Trim under pressure follows *Trim order if behind*, below.
+
 ## Definition of "industry standard" (scored at week 15)
 
 | # | Dimension | Bar |

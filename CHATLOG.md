@@ -166,3 +166,33 @@ Newest entries go at the bottom.
   rename-with-unique-suffix when `unlink()` does not actually remove the file.
 
 <!-- Append new ~15-minute entries below this line, newest last. -->
+
+## 2026-11-01 12:05 IST — new guide folded by ownership (no new file)
+
+- A further guide arrived with an empty `**File:**` body again, outlining four
+  areas: (1) design tiers Basic/Intermediate/Advanced, (2) a ~1000-user
+  test-run, (3) the bug-report mechanism, (4) the patch workflow.
+- Grounded each area against the repo before writing; decided **fold, split by
+  ownership, no new page** (the option that honours *One fact, one place* and
+  *Retire, don't fork*).
+- **Areas 3 & 4 were already owned** — `.github/ISSUE_TEMPLATE/bug_report.yml`
+  is the bug-report source of truth; `CONTRIBUTING.md` §3/§5/§11/§12 owns the
+  patch workflow. Added pointers, not copies:
+  - `CONTRIBUTING.md` §13 renamed *Questions and bugs*; added the issue-form
+    link and the `python -m bridgecad info` + `troubleshooting.md` first steps.
+  - `CONTRIBUTING.md` §11: one post-merge line to re-run the tier suite on a
+    clean clone of `main`.
+- **Areas 1 & 2 were genuinely new:**
+  - `docs/getting-started.md` — new *What the Suite handles* section: a tier
+    table mapping Basic/Intermediate/Advanced to the built-in templates and
+    their scope. Labelled a planning figure, not a measured mix.
+  - `docs/deployment.md` — new *Capacity / volume smoke test (proxy)* section
+    beside *Scaling*/*Pre-flight checklist*: per-tier pipeline smoke, a
+    tier-weighted batch loop (600 + 300 + 100), interface checklist link, and
+    pass criteria. Called a **proxy for volume, not a measured capacity** —
+    there is no load harness in the repo. Added one Pre-flight checklist item.
+- Claims verified: 28 fixtures really exist in `tests/e2e/fixtures/`; hydraulics
+  is real (`HydraulicData`, `gen_hydraulics_sheet`, `score_hydraulic`).
+- No `DOCS_INDEX.md` / `mkdocs.yml` change needed.
+- Gates green: `check_doc_paths.py --verbose` → OK; `scripts/verify_docs.py
+  --json` → `ok: true` (3 pass / 0 fail / 3 skip).

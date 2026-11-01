@@ -98,6 +98,47 @@ A Helm chart is planned (`charts/bridgecad/`). Until then, the prod compose file
 maps cleanly onto a Deployment + Service + Ingress, with postgres and redis as
 managed services.
 
+## Capacity / volume smoke test (proxy)
+
+There is no load harness in the repo. Before a release, approximate about a
+thousand real requests with a **tier-weighted batch over the built-in
+templates** — a practical proxy for volume, not a measured capacity figure.
+
+Corpus: the templates in
+[getting-started.md](getting-started.md#your-first-bridge-end-to-end), plus the
+28 fixtures in `tests/e2e/fixtures/`.
+
+A single workbook per tier must clear the full pipeline — validate, export (ZIP +
+`manifest.json`), BOQ, QA:
+
+```bash
+bridgecad-cli validate bridge.xlsx
+bridgecad-cli export all bridge.xlsx -o out/
+bridgecad-cli bill gen --input bridge.xlsx --format all
+bridgecad-cli qa report bridge.xlsx -o out/qa.html
+```
+
+The volume proxy is a batch loop weighted to the tier mix — 600 basic,
+300 intermediate, 100 advanced. Any non-zero exit, or a run that leaves no
+`manifest.json`, fails the exercise:
+
+```bash
+# 600 x basic (simple_12m)
+for i in $(seq 1 600); do
+  bridgecad-cli template new --type simple_12m -o runs/$i.xlsx
+  bridgecad-cli export all runs/$i.xlsx -o runs/out/$i/ || exit 1
+done
+```
+
+Repeat with `continuous_3x12m`/`girder_4x18m` × 300 and `arch_24m` × 100.
+Confirm each interface serves the same pipeline first — CLI, API (`/draw`
+`/bills` `/qa` `/exports`), Streamlit, React console; see
+[getting-started.md](getting-started.md#path-d--the-four-interfaces).
+
+**Pass criteria:** every workbook validates, exports without error, and produces
+`manifest.json`. Output still carries *"Generated — not reviewed for
+construction."*
+
 ## Pre-flight checklist
 
 - [ ] Every secret in `.env` changed from the example
@@ -108,3 +149,4 @@ managed services.
 - [ ] Health probes wired
 - [ ] Database backed up
 - [ ] `python rc1_smoke.py` green on the release commit
+- [ ] Volume smoke test run (see *Capacity / volume smoke test (proxy)*)

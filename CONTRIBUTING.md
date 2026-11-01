@@ -170,6 +170,10 @@ behaviour and not docs is incomplete.
 - [ ] No PII committed
 - [ ] PR description states what changed, why, and how it was verified
 
+After merge, re-run the tier smoke suite on a clean clone of `main`
+(see [docs/deployment.md](docs/deployment.md#capacity--volume-smoke-test-proxy))
+so the released commit is confirmed to behave as reviewed.
+
 ---
 
 ## 12. Review
@@ -180,7 +184,13 @@ in that order. Nitpicks are labelled `nit:` and are optional.
 
 ---
 
-## 13. Questions
+## 13. Questions and bugs
+
+**Reporting a bug:** use the issue form —
+[`.github/ISSUE_TEMPLATE/bug_report.yml`](.github/ISSUE_TEMPLATE/bug_report.yml).
+Run `python -m bridgecad info` first, and check
+[docs/troubleshooting.md](docs/troubleshooting.md), which lists the known
+non-bugs. The form carries its own required fields.
 
 Open an issue and tag it `support`. Professional-services and legal enquiries:
 tag `rks-legal`.

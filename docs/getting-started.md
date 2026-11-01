@@ -57,6 +57,21 @@ streamlit run apps/streamlit-ui/app.py
 cd apps/web-console && npm ci && npm run dev
 ```
 
+## What the Suite handles
+
+The built-in templates cover three design tiers, roughly the mix users bring
+(a planning figure, not a measured one):
+
+| Tier | Rough share | Templates | Typical scope |
+|---|---|---|---|
+| **Basic** | ~60 % | `simple_12m`, `box_culvert_8m` | single span, simple slab or box culvert |
+| **Intermediate** | ~30 % | `continuous_3x12m`, `girder_4x18m` | continuous multi-span, T-beam/girder, with BOQ + QA |
+| **Advanced** | ~10 % | `arch_24m` and the long-span/PSC fixtures | long span, PSC/arch, hydraulics + scour, plugins, strict audit |
+
+The same templates drive the E2E corpus (28 fixtures in `tests/e2e/fixtures/`).
+For a volume run built on them, see
+[deployment.md](deployment.md#capacity--volume-smoke-test-proxy).
+
 ---
 
 ## Your first bridge, end to end

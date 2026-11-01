@@ -16,8 +16,9 @@ Every doc in this repo, what it is, and whether to trust it.
 
 | File | What |
 |---|---|
-| [docs/getting-started.md](docs/getting-started.md) | Four install paths, first bridge end to end |
+| [docs/getting-started.md](docs/getting-started.md) | Start here: prerequisites, four install paths, first bridge end to end, verification gates, common pitfalls |
 | [docs/excel-contract.md](docs/excel-contract.md) | The 14-sheet workbook schema |
+| [docs/interop.md](docs/interop.md) | Per-format round-trip loss budget, import fuzzing, published JSON schema |
 | [docs/standards.md](docs/standards.md) | IRC/MORTH coverage, rule authoring |
 | [docs/drafting-standard.md](docs/drafting-standard.md) | Drawing-sheet drafting standard (text heights, layer weights) |
 | [docs/plugin-authoring.md](docs/plugin-authoring.md) | Adding a bridge type |

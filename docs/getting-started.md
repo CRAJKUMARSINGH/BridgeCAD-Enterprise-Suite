@@ -5,6 +5,9 @@ Four paths. Pick one. Path A needs no install at all.
 > **First:** the Suite lives at the repo root. If any doc tells you to
 > `cd` into a legacy `BridgeCAD Enterprise Suite` directory, it is stale.
 
+**Prerequisites:** Python 3.11+, Git. Docker (optional) for the API/full stack.
+Node.js (optional) only if you want the React console.
+
 ## Path A — zero install (verify the repo works)
 
 ```bash
@@ -27,9 +30,13 @@ If you see `ModuleNotFoundError: bridgecad_core`, you are in the wrong directory
 python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
+# Optional extras when you need them:
+#   pip install -e ".[dev,draw,api,ui]"
 pre-commit install
 make lint && make test
 ```
+
+After this you can use both `python -m bridgecad` and `bridgecad-cli`.
 
 ## Path C — full stack in Docker
 
@@ -39,6 +46,8 @@ docker compose up api              # FastAPI on :8000
 curl localhost:8000/health         # {"status":"ok"}
 docker compose up                  # + postgres, redis, minio, jaeger
 ```
+
+For a production-style stack see [deployment.md](deployment.md).
 
 ## Path D — the four interfaces
 
@@ -129,6 +138,57 @@ curl -F file=@bridge.xlsx localhost:8000/qa/report -o qa.html
 
 Routers: `/bridges` `/draw` `/bills` `/qa` `/exports` `/plugins` `/health`.
 OpenAPI docs at `/docs`.
+
+---
+
+## Quick verification before you rely on output
+
+```bash
+python -m bridgecad verify          # day3 + day4 acceptance
+python rc1_smoke.py                 # 11-check release gate
+python tests/e2e/run_e2e.py         # 28 fixtures
+make lint && make test
+```
+
+This is a release candidate. Generated drawings and BOQs carry
+**"Generated — not reviewed for construction."** until full V&V and engineer
+sign-off. See [GUIDE.md](../GUIDE.md) for the current status table.
+
+---
+
+## Common pitfalls
+
+| Symptom | Fix |
+|---------|-----|
+| `ModuleNotFoundError: bridgecad_core` | Run from the repo root; use Path A or an editable install |
+| DXF fails with “ezdxf is required” | `pip install -e ".[draw]"` |
+| Docker health fails | Copy `.env.example` → `.env` and set the required vars |
+| Long pytest runs look hung under PowerShell | Prefer `python -u -m pytest …` or `make test`; avoid piping through `Select-Object -Last N` |
+
+---
+
+## One-line recipes
+
+```bash
+# Clone + verify
+git clone https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite.git && cd BridgeCAD-Enterprise-Suite
+python -m bridgecad verify
+
+# Dev install + first package
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -e ".[dev,draw,api,ui]"
+bridgecad-cli template new --type simple_12m -o bridge.xlsx
+bridgecad-cli export all bridge.xlsx -o out/
+
+# API
+uvicorn bridgecad_api.main:app --reload --port 8000
+
+# Streamlit
+streamlit run apps/streamlit-ui/app.py
+
+# Docker API
+cp .env.example .env && docker compose up api
+```
 
 ---
 

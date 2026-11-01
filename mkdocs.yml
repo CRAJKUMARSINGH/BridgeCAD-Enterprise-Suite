@@ -112,6 +112,7 @@ nav:
   - How to use (video): how-to-use-video.md
   - Reference:
       - Excel contract: excel-contract.md
+      - Interoperability and loss budget: interop.md
       - Standards: standards.md
       - Drafting standard: drafting-standard.md
       - Plugin authoring: plugin-authoring.md

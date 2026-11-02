@@ -1,15 +1,31 @@
-"""Excel BOQ formatter — outputs a professional styled .xlsx workbook."""
+"""Excel BOQ formatter — outputs a professional styled .xlsx workbook.
+
+The workbook is *live*: ``Amount`` is ``=D*E`` (quantity × rate), each section
+total is ``=SUM(...)`` over its own item rows, and the sub-total / contingency /
+grand-total block chains off those cells. A rate change in column E therefore
+re-prices the whole bill on open — the sheet is a model, not a screenshot.
+Pass ``live_formulas=False`` only for a fully-static export.
+
+Layout contract (column letters are relied on by the formulas and by
+``tests/interop``):
+
+    A Item | B Description | C Unit | D Quantity | E Rate | F Amount | G Ref | H Remarks
+"""
 
 from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
 
+_AMOUNT_COL = 6  # F
 
-def format_excel(boq: Any, output_path: str | Path) -> Path:
+
+def format_excel(boq: Any, output_path: str | Path, live_formulas: bool = True) -> Path:
     """Write *boq* to a styled Excel workbook.
 
-    Returns the saved path. Requires openpyxl.
+    With *live_formulas* (default) the Amount column and every total are Excel
+    formulas; with it off they are the pre-computed values. Returns the saved
+    path. Requires openpyxl.
     """
     try:
         import openpyxl
@@ -90,6 +106,7 @@ def format_excel(boq: Any, output_path: str | Path) -> Path:
         ws.column_dimensions[get_column_letter(c)].width = w
 
     row = 4
+    section_total_rows: list[int] = []
     for sec in boq.sections:
         # Section header
         ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=9)
@@ -100,6 +117,7 @@ def format_excel(boq: Any, output_path: str | Path) -> Path:
         ws.row_dimensions[row].height = 16
         row += 1
 
+        first_item_row = row
         for i, item in enumerate(sec.items):
             fill = alt_fill if i % 2 else None
             _cell(row, 1, item.item_code, fill=fill, align=cen)
@@ -114,39 +132,52 @@ def format_excel(boq: Any, output_path: str | Path) -> Path:
                 align=right,
                 num_fmt="#,##0.00",
             )
-            _cell(
-                row,
-                6,
-                float(item.amount) if item.amount else 0,
-                fill=fill,
-                align=right,
-                num_fmt="₹#,##0.00",
-            )
+            # A priced line is a live product of its own quantity and rate.
+            amount = f"=D{row}*E{row}" if (live_formulas and item.rate) else _static_amount(item)
+            _cell(row, _AMOUNT_COL, amount, fill=fill, align=right, num_fmt="₹#,##0.00")
             _cell(row, 7, item.ref, fill=fill, align=cen)
             _cell(row, 8, item.remarks, fill=fill)
             row += 1
+        last_item_row = row - 1
 
-        # Section total
+        # Section total — sums this section's own Amount cells.
         st = ws.cell(row=row, column=1, value=f"Total — {sec.title}")
         st.font = Font(bold=True, name="Arial")
         st.border = bdr
         for c in range(2, 9):
             ws.cell(row=row, column=c).border = bdr
-        amt = ws.cell(row=row, column=6, value=float(sec.total))
+        if live_formulas and sec.items:
+            total_val: Any = f"=SUM(F{first_item_row}:F{last_item_row})"
+        else:
+            total_val = float(sec.total)
+        amt = ws.cell(row=row, column=_AMOUNT_COL, value=total_val)
         amt.font = Font(bold=True, name="Arial")
         amt.number_format = "₹#,##0.00"
         amt.alignment = right
         amt.border = bdr
+        section_total_rows.append(row)
         row += 2
 
-    # Grand total rows
+    # Grand total block — each row references the ones above it.
+    subtotal_row = row
+    contingency_row = row + 1
+    if live_formulas and section_total_rows:
+        subtotal_expr = "=" + "+".join(f"F{r}" for r in section_total_rows)
+    else:
+        subtotal_expr = float(boq.subtotal)
+    contingency_expr = (
+        f"=F{subtotal_row}*{float(boq.contingency_pct)}/100"
+        if live_formulas
+        else float(boq.contingency_amount)
+    )
+    grand_expr = f"=F{subtotal_row}+F{contingency_row}" if live_formulas else float(boq.grand_total)
     for label, val in [
-        ("SUB-TOTAL (Civil Works)", boq.subtotal),
-        (f"CONTINGENCY @ {boq.contingency_pct}%", boq.contingency_amount),
-        ("GRAND TOTAL", boq.grand_total),
+        ("SUB-TOTAL (Civil Works)", subtotal_expr),
+        (f"CONTINGENCY @ {boq.contingency_pct}%", contingency_expr),
+        ("GRAND TOTAL", grand_expr),
     ]:
         ws.cell(row=row, column=1, value=label).font = Font(bold=True, size=11, name="Arial")
-        c = ws.cell(row=row, column=6, value=float(val))
+        c = ws.cell(row=row, column=_AMOUNT_COL, value=val)
         c.font = Font(bold=True, size=11, name="Arial")
         c.number_format = "₹#,##0.00"
         c.alignment = right
@@ -156,6 +187,11 @@ def format_excel(boq: Any, output_path: str | Path) -> Path:
 
     wb.save(str(p))
     return p
+
+
+def _static_amount(item: Any) -> Any:
+    """Column-F value for a line that has no rate to multiply by."""
+    return float(item.amount) if item.amount else 0
 
 
 __all__ = ["format_excel"]

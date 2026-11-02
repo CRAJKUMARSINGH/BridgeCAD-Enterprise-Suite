@@ -1,0 +1,12 @@
+{
+  "plugin_id":              "steel_composite",
+  "version":                "1.0.0",
+  "name":                   "Steel-Concrete Composite Bridge",
+  "description":            "Welded plate girder with composite RCC deck per IRC:24-2010 and IRC:112-2020 for spans 20-45 m",
+  "bridge_types":           ["STEEL_COMPOSITE"],
+  "span_range_m":           [20, 45],
+  "default_values_yaml":    "defaults.yaml",
+  "draw_overrides_module":  "draw_overrides",
+  "author":                 "BridgeCAD Team",
+  "requires_core":          ">=0.1.0"
+}

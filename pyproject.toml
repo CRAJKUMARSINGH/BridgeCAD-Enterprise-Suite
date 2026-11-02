@@ -83,6 +83,10 @@ dev = [
   "pytest-benchmark>=4.0",
   "pytest-xdist>=3.6",
   "hypothesis>=6.100",
+  # The api-gateway (apps/api-gateway) is part of the Suite, so its unit tests
+  # (tests/unit/test_api_cors.py) must run under `pip install -e ".[dev]"` rather
+  # than being silent-skipped for want of a framework.
+  "fastapi>=0.115",
   "pyyaml>=6.0",
   # quality
   "ruff>=0.6",
@@ -107,6 +111,12 @@ draw = [
   # then writes the OutputIntent/XMP markers with PyMuPDF itself.
   "pymupdf>=1.24",
 ]
+ifc = [
+  # W08 openBIM hand-off. ifcopenshell ships a large binary wheel, so it stays
+  # out of the default and dev extras; `pytest tests/interop` skips the IFC
+  # round-trip when it is absent rather than passing silently.
+  "ifcopenshell>=0.8",
+]
 refs = [
   "pdfplumber>=0.11",
   "pypdf>=5.0",
@@ -119,7 +129,7 @@ refs-ocr = [
   "numpy>=1.26",
 ]
 all = [
-  "bridgecad-enterprise-suite[api,ui,ai,infra,docs,draw,refs,refs-ocr]",
+  "bridgecad-enterprise-suite[api,ui,ai,infra,docs,draw,ifc,refs,refs-ocr]",
 ]
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -305,6 +315,7 @@ markers = [
   "refs: reference-drawing corpus and extraction tests",
   "scaffold_only: scaffold-sheet structural contract lane",
   "regression: W07 drawing-output regression lane (tests/drawings)",
+  "interop: W08 interoperability round-trip and fuzzing lane (tests/interop)",
 ]
 filterwarnings = [
   "error::DeprecationWarning:bridgecad_.*",

@@ -1,0 +1,35 @@
+# Cable-Stayed Bridge typical default values (IRC:112-2020 / IRC SP:119)
+# Merged into project_dict when this plugin is activated.
+
+superstructure:
+  deck_material:              "M45"
+  deck_thickness_mm:          275
+  wearing_coat_type:          "BITUMINOUS_CONCRETE_BC"
+  wearing_coat_thickness_mm:  65
+  girder_type:                "CABLE_STAYED"
+  camber_mm:                  0
+
+substructure:
+  pier_type:            "WALL"
+  pier_material:        "M45"
+  abutment_type:        "CANTILEVER"
+  abutment_material:    "M45"
+
+foundation_details:
+  type:              "OPEN"
+  pile_type:         "BORED_CAST_IN_SITU"
+  pile_diameter_mm:  0
+  piles_per_pier:    0
+
+materials:
+  concrete_superstructure:   "M45"
+  concrete_substructure:     "M45"
+  concrete_foundation:       "M35"
+  reinforcement_steel_grade: "Fe500D"
+  bearing_type:              "POT_PTFE"
+  expansion_joint_type:      "MULTI_MODULAR"
+
+# Span/depth ratios (IRC:112-2020 / IRC SP:119)
+span_depth_ratios:
+  simply_supported:   55
+  continuous:         66

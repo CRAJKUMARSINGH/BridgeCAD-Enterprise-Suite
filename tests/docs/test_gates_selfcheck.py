@@ -41,7 +41,7 @@ def _audit(root: Path) -> subprocess.CompletedProcess:
     return subprocess.run(
         [sys.executable, str(REPO_ROOT / "scripts" / "check_doc_paths.py"),
          "--root", str(root)],
-        capture_output=True, text=True,
+        capture_output=True, text=True, timeout=300,
     )
 
 

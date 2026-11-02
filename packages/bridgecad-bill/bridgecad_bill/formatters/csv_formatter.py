@@ -26,6 +26,8 @@ def format_csv(boq: Any, output_path: str | Path) -> Path:
                 "Rate (INR)",
                 "Amount (INR)",
                 "Ref",
+                "Status",
+                "Basis",
             ]
         )
         for sec in boq.sections:
@@ -40,10 +42,12 @@ def format_csv(boq: Any, output_path: str | Path) -> Path:
                         float(item.rate) if item.rate else "",
                         float(item.amount) if item.amount else "",
                         item.ref,
+                        getattr(item, "status", ""),
+                        getattr(item, "basis", ""),
                     ]
                 )
         writer.writerow([])
-        writer.writerow(["", "", "SUB-TOTAL", "", "", "", float(boq.subtotal), ""])
+        writer.writerow(["", "", "SUB-TOTAL", "", "", "", float(boq.subtotal), "", "", ""])
         writer.writerow(
             [
                 "",
@@ -54,9 +58,11 @@ def format_csv(boq: Any, output_path: str | Path) -> Path:
                 "",
                 float(boq.contingency_amount),
                 "",
+                "",
+                "",
             ]
         )
-        writer.writerow(["", "", "GRAND TOTAL", "", "", "", float(boq.grand_total), ""])
+        writer.writerow(["", "", "GRAND TOTAL", "", "", "", float(boq.grand_total), "", "", ""])
     return p
 
 

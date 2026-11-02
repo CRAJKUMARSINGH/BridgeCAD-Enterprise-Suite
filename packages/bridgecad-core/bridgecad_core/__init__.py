@@ -33,9 +33,21 @@ from .geometry import (
     compute_plan_geometry,
 )
 from .models import BridgeProject, ProjectMaster, ValidationModel
-from .standards import (
+from .standards import (  # hydraulic, structural, combination and drawing rules
+    Envelope,
+    HydraulicDesignResult,
+    LoadCombination,
+    StructuralCheckResult,
+    check_structural_adequacy,
+    combinations_for,
+    compute_hydraulics,
+    design_scour_depth,
     dimension_style,
+    envelope,
+    freeboard_min,
     hatch_for_material,
+    impact_factor,
+    irc6_combinations,
     lineweight_for_layer,
     preferred_scale,
     text_height,
@@ -90,4 +102,19 @@ __all__ = [
     "lineweight_for_layer",
     "hatch_for_material",
     "dimension_style",
+    # IRC:5 hydraulics
+    "compute_hydraulics",
+    "HydraulicDesignResult",
+    "design_scour_depth",
+    "freeboard_min",
+    # IRC:21 / IRC:112 structural
+    "check_structural_adequacy",
+    "StructuralCheckResult",
+    "impact_factor",
+    # IRC:6 / EN 1990 combinations
+    "irc6_combinations",
+    "combinations_for",
+    "Envelope",
+    "envelope",
+    "LoadCombination",
 ]

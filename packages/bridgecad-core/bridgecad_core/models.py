@@ -2729,6 +2729,29 @@ class BridgeProject(BaseModel):
     def span_count_propagated(self) -> int:
         return self.geometry_input.span_count
 
+    # ── Validated update ─────────────────────────────────────────────────
+    def with_updates(self, **section_updates: Any) -> BridgeProject:
+        """Return a re-validated copy with section fields updated.
+
+        ``model_copy(update={...})`` is a *shallow, unvalidated* copy: it
+        bypassed GeometryInput._span_count_matches_lengths, so a project with
+        ``span_count=5`` and three span lengths was accepted and silently
+        produced ``total_length_m=30``. Use this instead when mutating a
+        project programmatically.
+        """
+        base: dict[str, Any] = {f: getattr(self, f) for f in type(self).model_fields}
+        for key, patch in section_updates.items():
+            if key not in base:
+                raise KeyError(f"BridgeProject has no section {key!r}")
+            current = base[key]
+            if isinstance(patch, dict) and current is not None and hasattr(current, "model_fields"):
+                merged = {f: getattr(current, f) for f in type(current).model_fields}
+                merged.update(patch)
+                base[key] = type(current).model_validate(merged)
+            else:
+                base[key] = patch
+        return type(self).model_validate(base)
+
 
 __all__ = [
     "ProjectMaster",

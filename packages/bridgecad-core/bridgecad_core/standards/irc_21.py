@@ -13,6 +13,7 @@ Implements:
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 # ---------------------------------------------------------------------------
@@ -325,8 +326,6 @@ def check_structural_adequacy(
         nominal_cover_mm=nominal_cover_mm(exposure_class, "DECK_SLAB"),
     )
 
-
-import math  # needed for expansion_joint_gap_mm ceiling
 
 __all__ = [
     "span_depth_limits",

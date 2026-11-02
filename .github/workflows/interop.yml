@@ -1,0 +1,36 @@
+name: interop
+
+# W08 lane. Owns tests/interop — see the OWNERSHIP note in suite-ci.yml, which
+# excludes this directory from the unit job for the same reason it excludes
+# tests/draw and tests/drawings.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: interop-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  interop:
+    name: round-trip, loss budget & import fuzzing (blocking)
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      # `draw` brings ezdxf so the DWG path is exercised up to its licensing
+      # check; `ifc` brings ifcopenshell for the IFC 4.3 validator. Either
+      # missing optional component skips its test rather than passing silently.
+      - uses: ./.github/actions/setup-suite
+        with:
+          extras: dev,draw,ifc
+          extra-pip: "openpyxl"
+
+      - name: published JSON schema is current
+        run: python scripts/export_project_schema.py --check
+
+      # W08 verification command, verbatim.
+      - name: interoperability lane
+        run: pytest -q tests/interop --tb=short

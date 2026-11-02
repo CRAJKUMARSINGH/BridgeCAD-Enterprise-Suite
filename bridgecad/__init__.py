@@ -53,6 +53,41 @@ __version__ = "0.1.0-rc1"
 __suite__   = "BridgeCAD Enterprise Suite"
 __moniker__ = "M1 · 11-span RCC Solid Slab · Major Bridge GAD"
 
+
+# ---------------------------------------------------------------------------
+# Workspace bootstrap — make `packages/*` / `apps/*` importable from anywhere.
+# ---------------------------------------------------------------------------
+def ensure_workspace() -> None:
+    """Prepend the workspace package roots to ``sys.path`` (idempotent).
+
+    ``sitecustomize.py`` covers ``python script.py`` and ``python -m bridgecad``:
+    CPython's ``site`` module imports it at startup because the repo root is on
+    ``sys.path``. Under ``python -c "import bridgecad"`` and some IDE runners the
+    root is *not* on ``sys.path``, so the facade resolves but ``bridgecad_core``
+    does not. This mirrors the same mapping sitecustomize uses and is safe to
+    call repeatedly.
+    """
+    import sys
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parent.parent
+    roots: list[Path] = []
+    for parent in (root / "packages", root / "apps"):
+        if not parent.is_dir():
+            continue
+        for child in sorted(parent.iterdir()):
+            if child.is_dir() and any((sub / "__init__.py").is_file() for sub in child.glob("*/")):
+                roots.append(child)
+    roots.append(root)
+
+    existing = {p for p in sys.path if isinstance(p, str)}
+    prepend = [str(p) for p in roots if str(p) not in existing]
+    if prepend:
+        sys.path[:0] = prepend
+
+
+ensure_workspace()
+
 # ---------------------------------------------------------------------------
 # Lazy module aliases.  We use ModuleType.__getattr__ (PEP 562) so the first
 # time the user writes `bc.types` we import `bridgecad_types` /

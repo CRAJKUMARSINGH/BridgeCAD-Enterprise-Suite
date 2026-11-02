@@ -278,9 +278,7 @@ def _combination_table(combos: Sequence[LoadCombination]) -> list[str]:
     return lines
 
 
-def calc_sheet_markdown(
-    project: BridgeProject, report: ComplianceReport | None = None
-) -> str:
+def calc_sheet_markdown(project: BridgeProject, report: ComplianceReport | None = None) -> str:
     """Render a deterministic calculation sheet (markdown) for ``project``."""
     report = report or build_compliance_report(project)
     master = project.project_master

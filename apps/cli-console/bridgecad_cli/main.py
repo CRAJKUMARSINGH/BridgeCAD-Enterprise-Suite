@@ -224,13 +224,27 @@ def draw_gad_cmd(
 
         sheets = generate_package(project, output_dir, prefix=prefix, scale_denom=scale)
 
-    t = Table(title=f"📐 DXF Package — {len(sheets)}/7 sheets")
+    from bridgecad_draw.booklet import _SHEET_MANIFEST
+
+    expected = len(_SHEET_MANIFEST)
+    t = Table(title=f"📐 DXF Package — {len(sheets)}/{expected} sheets")
     t.add_column("Sheet", style="cyan")
     t.add_column("Size", justify="right")
     for p in sheets:
         t.add_row(p.name, f"{p.stat().st_size//1024} KB")
     console.print(t)
     console.print(f"[green]Done.[/] Total: " f"{sum(p.stat().st_size for p in sheets)//1024} KB")
+
+
+@draw_app.command("booklet")
+def draw_booklet_cmd(
+    input_file: Path = typer.Argument(..., help="BridgeCAD Excel workbook"),
+    output_dir: Path = typer.Option(Path("./output/drawings"), "-o", "--output"),
+    scale: int = typer.Option(100, "-s", "--scale"),
+    prefix: str = typer.Option("GAD", "-p", "--prefix"),
+) -> None:
+    """Generate the full GAD booklet (alias of `draw gad`, documented form)."""
+    draw_gad_cmd(input_file, output_dir, scale, prefix)
 
 
 # ---------------------------------------------------------------------------
@@ -368,10 +382,20 @@ def plugin_info_cmd(
 
 @template_app.command("new")
 def template_new_cmd(
-    bridge_type: str = typer.Argument("simple_12m", help="Bridge type key"),
+    bridge_type_arg: str = typer.Argument(
+        None, help="Bridge type key (positional)", show_default=False
+    ),
     output: Path = typer.Option(Path("template.xlsx"), "-o", "--output"),
+    bridge_type_opt: str = typer.Option(
+        None, "--type", "-t", help="Bridge type key (README form: --type simple_12m)"
+    ),
 ) -> None:
-    """Generate a blank 14-sheet BridgeCAD Excel template."""
+    """Generate a blank 14-sheet BridgeCAD Excel template.
+
+    Accepts the bridge type either positionally (`template new simple_12m`) or
+    as `--type simple_12m`, because the README and GUIDE document the latter.
+    """
+    bridge_type = bridge_type_opt or bridge_type_arg or "simple_12m"
     with console.status(f"Generating template for type '{bridge_type}' …"):
         from bridgecad_io.excel_template import generate_template
 

@@ -20,6 +20,12 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+# A missing optional dependency (ezdxf) makes every sheet fail identically, so a
+# naive per-sheet warning prints the same line 8 times and buries any real
+# failure. Warn once for the first sheet, then drop to debug — the full
+# per-sheet trace stays available at -v.
+_missing_dep_warned = False
+
 # Each entry: (sheet_no, module_attr, filename_stem, default_scale)
 _SHEET_MANIFEST = [
     (1, "sheet1_plan", "Sheet1_Plan", 100),
@@ -58,6 +64,8 @@ def generate_package(
     """
     import importlib
 
+    global _missing_dep_warned
+
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
     results: list[Path] = []
@@ -73,7 +81,16 @@ def generate_package(
                 "Sheet %d (%s) → %s  (%d KB)", sheet_no, stem, p.name, p.stat().st_size // 1024
             )
         except Exception as exc:
-            logger.warning("Sheet %d (%s) failed: %s", sheet_no, stem, exc)
+            # Only the optional-dependency case is de-duplicated. A genuine
+            # ImportError inside a sheet module stays a loud per-sheet warning.
+            if isinstance(exc, ImportError) and "ezdxf" in str(exc):
+                if _missing_dep_warned:
+                    logger.debug("Sheet %d (%s) skipped: %s", sheet_no, stem, exc)
+                else:
+                    logger.warning("Sheet %d (%s) skipped: %s", sheet_no, stem, exc)
+                    _missing_dep_warned = True
+            else:
+                logger.warning("Sheet %d (%s) failed: %s", sheet_no, stem, exc)
 
     logger.info("Package complete: %d/8 sheets in %s", len(results), out)
     return results

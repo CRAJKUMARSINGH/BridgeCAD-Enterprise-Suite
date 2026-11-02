@@ -94,6 +94,7 @@ def export_all(
     out.mkdir(parents=True, exist_ok=True)
 
     results: dict[str, list[Path]] = {"dxf": [], "bill": [], "qa": []}
+    failures: dict[str, str] = {}
 
     # ── Step 1: DXF drawings ──────────────────────────────────────────────
     try:
@@ -106,6 +107,7 @@ def export_all(
         logger.info("DXF: %d sheets generated", len(dxf_files))
     except Exception as exc:
         _stage_failure("DXF generation", exc, results_key="dxf", results=results)
+        failures["dxf"] = f"{type(exc).__name__}: {exc}"
 
     # ── Step 2: Bill of Quantities ────────────────────────────────────────
     try:
@@ -125,6 +127,7 @@ def export_all(
         logger.info("BOQ: grand total INR %s  (xlsx+csv+pdf)", f"{float(boq.grand_total):,.0f}")
     except Exception as exc:
         _stage_failure("BOQ generation", exc, results_key="bill", results=results)
+        failures["bill"] = f"{type(exc).__name__}: {exc}"
 
     # ── Step 3: QA report ─────────────────────────────────────────────────
     try:
@@ -143,11 +146,12 @@ def export_all(
         logger.info("QA: score=%d  critical_fails=%d", report.score, report.critical_fail_count)
     except Exception as exc:
         _stage_failure("QA report", exc, results_key="qa", results=results)
+        failures["qa"] = f"{type(exc).__name__}: {exc}"
 
     # ── Step 4: ZIP bundle ────────────────────────────────────────────────
     from .bundler import create_bundle
 
-    bundle_path = create_bundle(out, prefix, results)
+    bundle_path = create_bundle(out, prefix, results, project=project, failures=failures or None)
     logger.info("Bundle: %s  (%.1f KB)", bundle_path.name, bundle_path.stat().st_size / 1024)
     return bundle_path
 

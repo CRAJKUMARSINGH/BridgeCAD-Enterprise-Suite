@@ -1,5 +1,5 @@
 .PHONY: help install dev lint format typecheck test cov test-e2e test-integration \
-        verify smoke bench build clean docker-up docker-down api ui web \
+        verify smoke robotic bench build clean docker-up docker-down api ui web \
         verify-docs verify-docs-fast test-docs mutate-docs prove prove-fast \
         refs-extract refs-check refs-coverage refs-verify refs-verify-crops \
         drawing-standards
@@ -42,6 +42,12 @@ verify:          ## Acceptance verifiers
 
 smoke:           ## Release gate
 	python rc1_smoke.py
+
+robotic:         ## Simulate Basic + Intermediate + Advanced users (seeded)
+	python scripts/robotic_smoke.py --persona all --seed 42
+	python scripts/basic_user_robot.py --seed 123
+	python scripts/intermediate_user_robot.py --seed 456
+	python scripts/advanced_user_robot.py --seed 789
 
 bench:           ## Benchmarks, 20% regression gate
 	pytest tests/benchmarks --benchmark-only

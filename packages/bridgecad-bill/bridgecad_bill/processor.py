@@ -29,6 +29,7 @@ def extract_and_price(
     project: Any,
     state: str | None = None,
     contingency_pct: Decimal = Decimal("15"),
+    attach_provenance: bool = True,
 ) -> BillOfQuantities:
     """Build a fully-priced BOQ from a BridgeProject.
 
@@ -677,6 +678,25 @@ def extract_and_price(
     s9.add(_item("QA.3", 1, "Proof load test on completed bridge (IRC:6-2017)"))
     boq.add_section(s9)
 
+    # ── Provenance attachment ────────────────────────────────────────────
+    # The audit contract said every line carries its inputs, but the priced
+    # BOQ handed to the CSV/Excel/PDF formatters carried no status at all, so
+    # the promise was unverifiable in the exported artefacts.
+    if attach_provenance:
+        try:
+            _grade_known = _concrete_grade_known(project)
+            _seen: dict[str, int] = {}
+            for _section in boq.sections:
+                for _item in _section.items:
+                    _code = _item.item_code
+                    _seen[_code] = _seen.get(_code, 0) + 1
+                    _no = _code if _seen[_code] == 1 else f"{_code}.{_seen[_code]}"
+                    _line = _provenance_line(_no, _item, _grade_known)
+                    _item.status = str(_line.status)
+                    _item.basis = _line.formula or _line.multiplier_source or _line.reason or ""
+        except Exception:  # provenance must never break pricing
+            pass
+
     return boq
 
 
@@ -922,7 +942,7 @@ def build_boq(project: Any, state: str | None = None) -> list[BoqLine]:
     (a multiplier and its source note), or ``not_calculated`` (a reason, never a
     number). A missing input propagates to ``not_calculated`` — never a default.
     """
-    boq = extract_and_price(project, state=state)
+    boq = extract_and_price(project, state=state, attach_provenance=False)
     grade_known = _concrete_grade_known(project)
 
     seen: dict[str, int] = {}

@@ -25,10 +25,16 @@ from __future__ import annotations
 
 import logging
 import re
+from collections.abc import Callable
 from datetime import date
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
+
+from ._fields import cell_to_value, flat_kind
+from ._fields import coerce as _coerce
+from ._fields import lookup_enum as _lookup_enum
+from .exceptions import ExcelParseError
 
 logger = logging.getLogger(__name__)
 
@@ -79,58 +85,40 @@ def _sheet_to_dict(ws: Any) -> dict[str, Any]:
     return result
 
 
-def _coerce(value: Any, python_type: type) -> Any:
-    """Best-effort coercion from Excel cell value to target Python type."""
-    if value is None:
-        return None
-    if python_type is bool:
-        if isinstance(value, bool):
-            return value
-        return str(value).strip().upper() in {"TRUE", "YES", "1", "Y"}
-    if python_type is int:
-        try:
-            return int(float(value))
-        except (TypeError, ValueError):
-            return None
-    if python_type is float:
-        try:
-            return float(value)
-        except (TypeError, ValueError):
-            return None
-    if python_type is Decimal:
-        try:
-            return Decimal(str(value))
-        except InvalidOperation:
-            return None
-    if python_type is date:
-        if isinstance(value, date):
-            return value
-        try:
-            from datetime import datetime
+def _model_sheet_parser(model_cls: Any, *, extra: Callable | None = None) -> Callable:
+    """Build a parser that reads a flat ``Field | Value`` sheet into *model_cls*.
 
-            return datetime.strptime(str(value).strip(), "%Y-%m-%d").date()
-        except (ValueError, TypeError):
-            return None
-    if python_type is str:
-        return str(value).strip() if value is not None else None
-    return value
+    Every flat field the model declares is read straight from the sheet, so the
+    reader can never silently drop a column the writer emitted. Computed fields
+    (which are not part of the input contract) are skipped. ``extra`` may add
+    sheet-specific handling for the tabular blocks.
+    """
+    computed = set(getattr(model_cls, "model_computed_fields", ()) or ())
+
+    def _parse(ws: Any, m: Any, t: Any) -> dict[str, Any]:
+        d = _sheet_to_dict(ws)
+        out: dict[str, Any] = {}
+        for name, field in model_cls.model_fields.items():
+            key = name.lower()
+            if name in computed or key not in d:
+                continue
+            if flat_kind(field.annotation) is None:
+                continue
+            out[name] = cell_to_value(d[key], field.annotation)
+        if extra is not None:
+            out.update(extra(ws, d, m, t))
+        return out
+
+    return _parse
 
 
-def _lookup_enum(enum_cls: Any, raw: Any) -> Any:
-    """Find an enum member by name or value; return None if not found."""
-    if raw is None:
-        return None
-    s = str(raw).strip()
-    # Try by name first (case-insensitive)
-    for m in enum_cls:
-        if m.name.upper() == s.upper():
-            return m
-    # Try by value
-    for m in enum_cls:
-        if str(m.value).upper() == s.upper():
-            return m
-    logger.warning("Could not resolve %s member from %r", enum_cls.__name__, raw)
-    return None
+def _generic(model_name: str) -> Callable:
+    """A parser that reads a flat sheet straight into ``models.<model_name>``."""
+
+    def _parse(ws: Any, m: Any, t: Any) -> dict[str, Any]:
+        return _model_sheet_parser(getattr(m, model_name))(ws, m, t)
+
+    return _parse
 
 
 # ---------------------------------------------------------------------------
@@ -243,154 +231,6 @@ def _parse_geometry_input(ws: Any, m: Any, t: Any) -> dict:
     }
 
 
-def _parse_superstructure(ws: Any, m: Any, t: Any) -> dict:
-    d = _sheet_to_dict(ws)
-    return {
-        "type": _lookup_enum(t.SuperstructureType, d.get("type")),
-        "deck_material": _lookup_enum(t.ConcreteGrade, d.get("deck_material")),
-        "deck_thickness_mm": _coerce(d.get("deck_thickness_mm"), int),
-        "wearing_coat_type": _lookup_enum(t.WearingCoatType, d.get("wearing_coat_type")),
-        "wearing_coat_grade": _lookup_enum(t.WearingCoatGrade, d.get("wearing_coat_grade")),
-        "wearing_coat_thickness_mm": _coerce(d.get("wearing_coat_thickness_mm"), int),
-        "wearing_coat_slope_pct": _coerce(d.get("wearing_coat_slope_pct"), Decimal),
-        "drainage_type": _lookup_enum(t.DrainageType, d.get("drainage_type")),
-        "drainage_spacing_m": _coerce(d.get("drainage_spacing_m"), Decimal),
-        "camber_mm": _coerce(d.get("camber_mm"), int),
-        "camber_method": _lookup_enum(t.CamberMethod, d.get("camber_method")),
-        "girder_type": _lookup_enum(t.GirderType, d.get("girder_type")),
-        "girder_depth_mm": _coerce(d.get("girder_depth_mm"), int),
-        "girder_spacing_m": _coerce(d.get("girder_spacing_m"), Decimal),
-        "girders_per_deck_count": _coerce(d.get("girders_per_deck_count"), int),
-        "parapet_type": _lookup_enum(t.ParapetType, d.get("parapet_type")),
-        "parapet_height_mm": _coerce(d.get("parapet_height_mm"), int),
-        "bearing_shelf_width_m": _coerce(d.get("bearing_shelf_width_m"), Decimal),
-        "transverse_diaphragm_spacing_m": _coerce(d.get("transverse_diaphragm_spacing_m"), Decimal),
-        "continuity_slab_thickness_mm": _coerce(d.get("continuity_slab_thickness_mm"), int),
-        "kerb_elevation_mm": _coerce(d.get("kerb_elevation_mm"), int),
-        "footpath_elevation_mm": _coerce(d.get("footpath_elevation_mm"), int),
-    }
-
-
-def _parse_substructure(ws: Any, m: Any, t: Any) -> dict:
-    d = _sheet_to_dict(ws)
-    return {
-        "pier_type": _lookup_enum(t.PierType, d.get("pier_type")),
-        "pier_material": _lookup_enum(t.ConcreteGrade, d.get("pier_material")),
-        "pier_height_typical_m": _coerce(d.get("pier_height_typical_m"), Decimal),
-        "pier_cap_type": _lookup_enum(t.PierCapType, d.get("pier_cap_type")),
-        "pier_cap_width_m": _coerce(d.get("pier_cap_width_m"), Decimal),
-        "pier_cap_length_m": _coerce(d.get("pier_cap_length_m"), Decimal),
-        "pier_cap_depth_m": _coerce(d.get("pier_cap_depth_m"), Decimal),
-        "pier_shaft_width_m": _coerce(d.get("pier_shaft_width_m"), Decimal),
-        "pier_shaft_length_m": _coerce(d.get("pier_shaft_length_m"), Decimal),
-        "pier_pedestal_height_m": _coerce(d.get("pier_pedestal_height_m"), Decimal),
-        "pier_diaphragm_required": _coerce(d.get("pier_diaphragm_required"), bool),
-        "abutment_type": _lookup_enum(t.AbutmentType, d.get("abutment_type")),
-        "abutment_material": _lookup_enum(t.ConcreteGrade, d.get("abutment_material")),
-        "abutment_width_m": _coerce(d.get("abutment_width_m"), Decimal),
-        "abutment_length_m": _coerce(d.get("abutment_length_m"), Decimal),
-        "abutment_height_m": _coerce(d.get("abutment_height_m"), Decimal),
-        "abutment_pedestal_height_m": _coerce(d.get("abutment_pedestal_height_m"), Decimal),
-        "return_wall_type": _lookup_enum(t.ReturnWallType, d.get("return_wall_type")),
-        "return_wall_length_m": _coerce(d.get("return_wall_length_m"), Decimal),
-        "return_wall_height_m": _coerce(d.get("return_wall_height_m"), Decimal),
-        "wing_wall_type": _lookup_enum(t.WingWallType, d.get("wing_wall_type")),
-        "wing_wall_angle_deg": _coerce(d.get("wing_wall_angle_deg"), Decimal),
-        "wing_wall_splay_length_m": _coerce(d.get("wing_wall_splay_length_m"), Decimal),
-        "wing_wall_height_m": _coerce(d.get("wing_wall_height_m"), Decimal),
-        "backfill_type": _coerce(d.get("backfill_type"), str),
-        "approach_slab_length_m": _coerce(d.get("approach_slab_length_m"), Decimal),
-        "approach_slab_thickness_mm": _coerce(d.get("approach_slab_thickness_mm"), int),
-        "bearings_per_pier": _coerce(d.get("bearings_per_pier"), int),
-        "bearings_per_abutment": _coerce(d.get("bearings_per_abutment"), int),
-    }
-
-
-def _parse_foundation_details(ws: Any, m: Any, t: Any) -> dict:
-    d = _sheet_to_dict(ws)
-    return {
-        "type": _lookup_enum(t.FoundationType, d.get("type")),
-        "pile_type": _lookup_enum(t.PileType, d.get("pile_type")),
-        "pile_shape": _lookup_enum(t.PileShape, d.get("pile_shape")),
-        "pile_diameter_mm": _coerce(d.get("pile_diameter_mm"), int),
-        "pile_length_m": _coerce(d.get("pile_length_m"), Decimal),
-        "piles_per_pier": _coerce(d.get("piles_per_pier"), int),
-        "pile_group_config": _coerce(d.get("pile_group_config"), str),
-        "pile_spacing_m": _coerce(d.get("pile_spacing_m"), Decimal),
-        "pile_cap_thickness_mm": _coerce(d.get("pile_cap_thickness_mm"), int),
-        "pile_cutoff_level_m": _coerce(d.get("pile_cutoff_level_m"), Decimal),
-        "under_ream_count": _lookup_enum(t.UnderReamCount, d.get("under_ream_count")),
-        "factor_of_safety_on_bearing": _coerce(d.get("factor_of_safety_on_bearing"), Decimal),
-        "bearing_capacity_kpa": _coerce(d.get("bearing_capacity_kpa"), Decimal),
-    }
-
-
-def _parse_approaches(ws: Any, m: Any, t: Any) -> dict:
-    d = _sheet_to_dict(ws)
-    return {
-        "left_approach_length_m": _coerce(d.get("left_approach_length_m"), Decimal),
-        "right_approach_length_m": _coerce(d.get("right_approach_length_m"), Decimal),
-        "type_of_embankment": _coerce(d.get("type_of_embankment"), str),
-        "soil_embankment_unit_weight_kn_m3": _coerce(
-            d.get("soil_embankment_unit_weight_kn_m3"), Decimal
-        ),
-        "approach_slope_width_m": _coerce(d.get("approach_slope_width_m"), Decimal),
-        "shoulder_width_left_m": _coerce(d.get("shoulder_width_left_m"), Decimal),
-        "shoulder_width_right_m": _coerce(d.get("shoulder_width_right_m"), Decimal),
-        "guide_rail_required": _coerce(d.get("guide_rail_required"), bool),
-        "speed_limit_on_approach_kmph": _coerce(d.get("speed_limit_on_approach_kmph"), int),
-        "transition_curve_length_m": _coerce(d.get("transition_curve_length_m"), Decimal),
-        "approach_gradient_pct": _coerce(d.get("approach_gradient_pct"), Decimal),
-    }
-
-
-def _parse_hydraulic_data(ws: Any, m: Any, t: Any) -> dict:
-    d = _sheet_to_dict(ws)
-    return {
-        "design_discharge_cumecs": _coerce(d.get("design_discharge_cumecs"), Decimal),
-        "hfl_m": _coerce(d.get("hfl_m"), Decimal),
-        "lwl_m": _coerce(d.get("lwl_m"), Decimal),
-        "normal_wl_m": _coerce(d.get("normal_wl_m"), Decimal),
-        "scour_level_m": _coerce(d.get("scour_level_m"), Decimal),
-        "design_scour_depth_m": _coerce(d.get("design_scour_depth_m"), Decimal),
-        "freeboard_m": _coerce(d.get("freeboard_m"), Decimal),
-        "actual_soffit_level_m": _coerce(d.get("actual_soffit_level_m"), Decimal),
-        "waterway_required_m2": _coerce(d.get("waterway_required_m2"), Decimal),
-        "waterway_provided_m2": _coerce(d.get("waterway_provided_m2"), Decimal),
-        "lacey_silt_factor": _coerce(d.get("lacey_silt_factor"), Decimal),
-        "regime_perimeter_m": _coerce(d.get("regime_perimeter_m"), Decimal),
-        "regime_depth_m": _coerce(d.get("regime_depth_m"), Decimal),
-        "regime_velocity_mps": _coerce(d.get("regime_velocity_mps"), Decimal),
-        "afflux_m": _coerce(d.get("afflux_m"), Decimal),
-        "max_afflux_allowable_m": _coerce(d.get("max_afflux_allowable_m"), Decimal),
-        "water_source_type": _lookup_enum(t.WaterSourceType, d.get("water_source_type")),
-        "river_bed_slope_m_per_km": _coerce(d.get("river_bed_slope_m_per_km"), Decimal),
-        "catchment_area_sqkm": _coerce(d.get("catchment_area_sqkm"), Decimal),
-        "return_period_yr": _lookup_enum(t.FloodReturnPeriodDesign, d.get("return_period_yr")),
-        "any_regime_equation_not_applied_flag": _coerce(
-            d.get("any_regime_equation_not_applied_flag"), bool
-        ),
-        "highest_recorded_flood_year": _coerce(d.get("highest_recorded_flood_year"), int),
-    }
-
-
-def _parse_materials(ws: Any, m: Any, t: Any) -> dict:
-    d = _sheet_to_dict(ws)
-    return {
-        "concrete_superstructure": _lookup_enum(t.ConcreteGrade, d.get("concrete_superstructure")),
-        "concrete_substructure": _lookup_enum(t.ConcreteGrade, d.get("concrete_substructure")),
-        "concrete_foundation": _lookup_enum(t.ConcreteGrade, d.get("concrete_foundation")),
-        "reinforcement_steel_grade": _lookup_enum(t.SteelGrade, d.get("reinforcement_steel_grade")),
-        "prestressing_steel": _lookup_enum(t.PrestressGrade, d.get("prestressing_steel")),
-        "bearing_type": _lookup_enum(t.BearingType, d.get("bearing_type")),
-        "expansion_joint_type": _lookup_enum(t.ExpansionJointType, d.get("expansion_joint_type")),
-        "wearing_coat_material_type": _lookup_enum(
-            t.WearingCoatType, d.get("wearing_coat_material_type")
-        ),
-        "wearing_coat_grade": _lookup_enum(t.WearingCoatGrade, d.get("wearing_coat_grade")),
-    }
-
-
 def _parse_bearings_joints(ws: Any, m: Any, t: Any) -> dict:
     """Parse S10 — bearing_schedule and expansion_joint_schedule tabular blocks."""
     bearing_rows: list[dict] = []
@@ -466,102 +306,6 @@ def _parse_bearings_joints(ws: Any, m: Any, t: Any) -> dict:
     }
 
 
-def _parse_components_lib(ws: Any, m: Any, t: Any) -> dict:
-    d = _sheet_to_dict(ws)
-    return {k: _coerce(v, str) for k, v in d.items()}
-
-
-def _parse_drawing_control(ws: Any, m: Any, t: Any) -> dict:
-    d = _sheet_to_dict(ws)
-    # output_formats may be comma-separated
-    fmt_raw = d.get("output_formats", "")
-    output_formats = []
-    for f in str(fmt_raw).split(","):
-        e = _lookup_enum(t.OutputFormat, f.strip())
-        if e:
-            output_formats.append(e)
-    return {
-        "output_formats": output_formats or [t.OutputFormat.DXF],
-        "autocad_version": _lookup_enum(t.AcadVersion, d.get("autocad_version")),
-        "sheet_size": _lookup_enum(t.SheetSize, d.get("sheet_size")),
-        "drawing_scale": _lookup_enum(t.DrawingScale, d.get("drawing_scale")),
-        "gen_plan_sheet": _coerce(d.get("gen_plan_sheet"), bool),
-        "gen_long_section_sheet": _coerce(d.get("gen_long_section_sheet"), bool),
-        "gen_cross_section_sheet": _coerce(d.get("gen_cross_section_sheet"), bool),
-        "gen_foundation_sheet": _coerce(d.get("gen_foundation_sheet"), bool),
-        "gen_reinforcement_sheet": _coerce(d.get("gen_reinforcement_sheet"), bool),
-        "gen_pier_details_sheet": _coerce(d.get("gen_pier_details_sheet"), bool),
-        "gen_abutment_details_sheet": _coerce(d.get("gen_abutment_details_sheet"), bool),
-        "gen_bearings_joints_sheet": _coerce(d.get("gen_bearings_joints_sheet"), bool),
-        "gen_boq_sheet": _coerce(d.get("gen_boq_sheet"), bool),
-        "gen_cover_sheet": _coerce(d.get("gen_cover_sheet"), bool),
-        "gen_legends_sheet": _coerce(d.get("gen_legends_sheet"), bool),
-        "gen_hydraulics_sheet": _coerce(d.get("gen_hydraulics_sheet"), bool),
-        "layer_standard": _lookup_enum(t.LayerStandard, d.get("layer_standard")),
-        "title_block_style": _lookup_enum(t.TitleBlockStyle, d.get("title_block_style")),
-        "dimension_precision_mm": _coerce(d.get("dimension_precision_mm"), int),
-        "text_height_scale_factor": _coerce(d.get("text_height_scale_factor"), Decimal),
-        "lineweight_scale_factor": _coerce(d.get("lineweight_scale_factor"), Decimal),
-        "drawing_border_inside_mm": _coerce(d.get("drawing_border_inside_mm"), int),
-        "revision_block_count": _coerce(d.get("revision_block_count"), int),
-        "legend_sheet_required": _coerce(d.get("legend_sheet_required"), bool),
-    }
-
-
-def _parse_calculations(ws: Any, m: Any, t: Any) -> dict:
-    d = _sheet_to_dict(ws)
-    return {
-        "total_length_m": _coerce(d.get("total_length_m"), Decimal),
-        "span_count": _coerce(d.get("span_count"), int),
-        "span_depth_ratio": _coerce(d.get("span_depth_ratio"), Decimal),
-        "deck_area_sqm": _coerce(d.get("deck_area_sqm"), Decimal),
-        "overall_width_check_ok": _coerce(d.get("overall_width_check_ok"), bool),
-        "concrete_volume_superstructure_cum": _coerce(
-            d.get("concrete_volume_superstructure_cum"), Decimal
-        ),
-        "concrete_volume_substructure_cum": _coerce(
-            d.get("concrete_volume_substructure_cum"), Decimal
-        ),
-        "concrete_volume_foundation_cum": _coerce(d.get("concrete_volume_foundation_cum"), Decimal),
-        "rebar_weight_tonnes_approx": _coerce(d.get("rebar_weight_tonnes_approx"), Decimal),
-        "prestress_tonnes_approx": _coerce(d.get("prestress_tonnes_approx"), Decimal),
-        "bearing_count": _coerce(d.get("bearing_count"), int),
-        "expansion_joint_count": _coerce(d.get("expansion_joint_count"), int),
-        "total_estimated_quantity_cost_inr": _coerce(
-            d.get("total_estimated_quantity_cost_inr"), Decimal
-        ),
-        "design_scour_vs_foundation_cover_ok": _coerce(
-            d.get("design_scour_vs_foundation_cover_ok"), bool
-        ),
-        "waterway_check_pass": _coerce(d.get("waterway_check_pass"), bool),
-        "afflux_ok": _coerce(d.get("afflux_ok"), bool),
-        "freeboard_actual_m": _coerce(d.get("freeboard_actual_m"), Decimal),
-        "minimum_vertical_clearance_m": _coerce(d.get("minimum_vertical_clearance_m"), Decimal),
-        "horizontal_clearance_m": _coerce(d.get("horizontal_clearance_m"), Decimal),
-    }
-
-
-def _parse_validation_sheet(ws: Any, m: Any, t: Any) -> dict:
-    d = _sheet_to_dict(ws)
-    return {
-        "overall_status": _coerce(d.get("overall_status"), str),
-        "critical_fail_count": _coerce(d.get("critical_fail_count"), int),
-        "warning_count": _coerce(d.get("warning_count"), int),
-        "info_count": _coerce(d.get("info_count"), int),
-        "score_0_to_100": _coerce(d.get("score_0_to_100"), Decimal),
-        "score_irc05": _coerce(d.get("score_irc05"), Decimal),
-        "score_irc21": _coerce(d.get("score_irc21"), Decimal),
-        "score_ircsp55": _coerce(d.get("score_ircsp55"), Decimal),
-        "score_structural": _coerce(d.get("score_structural"), Decimal),
-        "score_hydraulic": _coerce(d.get("score_hydraulic"), Decimal),
-        "score_drawing_standards": _coerce(d.get("score_drawing_standards"), Decimal),
-        "report_html_or_pdf_generated_flag": _coerce(
-            d.get("report_html_or_pdf_generated_flag"), bool
-        ),
-        "check_version_tag": _coerce(d.get("check_version_tag"), str),
-    }
-
-
 # ---------------------------------------------------------------------------
 # Sheet name normaliser — tolerates minor spelling variations
 # ---------------------------------------------------------------------------
@@ -605,20 +349,23 @@ _SHEET_ALIASES: dict[str, str] = {
 }
 
 _PARSERS = {
+    # Bespoke parsers: the workbook's own spellings / multi-row layouts.
     "S01": _parse_project_master,
     "S02": _parse_bridge_selection,
     "S03": _parse_geometry_input,
-    "S04": _parse_superstructure,
-    "S05": _parse_substructure,
-    "S06": _parse_foundation_details,
-    "S07": _parse_approaches,
-    "S08": _parse_hydraulic_data,
-    "S09": _parse_materials,
     "S10": _parse_bearings_joints,
-    "S11": _parse_components_lib,
-    "S12": _parse_drawing_control,
-    "S13": _parse_calculations,
-    "S14": _parse_validation_sheet,
+    # Flat sheets: read every declared field straight from the model, so the
+    # reader can never silently drop a column the writer emitted.
+    "S04": _generic("Superstructure"),
+    "S05": _generic("Substructure"),
+    "S06": _generic("FoundationDetails"),
+    "S07": _generic("Approaches"),
+    "S08": _generic("HydraulicData"),
+    "S09": _generic("Materials"),
+    "S11": _generic("ComponentsLib"),
+    "S12": _generic("DrawingControl"),
+    "S13": _generic("Calculations"),
+    "S14": _generic("ValidationModel"),
 }
 
 _MODEL_KEYS = {
@@ -809,6 +556,8 @@ def read_excel(path: str | Path) -> BridgeProject:
         If openpyxl is not installed.
     FileNotFoundError
         If the workbook does not exist.
+    ExcelParseError
+        If the file is not a readable workbook (truncated, renamed, corrupt).
     ValueError
         If the workbook is neither a 14-sheet contract workbook nor a
         recognisable legacy workbook.
@@ -821,7 +570,17 @@ def read_excel(path: str | Path) -> BridgeProject:
         raise FileNotFoundError(f"Workbook not found: {path}")
 
     m, t = _core()
-    wb = openpyxl.load_workbook(path, data_only=True)
+    try:
+        wb = openpyxl.load_workbook(path, data_only=True)
+    except Exception as exc:
+        # A truncated or renamed file reaches openpyxl as a bad ZIP, and a
+        # corrupt one as a missing-part KeyError. Both must arrive as the
+        # documented parse error, not as a zipfile/openpyxl traceback.
+        raise ExcelParseError(
+            f"Workbook could not be opened ({type(exc).__name__}: {exc})",
+            file=path,
+            suggestion="the file must be an .xlsx workbook written by generate_template()",
+        ) from exc
 
     # Map each worksheet to its canonical sheet ID
     sheet_map: dict[str, Any] = {}

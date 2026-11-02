@@ -25,6 +25,10 @@ class BillItem:
     amount: Decimal | None = None  # quantity × rate
     ref: str = ""  # MORTH clause reference
     remarks: str = ""
+    # Provenance, attached by processor.extract_and_price(). Empty when the
+    # line was built without a project (never silently "calculated").
+    status: str = ""
+    basis: str = ""
 
     def compute_amount(self) -> Decimal | None:
         if self.rate is not None and self.quantity > 0:
@@ -79,6 +83,11 @@ class BillOfQuantities:
 
     def all_items(self) -> list[BillItem]:
         return [item for sec in self.sections for item in sec.items]
+
+    @property
+    def items(self) -> list[BillItem]:
+        """Flat view of every line. `boq.items` used to raise AttributeError."""
+        return self.all_items()
 
 
 @dataclass

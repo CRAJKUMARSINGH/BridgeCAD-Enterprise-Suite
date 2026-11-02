@@ -139,6 +139,11 @@ PRESTRESS_SPECS: dict[str, PrestressSpec] = {
 }
 
 
+def prestress_spec(grade: str) -> PrestressSpec | None:
+    """Return prestressing steel specification for a given grade."""
+    return PRESTRESS_SPECS.get(grade.upper())
+
+
 # ---------------------------------------------------------------------------
 # Bituminous Wearing Coat — MORTH Clause 500–510
 # ---------------------------------------------------------------------------
@@ -147,10 +152,10 @@ PRESTRESS_SPECS: dict[str, PrestressSpec] = {
 @dataclass(frozen=True)
 class BituminousSpec:
     type: str  # BC / SMA / DBM / SDBC / OGFC
-    thickness_mm: tuple  # (min, max)
-    voids_pct: tuple  # air voids range
+    thickness_mm: tuple[int, int]  # (min, max) layer thickness
+    voids_pct: tuple[int, int]  # air voids range, % of mix volume
     stability_kN: float  # Marshall stability minimum
-    flow_mm: tuple  # Marshall flow range
+    flow_mm: tuple[int, int]  # Marshall flow range
     bitumen_grade: str  # VG-30 | VG-40 | PMB-40 | PMB-45
     clause: str
 
@@ -162,6 +167,11 @@ BITUMINOUS_SPECS: dict[str, BituminousSpec] = {
     "SDBC": BituminousSpec("SDBC", (20, 25), (3, 5), 8.0, (2, 4), "VG-30", "MORTH Cl.510"),
     "OGFC": BituminousSpec("OGFC", (25, 40), (18, 22), 5.0, (2, 4), "PMB-40", "MORTH Cl.510"),
 }
+
+
+def bituminous_spec(layer_type: str) -> BituminousSpec | None:
+    """Return bituminous layer specification for a given layer type."""
+    return BITUMINOUS_SPECS.get(layer_type.upper())
 
 
 # ---------------------------------------------------------------------------
@@ -222,8 +232,10 @@ __all__ = [
     "rebar_spec",
     "PrestressSpec",
     "PRESTRESS_SPECS",
+    "prestress_spec",
     "BituminousSpec",
     "BITUMINOUS_SPECS",
+    "bituminous_spec",
     "TEST_FREQUENCIES",
     "CONTRACT_CLAUSES",
     "contract_clause",

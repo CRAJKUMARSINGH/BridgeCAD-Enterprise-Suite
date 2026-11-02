@@ -15,6 +15,8 @@ def create_bundle(
     output_dir: Path,
     prefix: str,
     results: dict[str, list[Path]],
+    project: Any = None,
+    failures: dict[str, str] | None = None,
 ) -> Path:
     """Create a ZIP bundle containing all generated files + a manifest.
 
@@ -36,6 +38,31 @@ def create_bundle(
         "prefix": prefix,
         "contents": {},
     }
+
+    # The review label and the scaffold list are DERIVED, never typed. Before
+    # this, build_manifest() existed but create_bundle() never called it, so the
+    # "not reviewed for construction" promise in the README was absent from
+    # every shipped bundle.
+    if project is not None:
+        try:
+            manifest.update(build_manifest(project))
+        except Exception as exc:  # never fail an export over a label
+            manifest["review_label"] = "Generated — not reviewed for construction"
+            manifest["manifest_error"] = f"{type(exc).__name__}: {exc}"
+
+        # BOQ auditability: how much of the priced bill is calculated vs guessed.
+        try:
+            from bridgecad_bill.processor import build_boq
+            from bridgecad_bill.provenance import section_summary
+
+            manifest["boq_provenance"] = section_summary(build_boq(project))
+        except Exception as exc:
+            manifest["boq_provenance"] = {"error": f"{type(exc).__name__}: {exc}"}
+    else:
+        manifest["review_label"] = "Generated — not reviewed for construction"
+
+    if failures:
+        manifest["failed_stages"] = dict(failures)
 
     all_files: list[Path] = []
     for category, paths in results.items():

@@ -24,7 +24,7 @@ dependencies = [
 ]
 
 [project.scripts]
-bridgecad = "bridgecad_cli.main:app"
+bridgecad-cli = "bridgecad_cli.main:app"
 
 [tool.setuptools]
 packages = ["bridgecad_cli"]

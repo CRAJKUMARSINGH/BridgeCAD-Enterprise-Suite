@@ -1,0 +1,12 @@
+{
+  "plugin_id":              "voided_slab",
+  "version":                "1.0.0",
+  "name":                   "RCC Voided Slab Bridge",
+  "description":            "RCC slab with longitudinal voids per IRC:21-2000 for spans 8-20 m",
+  "bridge_types":           ["VOIDED_SLAB"],
+  "span_range_m":           [8, 20],
+  "default_values_yaml":    "defaults.yaml",
+  "draw_overrides_module":  "draw_overrides",
+  "author":                 "BridgeCAD Team",
+  "requires_core":          ">=0.1.0"
+}

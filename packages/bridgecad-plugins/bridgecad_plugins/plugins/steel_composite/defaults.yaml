@@ -1,0 +1,35 @@
+# Steel-Concrete Composite Bridge typical default values (IRC:24-2010 / IRC:112-2020)
+# Merged into project_dict when this plugin is activated.
+
+superstructure:
+  deck_material:              "M40"
+  deck_thickness_mm:          250
+  wearing_coat_type:          "BITUMINOUS_CONCRETE_BC"
+  wearing_coat_thickness_mm:  65
+  girder_type:                "STEEL_COMPOSITE"
+  camber_mm:                  0
+
+substructure:
+  pier_type:            "WALL"
+  pier_material:        "M35"
+  abutment_type:        "CANTILEVER"
+  abutment_material:    "M35"
+
+foundation_details:
+  type:              "OPEN"
+  pile_type:         "BORED_CAST_IN_SITU"
+  pile_diameter_mm:  0
+  piles_per_pier:    0
+
+materials:
+  concrete_superstructure:   "M40"
+  concrete_substructure:     "M35"
+  concrete_foundation:       "M30"
+  reinforcement_steel_grade: "Fe500D"
+  bearing_type:              "POT_PTFE"
+  expansion_joint_type:      "SINGLE_MODULAR"
+
+# Span/depth ratios (IRC:24-2010 / IRC:112-2020)
+span_depth_ratios:
+  simply_supported:   22
+  continuous:         26

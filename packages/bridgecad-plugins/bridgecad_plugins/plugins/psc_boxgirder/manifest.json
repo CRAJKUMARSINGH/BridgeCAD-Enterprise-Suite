@@ -1,0 +1,12 @@
+{
+  "plugin_id":              "psc_boxgirder",
+  "version":                "1.0.0",
+  "name":                   "PSC Box Girder Bridge",
+  "description":            "Pre-stressed concrete single-cell box girder per IRC:112-2020 for spans 25-60 m",
+  "bridge_types":           ["PSC_BOX_GIRDER"],
+  "span_range_m":           [25, 60],
+  "default_values_yaml":    "defaults.yaml",
+  "draw_overrides_module":  "draw_overrides",
+  "author":                 "BridgeCAD Team",
+  "requires_core":          ">=0.1.0"
+}

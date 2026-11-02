@@ -1,0 +1,12 @@
+{
+  "plugin_id":              "solid_slab",
+  "version":                "1.0.0",
+  "name":                   "RCC Solid Slab Bridge",
+  "description":            "Simply supported RCC solid slab deck per IRC:21-2000 for spans 3-10 m",
+  "bridge_types":           ["SOLID_SLAB"],
+  "span_range_m":           [3, 10],
+  "default_values_yaml":    "defaults.yaml",
+  "draw_overrides_module":  "draw_overrides",
+  "author":                 "BridgeCAD Team",
+  "requires_core":          ">=0.1.0"
+}

@@ -28,11 +28,19 @@ class LineStatus(str, Enum):
     ESTIMATED = "estimated"
     NOT_CALCULATED = "not_calculated"
 
+    def __str__(self) -> str:
+        # Without this, f"{status}" and str(status) yield
+        # "LineStatus.CALCULATED" and that leaks into reports and notes.
+        return self.value
+
 
 class RateSource(str, Enum):
     MORTH_2024_25 = "MORTH_2024_25"
     PWD_OVERRIDE = "PWD_OVERRIDE"
     MISSING = "missing"
+
+    def __str__(self) -> str:
+        return self.value
 
 
 @dataclass

@@ -189,6 +189,9 @@ unsupported}` per field before any heavy work starts.
 `Excel → model → Excel` must drift by ≤5%, cosmetic only. If a change makes a
 workbook fail to round-trip, the change is wrong.
 
+The measured per-format budget — and the tests that hold it — is in
+[docs/interop.md](docs/interop.md).
+
 ---
 
 ## 5. Standard workflows

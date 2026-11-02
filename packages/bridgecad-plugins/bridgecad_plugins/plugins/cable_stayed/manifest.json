@@ -1,0 +1,12 @@
+{
+  "plugin_id":              "cable_stayed",
+  "version":                "1.0.0",
+  "name":                   "Cable-Stayed Bridge",
+  "description":            "Fan / semi-fan cable-stayed deck per IRC:112-2020 and IRC SP:119 for spans 100-400 m",
+  "bridge_types":           ["CABLE_STAYED"],
+  "span_range_m":           [100, 400],
+  "default_values_yaml":    "defaults.yaml",
+  "draw_overrides_module":  "draw_overrides",
+  "author":                 "BridgeCAD Team",
+  "requires_core":          ">=0.1.0"
+}

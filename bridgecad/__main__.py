@@ -59,7 +59,6 @@ def app() -> int:
         suites = root / "packages" / "bridgecad-core"
         print("[bridgecad] verify :: day3_verify.py + day4_verify.py")
         # Execute both scripts in-process so sitecustomize.paths stays intact.
-        import subprocess
         py = sys.executable
         rc3 = subprocess.call([py, str(suites / "day3_verify.py")])
         rc4 = subprocess.call([py, str(suites / "day4_verify.py")])
@@ -78,7 +77,6 @@ def app() -> int:
             print(f"[bridgecad] generate :: unknown variant {variant!r}")
             return 2
         print(f"[bridgecad] generate :: {script.name}")
-        import subprocess
         return subprocess.call([sys.executable, str(script), *argv[2:]])
 
     # ── qa ────────────────────────────────────────────────────────────
@@ -135,16 +133,16 @@ def app() -> int:
                                   "piers", "abutments", "soils", "standards",
                                   "loads", "validation_model", "project_id", "revision"}
                     })
+        from bridgecad_core.validation import run_all
         from bridgecad_qa.compliance import score            # type: ignore
-        grade, score_num, notes = score(project)
+        # score() consumes a ValidationReport, not a project.
+        report = run_all(project)
+        comp = score(report)
         print(f"[bridgecad] qa :: {path.name}")
-        print(f"  Grade    : {grade}")
-        print(f"  Score    : {score_num}/100")
-        if isinstance(notes, list):
-            for n in notes:
-                print(f"  Note     : {n}")
-        else:
-            print(f"  Notes    : {notes}")
+        print(f"  Grade    : {comp.grade}")
+        print(f"  Score    : {comp.overall}/100")
+        print(f"  IRC:5    : {comp.irc05}   IRC:21/112 : {comp.irc21}   SP:55 : {comp.irc_sp55}")
+        print(f"  Critical : {comp.critical_fails}   Warnings : {comp.warning_fails}")
         return 0
 
     # ── calc-sheet ────────────────────────────────────────────────────

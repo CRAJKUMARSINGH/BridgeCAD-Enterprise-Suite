@@ -17,8 +17,11 @@ M2 Week 2 implementation.
 from __future__ import annotations
 
 import logging
+from enum import Enum
 from pathlib import Path
 from typing import Any
+
+from ._fields import base_annotation, flat_kind, list_element, value_to_cell
 
 logger = logging.getLogger(__name__)
 
@@ -171,6 +174,25 @@ def _numeric_dv(ws: Any, cell_ref: str, min_v: float, max_v: float) -> None:
 # ---------------------------------------------------------------------------
 def _enum_options(enum_cls: Any) -> list[str]:
     return [m.name for m in enum_cls]
+
+
+def _flat_field_names(model_cls: Any) -> list[str]:
+    """Names of the model's flat (single-cell) fields, excluding computed ones."""
+    computed = set(getattr(model_cls, "model_computed_fields", ()) or ())
+    return [
+        name
+        for name, field in model_cls.model_fields.items()
+        if name not in computed and flat_kind(field.annotation) is not None
+    ]
+
+
+def _enum_class(annotation: Any) -> Any:
+    """Return the Enum class behind a flat annotation (or list-of-enum), else None."""
+    elem = list_element(annotation)
+    base = elem if elem is not None else base_annotation(annotation)
+    if isinstance(base, type) and issubclass(base, Enum):
+        return base
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -392,98 +414,86 @@ def _build_geometry_input(wb: Any, t: Any, project: Any = None) -> Any:
     )
     row += 1
 
-    dimensional_fields = [
-        (
-            "carriageway_width_m",
-            float(getattr(gi, "carriageway_width_m", 7.5) or 7.5),
-            "m",
-            "Clear carriageway, IRC:86 (3.5–30 m)",
-        ),
-        (
-            "footpath_left_m",
-            float(getattr(gi, "footpath_left_m", 0) or 0),
-            "m",
-            "Left footpath (0 if absent)",
-        ),
-        (
-            "footpath_right_m",
-            float(getattr(gi, "footpath_right_m", 0) or 0),
-            "m",
-            "Right footpath (0 if absent)",
-        ),
-        (
-            "crash_barrier_width_left_m",
-            float(getattr(gi, "crash_barrier_width_left_m", 0) or 0),
-            "m",
-            "Left crash barrier",
-        ),
-        (
-            "crash_barrier_width_right_m",
-            float(getattr(gi, "crash_barrier_width_right_m", 0) or 0),
-            "m",
-            "Right crash barrier",
-        ),
-        ("kerb_width_left_m", float(getattr(gi, "kerb_width_left_m", 0) or 0), "m", "Left kerb"),
-        ("kerb_width_right_m", float(getattr(gi, "kerb_width_right_m", 0) or 0), "m", "Right kerb"),
-        (
-            "median_width_m",
-            float(getattr(gi, "median_width_m", 0) or 0),
-            "m",
-            "Median (0 = undivided)",
-        ),
-        (
-            "skew_angle_deg",
-            float(getattr(gi, "skew_angle_deg", 0) or 0),
-            "°",
-            "Skew (0–60°, IRC:112)",
-        ),
-        ("camber_mm", getattr(gi, "camber_mm", 0) or 0, "mm", "Crown height at CL"),
-        (
-            "gradient_pct",
-            float(getattr(gi, "gradient_pct", 0) or 0),
-            "%",
-            "Longitudinal slope (±8 %)",
-        ),
-        (
-            "chainage_start_km",
-            float(getattr(gi, "chainage_start_km", 0) or 0),
-            "km",
-            "Start chainage",
-        ),
-        ("chainage_end_km", float(getattr(gi, "chainage_end_km", 0) or 0), "km", "End chainage"),
-        (
-            "pavement_thickness_total_mm",
-            getattr(gi, "pavement_thickness_total_mm", 500) or 500,
-            "mm",
-            "Total crust thickness",
-        ),
-    ]
-    for label, value, unit, desc in dimensional_fields:
-        _field_row(ws, row, label, value, unit, desc)
-        row += 1
+    from bridgecad_core import models as m
 
-    # Enum dropdowns for fixed rows (alignment at row 4, skew at rows after dims)
-    _dropdown(ws, "B4", _enum_options(t.AlignmentType), "Alignment type")
-    _dropdown(ws, "B18", _enum_options(t.SkewDirection), "Skew direction (NONE/LEFT/RIGHT)")
-    _dropdown(ws, "B19", _enum_options(t.ChainageUnit), "Chainage unit")
-    _dropdown(ws, "B23", _enum_options(t.KerbType), "Kerb type")
-    _dropdown(ws, "B24", _enum_options(t.FootpathType), "Footpath type")
-    _dropdown(ws, "B25", _enum_options(t.MedianType), "Median type")
-    _dropdown(ws, "B26", _enum_options(t.CrashBarrierType), "Crash barrier type")
-    _dropdown(ws, "B20", _enum_options(t.CamberMethod), "Camber method")
+    meta = {
+        "carriageway_width_m": ("m", "Clear carriageway, IRC:86 (3.5–30 m)"),
+        "footpath_left_m": ("m", "Left footpath (0 if absent)"),
+        "footpath_right_m": ("m", "Right footpath (0 if absent)"),
+        "crash_barrier_width_left_m": ("m", "Left crash barrier"),
+        "crash_barrier_width_right_m": ("m", "Right crash barrier"),
+        "kerb_width_left_m": ("m", "Left kerb"),
+        "kerb_width_right_m": ("m", "Right kerb"),
+        "median_width_m": ("m", "Median (0 = undivided)"),
+        "skew_angle_deg": ("°", "Skew (0–60°, IRC:112)"),
+        "camber_mm": ("mm", "Crown height at CL"),
+        "gradient_pct": ("%", "Longitudinal slope (±8 %)"),
+        "chainage_start_km": ("km", "Start chainage"),
+        "chainage_end_km": ("km", "End chainage"),
+        "pavement_thickness_total_mm": ("mm", "Total crust thickness"),
+    }
+    row_of: dict[str, int] = {}
+    for name in _flat_field_names(m.GeometryInput):
+        if name == "span_count":  # written above, next to the span lengths
+            continue
+        ann = m.GeometryInput.model_fields[name].annotation
+        unit, desc = meta.get(name, ("", name.replace("_", " ").title()))
+        value = value_to_cell(getattr(gi, name, None), ann) if gi is not None else ""
+        _field_row(ws, row, name, value, unit, desc)
+        row_of[name] = row
+        row += 1
+    for name in _flat_field_names(m.GeometryInput):
+        enum_cls = _enum_class(m.GeometryInput.model_fields[name].annotation)
+        if enum_cls is not None and name in row_of:
+            _dropdown(ws, f"B{row_of[name]}", _enum_options(enum_cls), name.replace("_", " "))
     _set_widths(ws, [32, 18, 10, 50])
     return ws
 
 
-def _build_generic_sheet(wb: Any, sheet_name: str, title: str, fields: list[tuple], t: Any) -> Any:
-    """Generic 4-column field sheet builder."""
+def _build_generic_sheet(
+    wb: Any,
+    sheet_name: str,
+    title: str,
+    fields: list[tuple],
+    t: Any,
+    *,
+    model_cls: Any = None,
+    obj: Any = None,
+    calculated: bool = False,
+) -> Any:
+    """Generic 4-column field sheet builder.
+
+    When ``model_cls`` is supplied the sheet is written *from the model*: every
+    flat field the model declares is emitted, so the reader can never lose a
+    value the writer produced. In that mode ``fields`` only supplies
+    ``(name, _, unit, description)`` annotations for the cells. Without
+    ``model_cls`` the sheet is written verbatim from ``fields`` (used for the
+    AUTO summary sheets).
+    """
     ws = wb.create_sheet(sheet_name)
     _title_row(ws, 1, title)
     _header_row(ws, 2, ["Field", "Value", "Unit", "Description"])
-    for i, row_data in enumerate(fields, 3):
-        label, value, unit, desc = row_data[0], row_data[1], row_data[2], row_data[3]
-        calc = row_data[4] if len(row_data) > 4 else False
-        _field_row(ws, i, label, value, unit, desc, calculated=calc)
+
+    if model_cls is not None:
+        meta = {row[0]: row for row in fields}
+        row_of: dict[str, int] = {}
+        for i, name in enumerate(_flat_field_names(model_cls), 3):
+            row_of[name] = i
+            ann = model_cls.model_fields[name].annotation
+            row = meta.get(name)
+            unit = row[2] if row and len(row) > 2 else ""
+            desc = row[3] if row and len(row) > 3 else name.replace("_", " ").title()
+            value = value_to_cell(getattr(obj, name, None), ann) if obj is not None else ""
+            _field_row(ws, i, name, value, unit, desc, calculated=calculated)
+        for name in _flat_field_names(model_cls):
+            enum_cls = _enum_class(model_cls.model_fields[name].annotation)
+            if enum_cls is not None and name in row_of:
+                _dropdown(ws, f"B{row_of[name]}", _enum_options(enum_cls), name.replace("_", " "))
+    else:
+        for i, row_data in enumerate(fields, 3):
+            label, value, unit, desc = row_data[0], row_data[1], row_data[2], row_data[3]
+            calc = row_data[4] if len(row_data) > 4 else False
+            _field_row(ws, i, label, value, unit, desc, calculated=calc)
     _set_widths(ws, [30, 22, 12, 50])
     return ws
 
@@ -595,6 +605,7 @@ def generate_template(
     output_path: str | Path,
     project: Any = None,
     title: str = "BridgeCAD Enterprise — 14-Sheet GAD Workbook",
+    _fast_mode: bool = False,
 ) -> Path:
     """Generate a 14-sheet styled Excel workbook.
 
@@ -616,7 +627,8 @@ def generate_template(
     if not _OPENPYXL_AVAILABLE:
         raise ImportError("openpyxl is required: pip install openpyxl")
 
-    # Lazy import
+    # Lazy imports
+    from bridgecad_core import models as m
     from bridgecad_core import types as t
 
     output_path = Path(output_path)
@@ -705,6 +717,8 @@ def generate_template(
             ("camber_mm", getattr(ss, "camber_mm", 30) if ss else 0, "mm", "Pre-camber at CL"),
         ],
         t,
+        model_cls=m.Superstructure,
+        obj=ss,
     )
 
     sub = project.substructure if project else None
@@ -775,6 +789,8 @@ def generate_template(
             ),
         ],
         t,
+        model_cls=m.Substructure,
+        obj=sub,
     )
 
     fd = project.foundation_details if project else None
@@ -845,24 +861,32 @@ def generate_template(
             ),
         ],
         t,
+        model_cls=m.FoundationDetails,
+        obj=fd,
     )
 
-    # S07–S09: approaches, hydraulics, materials (abbreviated)
-    generic_sheets: list[tuple[str, str, list[tuple]]] = [
+    # S07–S09: approaches, hydraulics, materials. The tuples below are pure
+    # (name, _, unit, description) annotation — every value is read from the
+    # model so the sheet and the model can never drift apart.
+    generic_sheets: list[tuple[str, str, Any, Any, list[tuple]]] = [
         (
             "APPROACHES",
             "S07 — APPROACHES",
+            m.Approaches,
+            project.approaches if project else None,
             [
-                ("left_approach_length_m", 45.0, "m", "Left approach road length"),
-                ("right_approach_length_m", 55.0, "m", "Right approach road length"),
-                ("type_of_embankment", "SELECT GRANULAR MOORUM", "", "Fill specification"),
-                ("guide_rail_required", True, "", "Guide rail (TRUE/FALSE)"),
-                ("speed_limit_on_approach_kmph", 60, "kmph", "Design speed on approach"),
+                ("left_approach_length_m", 0, "m", "Left approach road length"),
+                ("right_approach_length_m", 0, "m", "Right approach road length"),
+                ("type_of_embankment", "", "", "Fill specification"),
+                ("guide_rail_required", False, "", "Guide rail (TRUE/FALSE)"),
+                ("speed_limit_on_approach_kmph", 0, "kmph", "Design speed on approach"),
             ],
         ),
         (
             "HYDRAULIC_DATA",
             "S08 — HYDRAULIC DATA",
+            m.HydraulicData,
+            project.hydraulic_data if project else None,
             [
                 ("hfl_m", 0.0, "m RL", "Highest Flood Level RL"),
                 ("lwl_m", 0.0, "m RL", "Low Water Level RL"),
@@ -872,32 +896,32 @@ def generate_template(
                 ("design_scour_depth_m", 0.0, "m", "Scour depth below HFL"),
                 ("freeboard_m", 2.0, "m", "Soffit - HFL clearance"),
                 ("lacey_silt_factor", 1.0, "-", "Lacey f = 1.76√(d50mm)"),
-                ("return_period_yr", "Q100_NHAI_NATIONAL_CORRIDOR", "", "Design return period"),
+                ("return_period_yr", "", "", "Design return period"),
             ],
         ),
         (
             "MATERIALS",
             "S09 — MATERIALS",
+            m.Materials,
+            project.materials if project else None,
             [
-                ("concrete_superstructure", "M40", "", "Deck concrete grade"),
-                ("concrete_substructure", "M30", "", "Pier/abutment grade"),
-                ("concrete_foundation", "M25", "", "Foundation grade"),
-                ("reinforcement_steel_grade", "Fe500D", "", "Rebar grade"),
-                ("prestressing_steel", "G1860", "", "Prestress strand grade"),
-                ("bearing_type", "POT_PTFE", "", "Primary bearing type"),
-                ("expansion_joint_type", "STRIP_SEAL", "", "Joint type"),
+                ("concrete_superstructure", "", "", "Deck concrete grade"),
+                ("concrete_substructure", "", "", "Pier/abutment grade"),
+                ("concrete_foundation", "", "", "Foundation grade"),
+                ("reinforcement_steel_grade", "", "", "Rebar grade"),
+                ("prestressing_steel", "", "", "Prestress strand grade"),
+                ("bearing_type", "", "", "Primary bearing type"),
+                ("expansion_joint_type", "", "", "Joint type"),
             ],
         ),
     ]
-    for sheet_name, title_str, fields in generic_sheets:
-        _build_generic_sheet(
-            wb, sheet_name, title_str, [(f[0], f[1], f[2], f[3]) for f in fields], t
-        )
+    for sheet_name, title_str, model_cls, obj, fields in generic_sheets:
+        _build_generic_sheet(wb, sheet_name, title_str, fields, t, model_cls=model_cls, obj=obj)
 
     # S10: bearings/joints tabular
     _build_bearings_joints(wb, t, project)
 
-    # S11–S14 generic
+    # S11–S14 model-driven
     _build_generic_sheet(
         wb,
         "COMPONENTS_LIB",
@@ -911,53 +935,63 @@ def generate_template(
             ("standard_expansion_joint_id", "", "", "Expansion joint ID"),
         ],
         t,
+        model_cls=m.ComponentsLib,
+        obj=project.components_lib if project else None,
     )
     _build_generic_sheet(
         wb,
         "DRAWING_CONTROL",
         "S12 — DRAWING CONTROL",
         [
-            ("output_formats", "DXF,PDF", "", "Comma-separated output formats"),
-            ("autocad_version", "R2018", "", "DXF version"),
-            ("sheet_size", "A1", "", "Drawing sheet size"),
-            ("drawing_scale", "100", "", "Plot scale denominator"),
-            ("gen_plan_sheet", True, "", "Generate plan sheet"),
-            ("gen_long_section_sheet", True, "", "Generate long section"),
-            ("gen_cross_section_sheet", True, "", "Generate cross section"),
-            ("gen_foundation_sheet", True, "", "Generate foundation details"),
-            ("layer_standard", "IRC", "", "Layer naming standard"),
-            ("title_block_style", "STANDARD", "", "Title block style"),
+            ("output_formats", "", "", "Comma-separated output formats"),
+            ("autocad_version", "", "", "DXF version"),
+            ("sheet_size", "", "", "Drawing sheet size"),
+            ("drawing_scale", "", "", "Plot scale denominator"),
+            ("gen_plan_sheet", False, "", "Generate plan sheet"),
+            ("gen_long_section_sheet", False, "", "Generate long section"),
+            ("gen_cross_section_sheet", False, "", "Generate cross section"),
+            ("gen_foundation_sheet", False, "", "Generate foundation details"),
+            ("layer_standard", "", "", "Layer naming standard"),
+            ("title_block_style", "", "", "Title block style"),
             ("dimension_precision_mm", 1, "mm", "Dimension decimal places"),
         ],
         t,
+        model_cls=m.DrawingControl,
+        obj=project.drawing_control if project else None,
     )
     _build_generic_sheet(
         wb,
         "CALCULATIONS",
         "S13 — CALCULATIONS (AUTO)",
         [
-            ("total_length_m", 0.0, "m", "AUTO from geometry", True),
-            ("span_count", 1, "nos", "AUTO from geometry", True),
-            ("deck_area_sqm", 0.0, "m²", "Length × overall_width", True),
-            ("concrete_volume_superstructure_cum", 0.0, "m³", "Estimated", True),
-            ("bearing_count", 0, "nos", "AUTO from schedule", True),
-            ("expansion_joint_count", 0, "nos", "AUTO from schedule", True),
-            ("freeboard_actual_m", 0.0, "m", "soffit_rl − hfl_rl", True),
+            ("total_length_m", 0.0, "m", "AUTO from geometry"),
+            ("span_count", 1, "nos", "AUTO from geometry"),
+            ("deck_area_sqm", 0.0, "m²", "Length × overall_width"),
+            ("concrete_volume_superstructure_cum", 0.0, "m³", "Estimated"),
+            ("bearing_count", 0, "nos", "AUTO from schedule"),
+            ("expansion_joint_count", 0, "nos", "AUTO from schedule"),
+            ("freeboard_actual_m", 0.0, "m", "soffit_rl − hfl_rl"),
         ],
         t,
+        model_cls=m.Calculations,
+        obj=project.calculations if project else None,
+        calculated=True,
     )
     _build_generic_sheet(
         wb,
         "VALIDATION",
         "S14 — VALIDATION SUMMARY",
         [
-            ("overall_status", "OK_PASS", "", "PASS / WARN / FAIL"),
+            ("overall_status", "", "", "PASS / WARN / FAIL"),
             ("critical_fail_count", 0, "nos", "Critical rule failures"),
             ("warning_count", 0, "nos", "Warning rule failures"),
             ("score_0_to_100", 100.0, "/100", "Compliance score"),
-            ("check_version_tag", "1.0.0", "", "Validator version"),
+            ("check_version_tag", "", "", "Validator version"),
         ],
         t,
+        model_cls=m.ValidationModel,
+        obj=project.validation if project else None,
+        calculated=True,
     )
 
     # Workbook properties

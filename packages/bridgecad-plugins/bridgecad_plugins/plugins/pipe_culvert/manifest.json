@@ -1,0 +1,12 @@
+{
+  "plugin_id":              "pipe_culvert",
+  "version":                "1.0.0",
+  "name":                   "RCC Pipe Culvert",
+  "description":            "Single or multi-barrel RCC NP3 pipe culvert per IS:458 and IRC SP:13 for 0.6-2.0 m dia",
+  "bridge_types":           ["PIPE_CULVERT_SINGLE", "PIPE_CULVERT_MULTI"],
+  "span_range_m":           [0.6, 2.0],
+  "default_values_yaml":    "defaults.yaml",
+  "draw_overrides_module":  "draw_overrides",
+  "author":                 "BridgeCAD Team",
+  "requires_core":          ">=0.1.0"
+}

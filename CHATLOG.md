@@ -355,3 +355,23 @@ Newest entries go at the bottom.
   --persona all --seed 42` → **BASIC/INTERMEDIATE/ADVANCED all `passed=True`**,
   exit 0, `reports/smoke_report_seed42.json` written. Nothing committed this
   turn.
+
+## 2026-11-02 09:27 IST — commit + push, and a robotic test guide
+
+- **Committed and pushed** `39f05eb` (see prior entry) → `origin/main`
+  (`5dfe1e4..39f05eb`). Scope was source/docs/tests only, per instruction:
+  `CODE-JUNCTION/`, `reports/`, and regenerated `outputs/` binaries excluded.
+  Windows stale `.git/index.lock` blocked staging twice; resolved via
+  `scripts/clear_stale_locks.py` then an editor-level unlink of the surviving
+  lock.
+- **Added `ROBOTIC-TEST-GUIDE.MD`** at the repo root (user request): a
+  copy-paste PowerShell playbook for exercising the app on demand — the
+  all-persona smoke, each persona individually, the full "green stack" sweep,
+  the release gate, a suggested cadence, and troubleshooting.
+- Written to respect the doc gates: only existing `scripts/*.py` appear in
+  fenced blocks; generated artefacts (`reports/*.json`, `outputs/*`) are named
+  inline (fences are what the path audit scans); no phantom-suite string; all
+  relative `.md` links resolve.
+- **Verified:** `python scripts/check_doc_paths.py` → OK; `pytest tests/docs -q
+  -m "not slow"` → **41 passed, 16 deselected**; `python scripts/verify_docs.py`
+  → **3 passed, 0 failed, 3 skipped**. New file is uncommitted.

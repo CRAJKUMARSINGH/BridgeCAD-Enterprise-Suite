@@ -123,6 +123,10 @@ tests/e2e/random_drawings/
 .bridge_repo_pdf_work/
 .vercel/
 
+# Persona robot walker output (screenshots + replay traces). The S1/S2 register
+# artifacts/TRIAGE_LOG.md stays tracked — only the per-run dumps are ignored.
+artifacts/robot/
+
 # React console audit dump (local analysis artifact)
 apps/web-console/audit_wc.json
 

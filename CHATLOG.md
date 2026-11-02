@@ -375,3 +375,163 @@ Newest entries go at the bottom.
 - **Verified:** `python scripts/check_doc_paths.py` → OK; `pytest tests/docs -q
   -m "not slow"` → **41 passed, 16 deselected**; `python scripts/verify_docs.py`
   → **3 passed, 0 failed, 3 skipped**. New file is uncommitted.
+
+## 2026-11-02 09:48 IST — Venice-patch, applied as an adapted safe subset
+
+- **Read `CODE-JUNCTION/Venice-patch/instructions.txt`** (1,713 lines). It is a
+  *persona test-plan + triage apparatus*, not a unified diff — so it was audited
+  claim-by-claim against the live tree. Applied the **adapted safe subset** the
+  user selected, not the verbatim drop.
+- **New harness (`tools/`):** `personas.py` (fixed the upstream `__WIDTHS`
+  NameError → `_WIDTHS`), `run_robot.py` (persona-weighted Playwright walker),
+  `triage.py` (failure → triage row), `gate.py` (merge gate reading the log).
+  Hardcoded `BridgeCAD Enterprise Suite/` paths removed; the flat repo root is
+  used instead.
+- **New register + playbooks:** `artifacts/TRIAGE_LOG.md`, root
+  `TRIAGE_AND_DEBUG.md`, root `PATCH_GUIDE.md` — all rewritten so no fenced
+  block names a nonexistent path, and the phantom-suite string is gone.
+- **Two upstream gate bugs fixed** so `make gates` is not red on day one: both
+  `gate.py` and `triage.py --metrics` now honour the Status column, so the
+  seeded `UNCONFIRMED` predictions do **not** count as open S1/S2. Verified: a
+  row flipped to `OPEN` is detected (12/12), baseline is 0.
+- **Makefile:** spliced (not replaced) `robot`, `robot-full`, `gates` targets +
+  `URL ?=`, leaving the existing `robotic` target intact.
+- **Deliberately NOT applied** (would overwrite live, tested files or break
+  gates): `tests/conftest.py`, `.github/ISSUE_TEMPLATE/config.yml`,
+  `.github/PULL_REQUEST_TEMPLATE.md`, the `.githooks/pre-push` hook, and a new
+  `docs/TEST_PLAN.md`. `artifacts/robot/` added to `.gitignore`; the log stays
+  tracked.
+- **Verified:** `python scripts/check_doc_paths.py` → OK; `python -m ruff check
+  tools/` + `format --check` → clean; `pytest tests/docs -q -m "not slow"` →
+  **41 passed, 16 deselected**; `python scripts/verify_docs.py` → **3 passed, 0
+  failed, 3 skipped**; `python tools/gate.py` → exit 0; `python tools/triage.py
+  --metrics` → `open S1=0 S2=0`. Nothing committed this turn.
+
+## 2026-11-02 09:51 IST — CODE-JUNCTION/1.TXT audited → NOT DUE (no change)
+
+- **Action:** audited the wiring-fix kit `CODE-JUNCTION/1.TXT` against the live
+  tree before applying. It is pinned to an old base commit (`c446a12`) and ships
+  an `apply_patch.py` that overwrites four core/package files, rewrites 7 plugin
+  dirs, and deletes marker files.
+- **Verdict:** every one of its six defects is already fixed in the live tree,
+  and the live fix is more thorough. The kit as a whole is **superseded**, and
+  applying it verbatim would be **destructive**.
+- **Per-defect audit (all already resolved):** 1) `standards/load_combinations.py`
+  exists and carries a *newer* IRC:6 + EN 1990 API (`LoadCase`, `IRC6_LOAD_CASES`,
+  `irc6_combinations`, `combinations_for`) — the kit would replace it with an
+  older, incompatible `Action`/`ALL_COMBINATIONS` table and break imports; 2) all
+  10 plugin dirs already ship real `manifest.json` + `defaults.yaml` +
+  `draw_overrides.py`, no bracket-named marker file; 3) `morth_specs.py` already
+  annotates `tuple[int, int]` at all three sites; 4) `standards/__init__.py`
+  already exports the full surface including `irc_sp55` constants and the
+  combination API; 5) `bridgecad_core/__init__.py` already exports IRC:5, IRC:21
+  and the combination API; 6) the mypy `files` key is absent but **moot** — every
+  invocation (`make typecheck` → `mypy packages apps`; CI → explicit per-package
+  paths) passes explicit paths, so `files` never takes effect and the
+  `warn_unused_configs` note never fires.
+- **Additionally stale:** `scripts/verify_wiring.py` already exists and is
+  *superior* (8 checks vs the kit's 7, plus a `bridge_types ∈ SuperstructureType`
+  check); `tests/plugins/` already exists with 6 passing tests. The kit's proposed
+  `tests/standards/test_load_combinations.py` imports symbols that no longer exist
+  → it would fail on arrival. Its root `PATCH_NOTES.md` would also be an
+  unregistered root markdown file (doc-gate risk).
+- **Evidence:** `python scripts/verify_wiring.py` → `WIRING OK — 10 plugins wired,
+  standards fully exported, no bare generics.` (exit 0); `pytest tests/plugins -q`
+  → **6 passed**.
+- **Decision:** apply nothing. No files written. Awaiting a genuine patch.
+```
+
+## 2026-11-02 10:44 IST — Venice-patch I2 applied as an adapted core (tools/ → scripts/robot/)
+
+Applied the follow-up Venice message (`CODE-JUNCTION/Venice-patch/I2.txt`) as the
+**adapted core** the user selected. I2 was written against a tree whose premises
+partly do not hold here, so two of its items were dropped with reason.
+
+**Two questions I2 asked, answered against this repo:**
+1. `scripts/mkdocs_hooks.py` stages root docs via an **explicit `STAGE`
+   allowlist** (GUIDE / README / CONTRIBUTING / CHANGELOG / SECURITY /
+   CODE_OF_CONDUCT / DOCS_INDEX) — no `rglob("*.md")`. A new root `.md` is never
+   auto-staged, so a new doc must live in `docs/` *and* be registered.
+2. `tests/docs/conftest.py` `SKIP_DIRS` has no `artifacts` member, and
+   `git check-ignore artifacts/TRIAGE_LOG.md` → **not ignored** (only
+   `artifacts/robot/` is). So I2's stated reason for moving the log to `docs/` —
+   "`artifacts/` is very likely gitignored, which would leave `gate.py` reading an
+   untracked file and passing vacuously in CI" — is **false here**. The log is
+   tracked and already scanned by the doc suite.
+
+**Applied (genuinely due):**
+- Relocated the persona harness `tools/` → **`scripts/robot/`**. `tools/` sat
+  *outside* the CI lint scope (`ruff check packages apps scripts`), so those four
+  files were never linted; `scripts/**` is in scope. `tools/` deleted.
+- `personas.py`: added the `_WIDTHS` drift guard
+  `assert set(_WIDTHS) == set(Tier)`.
+- `gate.py`: widened the blast-radius `PATH` regex for flat paths — it now
+  matches any repo-relative file (not just `packages|apps|tests`), so
+  `scripts/robot/*.py`, `pyproject.toml` and `docs/*.md` are recorded:
+  `(?:^|[\s`(])((?:[\w.\-]+/)*[\w.\-]+\.(?:py|js|ts|tsx|yml|yaml|toml|json|md))`.
+  `parse()` now uses `PATH.finditer`.
+- `pyproject.toml`: dropped `"tools/**" = ["T20"]`; added
+  `"scripts/robot/run_robot.py" = ["T20", "E402"]` — its `sys.path.insert` +
+  sibling-`personas` import is deliberate, the same precedent as the other
+  scripts listed there.
+- `Makefile`: `robot` / `robot-full` / `gates` now call `scripts/robot/*`.
+- Rebased live refs `tools/` → `scripts/robot/` in `TRIAGE_AND_DEBUG.md` (5) and
+  `artifacts/TRIAGE_LOG.md` (2). Earlier CHATLOG entries left as written
+  (append-only).
+
+**Deliberately NOT applied (cut list):**
+- The log **stays** at `artifacts/TRIAGE_LOG.md`. It is tracked, gate-clean and
+  already scanned; moving it into `docs/` would publish the live S1/S2 register in
+  the public site nav and impose a DOCS_INDEX + mkdocs-nav registration tax on a
+  file that churns on every ingest — for zero correctness gain.
+- `.githooks/pre-push`, `.github/workflows/robot.yml`,
+  `.github/ISSUE_TEMPLATE/defect.yml` — new CI / hook / governance surface. I2's
+  rationale (untracked log) does not apply, and a POSIX `sh` pre-push hook does
+  not run on this Windows box.
+
+**Verification (all green):**
+- `ruff check packages apps scripts` → *All checks passed*;
+  `ruff format --check scripts/robot` → 4 files formatted.
+- `python scripts/robot/personas.py` → exit 0 (guard holds).
+- `python scripts/robot/gate.py` → exit 0; `--metrics` → `open S1=0 S2=0`.
+- `python scripts/check_doc_paths.py` → *OK — every path referenced in a code
+  block exists*.
+- `pytest tests/docs -q -m "not slow"` → **41 passed, 16 deselected**.
+- `python scripts/verify_docs.py --json` → **3 pass / 0 fail / 3 skip**.
+- Regex spot-check: extracts `['docs/PATCH_GUIDE.md', 'pyproject.toml',
+  'scripts/robot/gate.py']`; seed log parses to 0 blocking entries.
+
+## 2026-11-02 11:20 IST — Verified "do tests generate drawings?" claim set
+
+Audited the pasted claim set against the live tree. Six of seven hold; one is
+false.
+
+**Confirmed:**
+- `suite-ci.yml` L138-144 runs `pytest tests/ --ignore=tests/e2e
+  --ignore=tests/benchmarks --ignore=tests/draw --ignore=tests/drawings
+  --ignore=tests/refs --ignore=tests/interop` — the default lane paints nothing
+  (the claim's list omitted `tests/benchmarks`; otherwise exact).
+- `--regression` is defined in `tests/conftest.py` L28-33 (not the subdir
+  conftest) and `draw.yml` L75 runs `pytest -q tests/drawings --regression`.
+- Scaffold sheets: `draw.yml` L31-35 — "sheets 2-4, 6, 7 are documented
+  scaffolds (tests/draw/sheets.spec.json)" under `continue-on-error: true`.
+- `MIN_SHEET_ENTITIES = 20` (`tests/e2e/run_e2e.py` L34, enforced L401-403).
+- `run_e2e.py` does not match `python_files = ["test_*.py"]`
+  (`pyproject.toml` L282); CI runs it as `python tests/e2e/run_e2e.py`
+  (`suite-ci.yml` L169).
+
+**Refuted — claim #2:** "`tests/drawings` collects zero tests unless you pass
+`--regression`; run it plain and you get a green tick over an empty lane."
+Empirically false: plain `pytest tests/drawings -q` → **14 passed in 73.72s**
+(real DXF + PDF/A-1b written). `--regression` only *adds* a `regression`
+markexpr filter; with it unset the markexpr is empty so every test runs. The
+"collects ZERO / exit 5" hazard is real but lives in **`tests/draw`**
+(`pytest tests/draw -m draw`), where a never-registered `scaffold_only` marker
+collected zero under `continue-on-error` — documented in `draw.yml` L25-27 and
+already fixed by switching to name-based `-k` selection.
+
+**Operational note nuance:** the churn is real but `tests/e2e/output/**` and
+`outputs/**` binaries are **tracked** (`git ls-files` shows them; `.gitignore`
+`outputs/*.dxf|pdf|xlsx` cannot untrack already-committed files), so dirty-tree
+symptoms show as `M`, not `??`. Generation working, not corruption — agreed.
+

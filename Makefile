@@ -1,8 +1,12 @@
 .PHONY: help install dev lint format typecheck test cov test-e2e test-integration \
-        verify smoke robotic bench build clean docker-up docker-down api ui web \
+        verify smoke robotic robot robot-full gates bench build clean docker-up \
+        docker-down api ui web \
         verify-docs verify-docs-fast test-docs mutate-docs prove prove-fast \
         refs-extract refs-check refs-coverage refs-verify refs-verify-crops \
         drawing-standards
+
+# Base URL of a running Streamlit console for the persona robot walker.
+URL ?= http://localhost:8517
 
 help:            ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -48,6 +52,17 @@ robotic:         ## Simulate Basic + Intermediate + Advanced users (seeded)
 	python scripts/basic_user_robot.py --seed 123
 	python scripts/intermediate_user_robot.py --seed 456
 	python scripts/advanced_user_robot.py --seed 789
+
+robot:           ## Persona-weighted UI walk (app must be up on $(URL))
+	python scripts/robot/run_robot.py --url $(URL) --out artifacts/robot
+
+robot-full:      ## Walk, then ingest failures and run the triage merge gate
+	python scripts/robot/run_robot.py --url $(URL) --out artifacts/robot
+	python scripts/robot/triage.py --ingest artifacts/robot
+	python scripts/robot/gate.py
+
+gates:           ## Merge gate — non-zero if any in-scope S1/S2 is open
+	python scripts/robot/gate.py
 
 bench:           ## Benchmarks, 20% regression gate
 	pytest tests/benchmarks --benchmark-only

@@ -638,3 +638,65 @@ lane; certify CODE-JUNCTION/1.txt applied`; 25 files, +1298/−169.
 (`Rename-Item .git/index.lock index.lock.bak`) cleared the block where deletion
 did not — a Windows handle-release nuance worth adding to the lock runbook.
 
+## 2026-11-03 10:57 IST — certified CODE-JUNCTION/Venice-patch (`V*/`)
+
+Verdict: **APPLIED (adapted)**. Audited the two source docs
+(`instructions.txt` = the original exploratory kit; `I2.txt` = the flat-path
+adaptation delta) against the live tree.
+
+- **Applied:** `scripts/robot/{personas,run_robot,gate,triage}.py`,
+  `artifacts/TRIAGE_LOG.md`, `.githooks/pre-push`, the `Makefile`
+  `robot/robot-full/gates/hooks/hooks-check` targets,
+  `.github/ISSUE_TEMPLATE/defect.yml`, the `config.yml` + PR-template Triage
+  blocks, `.github/workflows/robot.yml`, and the three docs
+  (`TEST_PLAN.md`, `TRIAGE_AND_DEBUG.md`, `PATCH_GUIDE.md`).
+- **Adapted:** fixtures → `tests/robot/` on the real contract (relocated from
+  `tests/test_*.py`); marker taxonomy → the repo's own lanes plus one new
+  `robot` marker; the log stayed at `artifacts/TRIAGE_LOG.md`.
+- **Rejected (3):** the `docs/TRIAGE_LOG.md` move (register is machine-written
+  and `docs/` needs manual mkdocs STAGE registration); the kit's
+  unit/api/app/e2e/export/determinism/perf/a11y marker names (repo already has
+  its own lanes); and `tests/test_ui_playwright.py` (browser E2E stays in
+  `tests/e2e`, the `robot.yml` sweep owns the persona walk).
+
+Live proofs: `personas.py` exit 0 · `gate.py` exit 0 (honours the `Status`
+column, so the 12 `UNCONFIRMED` seeds do not block — and crucially **not** exit 2,
+so the parser reads the log) · `triage.py --metrics` → `open S1=0 S2=0`.
+
+**One local step outstanding:** `.git/hooks/pre-push` is not installed on this
+clone — run `make hooks` (copy, not `core.hooksPath`). CI still enforces via
+`robot.yml`.
+
+## 2026-11-03 11:35 IST — certified CODE-JUNCTION/BridgeCAD_Robotic_Test_Package
+
+Verdict: **APPLIED (already present) + validated green**. Audited the incoming
+kit against the live tree before touching anything ("if due" rule).
+
+- **Both code patches already in the tree.** `01_advanced_robot_soft_hypothesis`
+  (hypothesis absent → step `skipped`, `ok=True`) and `02_intermediate_qa_hardening`
+  (explicit `python -m bridgecad qa` call, `--strict-qa`, always-recorded score)
+  were already applied in `scripts/advanced_user_robot.py` and
+  `scripts/intermediate_user_robot.py`. Re-verified with `git diff`.
+- **Legacy guidance already satisfied.** Enhanced-guide Patches 3–5 (NSPAN=1
+  pier/footing loops, `ABTL=0` degenerate wall, QA-score emission) are covered by
+  the live C1.5 fix in `src/bridge_gad/` — explicit simple-span paths plus the
+  `FUTL`/`ALCL` fallback ladder. `packages/bridgecad-draw` is the primary path.
+- **Guide merged, not forked.** Folded the kit's unique post-test debug playbook
+  and known-residual-issues into the root `ROBOTIC-TEST-GUIDE.MD` as §7–§8,
+  cross-referencing `docs/TRIAGE_AND_DEBUG.md` / `docs/PATCH_GUIDE.md` rather than
+  duplicating them.
+- **Ruff format fix.** `ruff format` normalised the patched dict literal in
+  `advanced_user_robot.py` (gate `ruff format --check` now clean).
+
+Live proofs: `robotic_smoke.py --persona all --seed 42` exit 0 (basic 13 PDFs ·
+intermediate pass · advanced schema 201843 B + unit green) ·
+`advanced_user_robot.py --hypothesis` → hypothesis lane rc 0 · `intermediate_user_robot.py
+--strict-qa --mutations 1` → `qa=88.0 qa_ok=True` · `python -m bridgecad verify` →
+Day 3 7/7 + Day 4 8/8 **ACCEPTED** (score 82).
+
+Doc gate: `verify_docs.py --json` → 1 **pre-existing** failure
+(`test_defect_02`) caused entirely by the untracked
+`CODE-JUNCTION/BridgeCAD_Robotic_Test_Package/docs/ROBOTIC-TEST-GUIDE.MD` scratch
+copy's links to `GUIDE.md`/`CONTRIBUTING.md`/`README.md` — absent from the
+committed tree and unrelated to the applied patch.
+

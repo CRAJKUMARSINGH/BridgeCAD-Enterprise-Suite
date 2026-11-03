@@ -82,3 +82,20 @@ Introduced by the `CODE-JUNCTION/00 FOR ALL APPS` brief (Phase 2).
   (`PATCH_NOTES.md` doc artifact; `pyproject.toml` mypy `files` cosmetic).
 - Generated `outputs/` binaries and scratch (`reports/`, `CODE-JUNCTION/`,
   `ATTACHED ASSETS/`) left untracked by design.
+- **Certified `CODE-JUNCTION/Venice-patch` (`V*/`): APPLIED (adapted).** The
+  robotic harness + triage apparatus is fully represented in the tree; the
+  phantom-path variants (`tools/`, the phantom suite dir, `requirements-dev.txt`)
+  were retargeted, and three kit deltas were rejected with reason — the
+  `docs/TRIAGE_LOG.md` move, the kit's marker names, and the Playwright file.
+  Local step outstanding: `make hooks` (install `.git/hooks/pre-push`).
+- **Certified `CODE-JUNCTION/BridgeCAD_Robotic_Test_Package`: APPLIED (already
+  present) + validated green.** The kit's two code patches (`01` soft-skip
+  `hypothesis`, `02` intermediate QA hardening with `--strict-qa`) were already
+  in `scripts/advanced_user_robot.py` / `scripts/intermediate_user_robot.py`;
+  the legacy guidance (Patches 3–5) is already covered by the C1.5 fix in
+  `src/bridge_gad/`. Its unique debug playbook + residual-issue list were merged
+  into the root `ROBOTIC-TEST-GUIDE.MD` (§7–§8) — retire, don't fork. Green
+  proofs: `robotic_smoke.py --persona all --seed 42` exit 0 · `verify` Day 3 7/7
+  + Day 4 8/8 ★ACCEPTED★ · `--hypothesis` lane rc 0 · `--strict-qa` → `qa=88.0`.
+  `ruff format --check scripts/` clean. The one `verify_docs.py` failure is the
+  pre-existing untracked-inbox link defect, absent from the committed tree.

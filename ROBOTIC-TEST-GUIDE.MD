@@ -136,6 +136,69 @@ These are the same commands exposed as `make smoke`, `make verify`, and
 
 ---
 
+## 7. Post-test debug playbook
+
+When a persona fails, work the following order — cheapest check first. This is the
+persona-CLI view; the general protocol (classify → minimize → bisect → patch) lives in
+[docs/TRIAGE_AND_DEBUG.md](docs/TRIAGE_AND_DEBUG.md) and
+[docs/PATCH_GUIDE.md](docs/PATCH_GUIDE.md).
+
+1. **Re-run just that persona, fresh seed, streaming output.**
+
+   ```powershell
+   python -u scripts/basic_user_robot.py --seed 7 --iterations 1
+   ```
+
+   Then read its evidence file (`reports/basic_robot.json`, `reports/intermediate_robot.json`,
+   `reports/advanced_robot.json`, or `reports/smoke_report_seed*.json`).
+
+2. **Core model & acceptance.** `python -m bridgecad verify` must print
+   `★ ACCEPTED ★` for both Day 3 (model, 7 checks) and Day 4 (geometry/QA, 8 checks).
+
+3. **Generation forensics.**
+
+   ```powershell
+   python -m bridgecad generate 11span
+   Get-ChildItem outputs\11span_110m_rcc_slab
+   ```
+
+   Confirm `project_*.json`, the eight `*Sheet*.dxf` / `*.pdf` pairs, and the GAD PDF exist.
+
+4. **Drawing contract** (needs `ezdxf`).
+
+   ```powershell
+   python -m pytest tests/draw -q --tb=line -k "not visual"
+   ```
+
+   Several XFAILs on scaffold sheets are expected (see Section 8).
+
+5. **Collect artefacts for a patch PR:** the failing `reports/*_robot.json`, the relevant
+   `outputs/**/project_*.json`, one failing DXF + its PDF, the full `verify` log, and
+   `pytest --tb=short` output.
+
+---
+
+## 8. Known residual issues
+
+- **QA score lives behind the CLI, not always in the project JSON.** A generated
+  `project_*.json` may omit `qa_score` / `qa.score`, so `robotic_smoke.py`'s intermediate
+  persona reports `score: null` (treated leniently). The authoritative score comes from
+  `python -m bridgecad qa <project.json>`. `scripts/intermediate_user_robot.py` calls that
+  CLI explicitly and, with `--strict-qa`, fails when the score is missing or `< 60`.
+- **Missing optional dependencies.** `hypothesis` is only needed for the advanced property
+  lane; when absent, `scripts/advanced_user_robot.py --hypothesis` records the step as
+  `skipped` instead of failing, so zero-extra-deps environments stay green. `ezdxf` is
+  required for the `tests/draw` lane.
+- **Legacy geometry bugs are already fixed.** The off-by-one pier/footing loops
+  (`range(1, nspan)` → empty for a single-span bridge) and the degenerate `ABTL = 0`
+  abutment wall in `src/bridge_gad/` carry the C1.5 fix (an explicit simple-span path plus
+  a `FUTL`/`ALCL` fallback ladder). New work should use `packages/bridgecad-draw`, which is
+  the primary generation path.
+- **Scaffold-sheet XFAILs are intentional.** The under-dimensioned scaffold sheets stay
+  XFAIL until the roadmap finishes sheet dimensioning; do not treat them as hard failures.
+
+---
+
 **See also:** [GUIDE.md](GUIDE.md) (the authoritative operating guide),
 [CONTRIBUTING.md](CONTRIBUTING.md) (workflow and gates), and
 [README.md](README.md) (repo orientation).

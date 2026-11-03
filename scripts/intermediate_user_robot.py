@@ -4,6 +4,7 @@
 Run from the BridgeCAD repo root::
 
     python scripts/intermediate_user_robot.py --seed 456 --mutations 5
+    python scripts/intermediate_user_robot.py --seed 456 --strict-qa   # CI gate
 """
 
 from __future__ import annotations
@@ -11,9 +12,12 @@ from __future__ import annotations
 import argparse
 import json
 import random
+import re
 import subprocess
 import sys
 from pathlib import Path
+
+QA_SCORE_RE = re.compile(r"Score\s*:\s*(\d+(?:\.\d+)?)\s*/\s*100")
 
 
 def run(cmd: list[str], timeout: int = 180) -> tuple[int, str]:
@@ -32,10 +36,21 @@ def qa_score(project_json: Path) -> float | int | None:
     return data.get("qa_score") or (data.get("qa") or {}).get("score")
 
 
+def parse_qa_stdout(out: str) -> float | None:
+    """Extract the score printed by ``python -m bridgecad qa <project.json>``."""
+    m = QA_SCORE_RE.search(out)
+    return float(m.group(1)) if m else None
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=456)
     parser.add_argument("--mutations", type=int, default=5)
+    parser.add_argument(
+        "--strict-qa",
+        action="store_true",
+        help="Fail when qa_score is missing or < 60",
+    )
     args = parser.parse_args()
     random.seed(args.seed)
 
@@ -47,11 +62,21 @@ def main() -> None:
         ok = rc == 0 or "COMPLETE" in out
 
         jsons = list(Path("outputs").rglob("project_*.json")) if Path("outputs").exists() else []
-        score = qa_score(jsons[0]) if jsons else None
-        qa_ok = score is None or (isinstance(score, int | float) and score >= 60)
+        qa_rc: int | None = None
+        cli_score: float | None = None
+        if ok and jsons:
+            # Exercise the QA emission path explicitly — never assume it ran.
+            qa_rc, qa_out = run(
+                [sys.executable, "-m", "bridgecad", "qa", str(jsons[0])], timeout=180
+            )
+            cli_score = parse_qa_stdout(qa_out)
+
+        score = cli_score if cli_score is not None else (qa_score(jsons[0]) if jsons else None)
+        numeric_ok = isinstance(score, int | float) and score >= 60
+        qa_ok = numeric_ok if args.strict_qa else (score is None or numeric_ok)
         print(f"  generate={'PASS' if ok else 'FAIL'}  qa={score}  qa_ok={qa_ok}")
 
-        results.append({"iter": i, "generate": ok, "qa": score, "qa_ok": qa_ok})
+        results.append({"iter": i, "generate": ok, "qa": score, "qa_rc": qa_rc, "qa_ok": qa_ok})
 
     all_ok = all(r["generate"] and r["qa_ok"] for r in results)
     Path("reports").mkdir(exist_ok=True)

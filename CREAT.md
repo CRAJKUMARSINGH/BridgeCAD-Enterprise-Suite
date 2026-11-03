@@ -75,4 +75,10 @@ Introduced by the `CODE-JUNCTION/00 FOR ALL APPS` brief (Phase 2).
   `/api/v1/design`, `/api/v1/export/*`) do not exist in the tree, so a verbatim
   port would redden CI. The retarget above keeps the intent — engineering
   oracles on the real contract — without oracles for a contract the tree lacks.
-- Nothing committed (standing rule: commit only on explicit instruction).
+- **Committed + pushed** on instruction (`commit push`): `c522356`
+  `feat(robot): add engine/API/export oracle lane; certify CODE-JUNCTION/1.txt
+  applied` — 25 files, +1298/−169. `HEAD == origin/main`. Certification of
+  `CODE-JUNCTION/1.txt`: **applied**, 8 of 10 items, 2 rejected with reason
+  (`PATCH_NOTES.md` doc artifact; `pyproject.toml` mypy `files` cosmetic).
+- Generated `outputs/` binaries and scratch (`reports/`, `CODE-JUNCTION/`,
+  `ATTACHED ASSETS/`) left untracked by design.

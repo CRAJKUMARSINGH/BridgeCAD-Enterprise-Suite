@@ -605,3 +605,36 @@ only the tests the real contract supports were written.
 `python scripts/robot/gate.py` → exit 0; `--metrics` → `open S1=0 S2=0`.
 Nothing committed (standing rule: commit only on explicit instruction).
 
+## 2026-11-03 10:54 IST — committed + pushed (c522356)
+
+Prompted to `commit push` and to certify `CODE-JUNCTION/1.txt` is applied.
+
+**Certification — `CODE-JUNCTION/1.txt`: APPLIED (8 of 10 items; 2 rejected with
+reason).** Audited each claim against the live tree:
+- `morth_specs.py` bare `tuple` → `tuple[int, int]` — applied (L155/156/158).
+- `load_combinations.py` — present, but as the **live** module
+  (`irc6_combinations` / `combinations_for` / `envelope` / `Envelope`), not the
+  patch's rewrite. The patch's own rewrite was rejected: a live, tested API
+  already existed.
+- `standards/__init__.py` full export surface — applied (`verify_wiring`).
+- `bridgecad_core/__init__.py` exports irc_05/irc_21/combinations — applied.
+- `irc_21.py` `import math` hoisted from EOF to L16 — applied.
+- 7 orphaned plugins — applied; 10/10 plugin dirs now carry
+  `manifest.json` + `defaults.yaml` + `draw_overrides.py`, no marker file.
+- `scripts/verify_wiring.py` guard — applied → `WIRING OK — 10 plugins wired,
+  standards fully exported, no bare generics.`
+- Tests — applied; `tests/plugins/test_plugin_wiring.py` present, combination
+  tests live at `tests/compliance/test_load_combinations.py` (relocated).
+- **Rejected:** `PATCH_NOTES.md` (a patch-description doc artifact, not source)
+  and the `pyproject.toml` mypy `files` key (cosmetic).
+
+**Committed + pushed.** `c522356` — `feat(robot): add engine/API/export oracle
+lane; certify CODE-JUNCTION/1.txt applied`; 25 files, +1298/−169.
+`HEAD == origin/main`. Generated `outputs/` binaries and scratch (`reports/`,
+`CODE-JUNCTION/`, `ATTACHED ASSETS/`) left untracked by design.
+
+**Operational note.** The Trae IDE's git watcher repeatedly recreated
+`.git/index.lock`, so `Remove-Item` silently no-op'd. Renaming the lock
+(`Rename-Item .git/index.lock index.lock.bak`) cleared the block where deletion
+did not — a Windows handle-release nuance worth adding to the lock runbook.
+

@@ -5,7 +5,7 @@
 with an open S1 or S2 in its area.
 
 **Rules**
-1. Nothing enters here without a **minimized trace** (`TRIAGE_AND_DEBUG.md` §2).
+1. Nothing enters here without a **minimized trace** (`docs/TRIAGE_AND_DEBUG.md` §2).
 2. ID is assigned by `scripts/robot/triage.py` only — never by hand.
 3. One entry = one defect class. Related findings get `REL:` links, not merged rows.
 4. A row closes only when all six DoD boxes are ticked.
@@ -23,7 +23,7 @@ with an open S1 or S2 in its area.
 `RACE` concurrency · `UNIT` units/dimensioning · `EXPORT` file generation ·
 `PERF` · `A11Y` · `UX`
 
-**Patch classes** — cross-reference `PATCH_GUIDE.md` §1–§10.
+**Patch classes** — cross-reference `docs/PATCH_GUIDE.md` §1–§10.
 
 ---
 

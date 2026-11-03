@@ -1,15 +1,21 @@
-# Patch Guide — by defect class
+# Patch guide — by defect class
 
-Patterns for what this app will actually produce. Each shows the wrong shape and
-the right one. Header paths point at the real modules in this flat repo.
+Patterns for what this app actually produces. Each shows the wrong shape and the
+right one. One patch = one class; cross-referenced from
+[TRIAGE_AND_DEBUG.md](TRIAGE_AND_DEBUG.md) Step 6.
+
+**See also:** [ROBOTIC-TEST-GUIDE.MD](../ROBOTIC-TEST-GUIDE.MD) ·
+[TRIAGE_LOG.md](../artifacts/TRIAGE_LOG.md).
+
+---
 
 ## 1. Zero / negative numeric input reaches the math
 
-**Symptom:** `ZeroDivisionError`, `inf` depth, `NaN` in DXF.
+**Symptom:** `ZeroDivisionError`, `inf` depth, `NaN` in the DXF.
 **Fix:** validate at the boundary *and* guard the math.
 
 ```diff
--# packages/bridgecad-core/bridgecad_core/validation.py
+-# --- engine module (resolve via scripts/robot/personas.py ENGINE_CANDIDATES) ---
 -def design_girder(span_m, carriageway_m, grade):
 -    return Girder(depth_m=span_m / 18.0, ...)
 +from pydantic import BaseModel, Field
@@ -21,16 +27,18 @@ the right one. Header paths point at the real modules in this flat repo.
 +
 +def design_girder(span_m: float, carriageway_m: float, grade: str) -> Girder:
 +    GirderInput(span_m=span_m, carriageway_m=carriageway_m, grade=grade)
-+    depth = max(span_m / 18.0, 0.6)          # never below practical minimum
++    depth = max(span_m / 18.0, 0.6)          # never below the practical minimum
 +    return Girder(depth_m=depth, ...)
 ```
 
-Same `GirderInput` gets reused by the FastAPI route → 422 for free, no duplicated checks.
+The same `GirderInput` gets reused by the FastAPI route → 422 for free, no
+duplicated checks.
 
 ## 2. Streamlit widget state resets on rerun
 
-**Symptom:** values blank after any interaction; robot fills span, then it's gone.
-**Cause:** widget created with a value derived from another widget without a key.
+**Symptom:** values blank after any interaction; the robot fills span, then it is
+gone.
+**Cause:** a widget created with a value derived from another widget, without a key.
 
 ```diff
 -span = st.number_input("Span (m)", value=20.0)
@@ -40,8 +48,8 @@ Same `GirderInput` gets reused by the FastAPI route → 422 for free, no duplica
 +                       min_value=1.0, max_value=500.0, step=0.5)
 ```
 
-Rule: **every** interactive widget gets a stable `key`. Never derive `value=` from
-`session_state` while also writing it.
+Rule: **every** interactive widget gets a stable `key`. Never derive `value=`
+from `session_state` while also writing it.
 
 ## 3. Export writes into a shared temp path → parallel users collide
 
@@ -72,7 +80,8 @@ Rule: **every** interactive widget gets a stable `key`. Never derive `value=` fr
 
 ## 5. Hardcoded 7-sheet assumption
 
-**Symptom:** adding a sheet breaks the count assertion; removing one silently exports 6.
+**Symptom:** adding a sheet breaks the count assertion; removing one silently
+exports 6.
 **Fix:** a registry, and the count derives from it.
 
 ```diff
@@ -85,23 +94,25 @@ Rule: **every** interactive widget gets a stable `key`. Never derive `value=` fr
 
 ## 6. Unbounded file upload
 
-**Symptom:** 50 MB PDF hangs the worker; 0-byte file → `IndexError` downstream.
+**Symptom:** a 50 MB PDF hangs the worker; a 0-byte file → `IndexError` downstream.
 
 ```diff
--up = st.file_uploader("PDF", type=["pdf"])
-+up = st.file_uploader("PDF", type=["pdf"])
+ up = st.file_uploader("PDF", type=["pdf"])
  if up:
 +    if up.size == 0:
-+        st.error("Empty file."); st.stop()
++        st.error("Empty file.")
++        st.stop()
 +    if up.size > 25 * 1024 * 1024:
-+        st.error("Max 25 MB."); st.stop()
++        st.error("Max 25 MB.")
++        st.stop()
 +    if not up.getvalue()[:5].startswith(b"%PDF"):
-+        st.error("Not a valid PDF (magic bytes)."); st.stop()
++        st.error("Not a valid PDF (magic bytes).")
++        st.stop()
 ```
 
 ## 7. Exception text leaks into the UI
 
-**Symptom:** user sees a Python traceback with internal paths.
+**Symptom:** the user sees a Python traceback with internal paths.
 
 ```diff
 -try:
@@ -110,7 +121,7 @@ Rule: **every** interactive widget gets a stable `key`. Never derive `value=` fr
 -    st.exception(sys.exc_info())
 +try:
 +    run()
-+except GirderInputError as e:
++except InputError as e:
 +    st.error(f"Input problem: {e}")
 +except Exception as e:
 +    st.error("Generation failed — see log.")
@@ -120,8 +131,8 @@ Rule: **every** interactive widget gets a stable `key`. Never derive `value=` fr
 
 ## 8. Export blocks the event loop
 
-**Symptom:** perf test > budget; UI freezes on max span.
-**Fix:** cache by config hash + move heavy build to a thread.
+**Symptom:** perf test over budget; the UI freezes on a max-span run.
+**Fix:** cache by config hash, and move the heavy build to a thread.
 
 ```diff
 -@st.cache_data
@@ -135,7 +146,7 @@ Rule: **every** interactive widget gets a stable `key`. Never derive `value=` fr
 
 ## 9. Filename injection
 
-**Symptom:** `a b/c:d` becomes a nested path or truncates.
+**Symptom:** `a b/c:d` becomes a nested path, or truncates.
 
 ```diff
 -name = f"{cfg.project_name}.dxf"
@@ -145,8 +156,8 @@ Rule: **every** interactive widget gets a stable `key`. Never derive `value=` fr
 
 ## 10. Unicode mojibake in exports
 
-**Symptom:** `पुल` becomes `????` in PDF/Excel.
-**Fix:** declare encoding everywhere; use a Unicode-capable font.
+**Symptom:** Devanagari or CJK glyphs become `????` in PDF/Excel.
+**Fix:** declare the encoding everywhere and use a Unicode-capable font.
 
 ```diff
 -ws.cell(row=1, column=1, value=cfg.project_name)
@@ -155,8 +166,12 @@ Rule: **every** interactive widget gets a stable `key`. Never derive `value=` fr
 +ws.column_dimensions["A"].width = min(max(len(cfg.project_name) * 1.4, 12), 60)
 ```
 
+---
+
 ## Patch hygiene
 
 - One class per PR. Title: `fix(<area>): <symptom> [S1]`.
 - Body links the minimized trace and the regression test.
-- No `# type: ignore`, no bare `except:`, no `time.sleep` added to hide races.
+- No `# type: ignore`, no bare `except:`, no `time.sleep` added to hide a race.
+- The [pull request template](../.github/PULL_REQUEST_TEMPLATE.md) carries the
+  triage block these rules attach to.

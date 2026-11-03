@@ -1,0 +1,67 @@
+#!/usr/bin/env sh
+# Blocks the push while an in-scope S1/S2 is open. Bypass: git push --no-verify
+#
+# Installed by `make hooks` (copied to .git/hooks/pre-push, not via
+# core.hooksPath, so it works uniformly across git clients).
+set -eu
+
+zero=0000000000000000000000000000000000000000
+base=""
+deleting=0
+
+while read -r _local_ref local_sha _remote_ref remote_sha; do
+  if [ "$local_sha" = "$zero" ]; then
+    deleting=1
+    continue
+  fi
+  if [ "$remote_sha" != "$zero" ]; then
+    base="$remote_sha"
+  else
+    base=$(git merge-base HEAD origin/main 2>/dev/null \
+        || git merge-base HEAD origin/master 2>/dev/null \
+        || git rev-parse HEAD~1 2>/dev/null \
+        || echo "")
+  fi
+done
+
+if [ "$deleting" = 1 ] && [ -z "$base" ]; then
+  echo "pre-push: branch delete, skipping"
+  exit 0
+fi
+
+if [ -z "$base" ]; then
+  base=$(git rev-parse HEAD~1 2>/dev/null || echo HEAD)
+fi
+
+files=$(git diff --name-only "$base"..HEAD 2>/dev/null || true)
+if [ -z "$files" ]; then
+  echo "pre-push: no file changes"
+  exit 0
+fi
+
+# 1. triage gate -------------------------------------------------------------
+if [ -f scripts/robot/gate.py ] && [ -f artifacts/TRIAGE_LOG.md ]; then
+  # shellcheck disable=SC2086
+  if ! python scripts/robot/gate.py --changed-file-list $files; then
+    printf '\npre-push: fix the S1/S2 above, or `git push --no-verify`\n'
+    exit 1
+  fi
+else
+  echo "pre-push: WARN no triage log — gate skipped"
+fi
+
+# 2. robot freshness ---------------------------------------------------------
+newest=$(find artifacts/robot -name '*_report.json' -newermt '-24 hours' 2>/dev/null | head -1)
+if [ -z "$newest" ]; then
+  echo "pre-push: WARN robot artifacts older than 24h — run: make robot-full"
+fi
+
+# 3. fast test subset --------------------------------------------------------
+if [ "${SKIP_TESTS:-0}" != "1" ] && command -v pytest >/dev/null 2>&1; then
+  if ! python -m pytest tests/unit -q -x --no-header; then
+    printf '\npre-push: fast suite red — see above\n'
+    exit 1
+  fi
+fi
+
+echo "pre-push: ok"

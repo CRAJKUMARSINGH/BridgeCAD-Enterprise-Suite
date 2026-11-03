@@ -1,0 +1,142 @@
+name: Defect
+description: A robot or human-found failure. Triage ID required.
+title: "[BCAD-####] <one-line symptom>"
+labels: ["defect", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Run `python scripts/robot/triage.py --ingest artifacts/robot` first — it
+        assigns the ID. No minimized trace, no triage. See
+        [docs/TRIAGE_AND_DEBUG.md](https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/blob/main/docs/TRIAGE_AND_DEBUG.md).
+
+  - type: input
+    id: triage_id
+    attributes:
+      label: Triage ID
+      placeholder: BCAD-0013
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: Reporters may raise, never lower.
+      options:
+        - "S1 — crash / 5xx / corrupt export / wrong number"
+        - "S2 — silent no-op / missing validation / encoding"
+        - "S3 — layout / a11y / performance"
+        - "S4 — cosmetic"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: persona
+    attributes:
+      label: Persona that found it
+      options: [P1_basic, P2_intermediate, P3_advanced, human]
+    validations:
+      required: true
+
+  - type: input
+    id: seed
+    attributes:
+      label: Persona seed
+      placeholder: "3003"
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Minimized trace (≤6 steps)
+      placeholder: |
+        1. open app
+        2. fill span = 0
+        3. click Generate
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual
+      description: Paste the exception or the wrong value. Not a screenshot alone.
+      render: text
+    validations:
+      required: true
+
+  - type: input
+    id: location
+    attributes:
+      label: First bad location (file:line)
+      placeholder: packages/bridgecad-core/bridgecad_core/validation.py:88
+
+  - type: dropdown
+    id: root_class
+    attributes:
+      label: Root-cause class
+      options: [VAL, STATE, ENC, RACE, UNIT, EXPORT, PERF, A11Y, UX]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: patch_class
+    attributes:
+      label: Patch guide section
+      options:
+        - "§1 numeric validation"
+        - "§2 session state"
+        - "§3 temp path collision"
+        - "§4 DXF determinism"
+        - "§5 sheet registry"
+        - "§6 upload bounds"
+        - "§7 error surface"
+        - "§8 blocking export"
+        - "§9 filename sanitising"
+        - "§10 unicode encoding"
+        - "new pattern"
+    validations:
+      required: true
+
+  - type: textarea
+    id: blast
+    attributes:
+      label: Blast radius
+      description: grep output — every sibling call site sharing the class
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: oracle
+    attributes:
+      label: Oracle that should have caught this
+      placeholder: boundary parametrize on every public engine fn
+    validations:
+      required: true
+
+  - type: input
+    id: rel
+    attributes:
+      label: Related IDs
+      placeholder: BCAD-0005
+
+  - type: checkboxes
+    id: dod
+    attributes:
+      label: Definition of Done
+      options:
+        - label: Reproduced from the minimized trace by a second person
+        - label: Failing test committed and observed red
+        - label: Patch merged, one class only
+        - label: Blast radius grep done, siblings fixed or filed
+        - label: "`make robot-full` green on the fix branch"
+        - label: Entry moved to Closed with SHA + test path

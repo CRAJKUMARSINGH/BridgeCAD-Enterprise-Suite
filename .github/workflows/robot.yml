@@ -1,0 +1,73 @@
+name: robot
+
+on:
+  pull_request:
+  schedule:
+    - cron: "30 3 * * 1-5"   # nightly persona sweep
+
+concurrency:
+  group: robot-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Engine / API / export oracles. These need httpx (TestClient), ezdxf (drawing
+  # integrity) and streamlit (AppTest), which the suite-ci unit job does not
+  # install — hence the dedicated lane rather than a third marker in tests/.
+  oracles:
+    name: engine + API + export oracles
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-suite
+        with:
+          extras: dev,api,ui,draw
+          extra-pip: "httpx openpyxl"
+
+      - name: Robotic oracle lane
+        run: pytest tests/robot -v --tb=short
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: robot-oracles-${{ github.run_id }}
+          path: artifacts/robot/
+
+  sweep:
+    name: persona UI sweep
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-suite
+        with:
+          extras: dev,ui,draw
+          extra-pip: "playwright"
+
+      - name: Browser
+        run: python -m playwright install --with-deps chromium
+
+      - name: Start console
+        run: |
+          streamlit run apps/streamlit-ui/app.py \
+            --server.port 8517 --server.headless true &
+          npx wait-on -t 60000 http://localhost:8517
+
+      - name: Persona sweep
+        run: python scripts/robot/run_robot.py --url http://localhost:8517 --out artifacts/robot
+
+      # Ingest first (best-effort), then let the metrics gate be the single
+      # pass/fail signal — an empty ingest must not fail the job by itself.
+      - name: Ingest failures
+        if: always()
+        run: python scripts/robot/triage.py --ingest artifacts/robot || true
+
+      - name: Triage gate (S1/S2 open?)
+        if: always()
+        run: python scripts/robot/triage.py --metrics
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: robot-${{ github.run_id }}
+          path: artifacts/robot/

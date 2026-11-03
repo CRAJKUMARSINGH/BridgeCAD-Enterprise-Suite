@@ -21,6 +21,9 @@ LABELS = [
     ("documentation", "0075ca", "Docs only"),
     ("question", "d876e3", "Usage question"),
     ("chore", "ededed", "Build, CI, dependency or housekeeping"),
+    # triage
+    ("defect", "d73a4a", "A robot or human-found failure carrying a BCAD triage ID"),
+    ("needs-triage", "fbca04", "Awaiting a BCAD triage ID before work starts"),
     # routing
     ("support", "0e8a16", "Needs a maintainer answer"),
     ("rks-legal", "14b8a6", "Professional services / legal enquiry"),

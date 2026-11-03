@@ -3,7 +3,7 @@
         docker-down api ui web \
         verify-docs verify-docs-fast test-docs mutate-docs prove prove-fast \
         refs-extract refs-check refs-coverage refs-verify refs-verify-crops \
-        drawing-standards
+        drawing-standards hooks hooks-check
 
 # Base URL of a running Streamlit console for the persona robot walker.
 URL ?= http://localhost:8517
@@ -63,6 +63,16 @@ robot-full:      ## Walk, then ingest failures and run the triage merge gate
 
 gates:           ## Merge gate — non-zero if any in-scope S1/S2 is open
 	python scripts/robot/gate.py
+
+hooks:           ## Install the versioned pre-push hook (copy, not core.hooksPath)
+	@mkdir -p .git/hooks
+	@cp .githooks/pre-push .git/hooks/pre-push
+	@chmod +x .git/hooks/pre-push
+	@echo "pre-push installed — re-run after pulling hook changes"
+
+hooks-check:     ## Fail if the installed pre-push drifts from .githooks/
+	@cmp -s .githooks/pre-push .git/hooks/pre-push \
+	  || { echo "pre-push hook is stale — run: make hooks"; exit 1; }
 
 bench:           ## Benchmarks, 20% regression gate
 	pytest tests/benchmarks --benchmark-only

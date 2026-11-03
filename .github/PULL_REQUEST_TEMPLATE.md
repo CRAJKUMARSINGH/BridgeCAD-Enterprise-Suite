@@ -1,3 +1,13 @@
+## Triage
+
+- ID: BCAD-####  ·  Severity: S_  ·  Class: VAL / STATE / ENC / RACE / UNIT / EXPORT / PERF / A11Y / UX  ·  Patch guide §:
+
+<!--
+One defect class per PR. No refactors.
+`python scripts/robot/triage.py --metrics` must print `open S1=0`.
+Close the matching row in artifacts/TRIAGE_LOG.md with this SHA.
+-->
+
 ## What
 
 <!-- One paragraph. What changed. -->

@@ -8,8 +8,10 @@ name: BridgeCAD Enterprise Suite — CI
 # OWNERSHIP: tests/draw, tests/drawings and tests/refs belong to draw.yml (it
 # models the promoted-vs-scaffold split correctly); tests/interop belongs to
 # interop.yml (W08), which installs the ifc/draw extras the round-trip lane
-# needs. The unit job here excludes all of them rather than running those
-# gates blocking against the wrong dependency set.
+# needs; tests/robot belongs to robot.yml, which installs the api/ui/draw extras
+# (httpx, ezdxf, streamlit) the engine/API/export oracles need. The unit job here
+# excludes all of them rather than running those gates blocking against the
+# wrong dependency set.
 #
 # Legacy app jobs live in ci.yml. The two workflows run in parallel.
 
@@ -142,6 +144,7 @@ jobs:
             --ignore=tests/drawings \
             --ignore=tests/refs \
             --ignore=tests/interop \
+            --ignore=tests/robot \
             -m "not slow" \
             -v --tb=short \
             --cov=packages \

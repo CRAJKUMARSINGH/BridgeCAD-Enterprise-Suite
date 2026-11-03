@@ -319,6 +319,7 @@ markers = [
   "scaffold_only: scaffold-sheet structural contract lane",
   "regression: W07 drawing-output regression lane (tests/drawings)",
   "interop: W08 interoperability round-trip and fuzzing lane (tests/interop)",
+  "robot: robotic oracle lane — engine/API/export oracles (tests/robot)",
 ]
 filterwarnings = [
   "error::DeprecationWarning:bridgecad_.*",

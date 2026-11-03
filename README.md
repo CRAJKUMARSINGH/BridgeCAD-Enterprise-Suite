@@ -145,9 +145,16 @@ docker compose -f docker-compose.prod.yml up -d   # full prod stack
 ## 🧭 Continuity
 
 Working-session hand-off lives in **[CREAT.md](CREAT.md)** and keeps only the
-last 24 hours — append the new entry, delete the stale portion. `Attached_Folder/`,
-`Test_Files/`, and any "how to use" guide are exempt from duplicate-file removal.
-Durable history belongs in [CHANGELOG.md](CHANGELOG.md).
+last 24 hours — append the new entry, delete the stale portion.
+
+> **Standing order — chat-log cadence.** The session chat log in
+> [CREAT.md](CREAT.md) is refreshed **every 12 minutes** for the duration of an
+> active session, so the hand-off never trails the work by more than one cadence.
+> The order is stated here **and** at the top of [CREAT.md](CREAT.md) so neither
+> copy is the single point of loss.
+
+`Attached_Folder/`, `Test_Files/`, and any "how to use" guide are exempt from
+duplicate-file removal. Durable history belongs in [CHANGELOG.md](CHANGELOG.md).
 
 ---
 

@@ -535,3 +535,73 @@ already fixed by switching to name-based `-k` selection.
 `outputs/*.dxf|pdf|xlsx` cannot untrack already-committed files), so dirty-tree
 symptoms show as `M`, not `??`. Generation working, not corruption — agreed.
 
+## 2026-11-03 10:04 IST — Venice-kit docs fork retired; persona suite parked
+
+Applied the remaining due deltas of `CODE-JUNCTION/Venice-patch/I2.txt` and
+cleaned up the one artifact the earlier passes left inconsistent.
+
+- **Doc fork retired.** The 2026-11-02 09:48 pass placed `TRIAGE_AND_DEBUG.md` and
+  `PATCH_GUIDE.md` at the repo **root**, while the later pass registered **`docs/`**
+  copies in `DOCS_INDEX.md` + the `mkdocs.yml` nav. That is a fork, which "one
+  fact, one place" forbids. The `docs/` copies win — registered, gate-passing,
+  with resolved cross-links. Deleted the root duplicates and rebased the two bare
+  refs in `artifacts/TRIAGE_LOG.md` (`TRIAGE_AND_DEBUG.md` →
+  `docs/TRIAGE_AND_DEBUG.md`; `PATCH_GUIDE.md` → `docs/PATCH_GUIDE.md`).
+- **Enforcement layer confirmed present** (changed this session, still
+  uncommitted): `scripts/sync_labels.py` (`defect`, `needs-triage`),
+  `.github/ISSUE_TEMPLATE/defect.yml`, `config.yml` contact links, the Triage
+  block in `.github/PULL_REQUEST_TEMPLATE.md`, `.githooks/pre-push`, `Makefile`
+  `hooks` / `hooks-check`, `.github/workflows/robot.yml`.
+- **Parked — persona test suite.** The kit's oracles assert
+  `design_girder(span_m, carriageway_m, grade)` → `.depth_m` / `.concrete_m3` and
+  the routes `/api/v1/design`, `/api/v1/export/{dxf,pdf,zip,…}`. A repo-wide grep
+  shows those symbols exist **only inside the patch docs** — the live engine and
+  API do not expose them. A verbatim port of `tests/robot/{conftest,test_*.py}`
+  would collect green-by-skip at best and red at worst (`test_ui_playwright.py`
+  imports `playwright` at module scope → collection error where it is absent), and
+  `docs/TEST_PLAN.md` describes those same non-existent suites. Deferred pending a
+  retarget to the real contract rather than shipping oracles for a contract the
+  tree does not have.
+
+**Verified (all green):** `python scripts/check_doc_paths.py` → OK;
+`python scripts/verify_docs.py --json` → 3 pass / 0 fail / 3 skip;
+`python -m pytest tests/docs -q -m "not slow"` → **41 passed, 16 deselected**;
+`python scripts/robot/gate.py` → exit 0; `--metrics` → `open S1=0 S2=0`;
+`python -m ruff check packages apps scripts` → *All checks passed*; YAML parse of
+`defect.yml` / `config.yml` / `robot.yml` / `mkdocs.yml` → ok. Nothing committed
+(standing rule: commit only on explicit instruction).
+
+## 2026-11-03 10:29 IST — persona suite retargeted to the real contract
+
+Decision taken: **retarget to the real contract** rather than port the kit
+verbatim or drop it. The Venice kit's oracles named `design_girder`,
+`/api/v1/design` and `/api/v1/export/*` — symbols that exist only inside the
+patch docs. Each oracle was mapped onto the live engine/API/export symbol, and
+only the tests the real contract supports were written.
+
+- **New lane — `tests/robot/`** (marker `robot`): `conftest.py` (real
+  `BridgeProject` via the e2e fixture, the real gateway `app` + `TestClient`, a
+  real `.xlsx` upload payload); `test_engine_oracles.py` (7 engineering oracles);
+  `test_api_contract.py` (`/health`, `/version`, `/bridges/{parse,validate}`,
+  `/draw/gad`, `/bills/generate`, `/qa/report`, `/exports/bundle`, `/plugins`,
+  RFC 7807 `415`/`422`, 50 MiB cap); `test_exports.py` (8-sheet draw, DXF audit,
+  byte determinism, workbook round-trip); `test_ui_streamlit.py` (`AppTest` page
+  sweep + unicode input).
+- **Contract facts pinned:** the draw package emits **8 sheets, not 7**; the ASGI
+  object is `app`; uploads are `.xlsx` only; a bad `scale` returns a plain
+  FastAPI `HTTPException(400)` (not problem+json) — the test asserts the actual
+  shape, not the aspirational one.
+- **Wiring:** `robot` marker registered in `pyproject.toml`; the `suite-ci.yml`
+  unit job now runs `--ignore=tests/robot`; a new `oracles` job in `robot.yml`
+  installs `dev,api,ui,draw` plus `httpx openpyxl`.
+- **`docs/TEST_PLAN.md`** written against the retargeted lane and registered in
+  `DOCS_INDEX.md`, the `mkdocs.yml` nav, and
+  `.github/ISSUE_TEMPLATE/config.yml`.
+
+**Verified (all green):** `python -m pytest tests/robot` → **31 passed,
+5 warnings**; `python -m pytest tests/docs -q -m "not slow"` → **41 passed,
+16 deselected**; `python scripts/check_doc_paths.py` → OK;
+`python -m ruff check packages apps scripts` → *All checks passed*;
+`python scripts/robot/gate.py` → exit 0; `--metrics` → `open S1=0 S2=0`.
+Nothing committed (standing rule: commit only on explicit instruction).
+

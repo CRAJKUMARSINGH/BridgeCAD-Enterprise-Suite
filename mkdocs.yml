@@ -120,6 +120,10 @@ nav:
   - Operations:
       - Deployment: deployment.md
       - Troubleshooting: troubleshooting.md
+      - Testing:
+          - Debug protocol: TRIAGE_AND_DEBUG.md
+          - Patch guide: PATCH_GUIDE.md
+          - Test plan: TEST_PLAN.md
   - Project:
       - Contributing: contributing.md
       - Changelog: changelog.md

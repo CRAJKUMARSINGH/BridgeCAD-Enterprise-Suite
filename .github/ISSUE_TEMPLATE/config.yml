@@ -17,3 +17,15 @@ contact_links:
   - name: Reference GAD drawings and standards corpus
     url: https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/tree/main/sample-gad-drawings
     about: The 28 reference drawings the E2E fixtures derive from.
+
+  - name: Robotic test guide
+    url: https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/blob/main/ROBOTIC-TEST-GUIDE.MD
+    about: Personas, seeded runs, and the green-stack sweep.
+
+  - name: Debug protocol
+    url: https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/blob/main/docs/TRIAGE_AND_DEBUG.md
+    about: Minimize, bisect and classify a failure before filing it.
+
+  - name: Robotic oracle test plan
+    url: https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/blob/main/docs/TEST_PLAN.md
+    about: What the engine, API, export and console oracle lane asserts, and how to run it.

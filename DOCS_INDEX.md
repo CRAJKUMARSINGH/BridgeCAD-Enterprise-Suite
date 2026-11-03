@@ -29,6 +29,9 @@ Every doc in this repo, what it is, and whether to trust it.
 | [docs/Bridge_GAD_User_Manual.md](docs/Bridge_GAD_User_Manual.md) | Generated user manual |
 | [docs/manual_template.md](docs/manual_template.md) | Source template for the generated manual |
 | [docs/how-to-use-video.md](docs/how-to-use-video.md) | "How to use" walkthrough — video-form storyboard + player |
+| [docs/TRIAGE_AND_DEBUG.md](docs/TRIAGE_AND_DEBUG.md) | Post-test debug protocol — minimize, bisect, classify, record |
+| [docs/PATCH_GUIDE.md](docs/PATCH_GUIDE.md) | Patch patterns by defect class, cross-referenced from the triage log |
+| [docs/TEST_PLAN.md](docs/TEST_PLAN.md) | Robotic oracle lane — engine, API, export and console oracles |
 
 ## Governance
 

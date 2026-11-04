@@ -1,0 +1,30 @@
+.drawing-sheet { width: 100%; height: auto; display: block; background: #0e1418; }
+.sheet-bg { fill: #0e1418; }
+.drawing-sheet line, .drawing-sheet rect, .drawing-sheet circle, .drawing-sheet polygon { fill: none; stroke-width: 0.9; }
+.drawing-sheet text { fill: #dfe6ea; font-family: ui-monospace, monospace; }
+.lyr-FRAME { stroke: #8a969e; }
+.lyr-FOUND-CAP, .lyr-FOUND-PILE, .lyr-FOUND-WELL { stroke: #d9c26a; }
+.lyr-SUB-PIER, .lyr-SUB-ABUT { stroke: #9fc3d8; }
+.lyr-SUB-BEARING { stroke: #e08a5a; }
+.lyr-SUPER-GIRDER, .lyr-SUPER-DECK { stroke: #7fb2cc; }
+.lyr-SUPER-WEARING { stroke: #8ec7a8; }
+.lyr-SUPER-CAMBER { stroke: #8ec7a8; stroke-dasharray: 4 2; }
+.lyr-STRUC-DETAIL, .lyr-STRUC-SECTION, .lyr-STRUC-OUTLINE { stroke: #b8c4cc; }
+.lyr-HTCH { stroke: #7a8894; stroke-width: 0.35; }
+.lyr-HIDD { stroke: #7a8894; stroke-dasharray: 5 3; }
+.lyr-CL { stroke: #c76a9c; stroke-dasharray: 9 2 2 2; }
+.lyr-DIM { stroke: #c9a227; }
+.lyr-TEXT { stroke: none; fill: #dfe6ea; }
+.lyr-TEXT-HEADER { stroke: none; fill: #fff; font-weight: 600; }
+.lyr-TEXT-LEVEL { stroke: none; fill: #e08a5a; }
+.lyr-CIVIL-SCOUR, .lyr-CIVIL-HFL { stroke: #5fb0c8; stroke-dasharray: 6 3; }
+.sheet-nav { display: flex; gap: 6px; flex-wrap: wrap; }
+.sheet-nav button { font: inherit; font-size: 11px; padding: 5px 9px; border-radius: 5px; border: 1px solid #2b3a46; background: #0e1418; color: #9fb0bb; cursor: pointer; }
+.sheet-nav button.on { background: #1f4a5c; border-color: #2f6d86; color: #fff; }
+.audit-chip { font-size: 11px; padding: 3px 8px; border-radius: 999px; border: 1px solid #2b3a46; }
+.audit-chip.ok { color: #6fd08a; border-color: #2c5c3c; }
+.audit-chip.bad { color: #e2705f; border-color: #6b2f27; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.detail-grid label { font-size: 11px; color: #9fb0bb; display: flex; flex-direction: column; gap: 3px; }
+.detail-grid input, .detail-grid select { font: inherit; font-size: 12px; padding: 4px 6px; border-radius: 4px; border: 1px solid #2b3a46; background: #0e1418; color: #dfe6ea; }
+.sheet-scroll { overflow: auto; max-height: 78vh; }

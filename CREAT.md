@@ -39,6 +39,41 @@ Introduced by the `CODE-JUNCTION/00 FOR ALL APPS` brief (Phase 2).
 
 ---
 
+## 2026-11-04
+
+### Session
+
+- **Netlify deploy 400 fixed + shipped.** Three deploys failed identically at the
+  deploy stage: `HTTP 400 ... uploadDeployFunction ... unable to decode manifest
+  file: json: cannot unmarshal string into Go struct field functionManifest.version
+  of type int`. **Root cause:** Netlify decodes any `.json` in the functions dir
+  whose basename matches a function name as that function's `functionManifest`;
+  `netlify/functions/package.js` collided with root `package.json` (string
+  `"version": "1.0.0"`). **Fix:** renamed the function to `export_package.js`,
+  moved `[functions] directory` out of `[build]`, added the `/api/package`
+  redirect, pinned Node 20 via `.nvmrc`. Green: `test_netlify_readiness.py`
+  → **26/26 · READY**. Committed + pushed (pathspec, excludes `outputs/*` and
+  scratch) → **`69d54d2`**; `HEAD == origin/main`. **Action for user:** redeploy
+  on Netlify with *Clear cache and deploy site*.
+- **Robotic matrix re-run green** (from the `BridgeCAD_Robotic_Test_Package`
+  run): smoke seeds 42/7/99/1234 → 3/3 each; basic `--iterations 3` `ALL OK`;
+  intermediate `--strict-qa` → `qa=88.0`; advanced `--hypothesis` OK; `verify`
+  ★ACCEPTED★; ruff clean (215 files); `pytest tests/unit` → 115 passed.
+- **Windows git-lock note.** `.git/index.lock` was repeatedly re-created by a
+  background git process; `Remove-Item`/`Rename-Item` failed while it was held —
+  resolved by retrying once the holder exited.
+- **Venice abutment patch applied (adapted) — sheets 04/05 restored.** From
+  `CODE-JUNCTION/Venice-patch/Cad.txt`: `frontend/src/sheets/*` (detail geometry,
+  foundation + pier/abutment/wing-wall renderers, registry, chrome, css),
+  `main.tsx` sheet register 01/04/05 with local DXF export, `allowJs: true`,
+  `scripts/robotic_sheet_detail_audit.py`, `tests/draw/test_sheet4_sheet5_present.py`.
+  The abutment fix floors `abtl` at `carriageway + 2` so `face_run` cannot reach
+  ≤ 0 and collapse a wing wall. Three kit defects fixed on retarget (Windows argv
+  limit, unquoted import specifier, centre-vs-corner rect extents). Dropped the
+  patch-notes doc (doc-integrity gate). Green: audit 2000 cases → **0 failures**,
+  `pytest …test_sheet4_sheet5_present.py` **4 passed**, `tsc --noEmit` + `vite
+  build` clean, ruff clean. **Not committed** (standing rule).
+
 ## 2026-11-03
 
 ### Session
@@ -99,3 +134,12 @@ Introduced by the `CODE-JUNCTION/00 FOR ALL APPS` brief (Phase 2).
   + Day 4 8/8 ★ACCEPTED★ · `--hypothesis` lane rc 0 · `--strict-qa` → `qa=88.0`.
   `ruff format --check scripts/` clean. The one `verify_docs.py` failure is the
   pre-existing untracked-inbox link defect, absent from the committed tree.
+- **Ran `CODE-JUNCTION/BridgeCAD_Robotic_Test_Package` (already upstream).**
+  Hash audit: every package script is byte-identical to the live tree (harness
+  differs only by CRLF), so there was nothing to apply. Full matrix green:
+  smoke seeds 42/7/99/1234 → 3/3 PASS each; basic 3 iterations `ALL OK`;
+  intermediate `--strict-qa` → `qa=88.0`; advanced `--hypothesis` → schema
+  201 843 B + unit OK; `verify` ★ACCEPTED★; `gate.py --json` → `blocked=false,
+  total_open=0`; ruff clean (215 files); `pytest tests/unit` → 115 passed. Sole
+  red: `verify_docs.py` `test_defect_02`, all dead links inside the untracked
+  `CODE-JUNCTION/` inbox (committed tree clean).

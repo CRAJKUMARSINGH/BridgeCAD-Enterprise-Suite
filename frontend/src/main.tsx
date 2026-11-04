@@ -1,19 +1,12 @@
-import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
+import "./sheets/sheets.css";
+import { DETAIL_DEFAULTS, audit, buildSheet4, buildSheet5, toDxf } from "./sheets/detailGeometry";
+import { SHEETS, findSheet } from "./sheets/registry";
+import type { ProjectState } from "./sheets/Sheet01Overview";
 
 type BackendState = "checking" | "online" | "demo" | "offline";
-
-type ProjectState = {
-  name: string;
-  number: string;
-  revision: string;
-  spans: number;
-  spanLength: number;
-  width: number;
-  rtl: number;
-  datum: number;
-};
 
 const initialProject: ProjectState = {
   name: "Yogendra Borse Bridge",
@@ -26,36 +19,45 @@ const initialProject: ProjectState = {
   datum: 100.0,
 };
 
+const DETAIL_FIELDS: Array<{ key: string; label: string; step?: string }> = [
+  { key: "abtl", label: "ABTL (m)", step: "0.05" },
+  { key: "carriageway", label: "Carriageway (m)", step: "0.1" },
+  { key: "splay", label: "Wing wall splay (°)", step: "1" },
+  { key: "pierLenM", label: "Pier length (m)", step: "0.1" },
+  { key: "pierWidM", label: "Pier width (m)", step: "0.05" },
+  { key: "abtHgtM", label: "Abutment height (m)", step: "0.1" },
+  { key: "retHgtM", label: "Return wall height (m)", step: "0.1" },
+  { key: "pileDiaMm", label: "Pile Ø (mm)", step: "50" },
+  { key: "pileLenM", label: "Pile length (m)", step: "0.5" },
+  { key: "capTMm", label: "Cap thickness (mm)", step: "50" },
+  { key: "deckRl", label: "Deck level RL", step: "0.1" },
+  { key: "foundingRl", label: "Founding level RL", step: "0.1" },
+];
+
 function App() {
   const [project, setProject] = useState(initialProject);
+  const [sheetIndex, setSheetIndex] = useState(5);
+  const [detail, setDetail] = useState<Record<string, unknown>>({ ...DETAIL_DEFAULTS, projectName: initialProject.name, number: initialProject.number, revision: initialProject.revision });
   const [activeView, setActiveView] = useState("Drawing workspace");
   const [backend, setBackend] = useState<BackendState>("checking");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
-  const [notice, setNotice] = useState("Preview loaded — upload a parameter workbook to generate a drawing.");
-  const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
-  const [generatedPdfUrl, setGeneratedPdfUrl] = useState<string | null>(null);
+  const [notice, setNotice] = useState("Detail sheets 04 and 05 render locally — no Python engine required.");
 
-  useEffect(() => {
-    fetch("/api/health")
-      .then((response) => {
-        if (!response.ok) throw new Error("Backend unavailable");
-        return response.json() as Promise<{ mode?: string }>;
-      })
-      .then((payload) => setBackend(payload.mode === "demo" ? "demo" : "online"))
-      .catch(() => setBackend("offline"));
-  }, []);
+  const sheet = findSheet(sheetIndex);
+  const ctx = { project, detail };
 
-  const totalLength = project.spans * project.spanLength;
-  const sheetSummary = useMemo(
-    () => [
-      ["Views", "Elevation · Plan · A-A · B-B"],
-      ["View gap", "2.0 m clear separation"],
-      ["Scale", "1:100 / details 1:50"],
-      ["Datum", `${project.datum.toFixed(3)} m`],
-    ],
-    [project.datum],
-  );
+  const verdict = useMemo(() => {
+    try {
+      const issues = [
+        ...audit(buildSheet4(detail)).issues,
+        ...audit(buildSheet5(detail)).issues,
+      ];
+      return { count: issues.length, codes: issues.map((i) => i.code) };
+    } catch (err) {
+      return { count: -1, codes: [String(err)] };
+    }
+  }, [detail]);
 
   function updateProject<K extends keyof ProjectState>(key: K, value: ProjectState[K]) {
     setProject((current) => ({ ...current, [key]: value }));
@@ -73,42 +75,40 @@ function App() {
       setNotice("Choose an .xlsx parameter workbook first.");
       return;
     }
-
     setBusy(true);
     setNotice("Generating the coordinated GAD sheet…");
     const formData = new FormData();
     formData.append("excel_file", selectedFile);
     try {
-      // Generate DXF
-      const dxfResponse = await fetch("/api/predict?output_format=dxf", {
-        method: "POST",
-        body: formData,
-      });
-      if (!dxfResponse.ok) throw new Error("DXF generation failed");
-      const dxfBlob = await dxfResponse.blob();
-      if (generatedUrl) URL.revokeObjectURL(generatedUrl);
-      setGeneratedUrl(URL.createObjectURL(dxfBlob));
-
-      // Generate PDF
-      setNotice("Generating PDF output…");
-      const pdfResponse = await fetch("/api/predict?output_format=pdf", {
-        method: "POST",
-        body: formData,
-      });
-      if (!pdfResponse.ok) throw new Error("PDF generation failed");
-      const pdfBlob = await pdfResponse.blob();
-      if (generatedPdfUrl) URL.revokeObjectURL(generatedPdfUrl);
-      setGeneratedPdfUrl(URL.createObjectURL(pdfBlob));
-
-      setNotice("DXF and PDF generated successfully. Download them from the export panel.");
+      const response = await fetch("/api/predict?output_format=dxf", { method: "POST", body: formData });
+      if (!response.ok) throw new Error("DXF generation failed");
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${project.number}.dxf`;
+      a.click();
+      URL.revokeObjectURL(url);
       setBackend("online");
-    } catch (err) {
-      console.error("Drawing generation failed:", err);
-      setNotice("Live generation is not configured here yet. The review draft and 11-bridge PDF catalogue are still ready to use.");
+      setNotice("DXF generated by the Python engine.");
+    } catch {
       setBackend("demo");
+      setNotice("Python engine offline — sheets 04/05 still render locally; use the local DXF button.");
     } finally {
       setBusy(false);
     }
+  }
+
+  function downloadLocalDxf() {
+    const built = sheetIndex === 4 ? buildSheet4(detail) : buildSheet5(detail);
+    const blob = new Blob([toDxf(built)], { type: "application/dxf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${project.number}_Sheet${String(sheetIndex).padStart(2, "0")}.dxf`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setNotice(`Sheet ${String(sheetIndex).padStart(2, "0")} exported locally on layer set ${built.meta.layersUsed.length} layers.`);
   }
 
   return (
@@ -138,7 +138,7 @@ function App() {
             >
               <span className="nav-icon">{["▧", "✓", "⇩"][index]}</span>
               {item}
-              {index === 0 && <span className="nav-count">01</span>}
+              {index === 0 && <span className="nav-count">{String(SHEETS.length).padStart(2, "0")}</span>}
             </button>
           ))}
         </nav>
@@ -155,17 +155,16 @@ function App() {
       <main className="main-content">
         <header className="topbar">
           <div>
-            <span className="breadcrumb">PROJECTS / {project.number}</span>
+            <span className="breadcrumb">PROJECTS / {project.number} / SHEET {String(sheetIndex).padStart(2, "0")}</span>
             <h1>{activeView}</h1>
           </div>
           <div className="topbar-actions">
-            <span className="sheet-chip">SHEET 01 / 01</span>
-            <a className="button button-dark" href="/api/template?template_key=simple_12m">
-              Download template
-            </a>
-            <a className="button button-primary" href="/api/generate_sample_pdf" target="_blank" rel="noreferrer">
-              Generate sample PDF
-            </a>
+            <span className="sheet-chip">SHEET {String(sheetIndex).padStart(2, "0")} / {String(SHEETS[SHEETS.length - 1].index).padStart(2, "0")}</span>
+            <span className={`audit-chip ${verdict.count === 0 ? "ok" : "bad"}`}>
+              {verdict.count === 0 ? "audit clean" : `${verdict.count} audit issue(s)`}
+            </span>
+            <button className="button button-outline" onClick={downloadLocalDxf} type="button">Export this sheet (DXF)</button>
+            <a className="button button-dark" href="/api/template?template_key=simple_12m">Download template</a>
           </div>
         </header>
 
@@ -173,17 +172,30 @@ function App() {
           <div className="canvas-panel panel">
             <div className="panel-heading">
               <div>
-                <span className="eyebrow">GENERAL ARRANGEMENT DRAWING</span>
-                <h2>Coordinated sheet preview</h2>
+                <span className="eyebrow">SHEET REGISTER</span>
+                <h2>{sheet.title}</h2>
               </div>
               <span className="ready-pill"><span className="status-dot online" /> Review-ready</span>
             </div>
-            <div className="drawing-frame">
-              <DrawingSheet project={project} totalLength={totalLength} />
+
+            <div className="sheet-nav" role="tablist" aria-label="Sheet register">
+              {SHEETS.map((entry) => (
+                <button
+                  key={entry.id}
+                  role="tab"
+                  aria-selected={entry.index === sheetIndex}
+                  className={entry.index === sheetIndex ? "on" : ""}
+                  onClick={() => setSheetIndex(entry.index)}
+                >
+                  {String(entry.index).padStart(2, "0")} · {entry.title}
+                </button>
+              ))}
             </div>
+
+            <div className="drawing-frame sheet-scroll">{sheet.render(ctx)}</div>
             <div className="canvas-footer">
-              <span>Pan and zoom are available in the exported CAD/PDF sheet.</span>
-              <span className="legend"><i className="legend-line cyan" /> Structure <i className="legend-line amber" /> Support <i className="legend-line violet" /> Dimension</span>
+              <span>Sheet 01 is the overview; 04 and 05 are the restored abutment-foundation and wing-wall detail sheets.</span>
+              <span className="legend"><i className="legend-line cyan" /> Structure <i className="legend-line amber" /> Foundation <i className="legend-line violet" /> Dimension</span>
             </div>
           </div>
 
@@ -215,25 +227,35 @@ function App() {
               <label className="upload-zone">
                 <span className="upload-icon">↑</span>
                 <strong>{selectedFile ? selectedFile.name : "Upload parameter workbook"}</strong>
-                <span>Excel .xlsx or .xls · required for generation</span>
+                <span>Excel .xlsx or .xls · optional for the local detail sheets</span>
                 <input type="file" accept=".xlsx,.xls" onChange={onFileChange} />
               </label>
               <button className="button button-primary" disabled={busy} type="submit">
-                {busy ? "Generating…" : "Generate coordinated drawing"} <span>→</span>
+                {busy ? "Generating…" : "Generate via Python engine"} <span>→</span>
               </button>
               <p className="notice" role="status">{notice}</p>
             </form>
 
             <div className="panel summary-panel">
               <div className="panel-heading compact">
-                <div><span className="eyebrow">SHEET RULES</span><h2>Presentation standard</h2></div>
+                <div><span className="eyebrow">DETAIL PARAMETERS</span><h2>Foundation & wing wall</h2></div>
               </div>
-              <div className="summary-list">
-                {sheetSummary.map(([label, value]) => <div className="summary-row" key={label}><span>{label}</span><strong>{value}</strong></div>)}
+              <div className="detail-grid">
+                {DETAIL_FIELDS.map((field) => (
+                  <label key={field.key}>
+                    {field.label}
+                    <input
+                      type="number"
+                      step={field.step ?? "0.01"}
+                      value={String(detail[field.key] ?? "")}
+                      onChange={(e) => setDetail((current) => ({ ...current, [field.key]: Number(e.target.value) }))}
+                    />
+                  </label>
+                ))}
               </div>
               <div className="callout">
                 <span className="callout-mark">i</span>
-                Elevation and plan use a reserved view band so dimensions remain readable at full-sheet scale.
+                Wing walls are measured from the abutment face: face run = (ABTL − carriageway) / 2, length = face run / cos(splay). The ABTL rung that fired is printed on the sheet.
               </div>
             </div>
 
@@ -242,8 +264,7 @@ function App() {
                 <div><span className="eyebrow">DELIVERABLES</span><h2>Export package</h2></div>
               </div>
               <div className="export-actions">
-                {generatedUrl && <a className="button button-outline" href={generatedUrl} download={`${project.number}.dxf`}>Download generated DXF</a>}
-                {generatedPdfUrl && <a className="button button-outline" href={generatedPdfUrl} download={`${project.number}.pdf`}>Download generated PDF</a>}
+                <button className="button button-outline" onClick={downloadLocalDxf} type="button">Download local DXF</button>
                 <a className="button button-outline" href="/bridge-catalogue-11.pdf" target="_blank" rel="noreferrer">Open 11-bridge PDF catalogue ↗</a>
                 <a className="button button-outline" href="/samples/sample_input.xlsx" download>Download sample workbook</a>
               </div>
@@ -252,109 +273,6 @@ function App() {
         </section>
       </main>
     </div>
-  );
-}
-
-function DrawingSheet({ project, totalLength }: { project: ProjectState; totalLength: number }) {
-  const left = 58;
-  const mainRight = 815;
-  const elevationY = 186;
-  const planY = 503;
-  const spanWidth = 610 / project.spans;
-  const sectionX = 895;
-  const viewGap = planY - elevationY;
-
-  return (
-    <svg className="drawing-sheet" viewBox="0 0 1200 720" role="img" aria-label="Bridge general arrangement drawing with elevation, plan and typical sections">
-      <rect className="sheet-bg" x="0" y="0" width="1200" height="720" rx="4" />
-      <rect className="sheet-border" x="18" y="18" width="1164" height="684" />
-      <rect className="sheet-inner-border" x="27" y="27" width="1146" height="666" />
-      <text className="sheet-kicker" x="48" y="54">BRIDGE GENERAL ARRANGEMENT DRAWING</text>
-      <text className="sheet-note" x="1145" y="54" textAnchor="end">NOT FOR CONSTRUCTION · REVIEW ISSUE</text>
-
-      <g className="view-label">
-        <text x={left} y="84">ELEVATION</text>
-        <line x1={left} y1="94" x2={mainRight} y2="94" />
-        <text x={left} y="411">PLAN</text>
-        <line x1={left} y1="421" x2={mainRight} y2="421" />
-      </g>
-
-      <g className="elevation">
-        <line className="datum-line" x1={left} y1={elevationY + 94} x2={mainRight} y2={elevationY + 94} />
-        <text className="dimension-label" x={left - 2} y={elevationY + 111}>DATUM {project.datum.toFixed(3)}</text>
-        {Array.from({ length: project.spans + 1 }).map((_, index) => {
-          const x = left + index * spanWidth;
-          return <line className="dimension-tick" key={`elev-${index}`} x1={x} y1={elevationY - 42} x2={x} y2={elevationY + 112} />;
-        })}
-        <rect className="deck-fill" x={left} y={elevationY - 32} width={610} height="19" rx="2" />
-        <line className="structure-line" x1={left} y1={elevationY - 32} x2={left + 610} y2={elevationY - 32} />
-        {Array.from({ length: Math.max(project.spans - 1, 0) }).map((_, index) => {
-          const x = left + (index + 1) * spanWidth;
-          return <g key={`pier-${index}`}><rect className="support-fill" x={x - 9} y={elevationY - 13} width="18" height="82" rx="2" /><rect className="footing-fill" x={x - 28} y={elevationY + 69} width="56" height="12" rx="2" /></g>;
-        })}
-        <rect className="abutment-fill" x={left - 13} y={elevationY - 5} width="13" height="76" />
-        <rect className="abutment-fill" x={left + 610} y={elevationY - 5} width="13" height="76" />
-        <line className="dimension-line" x1={left} y1={elevationY - 64} x2={left + 610} y2={elevationY - 64} />
-        {Array.from({ length: project.spans }).map((_, index) => {
-          const x = left + index * spanWidth + spanWidth / 2;
-          return <g key={`span-${index}`}><line className="dimension-tick" x1={x - spanWidth / 2} y1={elevationY - 70} x2={x - spanWidth / 2} y2={elevationY - 58} /><line className="dimension-tick" x1={x + spanWidth / 2} y1={elevationY - 70} x2={x + spanWidth / 2} y2={elevationY - 58} /><text className="dimension-label" x={x} y={elevationY - 73} textAnchor="middle">{project.spanLength.toFixed(2)} m</text></g>;
-        })}
-        <text className="component-label" x={left + 610} y={elevationY - 45} textAnchor="end">RCC deck · {totalLength.toFixed(2)} m total length</text>
-      </g>
-
-      <g className="view-gap">
-        <line x1={left} y1="366" x2={mainRight} y2="366" />
-        <line x1={left} y1="387" x2={mainRight} y2="387" />
-        <text x={(left + mainRight) / 2} y="381" textAnchor="middle">CLEAR VIEW BAND · {viewGap === 317 ? "2.0 m" : "2.0 m"} MINIMUM · DIMENSIONS KEPT OUTSIDE VIEWS</text>
-      </g>
-
-      <g className="plan">
-        <rect className="plan-outline" x={left} y={planY - 21} width="610" height="42" rx="2" />
-        {Array.from({ length: Math.max(project.spans - 1, 0) }).map((_, index) => {
-          const x = left + (index + 1) * spanWidth;
-          return <g key={`plan-pier-${index}`}><rect className="support-outline" x={x - 9} y={planY - 48} width="18" height="96" rx="2" /><rect className="footing-outline" x={x - 25} y={planY - 60} width="50" height="120" rx="2" /></g>;
-        })}
-        <line className="dimension-line" x1={left} y1={planY + 72} x2={left + 610} y2={planY + 72} />
-        <text className="dimension-label" x={left + 305} y={planY + 91} textAnchor="middle">{totalLength.toFixed(2)} m overall</text>
-        <text className="component-label" x={left + 305} y={planY - 35} textAnchor="middle">CARRIAGEWAY / DECK PLAN</text>
-        <text className="component-label" x={left + 305} y={planY + 112} textAnchor="middle">P1 · P2 · TYPICAL SUPPORT CENTRES</text>
-      </g>
-
-      <g className="section-column">
-        <text className="view-label" x={sectionX} y="84">TYPICAL DETAILS</text>
-        <line x1={sectionX} y1="94" x2="1138" y2="94" />
-        <text className="section-title" x={sectionX} y="128">A-A · DECK CROSS-SECTION</text>
-        <rect className="section-deck" x={sectionX} y="150" width="210" height="34" rx="2" />
-        <line className="section-line" x1={sectionX + 16} y1="150" x2={sectionX + 16} y2="184" />
-        <line className="section-line" x1={sectionX + 194} y1="150" x2={sectionX + 194} y2="184" />
-        <text className="section-note" x={sectionX + 105} y="204" textAnchor="middle">WIDTH {project.width.toFixed(2)} m · CAMBER / KERB / BARRIER</text>
-
-        <text className="section-title" x={sectionX} y="258">B-B · TYPICAL PIER</text>
-        <rect className="section-deck" x={sectionX + 82} y="282" width="46" height="14" rx="1" />
-        <path className="pier-profile" d={`M ${sectionX + 90} 296 L ${sectionX + 120} 296 L ${sectionX + 132} 385 L ${sectionX + 78} 385 Z`} />
-        <rect className="footing-fill" x={sectionX + 58} y="385" width="94" height="18" rx="2" />
-        <text className="section-note" x={sectionX + 105} y="424" textAnchor="middle">PIER · CAP · FOOTING · LEVELS</text>
-      </g>
-
-      <g className="title-block">
-        <rect x="895" y="518" width="243" height="153" />
-        <line x1="895" y1="548" x2="1138" y2="548" />
-        <line x1="895" y1="577" x2="1138" y2="577" />
-        <line x1="895" y1="610" x2="1138" y2="610" />
-        <line x1="895" y1="641" x2="1138" y2="641" />
-        <line x1="1030" y1="577" x2="1030" y2="610" />
-        <text className="title-main" x="905" y="539">BRIDGE GAD</text>
-        <text className="title-value" x="905" y="568">{project.name}</text>
-        <text className="title-label" x="905" y="570">PROJECT</text>
-        <text className="title-value" x="905" y="601">{project.number}</text>
-        <text className="title-value" x="1040" y="601">REV {project.revision}</text>
-        <text className="title-label" x="905" y="628">STANDARD</text>
-        <text className="title-value" x="905" y="636">IRC / MoRTH</text>
-        <text className="title-label" x="1040" y="628">SCALE</text>
-        <text className="title-value" x="1040" y="636">1:100</text>
-        <text className="title-value" x="905" y="662">DRAWN / CHECKED / APPROVED</text>
-      </g>
-    </svg>
   );
 }
 

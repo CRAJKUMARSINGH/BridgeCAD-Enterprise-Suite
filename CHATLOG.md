@@ -700,3 +700,87 @@ Doc gate: `verify_docs.py --json` → 1 **pre-existing** failure
 copy's links to `GUIDE.md`/`CONTRIBUTING.md`/`README.md` — absent from the
 committed tree and unrelated to the applied patch.
 
+## 2026-11-04 10:47 IST — applied + ran CODE-JUNCTION/BridgeCAD_Robotic_Test_Package
+
+Verdict: **ALREADY UPSTREAM — nothing to apply; full robotic matrix run green.**
+
+- **Hash audit.** Every package script is byte-identical to the live tree
+  (`robotic_smoke.py`, the three persona robots, `scripts/robot/{personas,run_robot,gate,triage}.py`,
+  `artifacts/TRIAGE_LOG.md`); `robotic_test_harness.py` differs only by CRLF. The
+  kit's own §1 confirms the hardening is already merged, so it is a validation
+  report + guides, not a code drop.
+- **Robotic matrix (all exit 0).**
+  - `robotic_smoke.py --persona all` on seeds **42 / 7 / 99 / 1234** → 3/3 PASS each.
+  - `basic_user_robot.py --seed 123 --iterations 3` → `ALL OK` (13 PDFs each).
+  - `intermediate_user_robot.py --seed 456 --mutations 2 --strict-qa` → `qa=88.0 qa_ok=True` (×2) `ALL OK`.
+  - `advanced_user_robot.py --seed 789 --hypothesis` → schema 201 843 B + unit suite `ALL OK`.
+  - `python -m bridgecad verify` → Day 3 7/7 + Day 4 8/8 **★ ACCEPTED ★** (score 82).
+- **Gate + stack.** `scripts/robot/gate.py --json` → `blocked=false, total_open=0` ·
+  `ruff check` + `ruff format --check packages/ apps/ scripts/` → clean (215 files) ·
+  `pytest tests/unit -q -m "not slow"` → **115 passed**.
+- **Doc gate.** `verify_docs.py --json` → pass 2 / **fail 1** / skip 3; the single
+  failure is `test_defect_02` and every dead link lives in the untracked
+  `CODE-JUNCTION/BridgeCAD_Robotic_Test_Package/docs/` inbox. The committed tree is clean.
+- Watch-item unchanged: `robotic_smoke.py`'s intermediate persona still shows
+  `score: null` (kit §6 item 1) — the dedicated script + `--strict-qa` is the strict gate.
+
+## 2026-11-04 14:45 IST — Netlify deploy 400 fixed (function-manifest basename collision)
+
+Verdict: **root cause found and shipped — remote now carries the fix (`69d54d2`).**
+
+- **Symptom.** Three deploys failed identically at the deploy stage:
+  `HTTP Error 400 ... uploadDeployFunction ... unable to decode manifest file:
+  json: cannot unmarshal string into Go struct field functionManifest.version of type int`.
+- **False leads (ruled out).** Legacy `[build] functions=` schema, a stale cache,
+  and Node pinning — none were the cause. Modernising `[functions] directory`,
+  adding `.nvmrc`, and clearing cache did **not** fix it.
+- **Root cause.** Netlify's deploy API decodes any `.json` in the functions dir
+  whose **basename matches a function name** as that function's `functionManifest`.
+  `netlify/functions/package.js` collided with root `package.json`, whose
+  `"version": "1.0.0"` is a **string** → the Go struct wanted an `int`. (Ref:
+  Netlify Support topic #127492, accepted answer.)
+- **Fix.** Renamed `package.js` → `export_package.js` (only the filename changed);
+  moved `[functions] directory` out of `[build]`; added `/api/package` →
+  `/.netlify/functions/export_package`; pinned Node 20 via `.nvmrc`.
+- **Verification.** No remaining basename collisions; `test_netlify_readiness.py`
+  → **26/26 PASS · READY for Netlify deploy**.
+- **Shipped.** Staged exactly `netlify.toml`, `.nvmrc`,
+  `netlify/functions/export_package.js` and the deleted `package.js`
+  (pathspec commit, excludes `outputs/*` and untracked scratch) →
+  `69d54d2`; `git push origin main` success; `HEAD == origin/main == 69d54d2`.
+- **Next.** Redeploy on Netlify with **Clear cache and deploy site**.
+- Windows note: `.git/index.lock` was re-created repeatedly mid-session by a
+  background git process; `Remove-Item`/`Rename-Item` both failed while it was
+  held. Resolved by re-running once the holder exited (`clear_stale_locks.py
+  --force` + a bare `Remove-Item` on `index.lock`).
+
+## 2026-11-04 18:40 IST — Venice-patch (abutment) applied: sheets 04/05 restored
+
+Verdict: **applied (adapted) — green.**
+
+- **Kit.** `CODE-JUNCTION/Venice-patch/Cad.txt` (diff embedded in prose). Restores
+  the abutment-foundation / pier-wing-wall detail sheets on the *static* deploy,
+  where the bundle previously rendered only "SHEET 01 / 01".
+- **Applied.** `frontend/src/sheets/` (`detailGeometry.js`, `Sheet04Foundation.tsx`,
+  `Sheet05PierAbutment.tsx`, `SheetChrome.tsx`, `registry.tsx`, `sheets.css`,
+  `Sheet01Overview.tsx`); rewired `frontend/src/main.tsx` to a 01/04/05 sheet
+  register with a local DXF export; `allowJs: true` in `frontend/tsconfig.json`;
+  added `scripts/robotic_sheet_detail_audit.py` + `tests/draw/test_sheet4_sheet5_present.py`.
+- **The abutment fix.** `normalizeParams` floors `abtl` at `carriageway + 2` so
+  `face_run = (abtl − carriageway)/2` can never reach ≤ 0 and collapse a wing
+  wall; `audit()` asserts `E_FACE_RUN` / `E_ABTL_SHORT` bite.
+- **Kit defects fixed on retarget (3):** (1) `node <driver> <json-argv>` blew the
+  ~32k Windows `CreateProcess` limit → `WinError 206`; cases now travel by temp
+  file. (2) the `import … from %s` specifier was unquoted → `SyntaxError`; now
+  `from "%s"`. (3) the audit read `rect.x/y` as a centre (`x−w`), reporting a
+  phantom `E_EXTENTS` on **all 600** renders; extents are now primitive-aware.
+- **Rejected with reason.** `docs/PATCH_RESTORE_SHEET4_5.md` — a patch-description
+  doc; a top-level `docs/*.md` must be registered in `DOCS_INDEX.md` + `mkdocs.yml`
+  to pass the integrity gate, and patch-notes are not committed to the source tree.
+- **Verified.** `robotic_sheet_detail_audit.py --cases 2000` → **failures=0**;
+  `pytest tests/draw/test_sheet4_sheet5_present.py` → **4 passed**;
+  `npx tsc --noEmit` clean; `npm run build` → dist (33 modules); `ruff format
+  --check` + `ruff check` clean.
+- **Not committed** (standing rule) — 6 new/modified paths sit staged-or-untracked
+  in `frontend/`, `scripts/`, `tests/draw/`.
+

@@ -99,6 +99,14 @@ Introduced by the `CODE-JUNCTION/00 FOR ALL APPS` brief (Phase 2).
   its own copy; a corrupt entry failed. Added dev-only
   `server.headers: { "Cache-Control": "no-store" }` so nothing is stored; all
   modules verified 200 + `cc='no-store'`. Hard reload once to evict the old entry.
+- **Drawing-generation lane run in full** (the earlier green stack was
+  frontend-only — a poor show). `python tests/e2e/run_e2e.py` → **28 fixtures,
+  28 passed, ACCEPTED**; fresh generation for 4 fixtures → **8 sheets each**
+  (`Sheet1_Plan` … `Sheet8_SideElevations`), **83–276 entities/sheet** (floor
+  20). `pytest tests/draw -m draw` → **234 passed / 2 skipped / 5 xfailed**;
+  coordinates **23**; signoff **7**; `tests/drawings --regression` → **14**;
+  `audit_layers.py` → PASS (63 layers). `wing_report.py` → 0 pass / 10 scaffold
+  / 25 fail = the documented pre-RC1 scaffold baseline, not a regression.
 
 ### Not taken
 

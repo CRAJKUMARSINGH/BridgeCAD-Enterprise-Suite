@@ -933,3 +933,31 @@ commit (standing rule: commit only on explicit instruction).
 - **One-time action for the preview tab:** hard reload (Ctrl+F5) once to evict
   the already-corrupt entry; thereafter `no-store` keeps it from recurring.
 
+## 2026-11-05 IST — drawing-generation lane run in full (the real thing)
+
+Ran the **actual drawing lanes** from `draw.yml`, not just the frontend
+contract + audit proxies:
+
+- **`python tests/e2e/run_e2e.py` → 28 fixtures, 28 passed, 0 failed,
+  `*** ACCEPTED ***`.** Each fixture goes BridgeProject → `generate_package()` →
+  DXF sheets + BOQ + ZIP, then asserts sheet count, total KB, per-sheet entity
+  count (`MIN_SHEET_ENTITIES = 20`) and ZIP contents.
+- **Concrete artifacts** (fresh generation, not the committed samples):
+  `simple_12m`, `mjb_pkg7_6x30m_viaduct`, `gad_3x18m_skew15`, `newaj_3x45m` →
+  **8 sheets each** (`Sheet1_Plan` … `Sheet8_SideElevations`), **83–276
+  entities/sheet** (floor 20), 46–96 KB/sheet.
+- **`pytest tests/draw -m draw`** → **234 passed, 2 skipped, 14 deselected,
+  5 xfailed** (55.0 s) · `tests/draw/test_coordinates.py` → **23 passed** ·
+  `tests/draw/test_signoff.py -k "not scaffold"` → **7 passed**.
+- **`pytest tests/drawings --regression`** → **14 passed** (77.5 s) ·
+  **`scripts/audit_layers.py`** → `layers: PASS` (63 project layers, 63 ISO
+  names, 7 weights).
+- **`scripts/wing_report.py`** → `0 pass, 10 scaffold, 25 fail, 0 signed off` —
+  this is the **documented pre-RC1 scaffold baseline**, not a regression; the
+  scaffold contract lane is `continue-on-error` by design in `draw.yml`.
+- **Local gotcha.** `bridgecad_draw` is not pip-installed in this checkout.
+  `audit_layers.py` and `pytest` are fine (they bootstrap `sys.path`), but
+  `scripts/wing_report.py` imports `bridgecad_draw` through
+  `tests/draw/contract.py` and needed `PYTHONPATH` = the `packages/*` dirs. CI
+  installs it through the `draw` extra.
+

@@ -86,6 +86,13 @@ Introduced by the `CODE-JUNCTION/00 FOR ALL APPS` brief (Phase 2).
   index + all edited modules 200; build exit 0; ruff clean (217 files); pytest
   49 passed; parity 28/0; audit 4000 renders 0 failures; mutation 4/4;
   `verify_docs` 3/0/3. Only `outputs/` binaries and untracked scratch differ.
+- **Vite `.d.ts` overlay fixed.** A stray request for
+  `src/sheets/detailGeometry.d.ts` made esbuild parse the type-only declarations
+  as JS and broadcast a transform error to the HMR overlay. The runtime never
+  imports the `.d.ts` (imports resolve to the `.js`). Added a 6-line
+  `skipTypeDeclarations` plugin in `frontend/vite.config.ts` serving any `.d.ts`
+  as `export {};`. Restarted the server; the file now returns 200 and all gates
+  stay green.
 
 ### Not taken
 

@@ -889,3 +889,27 @@ commit (standing rule: commit only on explicit instruction).
   and untracked scratch (`CODE-JUNCTION/`, `ATTACHED ASSETS/`, `reports/`).
   This entry is the only change, folded into the `docs(logs)` commit.
 
+## 2026-11-05 IST — Vite `.d.ts` overlay diagnosed and fixed
+
+- **Symptom.** Browser HMR overlay:
+  `[plugin:vite:esbuild] Transform failed ... detailGeometry.d.ts:25 The constant
+  "SHEET" must be initialized` (also `LAYERS`, `DETAIL_DEFAULTS`).
+- **Root cause.** The **runtime app never imports the declaration file** — the
+  transformed modules read
+  `import { … } from "/src/sheets/detailGeometry.js"`. The overlay was raised by
+  an **out-of-band request for `/src/sheets/detailGeometry.d.ts`** (an earlier
+  diagnostic HTTP GET). Vite's dev server transforms *any* requested file, so
+  esbuild parsed the `export const X: T;` declarations as JavaScript, failed, and
+  broadcast the error to every connected client — where it persisted until
+  dismissed or the server restarted.
+- **Fix.** `frontend/vite.config.ts` gains a small `skipTypeDeclarations` plugin;
+  its `load()` serves any `.d.ts` as `export {};`, so a stray request can never
+  raise the overlay again. Nothing about what the app *loads* changes
+  (`tsc --noEmit` still reads the real `.d.ts`).
+- **Verified on a restarted server.** `/src/sheets/detailGeometry.d.ts` → **200
+  `export {};`**; index + every module 200; `npm run build --prefix frontend`
+  exit 0 · ruff clean (217 files) · `pytest tests/draw/… tests/docs -q -m "not
+  slow"` → **49 passed** · `parity_detail_sheets.py` → 28/0 ·
+  `robotic_sheet_detail_audit.py --cases 2000` → 4000 renders, **0 failures** ·
+  `--mutate all` → **4/4** · `verify_docs.py` → **3 / 0 / 3**.
+

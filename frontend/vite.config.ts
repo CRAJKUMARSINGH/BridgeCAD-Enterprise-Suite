@@ -24,6 +24,12 @@ export default defineConfig({
     proxy: {
       "/api": "http://localhost:3000",
     },
+    // Vite serves source modules as `Cache-Control: no-cache`, so the browser
+    // revalidates each one and then reads its own copy out of the disk cache.
+    // If that entry is corrupt the read fails with `net::ERR_CACHE_READ_FAILURE`
+    // (common in embedded preview browsers after a dev-server restart). Dev
+    // responses are cheap to re-send, so forbid storing them at all.
+    headers: { "Cache-Control": "no-store" },
   },
   build: {
     sourcemap: true,

@@ -93,6 +93,12 @@ Introduced by the `CODE-JUNCTION/00 FOR ALL APPS` brief (Phase 2).
   `skipTypeDeclarations` plugin in `frontend/vite.config.ts` serving any `.d.ts`
   as `export {};`. Restarted the server; the file now returns 200 and all gates
   stay green.
+- **Dev-server cache hardening.** `net::ERR_CACHE_READ_FAILURE` on
+  `@react-refresh` / `src/main.tsx` was a browser disk-cache fault (the server
+  returned 200 + ETag). Vite's `no-cache` made the browser revalidate then read
+  its own copy; a corrupt entry failed. Added dev-only
+  `server.headers: { "Cache-Control": "no-store" }` so nothing is stored; all
+  modules verified 200 + `cc='no-store'`. Hard reload once to evict the old entry.
 
 ### Not taken
 

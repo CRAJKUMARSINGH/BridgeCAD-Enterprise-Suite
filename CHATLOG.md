@@ -913,3 +913,23 @@ commit (standing rule: commit only on explicit instruction).
   `robotic_sheet_detail_audit.py --cases 2000` → 4000 renders, **0 failures** ·
   `--mutate all` → **4/4** · `verify_docs.py` → **3 / 0 / 3**.
 
+## 2026-11-05 IST — dev-server cache hardening (`no-store`)
+
+- **Symptom.** Browser console: `net::ERR_CACHE_READ_FAILURE
+  http://localhost:5173/@react-refresh` and `.../src/main.tsx`.
+- **Root cause.** Client-side, not the server: the dev server returned **200**
+  for both URLs with valid `ETag`s. Vite serves source modules as
+  `Cache-Control: no-cache`, so the browser revalidates and then reads its own
+  copy back out of the **disk cache** — and a corrupt entry surfaces as
+  `ERR_CACHE_READ_FAILURE` (typical in embedded preview browsers after a
+  dev-server restart).
+- **Fix.** `frontend/vite.config.ts`: dev-only
+  `server.headers: { "Cache-Control": "no-store" }`, so the browser never stores
+  these responses and has no cache entry to fail to read. Dev re-sends are cheap.
+- **Verified on a restarted server.** `/`, `/@react-refresh`, `/src/main.tsx`,
+  `/@vite/client`, `detailGeometry.js` + `.d.ts`, Sheet 04/05 → all **200,
+  `cc='no-store'`**; build exit 0; ruff clean (217 files); pytest 49 passed;
+  audit 1000 renders 0 failures; `verify_docs` 3/0/3.
+- **One-time action for the preview tab:** hard reload (Ctrl+F5) once to evict
+  the already-corrupt entry; thereafter `no-store` keeps it from recurring.
+

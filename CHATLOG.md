@@ -846,3 +846,29 @@ caught) · `scripts/verify_docs.py` → **3 passed, 0 failed, 3 skipped**.
 **Not committed** — the instruction was to *apply* the three briefs, not to
 commit (standing rule: commit only on explicit instruction).
 
+## 2026-11-05 IST — browser run + green gate; committed + pushed (`449f57f`)
+
+- **Browser run.** `npm run dev --prefix frontend` at http://localhost:5173/ —
+  index 200; every edited module transforms 200 (`main.tsx`, `registry.tsx`,
+  `theme.ts`, `detailGeometry.js`, `Sheet04Foundation.tsx`,
+  `Sheet05PierAbutment.tsx`, `SheetChrome.tsx`, `Sheet01Overview.tsx`,
+  `sheets.css`). The only non-200 is `/src/sheets/detailGeometry.d.ts` → 500 on a
+  **direct** fetch, which is expected: Vite/esbuild never serves a declaration
+  file as a runtime module (no code imports it; imports resolve to
+  `detailGeometry.js`; `tsc --noEmit` passes).
+- **Geometry certification (headless).** `robotic_sheet_detail_audit.py --cases
+  2000 --seed 20261104` → `cases=2000 sheet-renders=4000 failures=0`; mutation
+  `--mutate all --cases 300` → `mutation score 4/4`.
+- **Green stack.** `npm run build --prefix frontend` exit 0 · `ruff check` +
+  `ruff format --check packages apps scripts` clean (2 files reformatted) ·
+  `pytest tests/draw/test_sheet4_sheet5_present.py
+  tests/draw/test_no_shared_class.py tests/docs -q -m "not slow"` → **49 passed,
+  16 deselected** · `parity_detail_sheets.py` → `fixtures=28 divergences=0` ·
+  `verify_docs.py` → **3 passed / 0 failed / 3 skipped**.
+- **Committed + pushed.** Pathspec commit (25 files, +994/−151) → `449f57f`;
+  `git push origin main` → `69d54d2..449f57f`; `HEAD == origin/main`.
+  `outputs/` binaries and scratch (`CODE-JUNCTION/`, `ATTACHED ASSETS/`,
+  `reports/`) excluded by design.
+- Windows lock litter recurred; `scripts/clear_stale_locks.py --force` cleared
+  4 locks (index / HEAD / AUTO_MERGE / packed-refs) and the write then succeeded.
+

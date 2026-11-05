@@ -75,8 +75,13 @@ Introduced by the `CODE-JUNCTION/00 FOR ALL APPS` brief (Phase 2).
   tests/e2e/fixtures` → `fixtures=28 divergences=0` ·
   `robotic_sheet_detail_audit.py --mutate all --cases 200` → **mutation 4/4** ·
   `scripts/verify_docs.py` → **3 passed / 0 failed / 3 skipped**.
-- **Not committed** — instruction was to *apply* the three briefs (standing rule:
-  commit only on explicit instruction).
+- **Browser run + certified.** Vite dev server at `http://localhost:5173/` (index
+  200; every edited module transforms 200). `robotic_sheet_detail_audit.py --cases
+  2000` → 0 failures (4000 renders); `--mutate all` → 4/4. `ruff format --check`
+  cleaned 2 files; `pytest … tests/docs -m "not slow"` → 49 passed.
+- **Committed + pushed on instruction.** Pathspec (25 files, +994/−151) →
+  **`449f57f`**; `git push origin main` → `69d54d2..449f57f`;
+  `HEAD == origin/main`. `outputs/` binaries + scratch excluded by design.
 
 ### Not taken
 

@@ -82,6 +82,10 @@ Introduced by the `CODE-JUNCTION/00 FOR ALL APPS` brief (Phase 2).
 - **Committed + pushed on instruction.** Pathspec (25 files, +994/−151) →
   **`449f57f`**; `git push origin main` → `69d54d2..449f57f`;
   `HEAD == origin/main`. `outputs/` binaries + scratch excluded by design.
+- **Re-verified on the pushed tree — no change to ship.** On `5d97ecb`: dev server
+  index + all edited modules 200; build exit 0; ruff clean (217 files); pytest
+  49 passed; parity 28/0; audit 4000 renders 0 failures; mutation 4/4;
+  `verify_docs` 3/0/3. Only `outputs/` binaries and untracked scratch differ.
 
 ### Not taken
 

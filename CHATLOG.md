@@ -872,3 +872,20 @@ commit (standing rule: commit only on explicit instruction).
 - Windows lock litter recurred; `scripts/clear_stale_locks.py --force` cleared
   4 locks (index / HEAD / AUTO_MERGE / packed-refs) and the write then succeeded.
 
+## 2026-11-05 IST — re-verified on the pushed tree (nothing new to ship)
+
+- Re-ran the browser + gate certification on the pushed HEAD `5d97ecb`: dev
+  server http://localhost:5173/ → index 200 and **every** edited module
+  transforms 200 (`main.tsx`, `registry.tsx`, `theme.ts`, `detailGeometry.js`,
+  Sheet 04/05, `SheetChrome.tsx`, `Sheet01Overview.tsx`, `sheets.css`).
+  `npm run build --prefix frontend` exit 0 · `ruff check` +
+  `ruff format --check packages apps scripts` clean (217 files) ·
+  `pytest tests/draw/… tests/docs -q -m "not slow"` → **49 passed** ·
+  `parity_detail_sheets.py` → 28/0 · `robotic_sheet_detail_audit.py --cases
+  2000` → 4000 renders, **0 failures** · `--mutate all` → **4/4** ·
+  `verify_docs.py` → **3 / 0 / 3**.
+- **Nothing new to commit.** `HEAD == origin/main == 5d97ecb`; the only
+  working-tree deltas are regenerated `outputs/` binaries (excluded by design)
+  and untracked scratch (`CODE-JUNCTION/`, `ATTACHED ASSETS/`, `reports/`).
+  This entry is the only change, folded into the `docs(logs)` commit.
+

@@ -39,6 +39,54 @@ Introduced by the `CODE-JUNCTION/00 FOR ALL APPS` brief (Phase 2).
 
 ---
 
+## 2026-11-05
+
+### Session
+
+- **Venice-patch applied in chronology** (`CODE-JUNCTION/Venice-patch`):
+  `Venice 6 steps.txt` → `Venice continual.txt` → `Venice santa.txt`, each audited
+  against the live tree first. All items landed; one documented deviation.
+  - **Phase 1 (6 steps).** `frontend/src/sheets/theme.ts` (INK/PAPER + `inkFor`),
+    `SheetContext` in `registry.tsx`; Sheets 04/05 moved off the Sheet-01-owned
+    `.drawing-sheet` / `.sheet-bg` / `.sheet-border` classes onto a new
+    `.bcsheet` root (inline attrs, zero cascade reliance,
+    `vector-effect: non-scaling-stroke`); `main.tsx` nav/zoom/theme/print;
+    `sheets.css` theme + stage blocks.
+  - **Phase 2 (continual).** New `docs/CONTINUAL_IMPROVEMENT_SHEET_DETAILS.md`
+    (invariants N1–N8, parity discipline, budgets, ledger D-01…D-12), registered
+    in `DOCS_INDEX.md` + `mkdocs.yml`; guard `tests/draw/test_no_shared_class.py`;
+    debt rows mirrored into `docs/upgrade/DEFECT-LEDGER.md`; `CHANGELOG.md`
+    `[Unreleased]` refreshed.
+  - **Phase 3 (santa, G1–G8).** Panel markers + `E_OVERLAP` bbox check + audit
+    fix map (**G1**); `scripts/parity_detail_sheets.py` JS↔Python oracle (**G2**);
+    `.github/workflows/sheet-detail.yml` retargeted to `./.github/actions/
+    setup-suite` (**G3**); `detailGeometry.d.ts` + `DetailParams` typing (**G4**);
+    `beforeprint`/`afterprint` + `@page A1 landscape` (**G5**); splay-extreme
+    fixtures + `tests/draw/golden/pins/detail_default.json` 156/567 ±2 + three
+    tests (**G6**); scale bar + north arrow (**G7**); `docs/sheets/
+    _SPEC_TEMPLATE.md` (**G8**).
+  - **Deviation:** brief's panel bands `4C`/`5F` genuinely intersect neighbours →
+    shrank `4C` width 220→200 and `5F` height 70→55 (smallest bbox change that
+    still bounds the content) so `E_OVERLAP` stays a meaningful gate.
+- **Verified (all green).** `npm run build --prefix frontend` exit 0 (index
+  184.10 kB / gzip 59.92 kB) · `pytest tests/draw/test_sheet4_sheet5_present.py
+  tests/draw/test_no_shared_class.py -q` → **8 passed** · `ruff check` on both
+  scripts → *All checks passed* · `parity_detail_sheets.py --fixtures
+  tests/e2e/fixtures` → `fixtures=28 divergences=0` ·
+  `robotic_sheet_detail_audit.py --mutate all --cases 200` → **mutation 4/4** ·
+  `scripts/verify_docs.py` → **3 passed / 0 failed / 3 skipped**.
+- **Not committed** — instruction was to *apply* the three briefs (standing rule:
+  commit only on explicit instruction).
+
+### Not taken
+
+- The santa brief's `docs/sheets/_SPEC_TEMPLATE.md` was left in the `docs/sheets/`
+  subdir rather than promoted to top-level `docs/`: the doc-integrity gates glob
+  `docs/*.md` only, so registering a template in the nav would orphan it — no
+  registration tax is the correct trade.
+- Feeder-ahead/cleanup debt rows **D-01, D-03, D-04, D-05, D-06, D-08, D-12**
+  remain open in the Phase-2 ledger; not in scope for G1–G8.
+
 ## 2026-11-04
 
 ### Session
@@ -74,72 +122,4 @@ Introduced by the `CODE-JUNCTION/00 FOR ALL APPS` brief (Phase 2).
   `pytest …test_sheet4_sheet5_present.py` **4 passed**, `tsc --noEmit` + `vite
   build` clean, ruff clean. **Not committed** (standing rule).
 
-## 2026-11-03
-
-### Session
-
-- **Standing order recorded.** While a session is active, the chat log in this
-  file is appended and refreshed **every 12 minutes**; the order is mirrored in
-  [README.md](README.md) §Continuity so it is not lost when this file's own
-  rolling window trims.
-- **Venice-kit enforcement layer applied** (from `CODE-JUNCTION/Venice-patch`):
-  `defect` / `needs-triage` labels in `scripts/sync_labels.py`;
-  `.github/ISSUE_TEMPLATE/defect.yml`; contact links in
-  `.github/ISSUE_TEMPLATE/config.yml`; the Triage block in
-  `.github/PULL_REQUEST_TEMPLATE.md`; `.githooks/pre-push` plus the `hooks` /
-  `hooks-check` Makefile targets; `.github/workflows/robot.yml`.
-- **Doc fork retired.** An earlier pass had placed the two playbooks at the repo
-  root; they now live **only** under `docs/`, registered in `DOCS_INDEX.md` and
-  the `mkdocs.yml` nav. The root duplicates were removed and the two bare refs in
-  `artifacts/TRIAGE_LOG.md` were rebased to `docs/…` — "retire, don't fork".
-- **Persona suite retargeted to the real contract.** Rather than port the Venice
-  kit verbatim, the engineered oracles were mapped onto the live symbols and
-  landed as `tests/robot/` (marker `robot`): engine, API-contract, export and
-  console oracles over the real `bridgecad_core` / gateway / `bridgecad_draw` /
-  `bridgecad_export` surface. Wired via the `robot` marker in `pyproject.toml`,
-  `--ignore=tests/robot` in the unit lane, and a new `oracles` job in
-  `robot.yml`. `docs/TEST_PLAN.md` documents the lane and is registered in
-  `DOCS_INDEX.md`, the `mkdocs.yml` nav, and `.github/ISSUE_TEMPLATE/config.yml`.
-- **Rolling window applied on append.** The previous `2026-11-01` entry was older
-  than 24 hours and was dropped here, per the standing rule above. Durable
-  history remains in [CHANGELOG.md](CHANGELOG.md).
-
-### Not taken
-
-- **Kit ported verbatim: no.** The kit's illustrative symbols (`design_girder`,
-  `/api/v1/design`, `/api/v1/export/*`) do not exist in the tree, so a verbatim
-  port would redden CI. The retarget above keeps the intent — engineering
-  oracles on the real contract — without oracles for a contract the tree lacks.
-- **Committed + pushed** on instruction (`commit push`): `c522356`
-  `feat(robot): add engine/API/export oracle lane; certify CODE-JUNCTION/1.txt
-  applied` — 25 files, +1298/−169. `HEAD == origin/main`. Certification of
-  `CODE-JUNCTION/1.txt`: **applied**, 8 of 10 items, 2 rejected with reason
-  (`PATCH_NOTES.md` doc artifact; `pyproject.toml` mypy `files` cosmetic).
-- Generated `outputs/` binaries and scratch (`reports/`, `CODE-JUNCTION/`,
-  `ATTACHED ASSETS/`) left untracked by design.
-- **Certified `CODE-JUNCTION/Venice-patch` (`V*/`): APPLIED (adapted).** The
-  robotic harness + triage apparatus is fully represented in the tree; the
-  phantom-path variants (`tools/`, the phantom suite dir, `requirements-dev.txt`)
-  were retargeted, and three kit deltas were rejected with reason — the
-  `docs/TRIAGE_LOG.md` move, the kit's marker names, and the Playwright file.
-  Local step outstanding: `make hooks` (install `.git/hooks/pre-push`).
-- **Certified `CODE-JUNCTION/BridgeCAD_Robotic_Test_Package`: APPLIED (already
-  present) + validated green.** The kit's two code patches (`01` soft-skip
-  `hypothesis`, `02` intermediate QA hardening with `--strict-qa`) were already
-  in `scripts/advanced_user_robot.py` / `scripts/intermediate_user_robot.py`;
-  the legacy guidance (Patches 3–5) is already covered by the C1.5 fix in
-  `src/bridge_gad/`. Its unique debug playbook + residual-issue list were merged
-  into the root `ROBOTIC-TEST-GUIDE.MD` (§7–§8) — retire, don't fork. Green
-  proofs: `robotic_smoke.py --persona all --seed 42` exit 0 · `verify` Day 3 7/7
-  + Day 4 8/8 ★ACCEPTED★ · `--hypothesis` lane rc 0 · `--strict-qa` → `qa=88.0`.
-  `ruff format --check scripts/` clean. The one `verify_docs.py` failure is the
-  pre-existing untracked-inbox link defect, absent from the committed tree.
-- **Ran `CODE-JUNCTION/BridgeCAD_Robotic_Test_Package` (already upstream).**
-  Hash audit: every package script is byte-identical to the live tree (harness
-  differs only by CRLF), so there was nothing to apply. Full matrix green:
-  smoke seeds 42/7/99/1234 → 3/3 PASS each; basic 3 iterations `ALL OK`;
-  intermediate `--strict-qa` → `qa=88.0`; advanced `--hypothesis` → schema
-  201 843 B + unit OK; `verify` ★ACCEPTED★; `gate.py --json` → `blocked=false,
-  total_open=0`; ruff clean (215 files); `pytest tests/unit` → 115 passed. Sole
-  red: `verify_docs.py` `test_defect_02`, all dead links inside the untracked
-  `CODE-JUNCTION/` inbox (committed tree clean).
+<!-- Rolling window: entries older than 24 h are dropped on append. -->

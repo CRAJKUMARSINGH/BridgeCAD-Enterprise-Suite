@@ -784,3 +784,65 @@ Verdict: **applied (adapted) — green.**
 - **Not committed** (standing rule) — 6 new/modified paths sit staged-or-untracked
   in `frontend/`, `scripts/`, `tests/draw/`.
 
+## 2026-11-05 IST — Venice-patch applied in chronology: 6 steps → continual → santa
+
+Applied the three remaining Venice briefs **in the order asked**
+(`Venice 6 steps.txt` → `Venice continual.txt` → `Venice santa.txt`). Each was
+audited against the live tree first ("if due" rule); every item landed.
+
+**Phase 1 — `Venice 6 steps.txt` (theme/`.bcsheet` refactor).**
+- New `frontend/src/sheets/theme.ts` — INK (#0e1418 screen) vs PAPER (#fbf9f2
+  print) with `inkFor(theme, layer)`; `SheetContext` in `registry.tsx`.
+- Sheets 04/05 moved off the shared `.drawing-sheet` / `.sheet-bg` /
+  `.sheet-border` classes (owned by Sheet 01 in `styles.css`, which beat the
+  `.lyr-*` rules on specificity) onto a **new `.bcsheet` root** with inline
+  attributes and zero cascade reliance; `vector-effect: non-scaling-stroke` for
+  crisp 0.9 px outlines at zoom.
+- `main.tsx` gained the sheet nav / zoom / theme toggle / print wiring;
+  `sheets.css` the theme + stage blocks.
+
+**Phase 2 — `Venice continual.txt`.**
+- New `docs/CONTINUAL_IMPROVEMENT_SHEET_DETAILS.md` — invariants **N1–N8**,
+  parity discipline, budgets, and debt ledger rows **D-01…D-12**; registered in
+  `DOCS_INDEX.md` + the `mkdocs.yml` nav ("Continual improvement (detail
+  sheets)").
+- New guard `tests/draw/test_no_shared_class.py` — asserts Sheets 04/05 never
+  re-enter the Sheet-01-owned class space.
+- Debt rows mirrored into `docs/upgrade/DEFECT-LEDGER.md`; `CHANGELOG.md`
+  refreshed under `[Unreleased]`.
+
+**Phase 3 — `Venice santa.txt` (gifts G1–G8).**
+- **G1** panel markers + `E_OVERLAP` pairwise bbox check in `audit()`;
+  `SheetChrome.tsx` renders `panel` as `null`; `REQUIRED_LAYERS` now expects
+  `FRAME` on both sheets; audit gains a code→fix map.
+- **G2** `scripts/parity_detail_sheets.py` — JS/Python wing-wall oracle,
+  `fixtures=28 divergences=0`.
+- **G3** `.github/workflows/sheet-detail.yml` — **retargeted** to the repo's
+  canonical `./.github/actions/setup-suite` composite action (the brief's bare
+  `setup-python` would not install pytest).
+- **G4** `detailGeometry.d.ts` typings; Sheets 04/05 + `main.tsx` typed
+  `DetailParams`.
+- **G5** `beforeprint`/`afterprint` theme flip + `@page { size: A1 landscape }`.
+- **G6** splay-extreme fixtures (15 / 60) + `tests/draw/golden/pins/
+  detail_default.json` (156/567 ±2) + three new tests.
+- **G7** scale bar + north arrow.
+- **G8** `docs/sheets/_SPEC_TEMPLATE.md` (subdir → not caught by the top-level
+  doc gate, so no registration tax).
+
+**Deviation (documented):** the brief's panel bands `4C` and `5F` actually
+intersect their neighbours, so `E_OVERLAP` fired on the first audit. Shrank `4C`
+width 220→200 and `5F` height 70→55 — the smallest bounding-box change that still
+covers the content.
+
+**Verified (all green).** `npm run build --prefix frontend` → exit 0
+(`✓ built`, index 184.10 kB / gzip 59.92 kB) · `pytest
+tests/draw/test_sheet4_sheet5_present.py tests/draw/test_no_shared_class.py -q`
+→ **8 passed** · `ruff check` on both scripts → *All checks passed* ·
+`parity_detail_sheets.py --fixtures tests/e2e/fixtures` → `fixtures=28
+divergences=0` · `robotic_sheet_detail_audit.py --mutate all --cases 200` →
+**mutation score 4/4** (splay-clamp / one-wall / no-abtl-clamp / flat-grid all
+caught) · `scripts/verify_docs.py` → **3 passed, 0 failed, 3 skipped**.
+
+**Not committed** — the instruction was to *apply* the three briefs, not to
+commit (standing rule: commit only on explicit instruction).
+

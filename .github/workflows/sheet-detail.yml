@@ -1,0 +1,41 @@
+name: sheet-detail
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: sheet-detail-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: sheet 04 / 05 detail gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Installs the workspace with the dev extra (pytest) and `-e` of every
+      # member, so the Node mirror and the Python core share one checkout.
+      - uses: ./.github/actions/setup-suite
+        with:
+          extras: dev
+
+      - run: npm ci --prefix frontend
+
+      - run: npm run build --prefix frontend
+
+      - name: Contract tests
+        run: pytest tests/draw/test_sheet4_sheet5_present.py tests/draw/test_no_shared_class.py -q
+
+      - name: Randomised audit (3000 seeded cases)
+        run: python scripts/robotic_sheet_detail_audit.py --cases 3000 --seed 20261104
+
+      - name: Mutation drills
+        run: python scripts/robotic_sheet_detail_audit.py --mutate all --cases 200

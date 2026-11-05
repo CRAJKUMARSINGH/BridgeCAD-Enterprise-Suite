@@ -1,11 +1,12 @@
-import { buildSheet4 } from "./detailGeometry";
+import { buildSheet4, type DetailParams } from "./detailGeometry";
 import { Prims, SheetFrame } from "./SheetChrome";
+import type { SheetTheme } from "./theme";
 
-export default function Sheet04Foundation({ params }: { params: any }) {
+export default function Sheet04Foundation({ params, theme }: { params: DetailParams; theme: SheetTheme }) {
   const sheet = buildSheet4(params);
   return (
-    <SheetFrame>
-      <Prims prims={sheet.prims} />
+    <SheetFrame theme={theme}>
+      <Prims prims={sheet.prims} theme={theme} />
     </SheetFrame>
   );
 }

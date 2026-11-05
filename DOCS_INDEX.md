@@ -32,6 +32,7 @@ Every doc in this repo, what it is, and whether to trust it.
 | [docs/TRIAGE_AND_DEBUG.md](docs/TRIAGE_AND_DEBUG.md) | Post-test debug protocol — minimize, bisect, classify, record |
 | [docs/PATCH_GUIDE.md](docs/PATCH_GUIDE.md) | Patch patterns by defect class, cross-referenced from the triage log |
 | [docs/TEST_PLAN.md](docs/TEST_PLAN.md) | Robotic oracle lane — engine, API, export and console oracles |
+| [docs/CONTINUAL_IMPROVEMENT_SHEET_DETAILS.md](docs/CONTINUAL_IMPROVEMENT_SHEET_DETAILS.md) | Continual improvement programme for detail sheets 04 / 05 — invariants, budgets, parity, debt ledger |
 
 ## Governance
 

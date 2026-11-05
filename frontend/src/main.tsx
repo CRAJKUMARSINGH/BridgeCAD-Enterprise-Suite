@@ -1,10 +1,11 @@
-import { ChangeEvent, FormEvent, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 import "./sheets/sheets.css";
-import { DETAIL_DEFAULTS, audit, buildSheet4, buildSheet5, toDxf } from "./sheets/detailGeometry";
+import { DETAIL_DEFAULTS, audit, buildSheet4, buildSheet5, toDxf, type DetailParams } from "./sheets/detailGeometry";
 import { SHEETS, findSheet } from "./sheets/registry";
 import type { ProjectState } from "./sheets/Sheet01Overview";
+import { INK, PAPER, type SheetTheme } from "./sheets/theme";
 
 type BackendState = "checking" | "online" | "demo" | "offline";
 
@@ -37,15 +38,31 @@ const DETAIL_FIELDS: Array<{ key: string; label: string; step?: string }> = [
 function App() {
   const [project, setProject] = useState(initialProject);
   const [sheetIndex, setSheetIndex] = useState(5);
-  const [detail, setDetail] = useState<Record<string, unknown>>({ ...DETAIL_DEFAULTS, projectName: initialProject.name, number: initialProject.number, revision: initialProject.revision });
+  const [detail, setDetail] = useState<DetailParams>({ ...DETAIL_DEFAULTS, projectName: initialProject.name, number: initialProject.number, revision: initialProject.revision });
   const [activeView, setActiveView] = useState("Drawing workspace");
   const [backend, setBackend] = useState<BackendState>("checking");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("Detail sheets 04 and 05 render locally — no Python engine required.");
+  const [theme, setTheme] = useState<SheetTheme>(INK);
+  const [zoom, setZoom] = useState<number | "fit">("fit");
 
   const sheet = findSheet(sheetIndex);
-  const ctx = { project, detail };
+  const ctx = { project, detail, theme };
+  const sheetWidth = sheetIndex === 1 ? 1200 : 841;
+
+  // Printing always uses the paper palette, whatever is on screen, and restores
+  // the on-screen theme afterwards — no timeout, no stale ink strokes.
+  useEffect(() => {
+    const before = () => setTheme(PAPER);
+    const after = () => setTheme(INK);
+    window.addEventListener("beforeprint", before);
+    window.addEventListener("afterprint", after);
+    return () => {
+      window.removeEventListener("beforeprint", before);
+      window.removeEventListener("afterprint", after);
+    };
+  }, []);
 
   const verdict = useMemo(() => {
     try {
@@ -190,9 +207,22 @@ function App() {
                   {String(entry.index).padStart(2, "0")} · {entry.title}
                 </button>
               ))}
+              <div className="sheet-tools">
+                {(["fit", 0.75, 1, 1.5, 2] as const).map((z) => (
+                  <button key={String(z)} className={zoom === z ? "on" : ""} onClick={() => setZoom(z)}>
+                    {z === "fit" ? "fit" : `${Math.round((z as number) * 100)}%`}
+                  </button>
+                ))}
+                <button onClick={() => setTheme(theme.id === "ink" ? PAPER : INK)}>{theme.id === "ink" ? "paper" : "ink"}</button>
+                <button onClick={() => window.print()}>print</button>
+              </div>
             </div>
 
-            <div className="drawing-frame sheet-scroll">{sheet.render(ctx)}</div>
+            <div className="bcsheet-wrap">
+              <div className="bcsheet-stage" style={{ width: zoom === "fit" ? "100%" : sheetWidth * zoom }}>
+                {sheet.render(ctx)}
+              </div>
+            </div>
             <div className="canvas-footer">
               <span>Sheet 01 is the overview; 04 and 05 are the restored abutment-foundation and wing-wall detail sheets.</span>
               <span className="legend"><i className="legend-line cyan" /> Structure <i className="legend-line amber" /> Foundation <i className="legend-line violet" /> Dimension</span>

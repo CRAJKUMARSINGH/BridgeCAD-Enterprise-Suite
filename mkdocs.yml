@@ -117,6 +117,7 @@ nav:
       - Drafting standard: drafting-standard.md
       - Plugin authoring: plugin-authoring.md
       - API reference: api-reference.md
+      - Continual improvement (detail sheets): CONTINUAL_IMPROVEMENT_SHEET_DETAILS.md
   - Operations:
       - Deployment: deployment.md
       - Troubleshooting: troubleshooting.md

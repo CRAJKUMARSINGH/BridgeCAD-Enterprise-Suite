@@ -34,3 +34,27 @@ Baseline captured week 1 against commit `2acef08`.
 | D-22 | major | No PDF measurement proof | — | — | W40 | open |
 
 Append rows as they are found. Never delete a row.
+
+---
+
+## Detail sheets
+
+Register for the JS deploy mirror (`frontend/src/sheets/**`) and the detail
+pipeline, governed by `docs/CONTINUAL_IMPROVEMENT_SHEET_DETAILS.md`. IDs in this
+section are scoped to the detail-sheet register and are independent of the
+Python-sheet rows above.
+
+| ID | Item | Impact | Exit criterion |
+|---|---|---|---|
+| D-01 | `toDxf` emits a minimal AC1015 skeleton | may fail strict CAD validators | one export opens in a real viewer and round-trips |
+| D-02 | No automated parity against Python sheets | silent drift | `parity_detail_sheets.py` green on 28 fixtures |
+| D-03 | PDF is print-to-file only, no vector path | weaker deliverable | client-side vector PDF with embedded fonts |
+| D-04 | Bearing schedule values hardcoded in `buildSheet5` | schedule can contradict the model | rows read from `bearings_joints` |
+| D-05 | No well-foundation panel on sheet 5 | well bridges under-drawn | well variant rendered with `FOUND-WELL` |
+| D-06 | Layer set is a subset of the 53 IRC layers | package mismatch | layers reconciled with `layers.py` |
+| D-07 | No scale bar or north arrow | drafting completeness | both drawn on every sheet |
+| D-08 | Zoom has no drag-pan | awkward at 200% | pointer drag pans the stage |
+| D-09 | No inter-panel overlap check | panels can collide at extremes | `E_OVERLAP` with bbox test |
+| D-10 | Print theme switch is timeout-based | flaky on slow devices | `beforeprint` hook |
+| D-11 | No fixture at splay 15 and 60 | clamp ends untested | two fixed fixtures |
+| D-12 | `CHANGELOG.md` not updated for this work | history gap | entry under Unreleased |

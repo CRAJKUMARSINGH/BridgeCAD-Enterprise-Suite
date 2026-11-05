@@ -210,7 +210,24 @@ function noteBlock(out, notes) {
   notes.forEach((n, i) => out.push(P.text("TEXT", 30, 108 - i * 5.4, n, 2.2)));
 }
 
+function scaleBar(out, x, y) {
+  out.push(P.line("FRAME", x, y, x + 50, y));
+  for (let i = 0; i < 5; i += 1) {
+    const bx = x + i * 10;
+    out.push(P.rect("FRAME", bx, y, 10, 2.2));
+    if (i % 2 === 0) out.push(P.line("FRAME", bx, y, bx + 10, y + 2.2));
+    out.push(P.text("TEXT", bx + 5, y - 2, String(i), 2, "middle"));
+  }
+  out.push(P.text("TEXT", x + 50, y - 2, "5 m", 2, "start"));
+  out.push(P.text("TEXT", x, y + 7, "SCALE 1:100 AT A1", 2));
+  const nx = x + 72, ny = y + 2;
+  out.push(P.poly("FRAME", [nx, ny - 9, nx - 4, ny + 3, nx, ny, nx + 4, ny + 3], true));
+  out.push(P.text("TEXT-HEADER", nx, ny - 12, "N", 2.6, "middle"));
+}
+
 /* ── Sheet 04 — abutment / pier foundation ───────────────────────────────── */
+
+const panel = (out, id, x, y, w, h) => out.push({ k: "panel", layer: "FRAME", id, x: r2(x), y: r2(y), w: r2(w), h: r2(h) });
 
 export function buildSheet4(raw) {
   const p = normalizeParams(raw);
@@ -231,6 +248,7 @@ export function buildSheet4(raw) {
   const yPileB = yCapB - pileL;
   const yBear = yCapT + 15;
 
+  panel(out, "4A", 20, 300, 200, 90);
   out.push(P.rect("FOUND-CAP", xA, yCapB, capW, capT));
   hatch(out, "HTCH", xA, yCapB, capW, capT, 2.6);
   if (f.wellDiaM > 0) {
@@ -255,6 +273,7 @@ export function buildSheet4(raw) {
   /* panel B — foundation plan */
   const xB = 250;
   const yB = 250;
+  panel(out, "4B", 240, 230, 150, 140);
   if (f.wellDiaM > 0) {
     const r = mm(f.wellDiaM / 2);
     out.push(P.circle("FOUND-WELL", xB + r, yB + r, r));
@@ -280,6 +299,7 @@ export function buildSheet4(raw) {
   /* panel C — pile cap reinforcement */
   const xC = 45;
   const yC = 170;
+  panel(out, "4C", 30, 160, 200, 80);
   out.push(P.rect("STRUC-DETAIL", xC, yC, capW, capT));
   hatch(out, "HTCH", xC, yC, capW, capT, 2.6);
   out.push(P.line("FOUND-CAP", xC, yC + capT * 0.82, xC + capW, yC + capT * 0.82));
@@ -297,6 +317,7 @@ export function buildSheet4(raw) {
   /* panel D — pile schedule */
   const xD = 470;
   const yD = 330;
+  panel(out, "4D", 460, 300, 120, 60);
   out.push(P.text("TEXT-HEADER", xD, yD + 14, "PILE SCHEDULE", 3));
   const rowsD = [["MARK", "Ø (mm)", "LENGTH"]];
   for (let i = 0; i < Math.min(f.nPiles, 6); i += 1) rowsD.push([`P${i + 1}`, p.pileDiaMm.toFixed(0), `${f.pileLm.toFixed(2)} m`]);
@@ -309,6 +330,8 @@ export function buildSheet4(raw) {
   dimV(out, xA - 8, yCapB, yCapT, `CAP ${p.capTMm.toFixed(0)} mm`);
   dimV(out, xA + capW + 26, yPileB, yCapB, `PILE ${f.pileLm.toFixed(2)} m`);
   dimV(out, xA - 8, yCapB, yBear, "BEARING LEVEL");
+
+  scaleBar(out, 30, 125);
 
   noteBlock(out, [
     "1. All dimensions in metres unless stated otherwise.",
@@ -351,6 +374,7 @@ export function buildSheet5(raw) {
   const yPileB = yFootB - pileL;
 
   /* panel A — pier elevation */
+  panel(out, "5A", 22, 180, 120, 180);
   const xA = 30;
   const wA = mm(p.pierLenM);
   const over = mm(0.6);
@@ -377,6 +401,7 @@ export function buildSheet5(raw) {
   out.push(P.text("TEXT", xA, yCapT + padH + 4, `${p.bearingsPerPier} No. BEARINGS ON PIER CAP`, 2.2));
 
   /* panel B — section A-A */
+  panel(out, "5B", 150, 180, 150, 190);
   const xB = 160;
   const deckW = mm(p.carriageway + 1.4);
   const cxB = xB + deckW / 2;
@@ -421,6 +446,7 @@ export function buildSheet5(raw) {
   out.push(P.text("TEXT", xB, yDeckT + 32, "KERB + PARAPET — READ FROM SUPERSTRUCTURE MODEL", 2.2));
 
   /* panel C — abutment elevation, ABTL and both splayed wing walls */
+  panel(out, "5C", 305, 130, 270, 170);
   const xC = 320;
   const wC = mm(w.abtl);
   const yAbtB = 235;
@@ -455,6 +481,7 @@ export function buildSheet5(raw) {
   dimV(out, xC + mm(w.returnM) + 22, yWp, yWp + mm(w.faceRunM), `RETURN ${w.returnM.toFixed(2)} m`);
 
   /* panel D — bearing schedule */
+  panel(out, "5D", 610, 300, 140, 60);
   const xD = 620;
   const yD = 340;
   out.push(P.text("TEXT-HEADER", xD, yD + 14, "BEARING SCHEDULE", 3));
@@ -471,6 +498,7 @@ export function buildSheet5(raw) {
   });
 
   /* panel E — pile foundation layout plan */
+  panel(out, "5E", 150, 70, 130, 70);
   const xE = 160;
   const yE = 95;
   const planW = wA;
@@ -490,6 +518,7 @@ export function buildSheet5(raw) {
   dimH(out, xE, xE + planW, yE - 18, `PILE CAP ${p.pierLenM.toFixed(2)} m`);
 
   /* panel F — pile foundation schedule */
+  panel(out, "5F", 325, 70, 120, 55);
   const xF = 330;
   const yF = 95;
   out.push(P.text("TEXT-HEADER", xF, yF + 14, "PILE FOUNDATION SCHEDULE", 3));
@@ -505,6 +534,8 @@ export function buildSheet5(raw) {
     r.forEach((c, j) => out.push(P.text(i === 0 ? "TEXT-HEADER" : "TEXT", xF + j * 52, yF - i * 7, c, 2.1)));
     out.push(P.line("FRAME", xF, yF - i * 7 - 2, xF + 104, yF - i * 7 - 2));
   });
+
+  scaleBar(out, 30, 125);
 
   noteBlock(out, [
     "1. All dimensions in metres unless stated otherwise.",
@@ -527,8 +558,8 @@ const REQUIRED_LABELS = {
 };
 
 const REQUIRED_LAYERS = {
-  4: ["FOUND-CAP", "CIVIL-SCOUR", "CIVIL-HFL", "TEXT-LEVEL", "DIM", "HTCH"],
-  5: ["SUB-ABUT", "SUB-PIER", "SUB-BEARING", "FOUND-PILE", "TEXT-HEADER", "DIM"],
+  4: ["FOUND-CAP", "CIVIL-SCOUR", "CIVIL-HFL", "TEXT-LEVEL", "DIM", "HTCH", "FRAME"],
+  5: ["SUB-ABUT", "SUB-PIER", "SUB-BEARING", "FOUND-PILE", "TEXT-HEADER", "DIM", "FRAME"],
 };
 
 const finite = (arr) => arr.filter((n) => typeof n === "number" && Number.isFinite(n));
@@ -585,6 +616,18 @@ export function audit(sheet) {
   const M = SHEET.MARGIN;
   if (!Number.isFinite(minX) || minX < M - 6 || maxX > SHEET.W - M + 6 || minY < M - 6 || maxY > SHEET.H - M + 6) {
     add("E_EXTENTS", `${minX.toFixed(1)},${minY.toFixed(1)} → ${maxX.toFixed(1)},${maxY.toFixed(1)}`);
+  }
+
+  // Panel collision: each drawing panel declares its bounding box as a "panel"
+  // primitive the renderer ignores. Overlapping boxes mean a panel has drifted
+  // into its neighbour's band at extreme parameters.
+  const panels = prims.filter((q) => q.k === "panel");
+  for (let i = 0; i < panels.length; i += 1) {
+    for (let j = i + 1; j < panels.length; j += 1) {
+      const a = panels[i], b = panels[j];
+      const hit = a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+      if (hit) add("E_OVERLAP", `${a.id} ∩ ${b.id}`);
+    }
   }
 
   const layers = new Set(prims.map((q) => q.layer));

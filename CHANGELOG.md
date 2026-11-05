@@ -6,6 +6,19 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [Unreleased]
+
+### Added
+- Sheet 04 (abutment/pier foundation) and Sheet 05 (pier, abutment, wing wall) restored to the static deploy.
+- `detailGeometry.js` with ABTL ladder, splayed wing-wall geometry, `audit()` and `toDxf()`.
+- Robotic randomised audit with independent oracle, mutation mode and CI gate.
+- Ink/paper themes, print at A1, scale bar, north arrow, panel overlap detection.
+
+### Fixed
+- Detail sheets unreachable in the Netlify bundle; `/api/predict` 501 no longer blocks detail rendering.
+
+---
+
 ## [0.1.0-rc1] — 2026-10-01 — BRIDGECAD-OSS-1.0 Release Candidate 1
 
 ### Summary

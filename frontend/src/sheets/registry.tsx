@@ -2,8 +2,9 @@ import type { ReactElement } from "react";
 import Sheet01Overview from "./Sheet01Overview";
 import Sheet04Foundation from "./Sheet04Foundation";
 import Sheet05PierAbutment from "./Sheet05PierAbutment";
+import type { SheetTheme } from "./theme";
 
-export type SheetContext = { project: any; detail: any };
+export type SheetContext = { project: any; detail: any; theme: SheetTheme };
 
 export type SheetEntry = {
   index: number;
@@ -14,8 +15,8 @@ export type SheetEntry = {
 
 export const SHEETS: SheetEntry[] = [
   { index: 1, id: "sheet1_overview", title: "General arrangement", render: ({ project }) => <Sheet01Overview project={project} /> },
-  { index: 4, id: "sheet4_foundation", title: "Abutment & pier foundation", render: ({ detail }) => <Sheet04Foundation params={detail} /> },
-  { index: 5, id: "sheet5_pier_abutment", title: "Pier, abutment & wing wall details", render: ({ detail }) => <Sheet05PierAbutment params={detail} /> },
+  { index: 4, id: "sheet4_foundation", title: "Abutment & pier foundation", render: ({ detail, theme }) => <Sheet04Foundation params={detail} theme={theme} /> },
+  { index: 5, id: "sheet5_pier_abutment", title: "Pier, abutment & wing wall details", render: ({ detail, theme }) => <Sheet05PierAbutment params={detail} theme={theme} /> },
 ];
 
 export const findSheet = (index: number): SheetEntry => SHEETS.find((s) => s.index === index) ?? SHEETS[0];

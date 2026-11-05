@@ -5,6 +5,7 @@ parameter sets, checks the emitted primitive contract with an independent Python
 oracle, and exits non-zero on any violation.
 
     python scripts/robotic_sheet_detail_audit.py --cases 2000 --seed 20261104
+    python scripts/robotic_sheet_detail_audit.py --mutate all --cases 200
 """
 
 from __future__ import annotations
@@ -12,6 +13,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import random
 import subprocess
 import sys
@@ -21,19 +23,45 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CORE = ROOT / "frontend" / "src" / "sheets" / "detailGeometry.js"
 
+#: Harness-side mutations. Each one breaks a contract the audit must catch, so a
+#: mutation that survives means the gate is blind — see the failure drills.
+MUTATIONS = {
+    "splay-clamp": "const clampSplay = (v) => v;",
+    "one-wall": "const ONLY = true;",
+    "no-abtl-clamp": "const NOABTL = true;",
+    "flat-grid": "const FLAT = true;",
+}
+
+#: Remediation hints keyed by audit code, echoed when a failure is printed.
+FIXES = {
+    "E_OVERLAP": "panels collided — retune the band or shrink the clamp",
+    "E_EXTENTS": "geometry left the drawing frame — check the mm() scale",
+    "E_WALL_COUNT": "expected exactly two wing walls (left and right)",
+    "E_ABTL_SHORT": "ABTL must exceed the carriageway by at least 2 m",
+}
+
 DRIVER = """
 import fs from "node:fs";
 import { buildSheet4, buildSheet5, audit, normalizeParams, wingWallGeometry } from "%s";
 const cases = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+const MUT = process.env.MUT || "";
 const out = [];
 for (const c of cases) {
   const rec = { seed: c.seed, sheet4: null, sheet5: null };
   try {
     const s4 = buildSheet4(c.params);
-    rec.sheet4 = { audit: audit(s4), n: s4.prims.length };
     const s5 = buildSheet5(c.params);
-    const w = wingWallGeometry(normalizeParams(c.params));
-    rec.sheet5 = { audit: audit(s5), walls: w.walls.map(x => ({ ...x })), p: normalizeParams(c.params), n: s5.prims.length };
+    wingWallGeometry(normalizeParams(c.params));
+    if (MUT === "one-wall") s5.meta.walls = s5.meta.walls.slice(0, 1);
+    if (MUT === "flat-grid") {
+      const flat = { ...s5.meta.foundation, rows: 1, cols: 1, nPiles: 2 };
+      s5.meta.foundation = flat;
+      s4.meta.foundation = flat;
+    }
+    if (MUT === "no-abtl-clamp") s5.meta.params = { ...s5.meta.params, abtl: c.params.abtl };
+    if (MUT === "splay-clamp") s5.meta.walls = s5.meta.walls.map((x) => ({ ...x, splayDeg: c.params.splay }));
+    rec.sheet4 = { audit: audit(s4), n: s4.prims.length };
+    rec.sheet5 = { audit: audit(s5), walls: s5.meta.walls.map((x) => ({ ...x })), p: s5.meta.params, n: s5.prims.length };
   } catch (e) { rec.error = String((e && e.message) || e); }
   out.push(rec);
 }
@@ -89,21 +117,7 @@ def oracle(wall: dict, p: dict) -> list[str]:
     return bad
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--cases", type=int, default=1500)
-    ap.add_argument("--seed", type=int, default=20261104)
-    ap.add_argument("--keep", action="store_true")
-    args = ap.parse_args()
-
-    if not CORE.exists():
-        print(f"missing core: {CORE}")
-        return 2
-    rng = random.Random(args.seed)
-    cases = [
-        {"seed": rng.randint(1, 2**31 - 1), "params": rand_params(rng)} for _ in range(args.cases)
-    ]
-
+def run_cases(cases: list[dict], mutate: str = "") -> tuple[subprocess.CompletedProcess, list[str]]:
     with tempfile.TemporaryDirectory() as tmp:
         drv = Path(tmp) / "drv.mjs"
         drv.write_text(DRIVER % CORE.as_uri(), encoding="utf-8")
@@ -112,15 +126,17 @@ def main() -> int:
         cases_file = Path(tmp) / "cases.json"
         cases_file.write_text(json.dumps(cases), encoding="utf-8")
         proc = subprocess.run(
-            ["node", str(drv), str(cases_file)], capture_output=True, text=True, timeout=900
+            ["node", str(drv), str(cases_file)],
+            capture_output=True,
+            text=True,
+            timeout=900,
+            env={**os.environ, "MUT": mutate},
         )
     if proc.returncode != 0:
-        print(proc.stderr[:4000])
-        return 2
+        return proc, []
 
-    records = json.loads(proc.stdout)
     fails: list[str] = []
-    for rec in records:
+    for rec in json.loads(proc.stdout):
         if rec.get("error"):
             fails.append(f"seed {rec['seed']}: E_THROW {rec['error']}")
             continue
@@ -133,8 +149,51 @@ def main() -> int:
         for wall in rec["sheet5"]["walls"]:
             for bad in oracle(wall, rec["sheet5"]["p"]):
                 fails.append(f"seed {rec['seed']} S5: {bad}")
+    return proc, fails
 
-    print(f"cases={len(records)} sheet-renders={len(records) * 2} failures={len(fails)}")
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--cases", type=int, default=1500)
+    ap.add_argument("--seed", type=int, default=20261104)
+    ap.add_argument("--keep", action="store_true")
+    ap.add_argument("--mutate", default="", help="mutation name, or 'all'")
+    args = ap.parse_args()
+
+    if not CORE.exists():
+        print(f"missing core: {CORE}")
+        return 2
+
+    def make_cases(count: int) -> list[dict]:
+        rng = random.Random(args.seed)
+        return [
+            {"seed": rng.randint(1, 2**31 - 1), "params": rand_params(rng)} for _ in range(count)
+        ]
+
+    if args.mutate == "all":
+        caught = 0
+        for name in MUTATIONS:
+            _proc, fails = run_cases(make_cases(args.cases), mutate=name)
+            ok = len(fails) > 0
+            caught += int(ok)
+            print(
+                f"  mutation {name:14s} {'caught' if ok else 'SURVIVED'} ({len(fails)} failure(s))"
+            )
+        print(f"mutation score {caught}/{len(MUTATIONS)}")
+        return 0 if caught == len(MUTATIONS) else 1
+
+    proc, fails = run_cases(make_cases(args.cases), mutate=args.mutate)
+    if proc.returncode != 0:
+        print(proc.stderr[:4000])
+        return 2
+
+    if args.mutate:
+        print(f"mutation={args.mutate} cases={args.cases} failures={len(fails)}")
+        for f in fails[:40]:
+            print(" ", f)
+        return 0 if fails else 1
+
+    print(f"cases={args.cases} sheet-renders={args.cases * 2} failures={len(fails)}")
     for f in fails[:40]:
         print(" ", f)
     if args.keep and fails:

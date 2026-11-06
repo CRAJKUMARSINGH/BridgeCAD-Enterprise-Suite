@@ -13,9 +13,47 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - `detailGeometry.js` with ABTL ladder, splayed wing-wall geometry, `audit()` and `toDxf()`.
 - Robotic randomised audit with independent oracle, mutation mode and CI gate.
 - Ink/paper themes, print at A1, scale bar, north arrow, panel overlap detection.
+- Sheet 05 panel 5G — dirt-wall drainage & backfill detail: DWTH-thin wall on the
+  abutment cap, weep holes with a granular/geotextile filter, layered retained
+  embankment and approach slab (cross-checked against the referenced dirt-wall
+  article in the README).
+- Sheet 01 GAD elevation: weep-hole callouts on the abutment dirt walls.
+- Abutment drawn as the two battered profiles the original LISP builds — `abt1()`
+  for A1 (AL* family) and its mirror for A2 (AR*) — on a new `ABUT-PROF` layer,
+  replacing the flat rectangle on Sheet 05 (Python source of truth and the JS
+  mirror) and the Sheet 01 GAD elevation.
+- Sheet 05 panel 5C now carries all four of `abt1()`'s internal lines per
+  profile, including `(x12, albbl)→(x12, RTL)` and `(x12, RTL)→(x14, RTL)`, so
+  the DWTH-thin dirt wall is outlined as its own wall instead of merging into
+  the abutment fill.
+- `compliance.js` — clause-cited IRC/MoRTH compliance report (CC-101..CC-111)
+  with `min`/`max`/`range` relations and `utilisation = demand / capacity`;
+  surfaces `nPassed`, `nFailed`, `governing` and `maxUtilisation`.
+- `layerGroups.js` — CAD layer visibility groups (STRUCT/HATCH/DIM/TEXT/LEVELS/
+  CIVIL/CENTER/FRAME) with `groupForLayer` and `hiddenLayersFor`, wired through
+  `SheetChrome`/`Sheet04Foundation`/`Sheet05PierAbutment` so a group toggle
+  filters the primitive stream before SVG render.
+- `presets.js` — superstructure types (slab/T-beam) and standard NHAI/MoRTH
+  preset bundles (`nhai_2lane_slab_12m`, `nhai_2lane_tbeam_16m`,
+  `morth_4lane_slab_12m`) that move only the thickness/depth family.
+- `boq.js` — MoRTH-grounded quantity take-off priced from the `rates_db.py`
+  seed rates, grouped into sections 300/1800/1700/2900/2700/800 with Indian
+  digit grouping (`formatINR`), contingency and grand total.
+- Workspace dock (`main.tsx`): type + preset selectors, layer toggle strip,
+  and four dock tabs (geometry / checks / BOQ / export) sharing one `NAV` array
+  for both sidebar and dock.
+- `tests/draw/test_workspace_features.py` — node-driven + source-level
+  regression suite for the four workspace features.
 
 ### Fixed
 - Detail sheets unreachable in the Netlify bundle; `/api/predict` 501 no longer blocks detail rendering.
+- Sheet 05 panel 5C dirt wall read as a taller abutment: only two of `abt1()`'s
+  four internal lines were drawn, leaving the thin wall filled solid with the
+  abutment.
+- `Sheet01Overview.tsx` — a JSX comment containing `AL*/AR*` closed its own
+  block comment early (`TS1005` / `TS1381`), breaking the frontend build.
+- Workspace sidebar nav rendered dead labels that did not select a dock tab;
+  both now derive from a single `NAV` array.
 
 ---
 

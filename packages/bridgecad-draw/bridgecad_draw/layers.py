@@ -67,6 +67,14 @@ LAYER_REGISTRY: dict[str, LayerDef] = {
         # ── Substructure ─────────────────────────────────────────────────────────
         LayerDef("SUB-PIER", 2, "Continuous", 35, "Pier shaft and cap outline"),
         LayerDef("SUB-ABUT", 3, "Continuous", 35, "Abutment wall and wing wall outline"),
+        LayerDef(
+            "ABUT-PROF",
+            4,
+            "Continuous",
+            50,
+            "Abutment battered profile outline (LISP abt1(), A1/A2)",
+        ),
+        LayerDef("SUB-DIRT-WALL", 3, "Continuous", 40, "Dirt (back) wall — retains fill under approach slab"),
         LayerDef("SUB-BEARING", 5, "Continuous", 25, "Bearing pad outlines and schedule"),
         LayerDef("SUB-EXPJOINT", 6, "Continuous", 25, "Expansion joint locations"),
         LayerDef("SUB-BACKFILL", 34, "Continuous", 18, "Backfill hatch (earth/granular)"),
@@ -212,7 +220,9 @@ ISO_13567_NAMES: dict[str, str] = {
     # ── Substructure ─────────────────────────────────────────────────────────
     "SUB-PIER": "B-SUB-PIE-N",
     "SUB-ABUT": "B-SUB-ABT-N",
+    "ABUT-PROF": "B-SUB-ABP-N",
     "SUB-BEARING": "B-SUB-BEA-N",
+    "SUB-DIRT-WALL": "B-SUB-DRW-N",
     "SUB-EXPJOINT": "B-SUB-EXJ-N",
     "SUB-BACKFILL": "B-SUB-BKF-N",
     # ── Superstructure ───────────────────────────────────────────────────────

@@ -144,6 +144,10 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     hfl_rl = float(hd.hfl_m or 0)
     scour_rl = float(hd.scour_level_m or 0)
 
+    _cap_d_m_abt = float(sub.abutment_cap_depth_mm or 600) / 1000.0
+    _cap_proj_m_abt = float(sub.abutment_cap_projection_front_mm or 300) / 1000.0
+    _dirt_t_m_abt = float(sub.dirt_wall_thickness_mm or 300) / 1000.0
+
     # ── BORDER + TITLE BLOCK ───────────────────────────────────────────────
     draw_border(msp, "A1")
     draw_title_block(
@@ -239,10 +243,10 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         scour_rl,
         found_type,
         view_label="VIEW 1 — SECTION A-A  |  ABUTMENT A2 END-FACE (LOOKING A1)",
+        cap_d_m=_cap_d_m_abt,
+        cap_proj_m=_cap_proj_m_abt,
+        dirt_t_m=_dirt_t_m_abt,
     )
-
-    # ═══════════════════════════════════════════════════════════════════════
-    #  VIEW 2 — Pier transverse / Fallback typical abutment (right half)
     # ═══════════════════════════════════════════════════════════════════════
     v2_cx = _VIEW2_X0 + _VIEW_W / 2.0
 
@@ -342,6 +346,9 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
             scour_rl,
             found_type,
             view_label="VIEW 2 — TYPICAL ABUTMENT TRANSVERSE SECTION",
+            cap_d_m=_cap_d_m_abt,
+            cap_proj_m=_cap_proj_m_abt,
+            dirt_t_m=_dirt_t_m_abt,
         )
 
     # ── Scale bar below View 2 ─────────────────────────────────────────────
@@ -415,6 +422,9 @@ def _draw_abutment_endface(
     scour_rl,
     found_type,
     view_label,
+    cap_d_m: float = 0.60,
+    cap_proj_m: float = 0.15,
+    dirt_t_m: float = 0.30,
 ):
     """Draw a single abutment end-face view at the given coordinate origin."""
 
@@ -547,21 +557,25 @@ def _draw_abutment_endface(
             color=8,
         )
 
-    # ── Bearing pads (below deck / abutment seat) ──────────────────────────
+    # ── Vertical stack — top-down from girder soffit ─────────────────────
     bearing_w_m = 0.40
-    bearing_t_m = ped_h_m * 0.4
-    brg_y_top = vvy(sof_rl + ped_h_m * 0.0)  # bearing sits on abutment cap seat
-    brg_y_bot = vvy(sof_rl - bearing_t_m)
-    for off_sign in (-1, +1):
-        bx = vhx(off_sign * (abt_len_m * 0.40)) - bearing_w_m * sc / 2.0
-        rectangle(
-            msp, bx, brg_y_bot, bearing_w_m * sc, brg_y_top - brg_y_bot, layer="SUB-BEARING", lw=30
-        )
+    bearing_t_m = 0.10
+    # Cap and dirt wall geometry — passed in from _draw via model fields.
+    _cap_d_m = cap_d_m
+    _cap_proj_m = cap_proj_m
+    _dirt_t_m = dirt_t_m
 
-    # ── Abutment shaft (thick transverse wall) ─────────────────────────────
-    abt_shaft_y_top = vvy(sof_rl - ped_h_m)
-    abt_shaft_y_bot = vvy(abt_base_rl)
+    ped_top_rl = sof_rl - bearing_t_m
+    ped_bot_rl = ped_top_rl - ped_h_m
+    cap_top_rl_s8 = ped_bot_rl
+    cap_bot_rl_s8 = cap_top_rl_s8 - _cap_d_m
+
     shaft_half_w_m = min(overall_w * 0.46, abt_len_m * 0.5)
+    cap_half_m = shaft_half_w_m + _cap_proj_m
+
+    # ── Abutment shaft — stops at the cap soffit ──────────────────────────
+    abt_shaft_y_top = vvy(cap_bot_rl_s8)
+    abt_shaft_y_bot = vvy(abt_base_rl)
     sa_x1 = vhx(-shaft_half_w_m)
     sa_x2 = vhx(shaft_half_w_m)
     rectangle(
@@ -584,14 +598,54 @@ def _draw_abutment_endface(
         layer="STRUC-HATCHING",
     )
 
-    # Pedestal strip between bearing seat level and shaft top
-    line(
-        msp,
-        (vhx(-shaft_half_w_m * 0.8), vvy(sof_rl)),
-        (vhx(shaft_half_w_m * 0.8), vvy(sof_rl)),
-        layer="SUB-ABUT",
-        lw=40,
+    # ── Abutment cap — bearing shelf, projecting both faces ───────────────
+    cx1_s8 = vhx(-cap_half_m)
+    cx2_s8 = vhx(cap_half_m)
+    rectangle(
+        msp, cx1_s8, vvy(cap_bot_rl_s8),
+        cx2_s8 - cx1_s8, vvy(cap_top_rl_s8) - vvy(cap_bot_rl_s8),
+        layer="SUB-ABUT", lw=50,
     )
+    hatch_rect(
+        msp, cx1_s8, vvy(cap_bot_rl_s8),
+        cx2_s8 - cx1_s8, vvy(cap_top_rl_s8) - vvy(cap_bot_rl_s8),
+        pattern="ANSI31", scale=sc * 0.015, layer="STRUC-HATCHING",
+    )
+
+    # ── Bearing pedestals + bearings on the cap ───────────────────────────
+    for off_sign in (-1, +1):
+        px_s8 = vhx(off_sign * (abt_len_m * 0.40)) - bearing_w_m * sc * 0.9 / 2.0
+        rectangle(
+            msp, px_s8, vvy(ped_bot_rl), bearing_w_m * sc * 0.9,
+            vvy(ped_top_rl) - vvy(ped_bot_rl), layer="SUB-ABUT", lw=30,
+        )
+        rectangle(
+            msp, px_s8, vvy(ped_top_rl), bearing_w_m * sc,
+            vvy(sof_rl) - vvy(ped_top_rl), layer="SUB-BEARING", lw=30,
+        )
+
+    # ── Dirt wall — beyond the cap (phantom / informational) ─────────────
+    dw_top_rl_s8 = tod_rl - wc_t_m - app_t_m
+    if dw_top_rl_s8 > cap_top_rl_s8:
+        rectangle(
+            msp,
+            vhx(-shaft_half_w_m),
+            vvy(dw_top_rl_s8),
+            vhx(shaft_half_w_m) - vhx(-shaft_half_w_m),
+            vvy(cap_top_rl_s8) - vvy(dw_top_rl_s8),
+            layer="SUB-DIRT-WALL",
+            lw=35,
+        )
+        text(
+            msp,
+            f"DIRT WALL {int(_dirt_t_m * 1000)} THK (BEYOND)",
+            vhx(0.0),
+            vvy(cap_top_rl_s8) + th * 1.5,
+            height=th * 0.75,
+            layer="TEXT-SPEC",
+            halign="CENTER",
+            color=3,
+        )
 
     # ── Return walls L / R ─────────────────────────────────────────────────
     for sign in (-1, +1):
@@ -599,7 +653,7 @@ def _draw_abutment_endface(
         rw_x_end = vhx(sign * (shaft_half_w_m + ret_w_m))
         x1r = min(rw_x_start, rw_x_end)
         x2r = max(rw_x_start, rw_x_end)
-        rw_top_y = vvy(sof_rl - ped_h_m - abt_h_m * 0.05)
+        rw_top_y = vvy(cap_bot_rl_s8 - abt_h_m * 0.05)
         rectangle(
             msp,
             x1r,
@@ -632,7 +686,7 @@ def _draw_abutment_endface(
 
     # ── Wing wall splay (dashed lines, view indicator) ────────────────────
     for sign in (-1, +1):
-        start = (vhx(sign * shaft_half_w_m), vvy(sof_rl - ped_h_m))
+        start = (vhx(sign * shaft_half_w_m), vvy(cap_bot_rl_s8))
         end = (
             vhx(sign * (shaft_half_w_m + wing_splay_m)),
             vvy(abt_base_rl + (sof_rl - ped_h_m - abt_base_rl) * (1.0 - wing_h_m / abt_h_m)),
@@ -685,6 +739,21 @@ def _draw_abutment_endface(
             layer="TEXT-GENERAL",
             halign="CENTER",
         )
+        # Wearing coat over the approach slab
+        wc_app_top_y = vvy(road_rl_approach)
+        wc_app_bot_y = vvy(road_rl_approach - wc_t_m)
+        hatch_rect(
+            msp,
+            as_x_left,
+            wc_app_bot_y,
+            as_x_right - as_x_left,
+            wc_app_top_y - wc_app_bot_y,
+            pattern="AR-SAND",
+            scale=sc * 0.004,
+            layer="SUPER-WEARING",
+            color=8,
+        )
+        rectangle(msp, as_x_left, wc_app_bot_y, as_x_right - as_x_left, wc_app_top_y - wc_app_bot_y, layer="SUPER-WEARING")
 
     # ── Pile cap + piles (if PILE foundation) ─────────────────────────────
     if "PILE" in found_type:
@@ -744,11 +813,9 @@ def _draw_abutment_endface(
     levels = [
         ("TOP OF DECK / FORMATION", tod_rl),
         ("SOFFIT OF DECK", sof_rl),
-        ("BEARING SEAT", sof_rl - ped_h_m * 0.6),
-        (
-            "TOP OF ABUTMENT / PILE CAP",
-            abt_base_rl if "PILE" not in found_type else (pile_cut_rl + pile_cap_t_m),
-        ),
+        ("BEARING SEAT", ped_top_rl),
+        ("TOP OF ABUTMENT CAP", cap_top_rl_s8),
+        ("BASE OF ABUTMENT SHAFT", abt_base_rl),
         ("ABUTMENT BASE / FOOTING", abt_base_rl),
     ]
     if "PILE" in found_type:
@@ -796,7 +863,7 @@ def _draw_abutment_endface(
     )
     # Bearing centres
     bc_sep = abt_len_m * 0.80
-    dim_y_bc = vvy(sof_rl - ped_h_m - bearing_t_m) + th * 2.5
+    dim_y_bc = vvy(ped_bot_rl) + th * 2.5
     dim_linear_h(
         msp,
         vhx(-bc_sep / 2),

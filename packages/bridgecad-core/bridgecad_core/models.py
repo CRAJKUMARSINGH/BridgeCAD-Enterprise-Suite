@@ -1048,6 +1048,9 @@ class Superstructure(BaseModel):
         default=None,
         description="Steel / rebar anti-corrosion system",
     )
+    wearing_coat_continuous_over_approach: bool = DB(
+        "Wearing coat runs end to end over both approach slabs (patch guide #1)",
+    )
 
     # --- Computed ------------------------------------------------------------
     @computed_field
@@ -1302,6 +1305,44 @@ class Substructure(BaseModel):
         ge=0,
         le=600,
     )
+    # --- Abutment cap / dirt wall / drainage (patch guide #1) ---
+    abutment_cap_depth_mm: int | None = DI(
+        "Abutment cap depth, mm (bearing-shelf vertical depth, IRC:21 min 450)",
+        ge=300,
+        le=1200,
+    )
+    abutment_cap_projection_front_mm: int | None = DI(
+        "Cap front projection beyond the shaft face (bearing shelf), mm",
+        ge=150,
+        le=600,
+    )
+    abutment_cap_projection_rear_mm: int | None = DI(
+        "Cap rear projection beyond the shaft face (dirt wall seat), mm",
+        ge=100,
+        le=600,
+    )
+    dirt_wall_thickness_mm: int | None = DI(
+        "Dirt (back) wall stem thickness, mm (min 200)",
+        ge=200,
+        le=400,
+    )
+    dirt_wall_height_m: Decimal | None = DM(
+        "Dirt wall height, cap top to approach slab soffit, m",
+        ge=Decimal("0.5"),
+        le=Decimal("4"),
+        dp=3,
+    )
+    weep_hole_diameter_mm: int | None = DI(
+        "Weep hole diameter through the dirt wall, mm",
+        ge=50,
+        le=150,
+    )
+    weep_hole_spacing_m: Decimal | None = DM(
+        "Weep hole centre-to-centre spacing, m",
+        ge=Decimal("1.0"),
+        le=Decimal("2.0"),
+        dp=2,
+    )
 
 
 # ===========================================================================
@@ -1345,6 +1386,11 @@ class FoundationDetails(BaseModel):
         "Number of piles supporting a single pier cap (0 = NA for open/well)",
         ge=0,
         le=100,
+    )
+    piles_per_abutment: int | None = DI(
+        "Number of piles supporting a single abutment (transverse row)",
+        ge=1,
+        le=40,
     )
     pile_group_config: str | None = DS(
         "Pile group layout string e.g. 3x3, 4x2, 6x2@2.5m c/c",

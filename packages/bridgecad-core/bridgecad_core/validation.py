@@ -2896,6 +2896,88 @@ def info_epc_deliverable_integrated_gad_detailed(p: BridgeProject) -> Validation
 # RulesEngine factory — registers all checks
 # ===========================================================================
 
+# ===========================================================================
+# Abutment cap / dirt wall QA checks (ABT-CAP-DEPTH, ABT-CAP-PROJ,
+# QA-DW-THK, QA-DW-TOP, QA-DW-WEEP)
+# ===========================================================================
+
+
+def check_abt_cap_depth(p: BridgeProject) -> ValidationFinding:
+    """ABT-CAP-DEPTH — Abutment cap depth must be >= 450 mm (IRC:21 min)."""
+    sub = p.substructure
+    cap_d_mm = int(sub.abutment_cap_depth_mm or 0)
+    passed = cap_d_mm == 0 or cap_d_mm >= 450
+    return _f(
+        "ABT-CAP-DEPTH",
+        "Abutment cap depth >= 450 mm (IRC:21 Clause 305 minimum)",
+        ValidationSeverity.CRITICAL,
+        passed,
+        f"abutment_cap_depth_mm={cap_d_mm} — must be >= 450 mm",
+    )
+
+
+def check_abt_cap_proj(p: BridgeProject) -> ValidationFinding:
+    """ABT-CAP-PROJ — Cap projection 100-250 mm bearing-shelf practice."""
+    sub = p.substructure
+    pf_mm = int(sub.abutment_cap_projection_front_mm or 0)
+    passed = pf_mm == 0 or (100 <= pf_mm <= 250)
+    return _f(
+        "ABT-CAP-PROJ",
+        "Abutment cap front projection in 100–250 mm bearing-shelf range",
+        ValidationSeverity.WARNING,
+        passed,
+        f"abutment_cap_projection_front_mm={pf_mm} — expected 100..250 mm",
+    )
+
+
+def check_dw_thickness(p: BridgeProject) -> ValidationFinding:
+    """QA-DW-THK — Dirt wall stem thickness >= 250 mm."""
+    sub = p.substructure
+    dw_mm = int(sub.dirt_wall_thickness_mm or 0)
+    passed = dw_mm == 0 or dw_mm >= 250
+    return _f(
+        "QA-DW-THK",
+        "Dirt wall thickness >= 250 mm (IRC:78 Clause 710 minimum)",
+        ValidationSeverity.CRITICAL,
+        passed,
+        f"dirt_wall_thickness_mm={dw_mm} — must be >= 250 mm",
+    )
+
+
+def check_dw_top_height(p: BridgeProject) -> ValidationFinding:
+    """QA-DW-TOP — Dirt wall height must reach approach slab soffit."""
+    sub = p.substructure
+    dw_h = float(sub.dirt_wall_height_m or 0.0)
+    app_t = float(sub.approach_slab_thickness_mm or 0) / 1000.0
+    required = app_t + 0.10  # 100 mm freeboard
+    passed = dw_h == 0.0 or dw_h >= required
+    return _f(
+        "QA-DW-TOP",
+        "Dirt wall height reaches approach-slab soffit with 100 mm margin",
+        ValidationSeverity.CRITICAL,
+        passed,
+        f"dirt_wall_height_m={dw_h:.3f} — must be >= approach_slab_t + 0.10 m = {required:.3f} m",
+    )
+
+
+def check_dw_weep_holes(p: BridgeProject) -> ValidationFinding:
+    """QA-DW-WEEP — >= 1 weep hole per 3 m of dirt wall."""
+    import math as _math
+    sub = p.substructure
+    abt_len = float(sub.abutment_length_m or 0.0)
+    n_weep = int(sub.weep_hole_diameter_mm and (sub.weep_hole_spacing_m is not None) and
+                 max(1, _math.ceil(abt_len / float(sub.weep_hole_spacing_m or 3.0))) or 0)
+    spacing = float(sub.weep_hole_spacing_m or 3.0)
+    passed = abt_len == 0 or spacing <= 3.0
+    return _f(
+        "QA-DW-WEEP",
+        "Weep hole spacing <= 3.0 m through dirt wall",
+        ValidationSeverity.WARNING,
+        passed,
+        f"weep_hole_spacing_m={spacing:.2f} — should be <= 3.0 m (1 per 3 m length)",
+    )
+
+
 _ALL_CHECK_FNS: list[CheckFn] = [
     # ── 25 Original Critical (C01–C25) ────────────────────────────────────
     check_project_stage_defined,
@@ -3008,6 +3090,12 @@ _ALL_CHECK_FNS: list[CheckFn] = [
     check_tied_arch_hanger_fatigue,  # W73
     check_warren_truss_without_verticals,  # W74
     check_drop_cap_pier_reinforcement_congestion,  # W75
+    # ── Abutment cap / dirt wall QA checks ───────────────────────────────
+    check_abt_cap_depth,     # ABT-CAP-DEPTH
+    check_abt_cap_proj,      # ABT-CAP-PROJ
+    check_dw_thickness,      # QA-DW-THK
+    check_dw_top_height,     # QA-DW-TOP
+    check_dw_weep_holes,     # QA-DW-WEEP
     # ── M1W2 INFO additions  I01–I50 ─────────────────────────────────────
     info_project_stage_design_developed,  # I01
     info_project_name_station_naming,  # I02

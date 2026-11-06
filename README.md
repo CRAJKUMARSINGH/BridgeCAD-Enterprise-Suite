@@ -5,7 +5,7 @@
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 [![suite-ci](https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/actions/workflows/suite-ci.yml/badge.svg)](../../actions/workflows/suite-ci.yml)
 
-**One parametric Excel workbook in. A 7-sheet standards-compliant bridge GAD
+**One parametric Excel workbook in. An 8-sheet standards-compliant bridge GAD
 package, priced Bill of Quantities, and QA compliance report out.**
 
 Built on IRC 5 / 6 / 21 / 83 / SP:55 / SP:114 and the MORTH 2024-25 schedule of
@@ -68,7 +68,7 @@ Full paths (dev install, Docker, API, React console) → **[docs/getting-started
 
 This is a **release candidate**. Per the project's release rule, generated
 drawings and BOQs are **not construction-ready** until CI is green, all 28 E2E
-fixtures emit pinned pass/fail JSON, all 7 sheets pass structural checks with
+fixtures emit pinned pass/fail JSON, all 8 sheets pass structural checks with
 engineer visual review, and every BOQ line carries traceable inputs.
 
 Until then, every export manifest carries
@@ -91,7 +91,7 @@ Full list → **[GUIDE.md §11](GUIDE.md)**
 ## 🏗 What's in the box
 
 **9 packages** — `core` (models, geometry, validation) · `io` (Excel/CSV/JSON) ·
-`draw` (7 sheets, 53 IRC layers) · `bill` (MORTH rates, 4 formatters) ·
+`draw` (8 sheets, 53 IRC layers) · `bill` (MORTH rates, 4 formatters) ·
 `qa` (150 rules, 0–100 grade) · `export` (orchestrator, ZIP, manifest) ·
 `plugins` (bridge-type registry) · `ai` (optimiser, estimator, comparator) ·
 `infra` (db, cache, auth, logging)
@@ -127,6 +127,17 @@ make lint && make test
 | [docs/deployment.md](docs/deployment.md) | [docs/troubleshooting.md](docs/troubleshooting.md) |
 | [MASTER_ROADMAP.md](MASTER_ROADMAP.md) — plan-level status | [CHANGELOG.md](CHANGELOG.md) — released history |
 | [CREAT.md](CREAT.md) — rolling 24h hand-off log | [README_RAJKUMAR.md](README_RAJKUMAR.md) — operator handbook |
+
+---
+
+## 📐 Engineering references
+
+Abutment/dirt-wall detailing and drainage practice is cross-checked against:
+
+- **Dirt Wall in Bridge Abutment** — purpose, weep-hole / geotextile-filter
+  drainage, layered granular backfill and MSE reinforcement, and the
+  pile → cap → abutment → abutment-cap → dirt-wall construction sequence:
+  <https://prewallcivil.com/dirt-wall-in-bridge-abutment/>
 
 ---
 

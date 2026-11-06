@@ -205,7 +205,9 @@ def collect(doc: Drawing, sheet: str, registry: dict, *, scaffold: bool = False)
     out: list[CheckResult] = []
     for name, fn, kwargs in _spec(scaffold):
         if name == "layers registered":
-            kwargs = {"registry": registry, "sheet": sheet}
+            # `sheet` is already passed by keyword below; adding it here too
+            # raises "got multiple values for keyword argument 'sheet'".
+            kwargs = {"registry": registry}
         try:
             fn(doc, sheet=sheet, **kwargs)
             out.append(CheckResult(name, "pass"))

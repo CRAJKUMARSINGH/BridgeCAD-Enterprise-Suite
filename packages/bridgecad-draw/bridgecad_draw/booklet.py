@@ -26,6 +26,24 @@ logger = logging.getLogger(__name__)
 # per-sheet trace stays available at -v.
 _missing_dep_warned = False
 
+
+class PackageGenerationError(RuntimeError):
+    """Raised when one or more GAD sheets fail to generate.
+
+    A partial package that is silently returned as success produces a ZIP or
+    drawing folder that is missing a sheet with no signal to the caller. The
+    failure of even a single sheet is therefore fatal: callers (API, CLI,
+    export orchestrator) surface it instead of shipping an incomplete set.
+    """
+
+    def __init__(self, failures: dict[int, str]) -> None:
+        self.failures = dict(failures)
+        detail = "; ".join(f"Sheet {no}: {msg}" for no, msg in failures.items())
+        super().__init__(
+            f"{len(self.failures)} of {len(_SHEET_MANIFEST)} GAD sheets failed — {detail}"
+        )
+
+
 # Each entry: (sheet_no, module_attr, filename_stem, default_scale)
 _SHEET_MANIFEST = [
     (1, "sheet1_plan", "Sheet1_Plan", 100),
@@ -43,7 +61,7 @@ def generate_package(
     project: Any,
     output_dir: str | Path,
     prefix: str = "GAD",
-    scale_denom: int = 100,
+    scale_denom: int | None = None,
 ) -> list[Path]:
     """Generate all 8 GAD sheets for *project*.
 
@@ -54,13 +72,21 @@ def generate_package(
         Directory where DXF files are saved.
     prefix : str
         Filename prefix  (e.g. ``"GAD"`` → ``GAD_Sheet1_Plan.dxf``)
-    scale_denom : int
-        Default horizontal scale denominator; each sheet may override.
+    scale_denom : int | None
+        Plot-scale denominator.  ``None`` (default) uses each sheet's own
+        standard scale from the manifest (e.g. 1:100 plan, 1:1 BOQ).  An int
+        overrides **every** sheet with that denominator — including 100, which
+        is now an explicit request rather than a magic "use defaults" value.
 
     Returns
     -------
     list[Path]
-        Paths of successfully generated DXF files (may be < 8 on partial failure).
+        Paths of the generated DXF files, one per manifest entry.
+
+    Raises
+    ------
+    PackageGenerationError
+        If any sheet fails to generate.  A partial package is never returned.
     """
     import importlib
 
@@ -69,9 +95,10 @@ def generate_package(
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
     results: list[Path] = []
+    failures: dict[int, str] = {}
 
     for sheet_no, mod_attr, stem, sheet_scale in _SHEET_MANIFEST:
-        sc = sheet_scale if scale_denom == 100 else scale_denom
+        sc = sheet_scale if scale_denom is None else scale_denom
         out_path = out / f"{prefix}_{stem}.dxf"
         try:
             mod = importlib.import_module(f".{mod_attr}", package="bridgecad_draw")
@@ -81,6 +108,7 @@ def generate_package(
                 "Sheet %d (%s) → %s  (%d KB)", sheet_no, stem, p.name, p.stat().st_size // 1024
             )
         except Exception as exc:
+            failures[sheet_no] = f"{type(exc).__name__}: {exc}"
             # Only the optional-dependency case is de-duplicated. A genuine
             # ImportError inside a sheet module stays a loud per-sheet warning.
             if isinstance(exc, ImportError) and "ezdxf" in str(exc):
@@ -92,8 +120,17 @@ def generate_package(
             else:
                 logger.warning("Sheet %d (%s) failed: %s", sheet_no, stem, exc)
 
-    logger.info("Package complete: %d/8 sheets in %s", len(results), out)
+    if failures:
+        logger.error(
+            "Package incomplete: %d/%d sheets generated, %d failed",
+            len(results),
+            len(_SHEET_MANIFEST),
+            len(failures),
+        )
+        raise PackageGenerationError(failures)
+
+    logger.info("Package complete: %d/%d sheets in %s", len(results), len(_SHEET_MANIFEST), out)
     return results
 
 
-__all__ = ["generate_package"]
+__all__ = ["generate_package", "PackageGenerationError"]

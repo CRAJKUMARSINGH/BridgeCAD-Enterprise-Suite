@@ -1,7 +1,7 @@
 """
 M9 E2E fixture verifier.
 
-Loads each fixture JSON → builds BridgeProject → generates 7-sheet DXF + BOQ
+Loads each fixture JSON → builds BridgeProject → generates 8-sheet DXF + BOQ
 + ZIP bundle → checks against expected values from the fixture.
 
 Run:
@@ -388,7 +388,7 @@ def _run_fixture(fixture_path: Path) -> tuple[str, bool, list[str]]:
         import ezdxf
         from bridgecad_draw.booklet import generate_package
         with tempfile.TemporaryDirectory() as td:
-            sheets = generate_package(project, Path(td), prefix=fid, scale_denom=100)
+            sheets = generate_package(project, Path(td), prefix=fid)
             total_kb = sum(s.stat().st_size for s in sheets) // 1024
             if len(sheets) < expected["dxf_sheets"]:
                 errors.append(f"dxf_sheets={len(sheets)} < {expected['dxf_sheets']}")

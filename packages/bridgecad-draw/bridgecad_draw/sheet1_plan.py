@@ -198,6 +198,19 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
         hatch_rect(
             msp, ax, ay, aw, ah, pattern="ANSI31", scale=scale * 0.05, layer="SUB-ABUT", color=3
         )
+        # Dirt wall footprint on the outboard (fill) face of the abutment
+        dirt_t_plan = float(getattr(sub, "dirt_wall_thickness_mm", None) or 300) / 1000.0
+        dw_plan_x = ax - dirt_t_plan * scale if label == "A1" else ax + aw
+        rectangle(msp, dw_plan_x, ay, dirt_t_plan * scale, ah, layer="SUB-DIRT-WALL", lw=35)
+        text(
+            msp,
+            "DW",
+            dw_plan_x + dirt_t_plan * scale / 2.0,
+            ay - text_h * 1.4,
+            height=text_h * 0.8,
+            layer="TEXT-SPEC",
+            halign="CENTER",
+        )
         text(msp, label, ax - text_h * 4, vpos(0), height=text_h * 1.2, layer="TEXT-GENERAL")
 
     # ── Piers ─────────────────────────────────────────────────────────────

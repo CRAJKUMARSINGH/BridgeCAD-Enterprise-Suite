@@ -33,8 +33,8 @@ from bridgecad_draw.titleblocks import draw_sheet_frame
 
 #: Text is sized on paper and scaled to model space once, here.
 PAPER_TEXT_MM = 2.5
-#: The set is seven sheets; every frame states its own index out of this.
-TOTAL_SHEETS = 7
+#: The set is eight sheets; every frame states its own index out of this.
+TOTAL_SHEETS = 8
 #: ezdxf creates this dimstyle on first use; naming it keeps the choice visible.
 DIM_DIMSTYLE = "EZDXF"
 

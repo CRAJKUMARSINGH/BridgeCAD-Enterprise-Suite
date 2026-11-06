@@ -350,7 +350,7 @@ def main() -> int:
     print(f"{'='*64}")
     print(f"  Output dir: {out_dir}")
 
-    sheets = generate_package(SIMPLE_12M, out_dir, prefix="simple_12m", scale_denom=100)
+    sheets = generate_package(SIMPLE_12M, out_dir, prefix="simple_12m")
 
     print(f"\n  Generated {len(sheets)} sheets:")
     total_bytes = 0

@@ -25,7 +25,7 @@ LEVELS ARE ANNOTATED, NOT PLACED
 from __future__ import annotations
 
 from bridgecad_draw.contract import resolve_abtl, wing_wall_geometry
-from bridgecad_draw.primitives import circle
+from bridgecad_draw.primitives import circle, hatch_poly
 from bridgecad_draw.sheets._common import Canvas, field
 
 SHEET = "sheet5_pier_abutment_details"
@@ -53,6 +53,73 @@ def _pile_grid(fd) -> tuple[int, int]:
         except ValueError:
             pass
     return 2, 2
+
+
+#: LISP abt1() abutment section parameters, in metres. A1 is the AL* family
+#: (dirt wall outward at -x); A2 mirrors it (AR*, dirt wall outward at +x).
+_ABT_PROFILE = {
+    "cap_w": 0.75,       # ALCW / ARCW — cap width
+    "cap_d": 1.2,        # ALCD / ARCD — cap depth
+    "front_batter": 10,  # ALFB / ARFB — face batter, 1:n
+    "back_batter": 3,    # ALBB / ARBB — back batter, 1:n
+    "toe_off": 1.5,      # ALFO / ARFO — toe and footing offset
+    "foot_d": 1.0,       # ALFD / ARFD — footing depth
+    "above": 0.98,       # RTL − CAPT — face upstand above the cap
+    "dirt_w": 0.3,       # DWTH — dirt wall thickness
+}
+
+
+def _abutment_profile(cv, side: str, x_face: float, y_cap_b: float, stem_m: float) -> dict:
+    """The 14-vertex LISP abt1() battered abutment elevation, in sheet mm.
+
+    Mirrors ``frontend/src/sheets/detailGeometry.js::abutmentProfile`` one-to-one:
+    the cap soffit sits on *y_cap_b*, the face is anchored at *x_face*, and the
+    stem is *stem_m* tall. ``side`` "left" is A1 (dirt wall outward at -x);
+    "right" is A2, the mirrored AR* family (dirt wall outward at +x).
+    """
+    p = _ABT_PROFILE
+    s = -1.0 if side == "right" else 1.0
+    stem = max(float(stem_m or 2.8), 0.5)
+    x1 = float(x_face)
+    capt = y_cap_b + cv.mm(p["cap_d"])
+    rtl = capt + cv.mm(p["above"])
+    altbl = y_cap_b - cv.mm(stem)
+    y8 = altbl - cv.mm(p["foot_d"])
+    x3 = x1 + s * cv.mm(p["cap_w"])
+    x5 = x3 + s * cv.mm(stem / p["front_batter"])
+    x6 = x5  # alfbl == altbl in abt1() defaults, so the toe drop is nil
+    x7 = x6 + s * cv.mm(p["toe_off"])
+    x14 = x1 - s * cv.mm(p["dirt_w"])
+    x12 = x14 - s * cv.mm(stem / p["back_batter"])
+    x10 = x12 - s * cv.mm(p["toe_off"])
+    pts = [
+        (x1, rtl),
+        (x1, capt),
+        (x3, capt),
+        (x3, y_cap_b),
+        (x5, altbl),
+        (x6, altbl),
+        (x7, altbl),
+        (x7, y8),
+        (x10, y8),
+        (x10, altbl),
+        (x12, altbl),
+        (x12, altbl),
+        (x14, y_cap_b),
+        (x14, rtl),
+    ]
+    return {
+        "pts": pts,
+        "rtl": rtl,
+        "altbl": altbl,
+        "y8": y8,
+        "x3": x3,
+        "x7": x7,
+        "x10": x10,
+        "x12": x12,
+        "x14": x14,
+        "dirt_x": x14,
+    }
 
 
 def _bearing_rows(bj) -> list[list[str]]:
@@ -259,15 +326,39 @@ def build(project):
         )
 
     # ══ panel C — abutment elevation, ABTL and the splayed wing walls ══════
+    # The abutment is NOT a plain rectangle: the original LISP draws two
+    # battered shapes, abt1() for A1 (AL* family) and its mirror for A2 (AR*).
+    # A1 anchors at the left end of the face, A2 at the right end, so the two
+    # battered profiles bracket the ABTL width instead of a single block.
     xc = cv.mm(26.0)
     w_c = cv.mm(abtl_m)
-    y_abt_b = cv.mm(17.5)
-    y_abt_t = y_abt_b + cv.mm(abt_hgt)
+    y_abt_b = cv.mm(17.5)  # cap soffit — the profiles and the wing walls seat here
+    a1 = _abutment_profile(cv, "left", xc, y_abt_b, abt_hgt)
+    a2 = _abutment_profile(cv, "right", xc + w_c, y_abt_b, abt_hgt)
+    y_abt_t = a1["rtl"]
 
-    with cv.on("SUB-ABUT"):
-        cv.rect(xc, y_abt_b, w_c, cv.mm(abt_hgt))
-    with cv.on("HTCH"):
-        cv.hatch(xc, y_abt_b, w_c, cv.mm(abt_hgt), scale=h * 0.4)
+    for tag, prof in (("A1", a1), ("A2", a2)):
+        with cv.on("ABUT-PROF"):
+            cv.poly(prof["pts"], close=True)
+            # abt1() internal construction lines: cap soffit and toe / footing top.
+            cv.line((prof["x14"], y_abt_b), (prof["x3"], y_abt_b))
+            cv.line((prof["x10"], prof["altbl"]), (prof["x7"], prof["altbl"]))
+            # abt1() also outlines the dirt wall itself: the back batter up to
+            # road level and across the wall top to its outer face.
+            cv.line((prof["x12"], prof["altbl"]), (prof["x12"], prof["rtl"]))
+            cv.line((prof["x12"], prof["rtl"]), (prof["x14"], prof["rtl"]))
+        with cv.on("HTCH"):
+            hatch_poly(
+                cv.ms, prof["pts"], pattern="ANSI31", scale=h * 0.4, layer=cv.ms.layer_name
+            )
+        with cv.on("TEXT"):
+            cv.text(
+                f"ABUTMENT {tag} \u2014 BATTERED PROFILE (abt1(), DWTH 0.30 m)",
+                prof["dirt_x"],
+                prof["y8"] - h * 1.5,
+                halign="LEFT" if tag == "A1" else "RIGHT",
+            )
+
     with cv.on("SUB-ABUT"):
         for side in (-1.0, 1.0):
             rx = xc - cv.mm(0.4) if side < 0 else xc + w_c
@@ -277,7 +368,7 @@ def build(project):
 
     with cv.on("TEXT-HEADER"):
         cv.text(
-            f"ABUTMENT A1 \u2014 ABTL {abtl_m:.2f} m (SOURCE: {abtl_source.upper()})",
+            f"ABUTMENT A1 & A2 \u2014 ABTL {abtl_m:.2f} m (SOURCE: {abtl_source.upper()})",
             xc,
             y_abt_t + h * 8.0,
         )
@@ -286,7 +377,9 @@ def build(project):
         cv.text(f"HFL RL {float(levels.hfl_m or 0.0):.3f}", xc, y_abt_t + h * 3.0)
         cv.text(f"LWL RL {float(levels.lwl_m or 0.0):.3f}", xc, y_abt_t + h * 1.0)
         cv.text(
-            f"FOUNDING LEVEL RL {float(levels.founding_level_m or 0.0):.3f}", xc, y_abt_b - h * 1.5
+            f"FOUNDING LEVEL RL {float(levels.founding_level_m or 0.0):.3f}",
+            xc,
+            a1["y8"] - h * 5.0,
         )
 
     y_wp = cv.mm(9.5)
@@ -477,8 +570,8 @@ def build(project):
             text=f"ABTL {abtl_m:.2f} m",
         )
         cv.dimension(
+            (xc - h * 3, a1["altbl"]),
             (xc - h * 3, y_abt_b),
-            (xc - h * 3, y_abt_t),
             base=(xc - h * 9, y_abt_b),
             angle=90.0,
             text=f"ABUTMENT {abt_hgt:.2f} m",

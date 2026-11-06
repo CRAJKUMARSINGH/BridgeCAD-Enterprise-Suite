@@ -8,12 +8,20 @@ Submodules:
   titleblocks   IRC / NHAI title block + sheet border
   sheet1_plan   Sheet 1: Plan View
   sheet2_long_section   Sheet 2: Longitudinal Section
-  booklet       7-sheet DXF package generator
+  booklet       8-sheet DXF package generator
 """
 
-from .booklet import generate_package
+from .booklet import PackageGenerationError, generate_package
 from .dxf_engine import CoordMapper, new_sheet, save
 from .layers import LAYER_REGISTRY, setup_layers
 
 __version__ = "0.1.0-rc1"
-__all__ = ["LAYER_REGISTRY", "setup_layers", "new_sheet", "CoordMapper", "save", "generate_package"]
+__all__ = [
+    "LAYER_REGISTRY",
+    "setup_layers",
+    "new_sheet",
+    "CoordMapper",
+    "save",
+    "generate_package",
+    "PackageGenerationError",
+]

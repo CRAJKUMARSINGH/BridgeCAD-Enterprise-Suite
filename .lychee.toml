@@ -38,6 +38,8 @@ exclude = [
   # badge endpoints rate-limit aggressively; they are covered by CI status itself
   "^https://img\\.shields\\.io",
   # add a flaky-but-real host here. Never delete the link.
+  # peer design/detailing reference; host is flaky under CI
+  "^https?://(www\\.)?nxstructural\\.com",
 ]
 
 cache = true

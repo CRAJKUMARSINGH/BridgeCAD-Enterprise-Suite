@@ -470,3 +470,16 @@ No changes this session.
 ---
 | 2026-11-07 11:31 | User prompt received |
 | 2026-11-07 20:49 | User prompt received |
+
+### Session — Brief re-audit; nxstructural gaps corrected · 2026-11-07 (rev)
+
+- Fourth re-issue of the full brief. Re-traced the actual call paths, not docstrings.
+- **Correction:** both supposed gaps were already implemented.
+  - BBS **is** bundled — `orchestrator.py` L97 seeds `results` with `"bbs"`, Step 3 writes `_BBS.csv/.xlsx`; only the `bundler.py` docstring is stale.
+  - Stability table **is** on the sheet — `checks_table.py` L99-124 emits QA-ABT-OT/SL/BRG rows.
+- Remaining genuine item: `.lychee.toml` nxstructural exclude.
+- Note: earlier `git add .lychee.toml CREAT.md && git commit` was a no-op — the proposed diffs had not been accepted, so the files were unchanged.
+
+**Pending:** Accept the `.lychee.toml` exclude, then commit the two files only. No commit unless explicitly instructed.
+
+---

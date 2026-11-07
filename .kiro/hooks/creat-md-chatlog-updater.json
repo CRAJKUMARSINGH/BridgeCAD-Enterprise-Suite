@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "CREAT.md Chat-Log Updater (every 12 min)",
+      "trigger": "UserPromptSubmit",
+      "description": "Appends a timestamped entry to CREAT.md whenever a user prompt is submitted, creating a running chat log record.",
+      "action": {
+        "type": "command",
+        "command": "powershell -NoProfile -Command \"$ts = Get-Date -Format 'yyyy-MM-dd HH:mm'; $logLine = '| ' + $ts + ' | User prompt received |'; Add-Content -Path 'E:\\Rajkumar\\BridgeCAD-Enterprise-Suite\\CREAT.md' -Value $logLine\"",
+        "timeout": 15
+      }
+    }
+  ]
+}

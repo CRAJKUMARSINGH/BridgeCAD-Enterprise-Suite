@@ -1,0 +1,2 @@
+# AutoLISP baseline must survive verbatim — evidence of intent, not source.
+references/lisp/*.lsp -text

@@ -14,7 +14,37 @@ export default function Sheet01Overview({ project }: { project: ProjectState }) 
   const mainRight = 815;
   const elevationY = 186;
   const planY = 503;
-  const spanWidth = 610 / project.spans;
+  // Centre the deck in the view band so the approach slabs (LISP APTHK/LASLAB)
+  // have room to run out to the view edge on both sides.
+  const deckWidth = 610;
+  // LISP abt1() / enhanced_abt1(): the abutment face is flush with the deck end
+  // (x1 = abtl). The cap (ALCW wide × ALCD deep) carries inward beneath the
+  // deck; the stem projects out to the dirt-wall face and batters down to the
+  // footing; the dirt wall (DWTH thin) rises from the cap soffit to road level.
+  const dirtWallWidth = 5;
+  const capWidth = 18;
+  const capDepth = 13;
+  const stemWidth = 26;
+  const footingWidth = 38;
+  const footingOverhang = 4;
+  // LISP abt1(): the abutment face batters out from the cap soffit down to the
+  // footing. Kept inside the footing so the battered stem still seats on it.
+  const stemBatter = 5;
+  const deckLeft = left + Math.round((mainRight - left - deckWidth) / 2);
+  const deckRight = deckLeft + deckWidth;
+  const roadY = elevationY - 32;
+  const soffitY = elevationY - 13;
+  const capBottomY = soffitY + capDepth;
+  const footingY = elevationY + 69;
+  const leftDirtWallX = deckLeft - dirtWallWidth;
+  const rightDirtWallX = deckRight;
+  const leftCapX = deckLeft;
+  const rightCapX = deckRight - capWidth;
+  const leftStemX = deckLeft - dirtWallWidth;
+  const rightStemX = deckRight + dirtWallWidth - stemWidth;
+  const leftFootingX = leftStemX - footingOverhang;
+  const rightFootingX = deckRight + dirtWallWidth + footingOverhang - footingWidth;
+  const spanWidth = deckWidth / project.spans;
   const sectionX = 895;
   const viewGap = planY - elevationY;
   const totalLength = project.spans * project.spanLength;
@@ -38,23 +68,55 @@ export default function Sheet01Overview({ project }: { project: ProjectState }) 
         <line className="datum-line" x1={left} y1={elevationY + 94} x2={mainRight} y2={elevationY + 94} />
         <text className="dimension-label" x={left - 2} y={elevationY + 111}>DATUM {project.datum.toFixed(3)}</text>
         {Array.from({ length: project.spans + 1 }).map((_, index) => {
-          const x = left + index * spanWidth;
+          const x = deckLeft + index * spanWidth;
           return <line className="dimension-tick" key={`elev-${index}`} x1={x} y1={elevationY - 42} x2={x} y2={elevationY + 112} />;
         })}
-        <rect className="deck-fill" x={left} y={elevationY - 32} width={610} height="19" rx="2" />
-        <line className="structure-line" x1={left} y1={elevationY - 32} x2={left + 610} y2={elevationY - 32} />
+        <rect className="deck-fill" x={deckLeft} y={elevationY - 32} width={deckWidth} height="19" rx="2" />
+        <line className="structure-line" x1={deckLeft} y1={elevationY - 32} x2={deckRight} y2={elevationY - 32} />
+        <rect className="barrier" x={deckLeft} y={elevationY - 39} width={deckWidth} height="7" />
         {Array.from({ length: Math.max(project.spans - 1, 0) }).map((_, index) => {
-          const x = left + (index + 1) * spanWidth;
+          const x = deckLeft + (index + 1) * spanWidth;
           return <g key={`pier-${index}`}><rect className="support-fill" x={x - 9} y={elevationY - 13} width="18" height="82" rx="2" /><rect className="footing-fill" x={x - 28} y={elevationY + 69} width="56" height="12" rx="2" /></g>;
         })}
-        <rect className="abutment-fill" x={left - 13} y={elevationY - 5} width="13" height="76" />
-        <rect className="abutment-fill" x={left + 610} y={elevationY - 5} width="13" height="76" />
-        <line className="dimension-line" x1={left} y1={elevationY - 64} x2={left + 610} y2={elevationY - 64} />
+        {/* Abutments (LISP abt1()/enhanced_abt1()): the face is flush with the
+            deck end (x1 = abtl). The cap (ALCW) carries inward beneath the deck,
+            the stem projects out to the dirt-wall face and batters down to the
+            footing, and the dirt wall (DWTH) is a thin wall rising from the cap
+            soffit to road level outside the face. */}
+        <rect className="abutment-cap" x={leftCapX} y={soffitY} width={capWidth} height={capDepth} />
+        <rect className="abutment-cap" x={rightCapX} y={soffitY} width={capWidth} height={capDepth} />
+        {/* Battered abutment stems (LISP abt1() AL and AR profiles): the face
+            batters out from the cap soffit down to the footing — A1 on the
+            left, mirrored A2 on the right. */}
+        <polygon className="abutment-fill" points={`${leftStemX},${capBottomY} ${leftStemX + stemWidth},${capBottomY} ${leftStemX + stemWidth + stemBatter},${footingY} ${leftStemX - stemBatter},${footingY}`} />
+        <polygon className="abutment-fill" points={`${rightStemX + stemWidth},${capBottomY} ${rightStemX},${capBottomY} ${rightStemX - stemBatter},${footingY} ${rightStemX + stemWidth + stemBatter},${footingY}`} />
+        <rect className="dirt-wall" x={leftDirtWallX} y={roadY} width={dirtWallWidth} height={capBottomY - roadY} />
+        <rect className="dirt-wall" x={rightDirtWallX} y={roadY} width={dirtWallWidth} height={capBottomY - roadY} />
+        {/* Weep holes (drainage): relieve hydrostatic pressure from the retained
+            embankment behind the thin dirt wall — see Sheet 05 panel 5G. */}
+        {[0.25, 0.5, 0.75].map((frac) => {
+          const wy = roadY + frac * (capBottomY - roadY);
+          return (
+            <g key={`weep-${frac}`}>
+              <circle className="dirt-wall-weep" cx={leftDirtWallX + dirtWallWidth / 2} cy={wy} r="1.6" />
+              <circle className="dirt-wall-weep" cx={rightDirtWallX + dirtWallWidth / 2} cy={wy} r="1.6" />
+            </g>
+          );
+        })}
+        <rect className="footing-fill" x={leftFootingX} y={footingY} width={footingWidth} height="12" rx="2" />
+        <rect className="footing-fill" x={rightFootingX} y={footingY} width={footingWidth} height="12" rx="2" />
+        {/* Approach slabs (LISP APTHK thin, LASLAB long) at road level, running out to the view edge. */}
+        <rect className="approach-slab" x={left} y={elevationY - 32} width={leftDirtWallX - left} height="8" />
+        <rect className="approach-slab" x={rightDirtWallX + dirtWallWidth} y={elevationY - 32} width={mainRight - rightDirtWallX - dirtWallWidth} height="8" />
+        <line className="dimension-line" x1={deckLeft} y1={elevationY - 64} x2={deckRight} y2={elevationY - 64} />
         {Array.from({ length: project.spans }).map((_, index) => {
-          const x = left + index * spanWidth + spanWidth / 2;
+          const x = deckLeft + index * spanWidth + spanWidth / 2;
           return <g key={`span-${index}`}><line className="dimension-tick" x1={x - spanWidth / 2} y1={elevationY - 70} x2={x - spanWidth / 2} y2={elevationY - 58} /><line className="dimension-tick" x1={x + spanWidth / 2} y1={elevationY - 70} x2={x + spanWidth / 2} y2={elevationY - 58} /><text className="dimension-label" x={x} y={elevationY - 73} textAnchor="middle">{project.spanLength.toFixed(2)} m</text></g>;
         })}
-        <text className="component-label" x={left + 610} y={elevationY - 45} textAnchor="end">RCC deck · {totalLength.toFixed(2)} m total length</text>
+        <text className="component-label" x={deckRight} y={elevationY - 45} textAnchor="end">RCC deck · {totalLength.toFixed(2)} m total length</text>
+        {/* Dirt-wall callout: the retaining wall, its drainage and the backfill
+            it holds are called out here and detailed on Sheet 05 panel 5G. */}
+        <text className="component-label" x={left} y={elevationY - 48}>DIRT WALL (DWTH 0.30 m) RETAINS EMBANKMENT · WEEP HOLES + GRANULAR FILTER (SHEET 05 · 5G)</text>
       </g>
 
       <g className="view-gap">
@@ -64,15 +126,17 @@ export default function Sheet01Overview({ project }: { project: ProjectState }) 
       </g>
 
       <g className="plan">
-        <rect className="plan-outline" x={left} y={planY - 21} width="610" height="42" rx="2" />
+        <rect className="approach-slab" x={left} y={planY - 21} width={leftDirtWallX - left} height="42" rx="2" />
+        <rect className="plan-outline" x={deckLeft} y={planY - 21} width={deckWidth} height="42" rx="2" />
+        <rect className="approach-slab" x={rightDirtWallX + dirtWallWidth} y={planY - 21} width={mainRight - rightDirtWallX - dirtWallWidth} height="42" rx="2" />
         {Array.from({ length: Math.max(project.spans - 1, 0) }).map((_, index) => {
-          const x = left + (index + 1) * spanWidth;
+          const x = deckLeft + (index + 1) * spanWidth;
           return <g key={`plan-pier-${index}`}><rect className="support-outline" x={x - 9} y={planY - 48} width="18" height="96" rx="2" /><rect className="footing-outline" x={x - 25} y={planY - 60} width="50" height="120" rx="2" /></g>;
         })}
-        <line className="dimension-line" x1={left} y1={planY + 72} x2={left + 610} y2={planY + 72} />
-        <text className="dimension-label" x={left + 305} y={planY + 91} textAnchor="middle">{totalLength.toFixed(2)} m overall</text>
-        <text className="component-label" x={left + 305} y={planY - 35} textAnchor="middle">CARRIAGEWAY / DECK PLAN</text>
-        <text className="component-label" x={left + 305} y={planY + 112} textAnchor="middle">P1 · P2 · TYPICAL SUPPORT CENTRES</text>
+        <line className="dimension-line" x1={deckLeft} y1={planY + 72} x2={deckRight} y2={planY + 72} />
+        <text className="dimension-label" x={deckLeft + deckWidth / 2} y={planY + 91} textAnchor="middle">{totalLength.toFixed(2)} m overall</text>
+        <text className="component-label" x={deckLeft + deckWidth / 2} y={planY - 35} textAnchor="middle">CARRIAGEWAY / DECK PLAN</text>
+        <text className="component-label" x={deckLeft + deckWidth / 2} y={planY + 112} textAnchor="middle">P1 · P2 · TYPICAL SUPPORT CENTRES</text>
       </g>
 
       <g className="section-column">

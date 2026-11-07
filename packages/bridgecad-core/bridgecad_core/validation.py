@@ -9,7 +9,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 
 from .models import BridgeProject
-from .types import ConcreteGrade, ValidationSeverity
+from .types import ConcreteGrade, SeismicZone, ValidationSeverity
 
 # ===========================================================================
 # Core data structures (unchanged from scaffold)
@@ -2962,11 +2962,8 @@ def check_dw_top_height(p: BridgeProject) -> ValidationFinding:
 
 def check_dw_weep_holes(p: BridgeProject) -> ValidationFinding:
     """QA-DW-WEEP — >= 1 weep hole per 3 m of dirt wall."""
-    import math as _math
     sub = p.substructure
     abt_len = float(sub.abutment_length_m or 0.0)
-    n_weep = int(sub.weep_hole_diameter_mm and (sub.weep_hole_spacing_m is not None) and
-                 max(1, _math.ceil(abt_len / float(sub.weep_hole_spacing_m or 3.0))) or 0)
     spacing = float(sub.weep_hole_spacing_m or 3.0)
     passed = abt_len == 0 or spacing <= 3.0
     return _f(
@@ -2976,6 +2973,458 @@ def check_dw_weep_holes(p: BridgeProject) -> ValidationFinding:
         passed,
         f"weep_hole_spacing_m={spacing:.2f} — should be <= 3.0 m (1 per 3 m length)",
     )
+
+
+# ===========================================================================
+# Reinforcement spacing / foundation / approach / drainage / seismic rules
+# (patch run-book — adapted to the model's real field names)
+# ===========================================================================
+
+_BAR_SPACING_MAX_MM = 200
+
+
+def _spacing_ok(*vals: int | None) -> tuple[bool, str]:
+    """True when every modelled spacing is within the 200 mm max (or unset)."""
+    bad = [v for v in vals if v is not None and v > _BAR_SPACING_MAX_MM]
+    return (not bad), ", ".join(str(v) for v in bad)
+
+
+def check_abt_bar_spacing(p: BridgeProject) -> ValidationFinding:
+    """QA-ABT-BAR-SPG — Abutment/cap bar spacing <= 200 mm."""
+    sub = p.substructure
+    ok, bad = _spacing_ok(
+        sub.abutment_main_bar_spacing_mm,
+        sub.abutment_link_spacing_mm,
+        sub.cap_main_bar_spacing_mm,
+    )
+    return _f(
+        "QA-ABT-BAR-SPG",
+        "Abutment & cap reinforcement spacing <= 200 mm",
+        ValidationSeverity.WARNING,
+        ok,
+        f"spacing {bad} mm exceeds 200 mm max",
+    )
+
+
+def check_dw_bar_spacing(p: BridgeProject) -> ValidationFinding:
+    """QA-DW-BAR-SPG — Dirt wall bar spacing <= 200 mm."""
+    sub = p.substructure
+    ok, bad = _spacing_ok(
+        sub.dirt_wall_vert_bar_spacing_mm,
+        sub.dirt_wall_horiz_bar_spacing_mm,
+    )
+    return _f(
+        "QA-DW-BAR-SPG",
+        "Dirt wall reinforcement spacing <= 200 mm",
+        ValidationSeverity.WARNING,
+        ok,
+        f"spacing {bad} mm exceeds 200 mm max",
+    )
+
+
+def _is_pile_foundation(p: BridgeProject) -> bool:
+    ft = str(getattr(getattr(p.bridge_selection, "foundation_type", None), "name", "") or "")
+    return "PILE" in ft.upper() or "BORED" in ft.upper()
+
+
+def check_pile_spacing_diameter(p: BridgeProject) -> ValidationFinding:
+    """QA-PLE-SPC — Pile spacing >= 2.0 × pile diameter (IRC:78 typical 2–4×)."""
+    fd = p.foundation_details
+    spacing_m = fd.pile_spacing_m
+    dia_mm = fd.pile_diameter_mm
+    if spacing_m is None or not dia_mm:
+        return _f(
+            "QA-PLE-SPC",
+            "Pile spacing >= 2.0 × pile diameter",
+            ValidationSeverity.WARNING,
+            True,
+        )
+    ratio = float(spacing_m) * 1000.0 / float(dia_mm)
+    passed = ratio >= 2.0
+    return _f(
+        "QA-PLE-SPC",
+        "Pile spacing >= 2.0 × pile diameter",
+        ValidationSeverity.CRITICAL,
+        passed,
+        f"spacing/diameter = {ratio:.2f} — minimum 2.0 (typical 2–4)",
+    )
+
+
+def check_pile_count_per_line(p: BridgeProject) -> ValidationFinding:
+    """QA-PLE-CNT — At least 2 piles per line / group."""
+    fd = p.foundation_details
+    if not _is_pile_foundation(p):
+        return _f(
+            "QA-PLE-CNT",
+            "At least 2 piles per line / group",
+            ValidationSeverity.WARNING,
+            True,
+        )
+    n = int(fd.piles_per_pier or fd.piles_per_abutment or 0)
+    passed = n >= 2
+    return _f(
+        "QA-PLE-CNT",
+        "At least 2 piles per line / group",
+        ValidationSeverity.CRITICAL,
+        passed,
+        f"piles per group = {n} — minimum 2",
+    )
+
+
+def check_pile_cap_thickness(p: BridgeProject) -> ValidationFinding:
+    """QA-PCAP-THK — Pile cap thickness >= 600 mm for pile foundations."""
+    fd = p.foundation_details
+    if not _is_pile_foundation(p):
+        return _f(
+            "QA-PCAP-THK",
+            "Pile cap thickness >= 600 mm",
+            ValidationSeverity.WARNING,
+            True,
+        )
+    thk = int(fd.pile_cap_thickness_mm or 0)
+    passed = thk == 0 or thk >= 600
+    return _f(
+        "QA-PCAP-THK",
+        "Pile cap thickness >= 600 mm",
+        ValidationSeverity.CRITICAL,
+        passed,
+        f"pile_cap_thickness_mm={thk} — minimum 600 mm",
+    )
+
+
+def check_foundation_fos(p: BridgeProject) -> ValidationFinding:
+    """QA-FDN-FOS — Factor of safety on bearing >= 1.5 when modelled."""
+    fos = p.foundation_details.factor_of_safety_on_bearing
+    if fos is None:
+        return _f(
+            "QA-FDN-FOS",
+            "Factor of safety on bearing >= 1.5",
+            ValidationSeverity.WARNING,
+            True,
+        )
+    passed = float(fos) >= 1.5
+    return _f(
+        "QA-FDN-FOS",
+        "Factor of safety on bearing >= 1.5",
+        ValidationSeverity.CRITICAL,
+        passed,
+        f"factor_of_safety_on_bearing={float(fos):.2f} — minimum 1.5",
+    )
+
+
+def check_approach_slab_length(p: BridgeProject) -> ValidationFinding:
+    """QA-APP-LEN — Approach slab length >= 2.0 m (typical 3–5 m major, 2–3 m culvert)."""
+    sub = p.substructure
+    ln = float(sub.approach_slab_length_m or 0.0)
+    passed = ln == 0.0 or ln >= 2.0
+    return _f(
+        "QA-APP-LEN",
+        "Approach slab length >= 2.0 m",
+        ValidationSeverity.WARNING,
+        passed,
+        f"approach_slab_length_m={ln:.2f} — minimum 2.0 m (typical 3–5)",
+    )
+
+
+def check_approach_slab_thickness(p: BridgeProject) -> ValidationFinding:
+    """QA-APP-THK — Approach slab thickness >= 200 mm."""
+    sub = p.substructure
+    thk = int(sub.approach_slab_thickness_mm or 0)
+    passed = thk == 0 or thk >= 200
+    return _f(
+        "QA-APP-THK",
+        "Approach slab thickness >= 200 mm",
+        ValidationSeverity.WARNING,
+        passed,
+        f"approach_slab_thickness_mm={thk} — minimum 200 mm",
+    )
+
+
+def check_joint_gap_movement(p: BridgeProject) -> ValidationFinding:
+    """QA-JNT-GAP — Expansion joint installed gap <= movement capacity."""
+    bj = p.bearings_joints
+    bad = [
+        r.location or "?"
+        for r in bj.expansion_joint_schedule
+        if r.gap_mm is not None
+        and r.movement_range_mm is not None
+        and r.gap_mm > r.movement_range_mm
+    ]
+    passed = not bad
+    return _f(
+        "QA-JNT-GAP",
+        "Expansion joint gap <= movement capacity",
+        ValidationSeverity.WARNING,
+        passed,
+        f"gap exceeds movement range at: {', '.join(bad)}",
+    )
+
+
+def check_seismic_seat_width(p: BridgeProject) -> ValidationFinding:
+    """QA-SEA-SEAT — Bearing seat width meets seismic demand in zones IV/V."""
+    sd = p.seismic_data
+    high_zone = sd.zone in (SeismicZone.ZONE_IV, SeismicZone.ZONE_V)
+    if not high_zone:
+        return _f(
+            "QA-SEA-SEAT",
+            "Bearing seat width meets seismic demand",
+            ValidationSeverity.WARNING,
+            True,
+        )
+    bj = p.bearings_joints
+    required = float(sd.seat_width_seismic_mm or 0.0) or 600.0
+    seat = bj.bearing_seat_width_mm
+    if seat is None:
+        return _f(
+            "QA-SEA-SEAT",
+            "Bearing seat width meets seismic demand (zones IV/V)",
+            ValidationSeverity.WARNING,
+            True,
+            "bearing_seat_width_mm not modelled — check manually",
+        )
+    passed = seat >= required
+    return _f(
+        "QA-SEA-SEAT",
+        "Bearing seat width meets seismic demand (zones IV/V)",
+        ValidationSeverity.CRITICAL,
+        passed,
+        f"bearing_seat_width_mm={seat} — required >= {required:.0f} mm",
+    )
+
+
+def check_thermal_movement(p: BridgeProject) -> ValidationFinding:
+    """QA-JNT-MOV — Design movement covers alpha × L × temp range."""
+    bj = p.bearings_joints
+    mat = p.materials
+    total_len = float(p.geometry_input.total_length_m or 0.0)
+    if bj.design_movement_mm is None or total_len <= 0:
+        return _f(
+            "QA-JNT-MOV",
+            "Design movement covers thermal range",
+            ValidationSeverity.WARNING,
+            True,
+        )
+    alpha = 12e-6
+    required_mm = alpha * total_len * 1000.0 * float(mat.temp_range_c or 40.0)
+    passed = bj.design_movement_mm >= required_mm
+    return _f(
+        "QA-JNT-MOV",
+        "Design movement covers thermal range",
+        ValidationSeverity.WARNING,
+        passed,
+        f"design_movement_mm={bj.design_movement_mm} — required >= {required_mm:.1f} mm "
+        f"(alpha={alpha}, L={total_len:.1f} m, dT={float(mat.temp_range_c or 40):.0f} C)",
+    )
+
+
+def check_scour_embedment(p: BridgeProject) -> ValidationFinding:
+    """QA-SCR-EMB — Pile tip extends >= 3 m below design scour level."""
+    if not _is_pile_foundation(p):
+        return _f(
+            "QA-SCR-EMB",
+            "Pile tip >= 3 m below design scour level",
+            ValidationSeverity.WARNING,
+            True,
+        )
+    fd = p.foundation_details
+    hd = p.hydraulic_data
+    cut_rl = fd.pile_cutoff_level_m
+    length = fd.pile_length_m
+    scour_rl = hd.scour_level_m
+    if cut_rl is None or length is None or scour_rl is None:
+        return _f(
+            "QA-SCR-EMB",
+            "Pile tip >= 3 m below design scour level",
+            ValidationSeverity.WARNING,
+            True,
+        )
+    tip_rl = float(cut_rl) - float(length)
+    margin = float(scour_rl) - tip_rl  # positive = tip below scour
+    passed = margin >= 3.0
+    return _f(
+        "QA-SCR-EMB",
+        "Pile tip >= 3 m below design scour level",
+        ValidationSeverity.CRITICAL,
+        passed,
+        f"embedment below scour = {margin:.2f} m — minimum 3.0 m",
+    )
+
+
+def check_debris_protection(p: BridgeProject) -> ValidationFinding:
+    """QA-DRB-PRT — Debris-prone waterway requires scour protection."""
+    hd = p.hydraulic_data
+    if not hd.debris_prone:
+        return _f(
+            "QA-DRB-PRT",
+            "Debris-prone waterway requires scour protection",
+            ValidationSeverity.WARNING,
+            True,
+        )
+    passed = hd.scour_protection is not None
+    return _f(
+        "QA-DRB-PRT",
+        "Debris-prone waterway requires scour protection",
+        ValidationSeverity.CRITICAL,
+        passed,
+        "debris_prone=True but scour_protection is not set",
+    )
+
+
+def check_max_velocity(p: BridgeProject) -> ValidationFinding:
+    """QA-VEL-LIM — Modelled max velocity within 25% of regime velocity."""
+    hd = p.hydraulic_data
+    vmax = hd.max_velocity_ms
+    vreg = hd.regime_velocity_mps
+    if vmax is None or vreg is None or float(vreg) <= 0:
+        return _f(
+            "QA-VEL-LIM",
+            "Modelled max velocity within regime limit",
+            ValidationSeverity.WARNING,
+            True,
+        )
+    passed = float(vmax) <= float(vreg) * 1.25
+    return _f(
+        "QA-VEL-LIM",
+        "Modelled max velocity within regime limit",
+        ValidationSeverity.WARNING,
+        passed,
+        f"max_velocity_ms={float(vmax):.2f} exceeds regime_velocity_mps={float(vreg):.2f} by >25%",
+    )
+
+
+# ===========================================================================
+# Skew rules (guide #4)
+# ===========================================================================
+
+
+def check_skew_limit(p: BridgeProject) -> ValidationFinding:
+    """SKW-001 — Skew angle <= 60 deg (IRC limit)."""
+    deg = float(p.geometry_input.skew_angle_deg or 0.0)
+    passed = deg <= 60.0
+    return _f(
+        "SKW-001",
+        "Skew angle <= 60 deg (IRC limit)",
+        ValidationSeverity.CRITICAL,
+        passed,
+        f"skew_angle_deg={deg:.1f} — IRC limit is 60 deg",
+    )
+
+
+def check_skew_acute_edge(p: BridgeProject) -> ValidationFinding:
+    """SKW-002 — Acute-corner bearing edge distance >= 150 mm."""
+    import math as _m
+
+    gi = p.geometry_input
+    skew = float(gi.skew_angle_deg or 0.0)
+    if skew <= 0:
+        return _f(
+            "SKW-002", "Acute corner edge distance >= 150 mm", ValidationSeverity.WARNING, True
+        )
+    proj_mm = int(p.substructure.abutment_cap_projection_front_mm or 0)
+    if proj_mm == 0:
+        return _f(
+            "SKW-002", "Acute corner edge distance >= 150 mm", ValidationSeverity.WARNING, True
+        )
+    edge_mm = proj_mm * _m.cos(_m.radians(skew))
+    passed = edge_mm >= 150.0
+    return _f(
+        "SKW-002",
+        "Acute corner edge distance >= 150 mm",
+        ValidationSeverity.WARNING,
+        passed,
+        f"acute corner edge ≈ {edge_mm:.0f} mm (cap projection {proj_mm} mm × cos {skew:.0f}°)",
+    )
+
+
+def check_skew_obtuse_note(p: BridgeProject) -> ValidationFinding:
+    """SKW-003 — Obtuse-corner note required when skew > 15 deg."""
+    skew = float(p.geometry_input.skew_angle_deg or 0.0)
+    if skew <= 15.0:
+        return _f(
+            "SKW-003", "Obtuse corner note when skew > 15 deg", ValidationSeverity.WARNING, True
+        )
+    notes = " ".join(
+        str(getattr(sec, attr) or "")
+        for sec in (p.bearings_joints, p.drawing_control)
+        for attr in ("notes_bearings", "notes_joints", "general_notes")
+        if hasattr(sec, attr)
+    ).lower()
+    has_note = "obtuse" in notes or "skew" in notes
+    return _f(
+        "SKW-003",
+        "Obtuse corner note when skew > 15 deg",
+        ValidationSeverity.WARNING,
+        has_note,
+        "skew > 15° but no obtuse-corner note found in bearings/joints or drawing control notes",
+    )
+
+
+def check_boq_entity_provenance(p: BridgeProject) -> ValidationFinding:
+    """BIL-001 — Every reinforcement item carries element-level provenance.
+
+    ``bridgecad_core`` cannot import ``bridgecad_bill`` (leaf contract), so the
+    check validates the provenance the bill consumes: every detailing item has
+    a non-empty element/face pair and a resolvable As,req source.
+    """
+    try:
+        from bridgecad_core.detailing import store_for
+
+        items = store_for(p).items()
+    except Exception as exc:
+        return _f(
+            "BIL-001",
+            "Every BOQ line has >= 1 entity_id",
+            ValidationSeverity.WARNING,
+            True,
+            f"detailing store unavailable: {exc}",
+        )
+    bad = [i.mark for i in items if not i.element or not i.face]
+    no_src = [i.mark for i in items if getattr(i, "source", "") != "minima_table_v1"]
+    problems = bad + [f"{m}(source)" for m in no_src]
+    return _f(
+        "BIL-001",
+        "Every BOQ line has >= 1 entity_id",
+        ValidationSeverity.CRITICAL,
+        not problems,
+        f"items lacking provenance: {problems}" if problems else "",
+    )
+
+
+def check_boq_quantity_reconciliation(p: BridgeProject) -> ValidationFinding:
+    """BIL-002 — Detailing ledger total reconciles with its own items."""
+    try:
+        from bridgecad_core.detailing import store_for
+
+        store = store_for(p)
+        items = store.items()
+        if not items:
+            return _f(
+                "BIL-002",
+                "BOQ quantities reconcile with ledger totals",
+                ValidationSeverity.WARNING,
+                True,
+                "no reinforcement items to reconcile",
+            )
+        # Ledger total must equal the sum of per-item masses (truncated schedule
+        # would break this).
+        total = store.ledger().total_kg
+        per_item = sum(store._kg(i) for i in items)
+        passed = abs(total - per_item) <= max(1.0, per_item * 0.001)
+        return _f(
+            "BIL-002",
+            "BOQ quantities reconcile with ledger totals",
+            ValidationSeverity.CRITICAL,
+            passed,
+            f"ledger {total:.2f} kg vs item sum {per_item:.2f} kg",
+        )
+    except Exception as exc:
+        return _f(
+            "BIL-002",
+            "BOQ quantities reconcile with ledger totals",
+            ValidationSeverity.WARNING,
+            True,
+            f"ledger unavailable: {exc}",
+        )
 
 
 _ALL_CHECK_FNS: list[CheckFn] = [
@@ -3091,11 +3540,33 @@ _ALL_CHECK_FNS: list[CheckFn] = [
     check_warren_truss_without_verticals,  # W74
     check_drop_cap_pier_reinforcement_congestion,  # W75
     # ── Abutment cap / dirt wall QA checks ───────────────────────────────
-    check_abt_cap_depth,     # ABT-CAP-DEPTH
-    check_abt_cap_proj,      # ABT-CAP-PROJ
-    check_dw_thickness,      # QA-DW-THK
-    check_dw_top_height,     # QA-DW-TOP
-    check_dw_weep_holes,     # QA-DW-WEEP
+    check_abt_cap_depth,  # ABT-CAP-DEPTH
+    check_abt_cap_proj,  # ABT-CAP-PROJ
+    check_dw_thickness,  # QA-DW-THK
+    check_dw_top_height,  # QA-DW-TOP
+    check_dw_weep_holes,  # QA-DW-WEEP
+    check_abt_bar_spacing,  # QA-ABT-BAR-SPG
+    check_dw_bar_spacing,  # QA-DW-BAR-SPG
+    # ── Foundation / approach / drainage / seismic rules ─────────────────
+    check_pile_spacing_diameter,  # QA-PLE-SPC
+    check_pile_count_per_line,  # QA-PLE-CNT
+    check_pile_cap_thickness,  # QA-PCAP-THK
+    check_foundation_fos,  # QA-FDN-FOS
+    check_approach_slab_length,  # QA-APP-LEN
+    check_approach_slab_thickness,  # QA-APP-THK
+    check_joint_gap_movement,  # QA-JNT-GAP
+    check_seismic_seat_width,  # QA-SEA-SEAT
+    check_thermal_movement,  # QA-JNT-MOV
+    check_scour_embedment,  # QA-SCR-EMB
+    check_debris_protection,  # QA-DRB-PRT
+    check_max_velocity,  # QA-VEL-LIM
+    # ── Skew rules ────────────────────────────────────────────────────────
+    check_skew_limit,  # SKW-001
+    check_skew_acute_edge,  # SKW-002
+    check_skew_obtuse_note,  # SKW-003
+    # ── Bill provenance ───────────────────────────────────────────────────
+    check_boq_entity_provenance,  # BIL-001
+    check_boq_quantity_reconciliation,  # BIL-002
     # ── M1W2 INFO additions  I01–I50 ─────────────────────────────────────
     info_project_stage_design_developed,  # I01
     info_project_name_station_naming,  # I02

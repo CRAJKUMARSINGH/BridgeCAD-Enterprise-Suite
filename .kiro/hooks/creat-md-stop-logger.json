@@ -1,0 +1,14 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "CREAT.md Stop Logger",
+      "trigger": "Stop",
+      "description": "Appends a timestamped entry to CREAT.md when each agent execution turn stops.",
+      "action": {
+        "type": "command",
+        "command": "powershell -NoProfile -Command \"$ts = Get-Date -Format 'yyyy-MM-dd HH:mm'; $logLine = '| ' + $ts + ' | Agent turn completed |'; Add-Content -Path 'E:\\Rajkumar\\BridgeCAD-Enterprise-Suite\\CREAT.md' -Value $logLine\""
+      }
+    }
+  ]
+}

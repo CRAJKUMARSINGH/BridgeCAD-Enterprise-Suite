@@ -14,13 +14,17 @@
 
 export const SHEET = Object.freeze({ W: 841, H: 594, MARGIN: 12, SCALE: 100 });
 const TEXT_H = 2.5;
+/** @param {number} m @returns {number} */
 const mm = (m) => (m * 1000) / SHEET.SCALE;
 
+/** @param {*} v @param {number} d @returns {number} */
 const NUM = (v, d) => {
   const n = typeof v === "number" ? v : Number.parseFloat(String(v ?? ""));
   return Number.isFinite(n) ? n : d;
 };
+/** @param {number} n @param {number} lo @param {number} hi @returns {number} */
 const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
+/** @param {number} n @returns {number} */
 const r2 = (n) => Math.round(n * 100) / 100;
 
 /** Layer table: name -> [colour, linetype]. */
@@ -30,6 +34,7 @@ export const LAYERS = Object.freeze({
   "FOUND-WELL": ["#d9c26a", "CONTINUOUS"],
   "SUB-PIER": ["#9fc3d8", "CONTINUOUS"],
   "SUB-ABUT": ["#9fc3d8", "CONTINUOUS"],
+  "ABUT-PROF": ["#9fc3d8", "CONTINUOUS"],
   "SUB-BEARING": ["#e08a5a", "CONTINUOUS"],
   "SUPER-GIRDER": ["#7fb2cc", "CONTINUOUS"],
   "SUPER-DECK": ["#7fb2cc", "CONTINUOUS"],
@@ -51,13 +56,19 @@ export const LAYERS = Object.freeze({
 });
 
 const P = {
+  /** @param {string} layer @param {number} x1 @param {number} y1 @param {number} x2 @param {number} y2 @returns {object} */
   line: (layer, x1, y1, x2, y2) => ({ k: "line", layer, x1: r2(x1), y1: r2(y1), x2: r2(x2), y2: r2(y2) }),
+  /** @param {string} layer @param {number} x @param {number} y @param {number} w @param {number} h @returns {object} */
   rect: (layer, x, y, w, h) => ({ k: "rect", layer, x: r2(x), y: r2(y), w: r2(w), h: r2(h) }),
+  /** @param {string} layer @param {number} cx @param {number} cy @param {number} r @returns {object} */
   circle: (layer, cx, cy, r) => ({ k: "circle", layer, cx: r2(cx), cy: r2(cy), r: r2(r) }),
+  /** @param {string} layer @param {number} x @param {number} y @param {string} s @param {number} [size] @param {string} [anchor] @returns {object} */
   text: (layer, x, y, s, size = TEXT_H, anchor = "start") => ({ k: "text", layer, x: r2(x), y: r2(y), s: String(s), size, anchor }),
+  /** @param {string} layer @param {number[] | number[][]} pts @param {boolean} [closed] @returns {object} */
   poly: (layer, pts, closed = true) => ({ k: "poly", layer, pts: pts.flat().map(r2), closed }),
 };
 
+/** @param {any[]} out @param {string} layer @param {number} x @param {number} y @param {number} w @param {number} h @param {number} [step] */
 function hatch(out, layer, x, y, w, h, step = 3) {
   if (w <= 0 || h <= 0) return;
   for (let o = -h; o < w; o += step) {
@@ -68,6 +79,48 @@ function hatch(out, layer, x, y, w, h, step = 3) {
   }
 }
 
+/**
+ * Hatch a (possibly rotated) polygon. `hatch` fills an axis-aligned box, so on a
+ * splayed wing wall most of the ink lands outside the outline. This clips 45°
+ * scan lines to the polygon's edges instead.
+ */
+/** @param {any[]} out @param {string} layer @param {number[]} pts @param {number} [step] */
+function hatchPoly(out, layer, pts, step = 3) {
+  const n = pts.length / 2;
+  if (n < 3) return;
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+  for (let i = 0; i < n; i += 1) {
+    const x = pts[2 * i];
+    const y = pts[2 * i + 1];
+    minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+    minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+  }
+  // Scan lines of slope 1: y - x = c.
+  for (let c = minY - maxX; c <= maxY - minX; c += step) {
+    /** @type {number[][]} */
+    const hits = [];
+    for (let i = 0; i < n; i += 1) {
+      const ax = pts[2 * i], ay = pts[2 * i + 1];
+      const j = (i + 1) % n;
+      const bx = pts[2 * j], by = pts[2 * j + 1];
+      const fa = ay - ax;
+      const fb = by - bx;
+      if (fa === fb || (fa - c) * (fb - c) > 0) continue;
+      const t = (c - fa) / (fb - fa);
+      if (t < 0 || t > 1) continue;
+      hits.push([ax + t * (bx - ax), ay + t * (by - ay)]);
+    }
+    hits.sort((a, b) => a[0] - b[0]);
+    for (let i = 0; i + 1 < hits.length; i += 2) {
+      out.push(P.line(layer, hits[i][0], hits[i][1], hits[i + 1][0], hits[i + 1][1]));
+    }
+  }
+}
+
+/** @param {any[]} out @param {number} x1 @param {number} x2 @param {number} y @param {string} text */
 function dimH(out, x1, x2, y, text) {
   out.push(P.line("DIM", x1, y, x2, y));
   out.push(P.line("DIM", x1, y - 2, x1, y + 2));
@@ -75,6 +128,7 @@ function dimH(out, x1, x2, y, text) {
   out.push(P.text("DIM", (x1 + x2) / 2, y + 3.2, text, TEXT_H, "middle"));
 }
 
+/** @param {any[]} out @param {number} x @param {number} y1 @param {number} y2 @param {string} text */
 function dimV(out, x, y1, y2, text) {
   out.push(P.line("DIM", x, y1, x, y2));
   out.push(P.line("DIM", x - 2, y1, x + 2, y1));
@@ -84,24 +138,75 @@ function dimV(out, x, y1, y2, text) {
 
 /* ── parameter normalisation: every downstream guarantee lives here ───────── */
 
+/** One recorded substitution: the caller's value was not the value used. */
+/** @param {string[]} notes @param {string} label @param {number} from @param {number} to @param {string} unit */
+const noteAdjust = (notes, label, from, to, unit) => {
+  if (!Number.isFinite(from) || Math.abs(from - to) < 1e-9) return;
+  notes.push(`${label} ${from.toFixed(2)} → ${to.toFixed(2)} ${unit}`);
+};
+
+/** @param {Record<string, any>} [input] @returns {Record<string, any>} */
 export function normalizeParams(input = {}) {
-  const carriageway = clamp(NUM(input.carriageway, 7.5), 5, 12);
-  const abtlRaw = clamp(NUM(input.abtl, 13), 6, 26);
-  const abtl = Math.max(abtlRaw, carriageway + 2);
-  const splay = clamp(NUM(input.splay, 45), 15, 60);
+  /** @type {string[]} */
+  const notes = [];
+
+  const cwRaw = NUM(input.carriageway, 7.5);
+  const carriageway = clamp(cwRaw, 5, 12);
+  noteAdjust(notes, "Carriageway", cwRaw, carriageway, "m");
+
+  // Resolve the ABTL ladder from the RAW inputs, before the carriageway floor
+  // runs. Resolving on the normalised object made `abtl` the first rung on every
+  // call, so FUTL/FOOTL/FUTRL/ALCL/ALCW could never fire.
+  const { valueM: abtlLadder, source: abtlSource } = resolveAbtlRaw(input);
+  const abtlClamped = clamp(abtlLadder, 6, 26);
+  const abtl = Math.max(abtlClamped, carriageway + 2);
+  noteAdjust(notes, `ABTL (${abtlSource})`, abtlLadder, abtl, "m");
+
+  const splayRaw = NUM(input.splay, 45);
+  const splay = clamp(splayRaw, 15, 60);
+  noteAdjust(notes, "Splay", splayRaw, splay, "°");
+
   const deckRl = clamp(NUM(input.deckRl, 112.4), 0, 400);
   const foundingRl = clamp(NUM(input.foundingRl, 96.2), -50, deckRl);
+  noteAdjust(notes, "Founding level RL", NUM(input.foundingRl, 96.2), foundingRl, "m");
+  // The founding level is the cap soffit (= pile cut-off). The scour level is a
+  // separate datum; when the caller supplies none the two coincide, and the
+  // sheet prints one number rather than claiming one RL means two things.
+  const scourRl = clamp(NUM(input.scourRl, NUM(input.foundingRl, 96.2)), -50, deckRl);
   const hflRl = clamp(NUM(input.hflRl, 104.5), foundingRl, deckRl);
   const lwlRl = clamp(NUM(input.lwlRl, 99.8), foundingRl, hflRl);
-  const rows = Math.round(clamp(NUM(input.rows, 2), 1, 3));
-  const cols = Math.round(clamp(NUM(input.cols, 2), 1, 3));
+
+  const rowsRaw = NUM(input.rows, 2);
+  const rows = Math.round(clamp(rowsRaw, 1, 3));
+  noteAdjust(notes, "Pile rows", rowsRaw, rows, "");
+  const colsRaw = NUM(input.cols, 2);
+  const cols = Math.round(clamp(colsRaw, 1, 3));
+  noteAdjust(notes, "Pile columns", colsRaw, cols, "");
+
+  const spanRaw = NUM(input.spans, 3);
+  const spans = Math.round(clamp(spanRaw, 1, 12));
+  noteAdjust(notes, "Spans", spanRaw, spans, "");
+
+  const pileDiaRaw = NUM(input.pileDiaMm, 1000);
+  const pileDiaMm = clamp(pileDiaRaw, 600, 1500);
+  noteAdjust(notes, "Pile diameter", pileDiaRaw, pileDiaMm, "mm");
+
+  const pileLenRaw = NUM(input.pileLenM, 12);
+  const pileLenM = clamp(pileLenRaw, 4, 25);
+  noteAdjust(notes, "Pile length", pileLenRaw, pileLenM, "m");
+
+  const capTRaw = NUM(input.capTMm, 1200);
+  const capTMm = clamp(capTRaw, 800, 1800);
+  noteAdjust(notes, "Cap thickness", capTRaw, capTMm, "mm");
+
   return {
     projectName: String(input.projectName || "Untitled bridge").slice(0, 48),
     number: String(input.number || "GAD-001").slice(0, 18),
     revision: String(input.revision || "R0").slice(0, 6),
-    spans: Math.round(clamp(NUM(input.spans, 3), 1, 12)),
+    spans,
     carriageway,
     abtl,
+    abtlSource,
     futl: NUM(input.futl, 0),
     footl: NUM(input.footl, 0),
     futrl: NUM(input.futrl, 0),
@@ -112,9 +217,10 @@ export function normalizeParams(input = {}) {
     hflRl,
     lwlRl,
     foundingRl,
-    pileDiaMm: clamp(NUM(input.pileDiaMm, 1000), 600, 1500),
-    pileLenM: clamp(NUM(input.pileLenM, 12), 4, 25),
-    capTMm: clamp(NUM(input.capTMm, 1200), 800, 1800),
+    scourRl,
+    pileDiaMm,
+    pileLenM,
+    capTMm,
     spacingM: clamp(NUM(input.spacingM, 2), 1.5, 4),
     rows,
     cols,
@@ -132,6 +238,7 @@ export function normalizeParams(input = {}) {
     girderDepthMm: clamp(NUM(input.girderDepthMm, 900), 600, 1800),
     deckThickMm: clamp(NUM(input.deckThickMm, 200), 150, 400),
     bearingsPerPier: Math.round(clamp(NUM(input.bearingsPerPier, 4), 2, 8)),
+    notes,
   };
 }
 
@@ -139,16 +246,26 @@ export function normalizeParams(input = {}) {
 
 const LADDER = ["abtl", "futl", "footl", "futrl", "alcl", "alcw"];
 
-export function resolveAbtl(p) {
+/** Resolve the ladder from raw caller inputs. */
+/** @param {Record<string, any>} [input] @returns {{ valueM: number, source: string }} */
+export function resolveAbtlRaw(input = {}) {
   for (const rung of LADDER) {
-    const v = NUM(p[rung], 0);
+    const v = NUM(input[rung], 0);
     if (v > 0) return { valueM: v, source: rung.toUpperCase() };
   }
   return { valueM: 13, source: "DEFAULT" };
 }
 
+/** The rung that fired for an already-normalised param set. */
+/** @param {Record<string, any>} p @returns {{ valueM: number, source: string }} */
+export function resolveAbtl(p) {
+  if (p && p.abtlSource) return { valueM: NUM(p.abtl, 13), source: p.abtlSource };
+  return resolveAbtlRaw(p || {});
+}
+
 /* ── wing walls, measured from the abutment face ─────────────────────────── */
 
+/** @param {Record<string, any>} p @returns {any} */
 export function wingWallGeometry(p) {
   const { valueM: abtl, source } = resolveAbtl(p);
   const splay = clamp(NUM(p.splay, 45), 0, 88.999);
@@ -157,13 +274,70 @@ export function wingWallGeometry(p) {
   const lengthM = Math.cos(rad) ? faceRunM / Math.cos(rad) : 0;
   const returnM = lengthM * Math.sin(rad);
   const topLevelM = p.deckRl - 1.2;
-  const baseLevelM = Math.min(p.foundingRl, topLevelM) - 0.5;
+  const scourRl = NUM(p.scourRl, p.foundingRl);
+  const baseLevelM = Math.min(scourRl, topLevelM) - 0.5;
   const walls = ["left", "right"].map((side) => ({
     side, splayDeg: splay, faceRunM, lengthM, returnM, topLevelM, baseLevelM,
   }));
   return { abtl, source, splayDeg: splay, faceRunM, lengthM, returnM, walls };
 }
 
+/* ── abutment battered profile (LISP abt1()) ─────────────────────────────── */
+
+/**
+ * LISP abt1() abutment parameters, in metres. The abutment faces carry the
+ * project's abutment height as the stem; the section geometry is the abt1()
+ * default set (ALCW/ALCD/ALFB/ALFO/ALFD/ALBB/DWTH and RTL−CAPT). A1 is the
+ * AL* family (dirt wall outward on −x), A2 the mirrored AR* family.
+ */
+const ABT_PROFILE = Object.freeze({
+  capW: 0.75,      // ALCW / ARCW — cap width
+  capD: 1.2,       // ALCD / ARCD — cap depth
+  frontBatter: 10, // ALFB / ARFB — face batter, 1:n
+  backBatter: 3,   // ALBB / ARBB — back batter, 1:n
+  toeOff: 1.5,     // ALFO / ARFO — toe and footing offset
+  footD: 1.0,      // ALFD / ARFD — footing depth
+  above: 0.98,     // RTL − CAPT — face upstand above the cap
+  dirtW: 0.3,      // DWTH — dirt wall thickness
+});
+
+/**
+ * The 14-vertex LISP abt1() battered abutment elevation, in sheet mm:
+ *
+ *   (x1,RTL) (x1,capt) (x3,capt) (x3,capB) (x5,alfbl) (x6,altbl) (x7,altbl)
+ *   (x7,y8) (x10,y8) (x10,altbl) (x12,altbl) (x12,albbl) (x14,capB) (x14,RTL)
+ *
+ * `side` "left" is A1 (dirt wall outward at −x), "right" is A2 (mirrored, dirt
+ * wall outward at +x). The cap soffit sits on `yCapB` and the face is anchored
+ * at `xFace`; the stem height is the project's abutment height.
+ */
+/** @param {"left" | "right"} side @param {number} xFace @param {number} yCapB @param {number} stemHM @returns {any} */
+export function abutmentProfile(side, xFace, yCapB, stemHM) {
+  const A = ABT_PROFILE;
+  const s = side === "right" ? -1 : 1;
+  const stemH = Math.max(NUM(stemHM, 2.8), 0.5);
+  const x1 = xFace;
+  const capt = yCapB + mm(A.capD);
+  const rtl = capt + mm(A.above);
+  const altbl = yCapB - mm(stemH);
+  const y8 = altbl - mm(A.footD);
+  const x3 = x1 + s * mm(A.capW);
+  const x5 = x3 + s * mm(stemH / A.frontBatter);
+  const x6 = x5; // alfbl == altbl in abt1() defaults, so the toe drop is nil
+  const x7 = x6 + s * mm(A.toeOff);
+  const x14 = x1 - s * mm(A.dirtW);
+  const x12 = x14 - s * mm(stemH / A.backBatter);
+  const x10 = x12 - s * mm(A.toeOff);
+  const pts = [
+    x1, rtl, x1, capt, x3, capt, x3, yCapB,
+    x5, altbl, x6, altbl, x7, altbl, x7, y8,
+    x10, y8, x10, altbl, x12, altbl, x12, altbl,
+    x14, yCapB, x14, rtl,
+  ];
+  return { pts, rtl, altbl, y8, x3, x7, x10, x12, x14, dirtWallX: x14 };
+}
+
+/** @param {Record<string, any>} p @returns {any} */
 export function foundationLayout(p) {
   const rows = Math.round(clamp(NUM(p.rows, 2), 1, 3));
   const cols = Math.round(clamp(NUM(p.cols, 2), 1, 3));
@@ -178,6 +352,7 @@ export function foundationLayout(p) {
   };
 }
 
+/** @param {Record<string, any>} p @param {number} sheet @returns {any} */
 const baseMeta = (p, sheet) => ({
   sheet,
   projectName: p.projectName,
@@ -188,6 +363,7 @@ const baseMeta = (p, sheet) => ({
   layersUsed: [],
 });
 
+/** @param {any[]} out @param {string} title @param {any} meta */
 function frame(out, title, meta) {
   const M = SHEET.MARGIN;
   out.push(P.rect("FRAME", M, M, SHEET.W - 2 * M, SHEET.H - 2 * M));
@@ -196,7 +372,7 @@ function frame(out, title, meta) {
   out.push(P.text("TEXT", SHEET.W - M - 8, SHEET.H - M - 10, "NOT FOR CONSTRUCTION · REVIEW ISSUE", 2.2, "end"));
   const tb = { x: SHEET.W - 205, y: 34 };
   out.push(P.rect("FRAME", tb.x, tb.y, 189, 96));
-  [24, 24, 24].forEach((d, i) => out.push(P.line("FRAME", tb.x, tb.y + 24 * (i + 1), tb.x + 189, tb.y + 24 * (i + 1))));
+  [24, 24, 24].forEach((_d, i) => out.push(P.line("FRAME", tb.x, tb.y + 24 * (i + 1), tb.x + 189, tb.y + 24 * (i + 1))));
   out.push(P.line("FRAME", tb.x + 104, tb.y + 48, tb.x + 104, tb.y + 72));
   out.push(P.text("TEXT-HEADER", tb.x + 5, tb.y + 88, "BRIDGECAD · IRC / MoRTH", 2.6));
   out.push(P.text("TEXT", tb.x + 5, tb.y + 66, meta.projectName, 2.4));
@@ -206,10 +382,12 @@ function frame(out, title, meta) {
   out.push(P.text("TEXT", tb.x + 109, tb.y + 18, "DRAWN / CHECKED", 2.2));
 }
 
+/** @param {any[]} out @param {string[]} notes */
 function noteBlock(out, notes) {
   notes.forEach((n, i) => out.push(P.text("TEXT", 30, 108 - i * 5.4, n, 2.2)));
 }
 
+/** @param {any[]} out @param {number} x @param {number} y */
 function scaleBar(out, x, y) {
   out.push(P.line("FRAME", x, y, x + 50, y));
   for (let i = 0; i < 5; i += 1) {
@@ -227,12 +405,15 @@ function scaleBar(out, x, y) {
 
 /* ── Sheet 04 — abutment / pier foundation ───────────────────────────────── */
 
+/** @param {any[]} out @param {string} id @param {number} x @param {number} y @param {number} w @param {number} h @returns {number} */
 const panel = (out, id, x, y, w, h) => out.push({ k: "panel", layer: "FRAME", id, x: r2(x), y: r2(y), w: r2(w), h: r2(h) });
 
+/** @param {Record<string, any>} [raw] @returns {any} */
 export function buildSheet4(raw) {
   const p = normalizeParams(raw);
   const f = foundationLayout(p);
   const meta = baseMeta(p, 4);
+  /** @type {any[]} */
   const out = [];
   frame(out, "ABUTMENT & PIER FOUNDATION — GENERAL ARRANGEMENT", meta);
 
@@ -240,6 +421,14 @@ export function buildSheet4(raw) {
   const capT = mm(f.capTm);
   const pileL = mm(Math.min(f.pileLm, 6));
   const pileW = mm(Math.max(f.pileDm, 0.8));
+
+  // Three levels, three names. The input foundingRl is the cap soffit (= pile
+  // cut-off); scour is a separate datum; the pile toe hangs a full pile length
+  // below the cut-off — the cap thickness sits *above* the soffit, not below it.
+  const capSoffitRl = p.foundingRl;
+  const scourRl = p.scourRl;
+  const pileToeRl = capSoffitRl - f.pileLm;
+  const bearingRl = p.deckRl - p.deckThickMm / 1000 - p.girderDepthMm / 1000;
 
   /* panel A — foundation elevation */
   const xA = 45;
@@ -261,12 +450,16 @@ export function buildSheet4(raw) {
       out.push(P.rect("FOUND-PILE", px, yPileB, pileW, pileL));
     }
   }
-  out.push(P.line("CIVIL-SCOUR", xA - 16, yCapB, xA + capW + 16, yCapB));
+  const yScour = yCapB - (Math.abs(scourRl - capSoffitRl) > 1e-6 ? 12 : 0);
+  out.push(P.line("CIVIL-SCOUR", xA - 16, yScour, xA + capW + 16, yScour));
   out.push(P.line("CIVIL-HFL", xA - 16, yCapT + 8, xA + capW + 16, yCapT + 8));
   out.push(P.line("HIDD", xA - 16, yBear, xA + capW + 16, yBear));
-  out.push(P.text("TEXT-LEVEL", xA + capW + 5, yCapB, `SCOUR LEVEL RL ${f.foundingRl.toFixed(3)}`));
-  out.push(P.text("TEXT-LEVEL", xA + capW + 5, yPileB, `FOUNDATION LEVEL RL ${(f.foundingRl - f.pileLm - f.capTm).toFixed(3)}`));
-  out.push(P.text("TEXT-LEVEL", xA + capW + 5, yBear, `BEARING LEVEL RL ${p.deckRl.toFixed(3)}`));
+  out.push(P.text("TEXT-LEVEL", xA + capW + 5, yScour, `SCOUR LEVEL RL ${scourRl.toFixed(3)}`));
+  if (Math.abs(scourRl - capSoffitRl) > 1e-6) {
+    out.push(P.text("TEXT-LEVEL", xA + capW + 5, yCapB, `PILE CUT-OFF LEVEL RL ${capSoffitRl.toFixed(3)}`));
+  }
+  out.push(P.text("TEXT-LEVEL", xA + capW + 5, yPileB, `FOUNDATION LEVEL RL ${pileToeRl.toFixed(3)}`));
+  out.push(P.text("TEXT-LEVEL", xA + capW + 5, yBear, `BEARING LEVEL RL ${bearingRl.toFixed(3)}`));
   out.push(P.text("TEXT-LEVEL", xA + capW + 5, yCapT + 8, `HFL RL ${p.hflRl.toFixed(3)}`));
   out.push(P.text("TEXT-HEADER", xA + capW / 2, yBear + 12, "FOUNDATION ELEVATION", 3, "middle"));
 
@@ -319,6 +512,7 @@ export function buildSheet4(raw) {
   const yD = 330;
   panel(out, "4D", 460, 300, 120, 60);
   out.push(P.text("TEXT-HEADER", xD, yD + 14, "PILE SCHEDULE", 3));
+  /** @type {string[][]} */
   const rowsD = [["MARK", "Ø (mm)", "LENGTH"]];
   for (let i = 0; i < Math.min(f.nPiles, 6); i += 1) rowsD.push([`P${i + 1}`, p.pileDiaMm.toFixed(0), `${f.pileLm.toFixed(2)} m`]);
   rowsD.forEach((r, i) => {
@@ -329,17 +523,22 @@ export function buildSheet4(raw) {
   dimH(out, xA, xA + capW, yCapB - 10, `CAP ${f.capWm.toFixed(2)} m`);
   dimV(out, xA - 8, yCapB, yCapT, `CAP ${p.capTMm.toFixed(0)} mm`);
   dimV(out, xA + capW + 26, yPileB, yCapB, `PILE ${f.pileLm.toFixed(2)} m`);
-  dimV(out, xA - 8, yCapB, yBear, "BEARING LEVEL");
+  // Offset from the cap dim: same x and a shared y span overprinted them.
+  dimV(out, xA - 20, yCapB, yBear, "BEARING LEVEL");
 
   scaleBar(out, 30, 125);
 
-  noteBlock(out, [
+  /** @type {string[]} */
+  const noteLines = [
     "1. All dimensions in metres unless stated otherwise.",
-    `2. Safe bearing capacity ${p.sbckPa.toFixed(0)} kPa at founding level RL ${(f.foundingRl - f.pileLm - f.capTm).toFixed(3)}.`,
-    `3. Pile cut-off level RL ${f.foundingRl.toFixed(3)}.`,
+    `2. Safe bearing capacity ${p.sbckPa.toFixed(0)} kPa at founding level RL ${pileToeRl.toFixed(3)}.`,
+    `3. Pile cut-off (cap soffit) level RL ${capSoffitRl.toFixed(3)}; scour level RL ${scourRl.toFixed(3)}.`,
     "4. Founding stratum to be confirmed by the geotechnical report.",
     "5. Restored on the static deploy — parity with bridgecad_draw/sheets/sheet4_foundation.py.",
-  ]);
+  ];
+  // Item 4: a clamp that rewrites an engineering input must say so on the sheet.
+  for (const n of p.notes) noteLines.push(`CLAMP: ${n}`);
+  noteBlock(out, noteLines);
 
   meta.layersUsed = [...new Set(out.map((q) => q.layer))];
   meta.foundation = f;
@@ -348,6 +547,7 @@ export function buildSheet4(raw) {
 
 /* ── Sheet 05 — pier, abutment, wing wall / fire wall details ────────────── */
 
+/** @param {Record<string, any>} [raw] @returns {any} */
 export function buildSheet5(raw) {
   const p = normalizeParams(raw);
   const w = wingWallGeometry(p);
@@ -355,6 +555,7 @@ export function buildSheet5(raw) {
   const meta = baseMeta(p, 5);
   meta.walls = w.walls;
   meta.abtlSource = w.source;
+  /** @type {any[]} */
   const out = [];
   frame(out, "PIER, ABUTMENT & WING WALL / FIRE WALL DETAILS", meta);
 
@@ -445,46 +646,68 @@ export function buildSheet5(raw) {
   out.push(P.text("TEXT", xB, yGirB - 5, `PIER WALL ${p.pierWidM.toFixed(2)} m THICK × ${p.pierHgtM.toFixed(2)} m HIGH`, 2.2));
   out.push(P.text("TEXT", xB, yDeckT + 32, "KERB + PARAPET — READ FROM SUPERSTRUCTURE MODEL", 2.2));
 
-  /* panel C — abutment elevation, ABTL and both splayed wing walls */
+  /* panel C — abutment elevation: the two LISP abt1() battered profiles.
+     A1 (left end) uses the AL* family, dirt wall outward on −x; A2 (right end)
+     mirrors it (AR*, dirt wall outward on +x). The cap, the battered face and
+     stem, the toe and the footing all come from abt1(); the wing walls still
+     spring from each abutment face on the cap soffit. */
   panel(out, "5C", 305, 130, 270, 170);
-  const xC = 320;
+  const xC = 355;
   const wC = mm(w.abtl);
-  const yAbtB = 235;
-  const yAbtT = yAbtB + mm(p.abtHgtM);
+  const yAbtB = 235; // cap soffit — the profiles and both wing walls seat here
+  const a1 = abutmentProfile("left", xC, yAbtB, p.abtHgtM);
+  const a2 = abutmentProfile("right", xC + wC, yAbtB, p.abtHgtM);
+  const yAbtT = a1.rtl;
 
-  out.push(P.rect("SUB-ABUT", xC, yAbtB, wC, mm(p.abtHgtM)));
-  hatch(out, "HTCH", xC, yAbtB, wC, mm(p.abtHgtM), 2.6);
-  out.push(P.rect("SUB-ABUT", xC - mm(0.4), yAbtB, mm(0.4), mm(p.retHgtM)));
-  out.push(P.rect("SUB-ABUT", xC + wC, yAbtB, mm(0.4), mm(p.retHgtM)));
+  for (const [tag, a] of /** @type {[string, any][]} */ ([["A1", a1], ["A2", a2]])) {
+    out.push(P.poly("ABUT-PROF", a.pts, true));
+    hatchPoly(out, "HTCH", a.pts, 2.6);
+    // Internal abt1() construction lines: the cap soffit and the toe/footing top.
+    out.push(P.line("ABUT-PROF", a.x14, yAbtB, a.x3, yAbtB));
+    out.push(P.line("ABUT-PROF", a.x10, a.altbl, a.x7, a.altbl));
+    // abt1() also outlines the dirt wall itself: the back batter up to road level
+    // and across the wall top to its outer face, so the wall reads as a wall.
+    out.push(P.line("ABUT-PROF", a.x12, a.altbl, a.x12, a.rtl));
+    out.push(P.line("ABUT-PROF", a.x12, a.rtl, a.x14, a.rtl));
+    out.push(P.text("TEXT", a.dirtWallX, a.y8 - 5, `ABUTMENT ${tag} — BATTERED PROFILE (abt1(), DWTH 0.30 m)`, 2.2, tag === "A1" ? "start" : "end"));
+  }
   out.push(P.line("CL", xC - 5, yAbtB, xC + wC + 5, yAbtB));
-  out.push(P.text("TEXT-HEADER", xC, yAbtT + 20, `ABUTMENT A1 — ABTL ${w.abtl.toFixed(2)} m (SOURCE: ${w.source})`, 3));
-  out.push(P.text("TEXT-LEVEL", xC, yAbtT + 13, `DECK LEVEL RL ${p.deckRl.toFixed(3)}`));
-  out.push(P.text("TEXT-LEVEL", xC, yAbtT + 8, `HFL RL ${p.hflRl.toFixed(3)}`));
-  out.push(P.text("TEXT-LEVEL", xC, yAbtT + 3, `LWL RL ${p.lwlRl.toFixed(3)}`));
-  out.push(P.text("TEXT-LEVEL", xC, yAbtB - 4, `FOUNDING LEVEL RL ${p.foundingRl.toFixed(3)}`));
+  out.push(P.text("TEXT-HEADER", xC, yAbtT + 24, `ABUTMENT A1 & A2 — BATTERED PROFILE · ABTL ${w.abtl.toFixed(2)} m (SOURCE: ${w.source})`, 3));
+  out.push(P.text("TEXT-LEVEL", xC, yAbtT + 18, `DECK LEVEL RL ${p.deckRl.toFixed(3)}`));
+  out.push(P.text("TEXT-LEVEL", xC, yAbtT + 13, `HFL RL ${p.hflRl.toFixed(3)}`));
+  out.push(P.text("TEXT-LEVEL", xC, yAbtT + 8, `LWL RL ${p.lwlRl.toFixed(3)}`));
+  out.push(P.text("TEXT-LEVEL", xC, yAbtT + 3, `FOUNDING LEVEL RL ${p.foundingRl.toFixed(3)}`));
 
-  const yWp = 200;
   const thick = mm(0.4);
+  const run = mm(w.faceRunM);
+  const ret = mm(w.returnM);
   for (const wall of w.walls) {
     const sign = wall.side === "left" ? -1 : 1;
-    const run = mm(wall.faceRunM);
-    const ret = mm(wall.returnM);
-    out.push(P.poly("SUB-ABUT", [xC, yWp, xC + ret, yWp + sign * run, xC + ret, yWp + sign * run + sign * thick, xC, yWp + sign * thick], true));
-    hatch(out, "HTCH", xC, Math.min(yWp, yWp + sign * run), Math.max(ret, 1), Math.abs(run) || 1, 2.4);
-    out.push(P.text("TEXT", xC + ret + 4, yWp + sign * run, `WING WALL ${wall.side.toUpperCase()} — ${wall.lengthM.toFixed(2)} m`, 2.2));
+    // Each wall springs from its OWN end of the abutment — left from xC, right
+    // from xC + wC — not both from one corner. The abutment face is horizontal,
+    // so the face run is horizontal too; the return drops vertically, and the
+    // wall is seated on the abutment soffit yAbtB rather than floating below it.
+    const noseX = sign < 0 ? xC : xC + wC;
+    const toeX = noseX + sign * run;
+    const toeY = yAbtB - ret;
+    const quad = [noseX, yAbtB, toeX, toeY, toeX, toeY - thick, noseX, yAbtB - thick];
+    out.push(P.poly("SUB-ABUT", quad, true));
+    hatchPoly(out, "HTCH", quad, 2.4);
+    out.push(P.text("TEXT", toeX + sign * 4, toeY, `WING WALL ${wall.side.toUpperCase()} — ${wall.lengthM.toFixed(2)} m`, 2.2, sign < 0 ? "end" : "start"));
   }
-  out.push(P.text("TEXT-HEADER", xC, yWp - 10, `WING WALL SPLAY ${w.splayDeg.toFixed(1)}° FROM ABUTMENT FACE (FACE RUN ${w.faceRunM.toFixed(2)} m, RETURN ${w.returnM.toFixed(2)} m)`, 2.4));
+  out.push(P.text("TEXT-HEADER", xC, 140, `WING WALL SPLAY ${w.splayDeg.toFixed(1)}° FROM ABUTMENT FACE (FACE RUN ${w.faceRunM.toFixed(2)} m, RETURN ${w.returnM.toFixed(2)} m)`, 2.4));
   dimH(out, xC, xC + wC, yAbtB - 12, `ABTL ${w.abtl.toFixed(2)} m`);
-  dimV(out, xC - 10, yAbtB, yAbtT, `ABUTMENT ${p.abtHgtM.toFixed(2)} m`);
-  dimV(out, xC + wC + 22, yAbtB, yAbtB + mm(p.retHgtM), `RETURN WALL ${p.retHgtM.toFixed(2)} m`);
-  dimH(out, xC, xC + mm(w.faceRunM), yWp - 14, `FACE RUN ${w.faceRunM.toFixed(2)} m`);
-  dimV(out, xC + mm(w.returnM) + 22, yWp, yWp + mm(w.faceRunM), `RETURN ${w.returnM.toFixed(2)} m`);
+  dimV(out, xC + wC + mm(8), a1.altbl, yAbtB, `ABUTMENT ${p.abtHgtM.toFixed(2)} m`);
+  dimV(out, xC + wC + mm(4), yAbtB, yAbtB + mm(p.retHgtM), `RETURN WALL ${p.retHgtM.toFixed(2)} m`);
+  dimH(out, xC - run, xC, yAbtB - ret - 10, `FACE RUN ${w.faceRunM.toFixed(2)} m`);
+  dimV(out, xC - run - 12, yAbtB - ret, yAbtB, `RETURN ${w.returnM.toFixed(2)} m`);
 
   /* panel D — bearing schedule */
   panel(out, "5D", 610, 300, 140, 60);
   const xD = 620;
   const yD = 340;
   out.push(P.text("TEXT-HEADER", xD, yD + 14, "BEARING SCHEDULE", 3));
+  /** @type {string[][]} */
   const rowsD = [
     ["LOCATION", "TYPE", "SIZE", "LOAD", "FIXITY", "QTY"],
     ["A1", "ELASTOMERIC", "300x400", "450", "GUIDE", "4"],
@@ -522,6 +745,7 @@ export function buildSheet5(raw) {
   const xF = 330;
   const yF = 95;
   out.push(P.text("TEXT-HEADER", xF, yF + 14, "PILE FOUNDATION SCHEDULE", 3));
+  /** @type {string[][]} */
   const rowsF = [
     ["PARAMETER", "VALUE"],
     ["Pile diameter", `${f.pileDm.toFixed(2)} m`],
@@ -534,6 +758,54 @@ export function buildSheet5(raw) {
     r.forEach((c, j) => out.push(P.text(i === 0 ? "TEXT-HEADER" : "TEXT", xF + j * 52, yF - i * 7, c, 2.1)));
     out.push(P.line("FRAME", xF, yF - i * 7 - 2, xF + 104, yF - i * 7 - 2));
   });
+
+  /* panel G — dirt wall in abutment: drainage, filter and backfill detail.
+     Reads the practice in the referenced dirt-wall article: the wall is DWTH
+     thin (0.3 m) and rises from the cap soffit to road level; weep holes plus a
+     granular/geotextile filter relieve hydrostatic pressure; the retained
+     embankment behind it is compacted in layers and capped by the approach slab. */
+  panel(out, "5G", 590, 150, 235, 115);
+  const xG = 590;
+  const yG = 150;
+  const dwth = mm(0.3);
+  const slabT = mm(0.38);
+  const capHG = mm(p.capTMm / 1000);
+  const gCapB = yG + 12;
+  const gCapT = gCapB + capHG;
+  const yRoad = gCapT + mm(p.abtHgtM);
+  const ySlabB = yRoad - slabT;
+  const xWall = xG + 92;
+  const wallH = Math.max(ySlabB - gCapT, 1);
+
+  // Abutment cap the dirt wall is seated on.
+  out.push(P.rect("FOUND-CAP", xWall, gCapB, 68, capHG));
+  hatch(out, "HTCH", xWall, gCapB, 68, capHG, 2.6);
+  // Thin dirt wall (DWTH) rising from the cap soffit to road level.
+  out.push(P.rect("SUB-ABUT", xWall, gCapT, dwth, wallH));
+  // Retained embankment, compacted in layers, behind the wall.
+  const embank = [xWall - 62, gCapB, xWall, gCapB, xWall, ySlabB, xWall - 62, ySlabB];
+  out.push(P.poly("HTCH", embank, true));
+  hatchPoly(out, "HTCH", embank, 2.4);
+  // Granular filter / geotextile immediately behind the wall.
+  out.push(P.rect("STRUC-DETAIL", xWall - mm(0.3), gCapT, mm(0.3), wallH));
+  // Weep holes through the wall, discharging to the abutment face.
+  for (const frac of [0.25, 0.55]) {
+    const wy = gCapT + frac * wallH;
+    out.push(P.circle("STRUC-DETAIL", xWall + dwth / 2, wy, 1.2));
+    out.push(P.line("CIVIL-HFL", xWall + dwth, wy, xWall + 10, wy));
+  }
+  // Approach slab (APTHK thin) seated on the embankment at road level.
+  out.push(P.rect("SUPER-DECK", xWall - 62, ySlabB, 62 + dwth, slabT));
+  out.push(P.rect("SUPER-WEARING", xWall - 62, yRoad, 62 + dwth, 1.2));
+  out.push(P.text("TEXT-HEADER", xG, yG + 110, "DIRT WALL IN ABUTMENT — DRAINAGE & BACKFILL DETAIL", 3));
+  out.push(P.text("TEXT-LEVEL", xWall + 6, yRoad + 3, `ROAD LEVEL RL ${p.deckRl.toFixed(3)}`));
+  out.push(P.text("TEXT", xWall + 6, gCapT + wallH * 0.5, "DIRT WALL DWTH 0.30 m (THIN)", 2.2));
+  out.push(P.text("TEXT", xWall + 6, gCapB + capHG + 4, "ABUTMENT CAP", 2.2));
+  out.push(P.text("TEXT", xWall + 14, gCapT + 4, "WEEP HOLES Ø100 @ 3 m c/c", 2.2));
+  out.push(P.text("TEXT", xWall - 62, ySlabB + 8, "APPROACH SLAB APTHK", 2.2));
+  out.push(P.text("TEXT", xWall - 62, ySlabB - 3, "GRANULAR FILTER / GEOTEXTILE", 2.2));
+  out.push(P.text("TEXT", xWall - 62, gCapT + 6, "RETAINED EMBANKMENT — COMPACTED IN LAYERS", 2.2));
+  out.push(P.text("TEXT", xG, yG + 5, "NOTE: WEEP HOLES + FILTER DRAIN THE BACKFILL, LIMITING HYDROSTATIC PRESSURE.", 2.1));
 
   scaleBar(out, 30, 125);
 
@@ -552,20 +824,26 @@ export function buildSheet5(raw) {
 
 /* ── audit: the contract the robotic test asserts ────────────────────────── */
 
+/** @type {Record<number, string[]>} */
 const REQUIRED_LABELS = {
   4: ["FOUNDATION ELEVATION", "SCOUR LEVEL RL", "FOUNDATION LEVEL RL", "BEARING LEVEL RL", "HFL RL", "PILE CAP REINFORCEMENT DETAIL", "PILE SCHEDULE", "FOUNDATION PLAN"],
-  5: ["PIER ELEVATION", "SECTION A-A THROUGH PIER", "ABUTMENT A1", "ABTL", "SOURCE:", "WING WALL LEFT", "WING WALL RIGHT", "WING WALL SPLAY", "FACE RUN", "RETURN", "FIRE WALL", "BEARING SCHEDULE", "PILE FOUNDATION LAYOUT PLAN", "PILE FOUNDATION SCHEDULE"],
+  5: ["PIER ELEVATION", "SECTION A-A THROUGH PIER", "ABUTMENT A1", "ABTL", "SOURCE:", "WING WALL LEFT", "WING WALL RIGHT", "WING WALL SPLAY", "FACE RUN", "RETURN", "FIRE WALL", "DIRT WALL", "WEEP HOLES", "GRANULAR FILTER", "RETAINED EMBANKMENT", "BEARING SCHEDULE", "PILE FOUNDATION LAYOUT PLAN", "PILE FOUNDATION SCHEDULE"],
 };
 
+/** @type {Record<number, string[]>} */
 const REQUIRED_LAYERS = {
   4: ["FOUND-CAP", "CIVIL-SCOUR", "CIVIL-HFL", "TEXT-LEVEL", "DIM", "HTCH", "FRAME"],
-  5: ["SUB-ABUT", "SUB-PIER", "SUB-BEARING", "FOUND-PILE", "TEXT-HEADER", "DIM", "FRAME"],
+  5: ["SUB-ABUT", "ABUT-PROF", "SUB-PIER", "SUB-BEARING", "FOUND-PILE", "TEXT-HEADER", "DIM", "FRAME"],
 };
 
+/** @param {any[]} arr @returns {number[]} */
 const finite = (arr) => arr.filter((n) => typeof n === "number" && Number.isFinite(n));
 
+/** @param {{ sheet: number, prims: any[], meta: any }} sheet @returns {any} */
 export function audit(sheet) {
+  /** @type {any[]} */
   const issues = [];
+  /** @param {string} code @param {string} detail */
   const add = (code, detail) => issues.push({ code, detail });
   const { prims, meta } = sheet;
   const p = meta.params;
@@ -593,7 +871,7 @@ export function audit(sheet) {
       q.k === "circle" ? q.cx - q.r : undefined,
       q.k === "circle" ? q.cx + q.r : undefined,
       q.k === "text" ? q.x : undefined,
-      ...(q.k === "poly" ? q.pts.filter((_, i) => i % 2 === 0) : []),
+      ...(q.k === "poly" ? q.pts.filter(/** @param {number} _ @param {number} i @returns {boolean} */ (_, i) => i % 2 === 0) : []),
     ]);
     const ys = finite([
       q.y1, q.y2,
@@ -602,7 +880,7 @@ export function audit(sheet) {
       q.k === "circle" ? q.cy - q.r : undefined,
       q.k === "circle" ? q.cy + q.r : undefined,
       q.k === "text" ? q.y : undefined,
-      ...(q.k === "poly" ? q.pts.filter((_, i) => i % 2 === 1) : []),
+      ...(q.k === "poly" ? q.pts.filter(/** @param {number} _ @param {number} i @returns {boolean} */ (_, i) => i % 2 === 1) : []),
     ]);
     if (q.k === "text") {
       const w = q.s.length * q.size * 0.52;
@@ -639,18 +917,43 @@ export function audit(sheet) {
   for (const label of REQUIRED_LABELS[sheet.sheet]) if (!text.includes(label)) add("E_LABEL_MISSING", label);
 
   if (sheet.sheet === 5) {
+    /** @type {any[]} */
     const walls = meta.walls || [];
     if (walls.length !== 2) add("E_WALL_COUNT", `${walls.length}`);
     const sides = new Set(walls.map((x) => x.side));
     if (!sides.has("left") || !sides.has("right")) add("E_WALL_SIDE", [...sides].join(","));
-    for (const wall of walls) {
-      if (!(wall.faceRunM > 0)) add("E_FACE_RUN", `${wall.faceRunM}`);
-      if (!(wall.returnM > 0)) add("E_RETURN", `${wall.returnM}`);
+
+    // The walls are emitted as polygons on SUB-ABUT. Auditing the *drawn*
+    // geometry — not the formula that produced it — is what catches a wall that
+    // springs from the wrong nose, or is rotated 90° out of the abutment face.
+    // The formula checks below only fire when a clamp is removed; these fire on
+    // the drawing itself, which is the failure the ABTL floor cannot hide.
+    const wallPolys = prims.filter((q) => q.k === "poly" && q.layer === "SUB-ABUT");
+    if (wallPolys.length !== walls.length) {
+      add("E_WALL_GEOM", `${wallPolys.length} wing-wall polygon(s) for ${walls.length} wall(s)`);
+    }
+    const noses = wallPolys.map((q) => q.pts[0]);
+    if (new Set(noses).size !== noses.length) add("E_WALL_ANCHOR", `wing walls share a nose: ${noses.join(", ")}`);
+
+    walls.forEach((wall, i) => {
+      if (!(wall.returnM > 0)) add("E_RETURN", `${wall.side} return ${wall.returnM}`);
       if (!(wall.lengthM >= wall.faceRunM)) add("E_HYPOTENUSE", `${wall.lengthM} < ${wall.faceRunM}`);
       if (wall.splayDeg < 14 || wall.splayDeg > 61) add("E_SPLAY_RANGE", `${wall.splayDeg}`);
-    }
+      const q = wallPolys[i];
+      if (!q) return;
+      // The face run is measured along the abutment face, which is horizontal: a
+      // drawn wall whose horizontal extent is not the face run has been rotated
+      // out of plane (run and return swapped).
+      const xs = q.pts.filter(/** @param {number} _ @param {number} k @returns {boolean} */ (_, k) => k % 2 === 0);
+      const drawnRun = Math.max(...xs) - Math.min(...xs);
+      if (!(drawnRun > 0) || Math.abs(drawnRun - mm(wall.faceRunM)) > mm(0.5)) {
+        add("E_FACE_RUN", `${wall.side} drawn ${drawnRun.toFixed(1)} vs face run ${mm(wall.faceRunM).toFixed(1)}`);
+      }
+    });
     if (!/SOURCE: [A-Z]+/.test(text)) add("E_ABTL_SOURCE", "no ladder rung printed");
-    if (p.abtl < p.carriageway + 1.9) add("E_ABTL_SHORT", `${p.abtl} vs cw ${p.carriageway}`);
+    // Guards the `carriageway + 2` floor in normalizeParams. Unreachable on real
+    // input by design — exercised by the `no-abtl-clamp` mutation drill.
+    if (p.abtl < p.carriageway + 2) add("E_ABTL_SHORT", `${p.abtl} vs cw ${p.carriageway}`);
   }
 
   if (sheet.sheet === 4) {
@@ -664,14 +967,79 @@ export function audit(sheet) {
 
 /* ── DXF export of the same primitive stream ─────────────────────────────── */
 
+/** AutoCAD Color Index entries, as [aci, r, g, b] — used to map a layer's hex. */
+const ACI_PALETTE = [
+  [1, 255, 0, 0], [2, 255, 255, 0], [3, 0, 255, 0], [4, 0, 255, 255],
+  [5, 0, 0, 255], [6, 255, 0, 255], [7, 255, 255, 255], [8, 128, 128, 128],
+  [9, 192, 192, 192], [30, 255, 128, 0], [40, 255, 191, 128], [50, 255, 255, 128],
+  [90, 128, 255, 128], [130, 128, 255, 255], [150, 128, 191, 255], [170, 128, 128, 255],
+  [190, 191, 128, 255], [210, 255, 128, 255], [250, 51, 51, 51], [251, 91, 91, 91],
+  [252, 132, 132, 132], [253, 173, 173, 173], [254, 214, 214, 214],
+];
+
+/** Dash patterns for the linetypes the layer table references: name -> segments. */
+const LTYPES = { CONTINUOUS: [], DASHED: [12.7, -6.35], DASHDOT: [12.7, -6.35, 0, -6.35] };
+
+/** @param {string} hex @returns {number[]} */
+const hexToRgb = (hex) => {
+  const h = hex.replace("#", "");
+  return [Number.parseInt(h.slice(0, 2), 16), Number.parseInt(h.slice(2, 4), 16), Number.parseInt(h.slice(4, 6), 16)];
+};
+
+/** Nearest ACI to a layer's hex colour, so the DXF matches the preview. */
+/** @param {string} hex @returns {number} */
+const aciFor = (hex) => {
+  const [r, g, b] = hexToRgb(hex);
+  let best = 7;
+  let bestD = Infinity;
+  for (const [aci, pr, pg, pb] of ACI_PALETTE) {
+    const d = (r - pr) ** 2 + (g - pg) ** 2 + (b - pb) ** 2;
+    if (d < bestD) { bestD = d; best = aci; }
+  }
+  return best;
+};
+
+/** Axis-aligned extents of the primitive stream, for $EXTMIN / $EXTMAX. */
+/** @param {any[]} prims @returns {{ minX: number, minY: number, maxX: number, maxY: number }} */
+function dxfExtents(prims) {
+  let minX = 0, minY = 0, maxX = 0, maxY = 0;
+  for (const q of prims) {
+    const xs = [];
+    const ys = [];
+    if (q.k === "line") { xs.push(q.x1, q.x2); ys.push(q.y1, q.y2); }
+    else if (q.k === "rect" || q.k === "panel") { xs.push(q.x, q.x + q.w); ys.push(q.y, q.y + q.h); }
+    else if (q.k === "circle") { xs.push(q.cx - q.r, q.cx + q.r); ys.push(q.cy - q.r, q.cy + q.r); }
+    else if (q.k === "poly") { for (let i = 0; i < q.pts.length; i += 2) { xs.push(q.pts[i]); ys.push(q.pts[i + 1]); } }
+    else if (q.k === "text") { xs.push(q.x); ys.push(q.y); }
+    for (const v of xs) { minX = Math.min(minX, v); maxX = Math.max(maxX, v); }
+    for (const v of ys) { minY = Math.min(minY, v); maxY = Math.max(maxY, v); }
+  }
+  return { minX: r2(minX), minY: r2(minY), maxX: r2(maxX), maxY: r2(maxY) };
+}
+
+/** @param {{ prims: any[] }} sheet @returns {string} */
 export function toDxf(sheet) {
+  const ext = dxfExtents(sheet.prims);
   const head = [
-    "0", "SECTION", "2", "HEADER", "9", "$ACADVER", "1", "AC1015",
-    "9", "$INSUNITS", "70", "4", "0", "ENDSEC",
-    "0", "SECTION", "2", "TABLES", "0", "TABLE", "2", "LAYER", "70", String(Object.keys(LAYERS).length),
+    "0", "SECTION", "2", "HEADER",
+    "9", "$ACADVER", "1", "AC1015",
+    "9", "$INSUNITS", "70", "4",
+    "9", "$EXTMIN", "10", String(ext.minX), "20", String(ext.minY), "30", "0",
+    "9", "$EXTMAX", "10", String(ext.maxX), "20", String(ext.maxY), "30", "0",
+    "0", "ENDSEC",
+    "0", "SECTION", "2", "TABLES",
+    "0", "TABLE", "2", "LTYPE", "70", String(Object.keys(LTYPES).length),
   ];
+  // Layer records reference DASHED / DASHDOT; without an LTYPE table a strict
+  // reader cannot resolve them and the import degrades.
+  for (const [name, segs] of Object.entries(LTYPES)) {
+    const total = segs.reduce((a, s) => a + Math.abs(s), 0);
+    head.push("0", "LTYPE", "2", name, "70", "0", "3", `${name} line`, "72", "65", "73", String(segs.length), "40", String(total));
+    for (const s of segs) head.push("49", String(s));
+  }
+  head.push("0", "ENDTAB", "0", "TABLE", "2", "LAYER", "70", String(Object.keys(LAYERS).length));
   for (const [name, [color, lt]] of Object.entries(LAYERS)) {
-    head.push("0", "LAYER", "2", name, "70", "0", "62", String((Math.abs(hashInt(name)) % 250) + 1), "6", lt);
+    head.push("0", "LAYER", "2", name, "70", "0", "62", String(aciFor(color)), "6", lt);
   }
   head.push("0", "ENDTAB", "0", "ENDSEC", "0", "SECTION", "2", "ENTITIES");
   const body = [];
@@ -685,16 +1053,19 @@ export function toDxf(sheet) {
       }
     } else if (q.k === "circle") body.push("0", "CIRCLE", "8", q.layer, "10", String(q.cx), "20", String(q.cy), "40", String(q.r));
     else if (q.k === "poly") {
-      for (let i = 0; i < q.pts.length - 2; i += 2) body.push("0", "LINE", "8", q.layer, "10", String(q.pts[i]), "20", String(q.pts[i + 1]), "11", String(q.pts[i + 2]), "21", String(q.pts[i + 3]));
-    } else if (q.k === "text") body.push("0", "TEXT", "8", q.layer, "10", String(q.x), "20", String(q.y), "40", String(q.size), "1", q.s, "72", q.anchor === "middle" ? "1" : "0");
+      // A closed poly must close: append the first vertex so the chain returns.
+      const pts = q.closed === false ? q.pts : [...q.pts, q.pts[0], q.pts[1]];
+      for (let i = 0; i + 3 < pts.length; i += 2) {
+        body.push("0", "LINE", "8", q.layer, "10", String(pts[i]), "20", String(pts[i + 1]), "11", String(pts[i + 2]), "21", String(pts[i + 3]));
+      }
+    } else if (q.k === "text") {
+      const just = q.anchor === "middle" ? "1" : q.anchor === "end" ? "2" : "0";
+      body.push("0", "TEXT", "8", q.layer, "10", String(q.x), "20", String(q.y), "40", String(q.size), "1", q.s, "72", just);
+      // Justified TEXT needs the second alignment point (11/21) or CAD ignores it.
+      if (just !== "0") body.push("11", String(q.x), "21", String(q.y));
+    }
   }
   return [...head, ...body, "0", "ENDSEC", "0", "EOF"].join("\n");
-}
-
-function hashInt(s) {
-  let h = 0;
-  for (let i = 0; i < s.length; i += 1) h = (h * 31 + s.charCodeAt(i)) | 0;
-  return h;
 }
 
 export const DETAIL_DEFAULTS = Object.freeze({

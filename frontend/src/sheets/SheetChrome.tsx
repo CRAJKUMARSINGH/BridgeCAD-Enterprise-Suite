@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { SHEET } from "./detailGeometry";
+import type { Prim as PrimShape } from "./detailGeometry";
 import { inkFor, type SheetTheme } from "./theme";
 
 export function Y(y: number) {
@@ -25,7 +26,7 @@ export function SheetFrame({ theme, children }: { theme: SheetTheme; children: R
   );
 }
 
-export function Prim({ p, theme }: { p: any; theme: SheetTheme }) {
+export function Prim({ p, theme }: { p: PrimShape; theme: SheetTheme }) {
   const ink = inkFor(theme, p.layer);
   const stroke = {
     stroke: ink,
@@ -35,14 +36,6 @@ export function Prim({ p, theme }: { p: any; theme: SheetTheme }) {
     strokeLinejoin: "round" as const,
     fill: "none",
     vectorEffect: "non-scaling-stroke" as const,
-  };
-  const text = {
-    fill: ink,
-    stroke: "none",
-    fontFamily: theme.font,
-    fontSize: p.size,
-    textAnchor: (p.anchor === "middle" ? "middle" : "start") as "middle" | "start",
-    letterSpacing: 0.04,
   };
 
   switch (p.k) {
@@ -55,10 +48,27 @@ export function Prim({ p, theme }: { p: any; theme: SheetTheme }) {
     case "poly": {
       const pts: string[] = [];
       for (let i = 0; i < p.pts.length; i += 2) pts.push(`${p.pts[i]},${Y(p.pts[i + 1])}`);
-      return <polygon {...stroke} points={pts.join(" ")} />;
+      // Honour the primitive's `closed` flag: an open chain (the super-camber
+      // parabola) must not be closed up by the renderer.
+      return p.closed === false
+        ? <polyline {...stroke} points={pts.join(" ")} />
+        : <polygon {...stroke} points={pts.join(" ")} />;
     }
     case "text":
-      return <text {...text} x={p.x} y={Y(p.y)}>{p.s}</text>;
+      return (
+        <text
+          fill={ink}
+          stroke="none"
+          fontFamily={theme.font}
+          fontSize={p.size}
+          textAnchor={p.anchor === "middle" ? "middle" : p.anchor === "end" ? "end" : "start"}
+          letterSpacing={0.04}
+          x={p.x}
+          y={Y(p.y)}
+        >
+          {p.s}
+        </text>
+      );
     case "panel":
       return null;
     default:
@@ -66,6 +76,11 @@ export function Prim({ p, theme }: { p: any; theme: SheetTheme }) {
   }
 }
 
-export function Prims({ prims, theme }: { prims: any[]; theme: SheetTheme }) {
-  return <>{prims.map((p: any, i: number) => <Prim p={p} theme={theme} key={i} />)}</>;
+export function Prims({ prims, theme, hiddenLayers }: { prims: PrimShape[]; theme: SheetTheme; hiddenLayers?: Set<string> }) {
+  // Layer visibility: a primitive on a switched-off layer never reaches the
+  // renderer. The geometry stream is untouched, so the same sheet can be
+  // stripped back to bare outlines (dimensions/text/hatch off) without
+  // rebuilding it.
+  const visible = hiddenLayers && hiddenLayers.size ? prims.filter((p) => !hiddenLayers.has(p.layer)) : prims;
+  return <>{visible.map((p, i) => <Prim p={p} theme={theme} key={i} />)}</>;
 }

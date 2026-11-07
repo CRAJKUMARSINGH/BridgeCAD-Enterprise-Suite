@@ -144,8 +144,10 @@ from .types import (
     ScourMeasurementMethod,
     ScourProtectionSubtype,
     ScourRegimeType,
+    ScourZone,
     SedimentLoadTransportType,
     SedimentYieldClassification,
+    SeismicSiteClass,
     # --- S10 Load / Seismic / Wind ---
     SeismicZone,
     SettlementCriterionCategoryType,
@@ -486,6 +488,10 @@ class ProjectMaster(BaseModel):
     design_firm_class: DesignFirmCategoryClass | None = Field(
         default=None,
         description="Design office capacity class per COE rules",
+    )
+    code_profile: str = Field(
+        default="aashto_lrfd",
+        description="Jurisdiction code profile name (profiles/*.yaml) driving rule constants",
     )
 
 
@@ -1343,6 +1349,29 @@ class Substructure(BaseModel):
         le=Decimal("2.0"),
         dp=2,
     )
+    # --- Reinforcement inputs (patch run-book step 1) ---
+    abutment_main_bar_dia_mm: int | None = DI("Abutment shaft main bar diameter, mm", ge=12, le=32)
+    abutment_main_bar_spacing_mm: int | None = DI(
+        "Abutment shaft main bar spacing c/c, mm (max 200)", ge=100, le=300
+    )
+    abutment_link_dia_mm: int | None = DI("Abutment shaft link diameter, mm", ge=8, le=16)
+    abutment_link_spacing_mm: int | None = DI(
+        "Abutment shaft link spacing c/c, mm (max 200)", ge=100, le=300
+    )
+    cap_main_bar_dia_mm: int | None = DI("Cap main bar diameter, mm", ge=12, le=32)
+    cap_main_bar_spacing_mm: int | None = DI(
+        "Cap main bar spacing c/c, mm (max 200)", ge=100, le=300
+    )
+    dirt_wall_vert_bar_dia_mm: int | None = DI("Dirt wall vertical bar diameter, mm", ge=10, le=25)
+    dirt_wall_vert_bar_spacing_mm: int | None = DI(
+        "Dirt wall vertical bar spacing c/c, mm (max 200)", ge=100, le=300
+    )
+    dirt_wall_horiz_bar_dia_mm: int | None = DI(
+        "Dirt wall horizontal distribution bar diameter, mm", ge=8, le=16
+    )
+    dirt_wall_horiz_bar_spacing_mm: int | None = DI(
+        "Dirt wall horizontal bar spacing c/c, mm (max 200)", ge=100, le=300
+    )
 
 
 # ===========================================================================
@@ -1720,6 +1749,19 @@ class HydraulicData(BaseModel):
         default=None,
         description="Scour countermeasure adopted (Launching apron / Rip-rap / Mattress etc.)",
     )
+    scour_zone: ScourZone | None = Field(
+        default=None,
+        description="Design scour severity class at the foundation",
+    )
+    max_velocity_ms: Decimal | None = DM(
+        "Design waterway / channel velocity, m/s",
+        ge=0,
+        le=Decimal("10"),
+        dp=2,
+    )
+    debris_prone: bool = DB(
+        "True = waterway prone to debris / floating log accumulation",
+    )
     freeboard_m: Decimal = Field(
         default=Decimal("2.0"),
         max_digits=8,
@@ -2060,6 +2102,30 @@ class Materials(BaseModel):
         default=None,
         description="Deck / substructure waterproofing product",
     )
+    # --- Thermal range (drives joint-gap / movement rules) ---
+    max_temp_c: float = Field(
+        default=35.0,
+        ge=-10.0,
+        le=60.0,
+        description="Maximum service temperature, deg C",
+    )
+    min_temp_c: float = Field(
+        default=-5.0,
+        ge=-40.0,
+        le=30.0,
+        description="Minimum service temperature, deg C",
+    )
+
+    @computed_field
+    @property
+    def temp_range_c(self) -> float:
+        return self.max_temp_c - self.min_temp_c
+
+    @model_validator(mode="after")
+    def _temp_order(self) -> Self:
+        if self.min_temp_c >= self.max_temp_c:
+            raise ValueError("min_temp_c must be below max_temp_c")
+        return self
 
 
 # ===========================================================================
@@ -2186,6 +2252,32 @@ class BearingsJoints(BaseModel):
     notes_joints: str | None = DS(
         "General notes on expansion joint sequencing, sealing type",
         maxlen=600,
+    )
+    # --- Bearing / joint demand parameters (patch run-book) ---
+    bearing_type: BearingType | None = Field(
+        default=None,
+        description="Primary bearing system class for the deck",
+    )
+    restrained_longitudinal: bool = DB(
+        "True = longitudinal movement restrained at this bearing",
+    )
+    restrained_transverse: bool = DB(
+        "True = transverse movement restrained at this bearing",
+    )
+    bearing_seat_width_mm: int | None = DI(
+        "Bearing seat (clear width at soffit level), mm",
+        ge=0,
+        le=5000,
+    )
+    bearing_clearance_mm: int | None = DI(
+        "Bearing edge clearance to seat, mm",
+        ge=0,
+        le=2000,
+    )
+    design_movement_mm: int | None = DI(
+        "Design thermal / seismic movement demand, mm",
+        ge=0,
+        le=3000,
     )
 
     # --- Computed ------------------------------------------------------------
@@ -2479,6 +2571,54 @@ class DrawingControl(BaseModel):
 
 
 # ===========================================================================
+# Sheet 15: SEISMIC_DATA — seismic demand parameters (appended, not inserted)
+# ===========================================================================
+class SeismicData(BaseModel):
+    """Seismic demand parameters. Defaults represent a non-seismic zone."""
+
+    model_config = ConfigDict(validate_assignment=True, extra="forbid")
+
+    zone: SeismicZone = Field(
+        default=SeismicZone.ZONE_0,
+        description="Seismic zone per IS 1893 (ZONE_0 = non-seismic)",
+    )
+    pga_g: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=1.5,
+        description="Peak ground acceleration, g",
+    )
+    importance_factor: float = Field(
+        default=1.0,
+        ge=0.5,
+        le=2.0,
+        description="Seismic importance factor I",
+    )
+    site_class: SeismicSiteClass = Field(
+        default=SeismicSiteClass.C,
+        description="Site class for response spectrum",
+    )
+    response_modifier_r: float = Field(
+        default=3.0,
+        ge=1.0,
+        le=6.0,
+        description="Response reduction factor R",
+    )
+    seat_width_seismic_mm: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=2000.0,
+        description="Minimum bearing seat width under seismic, mm (0 = derive)",
+    )
+
+    @model_validator(mode="after")
+    def _zone_consistency(self) -> Self:
+        if self.zone in (SeismicZone.ZONE_IV, SeismicZone.ZONE_V) and self.pga_g == 0.0:
+            raise ValueError("zones IV and V require pga_g > 0")
+        return self
+
+
+# ===========================================================================
 # Sheet 13: CALCULATIONS — auto-derived summary outputs
 # ===========================================================================
 class Calculations(BaseModel):
@@ -2754,6 +2894,7 @@ class BridgeProject(BaseModel):
     hydraulic_data: HydraulicData = Field(default_factory=HydraulicData)
     materials: Materials = Field(default_factory=Materials)  # type: ignore[arg-type]
     bearings_joints: BearingsJoints = Field(default_factory=BearingsJoints)
+    seismic_data: SeismicData = Field(default_factory=SeismicData)
     components_lib: ComponentsLib = Field(default_factory=ComponentsLib)
     drawing_control: DrawingControl = Field(default_factory=DrawingControl)  # type: ignore[arg-type]
     calculations: Calculations = Field(default_factory=Calculations)
@@ -2790,7 +2931,7 @@ class BridgeProject(BaseModel):
             if key not in base:
                 raise KeyError(f"BridgeProject has no section {key!r}")
             current = base[key]
-            if isinstance(patch, dict) and current is not None and hasattr(current, "model_fields"):
+            if isinstance(patch, dict) and current is not None and hasattr(type(current), "model_fields"):
                 merged = {f: getattr(current, f) for f in type(current).model_fields}
                 merged.update(patch)
                 base[key] = type(current).model_validate(merged)

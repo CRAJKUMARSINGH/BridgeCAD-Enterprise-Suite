@@ -1,0 +1,13 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "CREAT.md 12-min cadence",
+      "trigger": "Stop",
+      "action": {
+        "type": "agent",
+        "prompt": "Standing order: append a new session-log entry to CREAT.md at E:\\Rajkumar\\BridgeCAD-Enterprise-Suite\\CREAT.md. \n\nFormat (markdown):\n```\n### Session — &lt;one-line summary&gt; · &lt;HH:MM timestamp&gt;\n\n&lt;bullet-list of what was done, files changed, tests run, outcomes&gt;\n\n**Pending:** &lt;any open items before next commit&gt;\n\n---\n```\n\nRules:\n- Keep only the last 24 hours; delete entries older than 24 h on each append.\n- Record every file changed, command run, and test result from this session.\n- If no work was done, write a single \"No changes this session.\" line.\n- Do NOT commit or push — only write the file.\n"
+      }
+    }
+  ]
+}

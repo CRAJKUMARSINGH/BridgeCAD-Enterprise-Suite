@@ -1,0 +1,43 @@
+# Minimum reinforcement (As,req) per element — IRC:112-2020 minimum-steel clauses.
+# Key: element name.  Values: as_req_mm2_per_m by section-depth band (mm) and
+# concrete grade band.  `source` records the clause each row is traced to.
+version: minima_table_v1
+source: "IRC:112-2020 minimum steel + IS:456 ductility"
+
+elements:
+  ABUTMENT_CAP:
+    note: "cap top/bottom mesh, per metre run"
+    rows:
+      - depth_max_mm: 600
+        as_req_mm2_per_m: 1000
+        source: "IRC:112 min steel 0.12% of section, per m run"
+      - depth_max_mm: 900
+        as_req_mm2_per_m: 1200
+        source: "IRC:112 min steel 0.12% of section, per m run"
+      - depth_max_mm: 9999
+        as_req_mm2_per_m: 1500
+        source: "IRC:112 min steel 0.12% of section, per m run"
+  DIRT_WALL:
+    note: "dirt wall vertical + horizontal distribution"
+    rows:
+      - depth_max_mm: 9999
+        as_req_mm2_per_m: 800
+        source: "IRC:112 min steel for walls 0.2% each face"
+  ABUTMENT_SHAFT:
+    note: "shaft main bars per metre run"
+    rows:
+      - depth_max_mm: 9999
+        as_req_mm2_per_m: 1400
+        source: "IRC:112 min steel 0.2% of section"
+  APPROACH_SLAB:
+    note: "approach slab top/bottom mesh"
+    rows:
+      - depth_max_mm: 9999
+        as_req_mm2_per_m: 900
+        source: "IRC:112 min steel for slabs"
+  DECK_SLAB:
+    note: "deck slab mesh per metre"
+    rows:
+      - depth_max_mm: 9999
+        as_req_mm2_per_m: 1000
+        source: "IRC:112 min steel for slabs"

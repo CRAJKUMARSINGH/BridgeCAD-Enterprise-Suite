@@ -14,8 +14,7 @@ from typing import Any
 from .dxf_engine import new_sheet, save
 from .primitives import (
     circle,
-    dim_linear_h,
-    dim_linear_v,
+    dim_along,
     hatch_poly,
     hatch_rect,
     line,
@@ -118,33 +117,36 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         lw=15,
     )
 
-    # Dimensions
-    dim_linear_h(
-        msp,
-        pier_cx - cap_w_mm / 2,
-        pier_by - th * 5,
-        pier_cx + cap_w_mm / 2,
-        pier_by - th * 5,
+    # Dimensions — axis-checked against the pier_elevation view spec
+    from .contract import view_spec
+
+    _pier_elev = view_spec("pier_elevation")
+    dim_along(
+        _pier_elev,
+        (pier_cx - cap_w_mm / 2, pier_by - th * 5),
+        (pier_cx + cap_w_mm / 2, pier_by - th * 5),
+        "TRANSVERSE",
+        msp=msp,
         dim_y=pier_by - th * 5,
         label=f"Cap={cap_w:.2f}m",
         text_height=th,
     )
-    dim_linear_v(
-        msp,
-        pier_cx + cap_w_mm / 2 + th * 3,
-        pier_by,
-        pier_cx + cap_w_mm / 2 + th * 3,
-        cap_bot_y,
+    dim_along(
+        _pier_elev,
+        (pier_cx + cap_w_mm / 2 + th * 3, pier_by),
+        (pier_cx + cap_w_mm / 2 + th * 3, cap_bot_y),
+        "VERTICAL",
+        msp=msp,
         dim_x=pier_cx + cap_w_mm / 2 + th * 9,
         label=f"H={pier_h:.2f}m",
         text_height=th,
     )
-    dim_linear_h(
-        msp,
-        pier_cx - pier_sw_mm / 2,
-        pier_by + pier_h_mm / 2,
-        pier_cx + pier_sw_mm / 2,
-        pier_by + pier_h_mm / 2,
+    dim_along(
+        _pier_elev,
+        (pier_cx - pier_sw_mm / 2, pier_by + pier_h_mm / 2),
+        (pier_cx + pier_sw_mm / 2, pier_by + pier_h_mm / 2),
+        "TRANSVERSE",
+        msp=msp,
         dim_y=pier_by + pier_h_mm / 2 - th * 4,
         label=f"Shaft={pier_sw:.2f}m",
         text_height=th * 0.85,
@@ -196,7 +198,9 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     # ══════════════════════════════════════════════════════════════════════
     psec_cx = 140.0
     psec_by = 120.0
-    rectangle(msp, psec_cx - pier_sl_mm / 2, psec_by, pier_sl_mm, pier_sw_mm, layer="SUB-PIER", lw=40)
+    rectangle(
+        msp, psec_cx - pier_sl_mm / 2, psec_by, pier_sl_mm, pier_sw_mm, layer="SUB-PIER", lw=40
+    )
     hatch_rect(
         msp,
         psec_cx - pier_sl_mm / 2,
@@ -207,22 +211,23 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         scale=sc * 0.015,
         layer="STRUC-HATCHING",
     )
-    dim_linear_h(
-        msp,
-        psec_cx - pier_sl_mm / 2,
-        psec_by - th * 4,
-        psec_cx + pier_sl_mm / 2,
-        psec_by - th * 4,
+    _pier_sec = view_spec("pier_section")
+    dim_along(
+        _pier_sec,
+        (psec_cx - pier_sl_mm / 2, psec_by - th * 4),
+        (psec_cx + pier_sl_mm / 2, psec_by - th * 4),
+        "TRANSVERSE",
+        msp=msp,
         dim_y=psec_by - th * 4,
         label=f"L={pier_sl:.2f}m",
         text_height=th * 0.85,
     )
-    dim_linear_v(
-        msp,
-        psec_cx + pier_sl_mm / 2 + th * 3,
-        psec_by,
-        psec_cx + pier_sl_mm / 2 + th * 3,
-        psec_by + pier_sw_mm,
+    dim_along(
+        _pier_sec,
+        (psec_cx + pier_sl_mm / 2 + th * 3, psec_by),
+        (psec_cx + pier_sl_mm / 2 + th * 3, psec_by + pier_sw_mm),
+        "LONGITUDINAL",
+        msp=msp,
         dim_x=psec_cx + pier_sl_mm / 2 + th * 9,
         label=f"THK={pier_sw:.2f}m",
         text_height=th * 0.85,
@@ -325,32 +330,33 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         polyline(msp, ww_pts, layer="SUB-ABUT", close=True, lw=35)
         hatch_poly(msp, ww_pts, pattern="ANSI31", scale=sc * 0.015, layer="STRUC-HATCHING")
 
-    dim_linear_h(
-        msp,
-        abt_cx - L_mm / 2,
-        abt_by - th * 5,
-        abt_cx + L_mm / 2,
-        abt_by - th * 5,
+    _abt_elev = view_spec("abutment_elevation")
+    dim_along(
+        _abt_elev,
+        (abt_cx - L_mm / 2, abt_by - th * 5),
+        (abt_cx + L_mm / 2, abt_by - th * 5),
+        "TRANSVERSE",
+        msp=msp,
         dim_y=abt_by - th * 5,
         label=f"L={abt_len:.2f}m",
         text_height=th,
     )
-    dim_linear_h(
-        msp,
-        abt_cx - L_mm / 2 - ww_l * sc,
-        abt_by - th * 10,
-        abt_cx - L_mm / 2,
-        abt_by - th * 10,
+    dim_along(
+        _abt_elev,
+        (abt_cx - L_mm / 2 - ww_l * sc, abt_by - th * 10),
+        (abt_cx - L_mm / 2, abt_by - th * 10),
+        "TRANSVERSE",
+        msp=msp,
         dim_y=abt_by - th * 10,
         label=f"WW={ww_l:.1f}m",
         text_height=th * 0.85,
     )
-    dim_linear_v(
-        msp,
-        abt_cx - L_mm / 2 - th * 4,
-        abt_by,
-        abt_cx - L_mm / 2 - th * 4,
-        cap_el_top,
+    dim_along(
+        _abt_elev,
+        (abt_cx - L_mm / 2 - th * 4, abt_by),
+        (abt_cx - L_mm / 2 - th * 4, cap_el_top),
+        "VERTICAL",
+        msp=msp,
         dim_x=abt_cx - L_mm / 2 - th * 9,
         label=f"H={abt_h:.2f}m",
         text_height=th,
@@ -517,22 +523,23 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         lw=40,
     )
 
-    dim_linear_h(
-        msp,
-        wall_l,
-        ls_by - th * 5,
-        wall_r,
-        ls_by - th * 5,
+    _abt_sec = view_spec("abutment_section")
+    dim_along(
+        _abt_sec,
+        (wall_l, ls_by - th * 5),
+        (wall_r, ls_by - th * 5),
+        "LONGITUDINAL",
+        msp=msp,
         dim_y=ls_by - th * 5,
         label=f"THK={abt_w:.2f}m",
         text_height=th * 0.85,
     )
-    dim_linear_v(
-        msp,
-        ret_x + th * 3,
-        cap_top_ly + dw_mm,
-        ret_x + th * 3,
-        cap_top_ly + dw_mm + app_t_mm,
+    dim_along(
+        _abt_sec,
+        (ret_x + th * 3, cap_top_ly + dw_mm),
+        (ret_x + th * 3, cap_top_ly + dw_mm + app_t_mm),
+        "VERTICAL",
+        msp=msp,
         dim_x=ret_x + th * 8,
         label=f"APP THK={app_t:.2f}m",
         text_height=th * 0.85,
@@ -560,6 +567,11 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     ]
     for i, note in enumerate(notes):
         text(msp, note, 25.0, 226.0 - i * 7.0, height=th * 0.9, layer="TEXT-SPEC")
+
+    # ── Sheet self-audit table (clause-tagged checks) ─────────────────────
+    from .checks_table import build_abutment_rows, draw_checks_table
+
+    draw_checks_table(msp, 240.0, 80.0, build_abutment_rows(project), text_height=th * 0.8)
 
 
 __all__ = ["generate"]

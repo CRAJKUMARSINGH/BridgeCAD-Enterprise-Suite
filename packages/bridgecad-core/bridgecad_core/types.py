@@ -3345,6 +3345,26 @@ class SeismicZone(LabeledEnum):
     ZONE_0 = "ZONE_0_NON_SEISMIC"
 
 
+class ScourZone(LabeledEnum):
+    """Design scour severity class at the foundation."""
+
+    NONE = "NONE"
+    MINOR = "MINOR"
+    MODERATE = "MODERATE"
+    SEVERE = "SEVERE"
+
+
+class SeismicSiteClass(LabeledEnum):
+    """IS 1893 / AASHTO site class for response-spectrum selection."""
+
+    A = "A"
+    B = "B"
+    C = "C"
+    D = "D"
+    E = "E"
+    F = "F"
+
+
 class OutputFormat(LabeledEnum):
     DXF = "DXF"
     DXF_R2000 = "DXF_R2000"
@@ -3865,6 +3885,8 @@ _M0_LEGACY: list[type[Enum]] = [
     DesignCode,
     LoadClass,
     SeismicZone,
+    ScourZone,
+    SeismicSiteClass,
     OutputFormat,
     AcadVersion,
     SheetSize,

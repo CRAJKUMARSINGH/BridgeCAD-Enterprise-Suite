@@ -1,0 +1,23 @@
+# IRC:112-2020 — Indian practice profile (default).
+name: irc_112
+jurisdiction: IN
+
+cap_depth_min_mm: 450
+cap_proj_min_mm: 100
+cap_proj_max_mm: 250
+dirt_wall_thk_min_mm: 250
+dirt_wall_freeboard_m: 0.10
+weep_hole_dia_mm: 75
+weep_hole_spacing_min_m: 1.0
+weep_hole_spacing_max_m: 3.0
+bar_spacing_max_mm: 200
+bearing_seat_min_mm: 600
+approach_slab_len_min_m: 3.0
+approach_slab_thk_min_mm: 200
+pile_spacing_min_dia: 2.5
+pile_count_per_line_min: 2
+pile_embedment_min_m: 3.0
+pile_cap_thk_min_mm: 600
+foundation_fos_min: 1.5
+seismic_seat_extra_mm: 200
+temp_alpha_per_c: 0.000012

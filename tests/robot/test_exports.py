@@ -24,14 +24,31 @@ def package(project, tmp_path_factory):
     from bridgecad_draw.booklet import generate_package
 
     out = tmp_path_factory.mktemp("gad")
-    return generate_package(project, out, prefix="GAD", scale_denom=100)
+    return generate_package(project, out, prefix="GAD")
 
 
 def test_package_emits_every_sheet(package):
-    assert len(package) == 8, f"expected 8 sheets, got {len(package)}"
+    assert len(package) == 9, f"expected 9 sheets, got {len(package)}"
     for sheet in package:
         assert sheet.exists()
         assert sheet.stat().st_size > 0
+
+
+def test_partial_package_raises_instead_of_shipping(project, tmp_path, monkeypatch):
+    """A single sheet failure must fail the package, never ship a partial set."""
+    import bridgecad_draw.sheet5_pier_abutment_details as sheet5
+    from bridgecad_draw.booklet import PackageGenerationError, generate_package
+
+    def _boom(*_args, **_kwargs):
+        raise RuntimeError("simulated sheet failure")
+
+    monkeypatch.setattr(sheet5, "generate", _boom)
+
+    with pytest.raises(PackageGenerationError) as excinfo:
+        generate_package(project, tmp_path / "partial", prefix="GAD")
+
+    assert 5 in excinfo.value.failures
+    assert "RuntimeError" in excinfo.value.failures[5]
 
 
 def test_every_sheet_is_a_valid_dxf(package):
@@ -55,8 +72,8 @@ def test_output_is_deterministic(project, tmp_path):
     from bridgecad_draw.booklet import generate_package
     from bridgecad_draw.determinism import canonical_dxf_bytes
 
-    first = generate_package(project, tmp_path / "a", prefix="GAD", scale_denom=100)
-    second = generate_package(project, tmp_path / "b", prefix="GAD", scale_denom=100)
+    first = generate_package(project, tmp_path / "a", prefix="GAD")
+    second = generate_package(project, tmp_path / "b", prefix="GAD")
 
     assert [p.name for p in first] == [p.name for p in second]
     for a, b in zip(first, second, strict=True):

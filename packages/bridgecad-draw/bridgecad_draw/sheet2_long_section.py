@@ -87,6 +87,17 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
 
     total_len = float(gi.total_length_m)
     span_lens = [float(s) for s in gi.span_lengths_m]
+    # Skew: effective span = clear span × cos(skew) per IRC reduction; the
+    # geometric span stays primary and the effective value is annotated.
+    _skew_deg = float(gi.skew_angle_deg or 0.0)
+    import math as _math
+
+    _skew_cos = _math.cos(_math.radians(_skew_deg)) if _skew_deg else 1.0
+
+    def _span_label(i: int, slen: float) -> str:
+        if _skew_deg < 0.5:
+            return f"{slen:.1f} m"
+        return f"{slen:.1f} m (eff {slen * _skew_cos:.1f})"
 
     hfl_rl = ls.hfl_rl
     lwl_rl = ls.lwl_rl
@@ -471,7 +482,7 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
         mid_x = hx(cumul - slen / 2.0)
         text(
             msp,
-            f"{slen:.1f} m",
+            _span_label(i, slen),
             mid_x,
             sof_y_mm + (top_y_mm - sof_y_mm) / 2,
             height=th * 1.1,
@@ -483,7 +494,7 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
     mid_x = hx(total_len - span_lens[-1] / 2.0)
     text(
         msp,
-        f"{span_lens[-1]:.1f} m",
+        _span_label(len(span_lens) - 1, span_lens[-1]),
         mid_x,
         sof_y_mm + (top_y_mm - sof_y_mm) / 2,
         height=th * 1.1,
@@ -499,7 +510,6 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
     dw_t2 = float(sub.dirt_wall_thickness_mm or 300) / 1000.0
     ped_h2 = float(sub.abutment_pedestal_height_m or 0.15)
     brg_t2 = 0.10
-    app_l2 = float(sub.approach_slab_length_m or 3.5)
     app_t2 = float(sub.approach_slab_thickness_mm or 200) / 1000.0
 
     def sy2(m: float) -> float:
@@ -515,8 +525,14 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
         # Shaft stops at the cap soffit
         rectangle(msp, ax, shaft_bot, abt_w_mm, cap_bot_y2 - shaft_bot, layer="SUB-ABUT", lw=40)
         hatch_rect(
-            msp, ax, shaft_bot, abt_w_mm, cap_bot_y2 - shaft_bot,
-            pattern="ANSI31", scale=sc_h * 0.04, layer="STRUC-HATCHING",
+            msp,
+            ax,
+            shaft_bot,
+            abt_w_mm,
+            cap_bot_y2 - shaft_bot,
+            pattern="ANSI31",
+            scale=sc_h * 0.04,
+            layer="STRUC-HATCHING",
         )
 
         # Cap, projecting past both faces
@@ -524,33 +540,62 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
         cap_x0_2 = ax - sy2(cap_proj2)
         rectangle(msp, cap_x0_2, cap_top_y2, cap_w2, sy2(cap_d2), layer="SUB-ABUT", lw=40)
         hatch_rect(
-            msp, cap_x0_2, cap_top_y2, cap_w2, sy2(cap_d2),
-            pattern="ANSI31", scale=sc_h * 0.04, layer="STRUC-HATCHING",
+            msp,
+            cap_x0_2,
+            cap_top_y2,
+            cap_w2,
+            sy2(cap_d2),
+            pattern="ANSI31",
+            scale=sc_h * 0.04,
+            layer="STRUC-HATCHING",
         )
 
         # Pedestal + bearing
         ped_w_mm2 = abt_w_mm * 0.55
         ped_x_2 = ax + (abt_w_mm - ped_w_mm2) / 2.0
-        rectangle(msp, ped_x_2, sof_y_mm - sy2(brg_t2 + ped_h2), ped_w_mm2, sy2(ped_h2),
-                  layer="SUB-ABUT", lw=30)
-        rectangle(msp, ped_x_2, sof_y_mm - sy2(brg_t2), ped_w_mm2, sy2(brg_t2),
-                  layer="SUB-BEARING", lw=30)
+        rectangle(
+            msp,
+            ped_x_2,
+            sof_y_mm - sy2(brg_t2 + ped_h2),
+            ped_w_mm2,
+            sy2(ped_h2),
+            layer="SUB-ABUT",
+            lw=30,
+        )
+        rectangle(
+            msp, ped_x_2, sof_y_mm - sy2(brg_t2), ped_w_mm2, sy2(brg_t2), layer="SUB-BEARING", lw=30
+        )
 
         # Dirt wall on the rear (approach) face, up to approach-slab soffit
         dirt_x_2 = cap_x0_2 if sgn < 0 else cap_x0_2 + cap_w2 - sy2(dw_t2)
         dw_top_y2 = vy(top_rl - wc_t) - sy2(app_t2)
         if dw_top_y2 > cap_top_y2:
-            rectangle(msp, dirt_x_2, cap_top_y2, sy2(dw_t2), dw_top_y2 - cap_top_y2,
-                      layer="SUB-DIRT-WALL", lw=40)
+            rectangle(
+                msp,
+                dirt_x_2,
+                cap_top_y2,
+                sy2(dw_t2),
+                dw_top_y2 - cap_top_y2,
+                layer="SUB-DIRT-WALL",
+                lw=40,
+            )
             hatch_rect(
-                msp, dirt_x_2, cap_top_y2, sy2(dw_t2), dw_top_y2 - cap_top_y2,
-                pattern="ANSI31", scale=sc_h * 0.04, layer="STRUC-HATCHING",
+                msp,
+                dirt_x_2,
+                cap_top_y2,
+                sy2(dw_t2),
+                dw_top_y2 - cap_top_y2,
+                pattern="ANSI31",
+                scale=sc_h * 0.04,
+                layer="STRUC-HATCHING",
             )
             text(
-                msp, "DIRT WALL",
+                msp,
+                "DIRT WALL",
                 dirt_x_2 + sy2(dw_t2) + th * 0.6 if sgn > 0 else dirt_x_2 - th * 4,
                 cap_top_y2 + (dw_top_y2 - cap_top_y2) * 0.5,
-                height=th * 0.75, layer="TEXT-SPEC",
+                height=th * 0.75,
+                layer="TEXT-SPEC",
             )
 
         text(

@@ -212,6 +212,7 @@ export function normalizeParams(input = {}) {
     futrl: NUM(input.futrl, 0),
     alcl: NUM(input.alcl, 0),
     alcw: NUM(input.alcw, 0),
+    abutmentType: String(input.abutmentType || "").toUpperCase().slice(0, 40),
     splay,
     deckRl,
     hflRl,
@@ -597,6 +598,7 @@ export function buildSheet5(raw) {
   const meta = baseMeta(p, 5);
   meta.walls = w.walls;
   meta.abtlSource = w.source;
+  meta.abutmentFamily = abutmentFamily(p.abutmentType);
   /** @type {any[]} */
   const out = [];
   frame(out, "PIER, ABUTMENT & WING WALL / FIRE WALL DETAILS", meta);
@@ -743,6 +745,44 @@ export function buildSheet5(raw) {
   dimV(out, xC + wC + mm(4), yAbtB, yAbtB + mm(p.retHgtM), `RETURN WALL ${p.retHgtM.toFixed(2)} m`);
   dimH(out, xC - run, xC, yAbtB - ret - 10, `FACE RUN ${w.faceRunM.toFixed(2)} m`);
   dimV(out, xC - run - 12, yAbtB - ret, yAbtB, `RETURN ${w.returnM.toFixed(2)} m`);
+
+  /* panel H — abutment TRANSVERSE elevation, shape-family aware. Mirrors
+     bridgecad_core.geometry.abutment_profiles.elevation_outline: GRAVITY →
+     battered trapezoid; CANTILEVER/COUNTERFORT → inverted-T; else block.
+     A1/A2 battered SIDE profiles stay in panel 5C (abt1()); this panel is the
+     end-on view the family functions own. */
+  panel(out, "5H", 305, 312, 270, 180);
+  const fam = abutmentFamily(p.abutmentType);
+  const xH = 320;
+  const yHb = 352;
+  const Lh = mm(w.abtl);
+  const Hh = mm(p.abtHgtM);
+  const capH = mm(p.capDepM);
+  const shaftH = abutmentOutlineNorm(fam).map((v, i) => (i % 2 === 0 ? xH + v * Lh : yHb + v * Hh));
+  out.push(P.poly("ABUT-PROF", shaftH, true));
+  hatchPoly(out, "HTCH", shaftH, 2.6);
+  out.push(P.rect("SUB-ABUT", xH, yHb + Hh, Lh, capH));
+  hatch(out, "HTCH", xH, yHb + Hh, Lh, capH, 2.6);
+  const yCapH = yHb + Hh + capH;
+  // Rear stack edge-on: dirt wall → approach slab → continuous wearing coat.
+  const stackLh = Lh * 0.96;
+  const stackXh = xH + (Lh - stackLh) / 2;
+  const dwEh = mm(0.3);
+  const appEh = mm(0.38);
+  out.push(P.rect("ABUT-PROF", stackXh, yCapH, stackLh, dwEh));
+  out.push(P.rect("SUPER-DECK", stackXh, yCapH + dwEh, stackLh, appEh));
+  out.push(P.rect("SUPER-WEARING", stackXh, yCapH + dwEh + appEh, stackLh, 1.2));
+  // Wing walls: top falls at 1:10 from each cap end.
+  for (const side of [-1, 1]) {
+    const xe = xH + (side < 0 ? 0 : Lh);
+    const wwRun = 24;
+    out.push(P.poly("ABUT-PROF", [xe, yCapH, xe + side * wwRun, yCapH - wwRun / 10, xe + side * wwRun, yHb, xe, yHb], true));
+  }
+  out.push(P.line("CL", xH - 4, yHb, xH + Lh + 4, yHb));
+  dimH(out, xH, xH + Lh, yHb - 6, `L=${w.abtl.toFixed(2)} m`);
+  dimV(out, xH - 6, yHb, yHb + Hh, `H=${p.abtHgtM.toFixed(2)} m`);
+  out.push(P.text("TEXT-HEADER", xH, yCapH + dwEh + appEh + 12, `ABUTMENT TRANSVERSE ELEVATION — ${fam.toUpperCase()} FAMILY`, 3));
+  out.push(P.text("TEXT", xH, yHb - 12, `SHAPE FAMILY FROM abutment_type "${p.abutmentType || "battered"}"`, 2.2));
 
   /* panel D — bearing schedule */
   panel(out, "5D", 610, 300, 140, 60);

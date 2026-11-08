@@ -2,7 +2,7 @@
 BridgeCAD Enterprise — CLI console (M7).
 
 Real commands:
-  bridgecad draw gad   <input.xlsx> -o <outdir>   → 7-sheet DXF package
+  bridgecad draw gad   <input.xlsx> -o <outdir>   → 8-sheet DXF package
   bridgecad validate   <input.xlsx>               → QA compliance check
   bridgecad bill gen   <input.xlsx> -o <outdir>   → Excel + CSV BOQ
   bridgecad export all <input.xlsx> -o <outdir>   → full ZIP bundle
@@ -210,19 +210,25 @@ def calc_sheet_cmd(
 def draw_gad_cmd(
     input_file: Path = typer.Argument(..., help="BridgeCAD Excel workbook"),
     output_dir: Path = typer.Option(Path("./output/drawings"), "-o", "--output"),
-    scale: int = typer.Option(100, "-s", "--scale", help="Plot scale denominator"),
+    scale: int | None = typer.Option(
+        None, "-s", "--scale", help="Plot scale denominator (omit for standard per-sheet scales)"
+    ),
     prefix: str = typer.Option("GAD", "-p", "--prefix"),
 ) -> None:
-    """Generate a 7-sheet GAD DXF package from an Excel workbook."""
+    """Generate a 9-sheet GAD DXF package from an Excel workbook."""
     if not input_file.exists():
         console.print(f"[red]Not found: {input_file}[/]")
         raise typer.Exit(1)
     with console.status("Loading workbook …"):
         project = _load_project(input_file)
-    with console.status(f"Generating 7-sheet DXF package → {output_dir} …"):
-        from bridgecad_draw.booklet import generate_package
+    with console.status(f"Generating 9-sheet DXF package → {output_dir} …"):
+        from bridgecad_draw.booklet import PackageGenerationError, generate_package
 
-        sheets = generate_package(project, output_dir, prefix=prefix, scale_denom=scale)
+        try:
+            sheets = generate_package(project, output_dir, prefix=prefix, scale_denom=scale)
+        except PackageGenerationError as exc:
+            console.print(f"[red]Drawing package incomplete:[/] {exc}")
+            raise typer.Exit(1) from exc
 
     from bridgecad_draw.booklet import _SHEET_MANIFEST
 
@@ -240,11 +246,44 @@ def draw_gad_cmd(
 def draw_booklet_cmd(
     input_file: Path = typer.Argument(..., help="BridgeCAD Excel workbook"),
     output_dir: Path = typer.Option(Path("./output/drawings"), "-o", "--output"),
-    scale: int = typer.Option(100, "-s", "--scale"),
+    scale: int | None = typer.Option(None, "-s", "--scale"),
     prefix: str = typer.Option("GAD", "-p", "--prefix"),
 ) -> None:
     """Generate the full GAD booklet (alias of `draw gad`, documented form)."""
     draw_gad_cmd(input_file, output_dir, scale, prefix)
+
+
+@draw_app.command("redline")
+def draw_redline_cmd(
+    input_file: Path = typer.Argument(..., help="BridgeCAD Excel workbook (title block)"),
+    old_dir: Path = typer.Option(..., "--old", help="Previous rendered DXF package folder"),
+    new_dir: Path = typer.Option(..., "--new", help="Current rendered DXF package folder"),
+    output: Path = typer.Option(Path("./output/redline"), "-o", "--output"),
+    tag: str = typer.Option("R1", "--tag", "-t", help="Revision tag for the redline"),
+) -> None:
+    """Diff two rendered DXF packages and emit an entity-level redline DXF."""
+    if not input_file.exists():
+        console.print(f"[red]Not found: {input_file}[/]")
+        raise typer.Exit(1)
+    import ezdxf
+
+    from bridgecad_draw.diff import diff_sheets
+    from bridgecad_draw.fingerprint import sheet_signatures
+    from bridgecad_draw.sheet_revision import render_redline
+
+    project = _load_project(input_file)
+    output.mkdir(parents=True, exist_ok=True)
+    changes = []
+    for i, nf in enumerate(sorted(new_dir.glob("*.dxf")), start=1):
+        new_sigs = sheet_signatures(ezdxf.readfile(nf).modelspace())
+        of = old_dir / nf.name
+        old_sigs = sheet_signatures(ezdxf.readfile(of).modelspace()) if of.exists() else {}
+        changes.extend(diff_sheets(old_sigs, new_sigs, sheet_no=i))
+    if not changes:
+        console.print("[green]No entity changes between the two packages.[/]")
+        raise typer.Exit(0)
+    out = render_redline(project, output / f"redline_{tag}.dxf", changes, revision_tag=tag)
+    console.print(f"[green]Redline DXF:[/] {out}  ({len(changes)} change(s))")
 
 
 # ---------------------------------------------------------------------------
@@ -306,9 +345,11 @@ def export_all_cmd(
     input_file: Path = typer.Argument(..., help="BridgeCAD Excel workbook"),
     output_dir: Path = typer.Option(Path("./output"), "-o", "--output"),
     state: str | None = typer.Option(None, "--state", "-S"),
-    scale: int = typer.Option(100, "--scale", "-s"),
+    scale: int | None = typer.Option(
+        None, "--scale", "-s", help="Plot scale denominator (omit for standard per-sheet scales)"
+    ),
 ) -> None:
-    """Full export: 7-sheet DXF + BOQ (xlsx+csv) + QA HTML → ZIP bundle."""
+    """Full export: 8-sheet DXF + BOQ (xlsx+csv) + QA HTML → ZIP bundle."""
     if not input_file.exists():
         console.print(f"[red]Not found: {input_file}[/]")
         raise typer.Exit(1)
@@ -420,6 +461,65 @@ def template_fill_cmd(
 
         generate_template(out, project=project)
     console.print(f"[green]Styled template:[/] {out}")
+
+
+@app.command("issue")
+def issue_cmd(
+    input_file: Path = typer.Argument(..., help="Path to BridgeCAD Excel workbook"),
+    tag: str = typer.Option(..., "--tag", "-t", help="Revision tag, e.g. R1"),
+    author: str = typer.Option("", "--author", "-a", help="Issuing engineer"),
+) -> None:
+    """Freeze the current project state under a revision tag (immutable)."""
+    if not input_file.exists():
+        console.print(f"[red]Not found: {input_file}[/]")
+        raise typer.Exit(1)
+    project = _load_project(input_file)
+    from bridgecad_core import revisions
+
+    try:
+        rec = revisions.freeze(project, tag, author=author)
+    except revisions.RevisionError as exc:
+        console.print(f"[red]{exc}[/]")
+        raise typer.Exit(1) from exc
+    console.print(f"[green]Issued {rec.tag}[/] at {rec.issued_at} by {rec.author or '—'}")
+
+
+@app.command("diff")
+def diff_cmd(
+    input_file: Path = typer.Argument(..., help="Path to BridgeCAD Excel workbook"),
+    from_tag: str = typer.Option("R1", "--from", help="Baseline revision tag"),
+    to_tag: str = typer.Option(
+        None, "--to", help="Compare against issued tag (default: live state)"
+    ),
+    output: Path = typer.Option(Path("./output/diff"), "-o", "--output"),
+) -> None:
+    """Diff the live project against an issued revision; write CSV + redline DXF."""
+    if not input_file.exists():
+        console.print(f"[red]Not found: {input_file}[/]")
+        raise typer.Exit(1)
+    import csv as _csv
+
+    project = _load_project(input_file)
+    from bridgecad_core import revisions
+
+    last = revisions.last_issued(project)
+    if last is None:
+        console.print("[yellow]No issued revision found — nothing to diff against.[/]")
+        raise typer.Exit(0)
+    changes = revisions.compare_to_issued(project)
+    output.mkdir(parents=True, exist_ok=True)
+    csv_path = output / f"diff_{from_tag}_to_live.csv"
+    with csv_path.open("w", newline="", encoding="utf-8") as fh:
+        w = _csv.writer(fh)
+        w.writerow(["sheet", "entity_key", "change"])
+        for c in changes:
+            w.writerow([c.split(":", 1)[0], c.split(":", 1)[-1], "CHANGED"])
+    console.print(f"[green]Diff CSV:[/] {csv_path}  ({len(changes)} change(s) vs {last.tag})")
+    if to_tag:
+        console.print(
+            "[dim]Entity-level redline: run `bridgecad draw redline "
+            "--old <prev-dxf> --new <curr-dxf>` to render the redline sheet.[/]"
+        )
 
 
 def _entry() -> None:

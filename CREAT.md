@@ -568,3 +568,84 @@ No changes this session.
 | 2026-11-08 12:31 | User prompt received |
 | 2026-11-08 12:49 | User prompt received |
 | 2026-11-08 13:05 | User prompt received |
+
+### Session — D-13 artefacts + GUIDE.md committed and pushed · 01:45
+
+- User re-presented 5-artefact D-13 instruction and requested "update user manual".
+- Confirmed all 5 artefacts already on disk (verify_d13.py → ALL CHECKS PASSED).
+- Updated `GUIDE.md`:
+  - Capability matrix: added abutment cap/dirt wall and shape families rows
+  - §5.2: added Venice-patch abutment geometry note + `abutment_type` instruction
+  - §9: added 3 new pytest commands (test_abutment_profile, test_abutment_shape_families, test_abutment_stack)
+  - §11: corrected limitations (Sheets 3/6/7 scaffolds; sheets 2/4/5/8 complete; 35 QA rules implemented)
+  - §16 NEW: Venice-patch reference (RL ladder, sheets updated, QA rules)
+  - §17 NEW: D-13 abutment shape families (GRAVITY/CANTILEVER/BATTERED, Python/JS parity)
+  - Changelog: 2026-11-07 entry added
+- Staged: `abutment_profiles.py`, `geometry/__init__.py`, `sheet5_pier_abutment_details.py`, `detailGeometry.js` (already in prior commits), `GUIDE.md`, `CREAT.md`
+- Committed: `15e15c3` — "feat(draw,docs): D-13 abutment shape families + user manual update"
+- Pushed 3 local commits (`65d121b`, `a48eb96`, `15e15c3`) to origin/main: `4bcc9c9..15e15c3`
+- `origin/main` is now at `15e15c3` ✅
+
+**Commands run:**
+```
+git add <6 files>
+git commit -m "feat(draw,docs): D-13 abutment shape families + user manual update"
+git push origin main  →  4bcc9c9..15e15c3  main -> main
+```
+
+**Files changed:**
+- `GUIDE.md` (+116 lines, §5.2, §9, §11, §16, §17, changelog)
+- `packages/bridgecad-core/bridgecad_core/geometry/abutment_profiles.py`
+- `packages/bridgecad-draw/bridgecad_draw/sheet5_pier_abutment_details.py`
+- `CREAT.md`
+
+**Pending:** No open items. All Venice-patch + D-13 work committed and live on main.
+
+---
+| 2026-11-08 17:07 | Agent turn completed |
+
+### Session — Standing-order hook entry (no user task) · 01:52
+
+No changes this session.
+
+- Hook fired on incoming message. No user task present — hook-only trigger.
+- Previous session (01:45): D-13 artefacts + GUIDE.md committed (`15e15c3`) and pushed; origin/main now at `15e15c3`.
+- No source files modified, no commands run, no tests executed this turn.
+- All CREAT.md entries within 24 h window; nothing pruned.
+
+**Pending:** No open items. All Venice-patch + D-13 work committed and live on main.
+
+---
+| 2026-11-08 17:07 | User prompt received |
+
+### Session — USER-MANUAL.md verified as present and complete · 02:00
+
+- User pasted the "Create docs/USER-MANUAL.md" instruction block, noting three dangling references.
+- Read `docs/USER-MANUAL.md` — file exists (7584 bytes, 11 sections), created by commit `65d121b`, already a superset of the instruction content.
+- Verified all three broken references are now resolved:
+  - `DOCS_INDEX.md` L29 → `docs/USER-MANUAL.md` ✅
+  - `docs/Bridge_GAD_User_Manual.md` legacy banner → `USER-MANUAL.md` ✅
+  - `mkdocs.yml` L137 → `USER-MANUAL.md` ✅
+- Ran `python scripts/verify_docs.py --only paths` → **1/1 PASS** (code-block paths check, 6.0 s).
+- No files changed this turn — file was already correct and complete.
+
+**Pending:** No open items.
+
+---
+| 2026-11-08 17:11 | Agent turn completed |
+
+### Session — Standing-order hook entry (no user task) · 02:08
+
+No changes this session.
+
+- Hook fired on incoming message. No user task present — hook-only trigger.
+- Previous session (02:00): verified docs/USER-MANUAL.md already exists (7584 bytes, 11 sections); all 3 dangling references resolved; verify_docs paths check 1/1 PASS.
+- No source files modified, no commands run, no tests executed this turn.
+- All CREAT.md entries within 24 h window; nothing pruned.
+
+**Pending:** No open items. All Venice-patch + D-13 + user manual work committed and live on main at 15e15c3.
+
+---
+| 2026-11-08 17:21 | User prompt received |
+| 2026-11-08 17:29 | User prompt received |
+| 2026-11-08 22:53 | User prompt received |

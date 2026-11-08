@@ -543,15 +543,53 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         lw=15,
     )
 
-    # Dirt wall — cap top up to the approach slab soffit, on the rear ledge
-    dw_x = wall_r - dw_t * sc
-    rectangle(msp, dw_x, cap_top_ly, dw_t * sc, dw_mm, layer="ABUT-PROF", lw=40)
+    # Dirt wall — sits ON the cap rear ledge: its earthside face is flush with
+    # the cap rear edge (wall_r + cap_pr), so the wall occupies the rear
+    # projection, not the shaft face.  Approach slab starts behind the wall.
+    dw_x = wall_r + cap_pr * sc - dw_t * sc
+    app_x = dw_x + dw_t * sc  # = wall_r + cap_pr*sc — cap rear edge
+    # Granular sub-base (GSB) under the dirt wall — prewallcivil construction
+    # sequence: the wall is built on a 100 mm compacted granular layer on the
+    # cap rear ledge, then the earth wall is placed in compacted layers.
+    gsb_t = 0.10  # m
+    gsb_mm = gsb_t * sc
+    if gsb_mm < dw_mm:
+        rectangle(msp, dw_x, cap_top_ly, dw_t * sc, gsb_mm, layer="SUB-BACKFILL", lw=20)
+        hatch_rect(
+            msp,
+            dw_x,
+            cap_top_ly,
+            dw_t * sc,
+            gsb_mm,
+            pattern="ANSI31",
+            scale=sc * 0.02,
+            layer="STRUC-HATCHING",
+        )
+        text(
+            msp,
+            "GSB 100",
+            dw_x + dw_t * sc / 2.0,
+            cap_top_ly + gsb_mm / 2.0,
+            height=th * 0.6,
+            layer="TEXT-SPEC",
+            halign="CENTER",
+        )
+    dw_wall_bot = cap_top_ly + min(gsb_mm, dw_mm * 0.5)
+    rectangle(
+        msp,
+        dw_x,
+        dw_wall_bot,
+        dw_t * sc,
+        cap_top_ly + dw_mm - dw_wall_bot,
+        layer="ABUT-PROF",
+        lw=40,
+    )
     hatch_rect(
         msp,
         dw_x,
-        cap_top_ly,
+        dw_wall_bot,
         dw_t * sc,
-        dw_mm,
+        cap_top_ly + dw_mm - dw_wall_bot,
         pattern="ANSI31",
         scale=sc * 0.01,
         layer="STRUC-HATCHING",
@@ -574,9 +612,9 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
             lw=18,
         )
 
-    # Weep holes through the dirt wall
+    # Weep holes through the dirt wall — filter media packed on the earthside
     for i in range(2):
-        wy = cap_top_ly + dw_mm * (i + 1) / 3.0
+        wy = dw_wall_bot + (cap_top_ly + dw_mm - dw_wall_bot) * (i + 1) / 3.0
         circle(msp, dw_x + dw_t * sc / 2.0, wy, weephole_d * sc / 2.0, layer="ABUT-PROF", color=4)
     text(
         msp,
@@ -636,6 +674,17 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         layer="SUPER-DECK",
         lw=40,
     )
+    # Wearing coat over the deck stub — same level as the approach-slab coat,
+    # continuous at slab_top (the coat is never broken by the abutment joint)
+    rectangle(
+        msp,
+        cap_sec_l - deck_len,
+        cap_top_ly + deck_top_off,
+        deck_len,
+        wc_t * sc,
+        layer="SUPER-WEARING",
+        lw=20,
+    )
 
     _abt_sec = view_spec("abutment_section")
     dim_along(
@@ -675,9 +724,11 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         f"3. Backfill: {getattr(sub,'backfill_type','SELECT MOORUM')}.",
         "4. Approach slab reinforced with Fe500D bars @ 150 c/c both ways.",
         "5. All exposed surfaces to have 2-coat epoxy waterproofing.",
-        f"6. Dirt wall {int(dw_t * 1000)} mm thk; {int(sub.weep_hole_diameter_mm or 100)} mm dia PVC weep holes @ {float(sub.weep_hole_spacing_m or 1.5):.1f} m c/c with 300 mm graded granular filter behind stem.",
+        f"6. Dirt wall {int(dw_t * 1000)} mm thk on 100 mm GSB; {int(sub.weep_hole_diameter_mm or 100)} mm dia PVC weep holes @ {float(sub.weep_hole_spacing_m or 1.5):.1f} m c/c with graded granular filter + drainage on earthside (prewallcivil ref.).",
         f"7. Abutment cap {int(cap_ab_d * 1000)} mm deep, projecting {int(cap_pf * 1000)} mm front / {int(cap_pr * 1000)} mm rear beyond shaft face.",
         "8. Construction joint at dirt wall / cap interface with 150 mm PVC water bar; dirt wall cast monolithically with cap otherwise.",
+        "9. Cast sequence: pile cap -> abutment -> abutment cap -> dirt wall (compacted earth layers, geogrid, stone pitching face).",
+        "10. Dirt wall retains approach embankment; finish with stone pitching/vegetation and final grading to embankment.",
     ]
     for i, note in enumerate(notes):
         text(msp, note, 25.0, 226.0 - i * 7.0, height=th * 0.9, layer="TEXT-SPEC")

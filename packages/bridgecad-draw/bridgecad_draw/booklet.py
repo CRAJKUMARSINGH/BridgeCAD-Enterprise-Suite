@@ -1,5 +1,5 @@
 """
-bridgecad_draw.booklet — 8-sheet DXF package generator.
+bridgecad_draw.booklet — 9-sheet DXF package generator.
 
 Sheet manifest:
   Sheet 1  PLAN VIEW                    sheet1_plan
@@ -10,6 +10,7 @@ Sheet manifest:
   Sheet 6  BEARINGS & JOINTS SCHEDULE   sheet6_bearings_joints
   Sheet 7  BILL OF QUANTITIES           sheet7_bill_of_quantities
   Sheet 8  SIDE & END ELEVATIONS        sheet8_side_elevations
+  Sheet 9  REINFORCEMENT SCHEDULE       sheet9_reinforcement
 """
 
 from __future__ import annotations
@@ -54,6 +55,7 @@ _SHEET_MANIFEST = [
     (6, "sheet6_bearings_joints", "Sheet6_BearingsJoints", 20),
     (7, "sheet7_bill_of_quantities", "Sheet7_BOQ", 1),
     (8, "sheet8_side_elevations", "Sheet8_SideElevations", 50),
+    (9, "sheet9_reinforcement", "Sheet9_Reinforcement", 1),
 ]
 
 
@@ -63,7 +65,7 @@ def generate_package(
     prefix: str = "GAD",
     scale_denom: int | None = None,
 ) -> list[Path]:
-    """Generate all 8 GAD sheets for *project*.
+    """Generate all 9 GAD sheets for *project*.
 
     Parameters
     ----------

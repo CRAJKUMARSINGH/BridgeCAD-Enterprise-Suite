@@ -57,7 +57,9 @@ _VIEW_GUTTER_W = 18.0  # mm gap between left/right views
 _VIEW1_X0 = _MARGIN + 6.0
 _VIEW2_X0 = _MARGIN + (_SHEET_W - 2 * _MARGIN) * 0.50 + _VIEW_GUTTER_W / 2.0
 _VIEW_W = (_SHEET_W - 2 * _MARGIN - _VIEW_GUTTER_W) * 0.50
-_VIEW_Y0 = _MARGIN + _TB_H + 12.0
+_CHECKS_ROWS_H = 84.0  # room for the self-audit table strip above the title block
+_VIEW_Y0 = _MARGIN + _TB_H + _CHECKS_ROWS_H + 8.0
+_CHECKS_Y = _MARGIN + _TB_H + 6.0
 _VIEW_H = _SHEET_H - _VIEW_Y0 - _MARGIN - 22.0
 
 
@@ -136,7 +138,11 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     tod_rl = float(pm.road_level_rl_m or ls.top_of_deck_rl)  # Top-of-deck RL
     sof_rl = float(hd.actual_soffit_level_m or ls.soffit_rl)  # Soffit RL
     road_rl_approach = tod_rl - 0.01 * float(gi.gradient_pct or 0) * app_l_m
-    abt_base_rl = sof_rl - ped_h_m - abt_h_m  # bottom of abutment shaft
+    # Shaft bottom sits one bearing + pedestal + cap depth below soffit —
+    # without the cap term the shaft is drawn a full cap depth too short and
+    # the cap/pedestal stack floats above it (Venice C1).
+    _cap_d_m_early = float(sub.abutment_cap_depth_mm or 600) / 1000.0
+    abt_base_rl = sof_rl - 0.10 - ped_h_m - _cap_d_m_early - abt_h_m  # bottom of abutment shaft
     # If pile foundation, abutment sits on pile cap top (= pile_cut + pile_cap_t)
     if "PILE" in found_type:
         cap_top_rl = pile_cut_rl + pile_cap_t_m
@@ -281,6 +287,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
             par_h_m,
             pier_cap_w_m,
             pier_cap_d_m,
+            float(sub.pier_cap_length_m or pier_shaft_l_m),
             pier_shaft_w_m,
             pier_shaft_l_m,
             pier_ped_h_m,
@@ -360,6 +367,13 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         segments=4,
         seg_len_m=max(1.0, round(overall_w / 5)),
         text_height=th * 0.85,
+    )
+
+    # ── Sheet self-audit table (clause-tagged checks) ─────────────────────
+    from .checks_table import build_abutment_rows, draw_checks_table
+
+    draw_checks_table(
+        msp, _VIEW1_X0, _CHECKS_Y, build_abutment_rows(project), text_height=th * 0.85
     )
 
     # ── NTS disclaimer (FR-8: demoted, grey 8, 10% smaller) ──────────────
@@ -602,26 +616,45 @@ def _draw_abutment_endface(
     cx1_s8 = vhx(-cap_half_m)
     cx2_s8 = vhx(cap_half_m)
     rectangle(
-        msp, cx1_s8, vvy(cap_bot_rl_s8),
-        cx2_s8 - cx1_s8, vvy(cap_top_rl_s8) - vvy(cap_bot_rl_s8),
-        layer="SUB-ABUT", lw=50,
+        msp,
+        cx1_s8,
+        vvy(cap_bot_rl_s8),
+        cx2_s8 - cx1_s8,
+        vvy(cap_top_rl_s8) - vvy(cap_bot_rl_s8),
+        layer="SUB-ABUT",
+        lw=50,
     )
     hatch_rect(
-        msp, cx1_s8, vvy(cap_bot_rl_s8),
-        cx2_s8 - cx1_s8, vvy(cap_top_rl_s8) - vvy(cap_bot_rl_s8),
-        pattern="ANSI31", scale=sc * 0.015, layer="STRUC-HATCHING",
+        msp,
+        cx1_s8,
+        vvy(cap_bot_rl_s8),
+        cx2_s8 - cx1_s8,
+        vvy(cap_top_rl_s8) - vvy(cap_bot_rl_s8),
+        pattern="ANSI31",
+        scale=sc * 0.015,
+        layer="STRUC-HATCHING",
     )
 
     # ── Bearing pedestals + bearings on the cap ───────────────────────────
     for off_sign in (-1, +1):
         px_s8 = vhx(off_sign * (abt_len_m * 0.40)) - bearing_w_m * sc * 0.9 / 2.0
         rectangle(
-            msp, px_s8, vvy(ped_bot_rl), bearing_w_m * sc * 0.9,
-            vvy(ped_top_rl) - vvy(ped_bot_rl), layer="SUB-ABUT", lw=30,
+            msp,
+            px_s8,
+            vvy(ped_bot_rl),
+            bearing_w_m * sc * 0.9,
+            vvy(ped_top_rl) - vvy(ped_bot_rl),
+            layer="SUB-ABUT",
+            lw=30,
         )
         rectangle(
-            msp, px_s8, vvy(ped_top_rl), bearing_w_m * sc,
-            vvy(sof_rl) - vvy(ped_top_rl), layer="SUB-BEARING", lw=30,
+            msp,
+            px_s8,
+            vvy(ped_top_rl),
+            bearing_w_m * sc,
+            vvy(sof_rl) - vvy(ped_top_rl),
+            layer="SUB-BEARING",
+            lw=30,
         )
 
     # ── Dirt wall — beyond the cap (phantom / informational) ─────────────
@@ -638,7 +671,7 @@ def _draw_abutment_endface(
         )
         text(
             msp,
-            f"DIRT WALL {int(_dirt_t_m * 1000)} THK (BEYOND)",
+            f"DIRT WALL {int(_dirt_t_m * 1000)} THK + GSB/FILTER (BEYOND)",
             vhx(0.0),
             vvy(cap_top_rl_s8) + th * 1.5,
             height=th * 0.75,
@@ -703,9 +736,9 @@ def _draw_abutment_endface(
             halign="LEFT" if sign == +1 else "RIGHT",
         )
 
-    # ── Approach slab (partial hatch — road side) ──────────────────────────
+    # ── Approach slab — FULL length end-to-end, wearing coat over it ──────
     if app_l_m > 0 and app_t_m > 0:
-        as_x_left = vhx(-half_ow - app_l_m * 0.55)
+        as_x_left = vhx(-half_ow - app_l_m)
         as_x_right = vhx(-half_ow)
         as_y_top = vvy(road_rl_approach)
         as_y_bot = vvy(road_rl_approach - app_t_m)
@@ -753,7 +786,14 @@ def _draw_abutment_endface(
             layer="SUPER-WEARING",
             color=8,
         )
-        rectangle(msp, as_x_left, wc_app_bot_y, as_x_right - as_x_left, wc_app_top_y - wc_app_bot_y, layer="SUPER-WEARING")
+        rectangle(
+            msp,
+            as_x_left,
+            wc_app_bot_y,
+            as_x_right - as_x_left,
+            wc_app_top_y - wc_app_bot_y,
+            layer="SUPER-WEARING",
+        )
 
     # ── Pile cap + piles (if PILE foundation) ─────────────────────────────
     if "PILE" in found_type:
@@ -942,6 +982,7 @@ def _draw_pier_transverse(
     par_h_m,
     pier_cap_w_m,
     pier_cap_d_m,
+    pier_cap_length_m,
     pier_shaft_w_m,
     pier_shaft_l_m,
     pier_ped_h_m,
@@ -1087,8 +1128,9 @@ def _draw_pier_transverse(
     # ── Pier cap ──────────────────────────────────────────────────────────
     cap_y_top = ped_y_bot
     cap_y_bot = vvy(sof_rl - pier_ped_h_m - pier_cap_d_m)
-    pier_cap_w_m / 2.0
-    cap_half_l = pier_shaft_l_m / 2.0
+    # Cap is sized by its own length field, not the shaft length — a cap
+    # shorter than the shaft is legal and the old code could never show it.
+    cap_half_l = pier_cap_length_m / 2.0
     rectangle(
         msp,
         vhx(-cap_half_l),
@@ -1150,7 +1192,7 @@ def _draw_pier_transverse(
     # ── Pile cap + piles ──────────────────────────────────────────────────
     if "PILE" in found_type:
         pcap_top = shaft_y_bot
-        pcap_bot = vvy(pile_cut_rl)
+        pcap_bot = pcap_top + pile_cap_t_m * sc  # thickness governs, not cutoff RL
         pcap_half_l = pier_shaft_l_m / 2.0 + 0.15
         rectangle(
             msp,

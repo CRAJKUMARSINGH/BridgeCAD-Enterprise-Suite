@@ -17,7 +17,7 @@ Every doc in this repo, what it is, and whether to trust it.
 | File | What |
 |---|---|
 | [docs/getting-started.md](docs/getting-started.md) | Start here: prerequisites, four install paths, first bridge end to end, verification gates, common pitfalls |
-| [docs/excel-contract.md](docs/excel-contract.md) | The 14-sheet workbook schema |
+| [docs/excel-contract.md](docs/excel-contract.md) | The 15-sheet workbook schema |
 | [docs/interop.md](docs/interop.md) | Per-format round-trip loss budget, import fuzzing, published JSON schema |
 | [docs/standards.md](docs/standards.md) | IRC/MORTH coverage, rule authoring |
 | [docs/drafting-standard.md](docs/drafting-standard.md) | Drawing-sheet drafting standard (text heights, layer weights) |
@@ -26,13 +26,16 @@ Every doc in this repo, what it is, and whether to trust it.
 | [docs/troubleshooting.md](docs/troubleshooting.md) | When it breaks |
 | [docs/api-reference.md](docs/api-reference.md) | Public API surface, package by package |
 | [docs/BRIDGE_GAD_STANDARDS_ALIGNMENT.md](docs/BRIDGE_GAD_STANDARDS_ALIGNMENT.md) | IRC/MORTH clause → code alignment matrix |
-| [docs/Bridge_GAD_User_Manual.md](docs/Bridge_GAD_User_Manual.md) | Generated user manual |
+| [docs/USER-MANUAL.md](docs/USER-MANUAL.md) | **Current user manual** — task-oriented: install, 15 tabs, CLI groups, workbook fields, errors |
+| [docs/Bridge_GAD_User_Manual.md](docs/Bridge_GAD_User_Manual.md) | ⚠️ Legacy manual for the old `.exe` product — superseded by USER-MANUAL.md |
 | [docs/manual_template.md](docs/manual_template.md) | Source template for the generated manual |
 | [docs/how-to-use-video.md](docs/how-to-use-video.md) | "How to use" walkthrough — video-form storyboard + player |
 | [docs/TRIAGE_AND_DEBUG.md](docs/TRIAGE_AND_DEBUG.md) | Post-test debug protocol — minimize, bisect, classify, record |
 | [docs/PATCH_GUIDE.md](docs/PATCH_GUIDE.md) | Patch patterns by defect class, cross-referenced from the triage log |
 | [docs/TEST_PLAN.md](docs/TEST_PLAN.md) | Robotic oracle lane — engine, API, export and console oracles |
 | [docs/CONTINUAL_IMPROVEMENT_SHEET_DETAILS.md](docs/CONTINUAL_IMPROVEMENT_SHEET_DETAILS.md) | Continual improvement programme for detail sheets 04 / 05 — invariants, budgets, parity, debt ledger |
+| [docs/abutment-geometry.md](docs/abutment-geometry.md) | Resolved abutment datum stack — cap, dirt wall, approach slab, wearing coat |
+| [docs/lisp-baseline.md](docs/lisp-baseline.md) | LISP baseline audit — where the suite disagrees with the original AutoLISP |
 
 ## Governance
 

@@ -1,4 +1,12 @@
-# Bridge_GAD User Manual
+# Bridge_GAD User Manual (LEGACY)
+
+> ⚠️ **SUPERSEDED — DO NOT USE.** This page describes a **different, older product**
+> (a standalone `Bridge_GAD_Setup.exe` with a menubar and no Python). The current
+> software is the **BridgeCAD Enterprise Suite** — a Python/Streamlit/CLI/FastAPI
+> suite driven by an Excel workbook.
+>
+> **Read the current manual instead:** [USER-MANUAL.md](USER-MANUAL.md).
+> This file is retained for historical reference only.
 
 **Software:** Bridge_GAD  
 **Version:** 2.0.0  

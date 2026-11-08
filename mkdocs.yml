@@ -1,6 +1,6 @@
 site_name: BridgeCAD Enterprise Suite
 site_description: >-
-  Parametric bridge GAD generation — Excel workbook in, 7-sheet
+  Parametric bridge GAD generation — Excel workbook in, 8-sheet
   standards-compliant DXF package, priced BOQ and QA report out.
 site_url: https://crajkumarsingh.github.io/BridgeCAD-Enterprise-Suite/
 repo_url: https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite
@@ -118,6 +118,8 @@ nav:
       - Plugin authoring: plugin-authoring.md
       - API reference: api-reference.md
       - Continual improvement (detail sheets): CONTINUAL_IMPROVEMENT_SHEET_DETAILS.md
+      - Abutment geometry: abutment-geometry.md
+      - LISP baseline audit: lisp-baseline.md
   - Operations:
       - Deployment: deployment.md
       - Troubleshooting: troubleshooting.md
@@ -132,7 +134,8 @@ nav:
       - Code of conduct: code-of-conduct.md
       - Docs index: docs-index.md
       - Standards alignment: BRIDGE_GAD_STANDARDS_ALIGNMENT.md
-      - User manual: Bridge_GAD_User_Manual.md
+      - User manual (current): USER-MANUAL.md
+      - User manual (legacy .exe product): Bridge_GAD_User_Manual.md
       - Roadmap status: ROADMAP_STATUS.md
 
 extra:

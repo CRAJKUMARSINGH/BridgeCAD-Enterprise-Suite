@@ -41,7 +41,7 @@ standards-compliant bridge **General Arrangement Drawing (GAD)** package, a
 priced Bill of Quantities, and a QA compliance report — then bundles the lot.
 
 **Input:** one 14-sheet `.xlsx` workbook.
-**Output:** 7-sheet DXF drawing set, priced BOQ, QA report (0–100 grade),
+**Output:** 8-sheet DXF drawing set, priced BOQ, QA report (0–100 grade),
 `manifest.json`, ZIP bundle.
 
 It is built for Indian highway and rail bridge practice: IRC 5, 6, 21, 83,
@@ -53,17 +53,20 @@ model, not bolted on.
 | Capability | Status | Where |
 |---|---|---|
 | Excel → `BridgeProject` model | ✅ implemented | `packages/bridgecad-io` |
-| 7-sheet DXF drawing engine | ✅ implemented | `packages/bridgecad-draw` |
+| 8-sheet DXF drawing engine | ✅ implemented | `packages/bridgecad-draw` |
 | 53 IRC SP:55 layer definitions | ✅ implemented | `bridgecad_draw/layers.py` |
+| Abutment cap + dirt wall + WC geometry | ✅ implemented | `sheet2/4/5/8` + `abutment_stack.py` |
+| Abutment shape families (GRAVITY/CANTILEVER/BATTERED) | ✅ implemented | `geometry/abutment_profiles.py` |
 | Priced BOQ (8 sections, MORTH rates) | ✅ implemented | `packages/bridgecad-bill` |
 | QA rules + 0–100 compliance grade | ✅ implemented | `packages/bridgecad-qa` |
+| Abutment cap/dirt wall QA rules (ABT-CAP-DEPTH/PROJ, QA-DW-*) | ✅ implemented | `validation.py` |
 | ZIP bundle + manifest | ✅ implemented | `packages/bridgecad-export` |
 | Bridge-type plugin registry | ✅ 3 built-in | `packages/bridgecad-plugins` |
 | Optimiser / estimator / comparator | ✅ implemented | `packages/bridgecad-ai` |
 | CLI · FastAPI · Streamlit · React | ✅ all four | `apps/` |
 | 28 E2E fixtures | ✅ 28/28 passing | `tests/e2e/fixtures/` |
 | SVG / PNG / 3D engines | 🚧 partial | `bridgecad_draw/engines/` |
-| Sheet 2–7 full engineering geometry | 🚧 scaffolds | see §11 |
+| Sheet 2–7 full engineering geometry | 🚧 partial (Sheets 2,4,5,8 complete) | see §11 |
 
 ---
 
@@ -143,7 +146,7 @@ bridgecad_io ──► BridgeProject (Pydantic v2, single in-memory truth)
 |---|---|
 | `bridgecad-core` | enums, Pydantic models, geometry maths, validation, quantities |
 | `bridgecad-io` | Excel template / reader / writer, CSV + JSON adapters |
-| `bridgecad-draw` | layers, primitives, title blocks, 7 sheets, 5 engines, booklet |
+| `bridgecad-draw` | layers, primitives, title blocks, 8 sheets, 5 engines, booklet |
 | `bridgecad-bill` | MORTH rates DB, hierarchical processor, 4 formatters |
 | `bridgecad-qa` | rules engine, compliance scoring, HTML reports, recommendations |
 | `bridgecad-export` | orchestrator, ZIP bundler, versioner |
@@ -203,7 +206,7 @@ bridgecad-cli draw gad bridge.xlsx -o out/gad.dxf
 curl -F file=@bridge.xlsx localhost:8000/draw/gad -o gad.dxf
 ```
 
-### 5.2 Generate the 7-sheet package
+### 5.2 Generate the 8-sheet package
 
 ```bash
 bridgecad-cli draw booklet bridge.xlsx -o out/
@@ -211,10 +214,17 @@ bridgecad-cli draw booklet bridge.xlsx -o out/
 
 Sheets: `sheet1_plan` · `sheet2_long_section` · `sheet3_cross_section` ·
 `sheet4_foundation` · `sheet5_pier_abutment_details` · `sheet6_bearings_joints` ·
-`sheet7_bill_of_quantities`.
+`sheet7_bill_of_quantities` · `sheet8_side_elevations`.
 
 > **Naming note:** the legacy app README calls these IDX/GAD/TYP/ABT/PIER/BRG/DRN.
 > That is the legacy 4-sheet naming. The Suite names above are canonical.
+
+**Abutment geometry note (Venice-patch, 2026-11-07):**
+Sheet 5 and Sheet 8 now draw the correct abutment geometry — shaft → cap
+(projecting both faces) → pedestals → bearings → dirt wall → approach slab →
+continuous wearing coat. All levels derive from `resolve_abutment_stack()`.
+Set `abutment_type = CANTILEVER` (or `GRAVITY`) in the `SUBSTRUCTURE` sheet
+to get the correct transverse elevation shape on Sheet 5.
 
 ### 5.3 Price a BOQ
 
@@ -318,6 +328,9 @@ python -m bridgecad verify      # day3 (7/7) + day4 (8/8) acceptance verifiers
 python rc1_smoke.py             # 11-check release gate
 python tests/e2e/run_e2e.py     # 28 fixtures, 7 checks each
 pytest tests/integration        # 12/12 full-pipeline
+pytest tests/draw/test_abutment_profile.py           # 7/7 — abutment elevation geometry
+pytest tests/draw/test_abutment_shape_families.py    # 6/6 — shape family mapping
+pytest tests/unit/test_abutment_stack.py             # datum ladder unit tests
 make test
 ```
 
@@ -379,14 +392,15 @@ construction"** and the UI must show it at download time.
 
 ### Known limitations (be honest about these)
 
-- **Sheets 2–7 are scaffolds.** Per `2 OCT PROGRAM.MD`, only sheet 1 carries
-  complete engineering geometry. Until fixed, the export manifest should list
-  which sheets are scaffolds.
+- **Sheets 3, 6, 7 are scaffolds.** Sheets 2, 4, 5, and 8 now carry complete
+  engineering geometry (Venice-patch, 2026-11-07). Until sheets 3/6/7 are
+  complete, the export manifest should list which sheets are scaffolds.
 - **BOQ multipliers are heuristic.** `bridgecad_bill/processor.py` uses
   multipliers, not derived quantities. Every line needs a formula/source-field
   list and a `calculated` / `estimated` / `not_calculated` status. Missing input
   must return `not_calculated` with a reason, never a plausible default.
-- **120 of 150 QA rules are registered but stubbed.**
+- **120 of 150 QA rules are registered but stubbed** (35 are now fully
+  implemented including 5 new abutment cap/dirt wall rules).
 - **Sheet origins are not yet on one shared coordinate contract.**
 - **SVG, PNG and 3D engines are partial.**
 
@@ -454,9 +468,91 @@ MIT — see `LICENSE`.
 
 ---
 
+## 16. Venice-patch — abutment cap, dirt wall and wearing coat (2026-11-07)
+
+**Defect fixed:** Abutment cap was missing, dirt wall absent from all sheets,
+wearing coat did not extend over approach slabs, bearing pads floated, and
+the "TOP OF ABUTMENT" level tag pointed at the shaft base.
+
+### What was applied (commit `2d9dca9`)
+
+**Model fields added to `Substructure`:**
+- `abutment_cap_depth_mm` — cap vertical depth (IRC:21 min 450 mm)
+- `abutment_cap_projection_front_mm` / `_rear_mm` — bearing shelf projection
+- `dirt_wall_thickness_mm` — dirt (back) wall stem thickness
+- `dirt_wall_height_m` — cap top to approach slab soffit
+- `weep_hole_diameter_mm` / `weep_hole_spacing_m` — drainage
+
+**`abutment_stack.py` — single RL datum ladder:**
+
+```
+Road RL → WC soffit = slab top (ABT-001)
+       → approach slab soffit (= dirt wall top)
+       → cap top (ABT-002: cap_top < app_bot)
+       → cap soffit
+       → bearing seat
+```
+No element may be positioned by raw arithmetic off another element's top.
+
+**Sheets updated:**
+
+| Sheet | Change |
+|---|---|
+| 1 — Plan | Dirt wall footprint on outboard face of A1/A2 |
+| 2 — Long section | WC continuous end-to-end over both approach slabs; cap+dirt wall in section |
+| 4 — Foundation | Abutment A2 cap+dirt wall plan inset with weep holes |
+| 5 — Pier/Abutment | Shaft→cap→pedestals→bearings→dirt wall; construction joint + PVC water-bar note |
+| 8 — Side elevations | Real cap/pedestal/bearing stack; phantom dirt wall; corrected level tags |
+
+**QA rules added** (all pass on `simple_12m`):
+- `ABT-CAP-DEPTH` [CRITICAL] ≥ 450 mm
+- `ABT-CAP-PROJ` [WARNING] 100–250 mm
+- `QA-DW-THK` [CRITICAL] ≥ 250 mm
+- `QA-DW-TOP` [CRITICAL] dirt wall reaches approach slab soffit
+- `QA-DW-WEEP` [WARNING] ≤ 3.0 m c/c
+
+**Certified correct** — 7/7 draw tests pass; 5/5 QA rules pass; RL ladder
+verified numerically (Road RL 115.500 m → cap_top 114.050 m → cap_bot 113.450 m).
+
+**Reference:** [Dirt Wall in Bridge Abutment — PreWall Civil](https://prewallcivil.com/dirt-wall-in-bridge-abutment/)
+
+---
+
+## 17. D-13 — Abutment shape families (2026-11-07)
+
+**Defect fixed:** GRAVITY mass wall and CANTILEVER wall drew identically (plain rectangle).
+
+### Module: `bridgecad_core/geometry/abutment_profiles.py`
+
+Single source of truth for both the Python DXF engine and the JS sheet renderer.
+
+| Family | Shape | Vertex count | Trigger keywords |
+|---|---|---|---|
+| `gravity` | Battered trapezoid (25% face run-back) | 4 | GRAVITY, SEMI_GRAVITY |
+| `cantilever` | Inverted-T (50% stem, 18% base slab) | 8 | CANTILEVER, COUNTERFORT, BUTTRESS, STUB |
+| `battered` | Plain rectangle (legacy fallback) | 4 | anything else / None |
+
+```python
+from bridgecad_core.geometry.abutment_profiles import family_for, elevation_outline
+family = family_for(project.substructure.abutment_type)   # "gravity" / "cantilever" / "battered"
+norm_pts = elevation_outline(family)   # normalised [0,1] → scale to mm
+```
+
+**JS parity** — `frontend/src/sheets/detailGeometry.js` exports `abutmentFamily()` and
+`abutmentOutlineNorm()` with identical constants. A divergence re-opens D-13.
+
+**Tests:** 6/6 pass (`tests/draw/test_abutment_shape_families.py`).
+
+**How to use:** set `abutment_type = CANTILEVER` (or `GRAVITY`) in the
+`SUBSTRUCTURE` sheet of the Excel workbook — Sheet 5 transverse elevation
+will render the correct shape automatically.
+
+---
+
 ## Changelog for this guide
 
 | Date | Verified against commit | What changed |
 |---|---|---|
 | 2026-10-22 | `main` | Initial authoritative guide; consolidated the scattered, drifted docs into one master document. |
 | 2026-10-26 | `2acef08` | §9: replaced the non-existent weekly `bench.yml` with the real budget file (`tests/benchmarks/budgets.json`). §10: replaced the ghcr.io/wheels claim with the real `release.yml` — a legacy Windows PyInstaller build for `src/bridge_gad`. |
+| 2026-11-07 | `2d9dca9` / `4bcc9c9` | Venice-patch applied (§V) and D-13 closed (§16). §5.2 sheet list corrected. §11 limitations updated. §9 test count updated. |

@@ -345,13 +345,27 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     # dirt wall band (cap top → approach slab soffit)
     rectangle(msp, stack_x0, cap_el_top, stack_l, dw_mm_e, layer="ABUT-PROF", lw=30)
     hatch_rect(
-        msp, stack_x0, cap_el_top, stack_l, dw_mm_e,
-        pattern="ANSI31", scale=sc * 0.01, layer="STRUC-HATCHING",
+        msp,
+        stack_x0,
+        cap_el_top,
+        stack_l,
+        dw_mm_e,
+        pattern="ANSI31",
+        scale=sc * 0.01,
+        layer="STRUC-HATCHING",
     )
     # approach slab band
     rectangle(msp, stack_x0, cap_el_top + dw_mm_e, stack_l, app_t_mm_e, layer="CIVIL-ROAD", lw=25)
     # wearing coat — continuous over the approach slab
-    rectangle(msp, stack_x0, cap_el_top + dw_mm_e + app_t_mm_e, stack_l, wc_mm_e, layer="SUPER-WEARING", lw=20)
+    rectangle(
+        msp,
+        stack_x0,
+        cap_el_top + dw_mm_e + app_t_mm_e,
+        stack_l,
+        wc_mm_e,
+        layer="SUPER-WEARING",
+        lw=20,
+    )
     # level tags on the stack
     text(
         msp,
@@ -423,39 +437,101 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     dw_mm = dw_h * sc
     app_t_mm = app_t * sc
 
-    # Abutment wall (thickness = abutment_width_m)
-    rectangle(msp, wall_l, ls_by, w_mm, wall_h_mm, layer="SUB-ABUT", lw=50)
-    hatch_rect(
-        msp,
-        wall_l,
-        ls_by,
-        w_mm,
-        wall_h_mm,
-        pattern="ANSI31",
-        scale=sc * 0.015,
-        layer="STRUC-HATCHING",
-    )
+    # Abutment body — GRAVITY family draws the LISP abt1() battered side
+    # profile (different riverside/earthside batters); other families keep the
+    # rectangular stem + cap + dirt wall stack.
+    _fam_sec = _family_for(getattr(sub, "abutment_type", None))
+    _cap_w_m = abt_w + cap_pf + cap_pr
+    if _fam_sec == "gravity":
+        from bridgecad_core.geometry.abutment_profiles import battered_side_outline
 
-    # Cap — projects front (bearing shelf) and rear (dirt wall seat)
-    cap_sec_l = wall_l - cap_pf * sc
-    cap_sec_r = wall_r + cap_pr * sc
-    rectangle(
-        msp, cap_sec_l, cap_bot_ly, cap_sec_r - cap_sec_l, cap_ab_d_mm, layer="SUB-ABUT", lw=50
-    )
-    hatch_rect(
-        msp,
-        cap_sec_l,
-        cap_bot_ly,
-        cap_sec_r - cap_sec_l,
-        cap_ab_d_mm,
-        pattern="ANSI31",
-        scale=sc * 0.015,
-        layer="STRUC-HATCHING",
-    )
+        _foot_d_m = 1.0
+        _face_n = float(sub.abutment_face_batter_1n or 10)
+        _back_n = float(sub.abutment_back_batter_1n or 3)
+        _prof = battered_side_outline(
+            max(abt_h - cap_ab_d, 0.5),
+            cap_w_m=_cap_w_m,
+            cap_d_m=cap_ab_d,
+            face_batter_1n=_face_n,
+            back_batter_1n=_back_n,
+            toe_m=1.5,
+            foot_d_m=_foot_d_m,
+            above_m=dw_h,
+            dirt_w_m=dw_t,
+        )
+        # Earthside (+x sheet) = −x in profile frame; dirt-wall outer face on wall_r
+        _x0 = wall_r - (-_prof.dirt_wall_x) * sc
+        # Stem + footing only (profile indices 3..12): the cap, dirt wall,
+        # approach slab and wearing coat keep their certified stack geometry.
+        _stem_pts = _prof.points[3:13]
+        _pts = [(_x0 - px * sc, ls_by + (py - _foot_d_m) * sc) for px, py in _stem_pts]
+        _pts.append(_pts[0])  # close across the stem top (x14..x3 at cap soffit)
+        polyline(msp, _pts, layer="SUB-ABUT", close=True, lw=50)
+        hatch_poly(msp, _pts, pattern="ANSI31", scale=sc * 0.015, layer="STRUC-HATCHING")
+        # Cap keeps the standard position — its rear projection covers the
+        # dirt-wall seat on the exposed stem-top ledge.
+        cap_sec_l = wall_l - cap_pf * sc
+        cap_sec_r = wall_r + cap_pr * sc
+        rectangle(
+            msp, cap_sec_l, cap_bot_ly, cap_sec_r - cap_sec_l, cap_ab_d_mm, layer="SUB-ABUT", lw=50
+        )
+        hatch_rect(
+            msp,
+            cap_sec_l,
+            cap_bot_ly,
+            cap_sec_r - cap_sec_l,
+            cap_ab_d_mm,
+            pattern="ANSI31",
+            scale=sc * 0.015,
+            layer="STRUC-HATCHING",
+        )
+        _ped_centered = True
+        text(
+            msp,
+            f"BATTERED PROFILE — FACE 1:{_face_n:.0f} (RIVER) / BACK 1:{_back_n:.0f} (EARTH)",
+            ls_cx,
+            ls_by - _foot_d_m * sc - th * 4,
+            height=th * 0.9,
+            layer="TEXT-SPEC",
+            halign="CENTER",
+        )
+    else:
+        # Abutment wall (thickness = abutment_width_m)
+        rectangle(msp, wall_l, ls_by, w_mm, wall_h_mm, layer="SUB-ABUT", lw=50)
+        hatch_rect(
+            msp,
+            wall_l,
+            ls_by,
+            w_mm,
+            wall_h_mm,
+            pattern="ANSI31",
+            scale=sc * 0.015,
+            layer="STRUC-HATCHING",
+        )
+
+        # Cap — projects front (bearing shelf) and rear (dirt wall seat)
+        cap_sec_l = wall_l - cap_pf * sc
+        cap_sec_r = wall_r + cap_pr * sc
+        rectangle(
+            msp, cap_sec_l, cap_bot_ly, cap_sec_r - cap_sec_l, cap_ab_d_mm, layer="SUB-ABUT", lw=50
+        )
+        hatch_rect(
+            msp,
+            cap_sec_l,
+            cap_bot_ly,
+            cap_sec_r - cap_sec_l,
+            cap_ab_d_mm,
+            pattern="ANSI31",
+            scale=sc * 0.015,
+            layer="STRUC-HATCHING",
+        )
+        _ped_centered = False
 
     # Pedestal + bearing on the bearing shelf
     ped_a_w = 0.5 * sc
-    ped_a_x = cap_sec_l + 0.06 * sc
+    ped_a_x = (
+        (cap_sec_l + cap_sec_r) / 2.0 - ped_a_w / 2.0 if _ped_centered else cap_sec_l + 0.06 * sc
+    )
     rectangle(msp, ped_a_x, cap_top_ly, ped_a_w, ped_a_h_mm, layer="SUB-BEARING", lw=25)
     rectangle(
         msp,
@@ -467,7 +543,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         lw=15,
     )
 
-    # Dirt wall — cap top up to the approach slab soffit
+    # Dirt wall — cap top up to the approach slab soffit, on the rear ledge
     dw_x = wall_r - dw_t * sc
     rectangle(msp, dw_x, cap_top_ly, dw_t * sc, dw_mm, layer="ABUT-PROF", lw=40)
     hatch_rect(

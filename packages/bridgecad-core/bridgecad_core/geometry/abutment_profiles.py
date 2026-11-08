@@ -14,7 +14,13 @@ from __future__ import annotations
 
 from typing import Any
 
-__all__ = ["Family", "family_for", "elevation_outline"]
+__all__ = [
+    "Family",
+    "family_for",
+    "elevation_outline",
+    "battered_side_outline",
+    "BatteredSide",
+]
 
 Family = str
 
@@ -65,3 +71,86 @@ def elevation_outline(
         ]
     # BATTERED / unknown — plain rectangle
     return [(0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (0.0, 0.0)]
+
+
+# ── LISP abt1() battered side profile ──────────────────────────────────────
+# Faithful port of frontend/src/sheets/detailGeometry.js abutmentProfile().
+# This is the SIDE (longitudinal) profile: riverside face batter and earthside
+# (dirt-wall side) batter are DIFFERENT parameters — face 1:10 gentle, back
+# 1:3 steep in the LISP defaults.
+
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class BatteredSide:
+    """Resolved abt1() profile in metres; y measured up from footing bottom."""
+
+    points: list[tuple[float, float]]  # closed polygon, sheet-x/y in metres
+    cap_top_y: float  # RTL — top of the face upstand
+    cap_bot_y: float  # cap soffit
+    stem_bot_y: float  # altbl — top of footing / bottom of stem
+    foot_bot_y: float  # y8 — underside of footing
+    dirt_wall_x: float  # outer face of the dirt wall
+
+
+def battered_side_outline(
+    stem_h_m: float,
+    *,
+    cap_w_m: float = 0.75,
+    cap_d_m: float = 1.2,
+    face_batter_1n: float = 10.0,
+    back_batter_1n: float = 3.0,
+    toe_m: float = 1.5,
+    foot_d_m: float = 1.0,
+    above_m: float = 0.98,
+    dirt_w_m: float = 0.3,
+) -> BatteredSide:
+    """LISP abt1() 14-vertex battered abutment side profile, in metres.
+
+    ``stem_h_m`` is the stem height from cap soffit down to the footing top.
+    ``face_batter_1n`` / ``back_batter_1n`` are the riverside and earthside
+    batters as 1:n (horizontal run = height / n).  The polygon is drawn for
+    the +x orientation (A2): face anchor at x=0, dirt wall outward at +x;
+    mirror x for A1.
+    """
+    stem_h = max(float(stem_h_m), 0.5)
+    y_cap_bot = foot_d_m + stem_h  # cap soffit
+    y_foot_top = foot_d_m  # altbl — stem bottom / footing top
+    y_foot_bot = 0.0  # y8
+    y_cap_top = y_cap_bot + cap_d_m
+    y_rtl = y_cap_top + above_m
+
+    x1 = 0.0  # riverside face anchor
+    x3 = cap_w_m  # cap earth-side edge
+    x5 = x3 + stem_h / face_batter_1n  # gentle battered stem-back face
+    x6 = x5  # alfbl == altbl → toe drop nil (LISP default)
+    x7 = x6 + toe_m  # toe
+    x14 = x1 - dirt_w_m  # dirt wall outer face (earthside, −x in this frame)
+    x12 = x14 - stem_h / back_batter_1n  # steep battered face
+    x10 = x12 - toe_m
+
+    pts = [
+        (x1, y_rtl),
+        (x1, y_cap_top),
+        (x3, y_cap_top),
+        (x3, y_cap_bot),
+        (x5, y_foot_top),
+        (x6, y_foot_top),
+        (x7, y_foot_top),
+        (x7, y_foot_bot),
+        (x10, y_foot_bot),
+        (x10, y_foot_top),
+        (x12, y_foot_top),
+        (x12, y_foot_top),
+        (x14, y_cap_bot),
+        (x14, y_rtl),
+    ]
+    return BatteredSide(
+        points=pts,
+        cap_top_y=y_cap_top,
+        cap_bot_y=y_cap_bot,
+        stem_bot_y=y_foot_top,
+        foot_bot_y=y_foot_bot,
+        dirt_wall_x=x14,
+    )

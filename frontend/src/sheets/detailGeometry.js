@@ -337,6 +337,48 @@ export function abutmentProfile(side, xFace, yCapB, stemHM) {
   return { pts, rtl, altbl, y8, x3, x7, x10, x12, x14, dirtWallX: x14 };
 }
 
+/* ── abutment SHAPE FAMILY (mirrors bridgecad_core.geometry.abutment_profiles) ─
+ * Driven by abutment_type, not fixed. GRAVITY → trapezoid; CANTILEVER/
+ * COUNTERFORT/BUTTRESS/STUB → inverted-T; else legacy block. Keep identical to
+ * the Python module — a divergence re-opens defect D-13. */
+const ABT_FAMILY = Object.freeze({ GRAVITY: "gravity", CANTILEVER: "cantilever", BATTERED: "battered" });
+const ABT_FOOTING_FRAC    = 0.18;
+const ABT_STEM_FRAC       = 0.5;
+const ABT_TOP_BATTER_FRAC = 0.25;
+
+/**
+ * Map an abutment_type string to a shape family constant.
+ * @param {string|null|undefined} abutmentType
+ * @returns {"gravity"|"cantilever"|"battered"}
+ */
+export function abutmentFamily(abutmentType) {
+  const n = String(abutmentType || "").toUpperCase();
+  if (n.includes("GRAVITY")) return ABT_FAMILY.GRAVITY;
+  if (n.includes("CANTILEVER") || n.includes("COUNTERFORT") ||
+      n.includes("BUTTRESS") || n.includes("STUB")) return ABT_FAMILY.CANTILEVER;
+  return ABT_FAMILY.BATTERED;
+}
+
+/**
+ * Normalised [0,1] outline for an abutment shape family.
+ * x=0 left face, x=1 right face, y=0 founding level, y=1 road level.
+ * @param {"gravity"|"cantilever"|"battered"} family
+ * @returns {number[]} flat [x0,y0, x1,y1, …] closed ring
+ */
+export function abutmentOutlineNorm(family) {
+  if (family === ABT_FAMILY.GRAVITY) {
+    const h = ABT_TOP_BATTER_FRAC;
+    return [h, 1, 1 - h, 1, 1, 0, 0, 0];
+  }
+  if (family === ABT_FAMILY.CANTILEVER) {
+    const lo = (1 - ABT_STEM_FRAC) / 2;
+    const hi = 1 - lo;
+    const fd = ABT_FOOTING_FRAC;
+    return [lo, 1, hi, 1, hi, fd, 1, fd, 1, 0, 0, 0, 0, fd, lo, fd];
+  }
+  return [0, 1, 1, 1, 1, 0, 0, 0];
+}
+
 /** @param {Record<string, any>} p @returns {any} */
 export function foundationLayout(p) {
   const rows = Math.round(clamp(NUM(p.rows, 2), 1, 3));

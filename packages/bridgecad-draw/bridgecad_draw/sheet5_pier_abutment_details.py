@@ -25,6 +25,13 @@ from .primitives import (
 from .titleblocks import draw_border, draw_title_block
 
 
+def _family_for(abutment_type: Any) -> str:
+    """Shape family for an AbutmentType. Source: abutment_profiles."""
+    from bridgecad_core.geometry.abutment_profiles import family_for
+
+    return family_for(abutment_type)
+
+
 def generate(project: Any, output_path: str | Path, scale_denom: int = 50) -> Path:
     doc, msp = new_sheet("S5 Pier Abutment Details")
     _draw(msp, project, scale_denom)
@@ -274,18 +281,15 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     L_mm = abt_len * sc
     H_mm = abt_h * sc
 
-    # Abutment wall face (full transverse length)
-    rectangle(msp, abt_cx - L_mm / 2, abt_by, L_mm, H_mm, layer="SUB-ABUT", lw=50)
-    hatch_rect(
-        msp,
-        abt_cx - L_mm / 2,
-        abt_by,
-        L_mm,
-        H_mm,
-        pattern="ANSI31",
-        scale=sc * 0.015,
-        layer="STRUC-HATCHING",
-    )
+    # ── Family-aware shaft outline (Artefact ④) ────────────────────────
+    # GRAVITY → battered trapezoid; CANTILEVER → inverted-T; else rectangle.
+    from bridgecad_core.geometry.abutment_profiles import elevation_outline
+
+    _fam = _family_for(getattr(sub, "abutment_type", None))
+    _norm_pts = elevation_outline(_fam)
+    _shaft_pts = [(abt_cx - L_mm / 2 + nx * L_mm, abt_by + ny * H_mm) for nx, ny in _norm_pts]
+    polyline(msp, _shaft_pts, layer="SUB-ABUT", close=True, lw=50)
+    hatch_poly(msp, _shaft_pts, pattern="ANSI31", scale=sc * 0.015, layer="STRUC-HATCHING")
 
     # Cap beam across the full transverse length
     cap_el_bot = abt_by + H_mm
@@ -329,6 +333,40 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         ]
         polyline(msp, ww_pts, layer="SUB-ABUT", close=True, lw=35)
         hatch_poly(msp, ww_pts, pattern="ANSI31", scale=sc * 0.015, layer="STRUC-HATCHING")
+
+    # Rear stack, edge-on in transverse elevation: dirt wall on the cap rear
+    # ledge → approach slab → continuous wearing coat.  Heights come from the
+    # resolved abutment stack (dw_h / app_t / wc_t already bound above).
+    dw_mm_e = dw_h * sc
+    app_t_mm_e = app_t * sc
+    wc_mm_e = wc_t * sc
+    stack_l = L_mm * 0.96  # inset from wing-wall toes
+    stack_x0 = abt_cx - stack_l / 2
+    # dirt wall band (cap top → approach slab soffit)
+    rectangle(msp, stack_x0, cap_el_top, stack_l, dw_mm_e, layer="ABUT-PROF", lw=30)
+    hatch_rect(
+        msp, stack_x0, cap_el_top, stack_l, dw_mm_e,
+        pattern="ANSI31", scale=sc * 0.01, layer="STRUC-HATCHING",
+    )
+    # approach slab band
+    rectangle(msp, stack_x0, cap_el_top + dw_mm_e, stack_l, app_t_mm_e, layer="CIVIL-ROAD", lw=25)
+    # wearing coat — continuous over the approach slab
+    rectangle(msp, stack_x0, cap_el_top + dw_mm_e + app_t_mm_e, stack_l, wc_mm_e, layer="SUPER-WEARING", lw=20)
+    # level tags on the stack
+    text(
+        msp,
+        f"DW {dw_h * 1000:.0f}",
+        stack_x0 + stack_l + th * 2,
+        cap_el_top + dw_mm_e / 2,
+        height=th * 0.8,
+        layer="TEXT-SPEC",
+        color=4,
+    )
+
+    # Weep holes through the dirt wall (elevation: dots on the wall face)
+    for i in range(2):
+        wy_e = cap_el_top + dw_mm_e * (i + 1) / 3.0
+        circle(msp, abt_cx, wy_e, 0.05 * sc, layer="ABUT-PROF", color=4)
 
     _abt_elev = view_spec("abutment_elevation")
     dim_along(

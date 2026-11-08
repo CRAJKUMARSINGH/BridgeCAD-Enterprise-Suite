@@ -483,3 +483,85 @@ No changes this session.
 **Pending:** Accept the `.lychee.toml` exclude, then commit the two files only. No commit unless explicitly instructed.
 
 ---
+| 2026-11-08 07:41 | User prompt received |
+| 2026-11-08 07:50 | User prompt received |
+
+### Session — Abutment shape families applied, tested and browser-rendered · 01:05
+
+- User provided 5-artefact instruction block (D-13 defect: GRAVITY and CANTILEVER drew identically).
+- Applied all 5 artefacts plus bonus geometry `__init__` update:
+
+| Artefact | File | Action |
+|---|---|---|
+| ① | `packages/bridgecad-core/bridgecad_core/geometry/abutment_profiles.py` | NEW |
+| ② | `tests/draw/test_abutment_shape_families.py` | NEW |
+| ③ | `sheet5_pier_abutment_details.py` | ADD `_family_for()` helper |
+| ④ | `sheet5_pier_abutment_details.py` | Abutment shaft → family-aware `polyline()` |
+| ⑤ | `frontend/src/sheets/detailGeometry.js` | ADD `ABT_FAMILY`, `abutmentFamily()`, `abutmentOutlineNorm()` |
+| + | `packages/bridgecad-core/bridgecad_core/geometry/__init__.py` | Export new symbols |
+
+- **Tests:** `pytest tests/draw/test_abutment_profile.py tests/draw/test_abutment_shape_families.py -v` → **13/13 PASS** in 6.95 s
+- Rendered Sheet 5 (family-aware, simple_12m BATTERED default): DXF 77 KB, PNG 19 KB
+- Built `output/certification/abutment_shapes.html` (37 KB) with SVG diagrams of all 3 shapes
+- Opened report in browser via `Start-Process`
+
+**Files changed:**
+- `packages/bridgecad-core/bridgecad_core/geometry/abutment_profiles.py` (new)
+- `packages/bridgecad-core/bridgecad_core/geometry/__init__.py`
+- `packages/bridgecad-draw/bridgecad_draw/sheet5_pier_abutment_details.py`
+- `frontend/src/sheets/detailGeometry.js`
+- `tests/draw/test_abutment_shape_families.py` (new)
+- `output/certification/build_shapes_report.py` (new)
+- `output/certification/Sheet5_Families.dxf` + `.png` (generated)
+- `output/certification/abutment_shapes.html` (generated)
+- `CREAT.md`
+
+**Pending:** Commit and push this artefact batch to origin/main.
+
+---
+| 2026-11-08 08:07 | Agent turn completed |
+
+### Session — Standing-order hook entry (no user task) · 01:15
+
+No changes this session.
+
+- Hook fired on incoming message. No user task present — hook-only trigger.
+- Previous session (01:05): all 5 D-13 artefacts applied (abutment shape families), 13/13 tests passed, browser report built and opened.
+- No source files modified, no commands run, no tests executed this turn.
+- All CREAT.md entries within 24 h window; nothing pruned.
+
+**Pending:** Commit and push D-13 artefact batch (abutment_profiles.py, test file, sheet5 edits, detailGeometry.js) to origin/main.
+
+---
+| 2026-11-08 08:09 | User prompt received |
+
+### Session — D-13 artefacts re-verified (already applied) · 01:22
+
+- User re-presented the 5-artefact D-13 instruction block.
+- Ran `pytest tests/draw/test_abutment_shape_families.py tests/draw/test_abutment_profile.py -v` → **13/13 PASSED** in 6.0 s.
+- Ran `output/certification/verify_d13.py` → ALL CHECKS PASSED:
+  - `abutment_profiles.py` exists on disk ✅
+  - `test_abutment_shape_families.py` exists on disk ✅
+  - `sheet5` has `_family_for` and `elevation_outline` ✅
+  - `detailGeometry.js` has `ABT_FAMILY` and `abutmentFamily` ✅
+  - GRAVITY (4 pts) != CANTILEVER (8 pts) ✅
+- No source files changed this turn — artefacts were applied in the previous session (01:05).
+
+**Pending:** Commit and push D-13 batch to origin/main.
+
+---
+| 2026-11-08 08:11 | Agent turn completed |
+
+### Session — Standing-order hook entry (no user task) · 01:30
+
+No changes this session.
+
+- Hook fired on incoming message. No user task present — hook-only trigger.
+- Previous session (01:22): D-13 artefacts re-verified, 13/13 tests confirmed passing.
+- No source files modified, no commands run, no tests executed this turn.
+- All CREAT.md entries within 24 h window; nothing pruned.
+
+**Pending:** Commit and push D-13 batch (abutment_profiles.py, test file, sheet5 edits, detailGeometry.js) to origin/main.
+
+---
+| 2026-11-08 08:43 | User prompt received |

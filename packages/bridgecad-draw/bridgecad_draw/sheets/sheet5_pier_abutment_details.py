@@ -58,14 +58,14 @@ def _pile_grid(fd) -> tuple[int, int]:
 #: LISP abt1() abutment section parameters, in metres. A1 is the AL* family
 #: (dirt wall outward at -x); A2 mirrors it (AR*, dirt wall outward at +x).
 _ABT_PROFILE = {
-    "cap_w": 0.75,       # ALCW / ARCW — cap width
-    "cap_d": 1.2,        # ALCD / ARCD — cap depth
+    "cap_w": 0.75,  # ALCW / ARCW — cap width
+    "cap_d": 1.2,  # ALCD / ARCD — cap depth
     "front_batter": 10,  # ALFB / ARFB — face batter, 1:n
-    "back_batter": 3,    # ALBB / ARBB — back batter, 1:n
-    "toe_off": 1.5,      # ALFO / ARFO — toe and footing offset
-    "foot_d": 1.0,       # ALFD / ARFD — footing depth
-    "above": 0.98,       # RTL − CAPT — face upstand above the cap
-    "dirt_w": 0.3,       # DWTH — dirt wall thickness
+    "back_batter": 3,  # ALBB / ARBB — back batter, 1:n
+    "toe_off": 1.5,  # ALFO / ARFO — toe and footing offset
+    "foot_d": 1.0,  # ALFD / ARFD — footing depth
+    "above": 0.98,  # RTL − CAPT — face upstand above the cap
+    "dirt_w": 0.3,  # DWTH — dirt wall thickness
 }
 
 
@@ -348,9 +348,7 @@ def build(project):
             cv.line((prof["x12"], prof["altbl"]), (prof["x12"], prof["rtl"]))
             cv.line((prof["x12"], prof["rtl"]), (prof["x14"], prof["rtl"]))
         with cv.on("HTCH"):
-            hatch_poly(
-                cv.ms, prof["pts"], pattern="ANSI31", scale=h * 0.4, layer=cv.ms.layer_name
-            )
+            hatch_poly(cv.ms, prof["pts"], pattern="ANSI31", scale=h * 0.4, layer=cv.ms.layer_name)
         with cv.on("TEXT"):
             cv.text(
                 f"ABUTMENT {tag} \u2014 BATTERED PROFILE (abt1(), DWTH 0.30 m)",

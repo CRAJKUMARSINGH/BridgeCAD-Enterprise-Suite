@@ -14,7 +14,7 @@
     "date_issued": "2026-10-05",
     "designed_by": "Er. A. Deshpande",
     "checked_by": "Er. P. Joshi",
-    "approved_by": "Er. S. Patil (CE \u2014 PMGSY)",
+    "approved_by": "Er. S. Patil (CE — PMGSY)",
     "road_level_rl_m": "245.600",
     "ground_level_rl_m": "238.500",
     "survey_date": "2026-08-20",
@@ -112,9 +112,7 @@
     "footpath_type": "STANDARD_RCC",
     "median_type": "NONE_UNDIVIDED",
     "crash_barrier_type": "NEW_JERSEY_BARRIER",
-    "rotation_direction": null,
-    "total_length_m": "110.000",
-    "overall_width_m": "11.90"
+    "rotation_direction": null
   },
   "superstructure": {
     "type": "SOLID_SLAB",
@@ -159,8 +157,7 @@
     "arch_shape_type": null,
     "truss_configuration": null,
     "waterproofing_membrane": null,
-    "anti_corrosion_protection": null,
-    "total_deck_thickness_mm": 940
+    "anti_corrosion_protection": null
   },
   "substructure": {
     "pier_type": "WALL",
@@ -311,8 +308,7 @@
     "sediment_yield_class": null,
     "water_surface_profile": null,
     "water_quality_aggressive_class": null,
-    "ice_load_type": null,
-    "freeboard_actual_m": "2.000"
+    "ice_load_type": null
   },
   "materials": {
     "concrete_superstructure": "M30",
@@ -421,9 +417,7 @@
       }
     ],
     "notes_bearings": null,
-    "notes_joints": null,
-    "total_bearings_quantity": 44,
-    "total_joints_quantity": 2
+    "notes_joints": null
   },
   "components_lib": {
     "standard_pier_tag": "PIER-WALL-H6.5m-T0.80",
@@ -552,8 +546,5 @@
     "rules_skipped_count": null,
     "score_materials": null,
     "score_geometry": null
-  },
-  "total_bridge_length_m": "110.000",
-  "overall_bridge_width_m": "11.90",
-  "span_count_propagated": 11
+  }
 }

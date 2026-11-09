@@ -870,6 +870,15 @@ export function buildSheet5(raw) {
   hatchPoly(out, "HTCH", embank, 2.4);
   // Granular filter / geotextile immediately behind the wall.
   out.push(P.rect("STRUC-DETAIL", xWall - mm(0.3), gCapT, mm(0.3), wallH));
+  // Granular sub-base (GSB) compacted under the dirt wall — prewallcivil §5
+  // ("place granular sub-base material and compact it to improve stability").
+  out.push(P.rect("STRUC-DETAIL", xWall - mm(1.0), gCapT, mm(1.0) + dwth, mm(0.1)));
+  // Geogrid / MSE reinforcement between compacted backfill layers — §5.
+  for (const frac of [0.3, 0.55, 0.8]) {
+    out.push(P.line("HIDD", xWall - 58, gCapT + frac * wallH, xWall, gCapT + frac * wallH));
+  }
+  // Drainage pipe at the backfill heel, discharging the drained fill — §5.
+  out.push(P.circle("STRUC-DETAIL", xWall - 54, gCapT + 6, 1.5));
   // Weep holes through the wall, discharging to the abutment face.
   for (const frac of [0.25, 0.55]) {
     const wy = gCapT + frac * wallH;
@@ -888,6 +897,7 @@ export function buildSheet5(raw) {
   out.push(P.text("TEXT", xWall - 62, ySlabB - 3, "GRANULAR FILTER / GEOTEXTILE", 2.2));
   out.push(P.text("TEXT", xWall - 62, gCapT + 6, "RETAINED EMBANKMENT — COMPACTED IN LAYERS", 2.2));
   out.push(P.text("TEXT", xG, yG + 5, "NOTE: WEEP HOLES + FILTER DRAIN THE BACKFILL, LIMITING HYDROSTATIC PRESSURE.", 2.1));
+  out.push(P.text("TEXT", xG, yG + 1, "REF: GSB + GEOGRID LAYERS COMPACTED, DRAINAGE PIPE AT HEEL (prewallcivil.com dirt-wall).", 2.0));
 
   scaleBar(out, 30, 125);
 

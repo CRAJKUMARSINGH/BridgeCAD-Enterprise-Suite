@@ -74,8 +74,15 @@ LAYER_REGISTRY: dict[str, LayerDef] = {
             50,
             "Abutment battered profile outline (LISP abt1(), A1/A2)",
         ),
-        LayerDef("SUB-DIRT-WALL", 3, "Continuous", 40, "Dirt (back) wall — retains fill under approach slab"),
+        LayerDef(
+            "SUB-DIRT-WALL",
+            3,
+            "Continuous",
+            35,
+            "Dirt (back) wall — retains fill under approach slab",
+        ),
         LayerDef("SUB-BEARING", 5, "Continuous", 25, "Bearing pad outlines and schedule"),
+        LayerDef("REBAR", 1, "Continuous", 35, "Reinforcement bar positions and marks"),
         LayerDef("SUB-EXPJOINT", 6, "Continuous", 25, "Expansion joint locations"),
         LayerDef("SUB-BACKFILL", 34, "Continuous", 18, "Backfill hatch (earth/granular)"),
         # ── Superstructure ───────────────────────────────────────────────────────
@@ -110,6 +117,7 @@ LAYER_REGISTRY: dict[str, LayerDef] = {
         LayerDef("SYM-NORTHARROW", 7, "Continuous", 18, "North arrow symbol"),
         LayerDef("SYM-SECTIONMARK", 1, "Continuous", 18, "Section A-A cut markers"),
         LayerDef("SYM-REVISION", 6, "Continuous", 18, "Revision cloud / delta markers"),
+        LayerDef("REV-CLOUD", 1, "Continuous", 50, "Redline revision cloud (guide #5)"),
         LayerDef("SYM-SCALE", 7, "Continuous", 13, "Graphic scale bar"),
         # ── Miscellaneous ────────────────────────────────────────────────────────
         LayerDef("MISC-GRID", 8, "DASHED", 13, "Construction grid / reference"),
@@ -223,6 +231,7 @@ ISO_13567_NAMES: dict[str, str] = {
     "ABUT-PROF": "B-SUB-ABP-N",
     "SUB-BEARING": "B-SUB-BEA-N",
     "SUB-DIRT-WALL": "B-SUB-DRW-N",
+    "REBAR": "B-SUB-RBR-N",
     "SUB-EXPJOINT": "B-SUB-EXJ-N",
     "SUB-BACKFILL": "B-SUB-BKF-N",
     # ── Superstructure ───────────────────────────────────────────────────────
@@ -257,6 +266,7 @@ ISO_13567_NAMES: dict[str, str] = {
     "SYM-NORTHARROW": "B-SYM-NAR-N",
     "SYM-SECTIONMARK": "B-SYM-SMK-N",
     "SYM-REVISION": "B-SYM-REV-N",
+    "REV-CLOUD": "B-SYM-RVC-N",
     "SYM-SCALE": "B-SYM-SCL-N",
     # ── Miscellaneous ────────────────────────────────────────────────────────
     "MISC-GRID": "B-GEN-GRD-N",

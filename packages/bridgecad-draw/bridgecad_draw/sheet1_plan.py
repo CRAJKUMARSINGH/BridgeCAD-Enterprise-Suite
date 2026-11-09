@@ -236,6 +236,35 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
             layer="TEXT-GENERAL",
         )
 
+    # ── Skew annotation (guide #4): angle at CL of each support ────────────
+    if abs(skew_deg) >= 0.5:
+        skew_dir = getattr(gi, "skew_direction", None)
+        dir_name = getattr(skew_dir, "name", str(skew_dir or ""))
+        skew_note = f"SKEW = {skew_deg:.1f}° {dir_name}".strip()
+        # Support line angle tick at A1 chainage
+        from bridgecad_core.skew import support_line
+
+        sl = support_line(project, 0.0)
+        lx1, ly1 = float(sl.p_left[0]), float(sl.p_left[1])
+        lx2, ly2 = float(sl.p_right[0]), float(sl.p_right[1])
+        # map model plan coords (chainage, offset) through hpos/vpos
+        line(
+            msp,
+            (hpos(lx1), vpos(ly1)),
+            (hpos(lx2), vpos(ly2)),
+            layer="MISC-SETOUT",
+            color=1,
+        )
+        text(
+            msp,
+            skew_note,
+            hpos(0.0),
+            vpos(-half_w) - text_h * 3.5,
+            height=text_h * 1.1,
+            layer="TEXT-HEADER",
+            color=1,
+        )
+
     # ── Bearing symbols (cross marks) ─────────────────────────────────────
     for bx, by in geom.bearing_positions:
         sx = hpos(bx)

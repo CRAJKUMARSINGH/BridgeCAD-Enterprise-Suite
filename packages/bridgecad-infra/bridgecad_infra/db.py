@@ -122,6 +122,26 @@ class BridgeRecord(Base):
     )
 
 
+class ProjectIndexRecord(Base):
+    """Lightweight project index row (guide #8) — written by the save path."""
+
+    __tablename__ = "project_index"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    slug = Column(String(80), unique=True, nullable=False, index=True)
+    bridge_name = Column(String(120))
+    bridge_type = Column(String(50))
+    span_summary = Column(String(60))
+    total_length_m = Column(Float)
+    overall_width_m = Column(Float)
+    revision_tag = Column(String(10))
+    payload_json = Column(JSON)  # serialized BridgeProject for duplicate/export
+    origin_project_id = Column(Integer, ForeignKey("project_index.id"), nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+    deleted_at = Column(DateTime, nullable=True)
+
+
 class GenerationHistory(Base):
     __tablename__ = "generation_history"
 
@@ -174,6 +194,7 @@ def create_all_tables() -> None:
 __all__ = [
     "Base",
     "ProjectRecord",
+    "ProjectIndexRecord",
     "BridgeRecord",
     "GenerationHistory",
     "get_session",

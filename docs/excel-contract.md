@@ -1,6 +1,6 @@
 # The Excel contract
 
-One workbook. 14 sheets. 427 mapped fields. This is the only external contract
+One workbook. 15 sheets. 476 mapped fields. This is the only external contract
 in the system — everything downstream reads `BridgeProject`, which this file
 defines the shape of.
 
@@ -28,6 +28,7 @@ bridgecad-cli template new --type <type> -o bridge.xlsx
 | 12 | DrawingControl | scales, sheet sizes, title block fields | ○ |
 | 13 | Calculations | derived values, locked | ○ |
 | 14 | ValidationModel | rule toggles, tolerance overrides | ○ |
+| 15 | SeismicData | zone, soil type, importance factor | ○ |
 
 ✅ required · ○ has IRC-derived defaults
 

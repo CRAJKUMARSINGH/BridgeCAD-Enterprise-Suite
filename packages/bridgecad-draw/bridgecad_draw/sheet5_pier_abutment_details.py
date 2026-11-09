@@ -279,7 +279,12 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     abt_cx = 560.0
     abt_by = 250.0
     L_mm = abt_len * sc
-    H_mm = abt_h * sc
+    # `abutment_height_m` is the TOTAL height, GL to deck soffit (models.py).
+    # The cap is stacked on top of the shaft further down, so the shaft itself
+    # is one cap depth shorter — otherwise this view shows an abutment a full
+    # cap depth taller than the longitudinal view beside it, and the dirt-wall
+    # / approach-slab / wearing-coat stack floats one cap depth too high.
+    H_mm = max(abt_h - cap_ab_d, 0.2) * sc
 
     # ── Family-aware shaft outline (Artefact ④) ────────────────────────
     # GRAVITY → battered trapezoid; CANTILEVER → inverted-T; else rectangle.

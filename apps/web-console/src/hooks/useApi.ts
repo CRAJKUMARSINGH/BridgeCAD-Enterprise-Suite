@@ -48,7 +48,7 @@ export function useValidateBridge() {
 // ─── Draw ────────────────────────────────────────────────────────────────
 export function useDrawGAD() {
   return useMutation({
-    mutationFn: ({ file, scale, prefix }: { file: File; scale?: number; prefix?: string }) =>
+    mutationFn: ({ file, scale, prefix }: { file: File; scale?: number | null; prefix?: string }) =>
       api.drawGAD(file, scale, prefix),
     onSuccess: (blob, vars) => {
       downloadBlob(blob, `${vars.prefix ?? 'GAD'}_drawings.zip`)
@@ -74,7 +74,7 @@ export function useQAReport() {
 // ─── Export Bundle ────────────────────────────────────────────────────────
 export function useExportBundle() {
   return useMutation({
-    mutationFn: ({ file, state, scale }: { file: File; state?: string; scale?: number }) =>
+    mutationFn: ({ file, state, scale }: { file: File; state?: string; scale?: number | null }) =>
       api.exportBundle(file, state, scale),
     onSuccess: (blob) => {
       downloadBlob(blob, 'bridgecad_bundle.zip')

@@ -88,7 +88,7 @@ Required before a plugin PR is merged:
 
 ```python
 def test_psc_boxgirder_produces_valid_dxf():
-    """All 7 sheets generate, all extents finite, all geometry non-empty."""
+    """All 8 sheets generate, all extents finite, all geometry non-empty."""
 ```
 
 Plus: a span-range boundary test, and a check that `defaults.yaml` does not
@@ -101,7 +101,7 @@ override an explicitly set field.
 - [ ] `defaults.yaml` has a source note per value
 - [ ] Overrides call base before specialising
 - [ ] Overrides do not mutate the model
-- [ ] Smoke test generates valid DXF on all 7 sheets
+- [ ] Smoke test generates valid DXF on all 8 sheets
 - [ ] Added to the plugin table in `GUIDE.md`
 - [ ] A template exists for the type (or an issue says why not)
 

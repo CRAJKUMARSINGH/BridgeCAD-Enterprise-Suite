@@ -208,12 +208,12 @@ if xlsx_bytes:
         fail("QA validation", str(exc)[:80])
 
 # ── STEP 6: POST /draw/gad ────────────────────────────────────────────────
-print("\n── Step 6: POST /draw/gad (7-sheet DXF ZIP) ────────────────────")
+print("\n── Step 6: POST /draw/gad (8-sheet DXF ZIP) ────────────────────")
 if xlsx_bytes:
     try:
         t0 = time.perf_counter()
         r = requests.post(
-            f"{API}/draw/gad?scale=100&prefix=BTEST",
+            f"{API}/draw/gad?prefix=BTEST",
             files={
                 "file": (
                     "test.xlsx",
@@ -234,11 +234,11 @@ if xlsx_bytes:
             with zf.ZipFile(_io.BytesIO(r.content)) as z:
                 entries = z.namelist()
             ndxf = sum(1 for e in entries if e.endswith(".dxf"))
-            ok("Draw 7-sheet DXF", f"{zip_kb} KB ZIP  {ndxf} DXF files  [{ms}ms]")
+            ok("Draw 8-sheet DXF", f"{zip_kb} KB ZIP  {ndxf} DXF files  [{ms}ms]")
         else:
-            fail("Draw 7-sheet DXF", f"HTTP {r.status_code}: {r.text[:100]}")
+            fail("Draw 8-sheet DXF", f"HTTP {r.status_code}: {r.text[:100]}")
     except Exception as exc:
-        fail("Draw 7-sheet DXF", str(exc)[:80])
+        fail("Draw 8-sheet DXF", str(exc)[:80])
         import traceback
 
         traceback.print_exc()

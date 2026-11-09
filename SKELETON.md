@@ -77,7 +77,7 @@ repo root/
 │   │   │   └── json_adapter.py
 │   │   └── tests/__init__.py
 │   │
-│   ├── bridgecad-draw/                               ✅  (5 engines × 7 sheets)
+│   ├── bridgecad-draw/                               ✅  (5 engines × 8 sheets)
 │   │   ├── pyproject.toml
 │   │   ├── bridgecad_draw/
 │   │   │   ├── __init__.py

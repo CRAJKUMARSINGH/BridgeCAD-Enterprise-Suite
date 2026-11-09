@@ -37,6 +37,7 @@ class LineStatus(str, Enum):
 class RateSource(str, Enum):
     MORTH_2024_25 = "MORTH_2024_25"
     PWD_OVERRIDE = "PWD_OVERRIDE"
+    MEASURED = "MEASURED"
     MISSING = "missing"
 
     def __str__(self) -> str:

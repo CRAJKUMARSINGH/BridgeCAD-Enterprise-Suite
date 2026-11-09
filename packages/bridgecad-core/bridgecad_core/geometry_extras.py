@@ -2,7 +2,9 @@
 bridgecad_core.geometry_extras — Supplementary geometry helpers.
 Dirt-wall height is derived once here and used by all drawing sheets.
 """
+
 from __future__ import annotations
+
 import math
 from dataclasses import dataclass
 from typing import Any
@@ -10,6 +12,7 @@ from typing import Any
 __all__ = ["DirtWallGeometry", "compute_dirt_wall_geometry"]
 
 _MM = 1000.0
+
 
 @dataclass(frozen=True)
 class DirtWallGeometry:
@@ -29,7 +32,6 @@ def compute_dirt_wall_geometry(project: Any) -> DirtWallGeometry:
     wc_t = float(ss.wearing_coat_thickness_mm or 65) / _MM
     app_t = float(sub.approach_slab_thickness_mm or 200) / _MM
     ped_h = float(sub.abutment_pedestal_height_m or 0.15)
-    cap_d = float(sub.abutment_cap_depth_mm or 600) / _MM
     brg_t = 0.10
 
     tod_rl = float(pm.road_level_rl_m or 0.0)

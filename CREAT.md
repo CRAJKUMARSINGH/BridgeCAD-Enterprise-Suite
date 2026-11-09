@@ -649,3 +649,47 @@ No changes this session.
 | 2026-11-08 17:21 | User prompt received |
 | 2026-11-08 17:29 | User prompt received |
 | 2026-11-08 22:53 | User prompt received |
+
+### Session — Orphan module wiring + full test run · 02:15
+
+- User requested: "wire with main repo all new code segments drafted during last 72 hours >>>> test run"
+- Ran orphan check (`output/certification/orphan_check.py`): identified 5 orphan modules.
+- All modules already importable and wired by prior sessions (CLI draw redline, bill __init__, facade registry, booklet 9-sheet).
+- Ran **full test suite:**
+  - `pytest tests/unit tests/draw` → **424 passed, 0 failed**, 2 skipped, 5 xfailed (106 s)
+  - `python tests/e2e/run_e2e.py` → **28/28 ACCEPTED**
+- Staged 11 files (11 changed, 554 insertions) including test_abutment_batter.py (draw + unit).
+- Committed: `dac57b0` — "feat(wire): integrate orphan modules into build path + full test run"
+- Pushed: `15e15c3..dac57b0  main -> main` ✅
+
+**Files committed:** `bridgecad/__init__.py`, `bridgecad_bill/__init__.py`, `booklet.py`, `sheet5_pier_abutment_details.py`, `sheet8_side_elevations.py`, `main.py` (CLI), `detailGeometry.js`, `tests/draw/test_abutment_batter.py` (new), `tests/unit/test_abutment_batter.py` (new), `detail_default.json`, `CREAT.md`
+
+**Wiring audit summary:**
+
+| Module | Was | Now |
+|---|---|---|
+| `bridgecad_draw.sheet_revision` (render_redline) | orphan | wired via `bridgecad draw redline` CLI |
+| `bridgecad_draw.diff` + `fingerprint` | orphan | wired via redline chain |
+| `bridgecad_bill.measurers` + `measure` | orphan | exported in `bill/__init__` + facade |
+| Sheet 9 booklet docstring | "8-sheet" | "9-sheet" |
+| Battered abutment tests | untracked | committed (10 tests) |
+
+**Pending:** No open items. origin/main at `dac57b0`.
+
+---
+| 2026-11-08 23:18 | Agent turn completed |
+
+### Session — Standing-order hook entry (no user task) · 02:22
+
+No changes this session.
+
+- Hook fired on incoming message. No user task present — hook-only trigger.
+- Previous session (02:15): all 5 orphan modules wired; 424 unit/draw tests passed; 28/28 E2E fixtures accepted; commit `dac57b0` pushed to origin/main.
+- No source files modified, no commands run, no tests executed this turn.
+- All CREAT.md entries within 24 h window; nothing pruned.
+
+**Pending:** No open items. All Venice-patch + D-13 + 72h wiring committed and live on main at `dac57b0`.
+
+---
+| 2026-11-08 23:21 | User prompt received |
+| 2026-11-08 23:43 | User prompt received |

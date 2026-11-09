@@ -30,6 +30,10 @@ MUTATIONS = {
     "one-wall": "const ONLY = true;",
     "no-abtl-clamp": "const NOABTL = true;",
     "flat-grid": "const FLAT = true;",
+    # Drawn-geometry mutations: they perturb the emitted wing-wall polygons, not
+    # just the wall metadata, so they prove the audit reads the drawing itself.
+    "axes-swap": "transpose each wing-wall polygon about its nose (run <-> return)",
+    "corner-anchor": "spring both wing walls from one shared nose",
 }
 
 #: Remediation hints keyed by audit code, echoed when a failure is printed.
@@ -37,6 +41,8 @@ FIXES = {
     "E_OVERLAP": "panels collided — retune the band or shrink the clamp",
     "E_EXTENTS": "geometry left the drawing frame — check the mm() scale",
     "E_WALL_COUNT": "expected exactly two wing walls (left and right)",
+    "E_WALL_ANCHOR": "both wing walls spring from one nose — anchor each at its own abutment end",
+    "E_FACE_RUN": "the drawn wall's horizontal extent is not the face run — run and return are swapped",
     "E_ABTL_SHORT": "ABTL must exceed the carriageway by at least 2 m",
 }
 
@@ -60,6 +66,26 @@ for (const c of cases) {
     }
     if (MUT === "no-abtl-clamp") s5.meta.params = { ...s5.meta.params, abtl: c.params.abtl };
     if (MUT === "splay-clamp") s5.meta.walls = s5.meta.walls.map((x) => ({ ...x, splayDeg: c.params.splay }));
+    if (MUT === "axes-swap") {
+      // Turn each wing wall a quarter-turn about its own nose: its drawn
+      // horizontal extent then measures the return, not the face run. This is
+      // the item-1 "run and return swapped" defect, injected into the drawing.
+      s5.prims = s5.prims.map((q) => {
+        if (!(q.k === "poly" && q.layer === "SUB-ABUT")) return q;
+        const nx = q.pts[0], ny = q.pts[1], pts = [];
+        for (let i = 0; i < q.pts.length; i += 2) pts.push(nx + (q.pts[i + 1] - ny), ny + (q.pts[i] - nx));
+        return { ...q, pts };
+      });
+    }
+    if (MUT === "corner-anchor") {
+      // Spring both walls from the left wall's nose — the item-1 "both walls
+      // anchored to one corner" defect. The two noses collapse to one point.
+      const wallPolys = s5.prims.filter((q) => q.k === "poly" && q.layer === "SUB-ABUT");
+      if (wallPolys.length > 1) {
+        const nx = wallPolys[0].pts[0], ny = wallPolys[0].pts[1];
+        for (const q of wallPolys) { q.pts[0] = nx; q.pts[1] = ny; }
+      }
+    }
     rec.sheet4 = { audit: audit(s4), n: s4.prims.length };
     rec.sheet5 = { audit: audit(s5), walls: s5.meta.walls.map((x) => ({ ...x })), p: s5.meta.params, n: s5.prims.length };
   } catch (e) { rec.error = String((e && e.message) || e); }
@@ -104,16 +130,28 @@ def rand_params(rng: random.Random) -> dict:
 
 
 def oracle(wall: dict, p: dict) -> list[str]:
-    bad = []
-    face = max((p["abtl"] - p["carriageway"]) / 2.0, 0.0)
+    """Independent invariant check on one wing wall.
+
+    The wall is a right triangle measured from the abutment face: the face run and
+    the return are its legs and the wall length is the hypotenuse. Checking
+    Pythagoras, the angle recovered from the two drawn legs, and the face-run
+    definition catches a wrong length or a swapped run/return *without* restating
+    the implementation's own ``face / cos(splay)`` expression.
+    """
+    bad: list[str] = []
+    face = (p["abtl"] - p["carriageway"]) / 2.0
     if abs(face - wall["faceRunM"]) > 1e-6:
         bad.append(f"E_ORACLE_FACE {face:.4f} != {wall['faceRunM']:.4f}")
-    rad = math.radians(wall["splayDeg"])
-    hyp = face / math.cos(rad) if math.cos(rad) else 0.0
-    if abs(hyp - wall["lengthM"]) > 1e-6:
-        bad.append(f"E_ORACLE_LENGTH {hyp:.4f} != {wall['lengthM']:.4f}")
-    if abs(hyp * math.sin(rad) - wall["returnM"]) > 1e-6:
-        bad.append("E_ORACLE_RETURN")
+
+    lhs = wall["lengthM"] ** 2
+    rhs = wall["faceRunM"] ** 2 + wall["returnM"] ** 2
+    if abs(lhs - rhs) > 1e-6 * max(1.0, lhs):
+        bad.append(f"E_ORACLE_PYTHAGORAS {lhs:.4f} != {rhs:.4f}")
+
+    # The angle recovered from the drawn legs must equal the declared splay.
+    drawn_angle = math.degrees(math.atan2(wall["returnM"], wall["faceRunM"]))
+    if abs(drawn_angle - wall["splayDeg"]) > 1e-6:
+        bad.append(f"E_ORACLE_ANGLE {drawn_angle:.4f} != {wall['splayDeg']:.4f}")
     return bad
 
 

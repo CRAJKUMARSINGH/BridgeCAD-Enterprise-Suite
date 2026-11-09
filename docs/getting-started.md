@@ -130,7 +130,7 @@ You get a ZIP with the DXF sheets, BOQ, QA report and `manifest.json`.
 
 ```
 out/
-├── dxf/           7 sheets
+├── dxf/           8 sheets
 ├── pdf/           print-ready
 ├── boq.xlsx       priced, 8 sections
 ├── qa.html        compliance report, 0-100 grade

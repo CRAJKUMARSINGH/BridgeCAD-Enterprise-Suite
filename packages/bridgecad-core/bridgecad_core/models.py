@@ -1349,6 +1349,21 @@ class Substructure(BaseModel):
         le=Decimal("2.0"),
         dp=2,
     )
+    # --- Battered abutment faces (LISP abt1 ALFB/ARFB + ALBB/ARBB) ---
+    abutment_face_batter_1n: Decimal | None = DM(
+        "Abutment face (riverside) batter, 1:n — horizontal run = height/n; "
+        "larger n is gentler (LISP ALFB/ARFB, default 10)",
+        ge=Decimal("1.5"),
+        le=Decimal("30"),
+        dp=1,
+    )
+    abutment_back_batter_1n: Decimal | None = DM(
+        "Abutment back (earthside, dirt-wall side) batter, 1:n — steeper than "
+        "the face batter (LISP ALBB/ARBB, default 3)",
+        ge=Decimal("1.5"),
+        le=Decimal("30"),
+        dp=1,
+    )
     # --- Reinforcement inputs (patch run-book step 1) ---
     abutment_main_bar_dia_mm: int | None = DI("Abutment shaft main bar diameter, mm", ge=12, le=32)
     abutment_main_bar_spacing_mm: int | None = DI(
@@ -2931,7 +2946,11 @@ class BridgeProject(BaseModel):
             if key not in base:
                 raise KeyError(f"BridgeProject has no section {key!r}")
             current = base[key]
-            if isinstance(patch, dict) and current is not None and hasattr(type(current), "model_fields"):
+            if (
+                isinstance(patch, dict)
+                and current is not None
+                and hasattr(type(current), "model_fields")
+            ):
                 merged = {f: getattr(current, f) for f in type(current).model_fields}
                 merged.update(patch)
                 base[key] = type(current).model_validate(merged)

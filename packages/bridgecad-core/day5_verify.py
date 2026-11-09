@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import py_compile
 import sys
+
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 import traceback
 from datetime import date
 from decimal import Decimal

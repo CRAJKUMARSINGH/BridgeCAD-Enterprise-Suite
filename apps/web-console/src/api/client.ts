@@ -131,17 +131,20 @@ export const api = {
     }).then((r) => r.data)
   },
 
-  /** POST /draw/gad — upload xlsx, download DXF ZIP */
+  /** POST /draw/gad — upload xlsx, download DXF ZIP.
+   *  Omit `scale` to use each sheet's standard scale (recommended). */
   drawGAD: (
     file: File,
-    scale = 100,
+    scale?: number | null,
     prefix = 'GAD',
     onProgress?: (pct: number) => void,
   ): Promise<Blob> => {
     const fd = new FormData()
     fd.append('file', file)
+    const params = new URLSearchParams({ prefix })
+    if (scale != null) params.set('scale', String(scale))
     return http
-      .post(`/draw/gad?scale=${scale}&prefix=${prefix}`, fd, {
+      .post(`/draw/gad?${params}`, fd, {
         headers: { 'Content-Type': 'multipart/form-data' },
         responseType: 'blob',
         onUploadProgress: (e: AxiosProgressEvent) => {
@@ -171,14 +174,17 @@ export const api = {
     }).then((r) => r.data)
   },
 
-  /** POST /exports/bundle — upload xlsx, download ZIP */
-  exportBundle: (file: File, state?: string, scale = 100): Promise<Blob> => {
+  /** POST /exports/bundle — upload xlsx, download ZIP.
+   *  Omit `scale` to use each sheet's standard scale (recommended). */
+  exportBundle: (file: File, state?: string, scale?: number | null): Promise<Blob> => {
     const fd = new FormData()
     fd.append('file', file)
-    const params = new URLSearchParams({ scale: String(scale) })
+    const params = new URLSearchParams()
+    if (scale != null) params.set('scale', String(scale))
     if (state) params.set('state', state)
+    const qs = params.toString()
     return http
-      .post(`/exports/bundle?${params}`, fd, {
+      .post(`/exports/bundle${qs ? `?${qs}` : ''}`, fd, {
         headers: { 'Content-Type': 'multipart/form-data' },
         responseType: 'blob',
       })
@@ -194,12 +200,58 @@ export const api = {
     http.get(`/plugins/${id}`).then((r) => r.data),
 }
 
-/** Save a Blob as a file download */
+/** Save a Blob as a file download. */
 export function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
   a.download = filename
+  a.rel = 'noopener'
+  a.style.display = 'none'
+  document.body.appendChild(a)
   a.click()
-  URL.revokeObjectURL(url)
+  document.body.removeChild(a)
+  // Revoke on the next macrotask: revoking synchronously can abort the
+  // download before the browser has started fetching the object URL.
+  setTimeout(() => URL.revokeObjectURL(url), 0)
+}
+
+// ─── Project session (patch mechanic) ─────────────────────────────────────
+
+export interface PatchCheck {
+  id: string
+  parameter: string
+  value: string
+  limit: string
+  ok: boolean
+}
+
+export interface PatchResult {
+  section: string
+  field: string
+  value: unknown
+  checks: PatchCheck[]
+  qa: { score: number | null; failures: number | null; error?: string }
+}
+
+export interface ProjectLoadResult {
+  token: string
+  summary: ProjectSummary
+}
+
+export const projectApi = {
+  /** POST /project/load — upload xlsx, get a patch token */
+  load: (file: File): Promise<ProjectLoadResult> => {
+    const fd = new FormData()
+    fd.append('file', file)
+    return http.post('/project/load', fd, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }).then((r) => r.data)
+  },
+
+  /** PATCH /project/{token}/{section}/{field} — atomic single-field patch */
+  patch: (token: string, section: string, field: string, value: number | string): Promise<PatchResult> =>
+    http
+      .patch(`/project/${token}/${section}/${field}`, { value })
+      .then((r) => r.data),
 }

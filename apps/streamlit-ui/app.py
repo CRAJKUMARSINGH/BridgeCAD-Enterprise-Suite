@@ -113,7 +113,7 @@ if selected == "🏠 Home":
 | 200+ IRC/MORTH enums | ✅ M1 Done |
 | 427-field Pydantic models (14 sheets) | ✅ M1 Done |
 | Excel ↔ BridgeProject IO | ✅ M2 Done |
-| 7-sheet DXF GAD package (Plan/Long-section/Cross-section/Foundation/Pier-Abutment/Bearings/BOQ) | ✅ M3 Done |
+| 8-sheet DXF GAD package (Plan/Long-section/Cross-section/Foundation/Pier-Abutment/Bearings/BOQ/Side-elevations) | ✅ M3 Done |
 | 3 bridge-type plugins (RCC T-Beam / PSC I-Girder / Box Culvert) | ✅ M4 Done |
 | MORTH BOQ with 90 seed rates, Excel + CSV output | ✅ M5 Done |
 | Export ZIP bundle + QA HTML report | ✅ M6 Done |
@@ -221,35 +221,48 @@ elif selected == "✅ Validate":
 # ===========================================================================
 elif selected == "📐 Drawing Gen":
     uploaded = _upload_widget("draw_xl")
-    scale = st.slider("Plot scale (1:N)", 50, 500, 100, 50)
+    scale_choice = st.selectbox(
+        "Plot scale (1:N) — omit for each sheet's standard scale",
+        options=["Auto (standard per-sheet)", 50, 100, 200, 500],
+        index=0,
+    )
+    scale = None if isinstance(scale_choice, str) else int(scale_choice)
     prefix = st.text_input("Output prefix", "GAD")
-    if uploaded and st.button("Generate 7-Sheet DXF Package 🚀"):
+    if uploaded and st.button("Generate 8-Sheet DXF Package 🚀"):
         data = uploaded.read()
         project = _load_project_bytes(data)
         with st.spinner("Generating drawings …"), tempfile.TemporaryDirectory() as td:
-            from bridgecad_draw.booklet import generate_package
+            from bridgecad_draw.booklet import PackageGenerationError, generate_package
 
-            sheets = generate_package(project, Path(td), prefix=prefix, scale_denom=scale)
-            # ZIP for download
-            zip_buf = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
-            with zipfile.ZipFile(zip_buf.name, "w", zipfile.ZIP_DEFLATED) as zf:
-                for s in sheets:
-                    zf.write(s, s.name)
-            zip_bytes = Path(zip_buf.name).read_bytes()
-        st.success(f"✅ {len(sheets)}/7 sheets generated!")
-        total_kb = sum(s.stat().st_size for s in sheets) // 1024
-        st.metric("Total DXF size", f"{total_kb} KB")
-        import pandas as pd
+            try:
+                sheets = generate_package(project, Path(td), prefix=prefix, scale_denom=scale)
+            except PackageGenerationError as exc:
+                st.error(f"❌ Drawing package incomplete: {exc}")
+                sheets = None
+            if sheets is not None:
+                # ZIP for download
+                zip_buf = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
+                with zipfile.ZipFile(zip_buf.name, "w", zipfile.ZIP_DEFLATED) as zf:
+                    for s in sheets:
+                        zf.write(s, s.name)
+                zip_bytes = Path(zip_buf.name).read_bytes()
+        if sheets is not None:
+            st.success(f"✅ {len(sheets)}/8 sheets generated!")
+            total_kb = sum(s.stat().st_size for s in sheets) // 1024
+            st.metric("Total DXF size", f"{total_kb} KB")
+            import pandas as pd
 
-        st.dataframe(
-            pd.DataFrame([{"Sheet": s.name, "Size KB": s.stat().st_size // 1024} for s in sheets])
-        )
-        st.download_button(
-            "⬇ Download DXF Package (ZIP)",
-            data=zip_bytes,
-            file_name=f"{prefix}_drawings.zip",
-            mime="application/zip",
-        )
+            st.dataframe(
+                pd.DataFrame(
+                    [{"Sheet": s.name, "Size KB": s.stat().st_size // 1024} for s in sheets]
+                )
+            )
+            st.download_button(
+                "⬇ Download DXF Package (ZIP)",
+                data=zip_bytes,
+                file_name=f"{prefix}_drawings.zip",
+                mime="application/zip",
+            )
 
 
 # ===========================================================================
@@ -563,7 +576,7 @@ elif selected == "❓ Help":
 ### Quick Start
 1. **Load Project** tab — upload your BridgeCAD Excel workbook.
 2. **Validate** tab — check all 30 IRC/MORTH compliance rules.
-3. **Drawing Gen** tab — generate 7-sheet DXF GAD package.
+3. **Drawing Gen** tab — generate 8-sheet DXF GAD package.
 4. **BOQ Generator** tab — get priced Bill of Quantities.
 5. **Export Bundle** tab — one click → full ZIP (DXF + BOQ + QA report).
 

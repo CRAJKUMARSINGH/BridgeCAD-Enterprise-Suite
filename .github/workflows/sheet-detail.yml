@@ -32,7 +32,7 @@ jobs:
       - run: npm run build --prefix frontend
 
       - name: Contract tests
-        run: pytest tests/draw/test_sheet4_sheet5_present.py tests/draw/test_no_shared_class.py -q
+        run: pytest tests/draw/test_sheet4_sheet5_present.py tests/draw/test_no_shared_class.py tests/draw/test_workspace_features.py -q
 
       - name: Randomised audit (3000 seeded cases)
         run: python scripts/robotic_sheet_detail_audit.py --cases 3000 --seed 20261104

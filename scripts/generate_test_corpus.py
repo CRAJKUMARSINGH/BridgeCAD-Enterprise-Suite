@@ -97,7 +97,7 @@ def _render_suite_case(case_dir: Path, data: dict, prefix: str) -> dict:
 
     build_from_fixture = _load_builder()
     project = build_from_fixture(data)
-    sheets = generate_package(project, case_dir, prefix=prefix, scale_denom=100)
+    sheets = generate_package(project, case_dir, prefix=prefix)
     total_kb = sum(s.stat().st_size for s in sheets) // 1024
 
     qa_score = None

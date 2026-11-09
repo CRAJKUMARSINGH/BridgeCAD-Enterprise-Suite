@@ -8,7 +8,7 @@ build-backend = "hatchling.build"
 [project]
 name = "bridgecad-enterprise-suite"
 version = "0.1.0rc1"                     # PEP 440 form of 0.1.0-rc1
-description = "Parametric bridge GAD generation — Excel workbook in, 7-sheet IRC-compliant DXF package, priced BOQ and QA report out."
+description = "Parametric bridge GAD generation — Excel workbook in, 8-sheet IRC-compliant DXF package, priced BOQ and QA report out."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
@@ -372,7 +372,7 @@ directory = "htmlcov"
 # [tool.pytest.ini_options] — a nested table there is an unknown ini option and
 # `--strict-config` fails the whole run.
 # Gate: fail if a benchmark regresses more than 20% against the stored baseline.
-# Thresholds enforced: QA < 200ms, BOQ < 500ms, 1 sheet < 3s, 7 sheets < 15s.
+# Thresholds enforced: QA < 200ms, BOQ < 500ms, 1 sheet < 3s, 8 sheets < 15s.
 [tool.pytest-benchmark]
 autosave = false
 storage = ".benchmarks"

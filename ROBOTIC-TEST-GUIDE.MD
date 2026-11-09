@@ -76,7 +76,9 @@ python scripts/robotic_smoke.py --persona all --seed 99
 
 ## 3. The full robotic sweep (the "green stack")
 
-Run this before a push or a merge. Each line must be green.
+Run this before a push or a merge. Each line must be green. The last three
+lines are the **draw lanes** — without them "green" would only prove the
+frontend contract, never that a drawing package was actually produced.
 
 ```powershell
 python -m ruff check packages/ apps/ scripts/
@@ -84,6 +86,9 @@ python -m ruff format --check packages/ apps/ scripts/
 python -m pytest tests/docs -q -m "not slow"
 python scripts/verify_docs.py
 python scripts/robotic_smoke.py --persona all --seed 42
+python -m pytest tests/draw -m draw -q
+python -m pytest tests/drawings --regression -q
+python tests/e2e/run_e2e.py
 ```
 
 Expected results:
@@ -95,6 +100,22 @@ Expected results:
 | `pytest tests/docs` | all pass, some deselected (slow lane) |
 | `verify_docs.py` | `3 passed, 0 failed, 3 skipped` (lychee/mkdocs/sphinx skipped when absent) |
 | `robotic_smoke.py` | every persona `passed=True`, exit `0` |
+| `pytest tests/draw -m draw` | promoted sheets pass; pre-RC1 scaffolds xfail or are deselected (see below) |
+| `pytest tests/drawings --regression` | `N passed`; layer audit and PDF/A gates green |
+| `tests/e2e/run_e2e.py` | `28` fixtures, each `*** ACCEPTED ***`; every sheet ≥ 20 entities |
+
+> **Scaffold baseline (not a regression).** Sheets 2, 3, 4, 6 and 7 are the
+> documented pre-RC1 scaffolds and carry no dimensions yet, so
+> `test_non_scaffold_sheets_are_dimensioned` is `xfail` and the scaffold lane in
+> `.github/workflows/draw.yml` is `continue-on-error`. The three lines above are
+> only "green" when the *non-scaffold* sheet contracts and the E2E fixture
+> packages pass — the scaffold xfails are expected.
+
+Equivalent convenience target (if `make` is on your PATH):
+
+```powershell
+make green-stack
+```
 
 ---
 

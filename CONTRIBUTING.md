@@ -103,7 +103,7 @@ python tests/e2e/run_e2e.py    # 28 fixtures
 python rc1_smoke.py            # release gate
 ```
 
-Benchmarks matter: QA < 200 ms, BOQ < 500 ms, one sheet < 3 s, seven sheets
+Benchmarks matter: QA < 200 ms, BOQ < 500 ms, one sheet < 3 s, eight sheets
 < 15 s. If your change pushes past those, say so in the PR.
 
 ---

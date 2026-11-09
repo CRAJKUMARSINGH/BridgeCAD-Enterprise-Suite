@@ -9,6 +9,43 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- Abutment datum stack (`abutment_stack.py`) as the single resolver for cap,
+  bearing seat, dirt wall, approach slab and wearing-coat levels across Sheets
+  2, 5 and 8; `SUB-DIRT-WALL` layer; clause-tagged checks table on Sheets 5/8.
+- Sheet 9 reinforcement schedule & steel ledger (`sheet9_reinforcement.py`),
+  `RebarItem`/`detailing` store with utilisation, `standards/reinforcement_minima.yaml`
+  (IRC:112 minima, `minima_table_v1` source tag).
+- Skew module (`skew.py`): `SupportLine`, `effective_span_m`, obtuse-corner
+  helpers; SKW-001..003 QA rules; `curve_radius_m` guard.
+- Entity fingerprinting + revision diff (`fingerprint.py`, `diff.py`,
+  `sheet_revision.py`), append-only revision register (`revisions.py`),
+  `bridgecad-cli issue` / `diff` commands.
+- Geometry-derived measurement (`bridgecad_bill.measure`/`measurers.py`) with
+  entity provenance; BIL-001/002 QA rules; IS 2502 BBS column order.
+- View-axis contract (`contract.ViewSpec`/`ViewAxis`, `dim_along` in
+  primitives, `scripts/check_view_axes.py` wired into `make lint`).
+- Project index (`project_index` table, `ProjectIndexRepo`) with duplicate,
+  soft-delete and restore; `/projects` API endpoints.
+- API: `POST /draw/preview/{sheet}` (SVG), `POST /io/import/{sheet}`
+  (`excel_reader.read_sheet`), `POST /project/load` + `PATCH
+  /project/{token}/{section}/{field}` with live checks + QA verdict.
+- Web console Reinforcement page patching abutment/bar fields on blur.
+- `scripts/audit_dead_geometry.py` + `make audit-draw` + CI dead-geometry
+  audit; LISP baseline corpus slot (`references/lisp/`), inventory parser
+  (`bridgecad_refs.lisp_baseline`), `scripts/refs_lisp.py`,
+  `docs/lisp-baseline.md`.
+- `docs/abutment-geometry.md` — resolved datum stack documentation.
+
+### Fixed
+- Sheet 8 pier transverse view: cap sized by `pier_cap_length_m` (was shaft
+  length) and pile-cap height governed by `pile_cap_thickness_mm`.
+- Excel reader: blank separator rows reset schedule mode before being
+  skipped, so trailing flat fields are no longer eaten as schedule rows.
+- `excel_reader.read_sheet` resolves sheet number → section through the same
+  parser map as the full reader.
+- Node subprocess test decoding forced to UTF-8 (en-dash regression on
+  Windows).
+
 - Sheet 04 (abutment/pier foundation) and Sheet 05 (pier, abutment, wing wall) restored to the static deploy.
 - `detailGeometry.js` with ABTL ladder, splayed wing-wall geometry, `audit()` and `toDxf()`.
 - Robotic randomised audit with independent oracle, mutation mode and CI gate.

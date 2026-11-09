@@ -590,6 +590,58 @@ def _build_bearings_joints(wb: Any, t: Any, project: Any = None) -> Any:
         row += 1
     for col in range(1, len(expj_headers) + 1):
         _apply(ws.cell(row=row, column=col, value=""), _input_style())
+    row += 2
+
+    # Flat bearing / joint demand parameters (field|value rows — read back by
+    # _sheet_to_dict in the reader's S10 parser).
+    ws.cell(row=row, column=1, value="bearing_parameters:").font = Font(
+        bold=True, name="Arial", size=10
+    )
+    row += 1
+    bj_scalars = [
+        (
+            "bearing_type",
+            getattr(getattr(bj, "bearing_type", None), "name", "") if bj else "",
+            "",
+            "Primary bearing type",
+        ),
+        (
+            "restrained_longitudinal",
+            getattr(bj, "restrained_longitudinal", False) if bj else False,
+            "",
+            "Longitudinal restraint",
+        ),
+        (
+            "restrained_transverse",
+            getattr(bj, "restrained_transverse", False) if bj else False,
+            "",
+            "Transverse restraint",
+        ),
+        (
+            "bearing_seat_width_mm",
+            getattr(bj, "bearing_seat_width_mm", None) if bj else None,
+            "mm",
+            "Bearing seat width",
+        ),
+        (
+            "bearing_clearance_mm",
+            getattr(bj, "bearing_clearance_mm", None) if bj else None,
+            "mm",
+            "Bearing clearance",
+        ),
+        (
+            "design_movement_mm",
+            getattr(bj, "design_movement_mm", None) if bj else None,
+            "mm",
+            "Design movement",
+        ),
+    ]
+    for field_name, val, unit, desc in bj_scalars:
+        _apply(ws.cell(row=row, column=1, value=field_name), _sub_style())
+        _apply(ws.cell(row=row, column=2, value=val if val is not None else ""), _input_style())
+        _apply(ws.cell(row=row, column=3, value=unit), _sub_style())
+        _apply(ws.cell(row=row, column=4, value=desc), _sub_style())
+        row += 1
 
     for col_w, w in enumerate([28, 22, 12, 18, 10, 18, 20, 14, 16, 16, 14, 10], 1):
         ws.column_dimensions[get_column_letter(col_w)].width = w
@@ -841,6 +893,78 @@ def generate_template(
                 "m",
                 "Weep hole spacing",
             ),
+            (
+                "abutment_face_batter_1n",
+                float(getattr(sub, "abutment_face_batter_1n", 10) or 10) if sub else 10,
+                "1:n",
+                "Abutment face (river) batter",
+            ),
+            (
+                "abutment_back_batter_1n",
+                float(getattr(sub, "abutment_back_batter_1n", 3) or 3) if sub else 3,
+                "1:n",
+                "Abutment back (earth) batter",
+            ),
+            (
+                "abutment_main_bar_dia_mm",
+                getattr(sub, "abutment_main_bar_dia_mm", 20) if sub else 20,
+                "mm",
+                "Abutment main bar dia",
+            ),
+            (
+                "abutment_main_bar_spacing_mm",
+                getattr(sub, "abutment_main_bar_spacing_mm", 150) if sub else 150,
+                "mm",
+                "Abutment main bar spacing",
+            ),
+            (
+                "abutment_link_dia_mm",
+                getattr(sub, "abutment_link_dia_mm", 12) if sub else 12,
+                "mm",
+                "Abutment link dia",
+            ),
+            (
+                "abutment_link_spacing_mm",
+                getattr(sub, "abutment_link_spacing_mm", 200) if sub else 200,
+                "mm",
+                "Abutment link spacing",
+            ),
+            (
+                "cap_main_bar_dia_mm",
+                getattr(sub, "cap_main_bar_dia_mm", 25) if sub else 25,
+                "mm",
+                "Cap main bar dia",
+            ),
+            (
+                "cap_main_bar_spacing_mm",
+                getattr(sub, "cap_main_bar_spacing_mm", 150) if sub else 150,
+                "mm",
+                "Cap main bar spacing",
+            ),
+            (
+                "dirt_wall_vert_bar_dia_mm",
+                getattr(sub, "dirt_wall_vert_bar_dia_mm", 16) if sub else 16,
+                "mm",
+                "Dirt wall vertical bar dia",
+            ),
+            (
+                "dirt_wall_vert_bar_spacing_mm",
+                getattr(sub, "dirt_wall_vert_bar_spacing_mm", 150) if sub else 150,
+                "mm",
+                "Dirt wall vertical bar spacing",
+            ),
+            (
+                "dirt_wall_horiz_bar_dia_mm",
+                getattr(sub, "dirt_wall_horiz_bar_dia_mm", 12) if sub else 12,
+                "mm",
+                "Dirt wall horizontal bar dia",
+            ),
+            (
+                "dirt_wall_horiz_bar_spacing_mm",
+                getattr(sub, "dirt_wall_horiz_bar_spacing_mm", 200) if sub else 200,
+                "mm",
+                "Dirt wall horizontal bar spacing",
+            ),
         ],
         t,
         model_cls=m.Substructure,
@@ -1052,6 +1176,66 @@ def generate_template(
         model_cls=m.ValidationModel,
         obj=project.validation if project else None,
         calculated=True,
+    )
+    # S15: seismic demand parameters (appended sheet — was the reserved 13–24
+    # block assumption; appended rather than inserted so S13/S14 keep their ids)
+    _build_generic_sheet(
+        wb,
+        "SEISMIC_DATA",
+        "S15 — SEISMIC DATA",
+        [
+            (
+                "zone",
+                getattr(
+                    getattr(project.seismic_data if project else None, "zone", None),
+                    "name",
+                    "ZONE_0_NON_SEISMIC",
+                )
+                if project
+                else "ZONE_0_NON_SEISMIC",
+                "",
+                "Seismic zone",
+            ),
+            (
+                "pga_g",
+                getattr(project.seismic_data, "pga_g", 0.0) if project else 0.0,
+                "g",
+                "Peak ground acceleration",
+            ),
+            (
+                "importance_factor",
+                getattr(project.seismic_data, "importance_factor", 1.0) if project else 1.0,
+                "",
+                "Importance factor I",
+            ),
+            (
+                "site_class",
+                getattr(
+                    getattr(project.seismic_data if project else None, "site_class", None),
+                    "name",
+                    "C",
+                )
+                if project
+                else "C",
+                "",
+                "Site class",
+            ),
+            (
+                "response_modifier_r",
+                getattr(project.seismic_data, "response_modifier_r", 3.0) if project else 3.0,
+                "",
+                "Response reduction R",
+            ),
+            (
+                "seat_width_seismic_mm",
+                getattr(project.seismic_data, "seat_width_seismic_mm", 0.0) if project else 0.0,
+                "mm",
+                "Seismic seat width",
+            ),
+        ],
+        t,
+        model_cls=m.SeismicData,
+        obj=project.seismic_data if project else None,
     )
 
     # Workbook properties

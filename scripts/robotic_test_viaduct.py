@@ -581,9 +581,9 @@ ok(
 
 
 # ──────────────────────────────────────────────────────────────────────────
-# STEP 3 — Generate 7-sheet DXF package
+# STEP 3 — Generate 8-sheet DXF package
 # ──────────────────────────────────────────────────────────────────────────
-hdr("STEP 3 — Generate 7-Sheet DXF GAD Package")
+hdr("STEP 3 — Generate 8-Sheet DXF GAD Package")
 t3 = time.perf_counter()
 
 OUT = SUITE / "test_run_output" / "viaduct_8x30m_psc_box"
@@ -599,7 +599,7 @@ print()
 for s in sheets:
     kb = s.stat().st_size // 1024
     ok(f"  {s.name}", f"{kb} KB")
-ok("7/7 sheets generated", f"total={total_kb} KB  time={dxf_ms}ms")
+ok(f"{len(sheets)}/8 sheets generated", f"total={total_kb} KB  time={dxf_ms}ms")
 
 
 # ──────────────────────────────────────────────────────────────────────────
@@ -763,7 +763,7 @@ print()
 print("  TIMINGS:")
 print(f"    Build model   : {build_ms}ms")
 print(f"    QA checks     : {qa_ms}ms")
-print(f"    7-sheet DXF   : {dxf_ms}ms")
+print(f"    8-sheet DXF   : {dxf_ms}ms")
 print(f"    BOQ           : {boq_ms}ms")
 print(f"    QA HTML       : {html_ms}ms")
 print(f"    AI optimizer  : {ai_ms}ms")

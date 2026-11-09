@@ -4,26 +4,32 @@ import { useDrawGAD } from '../hooks/useApi'
 
 export default function DrawPage() {
   const draw     = useDrawGAD()
-  const [scale,  setScale]  = useState(100)
+  const [scale,  setScale]  = useState<string>('')
   const [prefix, setPrefix] = useState('GAD')
   const [file,   setFile]   = useState<File | null>(null)
+
+  const scaleValue = scale.trim() === '' ? null : Number(scale)
+  const scaleValid = scaleValue === null || (Number.isInteger(scaleValue) && scaleValue >= 10 && scaleValue <= 2500)
 
   return (
     <div className="max-w-2xl">
       <h1 className="text-xl font-bold text-slate-800 mb-1">📐 Drawing Generator</h1>
       <p className="text-slate-500 text-sm mb-6">
-        Upload a BridgeCAD Excel workbook and download a 7-sheet DXF GAD package.
+        Upload a BridgeCAD Excel workbook and download an 8-sheet DXF GAD package.
       </p>
 
       <FileDropzone file={file} onFile={(f) => setFile(f)} />
 
       <div className="mt-5 grid grid-cols-2 gap-4">
         <label className="block">
-          <span className="text-xs font-medium text-slate-600">Plot scale (1 : N)</span>
+          <span className="text-xs font-medium text-slate-600">Plot scale (1 : N) — blank = standard</span>
           <input
             type="number"
+            min={10}
+            max={2500}
+            placeholder="standard per-sheet"
             value={scale}
-            onChange={(e) => setScale(Number(e.target.value))}
+            onChange={(e) => setScale(e.target.value)}
             className="mt-1 block w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
           />
         </label>
@@ -39,11 +45,11 @@ export default function DrawPage() {
       </div>
 
       <button
-        disabled={!file || draw.isPending}
-        onClick={() => file && draw.mutate({ file, scale, prefix })}
+        disabled={!file || draw.isPending || !scaleValid}
+        onClick={() => file && draw.mutate({ file, scale: scaleValue, prefix })}
         className="mt-5 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white font-semibold py-3 rounded-xl transition-colors"
       >
-        {draw.isPending ? '⏳ Generating…' : '🚀 Generate 7-Sheet DXF Package'}
+        {draw.isPending ? '⏳ Generating…' : '🚀 Generate 8-Sheet DXF Package'}
       </button>
 
       {draw.isError && (
@@ -68,6 +74,7 @@ export default function DrawPage() {
             'Pier & Abutment Details',
             'Bearings & Expansion Joints Schedule',
             'Abstract Bill of Quantities',
+            'Side Elevations',
           ].map((s, i) => (
             <li key={i} className="flex items-center gap-2">
               <span className="text-blue-500 font-mono text-xs w-5">S{i + 1}</span>

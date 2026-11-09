@@ -29,6 +29,18 @@ elements:
       - depth_max_mm: 9999
         as_req_mm2_per_m: 1400
         source: "IRC:112 min steel 0.2% of section"
+  ABUTMENT_SHAFT_LINK:
+    note: "abutment links — shear/detailing steel, not section minimum"
+    rows:
+      - depth_max_mm: 9999
+        as_req_mm2_per_m: 500
+        source: "nominal link steel 12@200-class; shear-design governed (IRC:21)"
+  DIRT_WALL_DIST:
+    note: "dirt wall horizontal distribution bars"
+    rows:
+      - depth_max_mm: 9999
+        as_req_mm2_per_m: 400
+        source: "nominal wall distribution steel; not the 0.2% wall minimum"
   APPROACH_SLAB:
     note: "approach slab top/bottom mesh"
     rows:

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "bridgecad-draw"
 version = "0.1.0rc1"
-description = "BridgeCAD Enterprise — 2D/3D drawing package: 5 engines × 7 sheets"
+description = "BridgeCAD Enterprise — 2D/3D drawing package: 5 engines × 8 sheets"
 requires-python = ">=3.11"
 dependencies = [
   "ezdxf>=1.4.0",

@@ -87,3 +87,122 @@ __all__ = [
     "span_boundaries",
     "pier_positions",
 ]
+
+
+# ---------------------------------------------------------------------------
+# View axis contract (guide #7)
+# ---------------------------------------------------------------------------
+
+from enum import StrEnum
+
+from pydantic import BaseModel, ConfigDict, model_validator
+
+
+class ViewAxis(StrEnum):
+    LONGITUDINAL = "LONGITUDINAL"  # along chainage
+    TRANSVERSE = "TRANSVERSE"  # across the deck
+    VERTICAL = "VERTICAL"  # along RL
+
+
+class AxisError(ValueError):
+    """A dimension was asked for on an axis the view does not permit."""
+
+
+class ViewSpec(BaseModel):
+    """What a named view on a sheet is allowed to dimension.
+
+    An elevation looks *along* one axis, so it permits the other two:
+    abutment elevation → {TRANSVERSE, VERTICAL}; abutment section →
+    {LONGITUDINAL, VERTICAL}.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    sheet_no: int
+    view_name: str
+    allowed: frozenset[ViewAxis]
+    scale_denom: int
+
+    @model_validator(mode="after")
+    def _non_empty(self) -> ViewSpec:
+        if not self.allowed:
+            raise ValueError(f"{self.view_name}: allowed axis set must not be empty")
+        return self
+
+
+#: Registered views — sheet 5 splits into named views per the patch guide.
+VIEW_SPECS: dict[str, ViewSpec] = {
+    v.view_name: v
+    for v in [
+        ViewSpec(
+            sheet_no=5,
+            view_name="pier_elevation",
+            allowed=frozenset({ViewAxis.TRANSVERSE, ViewAxis.VERTICAL}),
+            scale_denom=50,
+        ),
+        ViewSpec(
+            sheet_no=5,
+            view_name="pier_section",
+            allowed=frozenset({ViewAxis.LONGITUDINAL, ViewAxis.TRANSVERSE}),
+            scale_denom=50,
+        ),
+        ViewSpec(
+            sheet_no=5,
+            view_name="abutment_elevation",
+            allowed=frozenset({ViewAxis.TRANSVERSE, ViewAxis.VERTICAL}),
+            scale_denom=50,
+        ),
+        ViewSpec(
+            sheet_no=5,
+            view_name="abutment_section",
+            allowed=frozenset({ViewAxis.LONGITUDINAL, ViewAxis.VERTICAL}),
+            scale_denom=50,
+        ),
+        ViewSpec(
+            sheet_no=5,
+            view_name="bearing_seat_detail",
+            allowed=frozenset({ViewAxis.TRANSVERSE, ViewAxis.VERTICAL}),
+            scale_denom=20,
+        ),
+        ViewSpec(
+            sheet_no=2,
+            view_name="long_section",
+            allowed=frozenset({ViewAxis.LONGITUDINAL, ViewAxis.VERTICAL}),
+            scale_denom=100,
+        ),
+        ViewSpec(
+            sheet_no=8,
+            view_name="abutment_end_face",
+            allowed=frozenset({ViewAxis.TRANSVERSE, ViewAxis.VERTICAL}),
+            scale_denom=50,
+        ),
+        ViewSpec(
+            sheet_no=8,
+            view_name="pier_transverse",
+            allowed=frozenset({ViewAxis.TRANSVERSE, ViewAxis.VERTICAL}),
+            scale_denom=50,
+        ),
+        ViewSpec(
+            sheet_no=1,
+            view_name="plan",
+            allowed=frozenset({ViewAxis.LONGITUDINAL, ViewAxis.TRANSVERSE}),
+            scale_denom=100,
+        ),
+        ViewSpec(
+            sheet_no=3,
+            view_name="cross_section",
+            allowed=frozenset({ViewAxis.TRANSVERSE, ViewAxis.VERTICAL}),
+            scale_denom=50,
+        ),
+        ViewSpec(
+            sheet_no=4,
+            view_name="foundation",
+            allowed=frozenset({ViewAxis.LONGITUDINAL, ViewAxis.TRANSVERSE, ViewAxis.VERTICAL}),
+            scale_denom=50,
+        ),
+    ]
+}
+
+
+def view_spec(name: str) -> ViewSpec:
+    return VIEW_SPECS[name]

@@ -128,7 +128,7 @@ def default_items(project: Any) -> list[RebarItem]:
     items.append(
         _item(
             "A2",
-            "ABUTMENT_SHAFT",
+            "ABUTMENT_SHAFT_LINK",
             "LINKS",
             abt_h_mm,
             int(sub.abutment_link_dia_mm or 12),
@@ -150,7 +150,7 @@ def default_items(project: Any) -> list[RebarItem]:
     items.append(
         _item(
             "D2",
-            "DIRT_WALL",
+            "DIRT_WALL_DIST",
             "HORIZONTAL_DIST",
             dw_h_mm,
             int(sub.dirt_wall_horiz_bar_dia_mm or 12),

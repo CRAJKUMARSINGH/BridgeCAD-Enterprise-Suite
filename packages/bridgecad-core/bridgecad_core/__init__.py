@@ -13,10 +13,17 @@ Submodules:
 """
 
 from . import (
+    abutment_stack,
     costs,
+    detailing,
     geometry,
+    geometry_extras,
     models,
     quantities,
+    reinforcement,
+    revisions,
+    skew,
+    stability,
     standards,
     types,
     validation,
@@ -75,6 +82,13 @@ __all__ = [
     "geometry",
     "standards",
     "validation_registry",
+    "abutment_stack",
+    "detailing",
+    "geometry_extras",
+    "reinforcement",
+    "revisions",
+    "skew",
+    "stability",
     # top-level type shortcuts (Day 4 exports)
     "BridgeCategory",
     "BridgeSelectionCriterion",

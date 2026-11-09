@@ -24,10 +24,10 @@ Until the rendered `assets/how-to-use.mp4` is committed, follow the storyboard.
 
 | # | Time | On screen | Narration |
 |---|---|---|---|
-| 1 | 0:00–0:15 | Title card: *One workbook in. Seven sheets out.* | "BridgeCAD turns one parametric Excel workbook into a standards-compliant drawing package, a priced BOQ and a QA report." |
+| 1 | 0:00–0:15 | Title card: *One workbook in. Eight sheets out.* | "BridgeCAD turns one parametric Excel workbook into a standards-compliant drawing package, a priced BOQ and a QA report." |
 | 2 | 0:15–0:45 | `python -m bridgecad verify` scrolling its 7/7 and 8/8 checks | "No install needed. Clone, then run one command — the acceptance verifiers tell you the repo is healthy." |
 | 3 | 0:45–1:30 | Opening `bridge.xlsx`; the 14 sheets, yellow inputs highlighted | "The workbook is the only contract. Fill the yellow cells; calculated cells stay locked." |
-| 4 | 1:30–2:30 | `bridgecad-cli draw booklet bridge.xlsx -o out/` → seven DXFs open in a viewer | "One command draws all seven sheets — plan, long section, cross sections, foundation, pier and abutment, bearings and joints, BOQ." |
+| 4 | 1:30–2:30 | `bridgecad-cli draw booklet bridge.xlsx -o out/` → eight DXFs open in a viewer | "One command draws all eight sheets — plan, long section, cross sections, foundation, pier and abutment, bearings and joints, BOQ, side elevations." |
 | 5 | 2:30–3:15 | The priced BOQ and the QA compliance grade | "Every BOQ line carries its inputs; the QA engine scores the project out of 100 against 150 rules." |
 | 6 | 3:15–4:00 | `manifest.json` with the *"Generated — not reviewed for construction."* notice | "Until CI is green and every sheet is engineer-reviewed, the manifest says so plainly. This is a release candidate." |
 | 7 | 4:00–4:30 | Streamlit console tabs and the React console pages | "Prefer a GUI? The Streamlit console and the React web app drive the same engine." |

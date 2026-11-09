@@ -18,7 +18,7 @@
 @page { size: A1 landscape; margin: 0; }
 
 @media print {
-  .sidebar, .right-rail, .topbar, .sheet-nav, .canvas-footer { display: none !important; }
+  .sidebar, .right-rail, .topbar, .sheet-nav, .layer-strip, .canvas-footer { display: none !important; }
   .bcsheet-wrap { max-height: none !important; overflow: visible !important; padding: 0; background: #fff; }
   .bcsheet-stage { width: 100% !important; }
   .bcsheet { border: 0; }

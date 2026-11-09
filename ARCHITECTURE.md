@@ -6,7 +6,7 @@
 
 ## 1. System context
 
-**One parametric Excel workbook in. A 7-sheet standards-compliant bridge GAD
+**One parametric Excel workbook in. An 8-sheet standards-compliant bridge GAD
 package, a priced Bill of Quantities, and a QA compliance report out.**
 
 ```
@@ -34,7 +34,7 @@ fenced off and labelled LEGACY in [README.md](README.md).
 |---|---|
 | `bridgecad-core` | enums, Pydantic models, geometry maths, validation, quantities |
 | `bridgecad-io` | Excel template / reader / writer, CSV + JSON adapters |
-| `bridgecad-draw` | layers, primitives, title blocks, 7 sheets, engines, booklet |
+| `bridgecad-draw` | layers, primitives, title blocks, 8 sheets, engines, booklet |
 | `bridgecad-bill` | MORTH rates DB, hierarchical processor, formatters |
 | `bridgecad-qa` | rules engine, compliance scoring, reports, recommendations |
 | `bridgecad-export` | orchestrator, ZIP bundler, versioner |

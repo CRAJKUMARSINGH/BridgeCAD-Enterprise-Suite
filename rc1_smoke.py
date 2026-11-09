@@ -14,6 +14,8 @@ Run:
 """
 from __future__ import annotations
 import sys
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 import importlib
 import traceback
 from pathlib import Path

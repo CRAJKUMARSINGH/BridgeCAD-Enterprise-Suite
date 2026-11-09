@@ -10,6 +10,7 @@ const NAV = [
   { to: '/qa',      icon: '✅', label: 'QA Check'   },
   { to: '/boq',     icon: '💰', label: 'BOQ'        },
   { to: '/export',  icon: '📦', label: 'Export'     },
+  { to: '/reinforcement', icon: '🧱', label: 'Reinforcement' },
 ]
 
 export default function Layout() {

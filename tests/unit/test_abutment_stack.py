@@ -8,6 +8,7 @@ an unset dirt wall still resolves (the resolver is total).
 
 from __future__ import annotations
 
+import itertools
 from decimal import Decimal
 
 from bridgecad_core.abutment_stack import AbutmentStack, resolve_abutment_stack
@@ -27,7 +28,7 @@ def test_cap_top_sits_below_the_approach_slab_soffit(project):
 def test_stack_is_strictly_ordered_from_road_down(project):
     st = resolve_abutment_stack(project)
     ladder = [st.wc_bot, st.deck_bot, st.cap_top, st.cap_bot]
-    assert all(a > b for a, b in zip(ladder, ladder[1:]))
+    assert all(a > b for a, b in itertools.pairwise(ladder))
 
 
 def test_unset_dirt_wall_still_resolves(blank_project):

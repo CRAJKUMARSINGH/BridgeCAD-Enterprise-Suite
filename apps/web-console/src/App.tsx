@@ -11,6 +11,7 @@ import DrawPage      from './pages/DrawPage'
 import QAPage        from './pages/QAPage'
 import BOQPage       from './pages/BOQPage'
 import ExportPage    from './pages/ExportPage'
+import ReinforcementPage from './pages/ReinforcementPage'
 
 function NotFound() {
   return (
@@ -59,6 +60,7 @@ export default function App() {
           <Route path="qa" element={<QAPage />} />
           <Route path="boq" element={<BOQPage />} />
           <Route path="export" element={<ExportPage />} />
+          <Route path="reinforcement" element={<ReinforcementPage />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

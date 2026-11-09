@@ -3,7 +3,7 @@
         docker-down api ui web \
         verify-docs verify-docs-fast test-docs mutate-docs prove prove-fast \
         refs-extract refs-check refs-coverage refs-verify refs-verify-crops \
-        drawing-standards hooks hooks-check
+        drawing-standards green-stack hooks hooks-check
 
 # Base URL of a running Streamlit console for the persona robot walker.
 URL ?= http://localhost:8517
@@ -21,6 +21,7 @@ dev:             ## Smoke-check the workspace resolves
 
 lint:            ## ruff lint (CI scope)
 	ruff check packages apps scripts
+	python scripts/check_view_axes.py
 
 format:          ## ruff format + autofix (CI scope)
 	ruff format packages apps scripts
@@ -130,6 +131,19 @@ prove-draw-fast: ## Critical geometry mutations only
 
 drawing-standards: ## W07 — layer audit, deterministic DXF, PDF/A-1b gates
 	pytest -q tests/drawings --regression
+
+audit-draw:      ## Dead-geometry audit — discarded pure expressions in sheet*.py
+	python scripts/audit_dead_geometry.py
+
+green-stack:     ## Full pre-push sweep incl. draw lanes (ROBOTIC-TEST-GUIDE §3)
+	ruff check packages apps scripts
+	ruff format --check packages apps scripts
+	pytest tests/docs -q -m "not slow"
+	python scripts/verify_docs.py
+	python scripts/robotic_smoke.py --persona all --seed 42
+	pytest tests/draw -m draw -q
+	pytest tests/drawings --regression -q
+	python tests/e2e/run_e2e.py
 
 links:           ## Check external + internal links
 	lychee --config .lychee.toml --no-progress '**/*.md'

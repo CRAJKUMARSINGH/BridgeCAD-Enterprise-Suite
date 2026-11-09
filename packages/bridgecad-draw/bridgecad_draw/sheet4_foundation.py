@@ -14,9 +14,11 @@ Draws for a typical pier:
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 from typing import Any
 
+from . import limits
 from .dxf_engine import new_sheet, save
 from .primitives import (
     circle,
@@ -25,7 +27,6 @@ from .primitives import (
     hatch_rect,
     level_tag,
     line,
-    polyline,
     rectangle,
     text,
 )
@@ -286,141 +287,155 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     )
 
     # ── ABUTMENT CAP + DIRT WALL PLAN INSET (bottom-right) ───────────────
-    # Shows the abutment A2 cap and dirt wall in plan so site engineers can
+    # Shows both abutments' cap and dirt wall in plan so site engineers can
     # set out the rear face, dirt wall, and weep holes directly from Sheet 4.
+    # A2's approach side is +x, A1's is -x — the wall mirrors with the sign.
     sub = project.substructure
     s2 = 10.0  # inset scale mm per metre (independent of pile-plan scale)
-    i_cx, i_y0 = 680.0, 60.0
 
     abt_w = float(getattr(sub, "abutment_width_m", None) or 1.2)
     abt_l = float(getattr(sub, "abutment_length_m", None) or 11.8)
-    cap_d_inset = float(getattr(sub, "abutment_cap_depth_mm", None) or 600) / 1000.0
     cap_proj = float(getattr(sub, "abutment_cap_projection_front_mm", None) or 300) / 1000.0
     dirt_t_inset = float(getattr(sub, "dirt_wall_thickness_mm", None) or 300) / 1000.0
 
     cap_w_inset = (abt_w + 2 * cap_proj) * s2
     shaft_w_inset = abt_w * s2
     ln_inset = abt_l * s2
+    # Weep holes across the dirt wall, spaced no wider than the IRC:78 drainage
+    # limit. Take the count from the same helper the sheet self-audit row
+    # (QA-DW-WEEP) reports, so the plan can never draw fewer holes than the
+    # table claims nor drift past the limit — the old int(abt_l / 3) gave only
+    # 3 holes at 3.07 m centres on a 9.2 m wall, breaching the 3.0 m rule.
+    from bridgecad_core.geometry_extras import compute_dirt_wall_geometry
 
-    # Shaft (plan rectangle)
-    rectangle(
-        msp,
-        i_cx - shaft_w_inset / 2,
-        i_y0,
-        shaft_w_inset,
-        ln_inset,
-        layer="SUB-ABUT",
-        lw=40,
-    )
-    hatch_rect(
-        msp,
-        i_cx - shaft_w_inset / 2,
-        i_y0,
-        shaft_w_inset,
-        ln_inset,
-        pattern="ANSI31",
-        scale=s2 * 0.03,
-        layer="STRUC-HATCHING",
-    )
+    n_weep_geom = compute_dirt_wall_geometry(project).weep_holes_count
+    if n_weep_geom <= 0:  # abutment_length unset — fall back to the drawn length
+        n_weep_geom = math.ceil(abt_l / limits.WEEP_HOLE_SPACING_M)
+    n_weep_inset = max(1, n_weep_geom)
 
-    # Cap, projecting both faces
-    rectangle(
-        msp,
-        i_cx - cap_w_inset / 2,
-        i_y0,
-        cap_w_inset,
-        ln_inset,
-        layer="SUB-ABUT",
-        lw=40,
-    )
+    # A2 on the right (+x rear face), A1 offset 150 mm to its left (-x rear)
+    for label, sgn, i_cx in (("A2", +1.0, 680.0), ("A1", -1.0, 530.0)):
+        i_y0 = 60.0
 
-    # Dirt wall on the rear (+x) face in plan
-    dw_x_inset = i_cx + cap_w_inset / 2 - dirt_t_inset * s2
-    rectangle(
-        msp,
-        dw_x_inset,
-        i_y0,
-        dirt_t_inset * s2,
-        ln_inset,
-        layer="SUB-DIRT-WALL",
-        lw=40,
-    )
-    hatch_rect(
-        msp,
-        dw_x_inset,
-        i_y0,
-        dirt_t_inset * s2,
-        ln_inset,
-        pattern="ANSI31",
-        scale=s2 * 0.03,
-        layer="STRUC-HATCHING",
-    )
-
-    # Weep holes through the dirt wall
-    n_weep_inset = int(getattr(sub, "dirt_wall_weep_holes_count", None) or max(1, int(abt_l / 3)))
-    import math as _math
-    n_weep_inset = max(1, n_weep_inset)
-    for i_w in range(n_weep_inset):
-        wy = i_y0 + ln_inset * (i_w + 0.5) / n_weep_inset
-        circle(
+        # Shaft (plan rectangle)
+        rectangle(
             msp,
-            dw_x_inset + dirt_t_inset * s2 / 2,
-            wy,
-            0.025 * s2,
-            layer="SUB-DIRT-WALL",
-            color=4,
+            i_cx - shaft_w_inset / 2,
+            i_y0,
+            shaft_w_inset,
+            ln_inset,
+            layer="SUB-ABUT",
+            lw=40,
+        )
+        hatch_rect(
+            msp,
+            i_cx - shaft_w_inset / 2,
+            i_y0,
+            shaft_w_inset,
+            ln_inset,
+            pattern="ANSI31",
+            scale=s2 * 0.03,
+            layer="STRUC-HATCHING",
         )
 
-    # Dimensions
-    dim_linear_h(
-        msp,
-        i_cx - cap_w_inset / 2,
-        i_y0 - th * 5,
-        i_cx + cap_w_inset / 2,
-        i_y0 - th * 5,
-        dim_y=i_y0 - th * 5,
-        label=f"CAP W={cap_w_inset / s2:.2f}m",
-        text_height=th * 0.8,
-    )
-    dim_linear_v(
-        msp,
-        i_cx + cap_w_inset / 2 + th * 3,
-        i_y0,
-        i_cx + cap_w_inset / 2 + th * 3,
-        i_y0 + ln_inset,
-        dim_x=i_cx + cap_w_inset / 2 + th * 9,
-        label=f"L={abt_l:.2f}m",
-        text_height=th * 0.8,
-    )
-    dim_linear_h(
-        msp,
-        dw_x_inset,
-        i_y0 + ln_inset + th * 4,
-        i_cx + cap_w_inset / 2,
-        i_y0 + ln_inset + th * 4,
-        dim_y=i_y0 + ln_inset + th * 4,
-        label=f"DW={dirt_t_inset:.2f}m",
-        text_height=th * 0.75,
-    )
+        # Cap, projecting both faces
+        rectangle(
+            msp,
+            i_cx - cap_w_inset / 2,
+            i_y0,
+            cap_w_inset,
+            ln_inset,
+            layer="SUB-ABUT",
+            lw=40,
+        )
 
-    text(
-        msp,
-        "ABUTMENT A2 — CAP + DIRT WALL PLAN",
-        i_cx,
-        i_y0 + ln_inset + th * 8,
-        height=th * 1.2,
-        layer="TEXT-HEADER",
-        halign="CENTER",
-    )
-    text(
-        msp,
-        f"{n_weep_inset} nos 50 mm dia weep holes",
-        i_cx,
-        i_y0 - th * 10,
-        height=th * 0.8,
-        layer="TEXT-SPEC",
-        halign="CENTER",
-    )
+        # Dirt wall on the rear face in plan — outside the cap edge
+        if sgn > 0:
+            dw_x_inset = i_cx + cap_w_inset / 2 - dirt_t_inset * s2
+        else:
+            dw_x_inset = i_cx - cap_w_inset / 2
+        rectangle(
+            msp,
+            dw_x_inset,
+            i_y0,
+            dirt_t_inset * s2,
+            ln_inset,
+            layer="SUB-DIRT-WALL",
+            lw=40,
+        )
+        hatch_rect(
+            msp,
+            dw_x_inset,
+            i_y0,
+            dirt_t_inset * s2,
+            ln_inset,
+            pattern="ANSI31",
+            scale=s2 * 0.03,
+            layer="STRUC-HATCHING",
+        )
+
+        # Weep holes through the dirt wall
+        for i_w in range(n_weep_inset):
+            wy = i_y0 + ln_inset * (i_w + 0.5) / n_weep_inset
+            circle(
+                msp,
+                dw_x_inset + dirt_t_inset * s2 / 2,
+                wy,
+                0.025 * s2,
+                layer="SUB-DIRT-WALL",
+                color=4,
+            )
+
+        # Dimensions
+        dim_linear_h(
+            msp,
+            i_cx - cap_w_inset / 2,
+            i_y0 - th * 5,
+            i_cx + cap_w_inset / 2,
+            i_y0 - th * 5,
+            dim_y=i_y0 - th * 5,
+            label=f"CAP W={cap_w_inset / s2:.2f}m",
+            text_height=th * 0.8,
+        )
+        dim_linear_v(
+            msp,
+            i_cx + cap_w_inset / 2 + th * 3,
+            i_y0,
+            i_cx + cap_w_inset / 2 + th * 3,
+            i_y0 + ln_inset,
+            dim_x=i_cx + cap_w_inset / 2 + th * 9,
+            label=f"L={abt_l:.2f}m",
+            text_height=th * 0.8,
+        )
+        dim_linear_h(
+            msp,
+            min(dw_x_inset, i_cx - cap_w_inset / 2),
+            i_y0 + ln_inset + th * 4,
+            max(dw_x_inset + dirt_t_inset * s2, i_cx + cap_w_inset / 2),
+            i_y0 + ln_inset + th * 4,
+            dim_y=i_y0 + ln_inset + th * 4,
+            label=f"DW={dirt_t_inset:.2f}m",
+            text_height=th * 0.75,
+        )
+
+        text(
+            msp,
+            f"ABUTMENT {label} — CAP + DIRT WALL PLAN",
+            i_cx,
+            i_y0 + ln_inset + th * 8,
+            height=th * 1.2,
+            layer="TEXT-HEADER",
+            halign="CENTER",
+        )
+        text(
+            msp,
+            f"{n_weep_inset} nos 50 mm dia weep holes",
+            i_cx,
+            i_y0 - th * 10,
+            height=th * 0.8,
+            layer="TEXT-SPEC",
+            halign="CENTER",
+        )
 
 
 __all__ = ["generate"]

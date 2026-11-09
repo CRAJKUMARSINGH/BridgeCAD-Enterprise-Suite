@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import SaraswatiMascot from '../components/SaraswatiMascot'
 
 const CARDS = [
-  { to: '/draw',    icon: '📐', title: 'Drawing Gen',  desc: 'Generate 7-sheet DXF GAD package',  color: 'blue'   },
+  { to: '/draw',    icon: '📐', title: 'Drawing Gen',  desc: 'Generate 8-sheet DXF GAD package',  color: 'blue'   },
   { to: '/qa',      icon: '✅', title: 'QA Validate',  desc: 'IRC:SP:55 compliance — 30 checks',  color: 'green'  },
   { to: '/boq',     icon: '💰', title: 'BOQ',          desc: 'Priced MORTH bill of quantities',   color: 'yellow' },
   { to: '/export',  icon: '📦', title: 'Export Bundle',desc: 'Full ZIP: DXF + BOQ + QA report',   color: 'purple' },

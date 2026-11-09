@@ -511,7 +511,7 @@ def main() -> int:
             case_dir.mkdir(parents=True, exist_ok=True)
 
             project = build_from_fixture(data)
-            sheets = generate_package(project, case_dir, prefix=fid, scale_denom=100)
+            sheets = generate_package(project, case_dir, prefix=fid)
             total_kb = sum(s.stat().st_size for s in sheets) // 1024
 
             (case_dir / "fixture.json").write_text(json.dumps(data, indent=2), encoding="utf-8")

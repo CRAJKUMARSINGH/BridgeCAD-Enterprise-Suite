@@ -118,7 +118,7 @@ def test_scaffold_count_is_reported_and_decreases_over_time():
 
 def test_manifest_declares_which_sheets_are_scaffolds():
     """GUIDE.md §11 requires the manifest to say so. If the manifest is silent,
-    a reader assumes all seven sheets are complete."""
+    a reader assumes all eight sheets are complete."""
     from bridgecad_export.bundler import build_manifest
     manifest = build_manifest(contract.make_project("simple_12m"))
     assert "scaffold_sheets" in manifest, "manifest does not declare scaffold sheets"

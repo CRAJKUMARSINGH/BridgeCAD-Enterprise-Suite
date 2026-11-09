@@ -17,8 +17,29 @@ const skipTypeDeclarations = (): Plugin => ({
   },
 });
 
+/**
+ * On a static Netlify deploy `/api/health` is answered by
+ * `netlify/functions/health.js`, which reports `mode: "demo"` when no FastAPI
+ * engine is wired. In dev the `server.proxy` rule forwards `/api/*` to
+ * `localhost:3000`, and with no engine there the browser logs
+ * `net::ERR_ABORTED` on every page load. Registering the middleware directly
+ * (not via the returned post-hook) puts it ahead of Vite's internal proxy, so
+ * dev serves the same demo payload as the deploy and the console stays clean.
+ */
+const devHealthStub = (): Plugin => ({
+  name: "bridgecad:dev-health-stub",
+  apply: "serve",
+  configureServer(server) {
+    server.middlewares.use((req, res, next) => {
+      if (req.url?.split("?")[0] !== "/api/health") return next();
+      res.setHeader("content-type", "application/json");
+      res.end(JSON.stringify({ frontend: "online", python: "demo", mode: "demo" }));
+    });
+  },
+});
+
 export default defineConfig({
-  plugins: [react(), skipTypeDeclarations()],
+  plugins: [react(), skipTypeDeclarations(), devHealthStub()],
   server: {
     port: 5173,
     proxy: {

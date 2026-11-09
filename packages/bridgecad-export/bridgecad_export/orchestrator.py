@@ -70,13 +70,14 @@ def export_all(
     output_dir: str | Path,
     prefix: str = "GAD",
     state: str | None = None,
-    scale_denom: int = 100,
+    scale_denom: int | None = None,
+    allow_fail: bool = False,
 ) -> Path:
     """Run the full export pipeline and return path to the ZIP bundle.
 
     Steps
     -----
-    1. Generate 7-sheet DXF package (bridgecad-draw)
+    1. Generate 8-sheet DXF package (bridgecad-draw)
     2. Extract and price BOQ → Excel + CSV + PDF (bridgecad-bill)
     3. Run QA checks → HTML report (bridgecad-qa)
     4. Bundle everything into a ZIP (bridgecad-export.bundler)
@@ -93,7 +94,7 @@ def export_all(
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
 
-    results: dict[str, list[Path]] = {"dxf": [], "bill": [], "qa": []}
+    results: dict[str, list[Path]] = {"dxf": [], "bill": [], "qa": [], "bbs": []}
     failures: dict[str, str] = {}
 
     # ── Step 1: DXF drawings ──────────────────────────────────────────────
@@ -129,7 +130,23 @@ def export_all(
         _stage_failure("BOQ generation", exc, results_key="bill", results=results)
         failures["bill"] = f"{type(exc).__name__}: {exc}"
 
-    # ── Step 3: QA report ─────────────────────────────────────────────────
+    # ── Step 3: Bar bending schedule ──────────────────────────────────────
+    try:
+        bbs_out = out / "bbs"
+        bbs_out.mkdir(exist_ok=True)
+        sys.path.insert(0, str(BASE / "packages" / "bridgecad-export"))
+        from bridgecad_export.bbs import write_csv as bbs_csv
+        from bridgecad_export.bbs import write_xlsx as bbs_xlsx
+
+        bbs_csv_path = bbs_csv(project, bbs_out / f"{prefix}_BBS.csv")
+        bbs_xlsx_path = bbs_xlsx(project, bbs_out / f"{prefix}_BBS.xlsx")
+        results["bbs"] = [bbs_csv_path, bbs_xlsx_path]
+        logger.info("BBS: %d bar marks", len(bbs_csv_path.read_text().splitlines()) - 2)
+    except Exception as exc:
+        _stage_failure("BBS generation", exc, results_key="bbs", results=results)
+        failures["bbs"] = f"{type(exc).__name__}: {exc}"
+
+    # ── Step 4: QA report ─────────────────────────────────────────────────
     try:
         qa_out = out / "qa"
         qa_out.mkdir(exist_ok=True)
@@ -147,6 +164,21 @@ def export_all(
     except Exception as exc:
         _stage_failure("QA report", exc, results_key="qa", results=results)
         failures["qa"] = f"{type(exc).__name__}: {exc}"
+
+    # ── Reinforcement gate: over-utilised items block a clean export ──────
+    try:
+        sys.path.insert(0, str(BASE / "packages" / "bridgecad-core"))
+        from bridgecad_core.detailing import failing_count
+
+        failing = failing_count(project)
+        if failing and not allow_fail:
+            failures["reinforcement"] = (
+                f"{failing} reinforcement item(s) over-utilised — "
+                "pass allow_fail=True to ship anyway"
+            )
+            logger.warning("Export flagged: %d over-utilised rebar item(s)", failing)
+    except Exception as exc:
+        _stage_failure("reinforcement gate", exc, results_key="bbs", results=results)
 
     # ── Step 4: ZIP bundle ────────────────────────────────────────────────
     from .bundler import create_bundle

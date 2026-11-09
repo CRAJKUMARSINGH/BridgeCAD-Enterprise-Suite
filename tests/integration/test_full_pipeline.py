@@ -364,7 +364,7 @@ def run_integration_smoke() -> int:
         from bridgecad_draw.booklet import generate_package
         with tempfile.TemporaryDirectory() as td:
             sheets = generate_package(project, Path(td),
-                                      prefix="SMOKE", scale_denom=100)
+                                      prefix="SMOKE")
             # copy to persistent temp dir
             import shutil
             tmp_draw = Path(tempfile.mkdtemp())
@@ -373,10 +373,10 @@ def run_integration_smoke() -> int:
                 shutil.copy(s, dest)
                 dxf_sheets.append(dest)
         total_kb = sum(s.stat().st_size for s in dxf_sheets) // 1024
-        ok = len(dxf_sheets) == 8 and total_kb > 50
+        ok = len(dxf_sheets) == 9 and total_kb > 50
         results.append(
-            _ok("T04", f"{len(dxf_sheets)}/8 sheets  total {total_kb} KB")
-            if ok else _fail("T04", f"only {len(dxf_sheets)}/8 sheets or too small")
+            _ok("T04", f"{len(dxf_sheets)}/9 sheets  total {total_kb} KB")
+            if ok else _fail("T04", f"only {len(dxf_sheets)}/9 sheets or too small")
         )
     except Exception as exc:
         results.append(_fail("T04", str(exc))); traceback.print_exc()

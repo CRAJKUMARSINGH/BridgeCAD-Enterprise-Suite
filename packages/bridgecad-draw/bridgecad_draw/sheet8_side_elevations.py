@@ -138,11 +138,12 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     tod_rl = float(pm.road_level_rl_m or ls.top_of_deck_rl)  # Top-of-deck RL
     sof_rl = float(hd.actual_soffit_level_m or ls.soffit_rl)  # Soffit RL
     road_rl_approach = tod_rl - 0.01 * float(gi.gradient_pct or 0) * app_l_m
-    # Shaft bottom sits one bearing + pedestal + cap depth below soffit —
-    # without the cap term the shaft is drawn a full cap depth too short and
-    # the cap/pedestal stack floats above it (Venice C1).
-    _cap_d_m_early = float(sub.abutment_cap_depth_mm or 600) / 1000.0
-    abt_base_rl = sof_rl - 0.10 - ped_h_m - _cap_d_m_early - abt_h_m  # bottom of abutment shaft
+    # `abutment_height_m` is the TOTAL height, GL to deck soffit (models.py):
+    # the shaft base sits one abutment-height below the deck soffit.  The cap,
+    # pedestal and bearing all live inside that span (cap bottom = shaft top),
+    # so they are NOT added again here — adding the cap term drew the shaft a
+    # full cap depth too tall and broke parity with Sheet 5.
+    abt_base_rl = sof_rl - abt_h_m  # bottom of abutment shaft
     # If pile foundation, abutment sits on pile cap top (= pile_cut + pile_cap_t)
     if "PILE" in found_type:
         cap_top_rl = pile_cut_rl + pile_cap_t_m

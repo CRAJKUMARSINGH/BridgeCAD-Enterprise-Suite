@@ -68,6 +68,9 @@ jobs:
         run: ruff check packages/ apps/ scripts/
       - name: Ruff format check
         run: ruff format --check packages/ apps/ scripts/
+      - name: Dead geometry audit
+        run: python scripts/audit_dead_geometry.py
+        continue-on-error: true  # warn-only until debt reaches zero, then promote to fatal
 
   import-linter:
     name: "[Suite] Architecture Invariants"

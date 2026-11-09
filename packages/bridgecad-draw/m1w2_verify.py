@@ -447,7 +447,7 @@ def main() -> int:
     print(f"  Output dir : {out_dir}")
     print(f"  Prefix     : {prefix}")
 
-    paths = generate_package(SIMPLE_12M, out_dir, prefix=prefix, scale_denom=100)
+    paths = generate_package(SIMPLE_12M, out_dir, prefix=prefix)
     paths_sorted = sorted(paths, key=lambda p: p.name)
     print(f"  booklet    : {len(paths_sorted)}/8 sheets generated\n")
 

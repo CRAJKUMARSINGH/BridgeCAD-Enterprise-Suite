@@ -93,7 +93,7 @@ def test_csv_round_trip_is_lossless(tmp_path, pinned):
     from bridgecad_io import from_csv, to_csv
 
     written = to_csv(pinned, tmp_path / "csv")
-    assert len(written) == 16, "14 sub-model CSVs + 2 schedules"
+    assert len(written) == 17, "15 sub-model CSVs + 2 schedules"
     assert _diff(_dump(pinned), _dump(from_csv(tmp_path / "csv"))) == []
 
 

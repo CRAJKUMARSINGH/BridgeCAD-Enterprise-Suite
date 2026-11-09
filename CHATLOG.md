@@ -961,3 +961,68 @@ contract + audit proxies:
   `tests/draw/contract.py` and needed `PYTHONPATH` = the `packages/*` dirs. CI
   installs it through the `draw` extra.
 
+## 2026-11-05 IST — "green stack" extended so green requires drawings
+
+The frontend-only sweep was what let the draw lanes slip. Fixed at the source:
+
+- **[ROBOTIC-TEST-GUIDE.MD](ROBOTIC-TEST-GUIDE.MD) §3** now appends the three
+  draw lanes to the sweep —
+  `pytest tests/draw -m draw -q` → `pytest tests/drawings --regression -q` →
+  `python tests/e2e/run_e2e.py` — with matching Expected-results rows and an
+  explicit **scaffold-baseline (not a regression)** note so the pre-RC1 xfails
+  are not mistaken for a failure.
+- **[Makefile](Makefile)** gains a runnable `green-stack` target (registered in
+  `.PHONY`) that executes the whole sweep, so the doc's "green" cannot be
+  claimed from lint + docs alone.
+- Verified: `python scripts/verify_docs.py` → **3 passed, 0 failed, 3 skipped**;
+  recipe lines confirmed tab-indented. `make` is not on this Windows box, so the
+  target is authored to the guide's existing "if `make` is on your PATH" guard.
+- Not committed (standing rule: commit only when explicitly instructed).
+
+## 2026-11-05 IST — extended sweep run end-to-end (all green)
+
+Ran the *new* §3 stack top to bottom; every lane green:
+
+| Lane | Result |
+|---|---|
+| `ruff check` / `ruff format --check` (packages/ apps/ scripts/) | `All checks passed!` · `217 files already formatted` |
+| `pytest tests/docs -q -m "not slow"` | `41 passed, 16 deselected` |
+| `scripts/verify_docs.py` | `3 passed, 0 failed, 3 skipped` |
+| `scripts/robotic_smoke.py --persona all --seed 42` | Basic/Intermediate/Advanced all `passed=True` |
+| `pytest tests/draw -m draw -q` | `240 passed, 2 skipped, 8 deselected, 5 xfailed` (scaffolds xfail by design) |
+| `pytest tests/drawings --regression` | `14 passed` |
+| `tests/e2e/run_e2e.py` | `28 fixtures, 28 passed, 0 failed` → `*** ACCEPTED ***` |
+
+Side effect: the sweep regenerated `outputs/11span_110m_rcc_slab/*` (persona
+package). Generated churn — restore before any commit.
+
+## 2026-11-05 IST — save-drawings lane run, five defects fixed
+
+`TEST RUN AND REPORT BUGS >>>SAVE DRAWINGS` → then `FIX ALL`. Ran the save path
+(DXF package, `/draw/gad` ZIP, CLI/UI save) and fixed every finding.
+
+- **BUG-1 (silent partial save).** `generate_package` returned a short list with
+  no error when a sheet failed. Now collects `failures: dict[int, str]` and
+  raises `PackageGenerationError`; exported from `bridgecad_draw`.
+- **BUG-5 (CLI exit 0 on partial).** `bridgecad-cli draw gad` now catches
+  `PackageGenerationError` → `typer.Exit(1)`; API → `HTTPException(500)`;
+  orchestrator/Streamlit surface the same.
+- **BUG-3 (magic-100 sentinel).** `scale_denom == 100` silently meant "use
+  per-sheet defaults", ignoring caller scale. Replaced with `None` = default,
+  explicit int = real override. Callers passing `100` as "default" now omit it.
+- **BUG-2 (7-vs-8 drift).** Reconcile the sheet count to **8** across UI, API,
+  CLI, orchestrator, docs, `mkdocs.yml`, both `pyproject.toml`s and `TOTAL_SHEETS`.
+- **BUG-4 (blob download race).** `downloadBlob` now attaches the anchor to the
+  DOM and defers `revokeObjectURL` to a `setTimeout(…, 0)`.
+
+Regression guard added: `tests/robot/test_exports.py::
+test_partial_package_raises_instead_of_shipping` (monkeypatches sheet 5 to throw;
+asserts `PackageGenerationError` with `5` in `.failures`).
+
+- **Verified.** `pytest tests/draw tests/robot/test_exports.py` → **255 passed,
+  2 skipped, 5 xfailed** · `pytest tests/drawings --regression` → **14 passed** ·
+  `pytest tests/robot` → **32 passed** · `tests/e2e/run_e2e.py` → **28/28
+  ACCEPTED** · `scripts/verify_docs.py --json` → **ok: true (3 pass / 0 fail / 3
+  skip)**.
+- **Not committed** (standing rule: never commit unless explicitly instructed).
+

@@ -43,7 +43,7 @@ def test_csv_round_trip(project, tmp_path):
     from bridgecad_io import from_csv, to_csv
 
     files = to_csv(project, tmp_path / "csv")
-    assert len(files) == 16
+    assert len(files) == 17  # 15 sections + 2 schedules
     assert from_csv(tmp_path / "csv").model_dump() == project.model_dump()
 
 

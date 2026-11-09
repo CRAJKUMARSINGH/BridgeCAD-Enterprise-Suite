@@ -211,6 +211,8 @@ def _build_from_fixture(data: dict):
             approach_slab_thickness_mm= _int(sub_d.get("approach_slab_thickness_mm",200)),
             bearings_per_pier       = _int(sub_d.get("bearings_per_pier",4)),
             bearings_per_abutment   = _int(sub_d.get("bearings_per_abutment",4)),
+            abutment_face_batter_1n = _dec(sub_d.get("abutment_face_batter_1n")),
+            abutment_back_batter_1n = _dec(sub_d.get("abutment_back_batter_1n")),
         ),
         foundation_details=FoundationDetails(
             type                       = _enum("FoundationType", fd_d.get("type", fd_d.get("foundation_type"))),

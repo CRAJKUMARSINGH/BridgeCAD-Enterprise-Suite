@@ -67,6 +67,7 @@ const TOKEN: Record<string, keyof SheetTheme> = {
   "FOUND-WELL": "found",
   "SUB-PIER": "sub",
   "SUB-ABUT": "sub",
+  "ABUT-PROF": "sub",
   "SUB-BEARING": "bearing",
   "SUPER-GIRDER": "super",
   "SUPER-DECK": "super",

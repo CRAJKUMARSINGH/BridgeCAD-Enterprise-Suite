@@ -3,7 +3,7 @@ BridgeCAD Enterprise — FastAPI Gateway (M7).
 
 Routers:
   /bridges  — project CRUD + Excel upload → BridgeProject
-  /draw     — trigger 7-sheet DXF package generation
+  /draw     — trigger 8-sheet DXF package generation
   /bills    — BOQ generation + download
   /qa       — compliance check + HTML report
   /exports  — full ZIP bundle orchestration
@@ -38,6 +38,7 @@ for _pkg in [
     "bridgecad-qa",
     "bridgecad-export",
     "bridgecad-plugins",
+    "bridgecad-infra",
 ]:
     _p = _SUITE / "packages" / _pkg
     if _p.exists() and str(_p) not in sys.path:
@@ -142,15 +143,20 @@ _ALLOWED_SCALE = (10, 2500)
 _UNSAFE_PREFIX_CHARS = set('<>:"/\\|?*\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f')
 
 
-def _validate_scale(scale: int) -> int:
-    """Reject clearly-invalid drawing scale denominators."""
+def _validate_scale(scale: int | None) -> int | None:
+    """Reject clearly-invalid drawing scale denominators.
+
+    ``None`` is valid and means "use each sheet's own standard scale".
+    """
+    if scale is None:
+        return None
     if not isinstance(scale, int) or not (_ALLOWED_SCALE[0] <= scale <= _ALLOWED_SCALE[1]):
         raise HTTPException(
             status_code=400,
             detail=(
                 f"scale must be an int drawing denominator between "
                 f"{_ALLOWED_SCALE[0]} and {_ALLOWED_SCALE[1]} (got {scale!r}).  "
-                f"Common values: 50, 100, 200, 500."
+                f"Omit it for standard per-sheet scales.  Common values: 50, 100, 200, 500."
             ),
         )
     return scale
@@ -210,22 +216,26 @@ def _staged_zip_response(
 draw_router = APIRouter(prefix="/draw", tags=["Drawing"])
 
 
-@draw_router.post("/gad", summary="Generate 7-sheet GAD DXF package → ZIP download")
+@draw_router.post("/gad", summary="Generate 8-sheet GAD DXF package → ZIP download")
 async def draw_gad(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
-    scale: int = 100,
+    scale: int | None = None,
     prefix: str = "GAD",
 ) -> FileResponse:
-    """Upload Excel, generate 7-sheet DXF package, return as ZIP."""
+    """Upload Excel, generate 8-sheet DXF package, return as ZIP.
+
+    A partial package (any sheet failing) is an error, not a smaller ZIP.
+    """
     scale = _validate_scale(scale)
     prefix = _validate_prefix(prefix)
     data = await enforce_upload_limits(file)
+    from bridgecad_draw.booklet import PackageGenerationError, generate_package
+
     try:
         project = _load_project_from_upload(data)
         with tempfile.TemporaryDirectory() as td:
             out_dir = Path(td)
-            from bridgecad_draw.booklet import generate_package
 
             sheets = generate_package(project, out_dir, prefix=prefix, scale_denom=scale)
             # Zip the sheets inside the TemporaryDirectory (auto-cleaned)
@@ -241,8 +251,199 @@ async def draw_gad(
             )
     except HTTPException:
         raise
+    except PackageGenerationError as exc:
+        raise HTTPException(500, detail=f"drawing package incomplete: {exc}") from exc
     except Exception as exc:
         raise HTTPException(500, detail=str(exc)) from exc
+
+
+@draw_router.post("/preview/{sheet}", summary="Render one sheet to SVG preview")
+async def draw_preview(
+    sheet: int,
+    file: UploadFile = File(...),
+    scale: int | None = None,
+) -> Any:
+    """Generate a single GAD sheet and return it as an SVG preview."""
+    from fastapi.responses import Response
+
+    scale = _validate_scale(scale)
+    data = await enforce_upload_limits(file)
+    from bridgecad_draw.booklet import _SHEET_MANIFEST
+
+    entry = next((e for e in _SHEET_MANIFEST if e[0] == sheet), None)
+    if entry is None:
+        raise HTTPException(404, detail=f"no sheet {sheet} in the GAD manifest")
+    _no, mod_attr, stem, sheet_scale = entry
+    try:
+        import importlib
+
+        project = _load_project_from_upload(data)
+        with tempfile.TemporaryDirectory() as td:
+            mod = importlib.import_module(f"bridgecad_draw.{mod_attr}")
+            dxf_path = Path(td) / f"{stem}.dxf"
+            mod.generate(project, dxf_path, scale_denom=scale or sheet_scale)
+            from bridgecad_draw.engines.svg_engine import render_svg
+
+            svg_path = Path(td) / f"{stem}.svg"
+            render_svg(dxf_path, svg_path)
+            svg = svg_path.read_text(encoding="utf-8")
+        return Response(content=svg, media_type="image/svg+xml")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(500, detail=f"preview failed: {exc}") from exc
+
+
+# ── Project session store (patch mechanic) ────────────────────────────────
+# The gateway is otherwise stateless (upload-per-request); the console's
+# single-field patch needs a "current project".  Tokens are in-memory only —
+# a restart drops sessions, which is honest for a GAD tool.
+
+_PROJECTS: dict[str, Any] = {}
+
+
+def _store_current(project: Any) -> str:
+    import uuid
+
+    token = uuid.uuid4().hex[:16]
+    _PROJECTS[token] = project
+    return token
+
+
+def _load_current(token: str) -> Any:
+    project = _PROJECTS.get(token)
+    if project is None:
+        raise HTTPException(404, detail=f"unknown project token '{token}'")
+    return project
+
+
+class PatchBody(BaseModel):
+    value: Any
+
+
+def _qa_verdict(project: Any) -> dict:
+    try:
+        from bridgecad_core.validation import run_all
+
+        report = run_all(project)
+        failures = sum(1 for f in report.findings if not f.passed)
+        return {"score": report.score, "failures": failures}
+    except Exception as exc:
+        return {"score": None, "failures": None, "error": str(exc)}
+
+
+project_router = APIRouter(prefix="/project", tags=["Project session"])
+
+
+@project_router.post("/load", summary="Load a workbook into a session; returns a patch token")
+async def project_load(file: UploadFile = File(...)) -> dict:
+    data = await enforce_upload_limits(file)
+    project = _load_project_from_upload(data)
+    token = _store_current(project)
+    # Index write is best-effort — a DB outage must not block patching.
+    import contextlib
+
+    with contextlib.suppress(Exception):
+        _index_repo().upsert_from_bridge_project(project)
+    return {"token": token, "summary": _project_summary(project)}
+
+
+@project_router.patch(
+    "/{token}/{section}/{field_name}",
+    summary="Apply one field, revalidate, return checks + QA verdict",
+)
+def patch_field(token: str, section: str, field_name: str, body: PatchBody) -> dict:
+    """Atomic single-field patch: ``with_updates`` revalidates the section, so
+    a rejected value yields 422 and the stored project is untouched."""
+    project = _load_current(token)
+    section_obj = getattr(project, section, None)
+    section_fields = (
+        getattr(type(section_obj), "model_fields", None) if section_obj is not None else None
+    )
+    if section_obj is None or section_fields is None:
+        raise HTTPException(404, detail=f"unknown section '{section}'")
+    if field_name not in section_fields:
+        raise HTTPException(404, detail=f"unknown field '{section}.{field_name}'")
+
+    try:
+        updated = project.with_updates(**{section: {field_name: body.value}})
+    except Exception as exc:
+        raise HTTPException(422, detail=f"patch rejected: {exc}") from exc
+
+    _PROJECTS[token] = updated
+
+    from bridgecad_draw.checks_table import build_abutment_rows
+
+    checks = [
+        {"id": r[0], "parameter": r[1], "value": r[2], "limit": r[3], "ok": r[4]}
+        for r in build_abutment_rows(updated)
+    ]
+    return {
+        "section": section,
+        "field": field_name,
+        "value": getattr(getattr(updated, section), field_name),
+        "checks": checks,
+        "qa": _qa_verdict(updated),
+    }
+
+
+projects_router = APIRouter(prefix="/projects", tags=["Project index"])
+
+
+def _index_repo() -> Any:
+    try:
+        from bridgecad_infra.repositories import ProjectIndexRepo
+    except ImportError as exc:
+        raise HTTPException(503, detail="bridgecad_infra unavailable") from exc
+    return ProjectIndexRepo()
+
+
+@projects_router.get("", summary="List indexed projects (soft-deleted excluded)")
+def list_projects(limit: int = 25, offset: int = 0) -> dict:
+    rows = _index_repo().list_projects(limit=min(limit, 100), offset=offset)
+    return {"count": len(rows), "projects": rows}
+
+
+@projects_router.post("/{idx}/duplicate", summary="Deep-copy a project, reset identity")
+def duplicate_project(idx: int) -> dict:
+    row = _index_repo().duplicate(idx)
+    if row is None:
+        raise HTTPException(404, detail=f"project {idx} not found or has no payload")
+    return {"duplicated": True, "project": row}
+
+
+@projects_router.delete("/{idx}", summary="Soft-delete a project")
+def delete_project(idx: int) -> dict:
+    if not _index_repo().soft_delete(idx):
+        raise HTTPException(404, detail=f"project {idx} not found")
+    return {"deleted": True, "id": idx}
+
+
+@projects_router.post("/{idx}/restore", summary="Restore a soft-deleted project")
+def restore_project(idx: int) -> dict:
+    if not _index_repo().restore(idx):
+        raise HTTPException(404, detail=f"project {idx} not found or not deleted")
+    return {"restored": True, "id": idx}
+
+
+io_router = APIRouter(prefix="/io", tags=["Excel I/O"])
+
+
+@io_router.post("/import/{sheet}", summary="Parse one workbook sheet into a section payload")
+async def import_sheet(sheet: int, file: UploadFile = File(...)) -> dict:
+    """Per-sheet import: lets the console fill one form without a full run."""
+    data = await enforce_upload_limits(file)
+    try:
+        from bridgecad_io.excel_reader import SheetNotFoundError, read_sheet
+    except ImportError as exc:
+        raise HTTPException(500, detail="bridgecad_io unavailable") from exc
+    try:
+        section = read_sheet(data, sheet)
+    except SheetNotFoundError as exc:
+        raise HTTPException(404, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(422, detail=f"sheet failed validation: {exc}") from exc
+    return {"sheet": sheet, "section": section.model_dump(mode="json")}
 
 
 # /bills
@@ -328,7 +529,7 @@ async def export_bundle(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     state: str | None = None,
-    scale: int = 100,
+    scale: int | None = None,
 ) -> FileResponse:
     """Upload Excel → full export (DXF + BOQ + QA) → ZIP bundle."""
     scale = _validate_scale(scale)
@@ -410,7 +611,7 @@ app = FastAPI(
     title="BridgeCAD Enterprise API",
     description=(
         "🌉 **BridgeCAD Enterprise Suite** — REST API for automated bridge GAD generation.\n\n"
-        "Upload an Excel workbook and get 7-sheet DXF drawings, "
+        "Upload an Excel workbook and get 8-sheet DXF drawings, "
         "priced BOQ, QA reports, and a full ZIP bundle."
     ),
     version=__version__,
@@ -462,6 +663,9 @@ app.include_router(bills_router)
 app.include_router(qa_router)
 app.include_router(exports_router)
 app.include_router(plugins_router)
+app.include_router(project_router)
+app.include_router(projects_router)
+app.include_router(io_router)
 
 
 # Health / meta

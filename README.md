@@ -139,6 +139,23 @@ Abutment/dirt-wall detailing and drainage practice is cross-checked against:
   pile → cap → abutment → abutment-cap → dirt-wall construction sequence:
   <https://prewallcivil.com/dirt-wall-in-bridge-abutment/>
 
+- **Abutment Cap in Bridge Construction** — cap depth, bearing-shelf
+  projection, pedestal and the cap → dirt-wall interface:
+  <https://prewallcivil.com/abutment-cap-in-bridge-construction/>
+
+- **Original LISP baseline** — [Explanation of LISP code for Solid Slab GAD](https://www.yogipwd.com/2023/05/explanation-of-lisp-code-for-solid-slab.html):
+  the AutoLISP source this project started from. The LISP solid-slab baseline
+  was diluted during enhancement; abutment/dirt-wall/wearing-coat geometry is
+  now re-derived from the reference above rather than from the LISP. The
+  baseline is preserved verbatim under `references/lisp/` and audited in
+  [docs/lisp-baseline.md](docs/lisp-baseline.md) — see
+  `python scripts/refs_lisp.py references/lisp/*.lsp` for the inventory.
+
+- **Peer implementation — nxstructural** — a design-to-drawing workflow worth
+  studying for clause-anchored checks printed on the sheet, bidirectional
+  rebar editing, live preview and BBS (IS 456 / IS 800 / IRC 112 / IRC 58 /
+  IRC 37): <https://www.nxstructural.com/>
+
 ---
 
 ## 🚀 Deploy
@@ -175,6 +192,16 @@ Standing on: **Pydantic** and **FastAPI** (contracts and gateway) · **ezdxf**
 (DXF authoring) · **Typer** and **Rich** (CLI) · **Streamlit**, **React**,
 **Vite** and **Tailwind** (the two consoles) · **pytest** and **mypy** (the
 gates) · **import-linter** (the architecture invariants).
+
+### Geometry references
+
+- **Dirt wall / abutment cap**: [Dirt Wall in Bridge Abutment — PreWall Civil](https://prewallcivil.com/dirt-wall-in-bridge-abutment/)
+  — source for the dirt-wall-as-back-wall definition, its position at the rear
+  of the cap, and the drainage (weep hole + filter) requirement.
+- **Original LISP baseline**: [Explanation of LISP code for Solid Slab GAD](https://www.yogipwd.com/2023/05/explanation-of-lisp-code-for-solid-slab.html)
+  — the starting point. The geometric basis was diluted during the suite
+  enhancement; abutment cap, dirt wall and wearing-coat extents are now
+  re-derived from the reference above rather than from the LISP.
 
 ---
 

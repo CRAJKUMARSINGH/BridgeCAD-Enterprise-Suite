@@ -18,6 +18,13 @@ FRONTEND = ROOT / "frontend" / "src" / "sheets"
 GOLDEN = ROOT / "tests" / "draw" / "golden" / "pins" / "detail_default.json"
 FIXTURES = ROOT / "tests" / "draw" / "fixtures"
 
+SHEET_SCALE = 100  # 1:100 sheet scale, mirrors detailGeometry.js
+
+
+def _mm(metres: float) -> float:
+    return metres * 1000.0 / SHEET_SCALE
+
+
 DETAIL_LABELS = [
     "FOUNDATION ELEVATION",
     "PILE CAP REINFORCEMENT DETAIL",
@@ -25,6 +32,10 @@ DETAIL_LABELS = [
     "WING WALL LEFT",
     "WING WALL RIGHT",
     "FIRE WALL",
+    "DIRT WALL",
+    "WEEP HOLES",
+    "GRANULAR FILTER",
+    "RETAINED EMBANKMENT",
     "BEARING SCHEDULE",
 ]
 
@@ -59,12 +70,89 @@ def test_registry_lists_sheets_4_and_5():
     assert "sheet5_pier_abutment" in registry
 
 
-def test_labels_present_in_core():
-    core = (FRONTEND / "detailGeometry.js").read_text(encoding="utf-8")
+@needs_node
+def test_required_labels_are_emitted():
+    """Every required label must reach the drawing, not merely the source.
+
+    The previous version scanned `detailGeometry.js` as text, where `FIRE WALL`
+    also sits inside a docstring comment — so the test passed even if the label
+    never became a primitive. Reading the built text stream removes that false
+    positive.
+    """
+    text = _run_node(
+        "import { buildSheet4, buildSheet5 } from './frontend/src/sheets/detailGeometry.js';"
+        "const textOf = (s) => s.prims.filter((q) => q.k === 'text').map((q) => q.s).join(' | ');"
+        "process.stdout.write(JSON.stringify({ s4: textOf(buildSheet4()), s5: textOf(buildSheet5()) }));"
+    )
+    blob = f"{text['s4']} | {text['s5']}"
     for label in DETAIL_LABELS:
-        assert label in core, f"detail label dropped: {label}"
+        assert label in blob, f"detail label not emitted: {label}"
 
 
+@needs_node
+@pytest.mark.parametrize("rung,value", [("futl", 20.0), ("footl", 18.0), ("futrl", 16.0), ("alcl", 15.0), ("alcw", 14.0)])
+def test_abtl_ladder_rungs_are_reachable(rung: str, value: float):
+    """Item-5 guard: every rung of the ABTL ladder must be selectable and the rung
+    that fired must be printed on the sheet.
+
+    Resolving the ladder on already-normalised params made `abtl` the first rung on
+    every call, so FUTL..ALCW could never fire. This drives each rung from raw
+    input and reads the printed `SOURCE:` label.
+    """
+    params = {"carriageway": 7.5, rung: value}
+    out = _run_node(
+        "import { buildSheet5 } from './frontend/src/sheets/detailGeometry.js';"
+        f"const s = buildSheet5({json.dumps(params)});"
+        "const text = s.prims.filter((q) => q.k === 'text').map((q) => q.s).join(' | ');"
+        "process.stdout.write(JSON.stringify({ src: s.meta.abtlSource, text }));"
+    )
+    assert out["src"] == rung.upper(), f"ladder rung {rung} did not fire: {out['src']}"
+    assert f"SOURCE: {rung.upper()}" in out["text"], f"rung not printed: {out['text']}"
+
+
+@needs_node
+def test_wing_walls_spring_from_both_abutment_ends():
+    """Item-1 guard: the two wing-wall polygons must spring from the *opposite*
+    ends of the abutment face, on the soffit, with a horizontal face run.
+
+    The pre-fix drawing anchored both walls to one corner, rotated 90° out of the
+    abutment face and floating below it — a defect the contract audit could not
+    see. This reads the drawn polygons, so it fails on that geometry.
+    """
+    got = _run_node(
+        "import { buildSheet5 } from './frontend/src/sheets/detailGeometry.js';"
+        "const s = buildSheet5();"
+        "const walls = s.prims.filter((q) => q.k === 'poly' && q.layer === 'SUB-ABUT').map((q) => {"
+        "  const xs = q.pts.filter((_, i) => i % 2 === 0);"
+        "  const ys = q.pts.filter((_, i) => i % 2 === 1);"
+        "  return { noseX: q.pts[0], topY: Math.max(...ys),"
+        "           run: Math.max(...xs) - Math.min(...xs), drop: Math.max(...ys) - Math.min(...ys) }; });"
+        "process.stdout.write(JSON.stringify({"
+        "  walls, abtl: s.meta.params.abtl,"
+        "  meta: s.meta.walls.map((w) => ({ faceRunM: w.faceRunM, returnM: w.returnM })) }));"
+    )
+    walls = got["walls"]
+    assert len(walls) == 2, f"expected two wing-wall polygons, got {len(walls)}"
+
+    # Anchored at opposite ends of the abutment face, not a shared corner.
+    assert walls[0]["noseX"] != walls[1]["noseX"], f"wing walls share a nose: {walls}"
+    span = abs(walls[1]["noseX"] - walls[0]["noseX"])
+    assert abs(span - _mm(got["abtl"])) < 1.0, f"nose span {span:.1f} != abutment width {_mm(got['abtl']):.1f}"
+
+    # Seated on the same soffit line (the abutment base), level with each other.
+    assert abs(walls[0]["topY"] - walls[1]["topY"]) < 1e-6, "wing walls not seated on the same soffit"
+
+    for drawn, wall in zip(walls, got["meta"]):
+        assert abs(drawn["run"] - _mm(wall["faceRunM"])) < 1.0, (
+            f"drawn face run {drawn['run']:.1f} != {_mm(wall['faceRunM']):.1f}"
+        )
+        # The wall drops by the return plus its own thickness (mm(0.4) = 4 mm).
+        assert abs(drawn["drop"] - (_mm(wall["returnM"]) + _mm(0.4))) < 1.0, (
+            f"drawn return {drawn['drop']:.1f} != {_mm(wall['returnM']) + _mm(0.4):.1f}"
+        )
+
+
+@needs_node
 @pytest.mark.skipif(not (FRONTEND / "detailGeometry.js").is_file(), reason="core missing")
 def test_random_audit_is_clean():
     proc = subprocess.run(
@@ -103,3 +191,29 @@ def test_splay_extremes_audit_clean(name: str):
     )
     assert result["s4"]["ok"], result["s4"]["issues"]
     assert result["s5"]["ok"], result["s5"]["issues"]
+
+
+@needs_node
+def test_dirt_wall_detail_panel_is_thin_and_drained():
+    """prewallcivil.com/dirt-wall-in-bridge-abutment: Sheet 05 must detail the
+    dirt wall — a DWTH-thin wall on the cap, drained by weep holes, holding a
+    layered granular backfill behind a geotextile filter.
+
+    Reads the built primitive stream, so it fails if the wall is drawn thick (a
+    second abutment) or left un-drained.
+    """
+    got = _run_node(
+        "import { buildSheet5 } from './frontend/src/sheets/detailGeometry.js';"
+        "const s = buildSheet5();"
+        "const widths = s.prims.filter((q) => q.k === 'rect' && q.layer === 'SUB-ABUT').map((q) => q.w);"
+        "const weep = s.prims.filter((q) => q.k === 'circle' && q.layer === 'STRUC-DETAIL').length;"
+        "const text = s.prims.filter((q) => q.k === 'text').map((q) => q.s).join(' | ');"
+        "process.stdout.write(JSON.stringify({"
+        "  panel: s.prims.some((q) => q.k === 'panel' && q.id === '5G'),"
+        "  minWidth: Math.min(...widths), weep, text }));"
+    )
+    assert got["panel"], "the dirt-wall detail panel 5G is missing"
+    assert abs(got["minWidth"] - _mm(0.3)) < 0.05, f"dirt wall is not DWTH 0.3 m thin: {got['minWidth']}"
+    assert got["weep"] >= 2, "the dirt wall has no weep holes"
+    for label in ("DIRT WALL", "WEEP HOLES", "GRANULAR FILTER", "RETAINED EMBANKMENT", "APPROACH SLAB"):
+        assert label in got["text"], f"dirt-wall detail label not emitted: {label}"

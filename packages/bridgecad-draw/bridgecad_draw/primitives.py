@@ -308,6 +308,33 @@ def dim_linear_v(
         return None
 
 
+def dim_along(
+    view: Any, p1: tuple[float, float], p2: tuple[float, float], axis: Any, **kw: Any
+) -> Any:
+    """Axis-aware dimension: refuses axes the view does not permit.
+
+    *view* is a ``contract.ViewSpec``; *axis* a ``contract.ViewAxis`` naming the
+    model axis the dimension measures.  The zero-length guard uses the span on
+    the screen axis the dimension is actually drawn along (``dim_y`` →
+    horizontal, ``dim_x`` → vertical), so a thickness dim in a plan view is not
+    confused with a longitudinal one.
+    """
+    from .contract import AxisError
+
+    if axis not in view.allowed:
+        raise AxisError(f"{view.view_name}: {axis} dimension not permitted")
+    msp = kw.pop("msp")
+    if "dim_y" in kw:
+        span = abs(p2[0] - p1[0])
+        if span < 0.5:
+            raise AxisError(f"{view.view_name}: zero-length {axis} dimension")
+        return dim_linear_h(msp, p1[0], p1[1], p2[0], p2[1], **kw)
+    span = abs(p2[1] - p1[1])
+    if span < 0.5:
+        raise AxisError(f"{view.view_name}: zero-length {axis} dimension")
+    return dim_linear_v(msp, p1[0], p1[1], p2[0], p2[1], **kw)
+
+
 def level_tag(
     msp, x: float, y: float, rl: float, text_height: float = 0.35, layer: str = "DIM-LEVEL"
 ) -> None:

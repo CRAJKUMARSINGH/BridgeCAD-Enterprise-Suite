@@ -241,7 +241,16 @@ def _parse_bearings_joints(ws: Any, m: Any, t: Any) -> dict:
     headers: list[str] = []
 
     for row in rows:
-        if not row or row[0] is None:
+        if not row:
+            continue
+        # A fully-empty row terminates the active tabular block. It must be
+        # checked BEFORE the row[0]-is-None skip, otherwise trailing
+        # field|value rows are silently swallowed as schedule records.
+        if all(c is None or str(c).strip() == "" for c in row):
+            mode = None
+            headers = []
+            continue
+        if row[0] is None:
             continue
         key0 = str(row[0]).strip().lower()
         if key0 in ("bearing_schedule:", "bearing_schedule"):
@@ -300,9 +309,19 @@ def _parse_bearings_joints(ws: Any, m: Any, t: Any) -> dict:
             "quantity": _coerce(r.get("quantity"), int) or 1,
         }
 
+    # Flat bearing/joint demand parameters (appended after the schedules as
+    # field|value rows; _sheet_to_dict picks them up alongside the tables).
+    flat = _sheet_to_dict(ws)
+
     return {
         "bearing_schedule": [_mk_bearing(r) for r in bearing_rows],
         "expansion_joint_schedule": [_mk_expansion(r) for r in expansion_rows],
+        "bearing_type": _lookup_enum(t.BearingType, flat.get("bearing_type")),
+        "restrained_longitudinal": _coerce(flat.get("restrained_longitudinal"), bool),
+        "restrained_transverse": _coerce(flat.get("restrained_transverse"), bool),
+        "bearing_seat_width_mm": _coerce(flat.get("bearing_seat_width_mm"), int),
+        "bearing_clearance_mm": _coerce(flat.get("bearing_clearance_mm"), int),
+        "design_movement_mm": _coerce(flat.get("design_movement_mm"), int),
     }
 
 
@@ -346,6 +365,9 @@ _SHEET_ALIASES: dict[str, str] = {
     "s13": "S13",
     "validation": "S14",
     "s14": "S14",
+    "seismic_data": "S15",
+    "seismic data": "S15",
+    "s15": "S15",
 }
 
 _PARSERS = {
@@ -366,6 +388,7 @@ _PARSERS = {
     "S12": _generic("DrawingControl"),
     "S13": _generic("Calculations"),
     "S14": _generic("ValidationModel"),
+    "S15": _generic("SeismicData"),
 }
 
 _MODEL_KEYS = {
@@ -383,7 +406,72 @@ _MODEL_KEYS = {
     "S12": "drawing_control",
     "S13": "calculations",
     "S14": "validation",
+    "S15": "seismic_data",
 }
+
+
+# ---------------------------------------------------------------------------
+# Per-sheet import (guide: per-sheet Excel import)
+# ---------------------------------------------------------------------------
+
+#: 1-indexed workbook position -> canonical sheet ID (S01..S15).
+_SHEET_NUMBERS: dict[int, str] = {i + 1: f"S{i + 1:02d}" for i in range(15)}
+
+
+class SheetNotFoundError(LookupError):
+    """Raised when the requested sheet number has no canonical section."""
+
+
+def _section_model(model_key: str) -> Any:
+    from bridgecad_core.models import BridgeProject
+
+    annotation = BridgeProject.model_fields[model_key].annotation
+    return annotation
+
+
+def read_sheet(source: str | Path | bytes, sheet: int) -> Any:
+    """Parse one workbook sheet into its validated section model.
+
+    Resolves sheet number → canonical sheet → section model through the same
+    ``_PARSERS`` / ``_MODEL_KEYS`` maps the full reader uses, so the two can
+    never diverge.  ``source`` may be a path or raw workbook bytes.
+    """
+    if not _OPENPYXL_AVAILABLE:
+        raise ImportError("openpyxl is required: pip install openpyxl")
+
+    sid = _SHEET_NUMBERS.get(int(sheet))
+    if sid is None:
+        raise SheetNotFoundError(f"sheet {sheet} is outside the 1..15 section range")
+
+    if isinstance(source, bytes):
+        from io import BytesIO
+
+        wb = openpyxl.load_workbook(BytesIO(source), data_only=True)
+    else:
+        path = Path(source)
+        if not path.exists():
+            raise FileNotFoundError(f"Workbook not found: {path}")
+        try:
+            wb = openpyxl.load_workbook(path, data_only=True)
+        except Exception as exc:
+            raise ExcelParseError(
+                f"Workbook could not be opened ({type(exc).__name__}: {exc})",
+                file=path,
+            ) from exc
+
+    target_ws = None
+    for ws in wb.worksheets:
+        if _SHEET_ALIASES.get(ws.title.strip().lower()) == sid:
+            target_ws = ws
+            break
+    if target_ws is None:
+        raise SheetNotFoundError(f"workbook has no sheet mapping to {sid}")
+
+    m, t = _core()
+    data = _PARSERS[sid](target_ws, m, t)
+    model_cls = _section_model(_MODEL_KEYS[sid])
+    cleaned = {k: v for k, v in data.items() if v is not None}
+    return model_cls.model_validate(cleaned)
 
 
 # ---------------------------------------------------------------------------
@@ -412,6 +500,7 @@ _CANONICAL_SHEET_NAMES = (
     "DRAWING_CONTROL",
     "CALCULATIONS",
     "VALIDATION",
+    "SEISMIC_DATA",
 )
 
 #: Legacy parameter codes that must be present before a workbook is treated as
@@ -425,7 +514,7 @@ def _no_sheets_error(path: Path) -> str:
     """The message a workbook that is neither canonical nor legacy receives."""
     return (
         f"No recognised BridgeCAD sheets found in '{path.name}'. "
-        f"Expected a 14-sheet workbook named: {', '.join(_CANONICAL_SHEET_NAMES)}. "
+        f"Expected a {len(_CANONICAL_SHEET_NAMES)}-sheet workbook named: {', '.join(_CANONICAL_SHEET_NAMES)}. "
         "See docs/excel-contract.md, or generate a template with "
         "`bridgecad-cli template new`. Older 1-4 sheet workbooks are only "
         "supported through legacy mode (Value / Variable / Description)."

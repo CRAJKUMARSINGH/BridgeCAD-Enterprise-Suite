@@ -472,9 +472,9 @@ except Exception as e:
 
 
 # ──────────────────────────────────────────────────────────────────────────
-# STEP 2 — Generate 7-sheet DXF package
+# STEP 2 — Generate 8-sheet DXF package
 # ──────────────────────────────────────────────────────────────────────────
-hdr("STEP 2 — Generate 7-Sheet DXF GAD Package")
+hdr("STEP 2 — Generate 8-Sheet DXF GAD Package")
 t3 = time.perf_counter()
 
 OUT = ROOT / "outputs" / "11span_110m_rcc_slab"
@@ -495,7 +495,7 @@ if sheets:
     for s in sheets:
         kb = s.stat().st_size // 1024
         ok(f"  {s.name}", f"{kb} KB")
-    ok(f"{len(sheets)}/7 sheets generated", f"total={total_kb} KB  time={dxf_ms}ms")
+    ok(f"{len(sheets)}/8 sheets generated", f"total={total_kb} KB  time={dxf_ms}ms")
 else:
     err("No DXF sheets generated, trying fallback via bridge_gad package")
 
@@ -863,7 +863,7 @@ print()
 print(f"  TIMINGS:")
 print(f"    Build model   : {build_ms}ms")
 print(f"    QA checks     : {qa_ms}ms")
-print(f"    7-sheet DXF   : {dxf_ms}ms")
+print(f"    8-sheet DXF   : {dxf_ms}ms")
 print(f"    PDF booklet   : {pdf_ms}ms")
 print(f"    JSON+BOQ      : {json_ms}ms")
 print(f"    TOTAL         : {total_ms}ms  ({total_ms/1000:.1f}s)")

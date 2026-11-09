@@ -35,6 +35,21 @@ standards/
 Python modules hold logic; YAML holds data. Changing a rate or a table means
 editing YAML, not Python.
 
+## Rule families beyond the table
+
+The validator (`bridgecad_core.validation`) also carries rule families that
+post-date the table above:
+
+- **Abutment geometry** — cap depth/projection, dirt-wall thickness vs
+  approach slab + freeboard, weep-hole spacing (IRC:21 / IRC:78 practice).
+- **SKW-001..003** — skew ≤ 60°, acute-corner edge distance ≥ 150 mm,
+  obtuse-corner note required above 15° skew.
+- **BIL-001/002** — every reinforcement item carries element provenance and
+  the detailing ledger reconciles with its own items.
+- **Reinforcement** — `RebarItem.utilisation = As,req / As,prov`; `As,req`
+  comes from `standards/reinforcement_minima.yaml` (`minima_table_v1`), an
+  IRC:112 minimum-steel table, not a design value.
+
 ## Key limits
 
 - **Span/depth**: $$10 \le L/d \le 20$$ — enforced in the validator *and* the

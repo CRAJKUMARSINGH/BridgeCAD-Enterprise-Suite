@@ -11,18 +11,24 @@ For each E2E fixture:
 Run from repo root:
     python scripts/generate_examples.py
 """
+
 from __future__ import annotations
 
 import json
 import sys
-import traceback
 from pathlib import Path
 
 # ── path bootstrap (no pip install required) ─────────────────────────────────
 _SUITE = Path(__file__).parents[1]
-for _pkg in ["bridgecad-core", "bridgecad-io", "bridgecad-draw",
-             "bridgecad-bill", "bridgecad-qa", "bridgecad-export",
-             "bridgecad-plugins"]:
+for _pkg in [
+    "bridgecad-core",
+    "bridgecad-io",
+    "bridgecad-draw",
+    "bridgecad-bill",
+    "bridgecad-qa",
+    "bridgecad-export",
+    "bridgecad-plugins",
+]:
     _p = _SUITE / "packages" / _pkg
     if _p.exists() and str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
@@ -34,36 +40,39 @@ FIXTURES_DIR = _SUITE / "tests" / "e2e" / "fixtures"
 EXAMPLES_DIR = _SUITE / "EXAMPLES"
 EXAMPLES_DIR.mkdir(exist_ok=True)
 
+# Markdown hard line break (two trailing spaces) for the generated READMEs.
+_MD_LB = "  "
+
 # Friendly human-readable labels
 LABELS: dict[str, str] = {
-    "simple_12m":                "Simple 1×12 m RCC Slab Bridge",
-    "continuous_3x12m":          "Continuous 3×12 m RCC T-Beam",
-    "girder_4x18m":              "4-Span 18 m RCC T-Beam Girder",
-    "arch_24m":                  "24 m Arch Bridge",
-    "box_culvert_8m":            "Box Culvert 8 m",
-    "box_culvert_2cell_8m":      "2-Cell Box Culvert 8 m",
-    "basantar_bridge_well":      "Basantar Bridge (Well Foundation)",
+    "simple_12m": "Simple 1×12 m RCC Slab Bridge",
+    "continuous_3x12m": "Continuous 3×12 m RCC T-Beam",
+    "girder_4x18m": "4-Span 18 m RCC T-Beam Girder",
+    "arch_24m": "24 m Arch Bridge",
+    "box_culvert_8m": "Box Culvert 8 m",
+    "box_culvert_2cell_8m": "2-Cell Box Culvert 8 m",
+    "basantar_bridge_well": "Basantar Bridge (Well Foundation)",
     "binder_bridge_3x20m_skew5": "Binder Bridge 3×20 m Skew 5°",
-    "bridge_ch_2_100":           "Bridge CH 2+100",
-    "chambakkara_5x25m":         "Chambakkara 5×25 m",
-    "e_sh35_mjb_psc_box":        "E-SH35 MJB PSC Box",
-    "gad_0_600_well_foundation":  "GAD 0+600 Well Foundation",
-    "gad_24_750m_rcc_tbeam":     "GAD 24.75 m RCC T-Beam",
-    "gad_2x15m_rcc_tbeam":       "2×15 m RCC T-Beam",
-    "gad_361_935_3x18m":         "GAD 361+935 3×18 m",
-    "gad_3x18m_skew15":          "3×18 m Skew 15°",
-    "gad_7_233_20m":             "GAD 7+233 20 m",
-    "launching_apron_10m":       "Launching Apron 10 m",
-    "mjb_pkg7_6x30m_viaduct":    "MJB PKG-7 6×30 m Viaduct",
-    "mnb_8_485_minor_18m":       "MNB 8+485 Minor Bridge 18 m",
+    "bridge_ch_2_100": "Bridge CH 2+100",
+    "chambakkara_5x25m": "Chambakkara 5×25 m",
+    "e_sh35_mjb_psc_box": "E-SH35 MJB PSC Box",
+    "gad_0_600_well_foundation": "GAD 0+600 Well Foundation",
+    "gad_24_750m_rcc_tbeam": "GAD 24.75 m RCC T-Beam",
+    "gad_2x15m_rcc_tbeam": "2×15 m RCC T-Beam",
+    "gad_361_935_3x18m": "GAD 361+935 3×18 m",
+    "gad_3x18m_skew15": "3×18 m Skew 15°",
+    "gad_7_233_20m": "GAD 7+233 20 m",
+    "launching_apron_10m": "Launching Apron 10 m",
+    "mjb_pkg7_6x30m_viaduct": "MJB PKG-7 6×30 m Viaduct",
+    "mnb_8_485_minor_18m": "MNB 8+485 Minor Bridge 18 m",
     "mr5_lc29_4x30m_continuous": "MR5-LC29 4×30 m Continuous",
-    "newaj_3x45m":               "Newaj 3×45 m",
-    "nh353c_4x24m_psc":          "NH-353C 4×24 m PSC",
-    "pp05_30m_psc":              "PP-05 30 m PSC",
-    "rob_viaduct_ch37_730":      "ROB Viaduct CH 37+730",
-    "shiwalay_3x30m_psc_box":    "Shiwalay 3×30 m PSC Box",
-    "srctip_4x20m":              "SRCTIP DOR 4×20 m",
-    "viaduct_br187_ch187_475":   "Viaduct BR-187 CH 187+475",
+    "newaj_3x45m": "Newaj 3×45 m",
+    "nh353c_4x24m_psc": "NH-353C 4×24 m PSC",
+    "pp05_30m_psc": "PP-05 30 m PSC",
+    "rob_viaduct_ch37_730": "ROB Viaduct CH 37+730",
+    "shiwalay_3x30m_psc_box": "Shiwalay 3×30 m PSC Box",
+    "srctip_4x20m": "SRCTIP DOR 4×20 m",
+    "viaduct_br187_ch187_475": "Viaduct BR-187 CH 187+475",
 }
 
 SHEET_NAMES = [
@@ -83,14 +92,16 @@ def _render_png(dxf_path: Path, png_path: Path, dpi: int = 200) -> Path | None:
     """Render DXF → PNG. Returns None on failure (non-fatal)."""
     try:
         from bridgecad_draw.engines.png_engine import render_png
+
         return render_png(dxf_path, png_path, dpi=dpi)
     except Exception as exc:
         print(f"        [PNG skip] {dxf_path.name}: {exc}")
         return None
 
 
-def _write_readme(out_dir: Path, fid: str, project, sheets: list[Path],
-                  pngs: list[Path], dxf_kb: int) -> None:
+def _write_readme(
+    out_dir: Path, fid: str, project, sheets: list[Path], pngs: list[Path], dxf_kb: int
+) -> None:
     label = LABELS.get(fid, fid.replace("_", " ").title())
     bridge = getattr(getattr(project, "project_master", None), "bridge_name", "") or fid
     n_pngs = sum(1 for p in pngs if p is not None)
@@ -101,11 +112,11 @@ def _write_readme(out_dir: Path, fid: str, project, sheets: list[Path],
 
     readme = f"""# {label}
 
-**Bridge:** {bridge}  
-**Fixture ID:** `{fid}`  
-**Sheets generated:** {len(sheets)} DXF  
-**Rendered PNGs:** {n_pngs}  
-**Total DXF size:** {dxf_kb} KB  
+**Bridge:** {bridge}{_MD_LB}
+**Fixture ID:** `{fid}`{_MD_LB}
+**Sheets generated:** {len(sheets)} DXF{_MD_LB}
+**Rendered PNGs:** {n_pngs}{_MD_LB}
+**Total DXF size:** {dxf_kb} KB{_MD_LB}
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets
@@ -114,7 +125,9 @@ def _write_readme(out_dir: Path, fid: str, project, sheets: list[Path],
 |---|---|---|
 """
     for i, s in enumerate(sheets, 1):
-        readme += f"| {i} | {SHEET_NAMES[i-1] if i <= len(SHEET_NAMES) else s.stem} | `{s.name}` |\n"
+        readme += (
+            f"| {i} | {SHEET_NAMES[i-1] if i <= len(SHEET_NAMES) else s.stem} | `{s.name}` |\n"
+        )
 
     readme += f"""
 ## Rendered previews
@@ -131,7 +144,6 @@ def generate_fixture(fixture_path: Path) -> tuple[str, bool, str]:
 
     data = json.loads(fixture_path.read_text(encoding="utf-8"))
     fid = data["_meta"]["fixture_id"]
-    label = LABELS.get(fid, fid)
 
     out_dir = EXAMPLES_DIR / fid
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -168,7 +180,7 @@ def main() -> int:
     passed, failed_ids = 0, []
 
     print(f"\n{'='*70}")
-    print(f"  BridgeCAD Enterprise Suite — EXAMPLES batch generator")
+    print("  BridgeCAD Enterprise Suite — EXAMPLES batch generator")
     print(f"  Fixtures: {total}  |  Output: {EXAMPLES_DIR}")
     print(f"{'='*70}\n")
 
@@ -234,7 +246,7 @@ every drawing is geometry-derived from the parametric Excel model.
 IRC 5 · IRC 6 · IRC 21 · IRC 78 · IRC SP:55 · IRC SP:114 · MoRTH 2024-25
 
 ---
-*Generated by BridgeCAD Enterprise Suite v0.1.0-rc1 — BRIDGECAD-OSS-1.0*  
+*Generated by BridgeCAD Enterprise Suite v0.1.0-rc1 — BRIDGECAD-OSS-1.0*{_MD_LB}
 *© Er. Rajkumar Singh Chauhan, Retd. Addl. Chief Engineer, PWD Rajasthan*
 """
     (EXAMPLES_DIR / "README.md").write_text(index, encoding="utf-8")

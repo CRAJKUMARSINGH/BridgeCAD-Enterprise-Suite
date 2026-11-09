@@ -54,6 +54,9 @@ ALLOW = {
     "boq.xlsx",
     "project.json",
     "manifest.json",
+    # Written at runtime by scripts/robotic_smoke.py into the (gitignored)
+    # reports/ tree; ROBOTIC-TEST-GUIDE.MD shows it as expected terminal output.
+    "smoke_report_seed42.json",
     "out/",
     "output_directory",
     "output_dir",

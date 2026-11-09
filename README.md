@@ -3,7 +3,7 @@
 [![version](https://img.shields.io/badge/version-0.1.0--rc1-blue.svg)](CHANGELOG.md)
 [![python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![suite-ci](https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/actions/workflows/suite-ci.yml/badge.svg)](../../actions/workflows/suite-ci.yml)
+[![suite-ci](https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/actions/workflows/suite-ci.yml/badge.svg)](https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/actions/workflows/suite-ci.yml)
 
 **One parametric Excel workbook in. An 8-sheet standards-compliant bridge GAD
 package, priced Bill of Quantities, and QA compliance report out.**

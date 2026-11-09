@@ -13,9 +13,13 @@ accept = [200, 206, 429, 403]
 
 # Follow "#section" links and verify the anchor exists. This catches the case
 # where a heading is renamed and every link into it rots silently.
-include_fragments = true
+# lychee >=0.19 takes an enum here ("full"), not a boolean.
+include_fragments = "full"
 
-exclude_mail = true
+# Mail addresses in the docs are illustrative, not live endpoints to probe.
+# lychee renamed this key from `exclude_mail` to the inverse `include_mail`
+# (>=0.19); the old spelling is rejected outright and fails the whole config.
+include_mail = false
 
 scheme = ["https", "http", "file"]
 

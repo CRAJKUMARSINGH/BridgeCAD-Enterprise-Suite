@@ -227,6 +227,10 @@ ignore = [
 "scripts/robotic_test_viaduct.py" = ["T20", "E402"]
 "scripts/test_netlify_readiness.py" = ["T20", "E402"]
 "scripts/wing_report.py" = ["T20", "E402"]
+# Demo-gallery generators: same sys.path bootstrap before importing the sibling
+# run_e2e helper — the late import is deliberate.
+"scripts/generate_examples.py" = ["T20", "E402"]
+"scripts/generate_remaining.py" = ["T20", "E402"]
 # Persona robot walker: inserts its own directory on sys.path so it can import
 # the sibling personas module — the import below the setup is deliberate.
 "scripts/robot/run_robot.py" = ["T20", "E402"]

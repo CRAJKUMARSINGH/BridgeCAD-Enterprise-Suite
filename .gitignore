@@ -31,6 +31,9 @@ env/
 .coverage
 htmlcov/
 .tox/
+.ruff_cache/
+.mypy_cache/
+.lycheecache
 
 # IDEs
 .vscode/
@@ -182,3 +185,15 @@ wing_report.json
 # Remove these two lines if you deliberately want them versioned.
 CODE-JUNCTION/
 ATTACHED ASSETS/
+
+# Ad-hoc scratch / run trees — regenerable output written by local test and
+# generation runs (never product source).
+03_outputs/
+test_run_sample/
+temp_diag/
+temp_fixed_pdf/
+_wheelout/
+artifacts/browser_check/
+smoke_output_simple_12m/
+my_bridge.xlsx
+test_sample_output.dxf

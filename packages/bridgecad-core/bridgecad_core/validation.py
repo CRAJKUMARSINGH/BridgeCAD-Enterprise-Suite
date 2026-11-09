@@ -2917,16 +2917,25 @@ def check_abt_cap_depth(p: BridgeProject) -> ValidationFinding:
 
 
 def check_abt_cap_proj(p: BridgeProject) -> ValidationFinding:
-    """ABT-CAP-PROJ — Cap projection 100-250 mm bearing-shelf practice."""
+    """ABT-CAP-PROJ — Face-specific cap projection.
+
+    FRONT (bearing shelf): 100–250 mm practice, IRC:21 Clause 305.
+    REAR (dirt-wall seat): 250–600 mm — the rear ledge carries the dirt-wall
+    stem, so it is deliberately wider than the bearing shelf. Checking the rear
+    against the front's bearing-shelf band was the old bug: a correctly wide
+    dirt-wall seat was reported as a FAIL.
+    """
     sub = p.substructure
     pf_mm = int(sub.abutment_cap_projection_front_mm or 0)
-    passed = pf_mm == 0 or (100 <= pf_mm <= 250)
+    pr_mm = int(sub.abutment_cap_projection_rear_mm or 0)
+    front_ok = pf_mm == 0 or (100 <= pf_mm <= 250)
+    rear_ok = pr_mm == 0 or (250 <= pr_mm <= 600)
     return _f(
         "ABT-CAP-PROJ",
-        "Abutment cap front projection in 100–250 mm bearing-shelf range",
+        "Cap front 100–250 mm (bearing shelf) / rear 250–600 mm (dirt-wall seat)",
         ValidationSeverity.WARNING,
-        passed,
-        f"abutment_cap_projection_front_mm={pf_mm} — expected 100..250 mm",
+        front_ok and rear_ok,
+        f"front={pf_mm} mm (100..250), rear={pr_mm} mm (250..600)",
     )
 
 

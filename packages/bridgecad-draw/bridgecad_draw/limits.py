@@ -18,10 +18,16 @@ CAP_DEPTH_MIN_M: float = 0.45
 """IRC:21 Clause 305: abutment cap (bearing shelf) vertical depth ≥ 450 mm."""
 
 CAP_PROJ_MIN_M: float = 0.10
-"""Minimum cap projection beyond shaft face, m."""
+"""Minimum cap FRONT projection beyond the shaft face (bearing shelf), m."""
 
 CAP_PROJ_MAX_M: float = 0.25
-"""Maximum cap projection beyond shaft face, m."""
+"""Maximum cap FRONT projection beyond the shaft face (bearing shelf), m."""
+
+CAP_PROJ_REAR_MIN_M: float = 0.25
+"""Minimum cap REAR projection (dirt-wall seat) — must take the dirt-wall stem, m."""
+
+CAP_PROJ_REAR_MAX_M: float = 0.60
+"""Maximum cap REAR projection (dirt-wall seat) — the model's own upper bound, m."""
 
 # ── Dirt wall ────────────────────────────────────────────────────────────────
 DIRT_WALL_THK_MIN_M: float = 0.25
@@ -45,6 +51,8 @@ __all__ = [
     "CAP_DEPTH_MIN_M",
     "CAP_PROJ_MIN_M",
     "CAP_PROJ_MAX_M",
+    "CAP_PROJ_REAR_MIN_M",
+    "CAP_PROJ_REAR_MAX_M",
     "DIRT_WALL_THK_MIN_M",
     "DIRT_WALL_FREEBOARD_M",
     "WEEP_HOLE_SPACING_M",

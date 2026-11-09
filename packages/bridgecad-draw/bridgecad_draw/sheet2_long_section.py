@@ -507,6 +507,7 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
     abt_h_mm = float(sub.abutment_height_m or 3.2) * sc_v * v_exag
     cap_d2 = float(sub.abutment_cap_depth_mm or 600) / 1000.0
     cap_proj2 = float(sub.abutment_cap_projection_front_mm or 300) / 1000.0
+    cap_proj2_r = float(sub.abutment_cap_projection_rear_mm or 300) / 1000.0
     dw_t2 = float(sub.dirt_wall_thickness_mm or 300) / 1000.0
     ped_h2 = float(sub.abutment_pedestal_height_m or 0.15)
     brg_t2 = 0.10
@@ -535,9 +536,13 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
             layer="STRUC-HATCHING",
         )
 
-        # Cap, projecting past both faces
-        cap_w2 = abt_w_mm + 2 * sy2(cap_proj2)
-        cap_x0_2 = ax - sy2(cap_proj2)
+        # Cap — asymmetric: front (bearing shelf) on the river side, larger
+        # rear (dirt-wall seat) on the approach side. sgn=+1 → approach to +x.
+        cap_front_off = sy2(cap_proj2)
+        cap_rear_off = sy2(cap_proj2_r)
+        cap_x0_2 = ax - (cap_front_off if sgn > 0 else cap_rear_off)
+        cap_x1_2 = ax + abt_w_mm + (cap_rear_off if sgn > 0 else cap_front_off)
+        cap_w2 = cap_x1_2 - cap_x0_2
         rectangle(msp, cap_x0_2, cap_top_y2, cap_w2, sy2(cap_d2), layer="SUB-ABUT", lw=40)
         hatch_rect(
             msp,

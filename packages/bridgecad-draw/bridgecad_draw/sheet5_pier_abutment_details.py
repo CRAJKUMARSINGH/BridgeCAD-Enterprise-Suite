@@ -631,7 +631,8 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         color=4,
     )
 
-    # Approach slab behind the dirt wall + continuous wearing coat over it
+    # Approach slab behind the dirt wall (its wearing coat is drawn once, as a
+    # single continuous band, further down with the deck stub)
     app_x = dw_x + dw_t * sc
     rectangle(msp, app_x, cap_top_ly + dw_mm, app_l * sc, app_t_mm, layer="CIVIL-ROAD", lw=25)
     hatch_rect(
@@ -643,15 +644,6 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         pattern="ANSI31",
         scale=sc * 0.015,
         layer="STRUC-HATCHING",
-    )
-    rectangle(
-        msp,
-        app_x,
-        cap_top_ly + dw_mm + app_t_mm,
-        app_l * sc,
-        wc_t * sc,
-        layer="SUPER-WEARING",
-        lw=20,
     )
 
     # Return wall along the embankment at the rear of the approach slab
@@ -679,13 +671,18 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         layer="SUPER-DECK",
         lw=40,
     )
-    # Wearing coat over the deck stub — same level as the approach-slab coat,
-    # continuous at slab_top (the coat is never broken by the abutment joint)
+    # Wearing coat — ONE continuous band end to end: from the deck stub,
+    # across the abutment cap and the dirt-wall seat, over the full approach
+    # slab to the embankment.  Sheet 2 draws the same unbroken band
+    # ("CONTINUOUS WEARING COAT OVER APPROACH SLABS"), so the two views can
+    # never disagree; the coat is not broken by the abutment joint.
+    coat_x0 = cap_sec_l - deck_len
+    coat_x1 = app_x + app_l * sc
     rectangle(
         msp,
-        cap_sec_l - deck_len,
+        coat_x0,
         cap_top_ly + deck_top_off,
-        deck_len,
+        coat_x1 - coat_x0,
         wc_t * sc,
         layer="SUPER-WEARING",
         lw=20,

@@ -60,16 +60,22 @@ def build_abutment_rows(project: Any) -> list[Row]:
         ),
         (
             "QA-ABT-CAP-PROJ",
-            "Cap projection each face",
+            "Cap projection front/rear",
             f"{cap_pf_mm}/{cap_pr_mm} mm",
-            f"{limits.CAP_PROJ_MIN_M * 1000:.0f}-{limits.CAP_PROJ_MAX_M * 1000:.0f} mm",
+            (
+                f"{limits.CAP_PROJ_MIN_M * 1000:.0f}-{limits.CAP_PROJ_MAX_M * 1000:.0f}"
+                f" / {limits.CAP_PROJ_REAR_MIN_M * 1000:.0f}-"
+                f"{limits.CAP_PROJ_REAR_MAX_M * 1000:.0f} mm"
+            ),
             (
                 cap_pf_mm == 0
                 or limits.CAP_PROJ_MIN_M * 1000 <= cap_pf_mm <= limits.CAP_PROJ_MAX_M * 1000
             )
             and (
                 cap_pr_mm == 0
-                or limits.CAP_PROJ_MIN_M * 1000 <= cap_pr_mm <= limits.CAP_PROJ_MAX_M * 1000
+                or limits.CAP_PROJ_REAR_MIN_M * 1000
+                <= cap_pr_mm
+                <= limits.CAP_PROJ_REAR_MAX_M * 1000
             ),
         ),
         (

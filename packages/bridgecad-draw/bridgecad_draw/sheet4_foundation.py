@@ -295,10 +295,15 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
 
     abt_w = float(getattr(sub, "abutment_width_m", None) or 1.2)
     abt_l = float(getattr(sub, "abutment_length_m", None) or 11.8)
-    cap_proj = float(getattr(sub, "abutment_cap_projection_front_mm", None) or 300) / 1000.0
+    # The cap is asymmetric: the FRONT (bearing shelf) and REAR (dirt-wall seat)
+    # projections are separate inputs and must not be averaged into one symmetric
+    # offset — Sheet 5 already draws them apart, so a symmetric plan here would
+    # put the dirt wall on the wrong side of the cap.
+    cap_pf_inset = float(getattr(sub, "abutment_cap_projection_front_mm", None) or 300) / 1000.0
+    cap_pr_inset = float(getattr(sub, "abutment_cap_projection_rear_mm", None) or 300) / 1000.0
     dirt_t_inset = float(getattr(sub, "dirt_wall_thickness_mm", None) or 300) / 1000.0
 
-    cap_w_inset = (abt_w + 2 * cap_proj) * s2
+    cap_w_inset = (abt_w + cap_pf_inset + cap_pr_inset) * s2
     shaft_w_inset = abt_w * s2
     ln_inset = abt_l * s2
     # Weep holes across the dirt wall, spaced no wider than the IRC:78 drainage
@@ -338,22 +343,19 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
             layer="STRUC-HATCHING",
         )
 
-        # Cap, projecting both faces
-        rectangle(
-            msp,
-            i_cx - cap_w_inset / 2,
-            i_y0,
-            cap_w_inset,
-            ln_inset,
-            layer="SUB-ABUT",
-            lw=40,
-        )
+        # Cap — asymmetric: front (bearing shelf) on the river side, rear
+        # (dirt-wall seat) on the approach side. sgn=+1 → approach to +x.
+        cap_front_x = i_cx - sgn * (shaft_w_inset / 2 + cap_pf_inset * s2)
+        cap_rear_x = i_cx + sgn * (shaft_w_inset / 2 + cap_pr_inset * s2)
+        cap_x0 = min(cap_front_x, cap_rear_x)
+        cap_x1 = max(cap_front_x, cap_rear_x)
+        rectangle(msp, cap_x0, i_y0, cap_x1 - cap_x0, ln_inset, layer="SUB-ABUT", lw=40)
 
-        # Dirt wall on the rear face in plan — outside the cap edge
+        # Dirt wall on the rear face in plan — inside the cap rear ledge
         if sgn > 0:
-            dw_x_inset = i_cx + cap_w_inset / 2 - dirt_t_inset * s2
+            dw_x_inset = cap_rear_x - dirt_t_inset * s2
         else:
-            dw_x_inset = i_cx - cap_w_inset / 2
+            dw_x_inset = cap_rear_x
         rectangle(
             msp,
             dw_x_inset,
@@ -389,9 +391,9 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         # Dimensions
         dim_linear_h(
             msp,
-            i_cx - cap_w_inset / 2,
+            cap_x0,
             i_y0 - th * 5,
-            i_cx + cap_w_inset / 2,
+            cap_x1,
             i_y0 - th * 5,
             dim_y=i_y0 - th * 5,
             label=f"CAP W={cap_w_inset / s2:.2f}m",
@@ -399,19 +401,19 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         )
         dim_linear_v(
             msp,
-            i_cx + cap_w_inset / 2 + th * 3,
+            cap_x1 + th * 3,
             i_y0,
-            i_cx + cap_w_inset / 2 + th * 3,
+            cap_x1 + th * 3,
             i_y0 + ln_inset,
-            dim_x=i_cx + cap_w_inset / 2 + th * 9,
+            dim_x=cap_x1 + th * 9,
             label=f"L={abt_l:.2f}m",
             text_height=th * 0.8,
         )
         dim_linear_h(
             msp,
-            min(dw_x_inset, i_cx - cap_w_inset / 2),
+            min(dw_x_inset, cap_x0),
             i_y0 + ln_inset + th * 4,
-            max(dw_x_inset + dirt_t_inset * s2, i_cx + cap_w_inset / 2),
+            max(dw_x_inset + dirt_t_inset * s2, cap_x1),
             i_y0 + ln_inset + th * 4,
             dim_y=i_y0 + ln_inset + th * 4,
             label=f"DW={dirt_t_inset:.2f}m",

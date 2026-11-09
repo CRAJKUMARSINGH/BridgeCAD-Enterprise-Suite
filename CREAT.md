@@ -885,3 +885,185 @@ No changes this session.
   merged in `2d9dca9`).
 
 ---
+
+| 2026-11-09 13:43 | Standing-order hook fired |
+
+### Session — Standing-order heartbeat · 13:43
+
+No changes this session.
+
+- Hook fired with the standing order: append a timestamped entry at the bottom of
+  `CREAT.md`, keep the file append-only (no edits/deletes to existing entries),
+  retain the last 24 h of hand-off content, and do not commit unless explicitly
+  instructed.
+- Reviewed: read `CREAT.md` in full (887 lines) to confirm the 12-min cadence and
+  locate the last entry (13:31 heartbeat; latest substantive work 13:07 — asymmetric
+  abutment cap + continuous wearing coat fix, verified with 294 draw tests + 151
+  unit/integration tests).
+- No source files changed, no tests executed, no commands succeeded this turn.
+  Terminal host unavailable — `Get-Date` failed to route through the agent runtime
+  ("Toolhost terminal commands must be routed through the agent runtime") — so the
+  timestamp is taken from session context (last logged event 13:31).
+- 24 h retention: logged entries span 2026-11-06 → 2026-11-09; per the append-only
+  rule no existing entries were pruned (matches prior sessions' behaviour).
+- Pending (unchanged): the 13:07 cap/projection + wearing-coat fix remains
+  **uncommitted** pending explicit instruction; `.lychee.toml` nxstructural exclude
+  already present; `CODE-JUNCTION/Venice-patch` remains absent/defunct (already
+  merged in `2d9dca9`).
+
+---
+
+| 2026-11-09 13:55 | Standing-order hook fired |
+
+### Session — Standing-order heartbeat · 13:55
+
+No changes this session.
+
+- Hook fired with the standing order: append a timestamped entry at the bottom of
+  `CREAT.md`, keep the file append-only (no edits/deletes to existing entries),
+  retain only the last 24 h of hand-off content, and do not commit unless
+  explicitly instructed.
+- Reviewed: read `CREAT.md` in full (913 lines) to confirm the 12-min cadence and
+  locate the last entry (13:43 heartbeat; latest substantive work 13:07 — asymmetric
+  abutment cap + continuous wearing coat fix, verified with 294 draw tests + 151
+  unit/integration tests). Also listed the repository root to confirm the working
+  tree layout is unchanged.
+- No source files changed, no tests executed, no commands succeeded this turn.
+  Terminal host unavailable — `Get-Date` and `git status` both failed to route
+  through the agent runtime ("Toolhost terminal commands must be routed through the
+  agent runtime") — so the timestamp and repo state are taken from session context
+  (last logged event 13:43; last known commit `dac57b0` on `main`).
+- 24 h retention: logged entries span 2026-11-06 → 2026-11-09; per the append-only
+  rule no existing entries were pruned (matches prior sessions' behaviour).
+- Pending (unchanged): the 13:07 cap/projection + wearing-coat fix remains
+  **uncommitted** pending explicit instruction; `.lychee.toml` nxstructural exclude
+  already present; `CODE-JUNCTION/Venice-patch` remains absent/defunct (already
+  merged in `2d9dca9`).
+
+---
+
+| 2026-11-09 14:07 | Standing-order hook fired |
+
+### Session — Standing-order heartbeat · 14:07
+
+No changes this session.
+
+- Hook fired with the standing order: append a timestamped entry at the bottom of
+  `CREAT.md`, keep the file append-only (no edits/deletes to existing entries),
+  retain only the last 24 h of hand-off content, and do not commit unless
+  explicitly instructed.
+- Reviewed: read `CREAT.md` in full (943 lines) to confirm the 12-min cadence and
+  locate the last entry (13:55 heartbeat; latest substantive work 13:07 — asymmetric
+  abutment cap + continuous wearing coat fix, verified with 294 draw tests + 151
+  unit/integration tests).
+- No source files changed, no tests executed, no commands succeeded this turn.
+  Terminal host unavailable — `Get-Date` failed to route through the agent runtime
+  ("Toolhost terminal commands must be routed through the agent runtime") — so the
+  timestamp is taken from session context (last logged event 13:55).
+- 24 h retention: logged entries span 2026-11-06 → 2026-11-09; per the append-only
+  rule no existing entries were pruned (matches prior sessions' behaviour).
+- Pending (unchanged): the 13:07 cap/projection + wearing-coat fix remains
+  **uncommitted** pending explicit instruction; `.lychee.toml` nxstructural exclude
+  already present; `CODE-JUNCTION/Venice-patch` remains absent/defunct (already
+  merged in `2d9dca9`).
+
+---
+
+| 2026-11-09 14:19 | Standing-order hook fired |
+
+### Session — Standing-order heartbeat · 14:19
+
+No changes this session.
+
+- Hook fired with the standing order: append a timestamped entry at the bottom of
+  `CREAT.md`, keep the file append-only (no edits/deletes to existing entries),
+  retain only the last 24 h of hand-off content, and do not commit unless
+  explicitly instructed.
+- Reviewed: read `CREAT.md` in full (970 lines) to confirm the 12-min cadence and
+  locate the last entry (14:07 heartbeat; latest substantive work 13:07 — asymmetric
+  abutment cap + continuous wearing coat fix, verified with 294 draw tests + 151
+  unit/integration tests). Listed the repository root to confirm the working-tree
+  layout is unchanged.
+- No source files changed, no tests executed, no commands succeeded this turn.
+  Terminal host unavailable — `Get-Date` failed to route through the agent runtime
+  ("Toolhost terminal commands must be routed through the agent runtime") — so the
+  timestamp is taken from session context (last logged event 14:07).
+- 24 h retention: logged entries span 2026-11-06 → 2026-11-09; per the append-only
+  rule no existing entries were pruned (matches prior sessions' behaviour).
+- Pending (unchanged): the 13:07 cap/projection + wearing-coat fix remains
+  **uncommitted** pending explicit instruction; `.lychee.toml` nxstructural exclude
+  already present; `CODE-JUNCTION/Venice-patch` remains absent/defunct (already
+  merged in `2d9dca9`).
+
+---
+
+| 2026-11-09 14:31 | Standing-order hook fired |
+
+### Session — Standing-order heartbeat · 14:31
+
+No changes this session.
+
+- Hook fired with the standing order: append a timestamped entry at the bottom of
+  `CREAT.md`, keep the file append-only (no edits/deletes to existing entries),
+  retain only the last 24 h of hand-off content, and do not commit unless
+  explicitly instructed.
+- Reviewed: read `CREAT.md` in full (996 lines) to confirm the 12-min cadence and
+  locate the last entry (14:19 heartbeat; latest substantive work 13:07 — asymmetric
+  abutment cap + continuous wearing coat fix, verified with 294 draw tests + 151
+  unit/integration tests).
+- No source files changed, no tests executed, no commands succeeded this turn.
+  Terminal host unavailable — `Get-Date`/`git status` failed to route through the
+  agent runtime ("Toolhost terminal commands must be routed through the agent
+  runtime") — so the timestamp and repo state are taken from session context (last
+  logged event 14:19; last known commit `dac57b0` on `main`).
+- 24 h retention: logged entries span 2026-11-06 → 2026-11-09; per the append-only
+  rule no existing entries were pruned (matches prior sessions' behaviour).
+- Pending (unchanged): the 13:07 cap/projection + wearing-coat fix remains
+  **uncommitted** pending explicit instruction; `.lychee.toml` nxstructural exclude
+  already present; `CODE-JUNCTION/Venice-patch` remains absent/defunct (already
+  merged in `2d9dca9`).
+
+---
+
+| 2026-11-09 14:51 | User brief acted upon — abutment foundation plan added to frontend Sheet 04 |
+
+### Session — "ABUTMENT FOUNDATION PLAN IS ABSENT" fixed in the web app · 14:51
+
+**Trigger.** User brief: *"THE ABUTMENT FOUNDATION PLAN IS BSENT"*. Clarified via
+two questions: the missing panel is in **Frontend Sheet 04 (web app)** — the React
+canvas `Sheet04Foundation.tsx` / `detailGeometry.js` `buildSheet4`, titled
+"ABUTMENT & PIER FOUNDATION" but drawing only the pier — and it should show the
+**abutment pile group + cap** in plan.
+
+**Root cause.** `buildSheet4` emitted four panels, A–D, all *pier* (elevation,
+foundation plan, cap reinforcement, pile schedule). No abutment plan existed. Three
+independent Sheet-4 implementations exist; the production DXF one
+(`bridgecad_draw/sheet4_foundation.py`) already had an abutment cap + dirt-wall plan
+inset, but the **frontend** one did not.
+
+**Fix — new panel E in `frontend/src/sheets/detailGeometry.js`:** an abutment pile
+foundation plan dimensioned like the pier plan. Draws the `FOUND-CAP` footprint
+(abutment length `abtl` transversely × derived cap depth along the bridge axis), the
+`FOUND-PILE` group at true centres, two `CL` centrelines, `dimH`/`dimV` cap
+dimensions, a header "ABUTMENT A1/A2 — PILE FOUNDATION PLAN", a pile-group spec
+line, and a `PILE CAP … × …` line. A `kFit` factor keeps an extreme `abtl` inside
+the panel and marks the inset **NTS** when scaled, so a shrunken plan is never
+passed off as 1:100. Panel bbox `4E (440,145,185,145)` collides with none of
+`4A–4D`.
+
+| File | Change |
+|---|---|
+| `frontend/src/sheets/detailGeometry.js` | new panel E (abutment pile foundation plan) in `buildSheet4` |
+| `tests/draw/golden/pins/detail_default.json` | re-pinned `sheet4` 156 → 175 (+19 prims) |
+
+**Verification:**
+- `node` count: `sheet4 = 175`, `sheet5 = 811`.
+- `python scripts/robotic_sheet_detail_audit.py --cases 200 --seed 7` → **400
+  sheet-renders, 0 failures** (no `E_OVERLAP`/`E_EXTENTS`).
+- `pytest tests/draw/test_sheet4_sheet5_present.py -q` → **14 passed**.
+- `npx tsc --noEmit` → clean; `npm run build` → built OK.
+
+**Pending:** the 13:07 cap/projection + wearing-coat fix **and** this Sheet-04 panel
+remain **uncommitted** (standing rule: never commit unless explicitly instructed).
+
+---

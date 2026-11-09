@@ -563,6 +563,44 @@ export function buildSheet4(raw) {
     out.push(P.line("FRAME", xD, yD - i * 7 - 2, xD + 86, yD - i * 7 - 2));
   });
 
+  /* panel E — abutment pile foundation plan. The sheet is titled "abutment &
+     pier foundation" but only the pier was drawn: panels A–D are all pier. The
+     abutment cap spans the abutment length (abtl) transversely and carries the
+     pile group in plan, dimensioned like the pier plan. Drawn to the sheet scale
+     where it fits; a fit factor keeps an extreme abtl inside the panel and the
+     inset is then marked NTS, so a scaled-down plan is never passed off as 1:100. */
+  panel(out, "4E", 440, 145, 185, 145);
+  const xE = 450;
+  const yE = 150;
+  const boxW = 165;
+  const capLenM = p.abtl; // transverse abutment length (= the cap length in plan)
+  const capDepM = Math.min(p.spacingM * (f.rows - 1) + 1.5, 6); // cap depth, along the bridge axis
+  const kFit = Math.min(1, boxW / mm(capLenM)); // 1.0 unless abtl overflows the panel
+  const wCapE = mm(capLenM) * kFit;
+  const dCapE = mm(capDepM) * kFit;
+  const rPileE = mm(f.pileDm / 2) * kFit;
+  const cellE = mm(p.spacingM) * kFit;
+  const xCapE = xE + (boxW - wCapE) / 2;
+  const yCapE = yE + 8;
+
+  out.push(P.rect("FOUND-CAP", xCapE, yCapE, wCapE, dCapE));
+  // Pile group at true centres, centred on the cap.
+  const cx0E = xCapE + wCapE / 2 - (cellE * (f.cols - 1)) / 2;
+  const cy0E = yCapE + dCapE / 2 - (cellE * (f.rows - 1)) / 2;
+  for (let r = 0; r < f.rows; r += 1) {
+    for (let c = 0; c < f.cols; c += 1) {
+      out.push(P.circle("FOUND-PILE", cx0E + c * cellE, cy0E + r * cellE, rPileE));
+    }
+  }
+  out.push(P.line("CL", xCapE + wCapE / 2, yCapE - 5, xCapE + wCapE / 2, yCapE + dCapE + 5));
+  out.push(P.line("CL", xCapE - 5, yCapE + dCapE / 2, xCapE + wCapE + 5, yCapE + dCapE / 2));
+
+  dimH(out, xCapE, xCapE + wCapE, yCapE - 8, `CAP ${capLenM.toFixed(2)} m`);
+  dimV(out, xCapE + wCapE + 12, yCapE, yCapE + dCapE, `CAP ${capDepM.toFixed(2)} m`);
+  out.push(P.text("TEXT-HEADER", xE, yCapE + dCapE + 16, "ABUTMENT A1/A2 — PILE FOUNDATION PLAN", 3));
+  out.push(P.text("TEXT", xE, yCapE + dCapE + 9, `${f.rows}×${f.cols} PILE GROUP — ${f.nPiles} No. Ø ${p.pileDiaMm.toFixed(0)} mm @ ${p.spacingM.toFixed(2)} m c/c`, 2.2));
+  out.push(P.text("TEXT", xE, yE, `PILE CAP ${capLenM.toFixed(2)} m × ${capDepM.toFixed(2)} m${kFit < 1 ? " — DRAWN NTS, DIMENSIONS GOVERN" : ""}`, 2.1));
+
   dimH(out, xA, xA + capW, yCapB - 10, `CAP ${f.capWm.toFixed(2)} m`);
   dimV(out, xA - 8, yCapB, yCapT, `CAP ${p.capTMm.toFixed(0)} mm`);
   dimV(out, xA + capW + 26, yPileB, yCapB, `PILE ${f.pileLm.toFixed(2)} m`);

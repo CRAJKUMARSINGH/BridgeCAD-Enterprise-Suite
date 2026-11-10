@@ -4,7 +4,8 @@
 **Fixture ID:** `mr5_lc29_4x30m_continuous`  
 **Sheets generated:** 9 DXF  
 **Rendered PNGs:** 9  
-**Total DXF size:** 672 KB  
+**PDF booklet:** [`mr5_lc29_4x30m_continuous_GAD_Booklet.pdf`](mr5_lc29_4x30m_continuous_GAD_Booklet.pdf) (2273 KB, 9 pages)  
+**Total DXF size:** 693 KB  
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets

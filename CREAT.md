@@ -1067,3 +1067,164 @@ passed off as 1:100. Panel bbox `4E (440,145,185,145)` collides with none of
 remain **uncommitted** (standing rule: never commit unless explicitly instructed).
 
 ---
+| 2026-11-10 07:15 | User prompt received |
+| 2026-11-10 07:15 | User prompt received |
+
+---
+
+## Session: 2026-11-10 · LISP article segments into the drawing code
+
+### 2026-11-10 08:31 — `layout()` + `cs()` + `st()` restored in the production Python sheets
+
+**Request.** *"incorporate all drawing segments in details as per blog in the drawing
+code >>>>> adding in readme has no effect in real drawings"* — the source is the
+[yogipwd article](https://www.yogipwd.com/2023/05/explanation-of-lisp-code-for-solid-slab.html)
+on Shri. P.M. Baviskar's `gad.lsp`. Clarified: target = **production Python sheets**
+(`packages/bridgecad-draw/bridgecad_draw/sheetN_*.py`), and the segments to carry
+over = `cs()`, `pier()`, `st()` (plus the `layout()` grid already started).
+
+**README.** New section *"📜 LISP Baseline — Article Principles (function-by-function)"*
+added before the Contributing block: one row per `gad.lsp` routine with the drawing
+segment in BridgeCAD that carries it.
+
+**`layout()` — `sheet2_long_section.py`.** The elevation plotting grid (axes →
+ticks → labels) is drawn first and separately, as the article does:
+
+| Segment | Change |
+|---|---|
+| Axis title `CHAINAGE` | added at the right-hand end of the chainage axis |
+| Axis title `BED LEVEL` | added rotated 90° at the head of the level axis |
+| `xincr` pitch | new `_chainage_pitch()` picks a uniform 6–12-tick interval; ticks + chainage text now run along the whole axis, not only at span ends |
+
+**`cs()` — `sheet2_long_section.py`.** Per-survey-point treatment on the bed profile:
+a small tick at the point, a `DASHED2` drop line from the point down to the datum
+axis, and the RL printed at every point (`{rl:.3f}`, grey).
+
+**`st()` — `dxf_engine.new_sheet()`.** One document-wide dimension style named
+**`pmb100`** is now registered by every sheet and set as `$DIMSTYLE`, matching the
+article's *"dimension style is set once, globally"*. Article values kept verbatim
+where they are unit-independent (`DIMLFAC 1`, `DIMDEC 0`, `DIMTAD 0`, `DIMTIH 1`,
+Arial text); the length values are scaled to a 2.5 mm plotted text height because
+BridgeCAD's model space is paper millimetres — the ratios (`ASZ:TXT = 150:400`,
+`DIMEXE = DIMEXO = DIMTXT`) are exact.
+
+**Verified (production path, `booklet.generate_package`):**
+- `GAD_Sheet2_LongSection.dxf`: `CHAINAGE` ✅, `BED LEVEL` ✅, 21 `DASHED2` drop lines ✅,
+  entities 560 → 623.
+- `pmb100` present: `dimtxt 2.5`, `dimasz 0.9375`, `dimexe 2.5`, `dimexo 2.5`,
+  `dimtxsty BRIDGE_STD`, `dimlfac 1.0`, `dimdec 0`, `dimtad 0`, `dimtih 1`,
+  header `$DIMSTYLE = pmb100`.
+- `pytest tests/integration tests/robot tests/draw/test_abutment_height_datum.py -q`
+  → **41 passed**.
+
+**`pier()` — not changed (deliberately).** The article's `pier()` needs elevation +
+plan + side view from one parameter block. All three already exist in production:
+plan on Sheet 4 (`PILE CAP PLAN`) and Sheet 5 (`PIER SECTION`), longitudinal side
+on Sheet 5 (`PIER ELEVATION`), transverse face on Sheet 8 (`VIEW 2 — SECTION B-B |
+PIER P1 TRANSVERSE FACE`). The one article input with **no BridgeCAD counterpart** is
+`battr` (pier batter) — `Substructure` has no pier-batter field, so drawing a
+tapered pier would mean inventing a parameter. Left alone rather than fabricated.
+
+**Pending:** README section + these `sheet2`/`dxf_engine` edits are **uncommitted**
+(standing rule: never commit unless explicitly instructed). Open question for the
+user: add a `pier_batter_1n` input so the pier can be drawn battered like the
+abutment, or leave the pier prismatic.
+
+---
+
+### 2026-11-10 — LISP saved **in toto** in `ATTACHED ASSETS` (+ principles + README)
+
+**Request.** *"i lost major inputs from inspiring blog >>>> save lisp in toto in
+attcahed assets >>>> and incorporate the basic guiding principles therein >>> add
+this effect in read me ttoooo"* — source:
+[yogipwd article](https://www.yogipwd.com/2023/05/explanation-of-lisp-code-for-solid-slab.html).
+
+**New file — `ATTACHED ASSETS/LISP_Solid_Slab_GAD_In_Toto.lsp`.** The whole AutoLISP
+listing consolidated from the fragmented blog dump
+(`yogipwd_lisp_solid_slab_gad_original.txt`) into one complete, ordered listing:
+`opn()` → `reed()` → `vpos()/hpos()` → `v2pos()/h2pos()` → `st()` → `layout()` →
+`cs()` → `pier()` (§8.1–8.6) → `pt()/p2t()` → `abt1()` (§10.1–10.4). Nothing was
+invented: article repetition and undefined variables are flagged in-line with
+`; [article: …]` (e.g. the undefined `lspan`), and a closing note records where the
+blog prints a fragment twice.
+
+**Basic guiding principles "therein".** The same `.lsp` carries a header comment
+block with the article's **14 basic guiding principles** (GP1…GP14) so the drawing
+code and its ancestor travel together.
+
+**README.** Both the geometry-reference bullet and the *"Article Principles
+(function-by-function)"* section now point at the in-toto listing; the archive
+footer records that all three preservation files travel together
+(`…In_Toto.lsp`, `…Complete_Archive.md`, `…original.txt`).
+
+**Files touched (uncommitted):** `ATTACHED ASSETS/LISP_Solid_Slab_GAD_In_Toto.lsp`
+(new), `README.md`, `ATTACHED ASSETS/LISP_Solid_Slab_GAD_Complete_Archive.md`,
+`CREAT.md`.
+
+---
+
+### 2026-11-10 — Derived module table stored with an "unverified" flag
+
+**Input.** A user-pasted 8-row table titled *"GAD Module Mappings & Drawing Segments"*
+mapping `c:GAD_INIT`, `c:DRAW_WELL`, `c:DRAW_PIER`, `c:DRAW_ABUT`, `c:DRAW_GIRDER`,
+`c:DRAW_DECK`, `c:GAD_DIM`, `c:GEN_TEXT` to BridgeCAD code segments.
+
+**Finding.** The table does **not** describe the archived `gad.lsp`. `grep` over
+`ATTACHED ASSETS/` returns zero matches for every one of those names (and for
+`steining`); the preserved source has only `opn/reed/vpos/hpos/v2pos/h2pos/st/
+layout/cs/pier/pt/p2t/abt1`, is solid-slab, and has no well/girder/HFL block. The
+table's trailing "would you like…?" lines look like another assistant's output.
+
+**Decision (user).** Save as an *unverified / derived* copy — do not present it as
+source truth.
+
+**Action.** New `ATTACHED ASSETS/GAD_Module_Mapping_Derived_Unverified.md` with a
+top banner stating provenance and the verified discrepancy, then the table
+reproduced verbatim. README's function-by-function section now carries a clearly
+labelled "Derived module map (unverified)" pointer. `.gitignore` exception list
+extended so the README link resolves.
+
+**Files touched (uncommitted):** `ATTACHED ASSETS/GAD_Module_Mapping_Derived_Unverified.md`
+(new), `README.md`, `.gitignore`, `CREAT.md`.
+
+---
+
+### 2026-11-10 — All example drawing sets now emit a PDF booklet
+
+**Request.** *"enable code to draw all type of drawings sample in pdf"* — every bridge
+type in `EXAMPLES/` should be viewable as a PDF, not only DXF + PNG.
+
+**Finding.** The PDF engine already existed but was never called by the sample
+generator: `bridgecad_draw.engines.pdf_engine.generate_pdf_booklet(dxf_paths,
+output_pdf)` renders all sheets into one multi-page PDF via matplotlib `PdfPages`,
+reusing the shared `_render.render_figure` (identical A2-landscape rendering as the
+PNG lane). The gap was wiring only — no new engine code.
+
+**Change — `scripts/generate_examples.py` (3 edits):**
+1. New `_render_pdf()` helper (non-fatal; prints `[PDF skip]` on failure) and a
+   `pdf_path` parameter on `_write_readme()` that emits a **PDF booklet** line
+   (link + size + page count) when present.
+2. `generate_fixture()` now calls `_render_pdf(sheets, out_dir /
+   f"<fid>_GAD_Booklet.pdf")` after the PNG pass and reports `, PDF <n> KB` (or
+   `, PDF skipped`) in its status string.
+3. `_write_index_readme()` header text updated to *"DXF + PNG + PDF packages"* and
+   a paragraph noting each folder bundles `<fixture>_GAD_Booklet.pdf`.
+
+**Verified (full batch, `python scripts/generate_examples.py`):** exit code 0,
+**28/28 bridge types**. Every `EXAMPLES/<fid>/<fid>_GAD_Booklet.pdf` written —
+count 28, total 62 MB, per-booklet 2184–2354 KB, 9 pages each. Per-folder README
+and the top-level `EXAMPLES/README.md` both show the PDF link (spot-checked
+`simple_12m`: 2292 KB, 9 pages).
+
+**Note (open for the user).** `EXAMPLES/` is tracked (533 files: DXF+PNG), so
+committing the 28 new PDFs adds ~62 MB to the repo. Left untracked/undecided —
+either commit them alongside the existing artefacts or add
+`EXAMPLES/**/*_GAD_Booklet.pdf` to `.gitignore` to keep PDFs as regenerated
+output only.
+
+**Files touched (uncommitted):** `scripts/generate_examples.py`, `EXAMPLES/**`
+(28 new `*_GAD_Booklet.pdf` + refreshed per-folder/`README.md`), `CREAT.md`.
+
+---
+
+| 2026-11-10 13:39 | User prompt received |

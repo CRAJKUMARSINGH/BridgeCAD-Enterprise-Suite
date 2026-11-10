@@ -99,8 +99,25 @@ def _render_png(dxf_path: Path, png_path: Path, dpi: int = 200) -> Path | None:
         return None
 
 
+def _render_pdf(sheets: list[Path], pdf_path: Path) -> Path | None:
+    """Render the sheet set into one multi-page PDF booklet. None on failure."""
+    try:
+        from bridgecad_draw.engines.pdf_engine import generate_pdf_booklet
+
+        return generate_pdf_booklet(sheets, pdf_path)
+    except Exception as exc:
+        print(f"        [PDF skip] {pdf_path.name}: {exc}")
+        return None
+
+
 def _write_readme(
-    out_dir: Path, fid: str, project, sheets: list[Path], pngs: list[Path], dxf_kb: int
+    out_dir: Path,
+    fid: str,
+    project,
+    sheets: list[Path],
+    pngs: list[Path],
+    dxf_kb: int,
+    pdf_path: Path | None = None,
 ) -> None:
     label = LABELS.get(fid, fid.replace("_", " ").title())
     bridge = getattr(getattr(project, "project_master", None), "bridge_name", "") or fid
@@ -110,13 +127,21 @@ def _write_readme(
         if p is not None and p.exists():
             png_lines += f"\n![{p.stem}]({p.name})\n"
 
+    if pdf_path is not None and pdf_path.exists():
+        pdf_line = (
+            f"**PDF booklet:** [`{pdf_path.name}`]({pdf_path.name})"
+            f" ({pdf_path.stat().st_size // 1024} KB, {len(sheets)} pages){_MD_LB}\n"
+        )
+    else:
+        pdf_line = "**PDF booklet:** not generated" + _MD_LB + "\n"
+
     readme = f"""# {label}
 
 **Bridge:** {bridge}{_MD_LB}
 **Fixture ID:** `{fid}`{_MD_LB}
 **Sheets generated:** {len(sheets)} DXF{_MD_LB}
 **Rendered PNGs:** {n_pngs}{_MD_LB}
-**Total DXF size:** {dxf_kb} KB{_MD_LB}
+{pdf_line}**Total DXF size:** {dxf_kb} KB{_MD_LB}
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets
@@ -166,12 +191,18 @@ def generate_fixture(fixture_path: Path) -> tuple[str, bool, str]:
         png_out = out_dir / (s.stem + ".png")
         pngs.append(_render_png(s, png_out, dpi=180))
 
+    # Render the 9 sheets as one multi-page PDF booklet
+    pdf_path = _render_pdf(sheets, out_dir / f"{fid}_GAD_Booklet.pdf")
+
     dxf_kb = sum(s.stat().st_size for s in sheets) // 1024
 
-    _write_readme(out_dir, fid, project, sheets, pngs, dxf_kb)
+    _write_readme(out_dir, fid, project, sheets, pngs, dxf_kb, pdf_path)
 
     n_pngs = sum(1 for p in pngs if p is not None)
-    return fid, True, f"{len(sheets)} sheets, {n_pngs} PNGs, {dxf_kb} KB"
+    pdf_note = (
+        f", PDF {pdf_path.stat().st_size // 1024} KB" if pdf_path is not None else ", PDF skipped"
+    )
+    return fid, True, f"{len(sheets)} sheets, {n_pngs} PNGs, {dxf_kb} KB{pdf_note}"
 
 
 def main() -> int:
@@ -222,18 +253,19 @@ def _write_index_readme(fixtures: list[Path], passed: int, total: int) -> None:
 
     index = f"""# BridgeCAD Enterprise Suite — Example Drawings
 
-**{passed}/{total} bridge types** rendered as 9-sheet DXF + PNG packages.
+**{passed}/{total} bridge types** rendered as 9-sheet DXF + PNG + PDF packages.
 
 Each subfolder contains the full 9-sheet GAD package for one bridge type,
 rendered from the automated fixture suite. These are not manual designs —
-every drawing is geometry-derived from the parametric Excel model.
+every drawing is geometry-derived from the parametric Excel model. Each folder
+also bundles the nine sheets as a single multi-page PDF booklet
+(`<fixture>_GAD_Booklet.pdf`).
 
 ## Bridge types covered
 
 | Bridge / Project | Fixture ID |
 |---|---|
-{rows}
----
+{rows}---
 
 ## How to open
 

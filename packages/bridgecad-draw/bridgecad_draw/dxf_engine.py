@@ -34,6 +34,20 @@ from .layers import setup_layers
 
 ACAD_VERSION = "R2018"
 
+# ---------------------------------------------------------------------------
+# Global dimension style — LISP `st()` → the `pmb100` style
+# ---------------------------------------------------------------------------
+# The article's `st()` sets the dimension style once, globally, and saves it as
+# `pmb100`: Arial text with DIMASZ 150, DIMDEC 0, DIMEXE 400, DIMEXO 400,
+# DIMLFAC 1, DIMTXT 400, DIMTAD 0, DIMTIH 1. BridgeCAD's model space is paper
+# millimetres, so the article's length values are scaled to a 2.5 mm plotted
+# text height. The ratios (ASZ:TXT = 150:400, EXE = EXO = TXT) are kept exact
+# and the unit-independent flags are used verbatim.
+DIMSTYLE_NAME = "pmb100"
+_LISP_DIMTXT = 400.0  # article value for DIMTXT
+_PLOT_TEXT_MM = 2.5  # plotted text height on the A1 sheet
+_PMB_SCALE = _PLOT_TEXT_MM / _LISP_DIMTXT
+
 
 def new_sheet(title: str = "", acad_ver: str = ACAD_VERSION) -> tuple[Any, Any]:
     """Create a new ezdxf Drawing with all IRC SP:55 layers pre-registered.
@@ -58,8 +72,30 @@ def new_sheet(title: str = "", acad_ver: str = ACAD_VERSION) -> tuple[Any, Any]:
     # Linetype definitions (non-standard ones)
     _setup_linetypes(doc)
 
+    # Global dimension style — set once, document-wide (LISP `st()`)
+    _setup_dimstyle(doc)
+
     msp = doc.modelspace()
     return doc, msp
+
+
+def _setup_dimstyle(doc: Any) -> None:
+    """Register the article's global dimension style, ``pmb100`` (LISP ``st()``)."""
+    if doc.dimstyles.has_entry(DIMSTYLE_NAME):
+        return
+    with contextlib.suppress(Exception):
+        ds = doc.dimstyles.add(DIMSTYLE_NAME, dxfattribs={"dimtxsty": "BRIDGE_STD"})
+        ds.dxf.dimtxt = _PLOT_TEXT_MM  # article: DIMTXT 400
+        ds.dxf.dimasz = 150.0 * _PMB_SCALE  # article: DIMASZ 150
+        ds.dxf.dimexe = 400.0 * _PMB_SCALE  # article: DIMEXE 400
+        ds.dxf.dimexo = 400.0 * _PMB_SCALE  # article: DIMEXO 400
+        ds.dxf.dimlfac = 1.0  # article: DIMLFAC 1
+        ds.dxf.dimdec = 0  # article: DIMDEC 0
+        ds.dxf.dimtad = 0  # article: DIMTAD 0
+        ds.dxf.dimtih = 1  # article: DIMTIH 1
+        ds.dxf.dimlunit = 2  # decimal units
+        # Make it the document-wide default — the style is set once, globally.
+        doc.header["$DIMSTYLE"] = DIMSTYLE_NAME
 
 
 def _setup_text_styles(doc: Any) -> None:
@@ -167,4 +203,4 @@ def save(doc: Any, output_path: str | Path) -> Path:
     return p
 
 
-__all__ = ["new_sheet", "CoordMapper", "save", "ACAD_VERSION"]
+__all__ = ["new_sheet", "CoordMapper", "save", "ACAD_VERSION", "DIMSTYLE_NAME"]

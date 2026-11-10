@@ -4,7 +4,8 @@
 **Fixture ID:** `gad_7_233_20m`  
 **Sheets generated:** 9 DXF  
 **Rendered PNGs:** 9  
-**Total DXF size:** 648 KB  
+**PDF booklet:** [`gad_7_233_20m_GAD_Booklet.pdf`](gad_7_233_20m_GAD_Booklet.pdf) (2279 KB, 9 pages)  
+**Total DXF size:** 669 KB  
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets

@@ -1,10 +1,12 @@
 # BridgeCAD Enterprise Suite — Example Drawings
 
-**28/28 bridge types** rendered as 9-sheet DXF + PNG packages.
+**28/28 bridge types** rendered as 9-sheet DXF + PNG + PDF packages.
 
 Each subfolder contains the full 9-sheet GAD package for one bridge type,
 rendered from the automated fixture suite. These are not manual designs —
-every drawing is geometry-derived from the parametric Excel model.
+every drawing is geometry-derived from the parametric Excel model. Each folder
+also bundles the nine sheets as a single multi-page PDF booklet
+(`<fixture>_GAD_Booklet.pdf`).
 
 ## Bridge types covered
 
@@ -38,7 +40,6 @@ every drawing is geometry-derived from the parametric Excel model.
 | [Simple 1×12 m RCC Slab Bridge](simple_12m/README.md) | `simple_12m` |
 | [SRCTIP DOR 4×20 m](srctip_4x20m/README.md) | `srctip_4x20m` |
 | [Viaduct BR-187 CH 187+475](viaduct_br187_ch187_475/README.md) | `viaduct_br187_ch187_475` |
-
 ---
 
 ## How to open

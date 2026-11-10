@@ -4,7 +4,8 @@
 **Fixture ID:** `arch_24m`  
 **Sheets generated:** 9 DXF  
 **Rendered PNGs:** 9  
-**Total DXF size:** 625 KB  
+**PDF booklet:** [`arch_24m_GAD_Booklet.pdf`](arch_24m_GAD_Booklet.pdf) (2245 KB, 9 pages)  
+**Total DXF size:** 647 KB  
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets

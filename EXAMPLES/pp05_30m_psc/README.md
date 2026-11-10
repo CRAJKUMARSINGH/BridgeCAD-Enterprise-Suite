@@ -4,7 +4,8 @@
 **Fixture ID:** `pp05_30m_psc`  
 **Sheets generated:** 9 DXF  
 **Rendered PNGs:** 9  
-**Total DXF size:** 650 KB  
+**PDF booklet:** [`pp05_30m_psc_GAD_Booklet.pdf`](pp05_30m_psc_GAD_Booklet.pdf) (2274 KB, 9 pages)  
+**Total DXF size:** 670 KB  
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets

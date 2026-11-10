@@ -4,7 +4,8 @@
 **Fixture ID:** `gad_3x18m_skew15`  
 **Sheets generated:** 9 DXF  
 **Rendered PNGs:** 9  
-**Total DXF size:** 661 KB  
+**PDF booklet:** [`gad_3x18m_skew15_GAD_Booklet.pdf`](gad_3x18m_skew15_GAD_Booklet.pdf) (2253 KB, 9 pages)  
+**Total DXF size:** 683 KB  
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets

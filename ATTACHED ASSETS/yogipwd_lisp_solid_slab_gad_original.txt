@@ -1,0 +1,1670 @@
+﻿Fetched content from: https://www.yogipwd.com/2023/05/explanation-of-lisp-code-for-solid-slab.html
+Size: 46746 bytes
+
+Content:
+---
+Explanation of LISP code for Solid Slab GAD Drawing
+
+
+
+
+
+Explanation of LISP Code for Solid Slab GAD Drawing
+
+
+
+
+
+
+Explanation of LISP Code for Solid Slab GAD Drawing
+
+
+This is the explanation of LISP language code written by 
+Shri. P.M. Baviskar, Executive Engineer, 
+Design Division Nashik (Bridge), which is used to draw 
+General Arrangement Drawing (GAD) of bridges in AutoCAD 
+using input data.
+
+
+
+
+
+1.0 Opening Input and Output Files
+
+
+(defun opn()
+
+    (setq f (open "D:\\gad.txt" "r"))   ; open input file
+
+    ;(setq h (open "E:\\program files\\AutoCAD 2004\\h.txt" "w"))
+    ; open output file (commented)
+
+)
+
+
+Explanation:
+
+
+This function opens an input file named gad.txt located on the D drive.
+The file is opened in read-only mode using the "r" parameter.
+
+
+
+The commented line shows an optional output file 
+h.txt in AutoCAD directory which is currently not used.
+
+
+
+The function ends with a closing parenthesis.
+
+
+
+Overall, this function prepares file access for further data processing.
+
+
+
+
+
+2.0 Reading Data Required for Layout
+
+
+(defun reed()
+
+    (setq scale1 (atof (read-line f))) ; scale for plan/elevation
+    (setq scale2 (atof (read-line f))) ; scale for sections
+
+    (setq skew  (atof (read-line f)))  ; skew angle
+    (setq datum (atoi (read-line f)))  ; datum level
+    (setq toprl (atoi (read-line f)))  ; top RL
+
+    (setq left  (atof (read-line f)))  ; start chainage
+    (setq right (atof (read-line f)))  ; end chainage
+    (setq xincr (atof (read-line f)))  ; X interval
+    (setq yincr (atof (read-line f)))  ; Y interval
+
+    (setq noch (atoi (read-line f)))   ; total chainages
+
+    ; fixed scale for screen plotting
+    (setq hs 1)
+    (setq vs 1)
+
+    ; conversion (m to mm)
+    (setq vvs (/ 1000.0 vs))
+    (setq hhs (/ 1000.0 hs))
+
+    ; skew angle conversion
+    (setq skew1 (* skew 0.0174532))
+    (setq s (sin skew1))
+    (setq c (cos skew1))
+
+)
+
+
+Explanation:
+
+
+Reads scale values for drawing
+Reads skew angle and datum levels
+Reads chainage limits and intervals
+Converts metres to millimetres
+Converts skew angle to radians
+Calculates sine and cosine values
+
+
+
+  
+  
+
+
+Additional Calculations in reed() Function
+
+(setq tn (/ s c))     ; tangent of skew angle
+(setq sc (/ scale1 scale2))  ; scale ratio
+
+
+;(princ (list "Datum=" datum " toprl=" toprl
+; " left=" left " right=" right
+; " xincr=" xincr " yincr=" yincr
+; " vvs=" vvs " hhs=" hhs) h)
+;(princ "\n" h)
+
+
+
+The above commented lines were used for debugging and printing variable
+values into output file h.
+
+
+
+
+Explanation of reed() Function
+
+
+This function reads all required drawing parameters from the input file.
+
+
+
+scale1 – Plan & elevation scale
+scale2 – Section scale
+skew – Skew angle (degrees)
+datum – Datum level
+toprl – Top RL
+left – Starting chainage
+right – Ending chainage
+xincr – X-axis interval
+yincr – Y-axis interval
+noch – Total cross-sections
+
+
+
+The scale factors hs and vs are fixed to 1 because
+drawing is plotted on screen with 1 unit = 1 mm.
+
+
+
+vvs and hhs convert meters into millimeters (×1000).
+
+
+
+Skew angle is converted from degrees to radians.
+Sine, cosine and tangent values are calculated.
+
+
+
+sc stores scale ratio for section adjustment.
+
+
+
+
+Vertical Position Function – vpos()
+
+(defun vpos (a)
+  (setq a (* vvs (- a datum)))
+  (setq a (+ datum a))
+)
+
+
+
+This function converts level values into drawing coordinates.
+It applies scaling and datum shift.
+
+
+
+
+Horizontal Position Function – hpos()
+
+(defun hpos (a)
+  (setq a (* hhs (- a left)))
+  (setq a (+ left a))
+)
+
+
+
+This function converts chainage values into drawing coordinates.
+
+
+
+
+
+vpos() and hpos() are utility functions used to convert
+real-world coordinates into drawing positions.
+
+
+
+
+ 
+  
+
+
+Explanation of vpos() and hpos()
+
+
+vpos() takes the level of a point (a) as input.
+It first calculates the difference between the point level and the
+reference level (datum).  
+This difference is multiplied by vvs to convert meters into
+millimeters (1 unit = 1 mm in drawing).  
+Finally, the converted value is added to the datum to obtain the
+vertical drawing position.
+
+
+
+hpos() takes the distance of a point from the left end (a).
+It calculates the difference from the reference distance (left),
+converts meters to millimeters using hhs, and adds it back to
+the reference to get the horizontal drawing position.
+
+
+
+
+Functions v2pos() and h2pos()
+
+(defun v2pos (a)
+  (setq a (* vvs (- a datum)))
+  (setq a (* sc a))
+  (setq a (+ datum a))
+)
+
+
+(defun h2pos (a)
+  (setq a (* hhs (- a left)))
+  (setq a (* sc a))
+  (setq a (+ left a))
+)
+
+
+
+These functions are similar to vpos() and hpos() but
+include an additional scaling factor sc.
+This accounts for the difference between plan/elevation scale
+and section scale.
+
+
+
+v2pos() converts the vertical level to millimeters and
+multiplies it by sc before applying datum shift.
+
+
+
+h2pos() converts horizontal distance to millimeters and
+multiplies it by sc before applying reference shift.
+
+
+
+
+Setting AutoCAD Dimension Style – st()
+
+(defun st ()
+  (command "-style" "Arial" "Arial" "" "" "" "" "")
+  (command "DIMASZ" "150")
+  (command "DIMDEC" "0")
+  (command "DIMEXE" "400")
+  (command "DIMEXO" "400")
+  (command "DIMLFAC" "1")
+  (command "DIMTXSTY" "Arial")
+  (command "DIMTXT" "400")
+  (command "DIMTAD" "0")
+  (command "DIMTIH" "1")
+  (command "-dimstyle" "save" "pmb100" "y")
+)
+
+
+Explanation of st()
+
+
+-style → Sets text style to Arial
+DIMASZ → Arrow size = 150
+DIMDEC → Decimal places = 0
+DIMEXE → Extension line length = 400
+DIMEXO → Offset from object = 400
+DIMLFAC → Scale factor = 1
+DIMTXSTY → Text style = Arial
+DIMTXT → Text height = 400
+DIMTAD → Text above dimension line
+DIMTIH → Text inside when possible
+-dimstyle save → Saves style as pmb100
+
+
+
+
+  
+  
+
+
+AutoCAD Dimension Settings
+
+
+  DIMEXE 400 – Sets the extension line length to 400 units.
+  DIMEXO 400 – Sets the offset from object to 400 units.
+  DIMLFAC 1 – Overall scale factor for dimensions = 1.
+  DIMTXSTY Arial – Dimension text style = Arial.
+  DIMTXT 400 – Dimension text height = 400 units.
+  DIMTAD 0 – Text aligned to center.
+  DIMTIH 1 – Dimension lines displayed on top of text.
+  -dimstyle save pmb100 y – Saves current style as "pmb100" without prompting.
+
+
+
+This sets the dimension style so that all dimensions in the drawing are consistent and properly formatted.
+
+
+
+
+3.0 Plotting Layout of Elevation (X axis, Y axis, etc.)
+
+(defun layout ()
+  ; Save current OSNAP mode
+  (setq os (getvar "OSMODE"))
+  ; Turn off OSNAP
+  (setvar "OSMODE" 0)
+
+  ; Convert left to integer
+  (setq left (- left (rem left 1.0)))
+
+  ; Define axis points
+  (setq pta1 (list left datum))
+  (setq d1 20) ; Distance in mm between lines parallel to X axis
+  (setq ptb1 (list left (- datum (* d1 scale1))))
+  (setq pta2 (list (hpos right) datum))
+  (setq ptb2 (list (hpos right) (- datum (* d1 scale1))))
+  (setq ptc1 (list left (- datum (* d1 scale1 2))))
+  (setq ptc2 (list (hpos right) (- datum (* d1 scale1 2))))
+  (setq ptd1 (list left (vpos toprl)))
+
+  ; Draw axes lines
+  (command "line" pta1 pta2 "") ; X axis
+  (command "line" ptb1 ptb2 "") ; parallel line below X axis
+  (command "line" ptc1 ptc2 "") ; parallel line below X axis
+  (command "line" ptc1 ptd1 "") ; Y axis
+
+  ; Add axis labels
+  (setq ptb3 (list (- left (* 25 scale1)) (- datum (* d1 0.5 scale1))))
+  (command "text" ptb3 (* 2.5 scale1) 0 (princ "BED LEVEL"))
+
+  (setq ptb3 (list (- left (* 25 scale1)) (- datum (* d1 1.5 scale1))))
+  (command "text" ptb3 (* 2.5 scale1) 0 (princ "CHAINAGE"))
+
+  ; Small Y-axis ticks
+  (setq d2 2.5) ; half length of small line
+  (setq pta1 (list (- left (* d2 scale1)) datum))
+  (setq pta2 (list (+ left (* d2 scale1)) datum))
+  (command "color" 7)
+  (command "line" pta1 pta2 "")
+  (setq e1 (entlast))
+
+  ; Number of elevation increments
+  (setq nov (- toprl datum))
+  (setq nov (fix nov))
+  (command "array" e1 "" "R" (+ nov 1) 1 vvs)
+
+  ; Write elevation levels on Y axis
+  (setq a 0)
+  (setq n (/ nov yincr))
+  (setq n (fix n))
+  (while (< a (+ n 1))
+    (setq lvl (+ datum (* a yincr)))
+    (setq b1 (rtos lvl 2 3)) ; convert to 100.000 format
+    (setq pta1 (list (- left (* 13 scale1)) (- (vpos lvl) (* 1.0 scale1))))
+    (command "text" pta1 (* 2.0 scale1) 0 (princ b1))
+    (setq a (+ a 1))
+  )
+
+  ; Write chainage on X axis
+  (setq a 1)
+  (setq noh (- right left))
+  (setq n (/ noh xincr))
+  (setq n (fix n))
+  (while (< a (+ n 1))
+    (setq ch (+ left (* a xincr)))
+    (setq b1 (rtos ch 2 3))
+    (setq d4 (* 2 d1))
+    (setq d5 (- d4 2.0))
+    (setq d6 (+ d1 2.0))
+    (setq d7 (- d1 2.0))
+    (setq d8 (- d4 4.0))
+    (setq d9 (- d1 4.0))
+
+    ; Draw chainage text
+    (setq pta1 (list (+ scale1 (hpos ch)) (- datum (* d8 scale1))))
+    (command "text" pta1 (* 2.0 scale1) 90 (princ b1))
+
+    ; Draw small lines on X axis
+    (setq pta1 (list (hpos ch) (- datum (* d4 scale1))))
+    (setq pta2 (list (hpos ch) (- datum (* d5 scale1))))
+    (setq pta3 (list (hpos ch) (- datum (* d6 scale1))))
+    (setq pta4 (list (hpos ch) (- datum (* d7 scale1))))
+    (command "color" 7)
+    (command "line" pta1 pta2 "")
+    (command "line" pta3 pta4 "")
+
+    (setq a (+ a 1))
+  )
+)
+
+
+Explanation
+
+
+The layout() function creates a plotting layout for elevation data:
+
+
+
+Saves the current OSNAP mode and disables it.
+Calculates points for X and Y axes and lines parallel to X.
+Draws axes using line commands.
+Adds text labels like "BED LEVEL" and "CHAINAGE".
+Draws small tick lines on Y axis and arrays them.
+Writes elevation levels on Y axis using a while loop.
+Writes chainage values along X axis and draws small vertical ticks.
+
+
+
+Overall, this function generates a complete elevation plotting grid in AutoCAD, with axes, grid lines, labels, and scaled increments.
+
+
+
+
+4.0 Plotting Cross Section of the River and Writing Chainages
+
+
+(defun cs ()
+  (setq a 1) ; Initialize chainage counter
+
+  ; Loop through all chainages
+  (while (< a (+ noch 1))
+    ; Read chainage and RL from file
+    (setq x (atof (read-line f))) ; Chainage
+    (setq y (atof (read-line f))) ; RL at chainage
+
+    ; Convert numbers to strings for text display
+    (setq b1 (rtos x 2 3)) ; Chainage as string
+    (setq b2 (rtos y 2 3)) ; RL as string
+
+    ; Get plotting positions
+    (setq xx (hpos x))
+    (setq pta1 (list (+ xx (* 0.9 scale1)) (- datum (* d8 scale1)))) ; Chainage text
+    (setq pta2 (list (+ xx (* 0.9 scale1)) (- datum (* d9 scale1)))) ; RL text
+
+    ; Write RL along X-axis
+    (command "text" pta2 (* 2 scale1) 90 (princ b2))
+
+    ; Check if chainage is a multiple of increment
+    (setq b (rem (- x left) xincr))
+    (if (/= b 0.0)
+      (command "text" pta1 (* 1.8 scale1) 90 (princ b1)) ; Write chainage if not already written
+    )
+
+    ; Draw small vertical lines on X-axis
+    (setq pta1 (list xx (- datum (* d4 scale1))))
+    (setq pta2 (list xx (- datum (* d5 scale1))))
+    (setq pta3 (list xx (- datum (* d6 scale1))))
+    (setq pta4 (list xx (- datum (* d7 scale1))))
+    (if (/= b 0.0) (command "line" pta1 pta2 ""))
+    (if (/= b 0.0) (command "line" pta3 pta4 ""))
+
+    ; Draw line from X-axis to datum
+    (setq pta5 (list xx (- datum (* 2 scale1))))
+    (setq pta6 (list xx datum))
+    (command "line" pta5 pta6 "")
+
+    ; Draw river cross-section line
+    (setq ptb4 (list xx (vpos y)))
+    (if (/= a 1) (command "line" ptb3 ptb4 ""))
+    (setq ptb3 ptb4)
+
+    ; Increment chainage counter
+    (setq a (+ a 1))
+  )
+)
+
+
+
+
+Explanation
+
+This code defines a function cs that plots a cross-section of a river and writes the chainages (distances along the river) on the X-axis. The function reads input data from a file f. Here's a detailed explanation:
+
+
+Function Definition: (defun cs() ...) defines the function for plotting river cross-sections.
+a: Counter for chainages.
+x: Chainage value read from input file f.
+y: RL (river level) value at the current chainage.
+b1, b2: String versions of chainage and RL for AutoCAD text placement.
+xx: Horizontal plotting position calculated using hpos.
+pta1 - pta6, ptb4: Points for placing text and drawing lines.
+Logic: Loop reads chainage & RL from file, writes RL text, conditionally writes chainage text (based on increment), draws small ticks on X-axis, draws line to datum, and connects points to form river profile.
+vpos y: Converts RL to vertical drawing coordinate.
+hpos x: Converts chainage to horizontal drawing coordinate.
+
+
+ 
+
+5.0 Plotting Pier in Elevation, Plan, and Side View
+5.1 Reading Data
+
+
+(defun pier ()
+  ; Read bridge and pier data from file "f"
+  (setq nspan (atoi (read-line f)))   ; Number of spans
+  (setq lbridge (atof (read-line f))) ; Total length of bridge
+  (setq abtl (atof (read-line f)))    ; Chainage of left abutment
+  (setq RTL (atof (read-line f)))     ; Road top level
+  (setq rtl2 (- RTL (* 30 sc)))       ; Adjusted RTL for drawing (distance from datum to section top)
+  (setq Sofl (atof (read-line f)))    ; Soffit level
+  (setq kerbw (atof (read-line f)))   ; Width of kerb at deck top
+  (setq kerbd (atof (read-line f)))   ; Depth of kerb above deck top
+  (setq ccbr (atof (read-line f)))    ; Clear carriageway width
+  (setq slbthc (atof (read-line f)))  ; Slab thickness at center
+  (setq slbthe (atof (read-line f)))  ; Slab thickness at edge (camber 2.5%)
+  (setq slbtht (atof (read-line f)))  ; Slab thickness at tip (usually 0.150)
+  (setq capt (atof (read-line f)))    ; Pier cap top RL
+  (setq capb (atof (read-line f)))    ; Pier cap bottom RL
+  (setq capw (atof (read-line f)))    ; Cap width
+  (setq piertw (atof (read-line f)))  ; Pier top width
+  (setq battr (atof (read-line f)))   ; Pier batter
+  (setq pierst (atof (read-line f)))  ; Straight length of pier
+  (setq piern (atoi (read-line f)))   ; Pier serial number (shown in cross-section)
+
+  ; Horizontal and vertical positions for drawing elevation view
+  (setq x1 (hpos abtl))
+  (setq y1 (vpos RTL))
+  (setq x2 (hpos (+ abtl lspan)))
+)
+
+
+
+
+Explanation
+
+
+Function Definition: (defun pier() ...) defines the function to plot pier in elevation, plan, and side views.
+nspan: Number of spans in the bridge.
+lbridge: Total length of the bridge.
+abtl: Chainage of left abutment.
+RTL: Road top level read from input.
+rtl2: Adjusted RTL for drawing sections (distance from datum to top of section on paper).
+Sofl: Soffit level of the bridge.
+kerbw, kerbd: Width and depth of the kerb at deck top.
+ccbr: Clear carriageway width.
+slbthc, slbthe, slbtht: Slab thickness at center, edge, and tip respectively (edge thickness considers camber).
+capt, capb, capw: Pier cap top RL, bottom RL, and width.
+piertw: Top width of pier.
+battr: Pier batter (taper angle).
+pierst: Straight length of pier.
+piern: Serial number of pier (used for identification in cross-section view).
+x1, y1, x2: Calculated positions for plotting elevation view.
+
+
+  
+
+5.2–5.4 Drawing Piers and Pier Caps
+
+
+; Set initial positions for elevation view
+(setq x1 (hpos abtl))
+(setq y1 (vpos RTL))
+(setq x2 (hpos (+ abtl lspan)))
+(setq y2 (vpos sofl))
+
+; Draw rectangle representing SS (superstructure)
+(setq pta1 (list (+ x1 25.0) y1))
+(setq pta2 (list (- x2 25.0) y2))
+(setq ptaa1 (list (+ x1 50) (+ y1 800)))
+(command "rectangle" pta1 pta2) ; draw SS rectangle
+(setq g1 (entlast))              ; get last entity (SS)
+
+; Adjust starting point for pier caps
+(setq x1 (+ abtl lspan))
+(setq capwsq (/ capw c))
+(setq x1 (- x1 (/ capwsq 2)))
+(setq x2 (+ x1 capwsq))
+(setq x1 (hpos x1))
+(setq x2 (hpos x2))
+(setq y1 (vpos capt))
+(setq y2 (vpos capb))
+(setq pta1 (list x1 y1))
+(setq pta2 (list x2 y2))
+(command "rectangle" pta1 pta2) ; draw rectangle for pier cap
+(setq g2 (entlast))
+
+; Initialize span chainage
+(setq spans abtl)
+
+; Loop to draw piers for each span
+(setq a 1)
+(while (<= a nspan)
+  (setq span1 (atof (read-line f))) ; read individual span length
+  (setq futrl (atof (read-line f)))  ; founding RL of pier
+  (setq futd (atof (read-line f)))   ; depth of footing
+  (setq futw (atof (read-line f)))   ; width of footing
+  (setq futl (atof (read-line f)))   ; length of footing along direction
+  (setq spane (+ spans span1))       ; end chainage of span
+
+  ; Draw SS rectangle for current span
+  (setq x1 (hpos spans))
+  (setq y1 (vpos RTL))
+  (setq x2 (hpos spane))
+  (setq y2 (vpos sofl))
+  (setq pta1 (list (+ x1 25.0) y1)) ; 25 mm expansion gap
+  (setq pta2 (list (- x2 25.0) y2))
+  (command "rectangle" pta1 pta2)   ; SS rectangle
+
+  ; Draw dimension line for span
+  (setq pta1 (list x1 y1))
+  (setq pta2 (list x2 y1))
+  (setq ptaa1 (list (+ x1 50) (+ y1 2000)))
+  (command "DIMLINEAR" pta1 pta2 ptaa1)
+
+  ; Update starting x1 for next span
+  (setq x1 spane)
+  (setq spans spane)
+  (setq a (+ a 1))
+
+
+
+
+Explanation
+
+SS Rectangle: Draws a rectangle representing the superstructure over a span. Expansion gap of 25 units is added to avoid overlap.
+Pier Caps: Calculated width (capwsq) and horizontal position (x1, x2) are used to draw rectangle representing the pier cap in elevation.
+Span Loop: Iterates through each bridge span, reads pier footing data, and draws the SS rectangle and dimension line.
+Dimension Line: (command "DIMLINEAR") draws linear dimension above SS rectangle.
+Chainage Update: spans and x1 are updated to move to next span.
+Last Entity: (entlast) stores the last drawn entity (rectangle) for possible array or reference.
+
+
+  
+  
+5.4 Drawing Pier Caps, Piers, and Footings in Elevation
+
+
+; --- Pier Caps (skewed if needed) ---
+(setq capwsq (/ capw c))       ; skew width = normal width / cos(angle)
+(setq x1 (- x1 (/ capwsq 2)))
+(setq x2 (+ x1 capwsq))
+(setq x1 (hpos x1))
+(setq x2 (hpos x2))
+(setq y1 (vpos capt))
+(setq y2 (vpos capb))
+(setq pta1 (list x1 y1))
+(setq pta2 (list x2 y2))
+(command "rectangle" pta1 pta2) ; draw rectangle for pier cap
+
+; Dimension for cap width
+(setq ptaa1 (list (+ x1 50) (- y2 400)))
+(command "DIMEXE" "300")
+(command "DIMEXO" "200")
+(command "DIMLINEAR" (list x1 y2) pta2 ptaa1)
+
+; --- Start drawing pier ---
+(setq xc spane)
+(setq piertwsq (/ piertw c))
+(setq x1 (- xc (/ piertwsq 2))) ; left point of pier top
+(setq x3 (+ x1 piertwsq))       ; right point of pier top
+(setq y2 (+ futrl futd))        ; pier bottom = footing RL + depth
+(setq ofset (/ (- capb y2) battr)) ; pier batter = height / batter
+(setq ofsetsq (/ ofset c))
+(setq x2 (- x1 ofsetsq))        ; left bottom of pier
+(setq x4 (+ x3 ofsetsq))        ; right bottom of pier
+(setq y4 y2)
+
+(setq pta1 (pt x1 capb pta1))
+(setq pta2 (pt x2 y2 pta2))
+(setq pta3 (pt x3 capb pta3))
+(setq pta4 (pt x4 y4 pta4))
+
+(command "line" pta1 pta2 "")   ; left side of pier
+(command "line" pta3 pta4 "")   ; right side of pier
+
+; Dimension for pier width
+(setq ptaa1 (list (+ (hpos x2) 50) (- (vpos y2) 300)))
+(command "DIMEXE" "200")
+(command "DIMEXO" "100")
+(command "DIMLINEAR" pta2 pta4 ptaa1)
+
+; --- Footing ---
+(setq futwsq (/ futw c))
+(setq x5 (- xc (/ futwsq 2))) ; left point of footing
+(setq x6 (+ x5 futwsq))       ; right point of footing
+(setq y6 futrl)               ; bottom of footing
+(setq y5 y4)                  ; top of footing
+
+(setq pta5 (pt x5 y5 pta5))
+(setq pta6 (pt x6 y6 pta6))
+(command "rectangle" pta5 pta6) ; draw rectangle to represent footing
+
+(setq pt1 (list (hpos x5) (vpos y6))) ; store point for reference
+
+
+Explanation
+
+  Pier Cap: Skewed width is calculated using cosine of skew angle. Rectangle represents cap in elevation.
+  Cap Dimension: DIMLINEAR draws the width dimension, with DIMEXE and DIMEXO adjusting extension and offset.
+  Pier with Batter: Top width (piertw) and batter determine bottom coordinates. Lines connect top and bottom for left and right faces.
+  Pier Dimension: DIMLINEAR shows width at bottom.
+  Footing: Footing rectangle drawn using width, length, and founding RL.
+  Points Storage: Points like pt1 can be used later for arrays or references.
+
+  
+  
+
+
+(setq pt2 pta6)
+
+(setq pt3 (list (+ (hpos x5) 100) (- (vpos y6) 600)))  ; pt3 coordinate
+
+(command "DIMEXE" "200")
+(command "DIMEXO" "400")  ; giving depth and width dimensions
+
+(command "DIMLINEAR" pt1 pt2 pt3)
+
+(setq pt2 pt1)
+(setq pt1 pta5)
+
+(setq pt3 (list (- (hpos x5) 700) (- (vpos y5) 100)))
+
+(command "DIMEXE" "400")
+(command "DIMEXO" "500")
+
+(command "DIMLINEAR" pt1 pt2 pt3)
+
+; 5.5 drawing piers in plan
+(setq x7 (- xc (/ futw 2)))  ; left top point of footing
+(setq x8 (+ x7 futw))
+(setq yc (- datum 30.0))
+(setq y7 (+ yc (/ futl 2)))
+(setq y8 (- y7 futl))
+
+(setq pta7 (pt x7 y7 pta7))
+(setq pta8 (pt x8 y8 pta8))
+
+(command "rectangle" pta7 pta8)  ; draw rectangle representing footing
+
+(setq g2 (entlast))
+
+(setq pt1 (list (hpos x7) (vpos y8)))
+(setq pt2 pta8)
+(setq pt3 (list (+ (hpos x7) 100) (- (vpos y8) 600)))
+
+(command "DIMEXE" "200")
+(command "DIMEXO" "400")  ; giving length and width dimensions
+
+(command "DIMLINEAR" pt1 pt2 pt3)
+(setq g3 (entlast))
+
+(setq pt1 (list (hpos x8) (vpos y7)))
+(setq pt2 pta8)
+(setq pt3 (list (+ (hpos x8) 700) (- (vpos y7) 100)))
+
+
+  
+  
+
+
+(command "DIMEXE" "200")
+(command "DIMEXO" "500")
+(command "DIMLINEAR" pt1 pt2 pt3)
+(setq g4 (entlast))
+
+(setq ptc (pt xc yc ptc))
+(Command "rotate" g2 g3 g4 "" ptc skew)  ; rotate footing in plan to angle 'skew'
+
+(setq pierstsq (+ (/ pierst c) (abs (* piertw tn))))  ; pier skew length = st/cos(phi) + w*tan(phi)
+
+(setq x1 (- xc (/ piertw 2)))  ; left point of pier top
+(setq x3 (+ x1 piertw))        ; right point of pier top
+(setq x2 (- x1 ofset))          ; left point of pier bottom
+(setq x4 (+ x3 ofset))          ; right point of pier bottom
+
+(setq y9 (+ yc (/ pierstsq 2)))
+(setq y10 (- y9 pierstsq))
+
+(setq pta9  (pt x2 y9  pta9))
+(setq pta10 (pt x2 y10 pta10))
+(setq pta11 (pt x1 y9  pta11))
+(setq pta12 (pt x1 y10 pta12))
+(setq pta13 (pt x3 y9  pta13))
+(setq pta14 (pt x3 y10 pta14))
+(setq pta15 (pt x4 y9  pta15))
+(setq pta16 (pt x4 y10 pta16))
+
+(command "line" pta9  pta10 "")
+(setq g1 (entlast))
+(command "line" pta11 pta12 "")
+(setq g2 (entlast))
+(command "line" pta13 pta14 "")
+(setq g3 (entlast))
+(command "line" pta15 pta16 "")
+(setq g4 (entlast))
+
+(setq y17 (+ y9 (/ piertw 2)))
+(setq y18 (+ y17 ofset))
+(setq y19 (- y10 (/ piertw 2)))
+(setq y20 (- y19 ofset))
+
+(setq pta17 (pt xc y17 pta17))
+(setq pta18 (pt xc y18 pta18))
+(setq pta19 (pt xc y19 pta19))
+(setq pta20 (pt xc y20 pta20))
+
+(command "arc" pta9  pta18 pta15)
+(setq g5 (entlast))
+(command "arc" pta11 pta17 pta13)
+(setq g6 (entlast))
+(command "arc" pta12 pta19 pta14)
+(setq g7 (entlast))
+
+
+  
+  
+ 
+
+(command "arc" pta10 pta20 pta16)
+(setq g8 (entlast))
+
+(command "DIMEXE" "200")
+(command "DIMEXO" "500")
+
+(setq pt3 (list (+ (hpos x4) 700) (- (vpos y9) 100)))
+(command "DIMLINEAR" pta15 pta16 pt3)
+(setq g9 (entlast))
+
+(setq pt3 (list (+ (hpos x1) 100) (+ (vpos y9) 700)))
+(command "DIMLINEAR" pta11 pta13 pt3)
+(setq g10 (entlast))
+
+(setq pt3 (list (+ (hpos x2) 100) (+ (vpos y9) 1000)))
+(command "DIMLINEAR" pta9 pta15 pt3)
+(setq g11 (entlast))
+
+(Command "rotate" g1 g2 g3 g4 g5 g6 g7 g8 g9 g10 g11 "" ptc skew)
+; rotate pier plan to skew angle
+
+(setq n a)
+(while (= n piern)        ; while loop 2
+  (setq futprl futrl)     ; founding RL
+  (setq futpd futd)       ; footing depth
+  (setq futpw futw)       ; footing width
+  (setq futpl futl)       ; footing length
+  (setq n (+ n 1))
+)
+
+(setq a (+ 1 a))
+(setq spans spane)
+) ; end first while loop
+
+
+; 5. Drawing SS of last span
+(setq x1 (hpos spane))
+(setq y1 (vpos RTL))
+(setq x2 (hpos (+ abtl lbridge)))
+(setq y2 (vpos sofl))
+
+(setq pta1 (list (+ x1 25.0) y1))
+(setq pta2 (list (- x2 25.0) y2))
+(command "rectangle" pta1 pta2)
+; SS rectangle drawn
+
+; Dimension SS
+(setq pta1 (list x1 y1))
+(setq pta2 (list x2 y1))
+(setq ptaa1 (list (+ x1 50) (+ y1 2000)))
+(command "DIMLINEAR" pta1 pta2 ptaa1)
+
+
+; 5.6 Draw elevation & section YY
+(setq xp (+ left 55))
+(setq yp rtl2)
+
+
+  
+  
+AutoLISP – Slab & Pier Cross Section
+
+(setq ppt16 (p2t xp yp ppt16))
+
+(setq ccbrsq (/ ccbr c))
+
+(setq ppt1 (p2t (+ xp (/ ccbrsq 2)) yp ppt1))
+(setq ppt2 (p2t (+ xp ccbrsq) yp ppt2))
+
+(setq kerbwsq (/ kerbw c))
+
+(setq ppt3 (p2t (+ xp ccbrsq kerbwsq) (+ yp (- slbthe slbtht)) ppt3))
+(setq ppt4 (p2t (+ xp ccbrsq kerbwsq) (+ yp slbthe) ppt4))
+(setq ppt5 (p2t (+ xp ccbrsq kerbwsq) (+ yp slbthe kerbd) ppt5))
+
+(setq k1 (/ 0.05 c))     ; 50 mm in skew
+(setq k2 (/ 0.025 c))    ; 25 mm in skew
+
+(setq ppt6 (p2t (+ xp ccbrsq k1) (+ yp slbthe kerbd) ppt6))
+(setq ppt7 (p2t (+ xp ccbrsq k2) (+ yp slbthe kerbd -0.025) ppt7))
+(setq ppt8 (p2t (+ xp ccbrsq) (+ yp slbthe) ppt8))
+(setq ppt9 (p2t (+ xp (/ ccbrsq 2)) (+ yp slbthc) ppt9))
+(setq ppt10 (p2t xp (+ yp slbthe) ppt10))
+
+(setq ppt11 (p2t (- xp k2) (+ yp slbthe kerbd -0.025) ppt11))
+(setq ppt12 (p2t (- xp k1) (+ yp slbthe kerbd) ppt12))
+(setq ppt13 (p2t (- xp kerbwsq) (+ yp slbthe kerbd) ppt13))
+
+(setq ppt14 (list (car ppt13) (cadr ppt4)))
+(setq ppt15 (list (car ppt13) (cadr ppt3)))
+
+(command "line" 
+ ppt16 ppt1 ppt2 ppt3 ppt4 ppt5 ppt6 ppt7 
+ ppt8 ppt9 ppt10 ppt11 ppt12 ppt13 ppt14 
+ ppt15 ppt16 "")
+
+(command "line" ppt14 ppt10 "")
+(command "line" ppt8 ppt4 "")
+
+(setq diff (/ (- pierstsq ccbrsq) 2))
+(setq xp (- xp diff))
+
+(setq pedstl (- sofl capt))
+(setq yp (- yp pedstl))
+
+(setq ppt16 (p2t xp yp ppt16))
+
+(setq capd (- capt capb))
+
+(setq ppt17 (p2t (- xp (/ capw 2)) yp ppt17))
+(setq ppt18 (p2t (+ xp pierstsq (/ capw 2)) yp ppt18))
+(setq ppt19 (p2t (- xp (/ capw 2)) (- yp capd) ppt19))
+(setq ppt20 (p2t (+ xp pierstsq (/ capw 2)) (- yp capd) ppt20))
+
+(command "line" ppt17 ppt18 ppt20 ppt19 ppt17 "")
+
+(setq ppt21 (p2t (- xp (/ piertw 2)) (- yp capd) ppt21))
+(setq ppt22 (p2t xp (- yp capd) ppt22))
+(setq ppt23 (p2t (+ xp pierstsq) (- yp capd) ppt23))
+(setq ppt24 (p2t (+ xp pierstsq (/ piertw 2)) (- yp capd) ppt24))
+
+(setq xpc (+ xp (/ pierstsq 2)))
+
+(setq pierht (- capb futprl futpd))
+(setq pierbw (/ pierht battr))
+
+ 
+  
+Pier Geometry – AutoLISP Code
+
+(setq pierbw (+ pierbw pierbw piertw))
+
+(setq h1 (- yp pierht capd))
+
+(setq ppt25 (p2t (- xpc (/ futpl 2)) h1 ppt25))
+(setq ppt26 (p2t (- xp (/ pierbw 2)) h1 ppt26))
+(setq ppt27 (p2t xp h1 ppt27))
+(setq ppt28 (p2t (+ xp pierstsq) h1 ppt28))
+(setq ppt29 (p2t (+ xp pierstsq (/ pierbw 2)) h1 ppt29))
+(setq ppt30 (p2t (+ xpc (/ futpl 2)) h1 ppt30))
+
+(setq h2 (- h1 futpd))
+
+(setq ppt31 (p2t (- xpc (/ futpl 2)) h2 ppt31))
+(setq ppt32 (p2t xpc h2 ppt32))
+(setq ppt33 (p2t (+ xpc (/ futpl 2)) h2 ppt33))
+
+(setq ppt2 (p2t (+ xp ccbrsq diff diff) yp ppt2))
+; Redefined point ppt2 for skew bridges
+
+(command "line" ppt21 ppt26 "")
+(command "line" ppt16 ppt27 "")
+(command "line" ppt2 ppt28 "")
+(command "line" ppt24 ppt29 "")
+(command "line" ppt25 ppt30 ppt33 ppt31 ppt25 "")
+(command "line" ppt9 ppt32 "")
+
+) ; End of pier subroutine
+
+
+
+
+Program Description
+
+This AutoLISP routine plots a pier in elevation, plan and side view.
+
+Section 5.1 – Input Data
+
+Number of spans
+Total bridge length
+Chainage of left abutment
+RL of right abutment top
+Soffit level
+Kerb width at deck top
+Kerb height above deck
+Clear carriageway width
+Slab thickness at center
+Slab thickness at edge
+Slab thickness at tip
+RL of pier cap top
+RL of pier cap bottom
+Pier cap width
+Pier top width
+Pier batter
+Straight pier length
+Pier serial number for section
+
+
+Section 5.2 – Loop for Pier Drawing
+Runs for nspan times. Reads:
+
+
+Span length
+Founding RL
+Foundation depth
+Foundation width
+Foundation length
+
+  
+  
+
+
+  Section 5.3: Draws a section through the bridge in elevation. 
+  It starts by calculating the chainage of the current span (spans) and the end 
+  chainage of the current span (spane) by adding the individual span length (span1) 
+  to the starting chainage of the span (spans). It then uses these values to draw 
+  the section in elevation. The section is represented by a rectangle.
+
+  Section 5.4: Draws a plan view of the bridge. This section is 
+  not implemented in the code.
+
+  Section 5.5: Draws a side view of the pier. It starts by 
+  calculating the RL of the bottom of the pier foundation (foundrl) by subtracting 
+  the depth of the pier foundation (futd) from the founding RL of the pier 
+  foundation (futrl). It then calculates the RL of the top of the pier (piertoprl) 
+  by adding the pier cap top RL (capt) to the thickness of the pier cap (capw).  
+  It calculates the width of the pier foundation at the bottom (futwb) by adding 
+  twice the width of the pier foundation (futw) to twice the thickness of the slab 
+  at the edge (slbthe). It calculates the width of the pier foundation at the top 
+  (piertopw) by adding twice the width of the pier top (piertw) to twice the 
+  thickness of the slab at the edge (slbthe).  
+  It then uses these values to draw the side view of the pier, which consists of a 
+  rectangle for the pier foundation and a trapezoid for the pier top.
+
+  
+
+  (defun pt(a b z) ;subroutine to convert given point into point on graph
+
+    (setq aa a)
+    (setq aa (hpos aa))
+    (setq bb b)
+    (setq bb (vpos bb))
+    (setq z (list aa bb))
+
+)   ;defun pt is closed.
+    ;(setq pta1 (pt (car nn1) (cadr nn1) pta1))
+  
+
+  
+
+  The given code defines a function called "pt" which takes in 
+  three arguments "a", "b", and "z". The purpose of this function is to convert a 
+  given point into a point on a graph and return it as a list.
+
+  The function starts by setting the variable "aa" equal to the value of "a", 
+  then it calls the function "hpos" with the value of "aa" and sets "aa" to the 
+  result of this function. The function "hpos" is not defined in the given code 
+  snippet, so it is likely defined elsewhere in the program.
+
+  Next, the function sets the variable "bb" equal to the value of "b", then it 
+  calls the function "vpos" with the value of "bb" and sets "bb" to the result of 
+  this function. Again, the function "vpos" is not defined in the given code 
+  snippet.
+
+  Finally, the function sets the value of "z" to a list containing the values of 
+  "aa" and "bb". The updated value of "z" is then returned by the function.
+
+  The last line of code shown is not part of the "pt" function definition but is 
+  likely calling the "pt" function with the values of "nn1" and "pta1" and setting 
+  the variable "pta1" to the result.
+
+  
+
+  (defun p2t(a b z) ;subroutine to convert given point into point on graph
+
+    (setq aa a)
+    (setq aa (h2pos aa))
+    (setq bb b)
+    (setq bb (v2pos bb))
+    (setq z (list aa bb))
+
+)   ;defun p2t is closed.
+  
+
+  
+
+  The given code defines a function named "p2t" using the 
+  "defun" keyword. This function takes three arguments, namely "a", "b", and "z". 
+  The purpose of this function is to convert a given point (a,b) into a point on a 
+  graph, and store the result in the variable "z".
+
+  Let's take a look at each line of the function:
+
+  (setq aa a)
+  This line sets the value of a local variable named "aa" to the value of the 
+  argument "a". This is done so that the original value of "a" is not modified.
+
+  (setq aa (h2pos aa))
+  This line sets the value of "aa" to the result of calling the function "h2pos" 
+  with the argument "aa". The "h2pos" function is assumed to be defined elsewhere 
+  in the program. It likely takes a value in some unit of horizontal distance and 
+  returns a corresponding value on the horizontal axis of the graph.
+
+  (setq bb b)
+  This line sets the value of a local variable named "bb" to the value of the 
+  argument "b". This is done so that the original value of "b" is not modified.
+
+  (setq bb (v2pos bb))
+
+
+
+ 
+  
+
+
+  This line sets the value of "bb" to the result of calling the function 
+  "v2pos" with the argument "bb". The "v2pos" function is assumed 
+  to be defined elsewhere in the program. It likely takes a value in some unit of 
+  vertical distance and returns a corresponding value on the vertical axis of the 
+  graph.
+
+  (setq z (list aa bb))
+  
+
+  This line creates a list with the values of "aa" and "bb" and assigns it to 
+  the variable "z". This list represents the point (aa, bb) on the graph.
+
+  Finally, the function is closed with a closing parenthesis, and the next line 
+  of code is not part of the function.
+
+  
+
+  6.0 LEFT ABUTMENT
+
+  (defun abt1()
+
+    ; 6.1 DATA
+    ;(setq abtlen (atof (read-line f))) ; read length of abutment along the current
+
+    (setq dwth (atof (read-line f)))   ; read dirtwall thickness.
+    (setq alcw (atof (read-line f)))   ; read abutment left cap width (excluding d/w)
+    (setq alcd (atof (read-line f)))   ; read abutment left cap depth
+    (setq alfb (atof (read-line f)))   ; abt left front batter
+    (setq alfbl (atof (read-line f)))  ; abt left front batter RL
+    (setq altb (atof (read-line f)))   ; abt left toe batter
+    (setq altbl (atof (read-line f)))  ; abt left toe batter level (footing top)
+    (setq alfo (atof (read-line f)))   ; abutment left front offset to footing
+    (setq alfd (atof (read-line f)))   ; abt left footing depth
+    (setq albb (atof (read-line f)))   ; abt left back batter
+    (setq albbl (atof (read-line f)))  ; abt left back batter RL
+
+    ; 6.2
+    (setq abtlen (+ ccbrsq kerbwsq kerbwsq))
+    (setq x1 abtl)
+    (setq alcwsq (/ alcw 1))           ; c changed to 1
+    (setq x3 (+ x1 alcwsq))
+
+    (setq capb (- capt alcd))
+    (setq p1 (/ (- capb alfbl) alfb))
+    (setq p1sq (/ p1 1))               ; c changed to 1
+    (setq x5 (+ x3 p1sq))
+
+    (setq p2 (/ (- alfbl altbl) altb))
+    (setq p2sq (/ p2 1))               ; c changed to 1
+    (setq x6 (+ x5 p2sq))
+
+    (setq alfosq (/ alfo 1))           ; c changed to 1
+    (setq x7 (+ x6 alfosq))
+
+    (setq y8 (- altbl alfd))
+
+    (setq dwthsq (/ dwth 1))           ; c changed to 1
+    (setq x14 (- x1 dwthsq))
+
+    (setq p3 (/ (- capb albbl) albb))
+    (setq p3sq (/ p3 1))               ; c changed to 1
+    (setq x12 (- x14 p3sq))
+
+    (setq rt1s x12) ; ch. where left return starts in elevation
+    (setq x10 (- x12 alfosq))
+
+)
+  
+
+
+
+  
+  
+
+
+  (setq pt1 (pt x1 rtl pt1))   ; 6.3 gives various points on elevation of abutment
+(setq pt2 (pt x1 capt pt2))
+(setq pt3 (pt x3 capt pt3))
+(setq pt4 (pt x3 capb pt4))
+(setq pt5 (pt x5 alfbl pt5))
+(setq pt6 (pt x6 altbl pt6))
+(setq pt7 (pt x7 altbl pt7))
+(setq pt8 (pt x7 y8 pt8))
+(setq pt9 (pt x10 y8 pt9))
+(setq pt10 (pt x10 altbl pt10))
+(setq pt11 (pt x12 altbl pt11))
+(setq pt12 (pt x12 albbl pt12))
+(setq pt13 (pt x14 capb pt13))
+(setq pt14 (pt x14 rtl pt14))
+(setq pt15 (pt x12 rtl pt15))
+
+(command "line" pt1 pt2 pt3 pt4 pt5 pt6 pt7 pt8 pt9 pt10 pt11 pt12 pt13 pt14 pt1 "")
+(command "line" pt13 pt4 "")
+(command "line" pt10 pt7 "")
+(command "line" pt12 pt15 pt14 "")
+  
+
+  
+
+  This Lisp code generates various points on the elevation of an abutment and 
+  then creates lines connecting these points to draw the abutment.
+
+  The (pt x y z) function is used to create a point object with the 
+  given x, y, and z coordinates. The setq function is used to assign 
+  a value to a variable.
+
+  Here is a breakdown of the code:
+
+  
+    (setq pt1 (pt x1 rtl pt1)):  
+    This line creates a point object pt1 with x-coordinate x1, y-coordinate rtl, 
+    and z-coordinate pt1. rtl and pt1 are assumed to be previously defined 
+    variables. This point is used to draw the first line of the abutment.
+  
+
+  
+    (setq pt2 (pt x1 capt pt2)):  
+    This line creates a point object pt2 with x-coordinate x1, y-coordinate capt, 
+    and z-coordinate pt2. capt and pt2 are assumed to be previously defined 
+    variables. This point is used to draw the second line of the abutment.
+  
+
+  
+    (setq pt3 (pt x3 capt pt3)):  
+    This line creates a point object pt3 with x-coordinate x3, y-coordinate capt, 
+    and z-coordinate pt3. capt and pt3 are assumed to be previously defined 
+    variables. This point is used to draw the third line of the abutment.
+  
+
+  
+    (setq pt4 (pt x3 capb pt4)):  
+    This line creates a point object pt4 with x-coordinate x3, y-coordinate capb, 
+    and z-coordinate pt4. capb and pt4 are assumed to be previously defined 
+    variables. This point is used to draw the fourth line of the abutment.
+  
+
+  
+    (setq pt5 (pt x5 alfbl pt5)):  
+    This line creates a point object pt5 with x-coordinate x5, y-coordinate alfbl, 
+    and z-coordinate pt5. alfbl and pt5 are assumed to be previously defined 
+    variables. This point is used to draw the fifth line of the abutment.
+  
+
+  
+    (setq pt6 (pt x6 altbl pt6)):  
+    This line creates a point object pt6 with x-coordinate x6, y-coordinate altbl, 
+    and z-coordinate pt6. altbl and pt6 are assumed to be previously defined 
+    variables. This point is used to draw the sixth line of the abutment.
+  
+
+  
+    (setq pt7 (pt x7 altbl pt7)):  
+    This line creates a point object pt7 with x-coordinate x7, y-coordinate altbl, 
+    and z-coordinate pt7. altbl and pt7 are assumed to be previously defined 
+    variables. This point is used to draw the seventh line of the abutment.
+  
+
+  
+    (setq pt8 (pt x7 y8 pt8)):  
+    This line creates a point object pt8 with x-coordinate x7, y-coordinate y8, 
+    and z-coordinate pt8. y8 and pt8 are assumed to be previously defined 
+    variables. This point is used to draw the eighth line of the abutment.
+  
+
+  
+    (setq pt9 (pt x10 y8 pt9)):  
+    This line creates a point object pt9 with x-coordinate x10, y-coordinate y8, 
+    and z-coordinate pt9. y8 and pt9 are assumed to be previously defined 
+    variables. This point is used to draw the ninth line of the abutment.
+  
+
+  
+    (setq pt10 (pt x10 altbl pt10)):  
+    This line calculates the point pt10 as the point obtained by calling the pt 
+    function with parameters x10, altbl, and pt10. The pt function is used to 
+    create a new point object at the specified coordinates.
+  
+
+
+
+  
+
+
+  
+    The next line calculates the point pt11 as the point obtained by calling the pt
+    function with parameters x12, altbl, and pt11.
+  
+
+  
+    The next line calculates the point pt12 as the point obtained by calling the pt
+    function with parameters x12, albbl, and pt12.
+  
+
+  
+    The next line calculates the point pt13 as the point obtained by calling the pt
+    function with parameters x14, capb, and pt13.
+  
+
+  
+    The next line calculates the point pt14 as the point obtained by calling the pt
+    function with parameters x14, rtl, and pt14.
+  
+
+  
+    The next line calculates the point pt15 as the point obtained by calling the pt
+    function with parameters x12, rtl, and pt15.
+  
+
+  
+    The next four lines use AutoCAD's command function to draw lines between the
+    points calculated above. The first line draws a line that passes through all
+    the points starting with pt1 and ending with pt14, and then returns to pt1.
+  
+
+  The second line draws a line between pt13 and pt4.
+
+  The third line draws a line between pt10 and pt7.
+
+  
+    The fourth line draws a line that connects pt12, pt15, and pt14.
+  
+
+  
+    Overall, this Lisp code is likely part of a larger program that creates a
+    specific set of lines and shapes in an AutoCAD drawing.
+  
+
+  
+
+  ***********************************************************************************
+***********************************************************************************
+; 6.4       ; drawing abutment left in plan
+
+(setq y20 (+ yc (/ abtlen 2)))     ; gives Y ordinate on D/S of abt
+(setq y21 (- y20 abtlen))          ; gives Y ordinate on U/S of abt
+(setq y16 (+ y20 0.15))            ; gives Y ordinate on D/S of footing
+(setq y17 (- y21 0.15))            ; gives Y ordinate on U/S of footing
+
+(setq footl (- y16 y17))
+(setq footl (/ footl 2))
+(setq x (* footl s))
+(setq y (* footl (- 1 c)))
+
+(setq pt16 (pt (- x10 x) (- y16 y) pt16))
+(setq pt17 (pt (+ x10 x) (+ y17 y) pt17))
+(setq pt18 (pt (- x7 x) (- y16 y) pt18))
+(setq pt19 (pt (+ x7 x) (+ y17 y) pt19))
+
+(setq pt14 (pt x14 rtl pta14))
+(setq pt15 (pt x12 rtl pta15))
+
+(command "line" pt16 pt17 pt19 pt18 pt16 "") ; drawing abt footing in plan
+
+(setq xx (/ abtlen 2))
+; due to skew , X and Y ordinates are shifted by:
+; x = l/2 * sin(phi) , y = l/2(1-cos(phi))
+
+(setq x (* xx s))
+(setq y (* xx (- 1 c)))
+(setq y20 (- y20 y))
+(setq y21 (+ y21 y))
+
+(setq pt20 (pt (- x12 x) y20 pt20))
+(setq pt21 (pt (+ x12 x) y21 pt21))
+  
+
+
+
+(setq pt22 (pt (- x14 x) y20 pt22))
+(setq pt23 (pt (+ x14 x) y21 pt23))
+(setq pt24 (pt (- x1 x) y20 pt24))
+(setq pt25 (pt (+ x1 x) y21 pt25))
+(setq pt26 (pt (- x3 x) y20 pt26))
+(setq pt27 (pt (+ x3 x) y21 pt27))
+(setq pt28 (pt (- x5 x) y20 pt28))
+(setq pt29 (pt (+ x5 x) y21 pt29))
+(setq pt30 (pt (- x6 x) y20 pt30))
+(setq pt31 (pt (+ x6 x) y21 pt31))
+
+(command "line" pt20 pt21 "")
+(command "line" pt22 pt23 "")
+(command "line" pt24 pt25 "")
+(command "line" pt26 pt27 "")
+(command "line" pt28 pt29 "")
+(command "line" pt30 pt31 "")
+(command "line" pt21 pt31 "")
+(command "line" pt20 pt30 "")  ; completed drawing plan abutment left
+
+
+
+The given code is a LISP function abt1 used for abutment design.  
+It reads input values, performs calculations, and draws the geometry.
+
+
+(defun abt1()
+
+(setq dwth (atof (read-line f)))   ; dirtwall thickness
+(setq alcw (atof (read-line f)))   ; abutment cap width
+(setq alcd (atof (read-line f)))   ; cap depth
+(setq alfb (atof (read-line f)))   ; front batter
+(setq alfbl (atof (read-line f)))  ; front batter RL
+(setq altb (atof (read-line f)))   ; toe batter
+(setq altbl (atof (read-line f)))  ; toe batter level
+(setq alfo (atof (read-line f)))   ; front offset
+(setq alfd (atof (read-line f)))   ; footing depth
+(setq albb (atof (read-line f)))   ; back batter
+(setq albbl (atof (read-line f)))  ; back batter RL
+
+(setq abtlen (+ ccbrsq kerbwsq kerbwsq))
+
+(setq x1 abtl)
+(setq alcwsq (/ alcw 1))
+(setq x3 (+ x1 alcwsq))
+
+(setq capb (- capt alcd))
+(setq p1 (/ (- capb alfbl) alfb))
+(setq p1sq (/ p1 1))
+(setq x5 (+ x3 p1sq))
+
+(setq p2 (/ (- alfbl altbl) altb))
+(setq p2sq (/ p2 1))
+(setq x6 (+ x5 p2sq))
+
+(setq alfosq (/ alfo 1))
+(setq x7 (+ x6 alfosq))
+
+(setq y8 (- altbl alfd))
+(setq dwthsq (/ dwth 1))
+(setq x14 (- x1 dwthsq))
+)
+
+  
+  (setq p3 (/ (- capb albbl) albb))
+(setq p3sq (/ p3 1))      ; c changed to 1
+(setq x12 (- x14 p3sq))
+(setq rt1s x12)
+(setq x10 (- x12 alfosq))
+
+
+
+These lines calculate various coordinates needed to draw the abutment elevation using arithmetic operations.
+
+
+(setq pt1  (pt x1  rtl   pt1))    ; elevation points
+(setq pt2  (pt x1  capt  pt2))
+(setq pt3  (pt x3  capt  pt3))
+(setq pt4  (pt x3  capb  pt4))
+(setq pt5  (pt x5  alfbl pt5))
+(setq pt6  (pt x6  altbl pt6))
+(setq pt7  (pt x7  altbl pt7))
+(setq pt8  (pt x7  y8    pt8))
+(setq pt9  (pt x10 y8    pt9))
+(setq pt10 (pt x10 altbl pt10))
+(setq pt11 (pt x12 altbl pt11))
+(setq pt12 (pt x12 albbl pt12))
+(setq pt13 (pt x14 capb  pt13))
+(setq pt14 (pt x14 rtl   pt14))
+(setq pt15 (pt x12 rtl   pt15))
+
+
+(command "line" pt1 pt2 pt3 pt4 pt5 pt6 pt7 pt8 pt9 pt10 pt11 pt12 pt13 pt14 pt1 "")
+(command "line" pt13 pt4 "")
+(command "line" pt10 pt7 "")
+(command "line" pt12 pt15 pt14 "")
+
+
+
+6.4 – Drawing abutment left in plan
+
+
+(setq y20 (+ yc (/ abtlen 2)))     ; downstream Y ordinate
+(setq y21 (- y20 abtlen))         ; upstream Y ordinate
+
+(setq y16 (+ y20 0.15))           ; D/S footing ordinate
+(setq y17 (- y21 0.15))           ; U/S footing ordinate
+
+(setq footl (- y16 y17))
+(setq footl (/ footl 2))
+
+(setq x (* footl s))
+(setq y (* footl (- 1 c)))
+
+
+(setq pt16 (pt (- x10 x) (- y16 y) pt16))
+(setq pt17 (pt (+ x10 x) (+ y17 y) pt17))
+(setq pt18 (pt (- x7  x) (- y16 y) pt18))
+(setq pt19 (pt (+ x7  x) (+ y17 y) pt19))
+
+(setq pt14 (pt x14 rtl pta14))
+(setq pt15 (pt x12 rtl pta15))
+(command "line" pt16 pt17 pt19 pt18 pt16 "")   ; drawing abutment footing in plan
+(setq xx (/ abtlen 2))   ; skew correction
+(setq x (* xx s))
+(setq y (* xx (- 1 c)))
+
+(setq y20 (- y20 y))
+(setq y21 (+ y21 y))
+(setq pt20 (pt (- x12 x) y20 pt20))
+(setq pt21 (pt (+ x12 x) y21 pt21))
+(setq pt22 (pt (- x14 x) y20 pt22))
+(setq pt23 (pt (+ x14 x) y21 pt23))
+(setq pt24 (pt (- x1  x) y20 pt24))
+(setq pt25 (pt (+ x1  x) y21 pt25))
+(setq pt26 (pt (- x3  x) y20 pt26))
+(setq pt27 (pt (+ x3  x) y21 pt27))
+(setq pt28 (pt (- x5  x) y20 pt28))
+(setq pt29 (pt (+ x5  x) y21 pt29))
+(setq pt30 (pt (- x6  x) y20 pt30))
+(setq pt31 (pt (+ x6  x) y21 pt31))
+
+(command "line" pt20 pt21 "")
+(command "line" pt22 pt23 "")
+(command "line" pt24 pt25 "")
+(command "line" pt26 pt27 "")
+(command "line" pt28 pt29 "")
+(command "line" pt30 pt31 "")
+(command "line" pt21 pt31 "")
+(command "line" pt20 pt30 "")   ; completed drawing plan abutment left
+
+
+
+This Lisp code draws the plan view of a bridge abutment.  
+Skew effects are considered using trigonometric factors s and c  
+where X = (L/2) sinφ and Y = (L/2)(1 − cosφ)
+
+
+(setq y20 (+ yc (/ abtlen 2)))
+(setq y21 (- y20 abtlen))
+(setq y16 (+ y20 0.15))
+(setq y17 (- y21 0.15))
+
+
+
+These lines compute Y-coordinates of abutment edges.  
+yc = bridge centerline ordinate  
+0.15 = footing offset
+
+
+(setq footl (- y16 y17))
+(setq footl (/ footl 2))
+
+(setq x (* footl s))
+(setq y (* footl (- 1 c)))
+
+
+footl = half footing length  
+s, c = sine & cosine of skew angle  
+Coordinates are adjusted accordingly.
+
+
+(setq pt16 (pt (- x10 x) (- y16 y) pt16))
+(setq pt17 (pt (+ x10 x) (+ y17 y) pt17))
+(setq pt18 (pt (- x7  x) (- y16 y) pt18))
+(setq pt19 (pt (+ x7  x) (+ y17 y) pt19))
+
+
+
+Points are generated using the pt function  
+which stores calculated X & Y coordinates.
+
+
+  
+    The x and y coordinates used here were calculated in the previous step and
+    assigned to a new point variable.
+  
+
+  Point Calculation
+
+  The next two lines of code calculate two more point coordinates:
+
+  
+(setq pt14 (pt x14 rtl pta14))
+(setq pt15 (pt x12 rtl pta15))
+  
+
+  
+    These lines create two more points using the pt function.
+    Since rtl and pta14 / pta15 are not defined in the
+    provided snippet, their exact behavior depends on earlier code.
+  
+
+  Drawing Lines Using command
+
+  
+    The final part of the code uses the command function to draw
+    lines between various points on the AutoCAD canvas:
+  
+
+  
+(command "line" pt16 pt17 pt19 pt18 pt16 "")
+(command "line" pt20 pt21 "")
+(command "line" pt22 pt23 "")
+(command "line" pt24 pt25 "")
+(command "line" pt26 pt27 "")
+(command "line" pt28 pt29 "")
+(command "line" pt30 pt31 "")
+(command "line" pt21 pt31 "")
+(command "line" pt20 pt30 "")
+  
+
+  Explanation
+
+  
+    
+      Polygon Creation:
+      (command "line" pt16 pt17 pt19 pt18 pt16 "")
+      Draws a closed polygon connecting the points.
+    
+
+    (command "line" pt20 pt21 "") – Draws a line between pt20 and pt21
+    (command "line" pt22 pt23 "") – Draws a line between pt22 and pt23
+    (command "line" pt24 pt25 "") – Draws a line between pt24 and pt25
+    (command "line" pt26 pt27 "") – Draws a line between pt26 and pt27
+    (command "line" pt28 pt29 "") – Draws a line between pt28 and pt29
+    (command "line" pt30 pt31 "") – Draws a line between pt30 and pt31
+    (command "line" pt21 pt31 "") – Connects pt21 to pt31
+    (command "line" pt20 pt30 "") – Connects pt20 to pt30
+  
+
+  Summary
+
+  
+    Together, these commands generate multiple structural lines and closed
+    shapes in AutoCAD, forming a detailed abutment drawing.
+  

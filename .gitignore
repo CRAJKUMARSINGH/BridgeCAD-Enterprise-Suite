@@ -184,7 +184,14 @@ wing_report.json
 # Local reference-extraction / patch scratch (vendor dumps, not product source).
 # Remove these two lines if you deliberately want them versioned.
 CODE-JUNCTION/
-ATTACHED ASSETS/
+ATTACHED ASSETS/*
+
+# Exception — this set is linked from README.md, so keep exactly these files
+# versioned; everything else under ATTACHED ASSETS/ stays local.
+!ATTACHED ASSETS/LISP_Solid_Slab_GAD_In_Toto.lsp
+!ATTACHED ASSETS/LISP_Solid_Slab_GAD_Complete_Archive.md
+!ATTACHED ASSETS/yogipwd_lisp_solid_slab_gad_original.txt
+!ATTACHED ASSETS/GAD_Module_Mapping_Derived_Unverified.md
 
 # Ad-hoc scratch / run trees — regenerable output written by local test and
 # generation runs (never product source).

@@ -4,7 +4,8 @@
 **Fixture ID:** `nh353c_4x24m_psc`  
 **Sheets generated:** 9 DXF  
 **Rendered PNGs:** 9  
-**Total DXF size:** 674 KB  
+**PDF booklet:** [`nh353c_4x24m_psc_GAD_Booklet.pdf`](nh353c_4x24m_psc_GAD_Booklet.pdf) (2272 KB, 9 pages)  
+**Total DXF size:** 695 KB  
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets

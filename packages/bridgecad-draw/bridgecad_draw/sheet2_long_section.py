@@ -48,6 +48,18 @@ _LEVEL_AXIS_W = 30.0  # width of level axis on left
 _CHAINAGE_H = 20.0  # height of chainage axis at bottom of drawing
 
 
+def _chainage_pitch(total_m: float) -> float:
+    """Uniform chainage interval for the axis ticks — the LISP `xincr`.
+
+    Keeps roughly 6–12 ticks across the bridge so the axis grid stays legible
+    at 1:100 without the labels colliding.
+    """
+    for pitch in (1.0, 2.0, 5.0, 10.0, 15.0, 20.0, 25.0, 50.0, 100.0):
+        if total_m / pitch <= 12:
+            return pitch
+    return 200.0
+
+
 def generate(
     project: Any,
     output_path: str | Path,
@@ -156,8 +168,33 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
 
     th = max(2.5, sc_h * 0.4)  # adaptive text height mm
 
-    # ── Datum / chainage axis ─────────────────────────────────────────────
+    # ── Datum / chainage axis (LISP `layout()`: axis → ticks → axis title) ─
     line(msp, (draw_x0, draw_y0), (hx(total_len), draw_y0), layer="CIVIL-CHAINAGE")
+    # Axis title, drawn once at the right-hand end of the chainage axis.
+    text(
+        msp,
+        "CHAINAGE",
+        hx(total_len) + th * 2.0,
+        draw_y0 - th * 0.4,
+        height=th * 0.9,
+        layer="TEXT-LEVEL",
+    )
+    # xincr pitch — uniform ticks + chainage text at a constant interval.
+    ch_pitch = _chainage_pitch(total_len)
+    ch_mark = 0.0
+    while ch_mark <= total_len + 1e-6:
+        xt = hx(ch_mark)
+        line(msp, (xt, draw_y0), (xt, draw_y0 - th * 1.0), layer="CIVIL-CHAINAGE")
+        text(
+            msp,
+            f"{ch_mark:.0f}",
+            xt,
+            draw_y0 - th * 2.6,
+            height=th * 0.7,
+            layer="TEXT-LEVEL",
+            halign="CENTER",
+        )
+        ch_mark += ch_pitch
     # Chainage markers every span
     cumul = 0.0
     for slen in span_lens:
@@ -200,7 +237,18 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
             )
         rl_val += rl_step
 
-    # ── Ground profile ────────────────────────────────────────────────────
+    # Axis title along the level axis (LISP `layout()` label "BED LEVEL").
+    text(
+        msp,
+        "BED LEVEL",
+        draw_x0 - th * 8.0,
+        vy(rl_top) + th * 1.0,
+        height=th * 0.9,
+        layer="TEXT-LEVEL",
+        rotation=90,
+    )
+
+    # ── Ground profile (LISP `cs()` — polyline through the survey points) ──
     gnd_pts = [(hx(ch), vy(rl)) for ch, rl in ls.ground_profile_pts]
     if len(gnd_pts) >= 2:
         polyline(msp, gnd_pts, layer="CIVIL-GROUND", color=3)
@@ -212,6 +260,22 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
             height=th * 0.85,
             layer="CIVIL-GROUND",
             color=3,
+        )
+    # LISP `cs()` per-point treatment: small tick at the point, drop line from
+    # the point down to the datum axis, and the RL printed at every point.
+    for ch_pt, rl_pt in ls.ground_profile_pts:
+        gx, gy = hx(ch_pt), vy(rl_pt)
+        line(msp, (gx, gy), (gx, draw_y0), layer="CIVIL-GROUND", color=8, linetype="DASHED2")
+        line(msp, (gx - th * 0.5, gy), (gx + th * 0.5, gy), layer="CIVIL-GROUND", color=3)
+        text(
+            msp,
+            f"{rl_pt:.3f}",
+            gx,
+            gy - th * 0.9,
+            height=th * 0.55,
+            layer="TEXT-LEVEL",
+            halign="CENTER",
+            color=8,
         )
 
     # ── HFL line ──────────────────────────────────────────────────────────

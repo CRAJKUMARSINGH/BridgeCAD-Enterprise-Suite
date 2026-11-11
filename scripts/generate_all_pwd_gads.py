@@ -406,26 +406,26 @@ def _build_project(params: dict):
     # Map superstructure type string to enum
     sst_map = {
         "RCC_SOLID_SLAB": "SOLID_SLAB",
-        "RCC_T_BEAM": "RCC_T_BEAM_GIRDER",
-        "PSC_I_GIRDER": "PSC_I_GIRDER",
+        "RCC_T_BEAM": "RCC_TBEAM",
+        "PSC_I_GIRDER": "PSC_IGIRDER",
         "PSC_BOX": "PSC_BOX_GIRDER",
-        "RCC_BOX_CELL": "BOX_CULVERT",
-        "RCC_PORTAL": "RCC_SOLID_SLAB",
-        "RCC_ARCH": "ARCH",
+        "RCC_BOX_CELL": "SOLID_SLAB",
+        "RCC_PORTAL": "SOLID_SLAB",
+        "RCC_ARCH": "SOLID_SLAB",
     }
     sst_name = sst_map.get(params["superstructure_type"], "SOLID_SLAB")
 
     # Map foundation type
-    ftype_map = {"OPEN": "OPEN_FOUNDATION", "PILE": "PILE", "RAFT": "RAFT",
-                 "WELL": "WELL_FOUNDATION"}
+    ftype_map = {"OPEN": "OPEN", "PILE": "PILE", "RAFT": "RAFT",
+                 "WELL": "WELL"}
 
     # Map abutment type
     abt_map = {"OPEN": "CANTILEVER", "INTEGRAL": "CANTILEVER",
                "PORTAL": "CANTILEVER"}
 
     # Map bearing type
-    brg_map = {"ELASTOMERIC": "ELASTOMERIC_PAD", "POT": "POT",
-               "NONE": "ELASTOMERIC_PAD"}
+    brg_map = {"ELASTOMERIC": "ELASTOMERIC_NEOPRENE", "POT": "POT_PTFE",
+               "NONE": "ELASTOMERIC_NEOPRENE"}
 
     pm = ProjectMaster(
         project_title=params["title"],
@@ -491,8 +491,8 @@ def _build_project(params: dict):
     )
 
     fd = FoundationDetails(
-        type=getattr(T.FoundationType, ftype_map.get(params["foundation_type"], "OPEN_FOUNDATION"),
-                     T.FoundationType.OPEN_FOUNDATION),
+        type=getattr(T.FoundationType, ftype_map.get(params["foundation_type"], "OPEN"),
+                     T.FoundationType.OPEN),
         pile_diameter_mm=_int(params.get("pile_diameter_mm", 0)) or None,
         pile_length_m=_dec(params.get("pile_length_m", 0)),
         piles_per_pier=_int(params.get("piles_per_pier", 0)) or None,
@@ -514,21 +514,31 @@ def _build_project(params: dict):
         concrete_substructure=getattr(T.ConcreteGrade, params.get("pier_material", "M25"),
                                        T.ConcreteGrade.M25),
         concrete_foundation=T.ConcreteGrade.M25,
-        steel_main=T.SteelGrade.FE500D,
+        reinforcement_steel_grade=T.SteelGrade.Fe500D,
+        prestressing_steel=T.PrestressGrade.G1860,
+        bearing_type=T.BearingType.ELASTOMERIC_NEOPRENE,
+        expansion_joint_type=T.ExpansionJointType.STRIP_SEAL,
     )
 
     bj = BearingsJoints(
-        bearing_type=getattr(T.BearingType, brg_map.get(params["bearing_type"], "ELASTOMERIC_PAD"),
-                             T.BearingType.ELASTOMERIC_PAD),
+        bearing_type=getattr(T.BearingType, brg_map.get(params["bearing_type"], "ELASTOMERIC_NEOPRENE"),
+                             T.BearingType.ELASTOMERIC_NEOPRENE),
     )
 
     return BridgeProject(
         project_master=pm,
         bridge_selection=BridgeSelection(
-            bridge_category=T.BridgeCategory.MINOR if params["total_length"] < 30
-                           else T.BridgeCategory.MAJOR,
-            bridge_subcategory=T.BridgeSubcategory.RCC if "RCC" in params["superstructure_type"]
-                             else T.BridgeSubcategory.PSC,
+            bridge_category=T.BridgeCategory.MINOR_BRIDGE if params["total_length"] < 30
+                           else T.BridgeCategory.MAJOR_BRIDGE,
+            bridge_type=getattr(T.SuperstructureType, sst_name, T.SuperstructureType.SOLID_SLAB),
+            span_configuration=T.SpanConfiguration.SIMPLY_SUPPORTED,
+            carriageway_config=T.CarriagewayLaneConfig.LANE_2,
+            design_code=T.DesignCode.IRC_6_2017,
+            loading_class=T.LoadClass.CLASS_A,
+            seismic_zone=T.SeismicZone.ZONE_III,
+            wind_zone_ms=T.WindSpeedBasic_ms.VB_39_ms_ZONE_2,
+            foundation_type=getattr(T.FoundationType, ftype_map.get(params["foundation_type"], "OPEN"),
+                                   T.FoundationType.OPEN),
         ),
         geometry_input=gi,
         superstructure=ss,
@@ -539,7 +549,11 @@ def _build_project(params: dict):
         materials=mt,
         bearings_joints=bj,
         components_lib=ComponentsLib(),
-        drawing_control=DrawingControl(),
+        drawing_control=DrawingControl(
+            sheet_size=T.SheetSize.A1,
+            drawing_scale=T.DrawingScale.S100,
+            title_block_style=T.TitleBlockStyle.STANDARD,
+        ),
         calculations=Calculations(),
         validation=ValidationModel(),
     )

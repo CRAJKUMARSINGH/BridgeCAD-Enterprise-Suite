@@ -352,7 +352,7 @@ PWD_TYPES: list[dict] = [
         "span_count": 1,
         "span_lengths": [15.0],
         "total_length": 15.0,
-        "carriageway_width": 3.0,
+        "carriageway_width": 3.5,
         "foundation_type": "OPEN",
         "pier_material": "M25",
         "superstructure_type": "RCC_ARCH",
@@ -444,14 +444,13 @@ def _build_project(params: dict):
     gi = GeometryInput(
         span_count=params["span_count"],
         span_lengths_m=[_dec(s) for s in params["span_lengths"]],
-        total_length_m=_dec(params["total_length"]),
         carriageway_width_m=_dec(params["carriageway_width"]),
-        overall_width_m=_dec(params["carriageway_width"] + 1.0),
         chainage_start_km=Decimal("0.000"),
     )
 
     ss = Superstructure(
         type=getattr(T.SuperstructureType, sst_name, T.SuperstructureType.SOLID_SLAB),
+        deck_material=T.ConcreteGrade.M30,
         deck_thickness_mm=_int(params.get("deck_thickness_mm", 500)),
         wearing_coat_thickness_mm=65,
         girder_depth_mm=_int(params.get("girder_depth_mm", 0)),
@@ -468,10 +467,11 @@ def _build_project(params: dict):
         pier_shaft_width_m=_dec(params.get("pier_shaft_width", 1.5)),
         pier_shaft_length_m=_dec(params.get("carriageway_width", 7.5)),
         pier_cap_depth_m=_dec(params.get("pier_cap_depth", 0.8)),
-        pier_cap_width_m=_dec(params.get("pier_shaft_width", 1.5) * 1.3),
+        pier_cap_width_m=Decimal(str(round(float(params.get("pier_shaft_width", 1.5)) * 1.3, 3))),
         pier_pedestal_height_m=Decimal("0.15"),
         abutment_type=getattr(T.AbutmentType, abt_map.get(params["abutment_type"], "CANTILEVER"),
                              T.AbutmentType.CANTILEVER),
+        abutment_material=T.ConcreteGrade.M25,
         abutment_width_m=Decimal("1.2"),
         abutment_length_m=_dec(params.get("carriageway_width", 7.5)),
         abutment_height_m=_dec(params.get("pier_height", 6.0)),

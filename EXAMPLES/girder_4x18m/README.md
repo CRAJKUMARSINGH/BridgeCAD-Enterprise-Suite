@@ -4,8 +4,8 @@
 **Fixture ID:** `girder_4x18m`  
 **Sheets generated:** 9 DXF  
 **Rendered PNGs:** 9  
-**PDF booklet:** [`girder_4x18m_GAD_Booklet.pdf`](girder_4x18m_GAD_Booklet.pdf) (2287 KB, 9 pages)  
-**Total DXF size:** 698 KB  
+**PDF booklet:** [`girder_4x18m_GAD_Booklet.pdf`](girder_4x18m_GAD_Booklet.pdf) (2441 KB, 9 pages)  
+**Total DXF size:** 861 KB  
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets

@@ -41,6 +41,21 @@ from .titleblocks import draw_border, draw_title_block
 _SHEET_CX = 420.0  # A1 horizontal centre (mm)
 _BASE_Y = 200.0  # road surface Y on sheet (mm)
 
+# Bounded annotation gutters (mm). Previously these were written as multiples of
+# the fit scale (``th * 18`` …), so a narrow section — which is drawn at the
+# largest scale — pushed the dimension staffs and level labels clean off the A1
+# frame. They are now fixed paper millimetres, and the section is fitted into
+# 560 mm (not 650) so ~140 mm of clear gutter remains on both sides for any width.
+_FIT_W = 560.0  # transverse fit budget (mm) inside the sheet
+_OFF_DIM_R = 16.0  # right dimension staff, from half overall width
+_OFF_DIM_RS = 12.0  # separation between successive right vertical staffs
+_OFF_DIM_L = 12.0  # left dimension staff, from half overall width
+_OFF_DIM_LS = 12.0  # separation between successive left vertical staffs
+_OFF_GS = 12.0  # girder-spacing dimension, below girder soffit
+_OFF_CW = 26.0  # carriageway dimension, below girder soffit
+_OFF_OW = 46.0  # overall-width dimension, below girder soffit
+_OFF_SB = 70.0  # scale-bar baseline, below girder soffit
+
 
 def generate(project: Any, output_path: str | Path, scale_denom: int = 50) -> Path:
     """Generate Sheet 3 — Typical Mid-Span Cross Section (production quality)."""
@@ -63,9 +78,9 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     is_psc = "PSC" in sst or "I_GIRDER" in sst
     is_slab = "SLAB" in sst and "VOID" not in sst
 
-    # ── Scale: fit overall width into 650 mm drawing width ───────────────────
+    # ── Scale: fit overall width into the transverse budget ──────────────────
     ow_m = float(cs.overall_width_m)
-    sc = min(650.0 / max(ow_m, 0.1), 35.0)
+    sc = min(_FIT_W / max(ow_m, 0.1), 35.0)
     cx = _SHEET_CX
     base_y = _BASE_Y
 
@@ -84,7 +99,11 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     camber_mm = float(gi.camber_mm or 0.0)
     par_h_m = float(ss.parapet_height_mm or 1000) / 1000.0
 
-    th = max(2.2, sc * 0.25)  # adaptive text height
+    # Adaptive text height, capped so the right-hand annotation block (RL value
+    # plus descriptive label) still fits the ~130 mm gutter that the 560 mm fit
+    # budget leaves. Un-capped, a narrow section draws at sc=35 → th=8.75, and on
+    # a wide box the "GIRDER SOFFIT / RL" label ran ~24 mm past the right border.
+    th = min(6.0, max(2.2, sc * 0.25))
 
     def hx(x_m):
         return cx + x_m * sc  # transverse offset → sheet X
@@ -102,7 +121,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         drawing_title="TYPICAL MID-SPAN CROSS SECTION",
         revision=getattr(getattr(pm, "revision", None), "name", "R0") or "R0",
         sheet_no="3",
-        total_sheets="8",
+        total_sheets="9",
     )
 
     # ── WEARING COAT ─────────────────────────────────────────────────────────
@@ -395,7 +414,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
 
     # ── EZDXF NATIVE LINEAR DIMENSIONS ───────────────────────────────────────
     # Carriageway width
-    dim_cw_y = wc_y - deck_t_m * sc - gd_m * sc - th * 12
+    dim_cw_y = gird_bot - _OFF_CW
     try:
         doc = msp.doc
         # Overall width dimension
@@ -407,28 +426,19 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         dim.dxf.dimtxt = th / 1000.0  # ezdxf: in drawing units (mm)
         dim.dxf.dimasz = th * 1.0
         msp.add_linear_dim(
-            base=(0, dim_cw_y),
+            base=(hx(0), dim_cw_y),
             p1=(hx(-half_cw), wc_y),
             p2=(hx(half_cw), wc_y),
+            text=f"CW={cw:.3f} m",
             dimstyle="BRG_DIM",
             override={
                 "dimtxt": th,
                 "dimasz": th,
                 "dimgap": th * 0.4,
                 "dimclrt": 3,
-                "dimlayer": "DIM-LINEAR",
             },
+            dxfattribs={"layer": "DIM-LINEAR"},
         ).render()
-        text(
-            msp,
-            f"CW={cw:.3f} m",
-            hx(0),
-            dim_cw_y - th * 2,
-            height=th,
-            layer="DIM-LINEAR",
-            halign="CENTER",
-            color=3,
-        )
     except Exception:
         dim_linear_h(
             msp,
@@ -442,7 +452,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         )
 
     # Overall width dimension
-    dim_ow_y = dim_cw_y - th * 8
+    dim_ow_y = gird_bot - _OFF_OW
     dim_linear_h(
         msp,
         hx(-half_ow),
@@ -455,7 +465,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     )
 
     # Depth dimensions (right side)
-    dim_x = hx(half_ow) + th * 18
+    dim_x = hx(half_ow) + _OFF_DIM_R
     if not is_slab and gd_m > 0:
         dim_linear_v(
             msp,
@@ -463,7 +473,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
             gird_bot,
             dim_x,
             slab_bot,
-            dim_x=dim_x + th * 8,
+            dim_x=dim_x + _OFF_DIM_RS,
             label=f"GD={gd_m:.3f}m",
             text_height=th * 0.9,
         )
@@ -473,28 +483,105 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         slab_bot,
         dim_x,
         wc_y,
-        dim_x=dim_x + th * 8 + th * 10,
+        dim_x=dim_x + _OFF_DIM_RS + _OFF_DIM_RS,
         label=f"D={deck_t_m:.3f}m+WC{int(wc_t_m*1000)}mm",
         text_height=th * 0.85,
     )
+
+    # ── Principal section dimensions (IRC SP:55 §4) ───────────────────────
+    # Kerb widths (left / right) — transverse.
+    kerb_dim_y = wc_y + kerb_h + th * 2.5
+    dim_linear_h(
+        msp,
+        hx(-half_cw - kerb_l),
+        kerb_dim_y - th,
+        hx(-half_cw),
+        kerb_dim_y - th,
+        dim_y=kerb_dim_y,
+        label=f"KERB L={kerb_l:.2f} m",
+        text_height=th * 0.8,
+    )
+    dim_linear_h(
+        msp,
+        hx(half_cw),
+        kerb_dim_y - th,
+        hx(half_cw + kerb_r),
+        kerb_dim_y - th,
+        dim_y=kerb_dim_y,
+        label=f"KERB R={kerb_r:.2f} m",
+        text_height=th * 0.8,
+    )
+    # Wearing coat + deck slab thicknesses — vertical staff at left edge.
+    staff_x = hx(-half_ow) - _OFF_DIM_L
+    dim_linear_v(
+        msp,
+        staff_x,
+        wc_y - wc_h,
+        staff_x,
+        wc_y,
+        dim_x=staff_x - _OFF_DIM_LS,
+        label=f"WC {int(wc_t_m * 1000)}mm",
+        text_height=th * 0.8,
+    )
+    dim_linear_v(
+        msp,
+        staff_x,
+        slab_bot,
+        staff_x,
+        wc_y - wc_h,
+        dim_x=staff_x - _OFF_DIM_LS,
+        label=f"DECK {int(deck_t_m * 1000)}mm",
+        text_height=th * 0.8,
+    )
+    # Parapet height — vertical staff at right edge.
+    par_x = hx(half_ow) + _OFF_DIM_R
+    dim_linear_v(
+        msp,
+        par_x,
+        wc_y,
+        par_x,
+        wc_y + par_h,
+        dim_x=par_x + _OFF_DIM_RS,
+        label=f"PAR {int(par_h_m * 1000)}mm",
+        text_height=th * 0.8,
+    )
+    # Girder spacing — transverse between the first two girder centres.
+    if not is_slab and n_g >= 2:
+        g0 = (0 - (n_g - 1) / 2.0) * gs_m
+        g1 = (1 - (n_g - 1) / 2.0) * gs_m
+        dim_linear_h(
+            msp,
+            hx(g0),
+            gird_bot - 4.0,
+            hx(g1),
+            gird_bot - 4.0,
+            dim_y=gird_bot - _OFF_GS,
+            label=f"GS={gs_m:.2f} m",
+            text_height=th * 0.8,
+        )
 
     # ── LEVEL TAGS ───────────────────────────────────────────────────────────
     road_rl = float(getattr(pm, "road_level_rl_m", 0) or 0)
     sof_rl = road_rl - (deck_t_m + wc_t_m) - (0 if is_slab else gd_m)
 
-    tag_x = hx(half_ow) + th * 2
+    tag_x = hx(half_ow) + 3.0
+    # Descriptive labels sit clear of the "RL …" value that level_tag writes to
+    # the right of the tick (tick half-width 3·th, value ~5·th wide), so the two
+    # never overlap; the section is fitted into 560 mm which guarantees the
+    # gutter is wide enough for both.
+    off_desc = 9.0 * th
     level_tag(msp, tag_x, wc_y, road_rl, text_height=th * 0.9)
     level_tag(msp, tag_x, slab_bot, road_rl - deck_t_m - wc_t_m, text_height=th * 0.9)
     if not is_slab and gd_m > 0:
         level_tag(msp, tag_x, gird_bot, sof_rl, text_height=th * 0.9)
 
-    text(msp, "TOP OF WC / RL", tag_x + th * 18, wc_y, height=th * 0.85, layer="TEXT-LEVEL")
-    text(msp, "SOFFIT OF SLAB", tag_x + th * 18, slab_bot, height=th * 0.85, layer="TEXT-LEVEL")
+    text(msp, "TOP OF WC / RL", tag_x + off_desc, wc_y, height=th * 0.85, layer="TEXT-LEVEL")
+    text(msp, "SOFFIT OF SLAB", tag_x + off_desc, slab_bot, height=th * 0.85, layer="TEXT-LEVEL")
     if not is_slab and gd_m > 0:
         text(
             msp,
             "GIRDER SOFFIT / RL",
-            tag_x + th * 18,
+            tag_x + off_desc,
             gird_bot,
             height=th * 0.85,
             layer="TEXT-LEVEL",
@@ -519,15 +606,19 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     )
 
     # ── SCALE BAR ─────────────────────────────────────────────────────────────
+    # seg_len_m is a paper length in mm (see primitives.scale_bar), so scale the
+    # chosen number of metres by the fit scale — otherwise the bar plotted a few
+    # millimetres wide with five unreadable labels.
     sb_x = hx(-half_ow)
-    sb_y = gird_bot - th * 12
+    sb_y = gird_bot - _OFF_SB
+    sb_seg_m = max(1.0, round(24.0 / max(sc, 1e-6)))
     scale_bar(
         msp,
         sb_x,
         sb_y,
         scale_denom,
         segments=4,
-        seg_len_m=max(1.0, round(ow_m / 6)),
+        seg_len_m=sb_seg_m * sc,
         text_height=th * 0.85,
     )
 

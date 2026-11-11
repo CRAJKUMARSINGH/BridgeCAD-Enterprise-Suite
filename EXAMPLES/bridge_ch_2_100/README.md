@@ -4,8 +4,8 @@
 **Fixture ID:** `bridge_ch_2_100`  
 **Sheets generated:** 9 DXF  
 **Rendered PNGs:** 9  
-**PDF booklet:** [`bridge_ch_2_100_GAD_Booklet.pdf`](bridge_ch_2_100_GAD_Booklet.pdf) (2248 KB, 9 pages)  
-**Total DXF size:** 674 KB  
+**PDF booklet:** [`bridge_ch_2_100_GAD_Booklet.pdf`](bridge_ch_2_100_GAD_Booklet.pdf) (2375 KB, 9 pages)  
+**Total DXF size:** 836 KB  
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets

@@ -4,8 +4,8 @@
 **Fixture ID:** `gad_2x15m_rcc_tbeam`  
 **Sheets generated:** 9 DXF  
 **Rendered PNGs:** 9  
-**PDF booklet:** [`gad_2x15m_rcc_tbeam_GAD_Booklet.pdf`](gad_2x15m_rcc_tbeam_GAD_Booklet.pdf) (2243 KB, 9 pages)  
-**Total DXF size:** 670 KB  
+**PDF booklet:** [`gad_2x15m_rcc_tbeam_GAD_Booklet.pdf`](gad_2x15m_rcc_tbeam_GAD_Booklet.pdf) (2373 KB, 9 pages)  
+**Total DXF size:** 832 KB  
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets

@@ -4,8 +4,8 @@
 **Fixture ID:** `continuous_3x12m`  
 **Sheets generated:** 9 DXF  
 **Rendered PNGs:** 9  
-**PDF booklet:** [`continuous_3x12m_GAD_Booklet.pdf`](continuous_3x12m_GAD_Booklet.pdf) (2250 KB, 9 pages)  
-**Total DXF size:** 693 KB  
+**PDF booklet:** [`continuous_3x12m_GAD_Booklet.pdf`](continuous_3x12m_GAD_Booklet.pdf) (2385 KB, 9 pages)  
+**Total DXF size:** 852 KB  
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets

@@ -1173,6 +1173,12 @@ class Substructure(BaseModel):
         le=Decimal("15"),
         dp=3,
     )
+    pier_batter_1n: Decimal | None = DM(
+        "Pier face batter (1:n horizontal:vertical, LISP 'battr'); 0 = plumb (no batter)",
+        ge=0,
+        le=Decimal("30"),
+        dp=2,
+    )
     pier_diameter_m: Decimal | None = DM(
         "For round/octagonal piers: shaft diameter, m",
         ge=Decimal("0.5"),

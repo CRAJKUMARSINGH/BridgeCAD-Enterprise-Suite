@@ -17,11 +17,19 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import Any
 
+from ezdxf.enums import TextEntityAlignment
+
 # ---------------------------------------------------------------------------
 # Type aliases
 # ---------------------------------------------------------------------------
 Pt2 = tuple[float, float]
 Pts = Sequence[Pt2]
+
+#: IRC SP:55 legibility floor for plotted annotation (paper mm). Scale-derived
+#: text heights shrink on long/dense sheets (e.g. a 75 m span at 1:200), so the
+#: funnel points below clamp to this floor — unreadable text is a defect, not a
+#: scale artefact.
+MIN_TEXT_HEIGHT_MM = 1.8
 
 
 # ---------------------------------------------------------------------------
@@ -56,8 +64,19 @@ def line(
     linetype: str | None = None,
     lw: int | None = None,
 ) -> Any:
-    """Draw a single line from *p1* to *p2*."""
+    """Draw a single line from *p1* to *p2*.
+
+    A zero-length line is not drawn: it carries no geometry, plots as nothing,
+    and is rejected by the DXF contract (``assert_no_degenerate_geometry``).
+    Whether it appears depends on the input data (a segment of length 0 arises
+    whenever two computed points coincide), so the guard belongs here rather
+    than in every caller.
+    """
     try:
+        dx = float(p1[0]) - float(p2[0])
+        dy = float(p1[1]) - float(p2[1])
+        if dx * dx + dy * dy < 1e-12:  # < 1e-6 — the contract's degeneracy tol
+            return None
         return msp.add_line(p1, p2, dxfattribs=_attribs(layer, color, linetype=linetype, lw=lw))
     except Exception:
         return None
@@ -140,17 +159,32 @@ def text(
     color: int | None = None,
     halign: str = "LEFT",
 ) -> Any:
-    """Add a simple text entity."""
+    """Add a simple text entity.
+
+    ``halign`` is resolved to an ``ezdxf.enums.TextEntityAlignment`` member and
+    applied with ``set_placement``. The previous version handed ``set_placement``
+    the raw DXF integer, which trips an ``assert isinstance(align,
+    TextEntityAlignment)``: the AssertionError was swallowed by the ``except``
+    below *after* the entity had already been created, so every centre/right
+    aligned label in the whole suite ended up stranded at the sheet origin with
+    its intended position silently discarded.
+    """
     try:
-        align_map = {"LEFT": 0, "CENTER": 4, "RIGHT": 2, "MIDDLE": 5, "TOP_LEFT": 1}
-        ha = align_map.get(halign.upper(), 0)
+        align_map = {
+            "LEFT": TextEntityAlignment.LEFT,
+            "CENTER": TextEntityAlignment.CENTER,
+            "RIGHT": TextEntityAlignment.RIGHT,
+            "MIDDLE": TextEntityAlignment.MIDDLE,
+            "TOP_LEFT": TextEntityAlignment.TOP_LEFT,
+        }
         attribs = _attribs(layer, color)
-        attribs.update({"height": float(height)})
+        attribs.update({"height": max(float(height), MIN_TEXT_HEIGHT_MM)})
         if rotation:
             attribs["rotation"] = float(rotation)
         t = msp.add_text(str(content), dxfattribs=attribs)
-        if ha:
-            t.set_placement((x, y), align=ha)
+        align = align_map.get(halign.upper())
+        if align is not None:
+            t.set_placement((float(x), float(y)), align=align)
         else:
             t.dxf.insert = (float(x), float(y))
         return t
@@ -171,7 +205,7 @@ def mtext(
     """Add an MTEXT (multi-line text) entity."""
     try:
         attribs = _attribs(layer, color)
-        attribs["char_height"] = float(height)
+        attribs["char_height"] = max(float(height), MIN_TEXT_HEIGHT_MM)
         attribs["width"] = float(width)
         attribs["insert"] = (float(x), float(y))
         return msp.add_mtext(str(content), dxfattribs=attribs)
@@ -230,6 +264,48 @@ def hatch_poly(
 # ---------------------------------------------------------------------------
 
 
+def _native_linear_dim(
+    msp,
+    p1: Pt2,
+    p2: Pt2,
+    base: Pt2,
+    angle: float,
+    label: str | None,
+    layer: str,
+    text_height: float,
+) -> bool:
+    """Emit a real DXF ``DIMENSION`` entity. Returns False if ezdxf refuses it.
+
+    A real DIMENSION is associative and lands in the document's DIMENSION table,
+    which is what the drawing contract counts (line + text alone is not a
+    dimension). ``dxfattribs`` stamps the DIMENSION entity itself, so it does not
+    leak onto layer ``0`` — the anonymous geometry block is not the entity.
+    """
+    if abs(float(p1[0]) - float(p2[0])) < 1e-9 and abs(float(p1[1]) - float(p2[1])) < 1e-9:
+        return False
+    from .dxf_engine import DIMSTYLE_NAME
+
+    try:
+        msp.add_linear_dim(
+            base=(float(base[0]), float(base[1])),
+            p1=(float(p1[0]), float(p1[1])),
+            p2=(float(p2[0]), float(p2[1])),
+            angle=angle,
+            dimstyle=DIMSTYLE_NAME,
+            override={
+                "dimtxt": text_height,
+                "dimasz": text_height,
+                "dimgap": text_height * 0.4,
+                "dimclrt": 3,
+            },
+            dxfattribs={"layer": layer},
+            text=label if label else "<>",
+        ).render()
+        return True
+    except Exception:
+        return False
+
+
 def dim_linear_h(
     msp,
     x1: float,
@@ -243,8 +319,12 @@ def dim_linear_h(
 ) -> Any:
     """Horizontal linear dimension between (x1,y1) and (x2,y2).
 
-    *dim_y* is the y-position of the dimension line.
+    *dim_y* is the y-position of the dimension line. A real DXF DIMENSION entity
+    is emitted; the legacy extension/dimension lines and tick label are drawn
+    only if ezdxf refuses the geometry.
     """
+    if _native_linear_dim(msp, (x1, y1), (x2, y2), (x1, dim_y), 0.0, label, layer, text_height):
+        return None
     try:
         # Extension lines
         line(msp, (x1, y1), (x1, dim_y), layer=layer)
@@ -284,8 +364,14 @@ def dim_linear_v(
 ) -> Any:
     """Vertical linear dimension between (x1,y1) and (x2,y2).
 
-    *dim_x* is the x-position of the dimension line.
+    *dim_x* is the x-position of the dimension line. A real DXF DIMENSION entity
+    is emitted; the legacy lines and tick label are drawn only if ezdxf refuses
+    the geometry.
     """
+    if _native_linear_dim(
+        msp, (x1, y1), (x2, y2), (dim_x, y1), 90.0, label, layer, text_height
+    ):
+        return None
     try:
         line(msp, (x1, y1), (dim_x, y1), layer=layer)
         line(msp, (x2, y2), (dim_x, y2), layer=layer)
@@ -340,6 +426,7 @@ def level_tag(
 ) -> None:
     """Draw a reduced-level (RL) tag: horizontal tick + RL value."""
     try:
+        text_height = max(float(text_height), MIN_TEXT_HEIGHT_MM)
         w = text_height * 3
         line(msp, (x - w, y), (x + w, y), layer=layer)
         line(msp, (x, y), (x, y - text_height * 0.5), layer=layer)
@@ -354,6 +441,7 @@ def chainage_tag(
 ) -> None:
     """Draw a chainage marker: vertical tick + CH label."""
     try:
+        text_height = max(float(text_height), MIN_TEXT_HEIGHT_MM)
         tick_h = text_height * 1.5
         line(msp, (x, y), (x, y - tick_h), layer=layer)
         label = f"CH {ch_km:.3f}"

@@ -27,6 +27,17 @@ MIN_TEXT_HEIGHT_MM = 1.8          # IRC SP:55 legibility floor
 TITLE_BLOCK_REQUIRED = (
     "PROJECT", "DRAWING TITLE", "SCALE", "DRAWN", "CHECKED", "REVISION", "SHEET",
 )
+# Schedules are tabulated, not drawn: a bill of quantities and a reinforcement
+# schedule carry no dimensioned views, so the dimension-count gate does not
+# apply to them (the project's own test design exempts these two).
+SCHEDULE_SHEETS = frozenset({"sheet7_bill_of_quantities", "sheet9_reinforcement"})
+
+# A1 landscape (841 x 594 mm) — the plotted sheet. Modelspace is 1:1 paper mm
+# (there is no paper-space viewport), so geometry past the frame is clipped away
+# on plot: an invisible missing segment. See ``assert_inside_frame``.
+SHEET_SIZE_MM = (841.0, 594.0)
+FRAME_TOL_MM = 2.0
+_BORDER_LAYERS = ("BORDER-OUTER", "BORDER-INNER", "BORDER")
 
 
 def load(path: Path | str) -> Drawing:
@@ -120,6 +131,48 @@ def assert_nothing_on_layer_zero(doc: Drawing, sheet: str = "?"):
         )
 
 
+def assert_inside_frame(
+    doc: Drawing,
+    sheet: str = "?",
+    tol: float = FRAME_TOL_MM,
+    size: tuple[float, float] = SHEET_SIZE_MM,
+):
+    """No drawable geometry may fall outside the plotted sheet frame.
+
+    Modelspace is 1:1 paper millimetres on an A1 sheet (there is no paper-space
+    viewport or PageSetup), so anything past the frame is silently clipped on
+    plot — a structurally "missing" segment. Annotation offsets were once written
+    as multiples of the fit-scale (mm per metre); on a short bridge that threw
+    symbols hundreds of mm off the sheet. This check pins that whole class of
+    defect. Border layers are exempt (the frame itself sits on the edge).
+    """
+    w, h = size
+    worst: tuple[float, str, str, str] | None = None
+    n_out = 0
+    for e in entities(doc):
+        if e.dxf.get("layer", "0") in _BORDER_LAYERS:
+            continue
+        try:
+            b = bbox.extents([e], fast=False)
+        except Exception:  # noqa: BLE001 — an unmeasurable entity is not a clip
+            continue
+        if not (b and b.has_data):
+            continue
+        ov = max(-b.extmin.x, -b.extmin.y, b.extmax.x - w, b.extmax.y - h)
+        if ov > tol:
+            n_out += 1
+            cand = (ov, e.dxftype(), e.dxf.get("layer", "0"),
+                    f"({b.extmin.x:.0f},{b.extmin.y:.0f})-({b.extmax.x:.0f},{b.extmax.y:.0f})")
+            if worst is None or cand[0] > worst[0]:
+                worst = cand
+    if worst is not None:
+        ov, t, lay, bb = worst
+        raise DxfContractError(
+            f"[{sheet}] {n_out} entities outside the {w:.0f}x{h:.0f} mm frame "
+            f"(worst +{ov:.0f}mm {t} on {lay} {bb})"
+        )
+
+
 def assert_min_dimensions(doc: Drawing, sheet: str = "?", minimum: int = 8):
     n = sum(1 for e in entities(doc) if e.dxftype() == "DIMENSION")
     if n < minimum:
@@ -189,6 +242,7 @@ def _spec(scaffold: bool):
     report states the real position instead of a wall of red."""
     return [
         ("finite extents",      assert_finite_extents,        {}),
+        ("inside frame",        assert_inside_frame,          {}),
         ("non-empty geometry",  assert_non_empty,             {"minimum": 20 if scaffold else 50}),
         ("no degenerate geo",   assert_no_degenerate_geometry, {}),
         ("layers registered",   assert_layers_known,          {}),
@@ -200,10 +254,19 @@ def _spec(scaffold: bool):
     ]
 
 
-def collect(doc: Drawing, sheet: str, registry: dict, *, scaffold: bool = False) -> list[CheckResult]:
-    """Run every contract check, collecting results instead of raising."""
+def collect(doc: Drawing, sheet: str, registry: dict, *, scaffold: bool = False,
+            schedule: bool | None = None) -> list[CheckResult]:
+    """Run every contract check, collecting results instead of raising.
+
+    *schedule* defaults to membership of ``SCHEDULE_SHEETS``, so a tabulated
+    sheet (BOQ, reinforcement) is not held to the dimension-count gate.
+    """
+    if schedule is None:
+        schedule = sheet in SCHEDULE_SHEETS
     out: list[CheckResult] = []
     for name, fn, kwargs in _spec(scaffold):
+        if name == "dimensioned" and schedule:
+            continue
         if name == "layers registered":
             # `sheet` is already passed by keyword below; adding it here too
             # raises "got multiple values for keyword argument 'sheet'".

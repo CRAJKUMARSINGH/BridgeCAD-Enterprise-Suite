@@ -4,8 +4,8 @@
 **Fixture ID:** `basantar_bridge_well`  
 **Sheets generated:** 9 DXF  
 **Rendered PNGs:** 9  
-**PDF booklet:** [`basantar_bridge_well_GAD_Booklet.pdf`](basantar_bridge_well_GAD_Booklet.pdf) (2183 KB, 9 pages)  
-**Total DXF size:** 662 KB  
+**PDF booklet:** [`basantar_bridge_well_GAD_Booklet.pdf`](basantar_bridge_well_GAD_Booklet.pdf) (2340 KB, 9 pages)  
+**Total DXF size:** 826 KB  
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets

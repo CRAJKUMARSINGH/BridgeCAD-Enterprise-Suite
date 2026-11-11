@@ -4,8 +4,8 @@
 **Fixture ID:** `gad_361_935_3x18m`  
 **Sheets generated:** 9 DXF  
 **Rendered PNGs:** 9  
-**PDF booklet:** [`gad_361_935_3x18m_GAD_Booklet.pdf`](gad_361_935_3x18m_GAD_Booklet.pdf) (2250 KB, 9 pages)  
-**Total DXF size:** 682 KB  
+**PDF booklet:** [`gad_361_935_3x18m_GAD_Booklet.pdf`](gad_361_935_3x18m_GAD_Booklet.pdf) (2398 KB, 9 pages)  
+**Total DXF size:** 845 KB  
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets

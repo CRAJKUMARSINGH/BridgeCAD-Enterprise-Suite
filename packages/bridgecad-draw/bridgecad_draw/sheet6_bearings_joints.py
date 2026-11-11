@@ -39,7 +39,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 20) -> None:
         drawing_title="BEARINGS AND EXPANSION JOINTS SCHEDULE",
         revision=getattr(getattr(pm, "revision", None), "name", "R0") or "R0",
         sheet_no="6",
-        total_sheets="8",
+        total_sheets="9",
     )
 
     th = 2.8
@@ -85,10 +85,12 @@ def _draw(msp: Any, project: Any, scale_denom: int = 20) -> None:
     bx, by = 530.0, 420.0
     sc = 15.0  # mm per 100mm
     bw = 450 * sc / 100
-    450 * sc / 100
     bt = 60 * sc / 100
     # ── Audit-required STRUC-OUTLINE layer bounding box around bearing sketches ──
-    rectangle(msp, bx - 15, by - 15, bw + 30, 250, layer="STRUC-OUTLINE", lw=30)
+    # Encloses both sketches (pad elevation at y≈420, pot plan centred on y≈330).
+    # The old fixed 250 mm height ran the top edge up to y=655 — 61 mm off the
+    # top of the A1 frame — so the height is now sized to the sketches it frames.
+    rectangle(msp, bx - 15.0, 310.0, bw + 30.0, 140.0, layer="STRUC-OUTLINE", lw=30)
     rectangle(msp, bx, by, bw, bt, layer="SUB-BEARING", lw=40)
     hatch_rect(msp, bx, by, bw, bt, pattern="ANSI31", scale=sc * 0.02, layer="STRUC-HATCHING")
     text(
@@ -212,6 +214,73 @@ def _draw(msp: Any, project: Any, scale_denom: int = 20) -> None:
         height=th * 0.85,
         layer="SUB-EXPJOINT",
         halign="CENTER",
+    )
+
+    # ── POT bearing dimensions (plan dia + PTFE insert) ───────────────────
+    pot_cx = px2 + bw / 2
+    dim_linear_h(
+        msp,
+        px2,
+        py2 - th * 3,
+        px2 + bw,
+        py2 - th * 3,
+        dim_y=py2 - th * 3,
+        label=f"Ø{int(bw / sc * 100)} mm",
+        text_height=th * 0.8,
+    )
+    dim_linear_v(
+        msp,
+        px2 + bw + th * 3,
+        py2,
+        px2 + bw + th * 3,
+        py2 + bw,
+        dim_x=px2 + bw + th * 9,
+        label=f"Ø{int(bw / sc * 100)} mm",
+        text_height=th * 0.8,
+    )
+    dim_linear_h(
+        msp,
+        pot_cx - bw / 2 * 0.6,
+        py2 + bw + th * 3,
+        pot_cx + bw / 2 * 0.6,
+        py2 + bw + th * 3,
+        dim_y=py2 + bw + th * 3,
+        label=f"PTFE Ø{int(bw * 0.6 / sc * 100)} mm",
+        text_height=th * 0.8,
+    )
+
+    # ── Expansion joint dimensions (overall width + depth + seal gap) ─────
+    ej_left = jx + bw / 2 - jw * 1.2 - jw / 4
+    ej_right = jx + bw / 2 + jw * 1.2 + jw / 4
+    dim_linear_h(
+        msp,
+        ej_left,
+        jy - th * 3,
+        ej_right,
+        jy - th * 3,
+        dim_y=jy - th * 3,
+        label=f"JOINT {int(jw * 2 / sc * 100)} mm",
+        text_height=th * 0.8,
+    )
+    dim_linear_v(
+        msp,
+        ej_right + th * 3,
+        jy,
+        ej_right + th * 3,
+        jy + jt * 2,
+        dim_x=ej_right + th * 9,
+        label=f"DEPTH {int(jt * 2 / sc * 100)} mm",
+        text_height=th * 0.8,
+    )
+    dim_linear_h(
+        msp,
+        jx + bw / 2 - jw * 1.2 + jw / 4,
+        jy + jt * 3,
+        jx + bw / 2 + jw * 1.2 - jw / 4,
+        jy + jt * 3,
+        dim_y=jy + jt * 3,
+        label=f"GAP {int(jw * 1.9 / sc * 100)} mm",
+        text_height=th * 0.8,
     )
 
     # ── Notes ─────────────────────────────────────────────────────────────

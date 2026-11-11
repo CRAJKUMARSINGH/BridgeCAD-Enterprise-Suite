@@ -47,19 +47,38 @@ _MARGIN = 10.0  # sheet margin mm
 _TB_H = 65.0  # reserve height for title block at bottom (IRC SP:55)
 _REV_W = 50.0  # revision strip width mm
 
-# Auto-fit bottom gutter — Sheet 1 Plan no longer uses a hard 10 mm floor.
-# The lowest plan annotation (scale bar / chainage tags) sits exactly 6 mm
-# above the title-block top edge. Tight 3 mm lower bound here is safe because
-# we also grow the scale-fraction from 0.85 → 0.93 (plan occupies more
-# vertical real estate), then reposition if needed via shift_y later.
-_PLAN_X0 = _MARGIN + 10.0
-_PLAN_Y0 = _MARGIN + _TB_H + 3.0  # was + 10.0 mm  (FR-1 loosen bottom)
-_PLAN_W = _SHEET_W - 2 * _MARGIN - 20.0
-_PLAN_H = _SHEET_H - _MARGIN - _TB_H - 15.0  # was -30 mm → reclaim 15 mm
+# ── Annotation gutters ────────────────────────────────────────────────────
+# Every annotation offset below is an ABSOLUTE millimetre gap from the deck
+# outline. They used to be written as multiples of the fit-scale (mm per
+# metre); at 1:15-ish that threw the north arrow, scale bar, section arrows
+# and the Total-L dimension hundreds of millimetres off the A1 frame, where
+# they were clipped on plot. Fixed gaps cannot do that.
+_ANN_TOP = 46.0  # view label + Total-L dimension + north arrow
+_ANN_BOT = 40.0  # span dimension + chainage tags + scale bar
+_LAB_W = 22.0  # left gutter for support labels
+_RIGHT_W = 22.0  # right gutter for overall-width / kerb staffs
 
-# Auto-fit target: lowest drawing entity Y sits 6 mm above TB top
-_LOWEST_ABOVE_TB_TARGET = _MARGIN + _TB_H + 6.0
-_SCALE_FIT_SHRINK = 0.93  # was 0.85 → more space reclaimed vertically
+_PLAN_X0 = _MARGIN + _LAB_W
+_PLAN_Y0 = _MARGIN + _TB_H + _ANN_BOT
+_PLAN_W = _SHEET_W - 2.0 * _MARGIN - _LAB_W - _RIGHT_W
+_PLAN_H = _SHEET_H - _MARGIN - _ANN_TOP - _PLAN_Y0
+
+_SCALE_FIT_SHRINK = 0.93  # leaves a little air inside the plan box
+
+# Fixed annotation gaps (mm) measured from the deck edges / centreline.
+_OFF_DIM_TOP = 7.0  # "Total L" dimension, above the deck
+_OFF_SUB = 18.0  # "(Not to Scale …)" subtitle (lower line)
+_OFF_LABEL = 27.0  # "PLAN VIEW" title (upper line)
+_OFF_DIM_BOT = 6.0  # span dimensions, below the deck
+_OFF_CHAIN = 15.0  # chainage ticks
+_OFF_SBAR = 31.0  # scale bar baseline
+_OFF_SIDE = 11.0  # side staffs (CW, overall width)
+_OFF_KERB = 20.0  # kerb staffs (further out than CW, no overlap)
+_OFF_ABUT = 11.0  # abutment-width staff
+_OFF_SECTION = 10.0  # section-arrow cut-line overrun
+_NARROW_SIZE = 8.0  # north-arrow symbol size (mm)
+_SECTION_SIZE = 6.0  # section-arrow symbol size (mm)
+_TEXT_MAX = 5.0  # adaptive text cap (mm) — keeps short bridges legible
 
 
 def generate(
@@ -107,16 +126,25 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
     pier_cap_l = float(sub.pier_cap_length_m or overall_w * 1.1)  # m
     abt_w = float(sub.abutment_width_m or 1.2)  # m
     abt_l = float(sub.abutment_length_m or overall_w * 1.1)  # m
+    kerb_l = float(gi.kerb_width_left_m or 0.25)  # m
+    kerb_r = float(gi.kerb_width_right_m or 0.25)  # m
     skew_deg = float(gi.skew_angle_deg or 0.0)
 
     # ── Scale: model-space mm per metre ──────────────────────────────────
-    # Fit the bridge (total_len × overall_w) into the plan area.
-    scale_h = _PLAN_W / max(total_len, 0.1)  # mm per metre (horizontal)
+    # Fit the bridge (total_len × overall_w) into the plan area. The horizontal
+    # budget must span the END FOOTPRINTS too: the A1 abutment is dimensioned
+    # from `hpos(0) - abt_w·scale` to `hpos(0)`, so fitting only [0, total_len]
+    # let the A1 width dimension plot off the left edge on a short, wide-footprint
+    # bridge (a 24 m arch ran 16 mm past x = 0).
+    x_lo = -abt_w
+    x_hi = total_len + abt_w
+    x_span = max(x_hi - x_lo, 0.1)
+    scale_h = _PLAN_W / x_span  # mm per metre (horizontal)
     scale_v = _PLAN_H / max(overall_w, 0.1)  # mm per metre (vertical)
     scale = min(scale_h, scale_v) * _SCALE_FIT_SHRINK  # was *0.85 → *0.93 (FR-1)
 
     # Coordinate mapper: x=chainage, y=transverse (offset from CL)
-    cx_offset = _PLAN_X0 + (_PLAN_W - total_len * scale) / 2.0
+    cx_offset = _PLAN_X0 + (_PLAN_W - x_span * scale) / 2.0 - x_lo * scale
     cy_offset = _PLAN_Y0 + (_PLAN_H - overall_w * scale) / 2.0
 
     def hpos(ch: float) -> float:  # chainage → mm X on sheet
@@ -145,22 +173,28 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
         consultant=getattr(getattr(pm, "consultant", None), "name", "") or "",
         scale_str=f"1:{scale_denom}",
         sheet_no="1",
-        total_sheets="8",
+        total_sheets="9",
     )
 
-    text_h = max(2.0, scale * 0.5)  # adaptive text height mm
+    text_h = min(_TEXT_MAX, max(2.0, scale * 0.5))  # adaptive text height mm (capped)
 
     # ── Centreline ───────────────────────────────────────────────────────
     cl_y = vpos(0.0)
     line(msp, (hpos(0), cl_y), (hpos(total_len), cl_y), layer="STRUC-CENTRE")
 
     # ── Deck outline ──────────────────────────────────────────────────────
+    # The plan is drawn SHEARED: chainage runs along x and any point at
+    # transverse offset `off` is shifted by `-off * scale * sin(theta)`.
+    # `sin_t` / `cos_t` are shared by the skew tick and the bearing symbols so
+    # everything uses this one mapping.
     skew_rad = math.radians(skew_deg)
+    cos_t = math.cos(skew_rad)
+    sin_t = math.sin(skew_rad)
     deck_pts = [
-        (hpos(0) + half_w * scale * math.sin(skew_rad), vpos(-half_w) - 0 * math.cos(skew_rad)),
-        (hpos(0) - half_w * scale * math.sin(skew_rad), vpos(half_w) + 0 * math.cos(skew_rad)),
-        (hpos(total_len) - half_w * scale * math.sin(skew_rad), vpos(half_w)),
-        (hpos(total_len) + half_w * scale * math.sin(skew_rad), vpos(-half_w)),
+        (hpos(0) + half_w * scale * sin_t, vpos(-half_w)),
+        (hpos(0) - half_w * scale * sin_t, vpos(half_w)),
+        (hpos(total_len) - half_w * scale * sin_t, vpos(half_w)),
+        (hpos(total_len) + half_w * scale * sin_t, vpos(-half_w)),
     ]
     # Fall back to simple rect when skew ≈ 0
     if abs(skew_deg) < 0.5:
@@ -241,17 +275,19 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
         skew_dir = getattr(gi, "skew_direction", None)
         dir_name = getattr(skew_dir, "name", str(skew_dir or ""))
         skew_note = f"SKEW = {skew_deg:.1f}° {dir_name}".strip()
-        # Support line angle tick at A1 chainage
+        # Support line angle tick at A1 chainage.  `support_line` returns its
+        # points in the ROTATED model frame, so mapping them straight through
+        # the sheared hpos/vpos inverted the tick slope (it ran diagonally
+        # across the deck).  Rebuild the A1 support line in the local
+        # (chainage, offset) frame and map it with the same shear as the deck.
         from bridgecad_core.skew import support_line
 
         sl = support_line(project, 0.0)
-        lx1, ly1 = float(sl.p_left[0]), float(sl.p_left[1])
-        lx2, ly2 = float(sl.p_right[0]), float(sl.p_right[1])
-        # map model plan coords (chainage, offset) through hpos/vpos
+        _c0 = float(sl.chainage_m)
         line(
             msp,
-            (hpos(lx1), vpos(ly1)),
-            (hpos(lx2), vpos(ly2)),
+            (hpos(_c0) - half_w * scale * sin_t, vpos(half_w)),
+            (hpos(_c0) + half_w * scale * sin_t, vpos(-half_w)),
             layer="MISC-SETOUT",
             color=1,
         )
@@ -266,16 +302,24 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
         )
 
     # ── Bearing symbols (cross marks) ─────────────────────────────────────
+    # `compute_plan_geometry` rotates the whole bridge clockwise about the A1
+    # centre, so an A2 bearing arrives as (x', y') with y' ≈ -total_len·sinθ
+    # (-8.6 m on a 30° skew).  The plan here is drawn SHEARED, so the rotated
+    # point must be un-rotated back to the local (chainage, offset) frame and
+    # then sheared like the deck outline — otherwise the A2 bearings land well
+    # clear of the deck and run off the sheet.
     for bx, by in geom.bearing_positions:
-        sx = hpos(bx)
-        sy = vpos(by)
+        lx = bx * cos_t - by * sin_t  # chainage (local)
+        ly = bx * sin_t + by * cos_t  # transverse offset (local)
+        sx = hpos(lx) - ly * scale * sin_t
+        sy = vpos(ly)
         r = scale * 0.3
         line(msp, (sx - r, sy), (sx + r, sy), layer="SUB-BEARING")
         line(msp, (sx, sy - r), (sx, sy + r), layer="SUB-BEARING")
         circle(msp, sx, sy, r, layer="SUB-BEARING")
 
     # ── Span dimensions ───────────────────────────────────────────────────
-    dim_y = vpos(-half_w) - scale * 2.0
+    dim_y = vpos(-half_w) - _OFF_DIM_BOT
     cumul = 0.0
     for slen in span_lens:
         x1 = hpos(cumul)
@@ -293,7 +337,7 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
         cumul += slen
 
     # Overall width dimension (right side)
-    dim_x = hpos(total_len) + scale * 2.5
+    dim_x = hpos(total_len) + _OFF_SIDE
     dim_linear_v(
         msp,
         hpos(total_len),
@@ -312,10 +356,47 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
         vpos(half_w),
         hpos(total_len),
         vpos(half_w),
-        dim_y=vpos(half_w) + scale * 3.0,
+        dim_y=vpos(half_w) + _OFF_DIM_TOP,
         label=f"Total L = {total_len:.3f} m",
         text_height=text_h,
     )
+
+    # ── Principal plan dimensions (IRC SP:55 §4) ──────────────────────────
+    # Carriageway width — transverse, measured across the deck at mid-span.
+    dim_linear_v(
+        msp,
+        hpos(total_len * 0.5),
+        vpos(-half_cw),
+        hpos(total_len * 0.5),
+        vpos(half_cw),
+        dim_x=hpos(total_len * 0.5) - _OFF_SIDE,
+        label=f"CW={cw:.3f} m",
+        text_height=text_h * 0.9,
+    )
+    # Abutment widths — longitudinal extent of each end footprint.
+    for ch, tag in ((0.0, "A1"), (total_len, "A2")):
+        dim_linear_h(
+            msp,
+            hpos(ch) - abt_w * scale,
+            vpos(0.0),
+            hpos(ch),
+            vpos(0.0),
+            dim_y=vpos(0.0) - _OFF_ABUT,
+            label=f"{tag} W={abt_w:.3f} m",
+            text_height=text_h * 0.8,
+        )
+    # Kerb widths (left / right) — transverse staff at mid-span.
+    for side, kw, tag in ((-1, kerb_l, "L"), (+1, kerb_r, "R")):
+        dim_linear_v(
+            msp,
+            hpos(total_len * 0.5),
+            vpos(side * half_cw),
+            hpos(total_len * 0.5),
+            vpos(side * (half_cw + kw)),
+            dim_x=hpos(total_len * 0.5) + side * _OFF_KERB,
+            label=f"KERB{tag}={kw:.2f} m",
+            text_height=text_h * 0.75,
+        )
 
     # ── Chainage markers ──────────────────────────────────────────────────
     ch_start = float(gi.chainage_start_km or 0) * 1000.0  # → m absolute
@@ -324,7 +405,7 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
         chainage_tag(
             msp,
             hpos(cumul),
-            vpos(-half_w) - scale * 1.0,
+            vpos(-half_w) - _OFF_CHAIN,
             (ch_start + cumul) / 1000.0,
             text_height=text_h * 0.85,
         )
@@ -332,26 +413,29 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
     chainage_tag(
         msp,
         hpos(total_len),
-        vpos(-half_w) - scale * 1.0,
+        vpos(-half_w) - _OFF_CHAIN,
         (ch_start + total_len) / 1000.0,
         text_height=text_h * 0.85,
     )
 
     # ── North arrow ───────────────────────────────────────────────────────
-    na_x = _PLAN_X0 + 20.0
-    na_y = vpos(half_w) + scale * 5.0
-    north_arrow(msp, na_x, na_y, size=scale * 1.5)
+    # Anchored in the top-left gutter at a fixed symbol size: it used to be
+    # ``vpos(half_w) + scale*5.0`` with ``size=scale*1.5``, which for a short
+    # bridge (large fit-scale) pushed it hundreds of mm above the A1 frame.
+    na_x = _PLAN_X0 + 12.0
+    na_y = vpos(half_w) + _OFF_LABEL
+    north_arrow(msp, na_x, na_y, size=_NARROW_SIZE)
 
     # ── Scale bar ─────────────────────────────────────────────────────────
-    sb_x = hpos(total_len * 0.6)
-    sb_y = vpos(-half_w) - scale * 8.0
+    sb_x = hpos(total_len * 0.5) - 40.0
+    sb_y = vpos(-half_w) - _OFF_SBAR
     scale_bar(
         msp,
         sb_x,
         sb_y,
         scale_denom,
         segments=4,
-        seg_len_m=max(1.0, round(total_len / 5)),
+        seg_len_m=min(25.0, max(1.0, round(total_len / 5))),
         text_height=text_h * 0.85,
     )
 
@@ -360,7 +444,7 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
         msp,
         "PLAN VIEW",
         hpos(total_len / 2),
-        vpos(half_w) + scale * 2.5,
+        vpos(half_w) + _OFF_LABEL,
         height=text_h * 1.4,
         layer="TEXT-HEADER",
         halign="CENTER",
@@ -369,7 +453,7 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
         msp,
         f"(Not to Scale — indicative 1:{scale_denom})",
         hpos(total_len / 2),
-        vpos(half_w) + scale * 1.2,
+        vpos(half_w) + _OFF_SUB,
         height=text_h * 0.9 * 0.9,
         layer="TEXT-SPEC",
         halign="CENTER",
@@ -379,10 +463,12 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
     # ── Section-cut markers for Sheet 8 views (FR-5) ─────────────────────
     # A-A cut line: just upstream of A1 abutment (Sheet 8 View 1 = abutment A2
     # end-face; we keep A-A on A1-side for conventional section labelling).
-    aa_x = hpos(0.0) - scale * 0.8
-    aa_y1 = vpos(-half_w) - scale * 2.2
-    aa_y2 = vpos(+half_w) + scale * 1.5
-    section_arrow(msp, aa_x, aa_y2, aa_y1, label="A-A", size=scale * 1.2, text_height=text_h * 0.95)
+    aa_x = hpos(0.0)
+    aa_y1 = vpos(-half_w) - _OFF_SECTION
+    aa_y2 = vpos(+half_w) + _OFF_SECTION
+    section_arrow(
+        msp, aa_x, aa_y2, aa_y1, label="A-A", size=_SECTION_SIZE, text_height=text_h * 0.95
+    )
 
     # B-B cut line: at first internal pier chainage (or 1 m past A1 if no pier,
     # i.e. span_count == 1) — matches Sheet 8 View 2 pier transverse / fallback.
@@ -390,9 +476,11 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
     if isinstance(bb_ch, tuple):
         bb_ch = float(bb_ch[0])
     bb_x = hpos(bb_ch)
-    bb_y1 = vpos(-half_w) - scale * 2.5
-    bb_y2 = vpos(+half_w) + scale * 3.0
-    section_arrow(msp, bb_x, bb_y2, bb_y1, label="B-B", size=scale * 1.2, text_height=text_h * 0.95)
+    bb_y1 = vpos(-half_w) - _OFF_SECTION
+    bb_y2 = vpos(+half_w) + _OFF_SECTION
+    section_arrow(
+        msp, bb_x, bb_y2, bb_y1, label="B-B", size=_SECTION_SIZE, text_height=text_h * 0.95
+    )
 
 
 __all__ = ["generate"]

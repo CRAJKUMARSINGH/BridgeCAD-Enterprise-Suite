@@ -4,8 +4,8 @@
 **Fixture ID:** `launching_apron_10m`  
 **Sheets generated:** 9 DXF  
 **Rendered PNGs:** 9  
-**PDF booklet:** [`launching_apron_10m_GAD_Booklet.pdf`](launching_apron_10m_GAD_Booklet.pdf) (2299 KB, 9 pages)  
-**Total DXF size:** 670 KB  
+**PDF booklet:** [`launching_apron_10m_GAD_Booklet.pdf`](launching_apron_10m_GAD_Booklet.pdf) (2409 KB, 9 pages)  
+**Total DXF size:** 843 KB  
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets

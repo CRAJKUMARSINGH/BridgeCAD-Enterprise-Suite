@@ -68,7 +68,7 @@ def _draw(msp: Any, project: Any) -> None:
         drawing_title="ABSTRACT BILL OF QUANTITIES",
         revision=getattr(getattr(pm, "revision", None), "name", "R0") or "R0",
         sheet_no="7",
-        total_sheets="8",
+        total_sheets="9",
     )
 
     th = 2.8

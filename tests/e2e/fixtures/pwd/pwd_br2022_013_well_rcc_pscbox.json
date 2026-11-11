@@ -1,0 +1,277 @@
+{
+  "_meta": {
+    "fixture_id": "pwd_br2022_013_well_rcc_pscbox",
+    "description": "WELL FOUNDATION WITH R.C.C. PIER & P.S.C. BOX SUPER STRUCTURE",
+    "booklet_ref": {
+      "sr_no": "14",
+      "drawing_no": "BR-I / 2022 - 013 A & B",
+      "source_pdf": "ATTACHED ASSETS/GENERAL ARRANGEMENT DRAWINGS.pdf"
+    },
+    "design_standard": "IRC:5 / IRC:6 / IRC:21 / IRC:78 / IRC:SP:55 (Maharashtra PWD)",
+    "expected_qa_grade": "A",
+    "notes": "Booklet pp.21-22. 'TOTAL LENGTH OF BRIDGE 95.00M (2 SPANS OF 47.50M c/c)'; WELLCAP TOP R.L. 474.000; 'ø2300' printed."
+  },
+  "expected": {
+    "total_length_m": 95.0,
+    "span_count": 2,
+    "dxf_sheets": 9
+  },
+  "project": {
+    "project_master": {
+      "project_title": "WELL FOUNDATION WITH R.C.C. PIER & P.S.C. BOX SUPER STRUCTURE — BR-I / 2022 - 013 A & B",
+      "project_code": "PWD-2022-013",
+      "bridge_name": "PWD_BR2022_013_WELL_RCC_PSCBOX",
+      "chainage_km": null,
+      "client": "STATE_PWD",
+      "revision": "R0",
+      "state_code": "MH",
+      "language": "EN",
+      "road_level_rl_m": null,
+      "ground_level_rl_m": null,
+      "project_phase": "DPR",
+      "currency": "INR"
+    },
+    "bridge_selection": {
+      "bridge_category": "MAJOR_BRIDGE",
+      "bridge_type": "PSC_BOX_GIRDER",
+      "span_configuration": "SIMPLY_SUPPORTED",
+      "span_count": 2,
+      "carriageway_config": "LANE_2",
+      "design_code": "IRC_112_2020",
+      "loading_class": "CLASS_A",
+      "seismic_zone": "ZONE_III",
+      "wind_zone_ms": "VB_44_ms_ZONE_3",
+      "foundation_type": "WELL"
+    },
+    "geometry_input": {
+      "span_count": 2,
+      "span_lengths_m": [
+        47.5,
+        47.5
+      ],
+      "alignment_type": "STRAIGHT",
+      "gradient_pct": 0.5,
+      "carriageway_width_m": 7.5,
+      "footpath_left_m": 0.0,
+      "footpath_right_m": 0.0,
+      "crash_barrier_width_left_m": 0.45,
+      "crash_barrier_width_right_m": 0.45,
+      "kerb_width_left_m": 0.25,
+      "kerb_width_right_m": 0.25,
+      "median_width_m": 0.0,
+      "skew_angle_deg": 0.0,
+      "skew_direction": "NONE",
+      "curved_bridge_flag": false,
+      "camber_mm": 20,
+      "camber_method": "PARABOLIC_CROWN",
+      "chainage_unit": "METER",
+      "chainage_start_km": null,
+      "chainage_end_km": null
+    },
+    "superstructure": {
+      "type": "PSC_BOX_GIRDER",
+      "deck_material": "M40",
+      "deck_thickness_mm": 200,
+      "wearing_coat_type": "BITUMINOUS_CONCRETE_BC",
+      "wearing_coat_grade": "BC_GRADE_1_MARSHALL_30_6",
+      "wearing_coat_thickness_mm": 65,
+      "girder_type": "BOX_GIRDER_PSC_SINGLE_CELL",
+      "girder_depth_mm": 1800,
+      "girder_spacing_m": 2.0,
+      "girders_per_deck_count": 1,
+      "parapet_type": "RCC_PARAPET_FULL_HEIGHT",
+      "parapet_height_mm": 900,
+      "camber_mm": 20,
+      "camber_method": "PARABOLIC_CROWN"
+    },
+    "substructure": {
+      "pier_type": "RECTANGULAR",
+      "pier_material": "M30",
+      "pier_height_typical_m": 6.0,
+      "pier_cap_type": "NON_DROP_FLAT",
+      "pier_cap_width_m": 1.8,
+      "pier_cap_length_m": 9.0,
+      "pier_cap_depth_m": 0.65,
+      "pier_shaft_width_m": 1.2,
+      "pier_shaft_length_m": 9.0,
+      "pier_pedestal_height_m": 0.15,
+      "pier_diaphragm_required": false,
+      "abutment_type": "FULL_HEIGHT_WALL",
+      "abutment_material": "M25",
+      "abutment_width_m": 1.0,
+      "abutment_length_m": 9.2,
+      "abutment_height_m": 3.0,
+      "abutment_pedestal_height_m": 0.15,
+      "return_wall_type": "CANTILEVER_RCC",
+      "return_wall_length_m": 3.5,
+      "return_wall_height_m": 2.5,
+      "wing_wall_type": "SPLAYED_45_DEG",
+      "wing_wall_angle_deg": 45.0,
+      "wing_wall_splay_length_m": 2.5,
+      "wing_wall_height_m": 2.0,
+      "backfill_type": "SELECT MOORUM",
+      "approach_slab_length_m": 3.5,
+      "approach_slab_thickness_mm": 200,
+      "bearings_per_pier": 4,
+      "bearings_per_abutment": 4
+    },
+    "foundation_details": {
+      "type": "WELL"
+    },
+    "approaches": {
+      "left_approach_length_m": 30.0,
+      "right_approach_length_m": 30.0,
+      "type_of_embankment": "SELECT MOORUM",
+      "soil_embankment_unit_weight_kN_m3": 18.5,
+      "approach_slope_width_m": 1.5,
+      "shoulder_width_left_m": 1.0,
+      "shoulder_width_right_m": 1.0,
+      "guide_rail_required": false,
+      "speed_limit_on_approach_kmph": 50,
+      "transition_curve_length_m": 0.0,
+      "approach_gradient_pct": 0.5
+    },
+    "hydraulic_data": {
+      "design_discharge_cumecs": 85.0,
+      "hfl_m": null,
+      "lwl_m": null,
+      "normal_wl_m": null,
+      "scour_level_m": null,
+      "design_scour_depth_m": 1.6,
+      "freeboard_m": 1.8,
+      "actual_soffit_level_m": null,
+      "waterway_required_m2": 28.5,
+      "waterway_provided_m2": 35.0,
+      "lacey_silt_factor": 0.85,
+      "regime_perimeter_m": 16.5,
+      "regime_depth_m": 1.5,
+      "regime_velocity_mps": 1.2,
+      "afflux_m": 0.12,
+      "max_afflux_allowable_m": 0.3,
+      "water_source_type": "RIVER_PERENNIAL",
+      "river_bed_slope_m_per_km": 0.5,
+      "catchment_area_sqkm": 580.0,
+      "return_period_yr": "Q50_MAJOR_BRIDGE_STANDARD",
+      "any_regime_equation_not_applied_flag": false,
+      "highest_recorded_flood_year": 2013
+    },
+    "materials": {
+      "concrete_superstructure": "M40",
+      "concrete_substructure": "M30",
+      "concrete_foundation": "M25",
+      "reinforcement_steel_grade": "Fe500D",
+      "prestressing_steel": "G1860",
+      "bearing_type": "ELASTOMERIC_NEOPRENE",
+      "expansion_joint_type": "COMPRESSION_SEAL",
+      "wearing_coat_material_type": "BITUMINOUS_CONCRETE_BC",
+      "wearing_coat_grade": "BC_GRADE_1_MARSHALL_30_6"
+    },
+    "bearings_joints": {
+      "bearing_schedule": [
+        {
+          "location": "A1-Bearing",
+          "bearing_type": "ELASTOMERIC_NEOPRENE",
+          "size_x_mm": 350,
+          "size_y_mm": 350,
+          "design_load_kn": 350.0,
+          "fixed_or_guide_or_free": "FREE",
+          "quantity": 4
+        },
+        {
+          "location": "A2-Bearing",
+          "bearing_type": "ELASTOMERIC_NEOPRENE",
+          "size_x_mm": 350,
+          "size_y_mm": 350,
+          "design_load_kn": 350.0,
+          "fixed_or_guide_or_free": "FREE",
+          "quantity": 4
+        }
+      ],
+      "expansion_joint_schedule": [
+        {
+          "location": "A1-End",
+          "joint_type": "COMPRESSION_SEAL",
+          "width_mm": 40,
+          "movement_range_mm": 20,
+          "gap_mm": 12,
+          "transverse_length_m": 8.9,
+          "quantity": 1
+        },
+        {
+          "location": "A2-End",
+          "joint_type": "COMPRESSION_SEAL",
+          "width_mm": 40,
+          "movement_range_mm": 20,
+          "gap_mm": 12,
+          "transverse_length_m": 8.9,
+          "quantity": 1
+        }
+      ]
+    },
+    "components_lib": {
+      "standard_pier_tag": "PIER-RECTANGULAR-H6m",
+      "standard_abutment_tag": "ABUT-FULL_HEIGHT_WALL-H3.0m",
+      "standard_foundation_tag": "WELL-mm",
+      "typical_girder_library_key": "BOX_GIRDER_PSC_SINGLE_CELL",
+      "standard_parapet_id": "PARAPET-RCC-H900"
+    },
+    "drawing_control": {
+      "output_formats": [
+        "DXF",
+        "PDF"
+      ],
+      "autocad_version": "R2018",
+      "sheet_size": "A1",
+      "drawing_scale": 100,
+      "gen_plan_sheet": true,
+      "gen_long_section_sheet": true,
+      "gen_cross_section_sheet": true,
+      "gen_foundation_sheet": true,
+      "gen_reinforcement_sheet": true,
+      "gen_pier_details_sheet": true,
+      "gen_abutment_details_sheet": true,
+      "gen_bearings_joints_sheet": true,
+      "gen_boq_sheet": true,
+      "gen_cover_sheet": true,
+      "gen_legends_sheet": true,
+      "gen_hydraulics_sheet": true,
+      "layer_standard": "IRC",
+      "title_block_style": "STANDARD",
+      "dimension_precision_mm": 1,
+      "text_height_scale_factor": 1.0,
+      "lineweight_scale_factor": 1.0,
+      "drawing_border_inside_mm": 10,
+      "revision_block_count": 4,
+      "legend_sheet_required": true
+    },
+    "calculations": {
+      "total_length_m": 95.0,
+      "span_count": 2,
+      "span_depth_ratio": 13.3,
+      "deck_area_sqm": 845.5,
+      "overall_width_check_ok": true,
+      "concrete_volume_superstructure_cum": 32.5,
+      "concrete_volume_substructure_cum": 58.0,
+      "concrete_volume_foundation_cum": 78.0,
+      "rebar_weight_tonnes_approx": 18.5,
+      "prestress_tonnes_approx": 12.0,
+      "bearing_count": 8,
+      "expansion_joint_count": 2,
+      "total_estimated_quantity_cost_inr": 9500000,
+      "design_scour_vs_foundation_cover_ok": true,
+      "waterway_check_pass": true,
+      "afflux_ok": true,
+      "freeboard_actual_m": 1.8,
+      "minimum_vertical_clearance_m": 4.5,
+      "horizontal_clearance_m": 1.0
+    },
+    "validation": {
+      "overall_status": "OK_PASS",
+      "critical_fail_count": 0,
+      "warning_count": 0,
+      "info_count": 3,
+      "score_0_to_100": 96.0,
+      "check_version_tag": "1.0.0-rc1"
+    }
+  }
+}

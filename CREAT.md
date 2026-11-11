@@ -1228,3 +1228,56 @@ output only.
 ---
 
 | 2026-11-10 13:39 | User prompt received |
+
+---
+
+## Session: 2026-11-10 · "Vary data within one set" — full-frame hardening
+
+**Request:** Confirm the engine is fully parametric; take ONE parameter set,
+systematically vary its data, generate the complete GAD for every variation, and
+prove every segment is drawn clearly and completely (nothing clipped outside the
+frame). Two AskUserQuestion decisions scoped the work: *"Fix real defects, exempt
+schedules"* and *"Fix all 6 sheets, regenerate examples"*.
+
+### What was done
+
+**1 · Central legibility floor — `primitives.py`**
+Scale-derived text heights shrink on long/dense sheets (a 75 m span at 1:200),
+dropping annotation below the IRC SP:55 1.8 mm plotted floor. Added
+`MIN_TEXT_HEIGHT_MM = 1.8` and clamped it in `text()`, `mtext()`, `level_tag()`
+and `chainage_tag()`, so no scale can starve a label.
+
+**2 · Frame-containment fixes (scale-proportional → bounded mm)**
+| Sheet | Defect | Fix |
+|---|---|---|
+| S1 plan | A1 abutment width dim plotted left of chainage 0 | fit budget widened to `[-abt_w, total_len+abt_w]` |
+| S2 long-sec | top level graduation above the frame (low-HFL culvert) | `rl_top = min(top_rl+2.5, datum_rl+rl_range)` |
+| S2 long-sec | view-label stack over the top border | `_lbl_shift` pushes the stack inside `_SHEET_H - _MARGIN` |
+| S3 cross-sec | `th` uncapped → "GIRDER SOFFIT" ran 24 mm past the right border | `th = min(6.0, max(2.2, sc*0.25))` |
+| S7 / S8 | `total_sheets="8"` while the manifest is 9 sheets | set to `"9"` |
+
+**3 · Sheet 4 dimension count (last outstanding defect)**
+`sheet4_foundation.py` fell to 6 DIMENSION entities on any fixture without a pile
+group *and* without a well (a box culvert, an arch). Two always-drawn staffs were
+added to each abutment inset (SH = shaft width; WE = weep-hole spacing at the
+IRC:78 3.0 m limit) plus OD/ID steining dimensions in the well-plan branch — so
+the sheet now always carries ≥8 real DIMENSION entities.
+
+### Verification (all green)
+
+- `output\_segment_audit.py` — 13 within-one-set variants × 9 sheets:
+  **TOTAL FAILURES: 0** (117/117 cells).
+- `output\_examples_verify.py` — **252 cells** (28 real EXAMPLES × 9 sheets) through
+  the full contract (finite / in-frame / non-degenerate / layers / nothing-on-0 /
+  title-block / SHEET n OF m / dimensioned / legible):
+  **total failures: 0**, per-sheet S1–S9 all 0.
+- `pytest tests/draw` — **294 passed, 2 skipped, 5 xfailed**.
+- `scripts\generate_examples.py` — **28/28** regenerated (9 DXF + 9 PNG +
+  9-page PDF booklet each); every artefact now carries all the fixes above.
+
+**Files touched (uncommitted):** `primitives.py`, `sheet1_plan.py`,
+`sheet2_long_section.py`, `sheet3_cross_section.py`, `sheet4_foundation.py`,
+`sheet7_bill_of_quantities.py`, `sheet8_side_elevations.py`, `EXAMPLES/**`
+(refreshed DXF+PNG+PDF), `CREAT.md`.
+| 2026-11-11 08:57 | User prompt received |
+| 2026-11-11 08:58 | User prompt received |

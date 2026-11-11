@@ -76,12 +76,18 @@ def draw_title_block(
     """Draw the IRC SP:55-2019 standard title block in the bottom-right corner.
 
     Layout (5 rows, bottom to top):
-      Row 0 (10mm): Drawing no | Rev | Date | Sheet X/Y
-      Row 1 (10mm): Designed | Checked | Approved
-      Row 2 (10mm): Scale | Client
-      Row 3 (12mm): Consultant
-      Row 4 (13mm): Drawing title (bold)
-    Plus project title + bridge name text ABOVE the block.
+      Row 0 (10mm): DRG | REVISION | DATE | SHEET n OF m
+      Row 1 (10mm): DRAWN | CHECKED | APPROVED
+      Row 2 (10mm): SCALE | CLIENT
+      Row 3 (12mm): CONSULTANT
+      Row 4 (13mm): DRAWING TITLE (bold)
+    Plus PROJECT + BRIDGE name text ABOVE the block.
+
+    Every field is emitted with its LABEL, so the block is self-describing and
+    the DXF-contract check (``assert_title_block_filled`` /
+    ``assert_sheet_annotation``) can find ``PROJECT``, ``DRAWING TITLE``,
+    ``SCALE``, ``DRAWN``, ``CHECKED``, ``REVISION`` and ``SHEET n OF m`` as text
+    rather than having to infer them from bare values.
     """
     sw, sh = _SHEET_SIZES.get(sheet_size.upper(), _SHEET_SIZES["A1"])
     m = _MARGIN
@@ -115,36 +121,50 @@ def draw_title_block(
             lyr = "TEXT-TITLE" if bold else "TITLEBLK-TEXT"
             text(msp, display, x0 + 1.5, y0 + h / 2 - th / 2, height=th, layer=lyr)
 
-    # ── Row 0: drg number / rev / date / sheet ──────────────────────────────
+    # ── Row 0: drg number / revision / date / sheet ─────────────────────────
     r0y, r0h = ys[0], row_h[0]
     _cell(tb_x0, r0y, 65, r0h, f"DRG: {drawing_no}", th=2.8)
-    _cell(tb_x0 + 65, r0y, 30, r0h, f"Rev: {revision}", th=2.8)
-    _cell(tb_x0 + 95, r0y, 45, r0h, f"Date: {date_str}", th=2.8)
-    _cell(tb_x0 + 140, r0y, _TB_W - 140, r0h, f"Sheet {sheet_no} / {total_sheets}", th=2.8)
+    _cell(tb_x0 + 65, r0y, 30, r0h, f"REVISION: {revision}", th=2.8)
+    _cell(tb_x0 + 95, r0y, 45, r0h, f"DATE: {date_str}", th=2.8)
+    _cell(tb_x0 + 140, r0y, _TB_W - 140, r0h, f"SHEET {sheet_no} OF {total_sheets}", th=2.8)
 
-    # ── Row 1: designed / checked / approved ─────────────────────────────────
+    # ── Row 1: drawn / checked / approved ────────────────────────────────────
     r1y, r1h = ys[1], row_h[1]
-    _cell(tb_x0, r1y, 62, r1h, f"Designed: {designed_by}", th=2.5)
-    _cell(tb_x0 + 62, r1y, 62, r1h, f"Checked: {checked_by}", th=2.5)
-    _cell(tb_x0 + 124, r1y, _TB_W - 124, r1h, f"Approved: {approved_by}", th=2.5)
+    _cell(tb_x0, r1y, 62, r1h, f"DRAWN: {designed_by}", th=2.5)
+    _cell(tb_x0 + 62, r1y, 62, r1h, f"CHECKED: {checked_by}", th=2.5)
+    _cell(tb_x0 + 124, r1y, _TB_W - 124, r1h, f"APPROVED: {approved_by}", th=2.5)
 
     # ── Row 2: scale / client ────────────────────────────────────────────────
     r2y, r2h = ys[2], row_h[2]
-    _cell(tb_x0, r2y, 55, r2h, f"Scale: {scale_str}", th=2.8)
-    _cell(tb_x0 + 55, r2y, _TB_W - 55, r2h, f"Client: {client}", th=2.8)
+    _cell(tb_x0, r2y, 55, r2h, f"SCALE: {scale_str}", th=2.8)
+    _cell(tb_x0 + 55, r2y, _TB_W - 55, r2h, f"CLIENT: {client}", th=2.8)
 
     # ── Row 3: consultant ────────────────────────────────────────────────────
     r3y, r3h = ys[3], row_h[3]
-    _cell(tb_x0, r3y, _TB_W, r3h, f"Consultant: {consultant}", th=3.0)
+    _cell(tb_x0, r3y, _TB_W, r3h, f"CONSULTANT: {consultant}", th=3.0)
 
     # ── Row 4 (top): drawing title — bold + larger ───────────────────────────
     r4y, r4h = ys[4], row_h[4]
     rectangle(msp, tb_x0, r4y, _TB_W, r4h, layer="TITLEBLK-BOX", lw=30)
-    text(msp, drawing_title[:50], tb_x0 + 2.0, r4y + r4h / 2 - 2.0, height=3.8, layer="TEXT-TITLE")
+    text(
+        msp,
+        f"DRAWING TITLE: {drawing_title}"[:60],
+        tb_x0 + 2.0,
+        r4y + r4h / 2 - 2.0,
+        height=3.8,
+        layer="TEXT-TITLE",
+    )
 
     # ── Project title + bridge name above block ───────────────────────────────
-    text(msp, (project_title or "")[:70], tb_x0, tb_y1 + 3.5, height=3.2, layer="TEXT-TITLE")
-    text(msp, (bridge_name or "")[:50], tb_x0, tb_y1 + 8.5, height=2.8, layer="TITLEBLK-TEXT")
+    text(msp, f"PROJECT: {project_title}"[:70], tb_x0, tb_y1 + 3.5, height=3.2, layer="TEXT-TITLE")
+    text(
+        msp,
+        f"BRIDGE: {bridge_name}"[:50],
+        tb_x0,
+        tb_y1 + 8.5,
+        height=2.8,
+        layer="TITLEBLK-TEXT",
+    )
 
 
 def draw_revision_strip(

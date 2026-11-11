@@ -4,8 +4,8 @@
 **Fixture ID:** `rob_viaduct_ch37_730`  
 **Sheets generated:** 9 DXF  
 **Rendered PNGs:** 9  
-**PDF booklet:** [`rob_viaduct_ch37_730_GAD_Booklet.pdf`](rob_viaduct_ch37_730_GAD_Booklet.pdf) (2268 KB, 9 pages)  
-**Total DXF size:** 692 KB  
+**PDF booklet:** [`rob_viaduct_ch37_730_GAD_Booklet.pdf`](rob_viaduct_ch37_730_GAD_Booklet.pdf) (2421 KB, 9 pages)  
+**Total DXF size:** 859 KB  
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets

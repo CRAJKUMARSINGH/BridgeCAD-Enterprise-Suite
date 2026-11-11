@@ -493,7 +493,7 @@ $SKPOLY
   9
 $TDCREATE
  40
-2461355.3817708334
+2461355.9961574073
   9
 $TDUCREATE
  40
@@ -501,7 +501,7 @@ $TDUCREATE
   9
 $TDUPDATE
  40
-2461355.3817708334
+2461355.9961574073
   9
 $TDUUPDATE
  40
@@ -933,11 +933,11 @@ $PSTYLEMODE
   9
 $FINGERPRINTGUID
   2
-{90B34C5A-C6AE-42B6-A776-49B16877C221}
+{4AD3E8D7-E352-44F1-9C24-43B93380FE57}
   9
 $VERSIONGUID
   2
-{DFCA1BDC-CB4E-4BF3-A4C3-938B6FA2E0D5}
+{9007E3A0-6AC1-422E-865E-A518CBC23D13}
   9
 $EXTNAMES
 290
@@ -4238,6 +4238,12 @@ AcDbText
 2.8
   1
 DRG: GAD-007
+ 11
+647.5
+ 21
+13.6
+ 31
+0.0
 100
 AcDbText
   0
@@ -4299,7 +4305,13 @@ AcDbText
  40
 2.8
   1
-Rev: R0
+REVISION: R0
+ 11
+712.5
+ 21
+13.6
+ 31
+0.0
 100
 AcDbText
   0
@@ -4361,7 +4373,13 @@ AcDbText
  40
 2.8
   1
-Date: 
+DATE: 
+ 11
+742.5
+ 21
+13.6
+ 31
+0.0
 100
 AcDbText
   0
@@ -4423,7 +4441,13 @@ AcDbText
  40
 2.8
   1
-Sheet 7 / 8
+SHEET 7 OF 9
+ 11
+787.5
+ 21
+13.6
+ 31
+0.0
 100
 AcDbText
   0
@@ -4485,7 +4509,13 @@ AcDbText
  40
 2.5
   1
-Designed: 
+DRAWN: 
+ 11
+647.5
+ 21
+23.75
+ 31
+0.0
 100
 AcDbText
   0
@@ -4547,7 +4577,13 @@ AcDbText
  40
 2.5
   1
-Checked: 
+CHECKED: 
+ 11
+709.5
+ 21
+23.75
+ 31
+0.0
 100
 AcDbText
   0
@@ -4609,7 +4645,13 @@ AcDbText
  40
 2.5
   1
-Approved: 
+APPROVED: 
+ 11
+771.5
+ 21
+23.75
+ 31
+0.0
 100
 AcDbText
   0
@@ -4671,7 +4713,13 @@ AcDbText
  40
 2.8
   1
-Scale: 1:100
+SCALE: 1:100
+ 11
+647.5
+ 21
+33.6
+ 31
+0.0
 100
 AcDbText
   0
@@ -4733,7 +4781,13 @@ AcDbText
  40
 2.8
   1
-Client: 
+CLIENT: 
+ 11
+702.5
+ 21
+33.6
+ 31
+0.0
 100
 AcDbText
   0
@@ -4795,7 +4849,13 @@ AcDbText
  40
 3.0
   1
-Consultant: 
+CONSULTANT: 
+ 11
+647.5
+ 21
+44.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -4857,7 +4917,13 @@ AcDbText
  40
 3.8
   1
-ABSTRACT BILL OF QUANTITIES
+DRAWING TITLE: ABSTRACT BILL OF QUANTITIES
+ 11
+648.0
+ 21
+56.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -4881,7 +4947,13 @@ AcDbText
  40
 3.2
   1
-MINOR BRIDGE AT CH 2+300 â€” PMGSY ROAD
+PROJECT: MINOR BRIDGE AT CH 2+300 â€” PMGSY ROAD
+ 11
+646.0
+ 21
+68.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -4905,7 +4977,13 @@ AcDbText
  40
 2.8
   1
-MINOR-BRIDGE-CH2-300
+BRIDGE: MINOR-BRIDGE-CH2-300
+ 11
+646.0
+ 21
+73.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -4957,15 +5035,23 @@ TEXT-HEADER
 100
 AcDbText
  10
-0.0
+208.5
  20
-0.0
+508.0
  30
 0.0
  40
 3.6399999999999997
   1
 ABSTRACT OF ESTIMATED COST — MINOR-BRIDGE-CH2-300
+ 72
+1
+ 11
+208.5
+ 21
+508.0
+ 31
+0.0
 100
 AcDbText
   0
@@ -5026,6 +5112,12 @@ AcDbText
 2.38
   1
 Chainage: 2.300 km  |  State: MH  |  Total Length: 100.000 m  |  Overall Width: 11.900 m
+ 11
+21.5
+ 21
+493.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -5086,6 +5178,12 @@ AcDbText
 2.52
   1
 Item
+ 11
+21.5
+ 21
+481.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -5146,6 +5244,12 @@ AcDbText
 2.52
   1
 Description
+ 11
+36.5
+ 21
+481.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -5206,6 +5310,12 @@ AcDbText
 2.52
   1
 Unit
+ 11
+211.5
+ 21
+481.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -5266,6 +5376,12 @@ AcDbText
 2.52
   1
 Quantity
+ 11
+233.5
+ 21
+481.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -5326,6 +5442,12 @@ AcDbText
 2.52
   1
 Rate (INR)
+ 11
+268.5
+ 21
+481.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -5386,6 +5508,12 @@ AcDbText
 2.52
   1
 Amount (INR)
+ 11
+313.5
+ 21
+481.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -5446,6 +5574,12 @@ AcDbText
 2.52
   1
 Ref.
+ 11
+368.5
+ 21
+481.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -5506,6 +5640,12 @@ AcDbText
 2.38
   1
 1
+ 11
+21.5
+ 21
+469.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -5566,6 +5706,12 @@ AcDbText
 2.38
   1
 EARTHWORK — EMBANKMENT (IMPO
+ 11
+36.5
+ 21
+469.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -5626,6 +5772,12 @@ AcDbText
 2.38
   1
 CUM
+ 11
+211.5
+ 21
+469.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -5686,6 +5838,12 @@ AcDbText
 2.38
   1
 2975.0
+ 11
+233.5
+ 21
+469.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -5746,6 +5904,12 @@ AcDbText
 2.38
   1
 TBC
+ 11
+268.5
+ 21
+469.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -5806,6 +5970,12 @@ AcDbText
 2.38
   1
 
+ 11
+313.5
+ 21
+469.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -5866,6 +6036,12 @@ AcDbText
 2.38
   1
 MORTH 300
+ 11
+368.5
+ 21
+469.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -5926,6 +6102,12 @@ AcDbText
 2.38
   1
 2
+ 11
+21.5
+ 21
+457.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -5986,6 +6168,12 @@ AcDbText
 2.38
   1
 GRANULAR SUB-BASE (GSB) — AP
+ 11
+36.5
+ 21
+457.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -6046,6 +6234,12 @@ AcDbText
 2.38
   1
 CUM
+ 11
+211.5
+ 21
+457.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -6106,6 +6300,12 @@ AcDbText
 2.38
   1
 187.5
+ 11
+233.5
+ 21
+457.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -6166,6 +6366,12 @@ AcDbText
 2.38
   1
 TBC
+ 11
+268.5
+ 21
+457.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -6226,6 +6432,12 @@ AcDbText
 2.38
   1
 
+ 11
+313.5
+ 21
+457.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -6286,6 +6498,12 @@ AcDbText
 2.38
   1
 MORTH 401
+ 11
+368.5
+ 21
+457.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -6346,6 +6564,12 @@ AcDbText
 2.38
   1
 3
+ 11
+21.5
+ 21
+445.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -6406,6 +6630,12 @@ AcDbText
 2.38
   1
 CONCRETE M25 — PILE FOUNDATI
+ 11
+36.5
+ 21
+445.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -6466,6 +6696,12 @@ AcDbText
 2.38
   1
 CUM
+ 11
+211.5
+ 21
+445.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -6526,6 +6762,12 @@ AcDbText
 2.38
   1
 78.00
+ 11
+233.5
+ 21
+445.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -6586,6 +6828,12 @@ AcDbText
 2.38
   1
 TBC
+ 11
+268.5
+ 21
+445.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -6646,6 +6894,12 @@ AcDbText
 2.38
   1
 
+ 11
+313.5
+ 21
+445.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -6706,6 +6960,12 @@ AcDbText
 2.38
   1
 MORTH 1700
+ 11
+368.5
+ 21
+445.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -6766,6 +7026,12 @@ AcDbText
 2.38
   1
 4
+ 11
+21.5
+ 21
+433.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -6826,6 +7092,12 @@ AcDbText
 2.38
   1
 CONCRETE M30 — SUBSTRUCTURE 
+ 11
+36.5
+ 21
+433.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -6886,6 +7158,12 @@ AcDbText
 2.38
   1
 CUM
+ 11
+211.5
+ 21
+433.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -6946,6 +7224,12 @@ AcDbText
 2.38
   1
 58.00
+ 11
+233.5
+ 21
+433.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -7006,6 +7290,12 @@ AcDbText
 2.38
   1
 TBC
+ 11
+268.5
+ 21
+433.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -7066,6 +7356,12 @@ AcDbText
 2.38
   1
 
+ 11
+313.5
+ 21
+433.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -7126,6 +7422,12 @@ AcDbText
 2.38
   1
 MORTH 1700
+ 11
+368.5
+ 21
+433.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -7186,6 +7488,12 @@ AcDbText
 2.38
   1
 5
+ 11
+21.5
+ 21
+421.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -7246,6 +7554,12 @@ AcDbText
 2.38
   1
 CONCRETE M40 — SUPERSTRUCTUR
+ 11
+36.5
+ 21
+421.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -7306,6 +7620,12 @@ AcDbText
 2.38
   1
 CUM
+ 11
+211.5
+ 21
+421.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -7366,6 +7686,12 @@ AcDbText
 2.38
   1
 32.50
+ 11
+233.5
+ 21
+421.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -7426,6 +7752,12 @@ AcDbText
 2.38
   1
 TBC
+ 11
+268.5
+ 21
+421.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -7486,6 +7818,12 @@ AcDbText
 2.38
   1
 
+ 11
+313.5
+ 21
+421.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -7546,6 +7884,12 @@ AcDbText
 2.38
   1
 MORTH 1700
+ 11
+368.5
+ 21
+421.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -7606,6 +7950,12 @@ AcDbText
 2.38
   1
 6
+ 11
+21.5
+ 21
+409.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -7666,6 +8016,12 @@ AcDbText
 2.38
   1
 REINFORCEMENT STEEL Fe500D —
+ 11
+36.5
+ 21
+409.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -7726,6 +8082,12 @@ AcDbText
 2.38
   1
 MT
+ 11
+211.5
+ 21
+409.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -7786,6 +8148,12 @@ AcDbText
 2.38
   1
 18.50
+ 11
+233.5
+ 21
+409.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -7846,6 +8214,12 @@ AcDbText
 2.38
   1
 TBC
+ 11
+268.5
+ 21
+409.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -7906,6 +8280,12 @@ AcDbText
 2.38
   1
 
+ 11
+313.5
+ 21
+409.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -7966,6 +8346,12 @@ AcDbText
 2.38
   1
 MORTH 1600
+ 11
+368.5
+ 21
+409.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -8026,6 +8412,12 @@ AcDbText
 2.38
   1
 7
+ 11
+21.5
+ 21
+397.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -8086,6 +8478,12 @@ AcDbText
 2.38
   1
 PRESTRESSING STEEL (STRANDS 
+ 11
+36.5
+ 21
+397.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -8146,6 +8544,12 @@ AcDbText
 2.38
   1
 MT
+ 11
+211.5
+ 21
+397.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -8206,6 +8610,12 @@ AcDbText
 2.38
   1
 0.00
+ 11
+233.5
+ 21
+397.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -8266,6 +8676,12 @@ AcDbText
 2.38
   1
 TBC
+ 11
+268.5
+ 21
+397.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -8326,6 +8742,12 @@ AcDbText
 2.38
   1
 
+ 11
+313.5
+ 21
+397.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -8386,6 +8808,12 @@ AcDbText
 2.38
   1
 MORTH 1600
+ 11
+368.5
+ 21
+397.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -8446,6 +8874,12 @@ AcDbText
 2.38
   1
 8
+ 11
+21.5
+ 21
+385.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -8506,6 +8940,12 @@ AcDbText
 2.38
   1
 FORMWORK — SUPERSTRUCTURE
+ 11
+36.5
+ 21
+385.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -8566,6 +9006,12 @@ AcDbText
 2.38
   1
 SQM
+ 11
+211.5
+ 21
+385.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -8626,6 +9072,12 @@ AcDbText
 2.38
   1
 146.2
+ 11
+233.5
+ 21
+385.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -8686,6 +9138,12 @@ AcDbText
 2.38
   1
 TBC
+ 11
+268.5
+ 21
+385.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -8746,6 +9204,12 @@ AcDbText
 2.38
   1
 
+ 11
+313.5
+ 21
+385.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -8806,6 +9270,12 @@ AcDbText
 2.38
   1
 MORTH 1700
+ 11
+368.5
+ 21
+385.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -8866,6 +9336,12 @@ AcDbText
 2.38
   1
 9
+ 11
+21.5
+ 21
+373.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -8926,6 +9402,12 @@ AcDbText
 2.38
   1
 BITUMINOUS CONCRETE (BC) WEA
+ 11
+36.5
+ 21
+373.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -8986,6 +9468,12 @@ AcDbText
 2.38
   1
 SQM
+ 11
+211.5
+ 21
+373.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -9046,6 +9534,12 @@ AcDbText
 2.38
   1
 750.0
+ 11
+233.5
+ 21
+373.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -9106,6 +9600,12 @@ AcDbText
 2.38
   1
 TBC
+ 11
+268.5
+ 21
+373.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -9166,6 +9666,12 @@ AcDbText
 2.38
   1
 
+ 11
+313.5
+ 21
+373.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -9226,6 +9732,12 @@ AcDbText
 2.38
   1
 MORTH 510
+ 11
+368.5
+ 21
+373.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -9286,6 +9798,12 @@ AcDbText
 2.38
   1
 10
+ 11
+21.5
+ 21
+361.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -9346,6 +9864,12 @@ AcDbText
 2.38
   1
 ELASTOMERIC / POT BEARINGS (
+ 11
+36.5
+ 21
+361.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -9406,6 +9930,12 @@ AcDbText
 2.38
   1
 EACH
+ 11
+211.5
+ 21
+361.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -9466,6 +9996,12 @@ AcDbText
 2.38
   1
 8
+ 11
+233.5
+ 21
+361.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -9526,6 +10062,12 @@ AcDbText
 2.38
   1
 TBC
+ 11
+268.5
+ 21
+361.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -9586,6 +10128,12 @@ AcDbText
 2.38
   1
 
+ 11
+313.5
+ 21
+361.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -9646,6 +10194,12 @@ AcDbText
 2.38
   1
 MORTH 2800
+ 11
+368.5
+ 21
+361.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -9706,6 +10260,12 @@ AcDbText
 2.38
   1
 11
+ 11
+21.5
+ 21
+349.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -9766,6 +10326,12 @@ AcDbText
 2.38
   1
 EXPANSION JOINTS (STRIP SEAL
+ 11
+36.5
+ 21
+349.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -9826,6 +10392,12 @@ AcDbText
 2.38
   1
 RM
+ 11
+211.5
+ 21
+349.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -9886,6 +10458,12 @@ AcDbText
 2.38
   1
 23.8
+ 11
+233.5
+ 21
+349.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -9946,6 +10524,12 @@ AcDbText
 2.38
   1
 TBC
+ 11
+268.5
+ 21
+349.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -10006,6 +10590,12 @@ AcDbText
 2.38
   1
 
+ 11
+313.5
+ 21
+349.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -10066,6 +10656,12 @@ AcDbText
 2.38
   1
 MORTH 2800
+ 11
+368.5
+ 21
+349.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -10126,6 +10722,12 @@ AcDbText
 2.38
   1
 12
+ 11
+21.5
+ 21
+337.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -10186,6 +10788,12 @@ AcDbText
 2.38
   1
 APPROACH SLAB M30 (BOTH ENDS
+ 11
+36.5
+ 21
+337.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -10246,6 +10854,12 @@ AcDbText
 2.38
   1
 CUM
+ 11
+211.5
+ 21
+337.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -10306,6 +10920,12 @@ AcDbText
 2.38
   1
 16.66
+ 11
+233.5
+ 21
+337.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -10366,6 +10986,12 @@ AcDbText
 2.38
   1
 TBC
+ 11
+268.5
+ 21
+337.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -10426,6 +11052,12 @@ AcDbText
 2.38
   1
 
+ 11
+313.5
+ 21
+337.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -10486,6 +11118,12 @@ AcDbText
 2.38
   1
 MORTH 1700
+ 11
+368.5
+ 21
+337.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -10546,6 +11184,12 @@ AcDbText
 2.38
   1
 13
+ 11
+21.5
+ 21
+325.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -10606,6 +11250,12 @@ AcDbText
 2.38
   1
 RIVER TRAINING WORKS (LUMP S
+ 11
+36.5
+ 21
+325.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -10666,6 +11316,12 @@ AcDbText
 2.38
   1
 LS
+ 11
+211.5
+ 21
+325.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -10726,6 +11382,12 @@ AcDbText
 2.38
   1
 1
+ 11
+233.5
+ 21
+325.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -10786,6 +11448,12 @@ AcDbText
 2.38
   1
 TBC
+ 11
+268.5
+ 21
+325.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -10846,6 +11514,12 @@ AcDbText
 2.38
   1
 
+ 11
+313.5
+ 21
+325.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -10906,6 +11580,12 @@ AcDbText
 2.38
   1
 MORTH 2500
+ 11
+368.5
+ 21
+325.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -10966,6 +11646,12 @@ AcDbText
 2.38
   1
 14
+ 11
+21.5
+ 21
+313.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -11026,6 +11712,12 @@ AcDbText
 2.38
   1
 RAILING / CRASH BARRIER (M.S
+ 11
+36.5
+ 21
+313.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -11086,6 +11778,12 @@ AcDbText
 2.38
   1
 RM
+ 11
+211.5
+ 21
+313.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -11146,6 +11844,12 @@ AcDbText
 2.38
   1
 214.0
+ 11
+233.5
+ 21
+313.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -11206,6 +11910,12 @@ AcDbText
 2.38
   1
 TBC
+ 11
+268.5
+ 21
+313.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -11266,6 +11976,12 @@ AcDbText
 2.38
   1
 
+ 11
+313.5
+ 21
+313.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -11326,6 +12042,12 @@ AcDbText
 2.38
   1
 MORTH 800
+ 11
+368.5
+ 21
+313.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -11386,6 +12108,12 @@ AcDbText
 2.38
   1
 15
+ 11
+21.5
+ 21
+301.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -11446,6 +12174,12 @@ AcDbText
 2.38
   1
 WATERPROOFING MEMBRANE — DEC
+ 11
+36.5
+ 21
+301.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -11506,6 +12240,12 @@ AcDbText
 2.38
   1
 SQM
+ 11
+211.5
+ 21
+301.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -11566,6 +12306,12 @@ AcDbText
 2.38
   1
 1190.0
+ 11
+233.5
+ 21
+301.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -11626,6 +12372,12 @@ AcDbText
 2.38
   1
 TBC
+ 11
+268.5
+ 21
+301.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -11686,6 +12438,12 @@ AcDbText
 2.38
   1
 
+ 11
+313.5
+ 21
+301.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -11746,6 +12504,12 @@ AcDbText
 2.38
   1
 MORTH 2600
+ 11
+368.5
+ 21
+301.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -11806,6 +12570,12 @@ AcDbText
 2.8
   1
 
+ 11
+21.5
+ 21
+289.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -11866,6 +12636,12 @@ AcDbText
 2.8
   1
 TOTAL (CIVIL WORKS — BRIDGE)
+ 11
+36.5
+ 21
+289.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -11926,6 +12702,12 @@ AcDbText
 2.8
   1
 
+ 11
+211.5
+ 21
+289.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -11986,6 +12768,12 @@ AcDbText
 2.8
   1
 INR 148,000,000
+ 11
+233.5
+ 21
+289.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -12046,6 +12834,12 @@ AcDbText
 2.8
   1
 TBC
+ 11
+268.5
+ 21
+289.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -12106,6 +12900,12 @@ AcDbText
 2.8
   1
 
+ 11
+313.5
+ 21
+289.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -12166,6 +12966,12 @@ AcDbText
 2.8
   1
 
+ 11
+368.5
+ 21
+289.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -12190,6 +12996,12 @@ AcDbText
 2.8
   1
 INR 148,000,000
+ 11
+233.5
+ 21
+289.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -12214,6 +13026,12 @@ AcDbText
 2.8
   1
 NOTES:
+ 11
+20.0
+ 21
+269.0
+ 31
+0.0
 100
 AcDbText
   0
@@ -12238,6 +13056,12 @@ AcDbText
 2.38
   1
 1. Quantities are preliminary estimates for budget purposes only.
+ 11
+20.0
+ 21
+261.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -12262,6 +13086,12 @@ AcDbText
 2.38
   1
 2. Final quantities to be measured as per IS:1200 / MORTH specifications.
+ 11
+20.0
+ 21
+254.0
+ 31
+0.0
 100
 AcDbText
   0
@@ -12286,6 +13116,12 @@ AcDbText
 2.38
   1
 3. Rates as per prevailing State PWD / MORTH Schedule of Rates.
+ 11
+20.0
+ 21
+246.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -12310,6 +13146,12 @@ AcDbText
 2.38
   1
 4. 15% contingency to be added for unforeseen items.
+ 11
+20.0
+ 21
+239.0
+ 31
+0.0
 100
 AcDbText
   0
@@ -12334,6 +13176,12 @@ AcDbText
 2.38
   1
 5. Preliminary estimated cost: INR 148,000,000
+ 11
+20.0
+ 21
+231.5
+ 31
+0.0
 100
 AcDbText
   0
@@ -13339,7 +14187,7 @@ DictionaryVariables
 280
 0
   1
-1.4.4 @ 2026-11-10T03:39:45.773729+00:00
+1.4.4 @ 2026-11-10T18:24:28.287299+00:00
   0
 DICTIONARYVAR
   5
@@ -13351,7 +14199,7 @@ DictionaryVariables
 280
 0
   1
-1.4.4 @ 2026-11-10T03:39:45.830294+00:00
+1.4.4 @ 2026-11-10T18:24:28.350285+00:00
   0
 ENDSEC
   0

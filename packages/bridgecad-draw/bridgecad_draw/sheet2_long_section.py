@@ -46,6 +46,9 @@ _MARGIN = 10.0
 _TB_H = 65.0  # title block height at bottom
 _LEVEL_AXIS_W = 30.0  # width of level axis on left
 _CHAINAGE_H = 20.0  # height of chainage axis at bottom of drawing
+_RIGHT_LABEL_W = 60.0  # right gutter for HFL / LWL / scour / pile-tip labels
+_TH_MAX = 6.0  # text-height cap (mm): the fit-scale can be ~65 mm/m on a
+#                short bridge, so an uncapped `sc_h * 0.4` drowned the sheet.
 
 
 def _chainage_pitch(total_m: float) -> float:
@@ -118,17 +121,38 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
     top_rl = ls.top_of_deck_rl
     pile_tip_rl = ls.pile_tip_rl
 
-    datum_rl = min(pile_tip_rl, scour_rl) - 2.0  # baseline datum
+    # The vertical fit must cover everything the sheet actually draws, not just
+    # the hydraulic RLs: the pier shafts run down to ``HFL − pier_height_typical``
+    # and the abutment shafts to ``soffit − abutment_height``.  On the PWD booklet
+    # fixtures (which print no absolute RLs, so HFL/scour/pile-tip all resolve to
+    # the same datum) those bases sit several metres below the old
+    # ``min(pile_tip, scour)`` datum and the shafts — and their ``P1..Pn`` labels —
+    # plotted 220–294 mm below the sheet frame.
+    pier_base_rl = hfl_rl - float(sub.pier_height_typical_m or 8.0)
+    abt_base_rl = soffit_rl - float(sub.abutment_height_m or 3.2)
+    rl_low = min(pile_tip_rl, scour_rl, pier_base_rl, abt_base_rl)
+    datum_rl = rl_low - 2.0  # baseline datum
     rl_range = max(top_rl + 2.0, hfl_rl + 3.0) - datum_rl
+
+    # The wearing coat and both approach slabs run a full approach-slab length
+    # past each deck end, so the horizontal fit must span them or they plot off
+    # the sheet.
+    from bridgecad_core.abutment_stack import resolve_abutment_stack
+
+    stack = resolve_abutment_stack(project)
+    app_l = float(sub.approach_slab_length_m or 3.5)
 
     # ── Drawing area ───────────────────────────────────────────────────────
     draw_x0 = _MARGIN + _LEVEL_AXIS_W + 5.0
     draw_y0 = _MARGIN + _TB_H + _CHAINAGE_H + 3.0  # FR-2: was +10.0, now 3 mm gutter
-    draw_w = _SHEET_W - draw_x0 - _MARGIN - 10.0
+    draw_w = _SHEET_W - draw_x0 - _MARGIN - _RIGHT_LABEL_W
     draw_h = _SHEET_H - draw_y0 - _MARGIN - 13.0  # FR-2: reclaim ~7 mm previously wasted
 
     # Scale factors (mm per metre)
-    sc_h = draw_w / max(total_len, 0.1)  # horizontal
+    ch_min = -app_l  # left-most drawn chainage (approach slab tail)
+    ch_max = total_len + app_l  # right-most drawn chainage
+    ch_span = max(ch_max - ch_min, 0.1)
+    sc_h = draw_w / ch_span  # horizontal
     sc_v = draw_h / max(rl_range, 0.1) / v_exag  # vertical (exaggerated)
 
     CoordMapper(
@@ -141,7 +165,7 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
     )
 
     def hx(ch):
-        return draw_x0 + ch * sc_h
+        return draw_x0 + (ch - ch_min) * sc_h
 
     def vy(rl):
         return draw_y0 + (rl - datum_rl) * sc_v * v_exag
@@ -163,10 +187,10 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
         consultant=getattr(getattr(pm, "consultant", None), "name", "") or "",
         scale_str=f"1:{scale_denom} H  1:{int(scale_denom/v_exag)} V",
         sheet_no="2",
-        total_sheets="8",
+        total_sheets="9",
     )
 
-    th = max(2.5, sc_h * 0.4)  # adaptive text height mm
+    th = min(_TH_MAX, max(2.5, sc_h * 0.4))  # adaptive text height mm (capped)
 
     # ── Datum / chainage axis (LISP `layout()`: axis → ticks → axis title) ─
     line(msp, (draw_x0, draw_y0), (hx(total_len), draw_y0), layer="CIVIL-CHAINAGE")
@@ -220,17 +244,20 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
     # Level scale graduations every 1m RL
     rl_step = 1.0
     rl_bot = max(pile_tip_rl - 1.0, datum_rl)
-    rl_top = top_rl + 2.5
+    # The graduations must stop where the modelled extent stops, or the top tick
+    # plots above the frame (a culvert with a low HFL left `rl_range` at
+    # `top_rl + 2` while this loop ran to `top_rl + 2.5` → +2 mm over the top).
+    rl_top = min(top_rl + 2.5, datum_rl + rl_range)
     rl_val = math.floor(rl_bot)
     while rl_val <= rl_top:
         yy = vy(rl_val)
-        tick_len = th * 3 if rl_val % 5 == 0 else th * 1.5
+        tick_len = th * 2 if rl_val % 5 == 0 else th * 1.0
         line(msp, (draw_x0 - tick_len, yy), (draw_x0, yy), layer="DIM-LEVEL")
         if rl_val % 2 == 0:
             text(
                 msp,
                 f"{rl_val:.0f}",
-                draw_x0 - th * 8,
+                _MARGIN + 12.0,
                 yy - th * 0.5,
                 height=th * 0.8,
                 layer="TEXT-LEVEL",
@@ -238,11 +265,13 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
         rl_val += rl_step
 
     # Axis title along the level axis (LISP `layout()` label "BED LEVEL").
+    # Anchored at the bottom of the axis: rotated 90° it grows upward, so a
+    # bottom anchor keeps it inside the frame (a top anchor ran 35 mm past it).
     text(
         msp,
         "BED LEVEL",
-        draw_x0 - th * 8.0,
-        vy(rl_top) + th * 1.0,
+        _MARGIN + 2.0,
+        draw_y0 + 2.0,
         height=th * 0.9,
         layer="TEXT-LEVEL",
         rotation=90,
@@ -321,10 +350,6 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
     )
 
     # ── Deck profile: slab + continuous wearing coat (guide #1 step 3) ────
-    from bridgecad_core.abutment_stack import resolve_abutment_stack
-
-    stack = resolve_abutment_stack(project)
-    app_l = float(sub.approach_slab_length_m or 3.5)
     wc_t = float(project.superstructure.wearing_coat_thickness_mm or 65) / 1000.0
 
     sof_y_mm = vy(soffit_rl)
@@ -526,7 +551,9 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
         text(
             msp,
             f"ΔREF={ref_delta:+.2f}m",
-            guide_x2 - th * 12,
+            # Clamp inside the margin: on the multi-span fit the unclamped
+            # `guide_x2 - th * 12` landed at x = -42 mm, ~42 mm off the sheet.
+            max(_MARGIN + 1.0, guide_x2 - th * 12),
             py_toc - th * 1.1,
             height=th * 0.65,
             layer="TEXT-SPEC",
@@ -724,11 +751,16 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
     )
 
     # ── View label ────────────────────────────────────────────────────────
+    # The offsets above the deck are scale-proportional (`sc_v * v_exag`), so a
+    # compact structure (small RL range → large mm-per-metre) pushes the label
+    # stack through the top border. Shift the whole stack down by the overflow.
+    _lbl_top = vy(top_rl) + sc_v * v_exag * 2.5
+    _lbl_shift = max(0.0, (_lbl_top + th * 1.5) - (_SHEET_H - _MARGIN))
     text(
         msp,
         "LONGITUDINAL SECTION",
         draw_x0 + draw_w / 2,
-        vy(top_rl) + sc_v * v_exag * 2.5,
+        _lbl_top - _lbl_shift,
         height=th * 1.5,
         layer="TEXT-HEADER",
         halign="CENTER",
@@ -737,7 +769,7 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
         msp,
         f"H Scale 1:{scale_denom}   V Scale 1:{int(scale_denom/v_exag)} (V.E.={v_exag}×)",
         draw_x0 + draw_w / 2,
-        vy(top_rl) + sc_v * v_exag * 1.0,
+        vy(top_rl) + sc_v * v_exag * 1.0 - _lbl_shift,
         height=th * 0.9,
         layer="TEXT-SPEC",
         halign="CENTER",
@@ -746,12 +778,50 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
         msp,
         "(Not to Scale — indicative)",
         draw_x0 + draw_w / 2,
-        vy(top_rl) + sc_v * v_exag * 0.15,
+        vy(top_rl) + sc_v * v_exag * 0.15 - _lbl_shift,
         height=th * 0.9 * 0.9,
         layer="TEXT-SPEC",
         halign="CENTER",
         color=8,
     )  # FR-8: demoted 10% smaller + grey colour (8)
+
+    # ── Principal dimensions (vertical level/thickness staffs) ───────────
+    # The drawing area has no gutter below the chainage axis and the deck-top
+    # band already carries the view title, so the section's principal
+    # dimensions run as vertical staffs stacked just inside the right edge,
+    # each measured against the datum baseline.
+    deck_t = float(getattr(project.superstructure, "deck_thickness_mm", 0) or 0) / 1000.0
+    base_y = vy(datum_rl)
+    staffs = (
+        (draw_x0 + draw_w * 0.97, (
+            ("T.O.DECK", top_rl),
+            ("HFL", hfl_rl),
+            ("LWL", lwl_rl),
+        )),
+        (draw_x0 + draw_w * 0.93, (
+            (f"WC={wc_t * 1000:.0f}mm", top_rl - wc_t),
+            (f"DECK={deck_t * 1000:.0f}mm", top_rl - wc_t - deck_t),
+        )),
+        (draw_x0 + draw_w * 0.89, (
+            (f"SCOUR={hfl_rl - scour_rl:.3f}m", scour_rl),
+        )),
+        (draw_x0 + draw_w * 0.85, (
+            (f"ABUT={float(stack.cap_top) - float(stack.app_bot):.3f}m", float(stack.app_bot)),
+            (f"PILE={pile_tip_rl - float(fd.pile_cutoff_level_m or scour_rl):.3f}m", pile_tip_rl),
+        )),
+    )
+    for staff_x, levels in staffs:
+        for lv_label, lv_rl in levels:
+            dim_linear_v(
+                msp,
+                staff_x,
+                base_y,
+                staff_x,
+                vy(lv_rl),
+                dim_x=staff_x,
+                label=lv_label,
+                text_height=th * 0.85,
+            )
 
 
 __all__ = ["generate"]

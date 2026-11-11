@@ -1,0 +1,4050 @@
+{
+  "generated_at": "2026-11-11T03:38:31+00:00",
+  "source_pdf": "ATTACHED ASSETS/GENERAL ARRANGEMENT DRAWINGS.pdf",
+  "source_dump": "output/_pdf_dump.txt",
+  "extraction": "output/_pwd_types_extract.json",
+  "generator": "scripts/generate_all_pwd_gads.py",
+  "contract": "tests/draw/dxf_assert.py",
+  "sheet_manifest": [
+    "Sheet1_Plan",
+    "Sheet2_LongSection",
+    "Sheet3_CrossSection",
+    "Sheet4_Foundation",
+    "Sheet5_PierAbutment",
+    "Sheet6_BearingsJoints",
+    "Sheet7_BOQ",
+    "Sheet8_SideElevations",
+    "Sheet9_Reinforcement"
+  ],
+  "summary": {
+    "types": 15,
+    "types_ok": 15,
+    "sheet_cells": 135,
+    "cells_pass": 135,
+    "cells_fail": 0,
+    "missing_segments": 0,
+    "check_tally": {
+      "finite extents": {
+        "pass": 135,
+        "fail": 0
+      },
+      "inside frame": {
+        "pass": 135,
+        "fail": 0
+      },
+      "non-empty geometry": {
+        "pass": 135,
+        "fail": 0
+      },
+      "no degenerate geo": {
+        "pass": 135,
+        "fail": 0
+      },
+      "layers registered": {
+        "pass": 135,
+        "fail": 0
+      },
+      "nothing on layer 0": {
+        "pass": 135,
+        "fail": 0
+      },
+      "title block filled": {
+        "pass": 135,
+        "fail": 0
+      },
+      "sheet n of m": {
+        "pass": 135,
+        "fail": 0
+      },
+      "dimensioned": {
+        "pass": 105,
+        "fail": 0
+      },
+      "text legible": {
+        "pass": 135,
+        "fail": 0
+      },
+      "geometry beyond title block": {
+        "pass": 135,
+        "fail": 0
+      }
+    }
+  },
+  "types": [
+    {
+      "id": "pwd_br2022_001_open_pcc_solidslab",
+      "sr_no": "02",
+      "drawing_no": "BR-I / 2022 - 001",
+      "description": "OPEN FOUNDATION WITH P.C.C. PIER & SOLID SLAB SUPER STRUCTURE",
+      "foundation": "OPEN",
+      "superstructure": "SOLID_SLAB",
+      "span_count": 4,
+      "total_length_m": 40.0,
+      "sheets": [
+        {
+          "sheet": "sheet1_plan",
+          "index": 1,
+          "file": "pwd_br2022_001_open_pcc_solidslab_Sheet1_Plan.dxf",
+          "ok": true,
+          "entities": 157,
+          "dimensions": 11,
+          "layers": 22,
+          "texts": 36,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet2_long_section",
+          "index": 2,
+          "file": "pwd_br2022_001_open_pcc_solidslab_Sheet2_LongSection.dxf",
+          "ok": true,
+          "entities": 266,
+          "dimensions": 8,
+          "layers": 28,
+          "texts": 92,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet3_cross_section",
+          "index": 3,
+          "file": "pwd_br2022_001_open_pcc_solidslab_Sheet3_CrossSection.dxf",
+          "ok": true,
+          "entities": 75,
+          "dimensions": 8,
+          "layers": 20,
+          "texts": 30,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet4_foundation",
+          "index": 4,
+          "file": "pwd_br2022_001_open_pcc_solidslab_Sheet4_Foundation.dxf",
+          "ok": true,
+          "entities": 136,
+          "dimensions": 10,
+          "layers": 13,
+          "texts": 55,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet5_pier_abutment_details",
+          "index": 5,
+          "file": "pwd_br2022_001_open_pcc_solidslab_Sheet5_PierAbutment.dxf",
+          "ok": true,
+          "entities": 194,
+          "dimensions": 10,
+          "layers": 19,
+          "texts": 78,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet6_bearings_joints",
+          "index": 6,
+          "file": "pwd_br2022_001_open_pcc_solidslab_Sheet6_BearingsJoints.dxf",
+          "ok": true,
+          "entities": 147,
+          "dimensions": 8,
+          "layers": 13,
+          "texts": 71,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet7_bill_of_quantities",
+          "index": 7,
+          "file": "pwd_br2022_001_open_pcc_solidslab_Sheet7_BOQ.dxf",
+          "ok": true,
+          "entities": 276,
+          "dimensions": 0,
+          "layers": 8,
+          "texts": 141,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet8_side_elevations",
+          "index": 8,
+          "file": "pwd_br2022_001_open_pcc_solidslab_Sheet8_SideElevations.dxf",
+          "ok": true,
+          "entities": 244,
+          "dimensions": 10,
+          "layers": 26,
+          "texts": 91,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet9_reinforcement",
+          "index": 9,
+          "file": "pwd_br2022_001_open_pcc_solidslab_Sheet9_Reinforcement.dxf",
+          "ok": true,
+          "entities": 192,
+          "dimensions": 0,
+          "layers": 7,
+          "texts": 97,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        }
+      ],
+      "ok": true,
+      "pdf": "pwd_br2022_001_open_pcc_solidslab_GAD_Booklet.pdf (2337 KB)",
+      "pngs": 9
+    },
+    {
+      "id": "pwd_br2022_002_open_rcc_solidslab",
+      "sr_no": "03",
+      "drawing_no": "BR-I / 2022 - 002",
+      "description": "OPEN FOUNDATION WITH R.C.C. PIER & SOLID SLAB SUPER STRUCTURE",
+      "foundation": "OPEN",
+      "superstructure": "SOLID_SLAB",
+      "span_count": 4,
+      "total_length_m": 40.0,
+      "sheets": [
+        {
+          "sheet": "sheet1_plan",
+          "index": 1,
+          "file": "pwd_br2022_002_open_rcc_solidslab_Sheet1_Plan.dxf",
+          "ok": true,
+          "entities": 157,
+          "dimensions": 11,
+          "layers": 22,
+          "texts": 36,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet2_long_section",
+          "index": 2,
+          "file": "pwd_br2022_002_open_rcc_solidslab_Sheet2_LongSection.dxf",
+          "ok": true,
+          "entities": 266,
+          "dimensions": 8,
+          "layers": 28,
+          "texts": 92,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet3_cross_section",
+          "index": 3,
+          "file": "pwd_br2022_002_open_rcc_solidslab_Sheet3_CrossSection.dxf",
+          "ok": true,
+          "entities": 75,
+          "dimensions": 8,
+          "layers": 20,
+          "texts": 30,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet4_foundation",
+          "index": 4,
+          "file": "pwd_br2022_002_open_rcc_solidslab_Sheet4_Foundation.dxf",
+          "ok": true,
+          "entities": 134,
+          "dimensions": 10,
+          "layers": 13,
+          "texts": 55,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet5_pier_abutment_details",
+          "index": 5,
+          "file": "pwd_br2022_002_open_rcc_solidslab_Sheet5_PierAbutment.dxf",
+          "ok": true,
+          "entities": 194,
+          "dimensions": 10,
+          "layers": 19,
+          "texts": 78,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet6_bearings_joints",
+          "index": 6,
+          "file": "pwd_br2022_002_open_rcc_solidslab_Sheet6_BearingsJoints.dxf",
+          "ok": true,
+          "entities": 147,
+          "dimensions": 8,
+          "layers": 13,
+          "texts": 71,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet7_bill_of_quantities",
+          "index": 7,
+          "file": "pwd_br2022_002_open_rcc_solidslab_Sheet7_BOQ.dxf",
+          "ok": true,
+          "entities": 276,
+          "dimensions": 0,
+          "layers": 8,
+          "texts": 141,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet8_side_elevations",
+          "index": 8,
+          "file": "pwd_br2022_002_open_rcc_solidslab_Sheet8_SideElevations.dxf",
+          "ok": true,
+          "entities": 244,
+          "dimensions": 10,
+          "layers": 26,
+          "texts": 91,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet9_reinforcement",
+          "index": 9,
+          "file": "pwd_br2022_002_open_rcc_solidslab_Sheet9_Reinforcement.dxf",
+          "ok": true,
+          "entities": 192,
+          "dimensions": 0,
+          "layers": 7,
+          "texts": 97,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        }
+      ],
+      "ok": true,
+      "pdf": "pwd_br2022_002_open_rcc_solidslab_GAD_Booklet.pdf (2343 KB)",
+      "pngs": 9
+    },
+    {
+      "id": "pwd_br2022_003_raft_rcc_solidslab",
+      "sr_no": "04",
+      "drawing_no": "BR-I / 2022 - 003",
+      "description": "RAFT FOUNDATION WITH R.C.C. PIER & SOLID SLAB SUPER STRUCTURE",
+      "foundation": "RAFT",
+      "superstructure": "SOLID_SLAB",
+      "span_count": 5,
+      "total_length_m": 50.0,
+      "sheets": [
+        {
+          "sheet": "sheet1_plan",
+          "index": 1,
+          "file": "pwd_br2022_003_raft_rcc_solidslab_Sheet1_Plan.dxf",
+          "ok": true,
+          "entities": 175,
+          "dimensions": 12,
+          "layers": 22,
+          "texts": 38,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet2_long_section",
+          "index": 2,
+          "file": "pwd_br2022_003_raft_rcc_solidslab_Sheet2_LongSection.dxf",
+          "ok": true,
+          "entities": 288,
+          "dimensions": 8,
+          "layers": 28,
+          "texts": 100,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet3_cross_section",
+          "index": 3,
+          "file": "pwd_br2022_003_raft_rcc_solidslab_Sheet3_CrossSection.dxf",
+          "ok": true,
+          "entities": 75,
+          "dimensions": 8,
+          "layers": 20,
+          "texts": 30,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet4_foundation",
+          "index": 4,
+          "file": "pwd_br2022_003_raft_rcc_solidslab_Sheet4_Foundation.dxf",
+          "ok": true,
+          "entities": 134,
+          "dimensions": 10,
+          "layers": 13,
+          "texts": 55,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet5_pier_abutment_details",
+          "index": 5,
+          "file": "pwd_br2022_003_raft_rcc_solidslab_Sheet5_PierAbutment.dxf",
+          "ok": true,
+          "entities": 194,
+          "dimensions": 10,
+          "layers": 19,
+          "texts": 78,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet6_bearings_joints",
+          "index": 6,
+          "file": "pwd_br2022_003_raft_rcc_solidslab_Sheet6_BearingsJoints.dxf",
+          "ok": true,
+          "entities": 147,
+          "dimensions": 8,
+          "layers": 13,
+          "texts": 71,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet7_bill_of_quantities",
+          "index": 7,
+          "file": "pwd_br2022_003_raft_rcc_solidslab_Sheet7_BOQ.dxf",
+          "ok": true,
+          "entities": 276,
+          "dimensions": 0,
+          "layers": 8,
+          "texts": 141,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet8_side_elevations",
+          "index": 8,
+          "file": "pwd_br2022_003_raft_rcc_solidslab_Sheet8_SideElevations.dxf",
+          "ok": true,
+          "entities": 244,
+          "dimensions": 10,
+          "layers": 26,
+          "texts": 91,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet9_reinforcement",
+          "index": 9,
+          "file": "pwd_br2022_003_raft_rcc_solidslab_Sheet9_Reinforcement.dxf",
+          "ok": true,
+          "entities": 192,
+          "dimensions": 0,
+          "layers": 7,
+          "texts": 97,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        }
+      ],
+      "ok": true,
+      "pdf": "pwd_br2022_003_raft_rcc_solidslab_GAD_Booklet.pdf (2365 KB)",
+      "pngs": 9
+    },
+    {
+      "id": "pwd_br2022_004_raft_boxcell",
+      "sr_no": "05",
+      "drawing_no": "BR-I / 2022 - 004",
+      "description": "RAFT FOUNDATION WITH R.C.C. BOX CELL SUPER STRUCTURE",
+      "foundation": "RAFT",
+      "superstructure": "BOX_CULVERT",
+      "span_count": 5,
+      "total_length_m": 61.25,
+      "sheets": [
+        {
+          "sheet": "sheet1_plan",
+          "index": 1,
+          "file": "pwd_br2022_004_raft_boxcell_Sheet1_Plan.dxf",
+          "ok": true,
+          "entities": 175,
+          "dimensions": 12,
+          "layers": 22,
+          "texts": 38,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet2_long_section",
+          "index": 2,
+          "file": "pwd_br2022_004_raft_boxcell_Sheet2_LongSection.dxf",
+          "ok": true,
+          "entities": 280,
+          "dimensions": 8,
+          "layers": 28,
+          "texts": 96,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet3_cross_section",
+          "index": 3,
+          "file": "pwd_br2022_004_raft_boxcell_Sheet3_CrossSection.dxf",
+          "ok": true,
+          "entities": 85,
+          "dimensions": 10,
+          "layers": 21,
+          "texts": 32,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet4_foundation",
+          "index": 4,
+          "file": "pwd_br2022_004_raft_boxcell_Sheet4_Foundation.dxf",
+          "ok": true,
+          "entities": 134,
+          "dimensions": 10,
+          "layers": 13,
+          "texts": 55,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet5_pier_abutment_details",
+          "index": 5,
+          "file": "pwd_br2022_004_raft_boxcell_Sheet5_PierAbutment.dxf",
+          "ok": true,
+          "entities": 194,
+          "dimensions": 10,
+          "layers": 19,
+          "texts": 78,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet6_bearings_joints",
+          "index": 6,
+          "file": "pwd_br2022_004_raft_boxcell_Sheet6_BearingsJoints.dxf",
+          "ok": true,
+          "entities": 147,
+          "dimensions": 8,
+          "layers": 13,
+          "texts": 71,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet7_bill_of_quantities",
+          "index": 7,
+          "file": "pwd_br2022_004_raft_boxcell_Sheet7_BOQ.dxf",
+          "ok": true,
+          "entities": 276,
+          "dimensions": 0,
+          "layers": 8,
+          "texts": 141,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet8_side_elevations",
+          "index": 8,
+          "file": "pwd_br2022_004_raft_boxcell_Sheet8_SideElevations.dxf",
+          "ok": true,
+          "entities": 244,
+          "dimensions": 10,
+          "layers": 26,
+          "texts": 91,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet9_reinforcement",
+          "index": 9,
+          "file": "pwd_br2022_004_raft_boxcell_Sheet9_Reinforcement.dxf",
+          "ok": true,
+          "entities": 192,
+          "dimensions": 0,
+          "layers": 7,
+          "texts": 97,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        }
+      ],
+      "ok": true,
+      "pdf": "pwd_br2022_004_raft_boxcell_GAD_Booklet.pdf (2344 KB)",
+      "pngs": 9
+    },
+    {
+      "id": "pwd_br2022_005_open_portal",
+      "sr_no": "06",
+      "drawing_no": "BR-I / 2022 - 005 A & B",
+      "description": "R.C.C. PORTAL WITH OPEN FOUNDATION",
+      "foundation": "OPEN",
+      "superstructure": "RCC_FRAME_CULVERT",
+      "span_count": 6,
+      "total_length_m": 90.0,
+      "sheets": [
+        {
+          "sheet": "sheet1_plan",
+          "index": 1,
+          "file": "pwd_br2022_005_open_portal_Sheet1_Plan.dxf",
+          "ok": true,
+          "entities": 193,
+          "dimensions": 13,
+          "layers": 22,
+          "texts": 40,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet2_long_section",
+          "index": 2,
+          "file": "pwd_br2022_005_open_portal_Sheet2_LongSection.dxf",
+          "ok": true,
+          "entities": 304,
+          "dimensions": 8,
+          "layers": 28,
+          "texts": 105,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet3_cross_section",
+          "index": 3,
+          "file": "pwd_br2022_005_open_portal_Sheet3_CrossSection.dxf",
+          "ok": true,
+          "entities": 80,
+          "dimensions": 10,
+          "layers": 20,
+          "texts": 31,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet4_foundation",
+          "index": 4,
+          "file": "pwd_br2022_005_open_portal_Sheet4_Foundation.dxf",
+          "ok": true,
+          "entities": 134,
+          "dimensions": 10,
+          "layers": 13,
+          "texts": 55,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet5_pier_abutment_details",
+          "index": 5,
+          "file": "pwd_br2022_005_open_portal_Sheet5_PierAbutment.dxf",
+          "ok": true,
+          "entities": 194,
+          "dimensions": 10,
+          "layers": 19,
+          "texts": 78,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet6_bearings_joints",
+          "index": 6,
+          "file": "pwd_br2022_005_open_portal_Sheet6_BearingsJoints.dxf",
+          "ok": true,
+          "entities": 147,
+          "dimensions": 8,
+          "layers": 13,
+          "texts": 71,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet7_bill_of_quantities",
+          "index": 7,
+          "file": "pwd_br2022_005_open_portal_Sheet7_BOQ.dxf",
+          "ok": true,
+          "entities": 276,
+          "dimensions": 0,
+          "layers": 8,
+          "texts": 141,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet8_side_elevations",
+          "index": 8,
+          "file": "pwd_br2022_005_open_portal_Sheet8_SideElevations.dxf",
+          "ok": true,
+          "entities": 244,
+          "dimensions": 10,
+          "layers": 26,
+          "texts": 91,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet9_reinforcement",
+          "index": 9,
+          "file": "pwd_br2022_005_open_portal_Sheet9_Reinforcement.dxf",
+          "ok": true,
+          "entities": 192,
+          "dimensions": 0,
+          "layers": 7,
+          "texts": 97,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        }
+      ],
+      "ok": true,
+      "pdf": "pwd_br2022_005_open_portal_GAD_Booklet.pdf (2364 KB)",
+      "pngs": 9
+    },
+    {
+      "id": "pwd_br2022_006_open_rcc_solidslab_piercap",
+      "sr_no": "07",
+      "drawing_no": "BR-I / 2022 - 006",
+      "description": "OPEN FOUNDATION WITH R.C.C. PIER, PIER CAP & SOLID SLAB SUPER STRUCTURE",
+      "foundation": "OPEN",
+      "superstructure": "SOLID_SLAB",
+      "span_count": 5,
+      "total_length_m": 50.0,
+      "sheets": [
+        {
+          "sheet": "sheet1_plan",
+          "index": 1,
+          "file": "pwd_br2022_006_open_rcc_solidslab_piercap_Sheet1_Plan.dxf",
+          "ok": true,
+          "entities": 175,
+          "dimensions": 12,
+          "layers": 22,
+          "texts": 38,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet2_long_section",
+          "index": 2,
+          "file": "pwd_br2022_006_open_rcc_solidslab_piercap_Sheet2_LongSection.dxf",
+          "ok": true,
+          "entities": 288,
+          "dimensions": 8,
+          "layers": 28,
+          "texts": 100,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet3_cross_section",
+          "index": 3,
+          "file": "pwd_br2022_006_open_rcc_solidslab_piercap_Sheet3_CrossSection.dxf",
+          "ok": true,
+          "entities": 75,
+          "dimensions": 8,
+          "layers": 20,
+          "texts": 30,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet4_foundation",
+          "index": 4,
+          "file": "pwd_br2022_006_open_rcc_solidslab_piercap_Sheet4_Foundation.dxf",
+          "ok": true,
+          "entities": 134,
+          "dimensions": 10,
+          "layers": 13,
+          "texts": 55,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet5_pier_abutment_details",
+          "index": 5,
+          "file": "pwd_br2022_006_open_rcc_solidslab_piercap_Sheet5_PierAbutment.dxf",
+          "ok": true,
+          "entities": 194,
+          "dimensions": 10,
+          "layers": 19,
+          "texts": 78,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet6_bearings_joints",
+          "index": 6,
+          "file": "pwd_br2022_006_open_rcc_solidslab_piercap_Sheet6_BearingsJoints.dxf",
+          "ok": true,
+          "entities": 147,
+          "dimensions": 8,
+          "layers": 13,
+          "texts": 71,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet7_bill_of_quantities",
+          "index": 7,
+          "file": "pwd_br2022_006_open_rcc_solidslab_piercap_Sheet7_BOQ.dxf",
+          "ok": true,
+          "entities": 276,
+          "dimensions": 0,
+          "layers": 8,
+          "texts": 141,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet8_side_elevations",
+          "index": 8,
+          "file": "pwd_br2022_006_open_rcc_solidslab_piercap_Sheet8_SideElevations.dxf",
+          "ok": true,
+          "entities": 244,
+          "dimensions": 10,
+          "layers": 26,
+          "texts": 91,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet9_reinforcement",
+          "index": 9,
+          "file": "pwd_br2022_006_open_rcc_solidslab_piercap_Sheet9_Reinforcement.dxf",
+          "ok": true,
+          "entities": 192,
+          "dimensions": 0,
+          "layers": 7,
+          "texts": 97,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        }
+      ],
+      "ok": true,
+      "pdf": "pwd_br2022_006_open_rcc_solidslab_piercap_GAD_Booklet.pdf (2371 KB)",
+      "pngs": 9
+    },
+    {
+      "id": "pwd_br2022_007_open_rcc_3girder",
+      "sr_no": "08",
+      "drawing_no": "BR-I / 2022 - 007 A & B",
+      "description": "OPEN FOUNDATION WITH R.C.C. PIER & R.C.C. THREE GIRDER SUPER STRUCTURE",
+      "foundation": "OPEN",
+      "superstructure": "RCC_TBEAM",
+      "span_count": 4,
+      "total_length_m": 60.0,
+      "sheets": [
+        {
+          "sheet": "sheet1_plan",
+          "index": 1,
+          "file": "pwd_br2022_007_open_rcc_3girder_Sheet1_Plan.dxf",
+          "ok": true,
+          "entities": 142,
+          "dimensions": 11,
+          "layers": 22,
+          "texts": 36,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet2_long_section",
+          "index": 2,
+          "file": "pwd_br2022_007_open_rcc_3girder_Sheet2_LongSection.dxf",
+          "ok": true,
+          "entities": 275,
+          "dimensions": 8,
+          "layers": 28,
+          "texts": 96,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet3_cross_section",
+          "index": 3,
+          "file": "pwd_br2022_007_open_rcc_3girder_Sheet3_CrossSection.dxf",
+          "ok": true,
+          "entities": 90,
+          "dimensions": 10,
+          "layers": 21,
+          "texts": 32,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet4_foundation",
+          "index": 4,
+          "file": "pwd_br2022_007_open_rcc_3girder_Sheet4_Foundation.dxf",
+          "ok": true,
+          "entities": 134,
+          "dimensions": 10,
+          "layers": 13,
+          "texts": 55,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet5_pier_abutment_details",
+          "index": 5,
+          "file": "pwd_br2022_007_open_rcc_3girder_Sheet5_PierAbutment.dxf",
+          "ok": true,
+          "entities": 194,
+          "dimensions": 10,
+          "layers": 19,
+          "texts": 78,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet6_bearings_joints",
+          "index": 6,
+          "file": "pwd_br2022_007_open_rcc_3girder_Sheet6_BearingsJoints.dxf",
+          "ok": true,
+          "entities": 147,
+          "dimensions": 8,
+          "layers": 13,
+          "texts": 71,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet7_bill_of_quantities",
+          "index": 7,
+          "file": "pwd_br2022_007_open_rcc_3girder_Sheet7_BOQ.dxf",
+          "ok": true,
+          "entities": 276,
+          "dimensions": 0,
+          "layers": 8,
+          "texts": 141,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet8_side_elevations",
+          "index": 8,
+          "file": "pwd_br2022_007_open_rcc_3girder_Sheet8_SideElevations.dxf",
+          "ok": true,
+          "entities": 245,
+          "dimensions": 10,
+          "layers": 26,
+          "texts": 91,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet9_reinforcement",
+          "index": 9,
+          "file": "pwd_br2022_007_open_rcc_3girder_Sheet9_Reinforcement.dxf",
+          "ok": true,
+          "entities": 192,
+          "dimensions": 0,
+          "layers": 7,
+          "texts": 97,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        }
+      ],
+      "ok": true,
+      "pdf": "pwd_br2022_007_open_rcc_3girder_GAD_Booklet.pdf (2351 KB)",
+      "pngs": 9
+    },
+    {
+      "id": "pwd_br2022_008_pile_wall_3girder",
+      "sr_no": "09",
+      "drawing_no": "BR-I / 2022 - 008 A & B",
+      "description": "PILE FOUNDATION WITH R.C.C. PIER (WALL TYPE) & R.C.C. THREE GIRDER SUPER STRUCTURE",
+      "foundation": "PILE",
+      "superstructure": "RCC_TBEAM",
+      "span_count": 3,
+      "total_length_m": 75.0,
+      "sheets": [
+        {
+          "sheet": "sheet1_plan",
+          "index": 1,
+          "file": "pwd_br2022_008_pile_wall_3girder_Sheet1_Plan.dxf",
+          "ok": true,
+          "entities": 127,
+          "dimensions": 10,
+          "layers": 22,
+          "texts": 34,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet2_long_section",
+          "index": 2,
+          "file": "pwd_br2022_008_pile_wall_3girder_Sheet2_LongSection.dxf",
+          "ok": true,
+          "entities": 270,
+          "dimensions": 8,
+          "layers": 28,
+          "texts": 93,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet3_cross_section",
+          "index": 3,
+          "file": "pwd_br2022_008_pile_wall_3girder_Sheet3_CrossSection.dxf",
+          "ok": true,
+          "entities": 90,
+          "dimensions": 10,
+          "layers": 21,
+          "texts": 32,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet4_foundation",
+          "index": 4,
+          "file": "pwd_br2022_008_pile_wall_3girder_Sheet4_Foundation.dxf",
+          "ok": true,
+          "entities": 166,
+          "dimensions": 13,
+          "layers": 18,
+          "texts": 61,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet5_pier_abutment_details",
+          "index": 5,
+          "file": "pwd_br2022_008_pile_wall_3girder_Sheet5_PierAbutment.dxf",
+          "ok": true,
+          "entities": 194,
+          "dimensions": 10,
+          "layers": 19,
+          "texts": 78,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet6_bearings_joints",
+          "index": 6,
+          "file": "pwd_br2022_008_pile_wall_3girder_Sheet6_BearingsJoints.dxf",
+          "ok": true,
+          "entities": 147,
+          "dimensions": 8,
+          "layers": 13,
+          "texts": 71,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet7_bill_of_quantities",
+          "index": 7,
+          "file": "pwd_br2022_008_pile_wall_3girder_Sheet7_BOQ.dxf",
+          "ok": true,
+          "entities": 276,
+          "dimensions": 0,
+          "layers": 8,
+          "texts": 141,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet8_side_elevations",
+          "index": 8,
+          "file": "pwd_br2022_008_pile_wall_3girder_Sheet8_SideElevations.dxf",
+          "ok": true,
+          "entities": 285,
+          "dimensions": 10,
+          "layers": 28,
+          "texts": 97,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet9_reinforcement",
+          "index": 9,
+          "file": "pwd_br2022_008_pile_wall_3girder_Sheet9_Reinforcement.dxf",
+          "ok": true,
+          "entities": 192,
+          "dimensions": 0,
+          "layers": 7,
+          "texts": 97,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        }
+      ],
+      "ok": true,
+      "pdf": "pwd_br2022_008_pile_wall_3girder_GAD_Booklet.pdf (2367 KB)",
+      "pngs": 9
+    },
+    {
+      "id": "pwd_br2022_009_open_rcc_psc4girder",
+      "sr_no": "10",
+      "drawing_no": "BR-I / 2022 - 009 A & B",
+      "description": "OPEN FOUNDATION WITH R.C.C. PIER & P.S.C. FOUR GIRDER SUPER STRUCTURE",
+      "foundation": "OPEN",
+      "superstructure": "PSC_IGIRDER",
+      "span_count": 4,
+      "total_length_m": 100.0,
+      "sheets": [
+        {
+          "sheet": "sheet1_plan",
+          "index": 1,
+          "file": "pwd_br2022_009_open_rcc_psc4girder_Sheet1_Plan.dxf",
+          "ok": true,
+          "entities": 157,
+          "dimensions": 11,
+          "layers": 22,
+          "texts": 36,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet2_long_section",
+          "index": 2,
+          "file": "pwd_br2022_009_open_rcc_psc4girder_Sheet2_LongSection.dxf",
+          "ok": true,
+          "entities": 273,
+          "dimensions": 8,
+          "layers": 28,
+          "texts": 95,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet3_cross_section",
+          "index": 3,
+          "file": "pwd_br2022_009_open_rcc_psc4girder_Sheet3_CrossSection.dxf",
+          "ok": true,
+          "entities": 89,
+          "dimensions": 10,
+          "layers": 21,
+          "texts": 32,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet4_foundation",
+          "index": 4,
+          "file": "pwd_br2022_009_open_rcc_psc4girder_Sheet4_Foundation.dxf",
+          "ok": true,
+          "entities": 134,
+          "dimensions": 10,
+          "layers": 13,
+          "texts": 55,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet5_pier_abutment_details",
+          "index": 5,
+          "file": "pwd_br2022_009_open_rcc_psc4girder_Sheet5_PierAbutment.dxf",
+          "ok": true,
+          "entities": 194,
+          "dimensions": 10,
+          "layers": 19,
+          "texts": 78,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet6_bearings_joints",
+          "index": 6,
+          "file": "pwd_br2022_009_open_rcc_psc4girder_Sheet6_BearingsJoints.dxf",
+          "ok": true,
+          "entities": 147,
+          "dimensions": 8,
+          "layers": 13,
+          "texts": 71,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet7_bill_of_quantities",
+          "index": 7,
+          "file": "pwd_br2022_009_open_rcc_psc4girder_Sheet7_BOQ.dxf",
+          "ok": true,
+          "entities": 276,
+          "dimensions": 0,
+          "layers": 8,
+          "texts": 141,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet8_side_elevations",
+          "index": 8,
+          "file": "pwd_br2022_009_open_rcc_psc4girder_Sheet8_SideElevations.dxf",
+          "ok": true,
+          "entities": 248,
+          "dimensions": 10,
+          "layers": 26,
+          "texts": 91,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet9_reinforcement",
+          "index": 9,
+          "file": "pwd_br2022_009_open_rcc_psc4girder_Sheet9_Reinforcement.dxf",
+          "ok": true,
+          "entities": 192,
+          "dimensions": 0,
+          "layers": 7,
+          "texts": 97,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        }
+      ],
+      "ok": true,
+      "pdf": "pwd_br2022_009_open_rcc_psc4girder_GAD_Booklet.pdf (2390 KB)",
+      "pngs": 9
+    },
+    {
+      "id": "pwd_br2022_010_pile_rcc_psc4girder",
+      "sr_no": "11",
+      "drawing_no": "BR-I / 2022 - 010 A & B",
+      "description": "PILE FOUNDATION WITH R.C.C. PIER & P.S.C. FOUR GIRDER SUPER STRUCTURE",
+      "foundation": "PILE",
+      "superstructure": "PSC_IGIRDER",
+      "span_count": 9,
+      "total_length_m": 270.0,
+      "sheets": [
+        {
+          "sheet": "sheet1_plan",
+          "index": 1,
+          "file": "pwd_br2022_010_pile_rcc_psc4girder_Sheet1_Plan.dxf",
+          "ok": true,
+          "entities": 247,
+          "dimensions": 16,
+          "layers": 22,
+          "texts": 46,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet2_long_section",
+          "index": 2,
+          "file": "pwd_br2022_010_pile_rcc_psc4girder_Sheet2_LongSection.dxf",
+          "ok": true,
+          "entities": 386,
+          "dimensions": 8,
+          "layers": 28,
+          "texts": 133,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet3_cross_section",
+          "index": 3,
+          "file": "pwd_br2022_010_pile_rcc_psc4girder_Sheet3_CrossSection.dxf",
+          "ok": true,
+          "entities": 89,
+          "dimensions": 10,
+          "layers": 21,
+          "texts": 32,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet4_foundation",
+          "index": 4,
+          "file": "pwd_br2022_010_pile_rcc_psc4girder_Sheet4_Foundation.dxf",
+          "ok": true,
+          "entities": 166,
+          "dimensions": 13,
+          "layers": 18,
+          "texts": 61,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet5_pier_abutment_details",
+          "index": 5,
+          "file": "pwd_br2022_010_pile_rcc_psc4girder_Sheet5_PierAbutment.dxf",
+          "ok": true,
+          "entities": 194,
+          "dimensions": 10,
+          "layers": 19,
+          "texts": 78,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet6_bearings_joints",
+          "index": 6,
+          "file": "pwd_br2022_010_pile_rcc_psc4girder_Sheet6_BearingsJoints.dxf",
+          "ok": true,
+          "entities": 147,
+          "dimensions": 8,
+          "layers": 13,
+          "texts": 71,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet7_bill_of_quantities",
+          "index": 7,
+          "file": "pwd_br2022_010_pile_rcc_psc4girder_Sheet7_BOQ.dxf",
+          "ok": true,
+          "entities": 276,
+          "dimensions": 0,
+          "layers": 8,
+          "texts": 141,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet8_side_elevations",
+          "index": 8,
+          "file": "pwd_br2022_010_pile_rcc_psc4girder_Sheet8_SideElevations.dxf",
+          "ok": true,
+          "entities": 288,
+          "dimensions": 10,
+          "layers": 28,
+          "texts": 97,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet9_reinforcement",
+          "index": 9,
+          "file": "pwd_br2022_010_pile_rcc_psc4girder_Sheet9_Reinforcement.dxf",
+          "ok": true,
+          "entities": 192,
+          "dimensions": 0,
+          "layers": 7,
+          "texts": 97,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        }
+      ],
+      "ok": true,
+      "pdf": "pwd_br2022_010_pile_rcc_psc4girder_GAD_Booklet.pdf (2558 KB)",
+      "pngs": 9
+    },
+    {
+      "id": "pwd_br2022_011_openwell_rcc_pscbox",
+      "sr_no": "12",
+      "drawing_no": "BR-I / 2022 - 011 A & B",
+      "description": "OPEN / WELL FOUNDATION WITH R.C.C. PIER & P.S.C. BOX SUPER STRUCTURE",
+      "foundation": "WELL",
+      "superstructure": "PSC_BOX_GIRDER",
+      "span_count": 3,
+      "total_length_m": 120.0,
+      "sheets": [
+        {
+          "sheet": "sheet1_plan",
+          "index": 1,
+          "file": "pwd_br2022_011_openwell_rcc_pscbox_Sheet1_Plan.dxf",
+          "ok": true,
+          "entities": 103,
+          "dimensions": 10,
+          "layers": 22,
+          "texts": 34,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet2_long_section",
+          "index": 2,
+          "file": "pwd_br2022_011_openwell_rcc_pscbox_Sheet2_LongSection.dxf",
+          "ok": true,
+          "entities": 259,
+          "dimensions": 8,
+          "layers": 28,
+          "texts": 91,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet3_cross_section",
+          "index": 3,
+          "file": "pwd_br2022_011_openwell_rcc_pscbox_Sheet3_CrossSection.dxf",
+          "ok": true,
+          "entities": 84,
+          "dimensions": 9,
+          "layers": 21,
+          "texts": 32,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet4_foundation",
+          "index": 4,
+          "file": "pwd_br2022_011_openwell_rcc_pscbox_Sheet4_Foundation.dxf",
+          "ok": true,
+          "entities": 139,
+          "dimensions": 12,
+          "layers": 14,
+          "texts": 56,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet5_pier_abutment_details",
+          "index": 5,
+          "file": "pwd_br2022_011_openwell_rcc_pscbox_Sheet5_PierAbutment.dxf",
+          "ok": true,
+          "entities": 194,
+          "dimensions": 10,
+          "layers": 19,
+          "texts": 78,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet6_bearings_joints",
+          "index": 6,
+          "file": "pwd_br2022_011_openwell_rcc_pscbox_Sheet6_BearingsJoints.dxf",
+          "ok": true,
+          "entities": 147,
+          "dimensions": 8,
+          "layers": 13,
+          "texts": 71,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet7_bill_of_quantities",
+          "index": 7,
+          "file": "pwd_br2022_011_openwell_rcc_pscbox_Sheet7_BOQ.dxf",
+          "ok": true,
+          "entities": 276,
+          "dimensions": 0,
+          "layers": 8,
+          "texts": 141,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet8_side_elevations",
+          "index": 8,
+          "file": "pwd_br2022_011_openwell_rcc_pscbox_Sheet8_SideElevations.dxf",
+          "ok": true,
+          "entities": 237,
+          "dimensions": 10,
+          "layers": 25,
+          "texts": 91,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet9_reinforcement",
+          "index": 9,
+          "file": "pwd_br2022_011_openwell_rcc_pscbox_Sheet9_Reinforcement.dxf",
+          "ok": true,
+          "entities": 192,
+          "dimensions": 0,
+          "layers": 7,
+          "texts": 97,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        }
+      ],
+      "ok": true,
+      "pdf": "pwd_br2022_011_openwell_rcc_pscbox_GAD_Booklet.pdf (2359 KB)",
+      "pngs": 9
+    },
+    {
+      "id": "pwd_br2022_012_pile_rcc_pscbox",
+      "sr_no": "13",
+      "drawing_no": "BR-I / 2022 - 012 A & B",
+      "description": "PILE FOUNDATION WITH R.C.C. PIER & P.S.C. BOX SUPER STRUCTURE",
+      "foundation": "PILE",
+      "superstructure": "PSC_BOX_GIRDER",
+      "span_count": 2,
+      "total_length_m": 65.0,
+      "sheets": [
+        {
+          "sheet": "sheet1_plan",
+          "index": 1,
+          "file": "pwd_br2022_012_pile_rcc_pscbox_Sheet1_Plan.dxf",
+          "ok": true,
+          "entities": 94,
+          "dimensions": 9,
+          "layers": 22,
+          "texts": 32,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet2_long_section",
+          "index": 2,
+          "file": "pwd_br2022_012_pile_rcc_pscbox_Sheet2_LongSection.dxf",
+          "ok": true,
+          "entities": 252,
+          "dimensions": 8,
+          "layers": 28,
+          "texts": 87,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet3_cross_section",
+          "index": 3,
+          "file": "pwd_br2022_012_pile_rcc_pscbox_Sheet3_CrossSection.dxf",
+          "ok": true,
+          "entities": 84,
+          "dimensions": 9,
+          "layers": 21,
+          "texts": 32,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet4_foundation",
+          "index": 4,
+          "file": "pwd_br2022_012_pile_rcc_pscbox_Sheet4_Foundation.dxf",
+          "ok": true,
+          "entities": 166,
+          "dimensions": 13,
+          "layers": 18,
+          "texts": 61,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet5_pier_abutment_details",
+          "index": 5,
+          "file": "pwd_br2022_012_pile_rcc_pscbox_Sheet5_PierAbutment.dxf",
+          "ok": true,
+          "entities": 194,
+          "dimensions": 10,
+          "layers": 19,
+          "texts": 78,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet6_bearings_joints",
+          "index": 6,
+          "file": "pwd_br2022_012_pile_rcc_pscbox_Sheet6_BearingsJoints.dxf",
+          "ok": true,
+          "entities": 147,
+          "dimensions": 8,
+          "layers": 13,
+          "texts": 71,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet7_bill_of_quantities",
+          "index": 7,
+          "file": "pwd_br2022_012_pile_rcc_pscbox_Sheet7_BOQ.dxf",
+          "ok": true,
+          "entities": 276,
+          "dimensions": 0,
+          "layers": 8,
+          "texts": 141,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet8_side_elevations",
+          "index": 8,
+          "file": "pwd_br2022_012_pile_rcc_pscbox_Sheet8_SideElevations.dxf",
+          "ok": true,
+          "entities": 277,
+          "dimensions": 10,
+          "layers": 27,
+          "texts": 97,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet9_reinforcement",
+          "index": 9,
+          "file": "pwd_br2022_012_pile_rcc_pscbox_Sheet9_Reinforcement.dxf",
+          "ok": true,
+          "entities": 192,
+          "dimensions": 0,
+          "layers": 7,
+          "texts": 97,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        }
+      ],
+      "ok": true,
+      "pdf": "pwd_br2022_012_pile_rcc_pscbox_GAD_Booklet.pdf (2374 KB)",
+      "pngs": 9
+    },
+    {
+      "id": "pwd_br2022_013_well_rcc_pscbox",
+      "sr_no": "14",
+      "drawing_no": "BR-I / 2022 - 013 A & B",
+      "description": "WELL FOUNDATION WITH R.C.C. PIER & P.S.C. BOX SUPER STRUCTURE",
+      "foundation": "WELL",
+      "superstructure": "PSC_BOX_GIRDER",
+      "span_count": 2,
+      "total_length_m": 95.0,
+      "sheets": [
+        {
+          "sheet": "sheet1_plan",
+          "index": 1,
+          "file": "pwd_br2022_013_well_rcc_pscbox_Sheet1_Plan.dxf",
+          "ok": true,
+          "entities": 94,
+          "dimensions": 9,
+          "layers": 22,
+          "texts": 32,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet2_long_section",
+          "index": 2,
+          "file": "pwd_br2022_013_well_rcc_pscbox_Sheet2_LongSection.dxf",
+          "ok": true,
+          "entities": 235,
+          "dimensions": 8,
+          "layers": 28,
+          "texts": 82,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet3_cross_section",
+          "index": 3,
+          "file": "pwd_br2022_013_well_rcc_pscbox_Sheet3_CrossSection.dxf",
+          "ok": true,
+          "entities": 84,
+          "dimensions": 9,
+          "layers": 21,
+          "texts": 32,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet4_foundation",
+          "index": 4,
+          "file": "pwd_br2022_013_well_rcc_pscbox_Sheet4_Foundation.dxf",
+          "ok": true,
+          "entities": 139,
+          "dimensions": 12,
+          "layers": 14,
+          "texts": 56,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet5_pier_abutment_details",
+          "index": 5,
+          "file": "pwd_br2022_013_well_rcc_pscbox_Sheet5_PierAbutment.dxf",
+          "ok": true,
+          "entities": 194,
+          "dimensions": 10,
+          "layers": 19,
+          "texts": 78,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet6_bearings_joints",
+          "index": 6,
+          "file": "pwd_br2022_013_well_rcc_pscbox_Sheet6_BearingsJoints.dxf",
+          "ok": true,
+          "entities": 147,
+          "dimensions": 8,
+          "layers": 13,
+          "texts": 71,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet7_bill_of_quantities",
+          "index": 7,
+          "file": "pwd_br2022_013_well_rcc_pscbox_Sheet7_BOQ.dxf",
+          "ok": true,
+          "entities": 276,
+          "dimensions": 0,
+          "layers": 8,
+          "texts": 141,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet8_side_elevations",
+          "index": 8,
+          "file": "pwd_br2022_013_well_rcc_pscbox_Sheet8_SideElevations.dxf",
+          "ok": true,
+          "entities": 237,
+          "dimensions": 10,
+          "layers": 25,
+          "texts": 91,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet9_reinforcement",
+          "index": 9,
+          "file": "pwd_br2022_013_well_rcc_pscbox_Sheet9_Reinforcement.dxf",
+          "ok": true,
+          "entities": 192,
+          "dimensions": 0,
+          "layers": 7,
+          "texts": 97,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        }
+      ],
+      "ok": true,
+      "pdf": "pwd_br2022_013_well_rcc_pscbox_GAD_Booklet.pdf (2339 KB)",
+      "pngs": 9
+    },
+    {
+      "id": "pwd_br2022_014_open_arch_slab_ped",
+      "sr_no": "15",
+      "drawing_no": "BR-I / 2022 - 014",
+      "description": "OPEN FOUNDATION WITH R.C.C. ARCH / SLAB SUPER STRUCTURE (PEDESTRIAN)",
+      "foundation": "OPEN",
+      "superstructure": "CONCRETE_ARCH_DECK",
+      "span_count": 3,
+      "total_length_m": 48.3,
+      "sheets": [
+        {
+          "sheet": "sheet1_plan",
+          "index": 1,
+          "file": "pwd_br2022_014_open_arch_slab_ped_Sheet1_Plan.dxf",
+          "ok": true,
+          "entities": 139,
+          "dimensions": 10,
+          "layers": 22,
+          "texts": 34,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet2_long_section",
+          "index": 2,
+          "file": "pwd_br2022_014_open_arch_slab_ped_Sheet2_LongSection.dxf",
+          "ok": true,
+          "entities": 250,
+          "dimensions": 8,
+          "layers": 28,
+          "texts": 87,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet3_cross_section",
+          "index": 3,
+          "file": "pwd_br2022_014_open_arch_slab_ped_Sheet3_CrossSection.dxf",
+          "ok": true,
+          "entities": 80,
+          "dimensions": 10,
+          "layers": 20,
+          "texts": 31,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet4_foundation",
+          "index": 4,
+          "file": "pwd_br2022_014_open_arch_slab_ped_Sheet4_Foundation.dxf",
+          "ok": true,
+          "entities": 130,
+          "dimensions": 10,
+          "layers": 13,
+          "texts": 55,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet5_pier_abutment_details",
+          "index": 5,
+          "file": "pwd_br2022_014_open_arch_slab_ped_Sheet5_PierAbutment.dxf",
+          "ok": true,
+          "entities": 194,
+          "dimensions": 10,
+          "layers": 19,
+          "texts": 78,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet6_bearings_joints",
+          "index": 6,
+          "file": "pwd_br2022_014_open_arch_slab_ped_Sheet6_BearingsJoints.dxf",
+          "ok": true,
+          "entities": 147,
+          "dimensions": 8,
+          "layers": 13,
+          "texts": 71,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet7_bill_of_quantities",
+          "index": 7,
+          "file": "pwd_br2022_014_open_arch_slab_ped_Sheet7_BOQ.dxf",
+          "ok": true,
+          "entities": 276,
+          "dimensions": 0,
+          "layers": 8,
+          "texts": 141,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet8_side_elevations",
+          "index": 8,
+          "file": "pwd_br2022_014_open_arch_slab_ped_Sheet8_SideElevations.dxf",
+          "ok": true,
+          "entities": 244,
+          "dimensions": 10,
+          "layers": 26,
+          "texts": 91,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet9_reinforcement",
+          "index": 9,
+          "file": "pwd_br2022_014_open_arch_slab_ped_Sheet9_Reinforcement.dxf",
+          "ok": true,
+          "entities": 192,
+          "dimensions": 0,
+          "layers": 7,
+          "texts": 97,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        }
+      ],
+      "ok": true,
+      "pdf": "pwd_br2022_014_open_arch_slab_ped_GAD_Booklet.pdf (2310 KB)",
+      "pngs": 9
+    },
+    {
+      "id": "pwd_br2022_015_open_arch_veh",
+      "sr_no": "16",
+      "drawing_no": "BR-I / 2022 - 015",
+      "description": "OPEN FOUNDATION WITH R.C.C. ARCH SUPER STRUCTURE (VEHICULAR)",
+      "foundation": "OPEN",
+      "superstructure": "CONCRETE_ARCH_DECK",
+      "span_count": 1,
+      "total_length_m": 61.94,
+      "sheets": [
+        {
+          "sheet": "sheet1_plan",
+          "index": 1,
+          "file": "pwd_br2022_015_open_arch_veh_Sheet1_Plan.dxf",
+          "ok": true,
+          "entities": 103,
+          "dimensions": 8,
+          "layers": 21,
+          "texts": 30,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet2_long_section",
+          "index": 2,
+          "file": "pwd_br2022_015_open_arch_veh_Sheet2_LongSection.dxf",
+          "ok": true,
+          "entities": 208,
+          "dimensions": 8,
+          "layers": 26,
+          "texts": 72,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet3_cross_section",
+          "index": 3,
+          "file": "pwd_br2022_015_open_arch_veh_Sheet3_CrossSection.dxf",
+          "ok": true,
+          "entities": 80,
+          "dimensions": 10,
+          "layers": 20,
+          "texts": 31,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet4_foundation",
+          "index": 4,
+          "file": "pwd_br2022_015_open_arch_veh_Sheet4_Foundation.dxf",
+          "ok": true,
+          "entities": 134,
+          "dimensions": 10,
+          "layers": 13,
+          "texts": 55,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet5_pier_abutment_details",
+          "index": 5,
+          "file": "pwd_br2022_015_open_arch_veh_Sheet5_PierAbutment.dxf",
+          "ok": true,
+          "entities": 194,
+          "dimensions": 10,
+          "layers": 19,
+          "texts": 78,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet6_bearings_joints",
+          "index": 6,
+          "file": "pwd_br2022_015_open_arch_veh_Sheet6_BearingsJoints.dxf",
+          "ok": true,
+          "entities": 147,
+          "dimensions": 8,
+          "layers": 13,
+          "texts": 71,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet7_bill_of_quantities",
+          "index": 7,
+          "file": "pwd_br2022_015_open_arch_veh_Sheet7_BOQ.dxf",
+          "ok": true,
+          "entities": 276,
+          "dimensions": 0,
+          "layers": 8,
+          "texts": 141,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet8_side_elevations",
+          "index": 8,
+          "file": "pwd_br2022_015_open_arch_veh_Sheet8_SideElevations.dxf",
+          "ok": true,
+          "entities": 286,
+          "dimensions": 16,
+          "layers": 24,
+          "texts": 106,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "dimensioned": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        },
+        {
+          "sheet": "sheet9_reinforcement",
+          "index": 9,
+          "file": "pwd_br2022_015_open_arch_veh_Sheet9_Reinforcement.dxf",
+          "ok": true,
+          "entities": 192,
+          "dimensions": 0,
+          "layers": 7,
+          "texts": 97,
+          "extent_mm": [
+            841.0,
+            594.0
+          ],
+          "checks": {
+            "finite extents": "pass",
+            "inside frame": "pass",
+            "non-empty geometry": "pass",
+            "no degenerate geo": "pass",
+            "layers registered": "pass",
+            "nothing on layer 0": "pass",
+            "title block filled": "pass",
+            "sheet n of m": "pass",
+            "text legible": "pass",
+            "geometry beyond title block": "pass"
+          },
+          "failures": []
+        }
+      ],
+      "ok": true,
+      "pdf": "pwd_br2022_015_open_arch_veh_GAD_Booklet.pdf (2342 KB)",
+      "pngs": 9
+    }
+  ]
+}

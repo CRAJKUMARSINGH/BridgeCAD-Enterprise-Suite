@@ -35,6 +35,7 @@ from .dxf_engine import new_sheet, save
 from .primitives import (
     circle,
     dim_linear_h,
+    dim_linear_v,
     hatch_poly,
     hatch_rect,
     level_tag,
@@ -128,11 +129,21 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     pile_sp_m = float(fd.pile_spacing_m or 2.0)
     piles_n = int(fd.piles_per_pier or 4)
     pile_cap_t_m = float(fd.pile_cap_thickness_mm or 1200) / 1000.0
-    pile_cut_rl = float(fd.pile_cutoff_level_m or 110.5)
-    pile_tip_rl = pile_cut_rl - pile_len_m
     found_type = str(
         getattr(getattr(fd, "type", None), "name", getattr(fd, "type", "PILE"))
     ).upper()
+    # Pile cut-off RL.  The PWD booklet fixtures carry no absolute RLs, and the
+    # old hard-coded 110.5 fallback then hung the pile cap ~110 m above the deck
+    # — the pile group plotted ~1.9 m below the sheet frame.  Anchor the fallback
+    # to the project's own datum instead: pile-cap top = abutment base =
+    # soffit − abutment_height (see the ``abutment_height_m`` datum note below).
+    pile_cut_rl = fd.pile_cutoff_level_m
+    if not pile_cut_rl and "PILE" in found_type:
+        pile_cut_rl = (
+            float(hd.actual_soffit_level_m or ls.soffit_rl) - abt_h_m
+        ) - pile_cap_t_m
+    pile_cut_rl = float(pile_cut_rl or 110.5)
+    pile_tip_rl = pile_cut_rl - pile_len_m
 
     # Levels
     tod_rl = float(pm.road_level_rl_m or ls.top_of_deck_rl)  # Top-of-deck RL
@@ -172,7 +183,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         consultant=getattr(getattr(pm, "consultant", None), "name", "") or "",
         scale_str=f"1:{scale_denom}",
         sheet_no="8",
-        total_sheets="8",
+        total_sheets="9",
     )
 
     # ── Adaptive scale per view (fit overall_w × total_height into box) ──
@@ -378,11 +389,14 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     )
 
     # ── NTS disclaimer (FR-8: demoted, grey 8, 10% smaller) ──────────────
+    # `th` scales with the view fit, so a compact structure inflates it and the
+    # `+ th * 6` offset pushed this line through the top border (measured +5 mm
+    # on the arch types).  Clamp it inside the margin.
     text(
         msp,
         "(Not to Scale — indicative)",
         (_VIEW1_X0 + _VIEW_W / 2.0 + _VIEW2_X0 + _VIEW_W / 2.0) / 2.0,
-        _VIEW_Y0 + _VIEW_H + th * 6.0,
+        min(_VIEW_Y0 + _VIEW_H + th * 6.0, _SHEET_H - _MARGIN - th * 0.9 - 1.0),
         height=th * 0.9,
         layer="TEXT-SPEC",
         halign="CENTER",
@@ -850,7 +864,11 @@ def _draw_abutment_endface(
         )
 
     # ── RL level tags (left side of view 1) ────────────────────────────────
-    tag_x_left = vhx(-half_ow - ret_w_m - app_l_m * 0.4 - th * 5.5)
+    # The staff offset must be PAPER millimetres.  The previous expression added
+    # `th * 5.5` *inside* the metre-space transform, so it was multiplied by the
+    # fit scale and pushed the whole staff — tick, leader, RL tag and label —
+    # roughly 400 mm off the left edge of the sheet.
+    tag_x_left = max(_MARGIN + 14.0, vhx(-half_ow) - 21.0 * th)
     levels = [
         ("TOP OF DECK / FORMATION", tod_rl),
         ("SOFFIT OF DECK", sof_rl),
@@ -915,6 +933,68 @@ def _draw_abutment_endface(
         label=f"BRG c/c {bc_sep:.2f} m",
         text_height=th * 0.8,
     )
+
+    # ── Structural dimensions — cap / shaft widths and heights ────────────
+    # Abutment cap width (transverse).
+    dim_y_cap = vvy(cap_bot_rl_s8) + th * 2.0
+    dim_linear_h(
+        msp,
+        vhx(-cap_half_m),
+        dim_y_cap,
+        vhx(cap_half_m),
+        dim_y_cap,
+        dim_y=dim_y_cap + th * 0.5,
+        label=f"CAP W = {cap_half_m * 2:.3f} m",
+        text_height=th * 0.8,
+    )
+    # Abutment shaft width (transverse).
+    dim_y_shaft = vvy(abt_base_rl) - th * 2.0
+    dim_linear_h(
+        msp,
+        vhx(-shaft_half_w_m),
+        dim_y_shaft,
+        vhx(shaft_half_w_m),
+        dim_y_shaft,
+        dim_y=dim_y_shaft - th * 6.0,
+        label=f"SHAFT W = {shaft_half_w_m * 2:.3f} m",
+        text_height=th * 0.8,
+    )
+    # Wearing coat + deck thickness — vertical staff at the deck's left edge.
+    wc_staff_x = vhx(-half_ow) - th * 4.0
+    dim_linear_v(
+        msp,
+        wc_staff_x,
+        vvy(tod_rl - wc_t_m),
+        wc_staff_x,
+        vvy(tod_rl),
+        dim_x=wc_staff_x - th * 5.0,
+        label=f"WC {int(wc_t_m * 1000)}mm",
+        text_height=th * 0.8,
+    )
+    dim_linear_v(
+        msp,
+        wc_staff_x,
+        vvy(tod_rl - wc_t_m - deck_t_m),
+        wc_staff_x,
+        vvy(tod_rl - wc_t_m),
+        dim_x=wc_staff_x - th * 5.0,
+        label=f"DECK {int(deck_t_m * 1000)}mm",
+        text_height=th * 0.8,
+    )
+    # Abutment shaft height (base of shaft → cap soffit).
+    shaft_h_m = cap_bot_rl_s8 - abt_base_rl
+    if shaft_h_m > 0.01:
+        shaft_staff_x = vhx(-shaft_half_w_m) - th * 4.0
+        dim_linear_v(
+            msp,
+            shaft_staff_x,
+            vvy(abt_base_rl),
+            shaft_staff_x,
+            vvy(cap_bot_rl_s8),
+            dim_x=shaft_staff_x - th * 6.0,
+            label=f"ABT {shaft_h_m:.3f} m",
+            text_height=th * 0.8,
+        )
 
     # ── HFL line (if within viewport) ──────────────────────────────────────
     if _VIEW_Y0 < vvy(hfl_rl) < _VIEW_Y0 + _VIEW_H:
@@ -1243,7 +1323,14 @@ def _draw_pier_transverse(
         )
 
     # ── RL level tags (right side of pier view) ────────────────────────────
-    tag_x = vhx(sh_half_w_l) + th * 12.0
+    # The staff must clear the widest structure (deck / pier cap / shaft) *and*
+    # leave the RL value column inside the sheet border.  The old offset had no
+    # right-hand bound, so on the wider multi-span decks the descriptive label
+    # ran 7 mm past the border; the tick is now clamped and the descriptive
+    # name is right-aligned into the gap between the structure and the tick
+    # (mirroring the left-hand staff on view 1).
+    _RIGHT_INNER = _SHEET_W - _MARGIN - 2.0
+    tag_x = min(vhx(max(sh_half_w_l, half_ow)) + th * 8.0, _RIGHT_INNER - th * 9.0)
     levels = [
         ("T.O.D. / FORMATION RL", tod_rl),
         ("SOFFIT RL", sof_rl),
@@ -1267,7 +1354,15 @@ def _draw_pier_transverse(
         tick_end = vhx(sh_half_w_l + 0.2)
         line(msp, (tag_x, yy), (tick_end, yy), layer="DIM-LEVEL", color=5)
         level_tag(msp, tag_x, yy, rl, text_height=th * 0.85)
-        text(msp, label, tag_x + th * 8, yy - th * 0.5, height=th * 0.75, layer="TEXT-LEVEL")
+        text(
+            msp,
+            label,
+            tag_x - th * 1.5,
+            yy - th * 0.5,
+            height=th * 0.75,
+            layer="TEXT-LEVEL",
+            halign="RIGHT",
+        )
 
     # ── Width dims (carriageway + overall) ────────────────────────────────
     dim_base_y = gir_bot - th * 1.5

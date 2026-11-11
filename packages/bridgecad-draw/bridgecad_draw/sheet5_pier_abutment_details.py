@@ -55,7 +55,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         drawing_title="PIER AND ABUTMENT DETAILS",
         revision=getattr(getattr(pm, "revision", None), "name", "R0") or "R0",
         sheet_no="5",
-        total_sheets="8",
+        total_sheets="9",
     )
 
     sc = 12.0  # mm per metre
@@ -80,20 +80,34 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     cap_w_mm = cap_w * sc
     ped_h_mm = ped_h * sc
 
-    # Pier shaft (front elevation — width dimension shown)
-    rectangle(
-        msp, pier_cx - pier_sw_mm / 2, pier_by, pier_sw_mm, pier_h_mm, layer="SUB-PIER", lw=50
-    )
-    hatch_rect(
-        msp,
-        pier_cx - pier_sw_mm / 2,
-        pier_by,
-        pier_sw_mm,
-        pier_h_mm,
-        pattern="ANSI31",
-        scale=sc * 0.015,
-        layer="STRUC-HATCHING",
-    )
+    # Pier shaft — LISP pier() draws battered faces (1:battr), not a rectangle.
+    # Baviskar's LISP: ofset = height / battr → bottom width = top + 2*ofset
+    pier_batter = float(getattr(sub, "pier_batter_1n", None) or 0)
+    if pier_batter > 0:
+        _batter_mm = pier_h_mm / pier_batter  # lateral offset per face (mm)
+        _pier_pts = [
+            (pier_cx - pier_sw_mm / 2, pier_by + pier_h_mm),
+            (pier_cx + pier_sw_mm / 2, pier_by + pier_h_mm),
+            (pier_cx + pier_sw_mm / 2 + _batter_mm, pier_by),
+            (pier_cx - pier_sw_mm / 2 - _batter_mm, pier_by),
+        ]
+        polyline(msp, _pier_pts, layer="SUB-PIER", close=True, lw=50)
+        hatch_poly(msp, _pier_pts, pattern="ANSI31", scale=sc * 0.015, layer="STRUC-HATCHING")
+    else:
+        # Plumb pier (no batter specified)
+        rectangle(
+            msp, pier_cx - pier_sw_mm / 2, pier_by, pier_sw_mm, pier_h_mm, layer="SUB-PIER", lw=50
+        )
+        hatch_rect(
+            msp,
+            pier_cx - pier_sw_mm / 2,
+            pier_by,
+            pier_sw_mm,
+            pier_h_mm,
+            pattern="ANSI31",
+            scale=sc * 0.015,
+            layer="STRUC-HATCHING",
+        )
 
     # Pier cap
     cap_bot_y = pier_by + pier_h_mm
@@ -575,7 +589,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
             "GSB 100",
             dw_x + dw_t * sc / 2.0,
             cap_top_ly + gsb_mm / 2.0,
-            height=th * 0.6,
+            height=th * 0.8,
             layer="TEXT-SPEC",
             halign="CENTER",
         )
@@ -738,7 +752,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     # ── Sheet self-audit table (clause-tagged checks) ─────────────────────
     from .checks_table import build_abutment_rows, draw_checks_table
 
-    draw_checks_table(msp, 240.0, 80.0, build_abutment_rows(project), text_height=th * 0.8)
+    draw_checks_table(msp, 240.0, 80.0, build_abutment_rows(project), text_height=th)
 
 
 __all__ = ["generate"]

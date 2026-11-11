@@ -4,8 +4,8 @@
 **Fixture ID:** `mnb_8_485_minor_18m`  
 **Sheets generated:** 9 DXF  
 **Rendered PNGs:** 9  
-**PDF booklet:** [`mnb_8_485_minor_18m_GAD_Booklet.pdf`](mnb_8_485_minor_18m_GAD_Booklet.pdf) (2282 KB, 9 pages)  
-**Total DXF size:** 668 KB  
+**PDF booklet:** [`mnb_8_485_minor_18m_GAD_Booklet.pdf`](mnb_8_485_minor_18m_GAD_Booklet.pdf) (2412 KB, 9 pages)  
+**Total DXF size:** 839 KB  
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets

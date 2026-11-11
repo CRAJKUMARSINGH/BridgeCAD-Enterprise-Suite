@@ -57,7 +57,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         drawing_title="FOUNDATION DETAILS — TYPICAL PIER",
         revision=getattr(getattr(pm, "revision", None), "name", "R0") or "R0",
         sheet_no="4",
-        total_sheets="8",
+        total_sheets="9",
     )
 
     sc = 20.0  # mm per metre
@@ -135,6 +135,30 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         r_in = layout.well_inner_radius_m * sc
         circle(msp, plan_cx, plan_cy, r_out, layer="FOUND-WELL", color=4)
         circle(msp, plan_cx, plan_cy, r_in, layer="FOUND-WELL", color=4)
+        # Steining dimensions — outer and inner diameter across the well. The well
+        # branch previously drew no dimension at all (only the pile branch did),
+        # which left the sheet short of the >=8 DIMENSION contract on any fixture
+        # without a pile group.
+        dim_linear_h(
+            msp,
+            plan_cx - r_out,
+            plan_cy - r_out - th * 5,
+            plan_cx + r_out,
+            plan_cy - r_out - th * 5,
+            dim_y=plan_cy - r_out - th * 5,
+            label=f"OD = {layout.well_outer_radius_m * 2:.2f} m",
+            text_height=th,
+        )
+        dim_linear_v(
+            msp,
+            plan_cx + r_out + th * 3,
+            plan_cy - r_out,
+            plan_cx + r_out + th * 3,
+            plan_cy + r_out,
+            dim_x=plan_cx + r_out + th * 9,
+            label=f"ID = {layout.well_inner_radius_m * 2:.2f} m",
+            text_height=th,
+        )
         text(
             msp,
             "WELL FOUNDATION — PLAN",
@@ -146,16 +170,26 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         )
 
     # ── ELEVATION VIEW (right side) ───────────────────────────────────────
-    elev_cx, elev_cy = 560.0, 300.0
+    # The elevation is FITTED, not fixed-scale: the paper distance between the
+    # pile tip and the top of the pier stub is budgeted so the whole view — cap,
+    # shafts and every RL tag — stays inside the A1 frame whatever the pile
+    # length.  The old absolute 30 mm/m exaggeration ran a 15 m pile's pier stub
+    # 111 mm past the top border.  Horizontal scale stays `sc * 1.5`.
+    elev_cx = 560.0
     scour_rl = float(hd.scour_level_m or 0)
     pile_cut = float(fd.pile_cutoff_level_m or 0) if fd.pile_cutoff_level_m else scour_rl + 2.0
     pile_len = float(fd.pile_length_m or 15.0)
     pile_tip = pile_cut - pile_len
-    cap_top = pile_cut + float(fd.pile_cap_thickness_mm or 1500) / 1000.0
-    datum_rl = pile_tip - 1.0
+    cap_thk = float(fd.pile_cap_thickness_mm or 1500) / 1000.0
+    cap_top = pile_cut + cap_thk
+
+    _EV_BOT = 200.0  # paper y of the pile tip (just above the inset band)
+    _EV_TOP = 560.0  # highest paper y the elevation may occupy
+    _ev_extent_m = max(1.0, (cap_top - pile_tip) + cap_thk * 2.2)
+    _ev_vs = (_EV_TOP - _EV_BOT) / _ev_extent_m  # mm per metre (vertical)
 
     def evy(rl):
-        return elev_cy - 100.0 + (rl - datum_rl) * sc * 1.5
+        return _EV_BOT + (rl - pile_tip) * _ev_vs
 
     # Ground/scour line
     scour_y = evy(scour_rl)
@@ -172,7 +206,6 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
 
     if layout.pile_positions:
         r_mm = layout.pile_diameter_m / 2.0 * sc * 1.5
-        float(fd.pile_cap_thickness_mm or 1500) / 1000.0
         # Pile cap elevation
         cap_y0 = evy(pile_cut)
         cap_y1 = evy(cap_top)
@@ -237,7 +270,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
             msp,
             "PILE FOUNDATION — ELEVATION",
             elev_cx,
-            evy(cap_top) + th * 5,
+            _EV_TOP + th * 4.0,  # clears the pier stub, still inside the frame
             height=th * 1.3,
             layer="TEXT-HEADER",
             halign="CENTER",
@@ -417,6 +450,31 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
             i_y0 + ln_inset + th * 4,
             dim_y=i_y0 + ln_inset + th * 4,
             label=f"DW={dirt_t_inset:.2f}m",
+            text_height=th * 0.75,
+        )
+        # Shaft width — a second horizontal staff below the cap overall width. It
+        # is drawn unconditionally (both abutments always have a shaft), so this
+        # sheet keeps >=8 real DIMENSION entities even on a culvert with neither a
+        # pile group nor a well, which previously left only the 6 inset dims.
+        dim_linear_h(
+            msp,
+            i_cx - shaft_w_inset / 2,
+            i_y0 - th * 10,
+            i_cx + shaft_w_inset / 2,
+            i_y0 - th * 10,
+            dim_y=i_y0 - th * 10,
+            label=f"SH={abt_w:.2f}m",
+            text_height=th * 0.8,
+        )
+        # Weep-hole spacing along the dirt wall (IRC:78 limit = 3.0 m)
+        dim_linear_v(
+            msp,
+            cap_x0 - th * 9,
+            i_y0,
+            cap_x0 - th * 9,
+            i_y0 + ln_inset / n_weep_inset,
+            dim_x=cap_x0 - th * 3,
+            label=f"WE={abt_l / n_weep_inset:.2f}m",
             text_height=th * 0.75,
         )
 

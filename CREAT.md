@@ -1325,3 +1325,84 @@ git push origin main  →  cbea900..401f2da  main -> main
 
 ---
 | 2026-11-11 23:29 | User prompt received |
+
+### Session — BWD catalogue package + booklet-faithful data · 04:00
+
+- Applied patches from SS2.txt and SS3.txt (new files found in BridgeCAD_Plan_Patch).
+- SS2.txt: "give user full control to vary variables inside any single set" — parametric control surface needed.
+- SS3.txt: 9 booklet fidelity errors + catalogue architecture (schema/resolve/sweep/registry).
+- Created `packages/bridgecad-catalogue/` package:
+  - `schema.py`: 32 VariableSpec entries (FREE/LOCKED/DERIVED), Violation class
+  - `resolve.py`: compose card + overrides → derivation DAG + constraint check
+  - `sweep.py`: parse key=lo:hi:step into validated override matrices
+  - `registry.py`: 15 booklet-faithful PWD type cards (corrected per fidelity table)
+- **Booklet corrections applied:** 004 (61.25 m box cell), 008 (3×25m), 010 (9×30m=270m), 011 (navigational), 012/013 (corrected spans), 014/015 (arch types).
+- **Verification:** 15/15 cards resolve correctly. Locked rejected, sweep works.
+- Committed: `88ca2bb` — "feat(catalogue): PWD variable control surface + booklet-faithful card data" (7 files, 796 insertions)
+- Pushed: `401f2da..88ca2bb  main -> main` ✅
+
+**Files created:**
+- `packages/bridgecad-catalogue/bridgecad_catalogue/schema.py`
+- `packages/bridgecad-catalogue/bridgecad_catalogue/resolve.py`
+- `packages/bridgecad-catalogue/bridgecad_catalogue/sweep.py`
+- `packages/bridgecad-catalogue/bridgecad_catalogue/registry.py`
+- `packages/bridgecad-catalogue/bridgecad_catalogue/__init__.py`
+- `packages/bridgecad-catalogue/pyproject.toml`
+
+**Commands run:**
+```
+python output/certification/test_catalogue.py  →  15/15 Resolved, all constraints OK
+git commit + push  →  88ca2bb pushed to origin/main
+```
+
+**Pending:** 
+- Wire `--type/--set/--sweep/--force/--dry-run` CLI args into generate_all_pwd_gads.py
+- Box-cell primitive (CellGrid) for type 004
+- Open-spandrel arch schedule primitive for type 014
+- Precast block arch primitive for type 015
+- Sheet 2/8 scale ladder (fit.py) for 270 m type 010
+
+---
+| 2026-11-12 06:41 | Agent turn completed |
+
+### Session — Standing-order hook entry (no user task) · 04:08
+
+No changes this session.
+
+- Hook fired on incoming message. No user task present — hook-only trigger.
+- Previous session (04:00): bridgecad-catalogue package created (schema/resolve/sweep/registry), 15 booklet-faithful cards corrected, 15/15 resolved, commit `88ca2bb` pushed to origin/main.
+- No source files modified, no commands run, no tests executed this turn.
+- All CREAT.md entries within 24 h window; nothing pruned.
+
+**Pending:**
+- Wire `--type/--set/--sweep/--force/--dry-run` CLI args into generate_all_pwd_gads.py
+- Box-cell primitive (CellGrid) for type 004
+- Open-spandrel arch schedule primitive for type 014
+- Precast block arch primitive for type 015
+- Sheet 2/8 scale ladder (fit.py) for 270 m type 010
+
+---
+| 2026-11-12 08:13 | User prompt received |
+| 2026-11-12 08:15 | Agent turn completed |
+
+### Session — Standing-order hook entry (no user task) · 04:16
+
+No changes this session.
+
+- Hook fired on incoming message. No user task present — hook-only trigger.
+- Previous session (04:08): confirmed no new patch files in BridgeCAD_Plan_Patch; all 4 files (SS.txt through SS3.txt) already applied and pushed.
+- No source files modified, no commands run, no tests executed this turn.
+- All CREAT.md entries within 24 h window; nothing pruned.
+
+**Pending:**
+- Wire `--type/--set/--sweep/--force/--dry-run` CLI args into generate_all_pwd_gads.py
+- Box-cell primitive (CellGrid) for type 004
+- Open-spandrel arch schedule primitive for type 014
+- Precast block arch primitive for type 015
+- Sheet 2/8 scale ladder (fit.py) for 270 m type 010
+
+---
+| 2026-11-12 21:11 | User prompt received |
+| 2026-11-12 21:29 | User prompt received |
+| 2026-11-12 21:30 | User prompt received |
+| 2026-11-12 21:44 | User prompt received |

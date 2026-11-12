@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bridgecad-catalogue"
+version = "0.1.0rc1"
+description = "BridgeCAD Enterprise — Maharashtra PWD booklet catalogue: variable control surface, resolver and sweep matrix"
+requires-python = ">=3.11"
+
+[tool.setuptools]
+packages = ["bridgecad_catalogue"]
+
+[tool.setuptools.package-dir]
+"" = "."

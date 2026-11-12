@@ -1281,3 +1281,47 @@ the sheet now always carries ≥8 real DIMENSION entities.
 (refreshed DXF+PNG+PDF), `CREAT.md`.
 | 2026-11-11 08:57 | User prompt received |
 | 2026-11-11 08:58 | User prompt received |
+| 2026-11-11 09:59 | User prompt received |
+| 2026-11-11 22:49 | User prompt received |
+| 2026-11-11 23:24 | Agent turn completed |
+
+### Session — Maharashtra PWD booklet generator + LISP archive + pier batter · 03:15
+
+- Applied patches from `CODE-JUNCTION/BridgeCAD_Plan_Patch/SS.txt` and `SS1.txt`.
+- Created `scripts/generate_all_pwd_gads.py` — generates all 15 Maharashtra PWD standard bridge types (BR-I/2022-001 through 015).
+- Fixed model construction iteratively: ProjectMaster (client/revision/state_code/language/project_phase), GeometryInput (removed extra fields), Superstructure (deck_material), Substructure (abutment_material, pier_cap_width precision), Materials (reinforcement_steel_grade/prestressing_steel/bearing_type/expansion_joint_type), DrawingControl (sheet_size/drawing_scale/title_block_style), BridgeSelection (9 required fields: bridge_type/span_configuration/carriageway_config/design_code/loading_class/seismic_zone/wind_zone_ms/foundation_type), FoundationType/BearingType/BridgeCategory enum name corrections.
+- **15/15 PWD types PASS** — each generates 9 DXF sheets + 9 PNGs + README + completeness check (0 issues each).
+- Output: `EXAMPLES/PWD_Booklet/` — 135 DXF + 135 PNG + 16 README = 14.8 MB.
+- Saved LISP blog to `ATTACHED ASSETS/`:
+  - `LISP_Solid_Slab_GAD_Complete_Archive.md` — full function-by-function analysis with 14 guiding principles
+  - `yogipwd_lisp_solid_slab_gad_original.txt` — verbatim blog preservation
+- Implemented LISP principle P6 (pier batter) in drawing code:
+  - `models.py`: added `pier_batter_1n` field to Substructure
+  - `sheet5_pier_abutment_details.py`: pier shaft now draws as LISP battered trapezoid (1:battr) instead of plain rectangle
+- Updated `README.md` with LISP Baseline section (14-principle mapping table + ATTACHED ASSETS links).
+- Committed: `401f2da` — "feat(pwd): Maharashtra PWD booklet generator + LISP archive + pier batter" (287 files, 1,906,676 insertions)
+- Pushed: `cbea900..401f2da  main -> main` ✅
+
+**Files changed:**
+- `scripts/generate_all_pwd_gads.py` (new)
+- `packages/bridgecad-core/bridgecad_core/models.py` (pier_batter_1n)
+- `packages/bridgecad-draw/bridgecad_draw/sheet5_pier_abutment_details.py` (battered pier)
+- `README.md` (LISP principles section)
+- `ATTACHED ASSETS/LISP_Solid_Slab_GAD_Complete_Archive.md` (new)
+- `ATTACHED ASSETS/yogipwd_lisp_solid_slab_gad_original.txt` (new)
+- `ATTACHED ASSETS/LISP_Solid_Slab_GAD_In_Toto.lsp` (new)
+- `ATTACHED ASSETS/GAD_Module_Mapping_Derived_Unverified.md` (new)
+- `EXAMPLES/PWD_Booklet/` — 15 directories × (9 DXF + 9 PNG + README) + index README
+
+**Commands run:**
+```
+python scripts/generate_all_pwd_gads.py  →  15/15 PASS, 135 DXF, 135 PNG, 14.8 MB
+git add -f "ATTACHED ASSETS/..." + EXAMPLES/PWD_Booklet/ + scripts/ + models.py + sheet5 + README.md
+git commit -m "feat(pwd): Maharashtra PWD booklet generator + LISP archive + pier batter"
+git push origin main  →  cbea900..401f2da  main -> main
+```
+
+**Pending:** No open items. All PWD booklet types generated and pushed.
+
+---
+| 2026-11-11 23:29 | User prompt received |

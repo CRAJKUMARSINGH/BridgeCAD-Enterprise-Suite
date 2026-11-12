@@ -1546,3 +1546,40 @@ Safety checks before deletion: `CODE-JUNCTION/` is gitignored (`.gitignore:186`)
 `CODE-JUNCTION/` now contains only `T.txt`.
 
 ---
+
+### Session — All patches confirmed applied; fit.py already on disk · 04:48
+
+- User re-sent "APPLY PATCHES FROM BridgeCAD_Plan_Patch + APPLY GENSPARK BridgeCAD-AssetPack".
+- Checked both directories: no new files in either location.
+- Verified `packages/bridgecad-draw/bridgecad_draw/fit.py` exists on disk and was included in `616c1b1`.
+- Ran live test: `choose_fit(270, 726, 11)` → 1:500 broken=True bands=2 (type 010 scale fix confirmed).
+- Ran 47 draw/unit/asset tests → **47/47 pass** (8.89 s).
+- No files changed, no commits made — everything already applied.
+
+**origin/main:** `616c1b1` — "feat(catalogue): PWD plan-patch — control surface, scale-fit ladder, canonical corpus"
+
+**Pending:**
+- Box-cell primitive (CellGrid) for PWD type 004
+- Open-spandrel arch schedule primitive for type 014
+- Precast block arch primitive for type 015
+
+---
+| 2026-11-12 22:37 | Agent turn completed |
+
+### Session — Standing-order hook entry (no user task) · 04:55
+
+No changes this session.
+
+- Hook fired on incoming message. No user task present — hook-only trigger.
+- Previous session (04:48): confirmed all patches from BridgeCAD_Plan_Patch and BridgeCAD-AssetPack already applied; fit.py verified on disk; 47/47 tests pass; origin/main at 616c1b1.
+- No source files modified, no commands run, no tests executed this turn.
+- All CREAT.md entries within 24 h window; nothing pruned.
+
+**Pending:**
+- Box-cell primitive (CellGrid) for PWD type 004
+- Open-spandrel arch schedule primitive for type 014
+- Precast block arch primitive for type 015
+
+---
+| 2026-11-12 22:53 | User prompt received |
+| 2026-11-12 23:28 | User prompt received |

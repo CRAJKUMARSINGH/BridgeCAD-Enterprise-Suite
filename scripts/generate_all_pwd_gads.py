@@ -349,7 +349,9 @@ def generate_one(params: dict, out_root: Path,
         return label, False, f"DXF failed: {type(exc).__name__}: {exc}"
 
     issues = _check_completeness(sheets)
-    _render_pngs(sheets, out_dir)
+    import os
+    if os.getenv("SKIP_PNG") != "1":
+        _render_pngs(sheets, out_dir)
     dxf_kb = sum(s.stat().st_size for s in sheets) // 1024
     _write_readme(out_dir, params, sheets, issues, dxf_kb)
 

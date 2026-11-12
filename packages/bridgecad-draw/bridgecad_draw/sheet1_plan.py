@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Any
 
 from .dxf_engine import new_sheet, save
+from .fit import LADDER, MIN_TEXT_MM
 from .primitives import (
     chainage_tag,
     circle,
@@ -84,7 +85,7 @@ _TEXT_MAX = 5.0  # adaptive text cap (mm) — keeps short bridges legible
 def generate(
     project: Any,
     output_path: str | Path,
-    scale_denom: int = 100,
+    scale_denom: int | None = None,
 ) -> Path:
     """Generate Sheet 1 (Plan View) as a DXF file.
 
@@ -94,8 +95,11 @@ def generate(
         Validated Pydantic model.
     output_path : str | Path
         Where to save the DXF file.
-    scale_denom : int
-        Denominator of drawing scale (100 = 1:100).
+    scale_denom : int | None
+        Denominator of drawing scale (100 = 1:100).  ``None`` (default) lets
+        the sheet pick the largest rung of the shared scale ladder that fits
+        the plan — the denominator printed in the title block is then the one
+        the geometry was actually drawn at.
 
     Returns
     -------
@@ -107,7 +111,7 @@ def generate(
     return save(doc, output_path)
 
 
-def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
+def _draw_plan(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     """Core plan-view drawing logic — operates on msp directly."""
     from bridgecad_core.geometry import compute_plan_geometry
 
@@ -117,6 +121,23 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
 
     # ── Geometry calculation ─────────────────────────────────────────────
     geom = compute_plan_geometry(project)
+
+    # ── Presence by type (SS3 §A6) ───────────────────────────────────────
+    # Sheet 1 drew pier caps and bearing symbols unconditionally. A box cell
+    # (004) or a box culvert is monolithic: there is no separate pier cap and
+    # no bearing, so both must be gated on the *model*, not the sheet.
+    from bridgecad_core import types as T
+
+    _no_pier_ss = (
+        T.SuperstructureType.BOX_CULVERT,
+        getattr(T.SuperstructureType, "BOX_CELL_MULTI", T.SuperstructureType.BOX_CULVERT),
+    )
+    has_piers = project.superstructure.type not in _no_pier_ss
+    # A bearingless structure carries no bearing symbol. The model encodes
+    # "no bearing" as an unset ``bearing_type`` (``BearingType | None``) — there
+    # is no ``NONE`` member — so a ``None`` here means no symbols.
+    _brg_type = getattr(project.bearings_joints, "bearing_type", None)
+    bearings = geom.bearing_positions if _brg_type is not None else []
 
     total_len = float(gi.total_length_m)  # m
     overall_w = float(gi.overall_width_m)  # m
@@ -139,9 +160,32 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
     x_lo = -abt_w
     x_hi = total_len + abt_w
     x_span = max(x_hi - x_lo, 0.1)
-    scale_h = _PLAN_W / x_span  # mm per metre (horizontal)
-    scale_v = _PLAN_H / max(overall_w, 0.1)  # mm per metre (vertical)
-    scale = min(scale_h, scale_v) * _SCALE_FIT_SHRINK  # was *0.85 → *0.93 (FR-1)
+
+    # The plan is drawn at a *standard* scale — a rung of the shared ladder —
+    # and the title block prints that rung. It used to fit itself to the box
+    # with an invented denominator (`min(scale_h, scale_v) * 0.93`) and then
+    # claim "1:100": a 24 m arch came out at about 1:15 under a "1:100" title.
+    if scale_denom is not None:
+        denom = scale_denom
+    else:
+        denom = next(
+            (
+                d
+                for d in LADDER
+                if x_span * (1000.0 / d) <= _PLAN_W * _SCALE_FIT_SHRINK
+                and overall_w * (1000.0 / d) <= _PLAN_H * _SCALE_FIT_SHRINK
+            ),
+            None,
+        )
+    if denom is None:
+        # Longer than the coarsest rung can carry in one view. A broken strip
+        # layout is the real answer; until that exists the plan is fit to the
+        # box and the *fitted* denominator is printed, so the caption still
+        # agrees with the geometry.
+        scale = min(_PLAN_W / x_span, _PLAN_H / max(overall_w, 0.1)) * _SCALE_FIT_SHRINK
+        denom = max(1, round(1000.0 / scale))
+    else:
+        scale = 1000.0 / denom
 
     # Coordinate mapper: x=chainage, y=transverse (offset from CL)
     cx_offset = _PLAN_X0 + (_PLAN_W - x_span * scale) / 2.0 - x_lo * scale
@@ -171,12 +215,12 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
         approved_by=getattr(pm, "approved_by", "") or "",
         client=getattr(getattr(pm, "client", None), "name", "") or "",
         consultant=getattr(getattr(pm, "consultant", None), "name", "") or "",
-        scale_str=f"1:{scale_denom}",
+        scale_str=f"1:{denom}",
         sheet_no="1",
         total_sheets="9",
     )
 
-    text_h = min(_TEXT_MAX, max(2.0, scale * 0.5))  # adaptive text height mm (capped)
+    text_h = min(_TEXT_MAX, max(MIN_TEXT_MM, scale * 0.5))  # adaptive text height mm (capped)
 
     # ── Centreline ───────────────────────────────────────────────────────
     cl_y = vpos(0.0)
@@ -248,9 +292,13 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
         text(msp, label, ax - text_h * 4, vpos(0), height=text_h * 1.2, layer="TEXT-GENERAL")
 
     # ── Piers ─────────────────────────────────────────────────────────────
+    # Presence gate (SS3 §A6): a box cell / box culvert has no separate pier
+    # cap, so there is nothing to draw here for those families.
     cumul = 0.0
     for i, slen in enumerate(span_lens[:-1]):
         cumul += slen
+        if not has_piers:
+            continue
         px = hpos(cumul) - pier_cap_w * scale / 2.0
         py = vpos(-pier_cap_l / 2.0)
         pw = pier_cap_w * scale
@@ -308,7 +356,7 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
     # point must be un-rotated back to the local (chainage, offset) frame and
     # then sheared like the deck outline — otherwise the A2 bearings land well
     # clear of the deck and run off the sheet.
-    for bx, by in geom.bearing_positions:
+    for bx, by in bearings:
         lx = bx * cos_t - by * sin_t  # chainage (local)
         ly = bx * sin_t + by * cos_t  # transverse offset (local)
         sx = hpos(lx) - ly * scale * sin_t
@@ -427,13 +475,16 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
     north_arrow(msp, na_x, na_y, size=_NARROW_SIZE)
 
     # ── Scale bar ─────────────────────────────────────────────────────────
+    # Labelled with the same denominator as the title block, so the two cannot
+    # disagree. (The bar's tick *lengths* are the primitive's own nominal ones
+    # — 1 unit per metre — which is a separate primitive-level defect.)
     sb_x = hpos(total_len * 0.5) - 40.0
     sb_y = vpos(-half_w) - _OFF_SBAR
     scale_bar(
         msp,
         sb_x,
         sb_y,
-        scale_denom,
+        denom,
         segments=4,
         seg_len_m=min(25.0, max(1.0, round(total_len / 5))),
         text_height=text_h * 0.85,
@@ -451,7 +502,7 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
     )
     text(
         msp,
-        f"(Not to Scale — indicative 1:{scale_denom})",
+        f"SCALE 1:{denom} — ALL DIMENSIONS IN METRES",
         hpos(total_len / 2),
         vpos(half_w) + _OFF_SUB,
         height=text_h * 0.9 * 0.9,
@@ -472,15 +523,30 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int = 100) -> None:
 
     # B-B cut line: at first internal pier chainage (or 1 m past A1 if no pier,
     # i.e. span_count == 1) — matches Sheet 8 View 2 pier transverse / fallback.
-    bb_ch: float = pier_ch[0] if (pier_ch := geom.pier_centrelines) else 1.0
-    if isinstance(bb_ch, tuple):
-        bb_ch = float(bb_ch[0])
-    bb_x = hpos(bb_ch)
-    bb_y1 = vpos(-half_w) - _OFF_SECTION
-    bb_y2 = vpos(+half_w) + _OFF_SECTION
-    section_arrow(
-        msp, bb_x, bb_y2, bb_y1, label="B-B", size=_SECTION_SIZE, text_height=text_h * 0.95
-    )
+    # A box cell / culvert has no pier to cut through, so B-B is not shown and
+    # the sheet says why (SS3 §A6) instead of drawing a section that does not
+    # exist.
+    if has_piers:
+        bb_ch: float = pier_ch[0] if (pier_ch := geom.pier_centrelines) else 1.0
+        if isinstance(bb_ch, tuple):
+            bb_ch = float(bb_ch[0])
+        bb_x = hpos(bb_ch)
+        bb_y1 = vpos(-half_w) - _OFF_SECTION
+        bb_y2 = vpos(+half_w) + _OFF_SECTION
+        section_arrow(
+            msp, bb_x, bb_y2, bb_y1, label="B-B", size=_SECTION_SIZE, text_height=text_h * 0.95
+        )
+    else:
+        text(
+            msp,
+            "SECTION B-B NOT APPLICABLE (NO PIER)",
+            hpos(total_len / 2),
+            vpos(-half_w) - _OFF_SECTION - text_h * 1.5,
+            height=text_h * 0.9,
+            layer="TEXT-SPEC",
+            halign="CENTER",
+            color=8,
+        )
 
 
 __all__ = ["generate"]

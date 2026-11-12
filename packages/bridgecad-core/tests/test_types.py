@@ -134,8 +134,8 @@ def test_enum_registry_size_ge_160() -> None:
     assert len(ENUM_REGISTRY) >= 160, f"Expected >= 160 enums registered, got {len(ENUM_REGISTRY)}"
 
 
-def test_all_validation_rules_count_eq_150() -> None:
-    assert len(ALL_RULES) == 150, f"Expected 150 rules, got {len(ALL_RULES)}"
+def test_all_validation_rules_count_eq_163() -> None:
+    assert len(ALL_RULES) == 163, f"Expected 163 rules, got {len(ALL_RULES)}"
 
 
 def test_registry_keys_match_class_names() -> None:
@@ -151,12 +151,31 @@ def test_all_rules_have_unique_ids() -> None:
 def test_rulespec_severity_has_valid_type() -> None:
     from bridgecad_core.types import ValidationSeverity
 
+    # The original three blocks, still positional.
     for r in ALL_RULES[:25]:
         assert r.severity is ValidationSeverity.CRITICAL
     for r in ALL_RULES[25:100]:
         assert r.severity is ValidationSeverity.WARNING
-    for r in ALL_RULES[100:]:
+    for r in ALL_RULES[100:150]:
         assert r.severity is ValidationSeverity.INFO
+    # The appended drawing-audit block declares its own severities — a W-id may
+    # be CRITICAL (W77) because the ID series names the category, not the tier.
+    expected = {
+        "W76": ValidationSeverity.WARNING,
+        "W77": ValidationSeverity.CRITICAL,
+        "W78": ValidationSeverity.CRITICAL,
+        "W79": ValidationSeverity.CRITICAL,
+        "W80": ValidationSeverity.WARNING,
+        "W81": ValidationSeverity.CRITICAL,
+        "W82": ValidationSeverity.CRITICAL,
+        "W83": ValidationSeverity.CRITICAL,
+        "W84": ValidationSeverity.WARNING,
+        "I51": ValidationSeverity.INFO,
+        "I52": ValidationSeverity.INFO,
+        "I53": ValidationSeverity.INFO,
+        "I54": ValidationSeverity.INFO,
+    }
+    assert {r.rule_id: r.severity for r in ALL_RULES[150:]} == expected
 
 
 def test_validation_registry_imports_from_package() -> None:

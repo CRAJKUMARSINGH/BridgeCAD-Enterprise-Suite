@@ -84,7 +84,7 @@ def test_rule_ids_are_unique_and_formatted():
 def test_rule_tiers_and_implemented_count():
     rules = _build_rules()
     assert {r.tier for r in rules} <= {"critical", "warning", "info"}
-    assert sum(1 for r in rules if r.implemented) == 30
+    assert sum(1 for r in rules if r.implemented) == 43
     assert rules[0].tier == "critical"
     assert rules[0].implemented is True
 

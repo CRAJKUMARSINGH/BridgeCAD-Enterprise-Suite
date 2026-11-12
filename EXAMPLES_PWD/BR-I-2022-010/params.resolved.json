@@ -1,0 +1,65 @@
+{
+  "resolved": {
+    "title": "Pile Fdn + RCC Pier + PSC 4-Girder (9 spans, 270 m)",
+    "spans": "9\u00d730 m = 270 m",
+    "span_count": 9,
+    "span_lengths": [
+      "30.0",
+      "30.0",
+      "30.0",
+      "30.0",
+      "30.0",
+      "30.0",
+      "30.0",
+      "30.0",
+      "30.0"
+    ],
+    "carriageway_width": 7.5,
+    "foundation_type": "PILE",
+    "pier_material": "M30",
+    "superstructure_type": "PSC_I_GIRDER",
+    "deck_thickness_mm": 200,
+    "girder_depth_mm": 2200,
+    "girder_spacing_m": 2.5,
+    "girders_per_deck": 4,
+    "pier_shaft_width_m": 2.0,
+    "pier_height_m": 12.0,
+    "pile_diameter_mm": 1200,
+    "pile_length_m": 25.0,
+    "piles_per_pier": 6,
+    "abutment_type": "OPEN",
+    "hfl_m": 100.0,
+    "road_level": 104.5,
+    "scour_depth_m": 3.5,
+    "freeboard_m": 1.0,
+    "sbc_t_per_m2": 15,
+    "submersible": false,
+    "total_length_m": "270.0",
+    "pier_count": 8,
+    "soffit_level": "102.025",
+    "foundation_level": "69.50",
+    "bearing_type": "POT",
+    "id": "BR-I-2022-010"
+  },
+  "trace": [
+    {
+      "field": "total_length_m",
+      "from": "None",
+      "to": "270.0",
+      "why": "\u03a3 span_lengths"
+    },
+    {
+      "field": "soffit_level",
+      "from": "None",
+      "to": "102.025",
+      "why": "RTL \u2212 deck \u2212 WC \u2212 girder"
+    },
+    {
+      "field": "foundation_level",
+      "from": "None",
+      "to": "69.50",
+      "why": "PILE embedment"
+    }
+  ],
+  "warnings": []
+}

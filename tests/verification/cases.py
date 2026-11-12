@@ -502,21 +502,21 @@ def _check_status_mapping(ctx: BenchContext) -> None:
 
 
 def _check_rule_count(ctx: BenchContext) -> None:
-    assert len(RULES) == 150
+    assert len(RULES) == 163
     ids = [rule.id for rule in RULES]
     assert len(ids) == len(set(ids))
     assert all(re.fullmatch(r"V\d{3}", rule_id) for rule_id in ids)
 
 
 def _check_rule_cross_map(ctx: BenchContext) -> None:
-    assert len(RULE_ID_BY_CHECK) == 150
+    assert len(RULE_ID_BY_CHECK) == 163
     for rule in RULES:
         assert RULE_ID_BY_CHECK[rule.source_rule_id] == rule.id
-    assert len(set(RULE_ID_BY_CHECK.values())) == 150
+    assert len(set(RULE_ID_BY_CHECK.values())) == 163
 
 
 def _check_implemented_count(ctx: BenchContext) -> None:
-    assert sum(1 for rule in RULES if rule.implemented) == 30
+    assert sum(1 for rule in RULES if rule.implemented) == 43
     assert RULES[0].tier == "critical"
     assert RULES[0].implemented is True
 
@@ -959,7 +959,7 @@ REGISTRY: list[Case] = [
         "bridgecad_core.validation_registry",
         "A",
         "Rule count and id format",
-        "len(RULES) == 150; ids unique and match V\\d{3}",
+        "len(RULES) == 163; ids unique and match V\\d{3}",
         _check_rule_count,
     ),
     Case(
@@ -975,7 +975,7 @@ REGISTRY: list[Case] = [
         "bridgecad_core.validation_registry",
         "A",
         "Implemented-rule count",
-        "exactly 30 rules flagged implemented; first is critical",
+        "exactly 43 rules flagged implemented; first is critical",
         _check_implemented_count,
     ),
     # ---- types -----------------------------------------------------------

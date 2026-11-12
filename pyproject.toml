@@ -148,6 +148,7 @@ bridgecad-export = { workspace = true }
 bridgecad-plugins = { workspace = true }
 bridgecad-ai = { workspace = true }
 bridgecad-infra = { workspace = true }
+bridgecad-catalogue = { workspace = true }
 
 [tool.hatch.build.targets.wheel]
 packages = ["bridgecad"]
@@ -239,7 +240,7 @@ ignore = [
 known-first-party = [
   "bridgecad_core", "bridgecad_io", "bridgecad_draw", "bridgecad_bill",
   "bridgecad_qa", "bridgecad_export", "bridgecad_plugins", "bridgecad_ai",
-  "bridgecad_infra",
+  "bridgecad_infra", "bridgecad_catalogue",
 ]
 
 [tool.ruff.format]
@@ -299,6 +300,7 @@ pythonpath = [
   "packages/bridgecad-plugins",
   "packages/bridgecad-ai",
   "packages/bridgecad-infra",
+  "packages/bridgecad-catalogue",
   "packages/bridgecad-refs",
   "apps/api-gateway",
   "apps/cli-console",
@@ -413,6 +415,7 @@ version_files = [
   "packages/bridgecad-plugins/pyproject.toml",
   "packages/bridgecad-ai/pyproject.toml",
   "packages/bridgecad-infra/pyproject.toml",
+  "packages/bridgecad-catalogue/pyproject.toml",
   "bridgecad/__init__.py",
 ]
 update_changelog_on_bump = true

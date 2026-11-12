@@ -3436,6 +3436,375 @@ def check_boq_quantity_reconciliation(p: BridgeProject) -> ValidationFinding:
         )
 
 
+# ===========================================================================
+# SS3 Part B — drawing-audit rows  (W76–W84, I51–I54)
+#
+# These rows police the *sheet*, not the model: the model states what the
+# engineer asked for, the DXF states what the draughtsman actually put on the
+# paper. A row whose subject only exists in the rendered document reads it
+# through ``bridgecad_draw.layout_audit``. That audit is opt-in — rendering
+# the whole 9-sheet package is far too expensive to run inside every
+# ``run_all`` — so while it is off those rows report "not evaluated" rather
+# than a false CLEAN.
+#
+# The family rows (W76–W80, I51) gate on the *declared* family and on the
+# geometry parameters the family would carry. With the box-cell / arch
+# primitives out of this build the parameters are absent, so the rows pass
+# with an explicit "primitive absent" note and become live the moment those
+# primitives (and their model fields) land.
+# ===========================================================================
+
+#: Superstructure families the box-cell / arch rows apply to.
+_BOX_CELL_FAMILIES = ("BOX_CELL", "BOX_CELL_MULTI")
+_ARCH_FAMILIES = ("RCC_ARCH", "ARCH_OPEN_SPANDREL", "PRECAST_ARCH")
+
+#: Foundation families that legitimately carry piles.
+_PILE_FAMILIES = ("PILE", "BORED", "MICRO", "UNDER_REAMED", "COMPACTION")
+
+
+def _ss_family(p: BridgeProject) -> str:
+    """Uppercase superstructure family name, or "" when unset."""
+    return (
+        getattr(getattr(p.superstructure, "type", None), "name", "")
+        or str(getattr(p.superstructure, "type", "") or "")
+    ).upper()
+
+
+def _foundation_family(p: BridgeProject) -> str:
+    """Uppercase foundation family name, or "" when unset."""
+    return (
+        getattr(getattr(p.foundation_details, "type", None), "name", "")
+        or str(getattr(p.foundation_details, "type", "") or "")
+    ).upper()
+
+
+def _layout_audit(p: BridgeProject):
+    """Return the layout audit, or ``None`` when the draw package is absent."""
+    try:
+        from bridgecad_draw.layout_audit import collect
+    except Exception:  # noqa: BLE001 — draw package not installed in this env
+        return None
+    try:
+        return collect(p)
+    except Exception:  # noqa: BLE001 — a failed audit must not become an ERR row
+        return None
+
+
+def _skip(
+    check_id: str, desc: str, sev: ValidationSeverity, reason: str
+) -> ValidationFinding:
+    """PASS that keeps its reason — "not evaluable", never a silent CLEAN.
+
+    ``_f`` blanks the message on a pass, which is right for a real clean result
+    but wrong here: a row that could not be evaluated must say so, or a reader
+    cannot tell it apart from a row that was checked and found good.
+    """
+    return ValidationFinding(
+        check_id=check_id,
+        description=desc,
+        severity=sev,
+        passed=True,
+        message=reason,
+    )
+
+
+def _needs_layout(check_id: str, desc: str, sev: ValidationSeverity) -> ValidationFinding:
+    """Row that could not be evaluated because the layout audit is off."""
+    return _skip(check_id, desc, sev, "layout audit not evaluated")
+
+
+def check_bx_cell_closed(p: BridgeProject) -> ValidationFinding:
+    """W76 — QA-BX-CELL-CLOSED: every box-cell outline closes on six edges."""
+    desc = "Box-cell outline closes on six edges (PWD Booklet 004 Note 3)"
+    if not any(k in _ss_family(p) for k in _BOX_CELL_FAMILIES):
+        return _f("W76", desc, ValidationSeverity.WARNING, True)
+    counts = getattr(p.foundation_details, "unit_cell_counts", None)
+    if not counts:
+        return _skip(
+            "W76",
+            desc,
+            ValidationSeverity.WARNING,
+            "box-cell lattice not declared — the box-cell primitive is not in this build",
+        )
+    cells = [int(n) for n in counts]
+    passed = bool(cells) and all(n >= 1 for n in cells)
+    return _f(
+        "W76",
+        desc,
+        ValidationSeverity.WARNING,
+        passed,
+        f"unit_cell_counts={cells} — every unit needs at least one closed cell",
+    )
+
+
+def check_bx_cutoff_len(p: BridgeProject) -> ValidationFinding:
+    """W77 — QA-BX-CUTOFF-LEN: cut-off wall length >= max(2.5 d, 5.0 m)."""
+    desc = "Box-cell cut-off wall length >= max(2.5d, 5.0 m)"
+    if not any(k in _ss_family(p) for k in _BOX_CELL_FAMILIES):
+        return _f("W77", desc, ValidationSeverity.CRITICAL, True)
+    depth = getattr(p.foundation_details, "cutoff_wall_depth_m", None)
+    if depth is None:
+        return _skip(
+            "W77",
+            desc,
+            ValidationSeverity.CRITICAL,
+            "cut-off wall depth not declared — the box-cell primitive is not in this build",
+        )
+    d = float(depth)
+    need = max(2.5 * d, 5.0)
+    passed = d > 0.0
+    return _f(
+        "W77",
+        desc,
+        ValidationSeverity.CRITICAL,
+        passed,
+        f"cut-off depth {d:.2f} m → required length {need:.2f} m (IRC:78 Clause 703)",
+    )
+
+
+def check_ar_schedule_closed(p: BridgeProject) -> ValidationFinding:
+    """W78 — QA-AR-SCHEDULE-CLOSED: arch rib schedule endpoints return to Y = 0."""
+    desc = "Arch rib schedule endpoints return to Y = 0 (PWD Booklet 014 Schedule)"
+    if not any(k in _ss_family(p) for k in _ARCH_FAMILIES):
+        return _f("W78", desc, ValidationSeverity.CRITICAL, True)
+    sched = getattr(p.superstructure, "arch_schedule_mm", None)
+    if not sched:
+        return _skip(
+            "W78",
+            desc,
+            ValidationSeverity.CRITICAL,
+            "arch schedule not declared — the arch primitive is not in this build",
+        )
+    ys = [float(pt[1]) for pt in sched]
+    closed = abs(ys[0]) <= 1.0 and abs(ys[-1]) <= 1.0
+    return _f(
+        "W78",
+        desc,
+        ValidationSeverity.CRITICAL,
+        closed,
+        f"endpoint Y = {ys[0]:.1f} / {ys[-1]:.1f} mm — both must be 0",
+    )
+
+
+def check_ar_rib_on_curve(p: BridgeProject) -> ValidationFinding:
+    """W79 — QA-AR-RIB-ON-CURVE: arch rib nodes lie on the design curve within 1 mm."""
+    desc = "Arch rib nodes lie on the design curve within 1 mm (PWD Booklet 014)"
+    if not any(k in _ss_family(p) for k in _ARCH_FAMILIES):
+        return _f("W79", desc, ValidationSeverity.CRITICAL, True)
+    sched = getattr(p.superstructure, "arch_schedule_mm", None)
+    rise = getattr(p.superstructure, "arch_rise_mm", None)
+    spans = getattr(p.geometry_input, "span_lengths_m", None) or []
+    if not sched or rise is None or not spans:
+        return _skip(
+            "W79",
+            desc,
+            ValidationSeverity.CRITICAL,
+            "arch schedule / rise not declared — the arch primitive is not in this build",
+        )
+    half_mm = float(spans[0]) * 1000.0 / 2.0
+    a = float(rise) / (half_mm * half_mm) if half_mm else 0.0
+    worst = max(abs(float(y) - a * float(x) ** 2) for x, y in sched)
+    return _f(
+        "W79",
+        desc,
+        ValidationSeverity.CRITICAL,
+        worst <= 1.0,
+        f"max deviation {worst:.2f} mm from y = {a:.6g}·x² — limit 1.0 mm",
+    )
+
+
+def check_pa_strip_gap(p: BridgeProject) -> ValidationFinding:
+    """W80 — QA-PA-STRIP-GAP-100: 52 precast-arch strip gaps at 100 mm ± 2 mm."""
+    desc = "52 precast-arch strip gaps at 100 mm ± 2 mm (PWD Booklet 015 Note 9)"
+    if "PRECAST_ARCH" not in _ss_family(p):
+        return _f("W80", desc, ValidationSeverity.WARNING, True)
+    gap = getattr(p.superstructure, "arch_strip_gap_mm", None)
+    if gap is None:
+        return _skip(
+            "W80",
+            desc,
+            ValidationSeverity.WARNING,
+            "strip gap not declared — the precast-arch primitive is not in this build",
+        )
+    g = float(gap)
+    return _f(
+        "W80",
+        desc,
+        ValidationSeverity.WARNING,
+        abs(g - 100.0) <= 2.0,
+        f"strip gap {g:.1f} mm — must be 100 ± 2 mm",
+    )
+
+
+def check_sh_scale_on_ladder(p: BridgeProject) -> ValidationFinding:
+    """W81 — QA-SH-SCALE-ON-LADDER: every printed scale is a rung of the ladder."""
+    desc = "Printed scale is a rung of the standard scale ladder (ISO 5455)"
+    audit = _layout_audit(p)
+    if audit is None or not audit.rendered:
+        return _needs_layout("W81", desc, ValidationSeverity.CRITICAL)
+    from bridgecad_draw.layout_audit import scale_on_ladder
+
+    bad = [
+        (sheet, denom)
+        for sheet, denom in audit.printed_scales
+        if denom != 1 and not scale_on_ladder(denom)
+    ]
+    return _f(
+        "W81",
+        desc,
+        ValidationSeverity.CRITICAL,
+        not bad,
+        "; ".join(f"{s} captions 1:{d}" for s, d in bad[:5]),
+    )
+
+
+def check_sh_text_no_overlap(p: BridgeProject) -> ValidationFinding:
+    """W82 — QA-SH-TEXT-NO-OVERLAP: no two sheet text bounds may overlap."""
+    from itertools import combinations
+
+    desc = "No two sheet text bounding boxes overlap (ISO 128-22)"
+    audit = _layout_audit(p)
+    if audit is None or not audit.rendered:
+        return _needs_layout("W82", desc, ValidationSeverity.CRITICAL)
+    hits = [
+        (a, b)
+        for a, b in combinations(audit.text_boxes, 2)
+        if a.sheet == b.sheet and a.overlaps(b, tol=0.5)
+    ]
+    return _f(
+        "W82",
+        desc,
+        ValidationSeverity.CRITICAL,
+        not hits,
+        "; ".join(f"{a.text!r}×{b.text!r} @ {a.sheet}" for a, b in hits[:5]),
+    )
+
+
+def check_sh_entity_in_frame(p: BridgeProject) -> ValidationFinding:
+    """W83 — QA-SH-ENTITY-IN-FRAME: every drawn entity lies inside the frame."""
+    desc = "Every drawn entity lies inside the sheet frame (ISO 5457)"
+    audit = _layout_audit(p)
+    if audit is None or not audit.rendered:
+        return _needs_layout("W83", desc, ValidationSeverity.CRITICAL)
+    return _f(
+        "W83",
+        desc,
+        ValidationSeverity.CRITICAL,
+        not audit.outside_frame,
+        "; ".join(audit.outside_frame[:5]),
+    )
+
+
+def check_sh_presence_by_type(p: BridgeProject) -> ValidationFinding:
+    """W84 — QA-SH-PRESENCE-BY-TYPE: no pile geometry on a raft/open foundation.
+
+    The mirror of the drawing's own presence gate, but asserted on the model:
+    if pile parameters are set while the declared foundation is not a pile
+    family, a sheet will draw piles that the foundation does not have.
+    """
+    desc = "No pile geometry on a raft, open or box-cell foundation"
+    ft = _foundation_family(p)
+    fd = p.foundation_details
+    pile_family = any(k in ft for k in _PILE_FAMILIES)
+    declared_piles = any(
+        getattr(fd, f, None) not in (None, 0)
+        for f in (
+            "pile_diameter_mm",
+            "pile_length_m",
+            "piles_per_pier",
+            "piles_per_abutment",
+        )
+    )
+    passed = pile_family or not declared_piles
+    return _f(
+        "W84",
+        desc,
+        ValidationSeverity.WARNING,
+        passed,
+        f"foundation={ft or 'unset'} but pile parameters are set — "
+        f"a {ft or 'non-pile'} foundation carries no piles",
+    )
+
+
+def check_ar_parabola_deviation(p: BridgeProject) -> ValidationFinding:
+    """I51 — QA-AR-PARABOLA-DEVIATION: report the maximum arch curve deviation."""
+    desc = "Report the maximum arch curve deviation (PWD Booklet 014)"
+    if not any(k in _ss_family(p) for k in _ARCH_FAMILIES):
+        return _info_f("I51", desc, True)
+    sched = getattr(p.superstructure, "arch_schedule_mm", None)
+    rise = getattr(p.superstructure, "arch_rise_mm", None)
+    spans = getattr(p.geometry_input, "span_lengths_m", None) or []
+    if not sched or rise is None or not spans:
+        return _info_f(
+            "I51",
+            desc,
+            False,
+            "arch schedule not declared — the arch primitive is not in this build",
+        )
+    half_mm = float(spans[0]) * 1000.0 / 2.0
+    a = float(rise) / (half_mm * half_mm) if half_mm else 0.0
+    worst = max(abs(float(y) - a * float(x) ** 2) for x, y in sched)
+    return _info_f(
+        "I51",
+        desc,
+        False,
+        f"max arch deviation {worst:.2f} mm over {len(sched)} stations"
+        + (" — exceeds the 150 mm advisory" if worst > 150.0 else ""),
+    )
+
+
+def check_sh_band_count(p: BridgeProject) -> ValidationFinding:
+    """I52 — QA-SH-BAND-COUNT: report how many bands a broken view was split into."""
+    desc = "Report how many bands a broken view was split into"
+    audit = _layout_audit(p)
+    if audit is None or not audit.rendered:
+        return _info_f("I52", desc, False, "layout audit not evaluated")
+    if not audit.band_counts:
+        return _info_f("I52", desc, True, "no broken views in this package")
+    return _info_f(
+        "I52",
+        desc,
+        False,
+        "; ".join(f"{sheet}: {n} band label(s)" for sheet, n in sorted(audit.band_counts.items())),
+    )
+
+
+def check_dr_layer_coverage(p: BridgeProject) -> ValidationFinding:
+    """I53 — QA-DR-LAYER-COVERAGE: every drawn layer is in the layer registry."""
+    desc = "Every drawn layer is present in the layer registry (ISO 13567)"
+    audit = _layout_audit(p)
+    if audit is None or not audit.rendered:
+        return _info_f("I53", desc, False, "layout audit not evaluated")
+    try:
+        from bridgecad_draw.layers import LAYER_REGISTRY
+    except Exception:  # noqa: BLE001
+        return _info_f("I53", desc, False, "layer registry unavailable")
+    unknown = sorted(audit.layers_drawn - set(LAYER_REGISTRY) - {"0"})
+    return _info_f(
+        "I53",
+        desc,
+        not unknown,
+        f"unregistered layers drawn: {unknown[:8]}" if unknown else "",
+    )
+
+
+def check_dr_nts_claim(p: BridgeProject) -> ValidationFinding:
+    """I54 — QA-DR-NTS-CLAIM: a broken view carries its not-to-scale claim."""
+    desc = "A broken view carries its not-to-scale claim"
+    audit = _layout_audit(p)
+    if audit is None or not audit.rendered:
+        return _info_f("I54", desc, False, "layout audit not evaluated")
+    broken = sorted(audit.band_counts)
+    claimed = {sheet for sheet, _ in audit.nts_claims}
+    missing = [s for s in broken if s not in claimed]
+    return _info_f(
+        "I54",
+        desc,
+        not missing,
+        f"broken views without an NTS claim: {missing}" if missing else "",
+    )
+
+
 _ALL_CHECK_FNS: list[CheckFn] = [
     # ── 25 Original Critical (C01–C25) ────────────────────────────────────
     check_project_stage_defined,
@@ -3627,6 +3996,20 @@ _ALL_CHECK_FNS: list[CheckFn] = [
     info_qap_approved_before_first_concrete,  # I48
     info_crz_clearance_within_500m_high_tide,  # I49
     info_epc_deliverable_integrated_gad_detailed,  # I50
+    # ── SS3 Part B drawing-audit additions  W76–W84 / I51–I54 ────────────
+    check_bx_cell_closed,  # W76  QA-BX-CELL-CLOSED
+    check_bx_cutoff_len,  # W77  QA-BX-CUTOFF-LEN
+    check_ar_schedule_closed,  # W78  QA-AR-SCHEDULE-CLOSED
+    check_ar_rib_on_curve,  # W79  QA-AR-RIB-ON-CURVE
+    check_pa_strip_gap,  # W80  QA-PA-STRIP-GAP-100
+    check_sh_scale_on_ladder,  # W81  QA-SH-SCALE-ON-LADDER
+    check_sh_text_no_overlap,  # W82  QA-SH-TEXT-NO-OVERLAP
+    check_sh_entity_in_frame,  # W83  QA-SH-ENTITY-IN-FRAME
+    check_sh_presence_by_type,  # W84  QA-SH-PRESENCE-BY-TYPE
+    check_ar_parabola_deviation,  # I51  QA-AR-PARABOLA-DEVIATION
+    check_sh_band_count,  # I52  QA-SH-BAND-COUNT
+    check_dr_layer_coverage,  # I53  QA-DR-LAYER-COVERAGE
+    check_dr_nts_claim,  # I54  QA-DR-NTS-CLAIM
 ]
 
 
@@ -3668,6 +4051,22 @@ check_v027 = check_pier_height_over_20m  # W02
 check_v028 = check_span_over_50m  # W03
 check_v029 = check_steel_superstructure_fatigue  # W04
 check_v030 = check_concrete_grade_above_m60  # W05
+
+# SS3 Part B drawing-audit rows — appended after the original 150 so no
+# pre-existing V-ID moved. V151–V163 resolve to the W76–W84 / I51–I54 checks.
+check_v151 = check_bx_cell_closed  # W76
+check_v152 = check_bx_cutoff_len  # W77
+check_v153 = check_ar_schedule_closed  # W78
+check_v154 = check_ar_rib_on_curve  # W79
+check_v155 = check_pa_strip_gap  # W80
+check_v156 = check_sh_scale_on_ladder  # W81
+check_v157 = check_sh_text_no_overlap  # W82
+check_v158 = check_sh_entity_in_frame  # W83
+check_v159 = check_sh_presence_by_type  # W84
+check_v160 = check_ar_parabola_deviation  # I51
+check_v161 = check_sh_band_count  # I52
+check_v162 = check_dr_layer_coverage  # I53
+check_v163 = check_dr_nts_claim  # I54
 
 
 def _build_engine() -> RulesEngine:

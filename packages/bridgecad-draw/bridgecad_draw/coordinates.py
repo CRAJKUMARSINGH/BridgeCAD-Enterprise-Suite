@@ -40,7 +40,11 @@ FRAME = {
 # Declared plot scales. Non-standard scales are a bug, not a preference.
 # 1:1 is standard for a schedule — a bill of quantities is a table, not a
 # scaled view, and drawing it full size is the engineering-correct choice.
-PLOT_SCALES = (1, 20, 25, 50, 100, 200, 250, 500, 1000)
+# 1:20/1:25 are detail scales (bearings, reinforcement); 1:1000 is a location
+# plan. The preferred-number rungs of `fit.LADDER` (75, 150, 300, 400) are
+# included here so a view may be *chosen* at one of them — a ladder the
+# elevation sheets impose but the contract refused would be a latent bug.
+PLOT_SCALES = (1, 20, 25, 50, 75, 100, 150, 200, 250, 300, 400, 500, 1000)
 
 TITLE_BLOCK = {"width_mm": 180.0, "height_mm": 60.0, "corner": "bottom_right"}
 

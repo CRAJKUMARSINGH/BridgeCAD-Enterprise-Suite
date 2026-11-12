@@ -32,6 +32,7 @@ from pathlib import Path
 from typing import Any
 
 from .dxf_engine import new_sheet, save
+from .fit import LADDER, MIN_TEXT_MM
 from .primitives import (
     circle,
     dim_linear_h,
@@ -64,14 +65,19 @@ _CHECKS_Y = _MARGIN + _TB_H + 6.0
 _VIEW_H = _SHEET_H - _VIEW_Y0 - _MARGIN - 22.0
 
 
-def generate(project: Any, output_path: str | Path, scale_denom: int = 50) -> Path:
-    """Generate Sheet 8 (Side & End Elevations) as a DXF file."""
+def generate(project: Any, output_path: str | Path, scale_denom: int | None = None) -> Path:
+    """Generate Sheet 8 (Side & End Elevations) as a DXF file.
+
+    ``scale_denom=None`` lets the sheet pick the largest rung of the shared
+    scale ladder that fits its end elevations, and prints that rung — the
+    printed scale and the drawn scale are then the same number.
+    """
     doc, msp = new_sheet("S8 Side Elevations")
     _draw(msp, project, scale_denom)
     return save(doc, output_path)
 
 
-def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
+def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     from bridgecad_core.geometry import compute_long_section_geometry
 
     gi = project.geometry_input
@@ -166,6 +172,41 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     _cap_proj_m_abt = float(sub.abutment_cap_projection_front_mm or 300) / 1000.0
     _dirt_t_m_abt = float(sub.dirt_wall_thickness_mm or 300) / 1000.0
 
+    # ── Adaptive scale per view (fit overall_w × total_height into box) ──
+    # We try to pick a single *standard* scale mm/m that fits the larger of the
+    # two views. The end elevation used to self-fit (`min(...) * 0.88`) and then
+    # print a constant denominator beside it; the two disagreed on every sheet.
+    abut_vheight_m = (tod_rl + par_h_m + 0.5) - min(pile_tip_rl, scour_rl - 0.5)
+    pier_vheight_m = (tod_rl + par_h_m + 0.5) - min(pile_tip_rl, scour_rl - 0.5)
+    # Horizontal fit: abutment end-face needs overall_w + 2×ret_w_m + approach
+    abut_hwidth_m = overall_w + 2 * ret_w_m + max(app_l_m, wing_splay_m) * 0.75
+    pier_hwidth_m = overall_w + 2.0
+
+    span_m = max(abut_hwidth_m, pier_hwidth_m, 0.1)
+    height_m = max(abut_vheight_m, pier_vheight_m, 0.1)
+
+    if scale_denom is not None:
+        denom = scale_denom
+    else:
+        denom = next(
+            (
+                d
+                for d in LADDER
+                if span_m * (1000.0 / d) <= _VIEW_W * 0.88
+                and height_m * (1000.0 / d) <= _VIEW_H * 0.88
+            ),
+            None,
+        )
+    if denom is None:
+        # Taller than the coarsest rung can carry: fit the box and print the
+        # fitted denominator, so the caption still tells the truth.
+        sc = min(_VIEW_W / span_m, _VIEW_H / height_m) * 0.88
+        denom = max(1, round(1000.0 / sc))
+    else:
+        sc = 1000.0 / denom
+
+    th = max(MIN_TEXT_MM, sc * 0.22)  # text height mm
+
     # ── BORDER + TITLE BLOCK ───────────────────────────────────────────────
     draw_border(msp, "A1")
     draw_title_block(
@@ -181,28 +222,10 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         approved_by=getattr(pm, "approved_by", "") or "",
         client=getattr(getattr(pm, "client", None), "name", "") or "",
         consultant=getattr(getattr(pm, "consultant", None), "name", "") or "",
-        scale_str=f"1:{scale_denom}",
+        scale_str=f"1:{denom}",
         sheet_no="8",
         total_sheets="9",
     )
-
-    # ── Adaptive scale per view (fit overall_w × total_height into box) ──
-    # We try to pick a single scale mm/m that fits the larger of the two views.
-    abut_vheight_m = (tod_rl + par_h_m + 0.5) - min(pile_tip_rl, scour_rl - 0.5)
-    pier_vheight_m = (tod_rl + par_h_m + 0.5) - min(pile_tip_rl, scour_rl - 0.5)
-    # Horizontal fit: abutment end-face needs overall_w + 2×ret_w_m + approach
-    abut_hwidth_m = overall_w + 2 * ret_w_m + max(app_l_m, wing_splay_m) * 0.75
-    pier_hwidth_m = overall_w + 2.0
-
-    sc = (
-        min(
-            _VIEW_W / max(abut_hwidth_m, pier_hwidth_m, 0.1),
-            _VIEW_H / max(abut_vheight_m, pier_vheight_m, 0.1),
-        )
-        * 0.88
-    )
-
-    th = max(2.0, sc * 0.22)  # text height mm
 
     # ═══════════════════════════════════════════════════════════════════════
     #  VIEW 1 — Abutment End-Face A2 (left half of page)
@@ -375,7 +398,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         msp,
         _VIEW2_X0 + 6.0,
         _VIEW_Y0 + _VIEW_H + th * 1.5,
-        scale_denom,
+        denom,
         segments=4,
         seg_len_m=max(1.0, round(overall_w / 5)),
         text_height=th * 0.85,
@@ -388,13 +411,15 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         msp, _VIEW1_X0, _CHECKS_Y, build_abutment_rows(project), text_height=th * 0.85
     )
 
-    # ── NTS disclaimer (FR-8: demoted, grey 8, 10% smaller) ──────────────
+    # ── Scale statement (FR-8: demoted, grey 8, 10% smaller) ─────────────
+    # The end elevations are drawn at the printed rung, so this states the
+    # scale rather than disclaiming it.
     # `th` scales with the view fit, so a compact structure inflates it and the
     # `+ th * 6` offset pushed this line through the top border (measured +5 mm
     # on the arch types).  Clamp it inside the margin.
     text(
         msp,
-        "(Not to Scale — indicative)",
+        f"SCALE 1:{denom} — DIMENSIONS IN METRES UNLESS NOTED",
         (_VIEW1_X0 + _VIEW_W / 2.0 + _VIEW2_X0 + _VIEW_W / 2.0) / 2.0,
         min(_VIEW_Y0 + _VIEW_H + th * 6.0, _SHEET_H - _MARGIN - th * 0.9 - 1.0),
         height=th * 0.9,

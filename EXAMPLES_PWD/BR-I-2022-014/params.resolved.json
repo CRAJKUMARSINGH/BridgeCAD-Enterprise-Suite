@@ -1,0 +1,64 @@
+{
+  "resolved": {
+    "title": "Open Fdn + RCC Open-Spandrel Arch (Pedestrian F.O.B.)",
+    "spans": "11.3 + 25.7 + 11.3 m, 2.0 m carriageway",
+    "span_count": 3,
+    "span_lengths": [
+      "11.3",
+      "25.7",
+      "11.3"
+    ],
+    "carriageway_width": "3.5",
+    "foundation_type": "OPEN",
+    "pier_material": "M25",
+    "superstructure_type": "RCC_ARCH",
+    "deck_thickness_mm": 350,
+    "pier_shaft_width_m": 1.0,
+    "pier_height_m": 5.0,
+    "abutment_type": "OPEN",
+    "hfl_m": 100.0,
+    "road_level": 102.5,
+    "scour_depth_m": 2.0,
+    "freeboard_m": 1.0,
+    "sbc_t_per_m2": 30,
+    "submersible": false,
+    "approximation": true,
+    "fidelity_note": "no arch coordinate-schedule primitive \u2014 span/depth governor not applied; arch drawn as a single-curve approximation",
+    "total_length_m": "48.3",
+    "pier_count": 2,
+    "soffit_level": "102.075",
+    "foundation_level": "97.40",
+    "bearing_type": "NONE",
+    "id": "BR-I-2022-014"
+  },
+  "trace": [
+    {
+      "field": "total_length_m",
+      "from": "None",
+      "to": "48.3",
+      "why": "\u03a3 span_lengths"
+    },
+    {
+      "field": "carriageway_width",
+      "from": "2.0",
+      "to": "3.5",
+      "why": "below the 3.5 m model carriageway floor \u2014 clamped"
+    },
+    {
+      "field": "soffit_level",
+      "from": "None",
+      "to": "102.075",
+      "why": "RTL \u2212 deck \u2212 WC \u2212 girder"
+    },
+    {
+      "field": "foundation_level",
+      "from": "None",
+      "to": "97.40",
+      "why": "OPEN embedment"
+    }
+  ],
+  "warnings": [
+    "carriageway 2.0 m is below the 3.5 m model floor \u2014 clamped to 3.5 m (deviation stated, not hidden)",
+    "RCC_ARCH: approximation \u2014 span/depth governor not applied"
+  ]
+}

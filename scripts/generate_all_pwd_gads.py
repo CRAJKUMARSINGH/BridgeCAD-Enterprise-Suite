@@ -1,431 +1,120 @@
 """
 scripts/generate_all_pwd_gads.py — Maharashtra PWD Booklet GAD Generator.
 
-Generates complete, parametric GAD packages for all 15 standard bridge types
+Generates complete, parametric GAD packages for the 15 standard bridge types
 from the official Maharashtra PWD booklet (C.E. Designs letter No. 2473,
 dt. 31.12.2022, "Booklet of General Arrangement Drawings for Various Types
 of Bridges").
 
-Each type produces a full 9-sheet DXF package + PNG renders + a completeness
-report. Output goes to EXAMPLES/PWD_Booklet/<type_id>/.
+The type cards are not duplicated here: they come from
+``bridgecad_catalogue.registry`` and every engineer override goes through
+``bridgecad_catalogue.resolve``, so a variation can never silently become the
+new baseline.  A run that passes ``--set``/``--sweep`` writes to the transient
+``out/pwd_sweep`` tree; only the booklet-faithful defaults touch the canonical
+``EXAMPLES_PWD`` corpus.  Each output folder carries a ``params.resolved.json``
+holding the exact resolved set and the trace that produced its sheets.
 
 Run:
     python scripts/generate_all_pwd_gads.py
-    python -m bridgecad generate-all-pwd   # CLI alias (if wired)
+    python scripts/generate_all_pwd_gads.py --type BR-I-2022-006 --set skew_deg=25
+    python scripts/generate_all_pwd_gads.py --sweep pier_height_m=6:12:3 --dry-run
+    python -m bridgecad generate-all-pwd --set span_length_m=12
 """
 from __future__ import annotations
 
+import argparse
 import json
 import sys
-import traceback
-from pathlib import Path
 from decimal import Decimal
+from pathlib import Path
 
 # ── path bootstrap ───────────────────────────────────────────────────────────
 _SUITE = Path(__file__).parents[1]
 for _pkg in ["bridgecad-core", "bridgecad-io", "bridgecad-draw",
              "bridgecad-bill", "bridgecad-qa", "bridgecad-export",
-             "packages/bridgecad-plugins"]:
+             "bridgecad-plugins", "bridgecad-catalogue"]:
     _p = _SUITE / "packages" / _pkg
     if _p.exists() and str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 sys.path.insert(0, str(_SUITE / "tests" / "e2e"))
 
-OUTPUT_ROOT = _SUITE / "EXAMPLES" / "PWD_Booklet"
-OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
+# Canonical corpus — booklet-faithful defaults only.
+OUTPUT_ROOT = _SUITE / "EXAMPLES_PWD"
+# Transient sweep tree — written whenever --set/--sweep is used, git-ignored.
+SWEEP_ROOT = _SUITE / "out" / "pwd_sweep"
 
 MIN_ENTITIES = 20  # minimum DXF entities per sheet (completeness gate)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# The 15 Maharashtra PWD standard bridge types
+# catalogue card → value-model translation
 # ──────────────────────────────────────────────────────────────────────────────
-PWD_TYPES: list[dict] = [
-    {
-        "id": "BR-I-2022-001",
-        "title": "Open Foundation + PCC Pier + Solid Slab",
-        "spans": "4×10 m",
-        "span_count": 4,
-        "span_lengths": [10.0, 10.0, 10.0, 10.0],
-        "total_length": 40.0,
-        "carriageway_width": 7.5,
-        "foundation_type": "OPEN",
-        "pier_material": "M20",
-        "superstructure_type": "RCC_SOLID_SLAB",
-        "deck_thickness_mm": 500,
-        "pier_shaft_width": 1.5,
-        "pier_height": 6.0,
-        "abutment_type": "OPEN",
-        "bearing_type": "ELASTOMERIC",
-        "hfl": 100.0,
-        "soffit_level": 101.5,
-        "road_level": 102.5,
-        "scour_depth": 2.0,
-    },
-    {
-        "id": "BR-I-2022-002",
-        "title": "Open Foundation + RCC Pier + Solid Slab",
-        "spans": "4×10 m",
-        "span_count": 4,
-        "span_lengths": [10.0, 10.0, 10.0, 10.0],
-        "total_length": 40.0,
-        "carriageway_width": 7.5,
-        "foundation_type": "OPEN",
-        "pier_material": "M25",
-        "superstructure_type": "RCC_SOLID_SLAB",
-        "deck_thickness_mm": 500,
-        "pier_shaft_width": 1.5,
-        "pier_height": 6.0,
-        "abutment_type": "OPEN",
-        "bearing_type": "ELASTOMERIC",
-        "hfl": 100.0,
-        "soffit_level": 101.5,
-        "road_level": 102.5,
-        "scour_depth": 2.0,
-    },
-    {
-        "id": "BR-I-2022-003",
-        "title": "Raft Foundation + RCC Pier + Solid Slab",
-        "spans": "5×10 m",
-        "span_count": 5,
-        "span_lengths": [10.0, 10.0, 10.0, 10.0, 10.0],
-        "total_length": 50.0,
-        "carriageway_width": 7.5,
-        "foundation_type": "RAFT",
-        "pier_material": "M25",
-        "superstructure_type": "RCC_SOLID_SLAB",
-        "deck_thickness_mm": 500,
-        "pier_shaft_width": 1.5,
-        "pier_height": 7.0,
-        "abutment_type": "OPEN",
-        "bearing_type": "ELASTOMERIC",
-        "hfl": 100.0,
-        "soffit_level": 101.5,
-        "road_level": 102.5,
-        "scour_depth": 3.0,
-    },
-    {
-        "id": "BR-I-2022-004",
-        "title": "Raft Foundation + RCC Box Cell",
-        "spans": "Multi-cell",
-        "span_count": 1,
-        "span_lengths": [8.0],
-        "total_length": 8.0,
-        "carriageway_width": 7.5,
-        "foundation_type": "RAFT",
-        "pier_material": "M30",
-        "superstructure_type": "RCC_BOX_CELL",
-        "deck_thickness_mm": 300,
-        "pier_shaft_width": 0.8,
-        "pier_height": 4.0,
-        "abutment_type": "INTEGRAL",
-        "bearing_type": "NONE",
-        "hfl": 100.0,
-        "soffit_level": 101.0,
-        "road_level": 101.5,
-        "scour_depth": 1.5,
-    },
-    {
-        "id": "BR-I-2022-005",
-        "title": "RCC Portal + Open Foundation (Submersible)",
-        "spans": "6×15 m",
-        "span_count": 6,
-        "span_lengths": [15.0]*6,
-        "total_length": 90.0,
-        "carriageway_width": 7.5,
-        "foundation_type": "OPEN",
-        "pier_material": "M30",
-        "superstructure_type": "RCC_PORTAL",
-        "deck_thickness_mm": 600,
-        "pier_shaft_width": 2.0,
-        "pier_height": 8.0,
-        "abutment_type": "PORTAL",
-        "bearing_type": "NONE",
-        "hfl": 100.0,
-        "soffit_level": 101.0,
-        "road_level": 102.0,
-        "scour_depth": 3.0,
-    },
-    {
-        "id": "BR-I-2022-006",
-        "title": "Open Fdn + RCC Pier + Pier Cap + Solid Slab",
-        "spans": "4×12 m",
-        "span_count": 4,
-        "span_lengths": [12.0]*4,
-        "total_length": 48.0,
-        "carriageway_width": 7.5,
-        "foundation_type": "OPEN",
-        "pier_material": "M25",
-        "superstructure_type": "RCC_SOLID_SLAB",
-        "deck_thickness_mm": 550,
-        "pier_shaft_width": 1.8,
-        "pier_height": 7.0,
-        "pier_cap_depth": 0.8,
-        "abutment_type": "OPEN",
-        "bearing_type": "ELASTOMERIC",
-        "hfl": 100.0,
-        "soffit_level": 101.5,
-        "road_level": 102.5,
-        "scour_depth": 2.5,
-    },
-    {
-        "id": "BR-I-2022-007",
-        "title": "Open Fdn + RCC Pier + RCC 3-Girder (T-Beam)",
-        "spans": "3×15 m",
-        "span_count": 3,
-        "span_lengths": [15.0]*3,
-        "total_length": 45.0,
-        "carriageway_width": 7.5,
-        "foundation_type": "OPEN",
-        "pier_material": "M25",
-        "superstructure_type": "RCC_T_BEAM",
-        "deck_thickness_mm": 200,
-        "girder_depth_mm": 1200,
-        "girder_spacing": 2.5,
-        "girders_per_deck": 3,
-        "pier_shaft_width": 1.5,
-        "pier_height": 8.0,
-        "abutment_type": "OPEN",
-        "bearing_type": "ELASTOMERIC",
-        "hfl": 100.0,
-        "soffit_level": 101.5,
-        "road_level": 103.0,
-        "scour_depth": 2.5,
-    },
-    {
-        "id": "BR-I-2022-008",
-        "title": "Pile Fdn + RCC Pier + RCC 3-Girder (T-Beam)",
-        "spans": "3×15 m",
-        "span_count": 3,
-        "span_lengths": [15.0]*3,
-        "total_length": 45.0,
-        "carriageway_width": 7.5,
-        "foundation_type": "PILE",
-        "pier_material": "M25",
-        "superstructure_type": "RCC_T_BEAM",
-        "deck_thickness_mm": 200,
-        "girder_depth_mm": 1200,
-        "girder_spacing": 2.5,
-        "girders_per_deck": 3,
-        "pier_shaft_width": 1.5,
-        "pier_height": 8.0,
-        "pile_diameter_mm": 1000,
-        "pile_length_m": 15.0,
-        "piles_per_pier": 4,
-        "abutment_type": "OPEN",
-        "bearing_type": "ELASTOMERIC",
-        "hfl": 100.0,
-        "soffit_level": 101.5,
-        "road_level": 103.0,
-        "scour_depth": 3.0,
-    },
-    {
-        "id": "BR-I-2022-009",
-        "title": "Open Fdn + RCC Pier + PSC 4-Girder",
-        "spans": "4×20 m",
-        "span_count": 4,
-        "span_lengths": [20.0]*4,
-        "total_length": 80.0,
-        "carriageway_width": 7.5,
-        "foundation_type": "OPEN",
-        "pier_material": "M30",
-        "superstructure_type": "PSC_I_GIRDER",
-        "deck_thickness_mm": 200,
-        "girder_depth_mm": 1500,
-        "girder_spacing": 2.5,
-        "girders_per_deck": 4,
-        "pier_shaft_width": 2.0,
-        "pier_height": 10.0,
-        "abutment_type": "OPEN",
-        "bearing_type": "POT",
-        "hfl": 100.0,
-        "soffit_level": 101.5,
-        "road_level": 103.5,
-        "scour_depth": 3.0,
-    },
-    {
-        "id": "BR-I-2022-010",
-        "title": "Pile Fdn + RCC Pier + PSC 4-Girder",
-        "spans": "4×20 m",
-        "span_count": 4,
-        "span_lengths": [20.0]*4,
-        "total_length": 80.0,
-        "carriageway_width": 7.5,
-        "foundation_type": "PILE",
-        "pier_material": "M30",
-        "superstructure_type": "PSC_I_GIRDER",
-        "deck_thickness_mm": 200,
-        "girder_depth_mm": 1500,
-        "girder_spacing": 2.5,
-        "girders_per_deck": 4,
-        "pier_shaft_width": 2.0,
-        "pier_height": 10.0,
-        "pile_diameter_mm": 1200,
-        "pile_length_m": 20.0,
-        "piles_per_pier": 6,
-        "abutment_type": "OPEN",
-        "bearing_type": "POT",
-        "hfl": 100.0,
-        "soffit_level": 101.5,
-        "road_level": 103.5,
-        "scour_depth": 3.5,
-    },
-    {
-        "id": "BR-I-2022-011",
-        "title": "Open/Well Fdn + RCC Pier + PSC Box",
-        "spans": "3×30 m",
-        "span_count": 3,
-        "span_lengths": [30.0]*3,
-        "total_length": 90.0,
-        "carriageway_width": 7.5,
-        "foundation_type": "WELL",
-        "pier_material": "M35",
-        "superstructure_type": "PSC_BOX",
-        "deck_thickness_mm": 250,
-        "girder_depth_mm": 2500,
-        "girder_spacing": 3.0,
-        "girders_per_deck": 1,
-        "pier_shaft_width": 2.5,
-        "pier_height": 12.0,
-        "abutment_type": "OPEN",
-        "bearing_type": "POT",
-        "hfl": 100.0,
-        "soffit_level": 101.5,
-        "road_level": 104.5,
-        "scour_depth": 4.0,
-    },
-    {
-        "id": "BR-I-2022-012",
-        "title": "Pile Fdn + RCC Pier + PSC Box",
-        "spans": "3×30 m",
-        "span_count": 3,
-        "span_lengths": [30.0]*3,
-        "total_length": 90.0,
-        "carriageway_width": 7.5,
-        "foundation_type": "PILE",
-        "pier_material": "M35",
-        "superstructure_type": "PSC_BOX",
-        "deck_thickness_mm": 250,
-        "girder_depth_mm": 2500,
-        "girder_spacing": 3.0,
-        "girders_per_deck": 1,
-        "pier_shaft_width": 2.5,
-        "pier_height": 12.0,
-        "pile_diameter_mm": 1500,
-        "pile_length_m": 25.0,
-        "piles_per_pier": 6,
-        "abutment_type": "OPEN",
-        "bearing_type": "POT",
-        "hfl": 100.0,
-        "soffit_level": 101.5,
-        "road_level": 104.5,
-        "scour_depth": 4.0,
-    },
-    {
-        "id": "BR-I-2022-013",
-        "title": "Well Fdn + RCC Pier + PSC Box",
-        "spans": "3×30 m",
-        "span_count": 3,
-        "span_lengths": [30.0]*3,
-        "total_length": 90.0,
-        "carriageway_width": 7.5,
-        "foundation_type": "WELL",
-        "pier_material": "M35",
-        "superstructure_type": "PSC_BOX",
-        "deck_thickness_mm": 250,
-        "girder_depth_mm": 2500,
-        "girder_spacing": 3.0,
-        "girders_per_deck": 1,
-        "pier_shaft_width": 2.5,
-        "pier_height": 12.0,
-        "well_diameter_m": 6.0,
-        "abutment_type": "OPEN",
-        "bearing_type": "POT",
-        "hfl": 100.0,
-        "soffit_level": 101.5,
-        "road_level": 104.5,
-        "scour_depth": 4.5,
-    },
-    {
-        "id": "BR-I-2022-014",
-        "title": "Open Fdn + RCC Arch/Slab (Pedestrian)",
-        "spans": "1×15 m",
-        "span_count": 1,
-        "span_lengths": [15.0],
-        "total_length": 15.0,
-        "carriageway_width": 3.5,
-        "foundation_type": "OPEN",
-        "pier_material": "M25",
-        "superstructure_type": "RCC_ARCH",
-        "deck_thickness_mm": 300,
-        "pier_shaft_width": 1.0,
-        "pier_height": 5.0,
-        "abutment_type": "OPEN",
-        "bearing_type": "NONE",
-        "hfl": 100.0,
-        "soffit_level": 101.5,
-        "road_level": 102.5,
-        "scour_depth": 2.0,
-    },
-    {
-        "id": "BR-I-2022-015",
-        "title": "Open Fdn + RCC Arch (Vehicular)",
-        "spans": "1×20 m",
-        "span_count": 1,
-        "span_lengths": [20.0],
-        "total_length": 20.0,
-        "carriageway_width": 7.5,
-        "foundation_type": "OPEN",
-        "pier_material": "M30",
-        "superstructure_type": "RCC_ARCH",
-        "deck_thickness_mm": 400,
-        "pier_shaft_width": 1.5,
-        "pier_height": 6.0,
-        "abutment_type": "OPEN",
-        "bearing_type": "NONE",
-        "hfl": 100.0,
-        "soffit_level": 101.5,
-        "road_level": 103.0,
-        "scour_depth": 2.5,
-    },
-]
+# RCC_BOX_CELL, RCC_PORTAL and RCC_ARCH used to collapse to SOLID_SLAB here,
+# which silently made the family-driven rules (sheet 1 "no piers", the sheet 2
+# datum, the arch/box-cell presence gates) treat a box cell, a portal frame and
+# both arches as slabs and draw them as such.
+_SST_MAP = {
+    "RCC_SOLID_SLAB": "SOLID_SLAB",
+    "RCC_T_BEAM": "RCC_TBEAM",
+    "PSC_I_GIRDER": "PSC_IGIRDER",
+    "PSC_BOX": "PSC_BOX_GIRDER",
+    "RCC_BOX_CELL": "BOX_CELL_MULTI",
+    # SuperstructureType has no RCC_PORTAL member; a monolithic portal frame is
+    # the closest member the engine and the sheets both understand.
+    "RCC_PORTAL": "RCC_FRAME_CULVERT",
+}
+# The booklet draws two different arches — 014 an open-spandrel pedestrian F.O.B.
+# and 015 a precast block arch — so the arch family is named by the card.
+_ARCH_BY_ID = {
+    "BR-I-2022-014": "RCC_ARCH_OPEN_SPANDREL",
+    "BR-I-2022-015": "PRECAST_ARCH",
+}
+_FOUNDATION_MAP = {"OPEN": "OPEN", "PILE": "PILE", "RAFT": "RAFT", "WELL": "WELL"}
+# Every booklet type founds an open-foundation / raft / pile / well pier and
+# carries a cantilever wall abutment; only the foundation differs between cards.
+_ABUTMENT_MAP = {"OPEN": "CANTILEVER", "INTEGRAL": "CANTILEVER", "PORTAL": "CANTILEVER"}
+# BearingType has no NONE member: a bearingless (monolithic) deck is an *unset*
+# bearing type, so the sheets skip the bearing schedule instead of drawing a
+# neoprene pad the booklet does not have.
+_BEARING_MAP = {"ELASTOMERIC": "ELASTOMERIC_NEOPRENE", "POT": "POT_PTFE", "NONE": None}
+
+
+def _superstructure_name(params: dict) -> str:
+    """Booklet superstructure family → ``SuperstructureType`` member name."""
+    raw = params["superstructure_type"]
+    if raw == "RCC_ARCH":
+        return _ARCH_BY_ID.get(params.get("id", ""), "CONCRETE_ARCH_DECK")
+    return _SST_MAP.get(raw, "SOLID_SLAB")
 
 
 def _build_project(params: dict):
-    """Build a BridgeProject from a PWD parameter dict."""
-    from bridgecad_core.models import (
-        BridgeProject, ProjectMaster, BridgeSelection, GeometryInput,
-        Superstructure, Substructure, FoundationDetails, Approaches,
-        HydraulicData, Materials, BearingsJoints, ComponentsLib,
-        DrawingControl, Calculations, ValidationModel,
-    )
+    """Build a BridgeProject from a resolved catalogue parameter set."""
     from bridgecad_core import types as T
+    from bridgecad_core.models import (
+        Approaches, BearingsJoints, BridgeProject, BridgeSelection,
+        Calculations, ComponentsLib, DrawingControl, FoundationDetails,
+        GeometryInput, HydraulicData, Materials, ProjectMaster, Substructure,
+        Superstructure, ValidationModel,
+    )
 
     def _dec(v): return Decimal(str(v)) if v is not None else None
     def _int(v): return int(v) if v is not None else None
 
-    # Map superstructure type string to enum
-    sst_map = {
-        "RCC_SOLID_SLAB": "SOLID_SLAB",
-        "RCC_T_BEAM": "RCC_TBEAM",
-        "PSC_I_GIRDER": "PSC_IGIRDER",
-        "PSC_BOX": "PSC_BOX_GIRDER",
-        "RCC_BOX_CELL": "SOLID_SLAB",
-        "RCC_PORTAL": "SOLID_SLAB",
-        "RCC_ARCH": "SOLID_SLAB",
-    }
-    sst_name = sst_map.get(params["superstructure_type"], "SOLID_SLAB")
+    sst = getattr(T.SuperstructureType, _superstructure_name(params),
+                  T.SuperstructureType.SOLID_SLAB)
+    fdn = getattr(T.FoundationType,
+                  _FOUNDATION_MAP.get(params["foundation_type"], "OPEN"),
+                  T.FoundationType.OPEN)
+    abt = getattr(T.AbutmentType,
+                  _ABUTMENT_MAP.get(params["abutment_type"], "CANTILEVER"),
+                  T.AbutmentType.CANTILEVER)
+    pier_material = getattr(T.ConcreteGrade, params.get("pier_material", "M25"),
+                            T.ConcreteGrade.M25)
+    bearing_name = _BEARING_MAP.get(params["bearing_type"])
+    bearing = getattr(T.BearingType, bearing_name) if bearing_name else None
 
-    # Map foundation type
-    ftype_map = {"OPEN": "OPEN", "PILE": "PILE", "RAFT": "RAFT",
-                 "WELL": "WELL"}
-
-    # Map abutment type
-    abt_map = {"OPEN": "CANTILEVER", "INTEGRAL": "CANTILEVER",
-               "PORTAL": "CANTILEVER"}
-
-    # Map bearing type
-    brg_map = {"ELASTOMERIC": "ELASTOMERIC_NEOPRENE", "POT": "POT_PTFE",
-               "NONE": "ELASTOMERIC_NEOPRENE"}
+    hfl = _dec(params["hfl_m"])
+    scour = _dec(params["scour_depth_m"])
+    footpath = _dec(params.get("footpath_width"))
 
     pm = ProjectMaster(
         project_title=params["title"],
@@ -438,43 +127,44 @@ def _build_project(params: dict):
         language=T.Language.EN,
         project_phase=T.ProjectPhase.DESIGN_GAD_60_PCT,
         road_level_rl_m=_dec(params["road_level"]),
-        ground_level_rl_m=_dec(params["hfl"] - params["scour_depth"]),
+        ground_level_rl_m=hfl - scour,
     )
 
     gi = GeometryInput(
         span_count=params["span_count"],
         span_lengths_m=[_dec(s) for s in params["span_lengths"]],
         carriageway_width_m=_dec(params["carriageway_width"]),
+        footpath_left_m=footpath,
+        footpath_right_m=footpath,
+        skew_angle_deg=_dec(params.get("skew_deg", 0)),
         chainage_start_km=Decimal("0.000"),
     )
 
     ss = Superstructure(
-        type=getattr(T.SuperstructureType, sst_name, T.SuperstructureType.SOLID_SLAB),
+        type=sst,
         deck_material=T.ConcreteGrade.M30,
         deck_thickness_mm=_int(params.get("deck_thickness_mm", 500)),
         wearing_coat_thickness_mm=65,
         girder_depth_mm=_int(params.get("girder_depth_mm", 0)),
-        girder_spacing_m=_dec(params.get("girder_spacing", 2.5)),
+        girder_spacing_m=_dec(params.get("girder_spacing_m", 2.5)),
         girders_per_deck_count=_int(params.get("girders_per_deck", 0)),
         parapet_height_mm=1000,
     )
 
     sub = Substructure(
         pier_type=T.PierType.WALL,
-        pier_material=getattr(T.ConcreteGrade, params.get("pier_material", "M25"),
-                              T.ConcreteGrade.M25),
-        pier_height_typical_m=_dec(params.get("pier_height", 6.0)),
-        pier_shaft_width_m=_dec(params.get("pier_shaft_width", 1.5)),
+        pier_material=pier_material,
+        pier_height_typical_m=_dec(params.get("pier_height_m", 6.0)),
+        pier_shaft_width_m=_dec(params.get("pier_shaft_width_m", 1.5)),
         pier_shaft_length_m=_dec(params.get("carriageway_width", 7.5)),
-        pier_cap_depth_m=_dec(params.get("pier_cap_depth", 0.8)),
-        pier_cap_width_m=Decimal(str(round(float(params.get("pier_shaft_width", 1.5)) * 1.3, 3))),
+        pier_cap_depth_m=_dec(params.get("pier_cap_depth_m", 0.8)),
+        pier_cap_width_m=Decimal(str(round(float(params.get("pier_shaft_width_m", 1.5)) * 1.3, 3))),
         pier_pedestal_height_m=Decimal("0.15"),
-        abutment_type=getattr(T.AbutmentType, abt_map.get(params["abutment_type"], "CANTILEVER"),
-                             T.AbutmentType.CANTILEVER),
+        abutment_type=abt,
         abutment_material=T.ConcreteGrade.M25,
         abutment_width_m=Decimal("1.2"),
         abutment_length_m=_dec(params.get("carriageway_width", 7.5)),
-        abutment_height_m=_dec(params.get("pier_height", 6.0)),
+        abutment_height_m=_dec(params.get("pier_height_m", 6.0)),
         abutment_pedestal_height_m=Decimal("0.15"),
         approach_slab_length_m=Decimal("3.5"),
         approach_slab_thickness_mm=200,
@@ -491,28 +181,27 @@ def _build_project(params: dict):
     )
 
     fd = FoundationDetails(
-        type=getattr(T.FoundationType, ftype_map.get(params["foundation_type"], "OPEN"),
-                     T.FoundationType.OPEN),
-        pile_diameter_mm=_int(params.get("pile_diameter_mm", 0)) or None,
+        type=fdn,
+        pile_diameter_mm=_int(params.get("pile_diameter_mm")) or None,
         pile_length_m=_dec(params.get("pile_length_m", 0)),
-        piles_per_pier=_int(params.get("piles_per_pier", 0)) or None,
+        piles_per_pier=_int(params.get("piles_per_pier")) or None,
         pile_spacing_m=Decimal("2.5"),
         pile_cap_thickness_mm=_int(1500 if params["foundation_type"] == "PILE" else 0),
-        pile_cutoff_level_m=_dec(params["hfl"] - 1.0),
+        pile_cutoff_level_m=hfl - Decimal("1.0"),
+        well_diameter_m=_dec(params.get("well_diameter_m")),
     )
 
     hd = HydraulicData(
-        hfl_m=_dec(params["hfl"]),
-        lwl_m=_dec(params["hfl"] - 0.5),
-        scour_level_m=_dec(params["hfl"] - params["scour_depth"]),
-        design_scour_depth_m=_dec(params["scour_depth"]),
+        hfl_m=hfl,
+        lwl_m=hfl - Decimal("0.5"),
+        scour_level_m=hfl - scour,
+        design_scour_depth_m=scour,
         actual_soffit_level_m=_dec(params["soffit_level"]),
     )
 
     mt = Materials(
         concrete_superstructure=T.ConcreteGrade.M30,
-        concrete_substructure=getattr(T.ConcreteGrade, params.get("pier_material", "M25"),
-                                       T.ConcreteGrade.M25),
+        concrete_substructure=pier_material,
         concrete_foundation=T.ConcreteGrade.M25,
         reinforcement_steel_grade=T.SteelGrade.Fe500D,
         prestressing_steel=T.PrestressGrade.G1860,
@@ -520,25 +209,22 @@ def _build_project(params: dict):
         expansion_joint_type=T.ExpansionJointType.STRIP_SEAL,
     )
 
-    bj = BearingsJoints(
-        bearing_type=getattr(T.BearingType, brg_map.get(params["bearing_type"], "ELASTOMERIC_NEOPRENE"),
-                             T.BearingType.ELASTOMERIC_NEOPRENE),
-    )
+    bj = BearingsJoints(bearing_type=bearing)
 
     return BridgeProject(
         project_master=pm,
         bridge_selection=BridgeSelection(
-            bridge_category=T.BridgeCategory.MINOR_BRIDGE if params["total_length"] < 30
-                           else T.BridgeCategory.MAJOR_BRIDGE,
-            bridge_type=getattr(T.SuperstructureType, sst_name, T.SuperstructureType.SOLID_SLAB),
+            bridge_category=(T.BridgeCategory.MINOR_BRIDGE
+                             if params["total_length_m"] < 30
+                             else T.BridgeCategory.MAJOR_BRIDGE),
+            bridge_type=sst,
             span_configuration=T.SpanConfiguration.SIMPLY_SUPPORTED,
             carriageway_config=T.CarriagewayLaneConfig.LANE_2,
             design_code=T.DesignCode.IRC_6_2017,
             loading_class=T.LoadClass.CLASS_A,
             seismic_zone=T.SeismicZone.ZONE_III,
             wind_zone_ms=T.WindSpeedBasic_ms.VB_39_ms_ZONE_2,
-            foundation_type=getattr(T.FoundationType, ftype_map.get(params["foundation_type"], "OPEN"),
-                                   T.FoundationType.OPEN),
+            foundation_type=fdn,
         ),
         geometry_input=gi,
         superstructure=ss,
@@ -596,6 +282,10 @@ def _write_readme(out_dir: Path, params: dict, sheets: list[Path],
 
     status = "✅ PASS" if not issues else "❌ FAIL"
     issues_text = "\n".join(f"- {i}" for i in issues) if issues else "No issues found."
+    fidelity = ""
+    if params.get("approximation"):
+        fidelity = ("\n> **Fidelity:** approximation — "
+                    f"{params.get('fidelity_note', 'engine primitive not implemented')}\n")
 
     readme = f"""# {params['title']}
 
@@ -606,8 +296,8 @@ def _write_readme(out_dir: Path, params: dict, sheets: list[Path],
 **Pier Material:** {params.get('pier_material', 'M25')}  
 **Carriageway:** {params['carriageway_width']} m  
 **Road RL:** {params['road_level']} m  
-**HFL:** {params['hfl']} m  
-
+**HFL:** {params['hfl_m']} m  
+{fidelity}
 ## Completeness check: {status}
 
 {issues_text}
@@ -623,26 +313,40 @@ def _write_readme(out_dir: Path, params: dict, sheets: list[Path],
 ---
 *Generated by BridgeCAD Enterprise Suite v0.1.0-rc1 — Maharashtra PWD Booklet*
 *IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25*
+*Parameters resolved from `bridgecad_catalogue` — see `params.resolved.json`.*
 """
     (out_dir / "README.md").write_text(readme, encoding="utf-8")
 
 
-def generate_one(params: dict) -> tuple[str, bool, str]:
-    """Generate one PWD type. Returns (id, success, message)."""
-    from bridgecad_draw.booklet import generate_package, PackageGenerationError
+def generate_one(params: dict, out_root: Path,
+                 label: str | None = None) -> tuple[str, bool, str]:
+    """Generate one variant into ``out_root/<label>``.
 
-    out_dir = OUTPUT_ROOT / params["id"]
+    Returns ``(label, success, message)``.
+    """
+    from bridgecad_draw.booklet import generate_package
+
+    label = label or params["id"]
+    out_dir = out_root / label
     out_dir.mkdir(parents=True, exist_ok=True)
+
+    # Provenance: the exact resolved set (and the trace that produced it) that
+    # the sheets in this folder were drawn from.
+    (out_dir / "params.resolved.json").write_text(
+        json.dumps({"resolved": params, "trace": params.trace,
+                    "warnings": params.warnings}, indent=2, default=str),
+        encoding="utf-8",
+    )
 
     try:
         project = _build_project(params)
     except Exception as exc:
-        return params["id"], False, f"build failed: {exc}"
+        return label, False, f"build failed: {exc}"
 
     try:
-        sheets = generate_package(project, out_dir, prefix=params["id"])
-    except (PackageGenerationError, Exception) as exc:
-        return params["id"], False, f"DXF failed: {type(exc).__name__}: {exc}"
+        sheets = generate_package(project, out_dir, prefix=label)
+    except Exception as exc:
+        return label, False, f"DXF failed: {type(exc).__name__}: {exc}"
 
     issues = _check_completeness(sheets)
     _render_pngs(sheets, out_dir)
@@ -650,48 +354,105 @@ def generate_one(params: dict) -> tuple[str, bool, str]:
     _write_readme(out_dir, params, sheets, issues, dxf_kb)
 
     status = "PASS" if not issues else "FAIL"
-    return params["id"], not issues, f"{status} — {len(sheets)} sheets, {dxf_kb} KB, {len(issues)} issue(s)"
+    return label, not issues, f"{status} — {len(sheets)} sheets, {dxf_kb} KB, {len(issues)} issue(s)"
 
 
-def main() -> int:
-    total = len(PWD_TYPES)
-    passed, failed_ids = 0, []
+def _write_index(root: Path, jobs: list[tuple[dict, str]], failed: set[str]) -> None:
+    index = "# Maharashtra PWD Booklet — GAD Packages\n\n"
+    index += (f"**{len(jobs) - len(failed)}/{len(jobs)} variants** generated as "
+              "9-sheet DXF + PNG packages.\n\n")
+    index += "| # | Folder | PWD Drawing No. | Type | Spans | Status |\n"
+    index += "|---|---|---|---|---|---|\n"
+    for i, (p, label) in enumerate(jobs, 1):
+        ok = label not in failed
+        index += (f"| {i:02d} | {label} | {p['id']} | {p['title']} | {p['spans']} | "
+                  f"{'✅' if ok else '❌'} |\n")
+    index += "\n---\n*BridgeCAD Enterprise Suite v0.1.0-rc1 — BRIDGECAD-OSS-1.0*\n"
+    (root / "README.md").write_text(index, encoding="utf-8")
+
+
+def main(argv: list[str] | None = None) -> int:
+    from bridgecad_catalogue import registry, resolve as R, sweep as S
+
+    ap = argparse.ArgumentParser(
+        prog="generate_all_pwd_gads",
+        description="Generate Maharashtra PWD booklet GAD packages from the catalogue.",
+    )
+    ap.add_argument("--type", action="append", metavar="BR-I-2022-00N",
+                    help="restrict to one booklet type (repeatable)")
+    ap.add_argument("--set", action="append", default=[], metavar="key=value",
+                    help="pin one catalogue dial (repeatable) → writes to out/pwd_sweep")
+    ap.add_argument("--sweep", action="append", default=[], metavar="key=lo:hi:step",
+                    help="vary one catalogue dial (repeatable) → writes to out/pwd_sweep")
+    ap.add_argument("--force", action="store_true",
+                    help="allow LOCKED (booklet identity) edits")
+    ap.add_argument("--dry-run", action="store_true",
+                    help="resolve and print the variants, generate nothing")
+    a = ap.parse_args(argv)
+
+    cards = registry.load()
+    known = {c["id"] for c in cards}
+    unknown = [t for t in a.type or [] if t not in known]
+    if unknown:
+        print(f"  [ERROR] unknown booklet type(s): {', '.join(unknown)}")
+        print(f"          known: {', '.join(sorted(known))}")
+        return 2
+
+    chosen = [c for c in cards if not a.type or c["id"] in a.type]
+    fixed = {k: v for k, v in (s.split("=", 1) for s in a.set)}
+    variants = S.matrix(a.sweep) if a.sweep else [{}]
+
+    jobs: list[tuple[dict, str]] = []
+    for card in chosen:
+        for i, var in enumerate(variants):
+            ov = {**fixed, **var}
+            try:
+                p = R.resolve(card, ov, force=a.force)
+            except R.Violation as exc:
+                print(f"  [REJECT] {card['id']} {ov} — {exc}")
+                continue
+            p["id"] = card["id"]          # resolve() drops the identity key
+            for w in p.warnings:
+                print(f"  [WARN]   {card['id']} — {w}")
+            label = card["id"] if not ov else f"{card['id']}__v{i:02d}"
+            jobs.append((p, label))
+
+    if not jobs:
+        print("  [ERROR] no buildable variant — every override was rejected")
+        return 1
+
+    if a.dry_run:
+        for p, label in jobs:
+            print(f"  {label:<24} Σ={p['total_length_m']} m  soffit={p['soffit_level']}")
+        print(f"\n  dry-run: {len(jobs)} variant(s) resolved, nothing written.")
+        return 0
+
+    root = SWEEP_ROOT if (a.set or a.sweep) else OUTPUT_ROOT
 
     print(f"\n{'='*72}")
-    print(f"  Maharashtra PWD Booklet — GAD Generator")
-    print(f"  Types: {total}  |  Output: {OUTPUT_ROOT}")
+    print("  Maharashtra PWD Booklet — GAD Generator")
+    print(f"  Variants: {len(jobs)}  |  Output: {root}")
     print(f"{'='*72}\n")
 
-    for params in PWD_TYPES:
-        fid, ok, msg = generate_one(params)
-        status = "DONE" if ok else "FAIL"
-        print(f"  [{status:4s}] {params['id']:<20} {params['title']:<50} {msg}")
+    passed, failed = 0, []
+    for p, label in jobs:
+        fid, ok, msg = generate_one(p, root, label)
+        print(f"  [{'DONE' if ok else 'FAIL':4s}] {label:<28} {p['title']:<46} {msg}")
         if ok:
             passed += 1
         else:
-            failed_ids.append(fid)
+            failed.append(fid)
 
     print(f"\n{'='*72}")
-    print(f"  Generated : {passed}/{total}")
-    print(f"  Failed    : {len(failed_ids)}")
-    if failed_ids:
-        for f in failed_ids:
-            print(f"    ✗ {f}")
-    print(f"  Output dir: {OUTPUT_ROOT}")
+    print(f"  Generated : {passed}/{len(jobs)}")
+    print(f"  Failed    : {len(failed)}")
+    for f in failed:
+        print(f"    ✗ {f}")
+    print(f"  Output dir: {root}")
     print(f"{'='*72}\n")
 
-    # Write index README
-    index = "# Maharashtra PWD Booklet — GAD Packages\n\n"
-    index += f"**{passed}/{total} types** generated as 9-sheet DXF + PNG packages.\n\n"
-    index += "| # | PWD Drawing No. | Type | Spans | Status |\n"
-    index += "|---|---|---|---|---|\n"
-    for i, p in enumerate(PWD_TYPES, 1):
-        ok = p["id"] not in failed_ids
-        index += f"| {i:02d} | {p['id']} | {p['title']} | {p['spans']} | {'✅' if ok else '❌'} |\n"
-    index += "\n---\n*BridgeCAD Enterprise Suite v0.1.0-rc1 — BRIDGECAD-OSS-1.0*\n"
-    (OUTPUT_ROOT / "README.md").write_text(index, encoding="utf-8")
-
-    return 0 if not failed_ids else 1
+    _write_index(root, jobs, set(failed))
+    return 0 if not failed else 1
 
 
 if __name__ == "__main__":

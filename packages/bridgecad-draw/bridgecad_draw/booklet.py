@@ -46,15 +46,20 @@ class PackageGenerationError(RuntimeError):
 
 
 # Each entry: (sheet_no, module_attr, filename_stem, default_scale)
+# A ``None`` default means "let the sheet pick its own scale": the plan (1),
+# the long section (2) and the end elevations (8) choose the largest rung of
+# ``fit.LADDER`` that fits their view, so the scale printed in their title
+# block is the scale they were drawn at. A fixed default there produced a
+# caption that disagreed with the geometry on every long bridge.
 _SHEET_MANIFEST = [
-    (1, "sheet1_plan", "Sheet1_Plan", 100),
-    (2, "sheet2_long_section", "Sheet2_LongSection", 100),
+    (1, "sheet1_plan", "Sheet1_Plan", None),
+    (2, "sheet2_long_section", "Sheet2_LongSection", None),
     (3, "sheet3_cross_section", "Sheet3_CrossSection", 50),
     (4, "sheet4_foundation", "Sheet4_Foundation", 50),
     (5, "sheet5_pier_abutment_details", "Sheet5_PierAbutment", 50),
     (6, "sheet6_bearings_joints", "Sheet6_BearingsJoints", 20),
     (7, "sheet7_bill_of_quantities", "Sheet7_BOQ", 1),
-    (8, "sheet8_side_elevations", "Sheet8_SideElevations", 50),
+    (8, "sheet8_side_elevations", "Sheet8_SideElevations", None),
     (9, "sheet9_reinforcement", "Sheet9_Reinforcement", 1),
 ]
 

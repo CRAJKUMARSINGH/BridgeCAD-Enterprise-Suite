@@ -1,0 +1,54 @@
+{
+  "resolved": {
+    "title": "Open Foundation + PCC Pier + Solid Slab",
+    "spans": "4\u00d710 m",
+    "span_count": 4,
+    "span_lengths": [
+      "10.0",
+      "10.0",
+      "10.0",
+      "10.0"
+    ],
+    "carriageway_width": 7.5,
+    "foundation_type": "OPEN",
+    "pier_material": "M20",
+    "superstructure_type": "RCC_SOLID_SLAB",
+    "deck_thickness_mm": 500,
+    "pier_shaft_width_m": 1.5,
+    "pier_height_m": 6.0,
+    "abutment_type": "OPEN",
+    "hfl_m": 100.0,
+    "road_level": 102.5,
+    "scour_depth_m": 2.0,
+    "freeboard_m": 1.0,
+    "sbc_t_per_m2": 30,
+    "submersible": false,
+    "total_length_m": "40.0",
+    "pier_count": 3,
+    "soffit_level": "101.925",
+    "foundation_level": "97.40",
+    "bearing_type": "ELASTOMERIC",
+    "id": "BR-I-2022-001"
+  },
+  "trace": [
+    {
+      "field": "total_length_m",
+      "from": "None",
+      "to": "40.0",
+      "why": "\u03a3 span_lengths"
+    },
+    {
+      "field": "soffit_level",
+      "from": "None",
+      "to": "101.925",
+      "why": "RTL \u2212 deck \u2212 WC \u2212 girder"
+    },
+    {
+      "field": "foundation_level",
+      "from": "None",
+      "to": "97.40",
+      "why": "OPEN embedment"
+    }
+  ],
+  "warnings": []
+}

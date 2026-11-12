@@ -1,0 +1,61 @@
+{
+  "resolved": {
+    "title": "Well Fdn + RCC Pier + PSC Box",
+    "spans": "2\u00d747.5 m",
+    "span_count": 2,
+    "span_lengths": [
+      "47.5",
+      "47.5"
+    ],
+    "carriageway_width": 7.5,
+    "foundation_type": "WELL",
+    "pier_material": "M35",
+    "superstructure_type": "PSC_BOX",
+    "deck_thickness_mm": 250,
+    "girder_depth_mm": 3500,
+    "pier_shaft_width_m": 2.5,
+    "pier_height_m": 15.0,
+    "well_diameter_m": 8.0,
+    "abutment_type": "OPEN",
+    "hfl_m": 100.0,
+    "road_level": 105.5,
+    "scour_depth_m": 4.5,
+    "freeboard_m": 1.0,
+    "sbc_t_per_m2": 25,
+    "submersible": false,
+    "total_length_m": "95.0",
+    "pier_count": 1,
+    "soffit_level": "101.675",
+    "foundation_level": "88.0",
+    "bearing_type": "POT",
+    "girders_per_deck": 4,
+    "id": "BR-I-2022-013"
+  },
+  "trace": [
+    {
+      "field": "total_length_m",
+      "from": "None",
+      "to": "95.0",
+      "why": "\u03a3 span_lengths"
+    },
+    {
+      "field": "soffit_level",
+      "from": "None",
+      "to": "101.675",
+      "why": "RTL \u2212 deck \u2212 WC \u2212 girder"
+    },
+    {
+      "field": "foundation_level",
+      "from": "None",
+      "to": "88.0",
+      "why": "WELL embedment"
+    },
+    {
+      "field": "girders_per_deck",
+      "from": "None",
+      "to": "4",
+      "why": "spacing vs carriageway"
+    }
+  ],
+  "warnings": []
+}

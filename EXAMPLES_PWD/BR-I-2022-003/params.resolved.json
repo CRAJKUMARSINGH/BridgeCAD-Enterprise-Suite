@@ -1,0 +1,55 @@
+{
+  "resolved": {
+    "title": "Raft Foundation + RCC Pier + Solid Slab",
+    "spans": "5\u00d710 m",
+    "span_count": 5,
+    "span_lengths": [
+      "10.0",
+      "10.0",
+      "10.0",
+      "10.0",
+      "10.0"
+    ],
+    "carriageway_width": 7.5,
+    "foundation_type": "RAFT",
+    "pier_material": "M25",
+    "superstructure_type": "RCC_SOLID_SLAB",
+    "deck_thickness_mm": 500,
+    "pier_shaft_width_m": 1.5,
+    "pier_height_m": 7.0,
+    "abutment_type": "OPEN",
+    "hfl_m": 100.0,
+    "road_level": 102.5,
+    "scour_depth_m": 3.0,
+    "freeboard_m": 1.0,
+    "sbc_t_per_m2": 15,
+    "submersible": false,
+    "total_length_m": "50.0",
+    "pier_count": 4,
+    "soffit_level": "101.925",
+    "foundation_level": "96.0",
+    "bearing_type": "ELASTOMERIC",
+    "id": "BR-I-2022-003"
+  },
+  "trace": [
+    {
+      "field": "total_length_m",
+      "from": "None",
+      "to": "50.0",
+      "why": "\u03a3 span_lengths"
+    },
+    {
+      "field": "soffit_level",
+      "from": "None",
+      "to": "101.925",
+      "why": "RTL \u2212 deck \u2212 WC \u2212 girder"
+    },
+    {
+      "field": "foundation_level",
+      "from": "None",
+      "to": "96.0",
+      "why": "RAFT embedment"
+    }
+  ],
+  "warnings": []
+}

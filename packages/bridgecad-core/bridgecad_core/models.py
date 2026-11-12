@@ -1042,6 +1042,21 @@ class Superstructure(BaseModel):
         default=None,
         description="Arch rib shape type (Parabolic/Circular/Tied/Deck/Through)",
     )
+    # --- SS3 arch-family schedules -------------------------------------------
+    # Read by the drawing-audit rows QA-AR-SCHEDULE-CLOSED / QA-AR-RIB-ON-CURVE /
+    # QA-AR-PARABOLA-DEVIATION / QA-PA-STRIP-GAP-100. They are declared here but
+    # left unset until the arch primitives that emit them land; a row whose
+    # parameter is absent reports "not evaluable" rather than a clean pass.
+    arch_schedule_mm: list[tuple[int, int]] | None = Field(
+        default=None,
+        description="Arch soffit coordinate schedule (x, y) in mm, origin at springing",
+    )
+    arch_rise_mm: int | None = Field(
+        default=None, description="Arch rise H in mm, springing to crown soffit"
+    )
+    arch_strip_gap_mm: int | None = Field(
+        default=None, description="Precast-arch strip joint gap in mm (booklet 015: 100)"
+    )
     truss_configuration: TrussConfigurationClass | None = Field(
         default=None,
         description="Truss configuration (Warren/Pratt/Howe/Baltimore)",
@@ -1555,6 +1570,38 @@ class FoundationDetails(BaseModel):
         "Principal raft reinforcement bar diameter, mm",
         ge=8,
         le=50,
+    )
+    # --- SS3 box cell (PWD Booklet type 004) ---
+    cell_clear_m: Decimal | None = DM(
+        "Clear cell dimension of the box-cell unit, m (booklet 004: 5.0)",
+        ge=Decimal("0.5"),
+        le=Decimal("30"),
+        dp=3,
+    )
+    cell_wall_mm: int | None = DI(
+        "Box-cell wall thickness, mm (004: 500)",
+        ge=100,
+        le=3000,
+    )
+    cell_haunch_mm: int | None = DI(
+        "Internal corner haunch size, mm (004: 500)",
+        ge=0,
+        le=3000,
+    )
+    unit_cell_counts: list[int] | None = Field(
+        default=None,
+        description="Cells per box-cell unit, e.g. [4, 3, 4] (004)",
+    )
+    unit_joint_mm: int | None = DI(
+        "Construction joint between box-cell units, mm (004: 100)",
+        ge=0,
+        le=2000,
+    )
+    cutoff_wall_depth_m: Decimal | None = DM(
+        "Detached cut-off wall depth below the bed, m (004)",
+        ge=Decimal("0.0"),
+        le=Decimal("40"),
+        dp=3,
     )
     # --- Combined footing ---
     combined_footing_length_m: Decimal | None = DM(

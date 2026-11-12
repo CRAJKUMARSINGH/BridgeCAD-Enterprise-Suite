@@ -1406,3 +1406,143 @@ No changes this session.
 | 2026-11-12 21:29 | User prompt received |
 | 2026-11-12 21:30 | User prompt received |
 | 2026-11-12 21:44 | User prompt received |
+
+### Session — Genspark asset-pack applied + BridgeCAD_Plan_Patch confirmed current · 04:30
+
+**BridgeCAD_Plan_Patch:** Same 4 files (SS.txt–SS3.txt). No new files. All already applied in prior sessions.
+
+**BridgeCAD-AssetPack (Genspark):**
+- Read `CODE-JUNCTION/BridgeCAD-AssetPack/new 1.txt` — Genspark session that produced 4 GAD sheets from real Maharashtra PWD + Amarwada bridge PDFs.
+- Copied 7 Python source files from `repo/` subfolder into the live repo:
+  - `packages/bridgecad-draw/bridgecad_draw/_sheetkit.py` (Panel/Sheet furniture)
+  - `packages/bridgecad-draw/bridgecad_draw/asset_specs.py` (both bridges as dataclasses)
+  - `packages/bridgecad-draw/bridgecad_draw/asset_pack.py` (builder + coverage report)
+  - `packages/bridgecad-draw/bridgecad_draw/asset_sheet1_lsection.py`
+  - `packages/bridgecad-draw/bridgecad_draw/asset_sheet2_deck_abutment.py`
+  - `packages/bridgecad-draw/bridgecad_draw/asset_sheet3_pier.py`
+  - `packages/bridgecad-draw/bridgecad_draw/asset_sheet4_single_span.py`
+  - `scripts/render_asset_pack.py`
+  - `tests/test_asset_pack.py`
+- Copied 4 reference DXFs to `sample-gad-drawings/`.
+- Ran `pytest tests/test_asset_pack.py -v` → **30/30 PASSED** in 7.09 s.
+- Committed: `5769854` — "feat(draw): Genspark asset-pack — 4 real-site GAD sheets with 30 tests" (14 files, 75,643 insertions)
+- Pushed: `88ca2bb..5769854  main -> main` ✅
+
+**What the asset-pack adds:**
+
+| Sheet | Source bridge | Views |
+|---|---|---|
+| S1 | PMGSY 7×9 m minor bridge | L-section elevation, plan, schedule |
+| S2 | PMGSY 7×9 m minor bridge | Deck section, soil profile, abutment, return wall, toe wall, 13 notes |
+| S3 | PMGSY 7×9 m minor bridge | Pier elevation/plan/section, retaining wall |
+| S4 | Amarwada 1×6.4 m bridge | Longitudinal elevation, plans, boreholes, levels table, 13 notes |
+
+**Pending:** No open items from patch files. Plan_Patch pending items remain (box-cell primitive, arch schedule, fit.py).
+
+---
+| 2026-11-12 21:59 | Agent turn completed |
+
+### Session — Standing-order hook entry (no user task) · 04:38
+
+No changes this session.
+
+- Hook fired on incoming message. No user task present — hook-only trigger.
+- Previous session (04:30): Genspark asset-pack applied (30/30 tests pass), commit `5769854` pushed to origin/main.
+- No source files modified, no commands run, no tests executed this turn.
+- All CREAT.md entries within 24 h window; nothing pruned.
+
+**Pending:**
+- Box-cell primitive (CellGrid) for PWD type 004
+- Open-spandrel arch schedule primitive for type 014
+- Precast block arch primitive for type 015
+- Sheet 2/8 scale ladder (fit.py) for 270 m type 010
+
+---
+
+| 2026-11-12 22:22 | Plan_Patch leg closed; AssetPack leg re-verified |
+
+### Session — APPLY PATCHES FROM CODE-JUNCTION/BridgeCAD_Plan_Patch + NEXT BridgeCAD-AssetPack · 22:22
+
+**Plan_Patch leg — green.**
+
+- Root-caused the 3 residual build failures at the catalogue layer (not in the generator):
+  - `registry.py`: cards BR-I-2022-007 / -008 now carry `girder_spacing_m: 2.0` + `girders_per_deck: 3` — booklet-faithful, and the value model requires `>= 1` for `RCC_T_BEAM`.
+  - `resolve.py`: added `MIN_CARRIAGEWAY_M = 3.5` and `GIRDER_SST`; `_derive()` clamps a below-floor carriageway with the deviation *stated* (trace note + warning), and derives a girder count for any `GIRDER_SST` member that is silent — a card-stated count wins at baseline and grows only when `carriageway_width` is overridden.
+- Full-corpus regeneration: **15/15 generated, 0 failed** (`pwd_gen2.log`, `EXIT=0`). 007/008 → `cw=7.5 girders=3 span=2.0`; 014 → `cw=3.5` + clamp warning; 009 at `cw=11.0` grows 4 → 6.
+- Test suite `tests/catalogue tests/draw tests/unit tests/verification tests/test_asset_pack.py` → **597 passed, 2 skipped, 5 xfailed** — no golden drift from the 007/008/014 geometry change.
+- Corpus reconciliation (user-approved): `EXAMPLES_PWD` is now canonical-only — 301 legacy `pwd_br2022_*` paths (15 dirs) + the orphaned `completeness_report.json` staged as deletions; 301 canonical `BR-I-2022-*` paths staged as additions. A stale `.git/index.lock` was cleared manually (Windows IDE race), and `git rm` had left the legacy files on disk, so the dirs were removed explicitly.
+
+**AssetPack leg — re-verified green.**
+
+- `python -m bridgecad_draw.asset_pack --out output/asset_pack` → 4 DXFs + coverage report (S1 157 KB, S2 116 KB, S3 112 KB, S4 106 KB), `BUILD_EXIT=0`.
+- `scripts/render_asset_pack.py output/asset_pack` → 4 PNGs, `RENDER_EXIT=0`.
+- `pytest tests/test_asset_pack.py tests/catalogue` → 61 passed.
+
+**Pending (unchanged; cards 004/014/015 carry `approximation: True` + `fidelity_note`):**
+- Box-cell primitive (CellGrid) for PWD type 004
+- Open-spandrel arch schedule primitive for type 014
+- Precast block arch primitive for type 015
+- `bridgecad_draw/plan_layout.py` Sheet-1 strips + key plan
+
+---
+| 2026-11-12 22:20 | User prompt received |
+| 2026-11-12 22:26 | AssetPack leg re-confirmed (no code change needed) |
+
+### Session — APPLY GENSPARK UPDATION per CODE-JUNCTION/BridgeCAD-AssetPack · 22:26
+
+**Finding: the patch is already fully applied.** All nine files named in the handoff are present at their spec'd paths and are **byte-identical** to the inbox copies (`new 1.txt` §"Files added"):
+
+`packages/bridgecad-draw/bridgecad_draw/` → `_sheetkit.py`, `asset_specs.py`, `asset_sheet1_lsection.py`, `asset_sheet2_deck_abutment.py`, `asset_sheet3_pier.py`, `asset_sheet4_single_span.py`, `asset_pack.py`; plus `scripts/render_asset_pack.py` and `tests/test_asset_pack.py`. Verified with `git diff --no-index --numstat` against `CODE-JUNCTION/BridgeCAD-AssetPack/repo/...` and a control diff to prove the comparison detects differences.
+
+**Reproduction check — the layer really does re-draw the four source pages:**
+
+| Sheet | ref ents / layers | fresh build ents / layers | entity-type histogram |
+|---|---|---|---|
+| S1 L-section + plan | 351 / 30 | 351 / 30 | identical |
+| S2 deck section + substructure | 245 / 25 | 245 / 25 | identical |
+| S3 pier + retaining wall | 170 / 24 | 170 / 24 | identical |
+| S4 single span 6 m | 242 / 31 | 242 / 31 | identical |
+
+Only the on-disk byte counts differ (ref 138 530 → 161 602 etc.); that is a DXF-writer/version artefact, not a geometry difference — entity counts, layer counts and the per-type histogram match exactly on all four sheets.
+
+- `python -m bridgecad_draw.asset_pack out/assetpack_check` → 4 DXFs + coverage report.
+- `pytest tests/test_asset_pack.py` → **30 passed** (the handoff's own count). Note the CLI takes a **positional** out-dir; `--out <dir>` silently creates a directory literally named `--out` — that stray dir has been removed.
+- `scripts/render_asset_pack.py out/assetpack_check --out out/assetpack_check/png` → 4 PNGs, `RENDER_EXIT=0`.
+- Transient check tree removed after the run; `output/asset_pack` rebuilt via the Python API path.
+
+**Two gaps the handoff names, still open by design:** the PMGSY sheet schedules no HFL, so `SlabBridgeSpec.hfl` stays `None` and the drawing marks it "not scheduled" rather than inventing a level; and that set's founding level is taken as bed − 2.0 m per its own note 11, not read off the sheet.
+
+---
+
+| 2026-11-12 22:27 | Both legs re-verified on re-issue (no changes needed) |
+
+### Session — re-run of APPLY PATCHES … BridgeCAD_Plan_Patch >>>>>>NEXT BridgeCAD-AssetPack · 22:27
+
+Instruction re-issued verbatim; both legs were already applied, so this is a re-verification pass. `CODE-JUNCTION/BridgeCAD_Plan_Patch/` holds exactly four files (`SS.txt`, `SS1.txt`, `SS2.txt`, `SS3.txt`) — no `*.MD` — all read in a prior pass.
+
+**Leg 1 — Plan_Patch.** Fixes still in place: `resolve.py` carries `MIN_CARRIAGEWAY_M = 3.5`, `GIRDER_SST`, the stated-deviation carriageway clamp and the `cw_overridden` girder derivation; `registry.py` cards BR-I-2022-007 / -008 still carry `girder_spacing_m: 2.0` + `girders_per_deck: 3`.
+
+- `generate_all_pwd_gads.py --dry-run` → **15 variant(s) resolved, `EXIT=0`**, all booklet-faithful (004 Σ=61.25, 010 Σ=270.0, 014 Σ=48.3, 015 Σ=61.94). Warnings are the expected three: 004/014/015 approximation, 004/005 submersible afflux, 014 carriageway clamp.
+- `pytest tests/catalogue tests/test_asset_pack.py` → **61 passed** (`EXIT=0`).
+- **Correction to a previously recorded command:** `--no-render` is *not* a flag on this CLI (it accepts `--type/--set/--sweep/--force/--dry-run`); `--no-render` exits 2. The fast gate is `--dry-run`; full-corpus generation always renders.
+
+**Leg 2 — AssetPack.** Unchanged from the 22:26 pass: nine files byte-identical to the inbox, entity/layer/histogram match against all four reference DXFs, `pytest tests/test_asset_pack.py` → 30 passed, 4 PNGs rendered.
+
+---
+
+| 2026-11-12 22:28 | Applied patch inboxes purged (user-approved) |
+
+### Session — DELETE THE INSTRUCTIONS APPLIED AND NOW REDUNDANT · 22:28
+
+Both applied patch inboxes deleted in full:
+
+- `CODE-JUNCTION/BridgeCAD_Plan_Patch/` — 64 KB (`SS.txt`, `SS1.txt`, `SS2.txt`, `SS3.txt`).
+- `CODE-JUNCTION/BridgeCAD-AssetPack/` — 205 MB (`new 1.txt`, the `repo/` Genspark snapshot, the four `ASSET_Asset_S*.dxf` reference sheets).
+
+Safety checks before deletion: `CODE-JUNCTION/` is gitignored (`.gitignore:186`) and `git ls-files CODE-JUNCTION` returns **0 tracked files**, so nothing was removed from version control. A repo-wide grep confirms no code, script, or test reads either path — the only surviving references are historical entries in this file plus the `.gitignore` rule itself (retained: the inbox pattern is still the right guard for future patches).
+
+`CODE-JUNCTION/T.txt` (1 KB) was **deliberately kept** — it is an unapplied backlog (README references, `Venice-patch`, redundant `C:\Program Files` folders, the LISP *in toto* archive) and was not part of either applied patch set.
+
+`CODE-JUNCTION/` now contains only `T.txt`.
+
+---

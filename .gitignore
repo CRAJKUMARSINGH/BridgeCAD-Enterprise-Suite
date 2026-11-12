@@ -193,6 +193,11 @@ ATTACHED ASSETS/*
 !ATTACHED ASSETS/yogipwd_lisp_solid_slab_gad_original.txt
 !ATTACHED ASSETS/GAD_Module_Mapping_Derived_Unverified.md
 
+# Parameter-sweep tree written by scripts/generate_all_pwd_gads.py whenever
+# --set/--sweep is used. Only the booklet-faithful defaults (EXAMPLES_PWD) are
+# canonical; every swept variant is transient.
+out/
+
 # Ad-hoc scratch / run trees — regenerable output written by local test and
 # generation runs (never product source).
 03_outputs/

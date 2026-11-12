@@ -15,7 +15,7 @@ pytestmark = pytest.mark.draw
 
 from bridgecad_core import validation_registry as reg  # noqa: E402
 
-TIER_COUNTS = {"critical": 25, "warning": 75, "info": 50}
+TIER_COUNTS = {"critical": 31, "warning": 78, "info": 54}
 ID_RE = re.compile(r"^V(\d{3})$")
 
 
@@ -47,8 +47,9 @@ def test_rule_ids_are_contiguous_from_v001():
 
 
 def test_tier_distribution_matches_the_documented_counts():
-    """GUIDE.md §5.4 and docs/standards.md both state 25/75/50. If the registry
-    moves, the docs move with it or this fails."""
+    """31/78/54 — the M1W1-D4 25/75/50 core plus the SS3 Part B drawing-audit
+    rows (6 critical, 3 warning, 4 info). If the registry moves, the docs move
+    with it or this fails."""
     from collections import Counter
     counts = Counter(r.tier for r in _specs())
     assert dict(counts) == TIER_COUNTS, f"tier counts {dict(counts)} != {TIER_COUNTS}"

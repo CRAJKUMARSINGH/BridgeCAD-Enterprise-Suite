@@ -1,0 +1,59 @@
+{
+  "resolved": {
+    "title": "Pile Fdn + RCC Pier + RCC 3-Girder (T-Beam)",
+    "spans": "3\u00d725 m",
+    "span_count": 3,
+    "span_lengths": [
+      "25.0",
+      "25.0",
+      "25.0"
+    ],
+    "carriageway_width": 7.5,
+    "foundation_type": "PILE",
+    "pier_material": "M25",
+    "superstructure_type": "RCC_T_BEAM",
+    "deck_thickness_mm": 200,
+    "girder_depth_mm": 1800,
+    "girder_spacing_m": 2.0,
+    "girders_per_deck": 3,
+    "pier_shaft_width_m": 1.5,
+    "pier_height_m": 10.0,
+    "pile_diameter_mm": 1200,
+    "pile_length_m": 20.0,
+    "piles_per_pier": 4,
+    "abutment_type": "OPEN",
+    "hfl_m": 100.0,
+    "road_level": 103.5,
+    "scour_depth_m": 3.0,
+    "freeboard_m": 1.0,
+    "sbc_t_per_m2": 15,
+    "submersible": false,
+    "total_length_m": "75.0",
+    "pier_count": 2,
+    "soffit_level": "101.425",
+    "foundation_level": "75.00",
+    "bearing_type": "ELASTOMERIC",
+    "id": "BR-I-2022-008"
+  },
+  "trace": [
+    {
+      "field": "total_length_m",
+      "from": "None",
+      "to": "75.0",
+      "why": "\u03a3 span_lengths"
+    },
+    {
+      "field": "soffit_level",
+      "from": "None",
+      "to": "101.425",
+      "why": "RTL \u2212 deck \u2212 WC \u2212 girder"
+    },
+    {
+      "field": "foundation_level",
+      "from": "None",
+      "to": "75.00",
+      "why": "PILE embedment"
+    }
+  ],
+  "warnings": []
+}

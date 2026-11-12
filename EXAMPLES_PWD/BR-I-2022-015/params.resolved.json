@@ -1,0 +1,55 @@
+{
+  "resolved": {
+    "title": "Open Fdn + RCC Precast Block Arch (Vehicular)",
+    "spans": "61.94 m, 10.0 m carriageway, 27 blocks",
+    "span_count": 1,
+    "span_lengths": [
+      "61.94"
+    ],
+    "carriageway_width": 10.0,
+    "foundation_type": "OPEN",
+    "pier_material": "M30",
+    "superstructure_type": "RCC_ARCH",
+    "deck_thickness_mm": 400,
+    "pier_shaft_width_m": 1.5,
+    "pier_height_m": 6.0,
+    "abutment_type": "OPEN",
+    "hfl_m": 100.0,
+    "road_level": 103.0,
+    "scour_depth_m": 2.5,
+    "freeboard_m": 1.0,
+    "sbc_t_per_m2": 27.233,
+    "submersible": false,
+    "approximation": true,
+    "fidelity_note": "no precast-block / socket primitive \u2014 drawn as a single-curve approximation",
+    "total_length_m": "61.94",
+    "pier_count": 0,
+    "soffit_level": "102.525",
+    "foundation_level": "96.90",
+    "bearing_type": "NONE",
+    "id": "BR-I-2022-015"
+  },
+  "trace": [
+    {
+      "field": "total_length_m",
+      "from": "None",
+      "to": "61.94",
+      "why": "\u03a3 span_lengths"
+    },
+    {
+      "field": "soffit_level",
+      "from": "None",
+      "to": "102.525",
+      "why": "RTL \u2212 deck \u2212 WC \u2212 girder"
+    },
+    {
+      "field": "foundation_level",
+      "from": "None",
+      "to": "96.90",
+      "why": "OPEN embedment"
+    }
+  ],
+  "warnings": [
+    "RCC_ARCH: approximation \u2014 span/depth governor not applied"
+  ]
+}

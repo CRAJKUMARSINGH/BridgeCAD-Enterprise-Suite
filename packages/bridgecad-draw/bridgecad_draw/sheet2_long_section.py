@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any
 
 from .dxf_engine import CoordMapper, new_sheet, save
+from .fit import MIN_TEXT_MM, Fit, choose_fit
 from .primitives import (
     chainage_tag,
     circle,
@@ -52,10 +53,11 @@ _TH_MAX = 6.0  # text-height cap (mm): the fit-scale can be ~65 mm/m on a
 
 
 def _chainage_pitch(total_m: float) -> float:
-    """Uniform chainage interval for the axis ticks — the LISP `xincr`.
+    """Uniform chainage interval for the *labelled* grid — the LISP `xincr`.
 
-    Keeps roughly 6–12 ticks across the bridge so the axis grid stays legible
-    at 1:100 without the labels colliding.
+    Keeps roughly 6–12 labels across the bridge so the axis grid stays legible
+    without the numbers colliding. The chainage is drawn two-tier around this
+    pitch: unlabelled ticks at half the pitch and a labelled tick on it.
     """
     for pitch in (1.0, 2.0, 5.0, 10.0, 15.0, 20.0, 25.0, 50.0, 100.0):
         if total_m / pitch <= 12:
@@ -63,11 +65,30 @@ def _chainage_pitch(total_m: float) -> float:
     return 200.0
 
 
+def _annot_mode(span_mm: float, pier_pitch_mm: float) -> str:
+    """How much annotation the pier line can carry on paper — SS3 §A2.
+
+    The section used to print its full annotation set regardless of how small
+    it had been drawn, so on a 270 m nine-span the eight `ΔREF=` strings and the
+    per-pier labels all landed on the same few millimetres. Gate each tier on
+    the paper space actually available:
+
+    ``full``         span length + in-line T.O.C. tags + the ΔREF table
+    ``index``        span index tags only; per-pier labels rotated off the line
+    ``index-narrow`` span index tags at 90°; no per-pier tag at all
+    """
+    if span_mm >= 30 and pier_pitch_mm >= 20:
+        return "full"
+    if span_mm >= 18 and pier_pitch_mm >= 12:
+        return "index"
+    return "index-narrow"
+
+
 def generate(
     project: Any,
     output_path: str | Path,
-    scale_denom: int = 100,
-    v_exag: float = 2.0,
+    scale_denom: int | None = None,
+    v_exag: float = 1.0,
 ) -> Path:
     """Generate Sheet 2 (Longitudinal Section) as a DXF file.
 
@@ -75,10 +96,17 @@ def generate(
     ----------
     project : BridgeProject
     output_path : str | Path
-    scale_denom : int
-        Horizontal scale denominator (e.g. 100 for 1:100).
+    scale_denom : int | None
+        Horizontal scale denominator. ``None`` (default) lets the sheet pick
+        the largest standard rung that fits the elevation — a fitted scale far
+        from any preferred number is what made the printed caption a lie.
+        An explicit denominator is honoured as given: the geometry is then
+        drawn at *that* scale, so the caption derived from it stays true.
     v_exag : float
-        Vertical exaggeration multiplier (default 2.0 for readability).
+        Vertical exaggeration applied to the section (SS3 §A3). ``1.0``
+        (default) is a true section whose vertical scale is the height fit; a
+        value > 1 stretches the vertical proportionally and the printed V
+        scale/V.E. follow the geometry drawn.
 
     Returns
     -------
@@ -89,13 +117,33 @@ def generate(
     return save(doc, output_path)
 
 
-def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: float = 2.0) -> None:
+def _draw_long_section(
+    msp: Any,
+    project: Any,
+    scale_denom: int | None = None,
+    v_exag: float = 1.0,
+) -> None:
+    from bridgecad_core import types as T
     from bridgecad_core.geometry import compute_long_section_geometry
 
     gi = project.geometry_input
     sub = project.substructure
     fd = project.foundation_details
+    ss = project.superstructure
     pm = project.project_master
+
+    # ── Presence by type (SS3 §A4) ────────────────────────────────────────
+    # A raft or open foundation carries no piles; a box culvert or a box cell
+    # carries no *separate* intermediate piers (the monolithic cell walls do
+    # the work, not a shaft+cap). Both gates are driven by the *model*, never
+    # by the sheet, so a 004 raft box cannot inherit a pile group it does not
+    # have.
+    _no_pier_ss = (
+        T.SuperstructureType.BOX_CULVERT,
+        getattr(T.SuperstructureType, "BOX_CELL_MULTI", T.SuperstructureType.BOX_CULVERT),
+    )
+    has_piles = fd.type == T.FoundationType.PILE
+    has_piers = ss.type not in _no_pier_ss
 
     # ── Geometry ──────────────────────────────────────────────────────────
     ls = compute_long_section_geometry(project)
@@ -148,18 +196,32 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
     draw_w = _SHEET_W - draw_x0 - _MARGIN - _RIGHT_LABEL_W
     draw_h = _SHEET_H - draw_y0 - _MARGIN - 13.0  # FR-2: reclaim ~7 mm previously wasted
 
-    # Scale factors (mm per metre)
+    # Scale factors (mm per metre). The horizontal scale is a rung of the
+    # shared ladder, never `draw_w / ch_span`: an invented denominator is what
+    # let this sheet's title block claim "1:100" for a view drawn at about
+    # 1:382 (PWD 010 — 9 × 30 m). The vertical scale is the fit that fills the
+    # drawing height; the exaggeration is *reported* from the two, never
+    # asserted.
     ch_min = -app_l  # left-most drawn chainage (approach slab tail)
     ch_max = total_len + app_l  # right-most drawn chainage
     ch_span = max(ch_max - ch_min, 0.1)
-    sc_h = draw_w / ch_span  # horizontal
-    sc_v = draw_h / max(rl_range, 0.1) / v_exag  # vertical (exaggerated)
+    fit = choose_fit(ch_span, draw_w, len(span_lens) + 2)
+    if scale_denom is not None:
+        fit = Fit(scale_denom, 1000.0 / scale_denom, False, 1)
+    sc_h = fit.mm_per_m  # horizontal — a ladder rung, so the caption is true
+    # Vertical scale: the height fit, exaggerated by `v_exag` (SS3 §A3). Every
+    # vertical *size* must then be drawn through `sy()` (a `vy` RL delta), never
+    # as `metres * sc_v * v_exag` — the old form's `v_exag` cancelled the one
+    # already folded into `sc_v`, so the section drew flat under an exaggerated
+    # caption. `v_exag=1.0` is an un-exaggerated fitted section.
+    sc_v = (draw_h / max(rl_range, 0.1)) * v_exag
+    v_eff = sc_v / sc_h  # the *real* vertical exaggeration, for the caption
 
     CoordMapper(
         datum_rl=datum_rl,
         origin_ch=0.0,
         h_scale=sc_h / 1000.0,  # CoordMapper expects h_scale in m→unit
-        v_scale=sc_v / 1000.0 * v_exag,
+        v_scale=sc_v / 1000.0,
         x_offset=draw_x0,
         y_offset=draw_y0,
     )
@@ -168,7 +230,16 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
         return draw_x0 + (ch - ch_min) * sc_h
 
     def vy(rl):
-        return draw_y0 + (rl - datum_rl) * sc_v * v_exag
+        return draw_y0 + (rl - datum_rl) * sc_v
+
+    def sy(m: float) -> float:
+        """A vertical size in metres → paper mm at the section's vertical scale.
+
+        Every thickness must go through here (or through `vy` as an RL delta):
+        `m * sc_v * v_exag` was the form whose `v_exag` cancelled the one in
+        `sc_v`, drawing an un-exaggerated section under an exaggerated caption.
+        """
+        return m * sc_v
 
     # ── Border & title block ───────────────────────────────────────────────
     draw_border(msp, "A1")
@@ -185,12 +256,12 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
         approved_by=getattr(pm, "approved_by", "") or "",
         client=getattr(getattr(pm, "client", None), "name", "") or "",
         consultant=getattr(getattr(pm, "consultant", None), "name", "") or "",
-        scale_str=f"1:{scale_denom} H  1:{int(scale_denom/v_exag)} V",
+        scale_str=f"{fit.scale_str} H   1:{round(1000.0 / sc_v)} V  (V.E.={v_eff:.2f}x)",
         sheet_no="2",
         total_sheets="9",
     )
 
-    th = min(_TH_MAX, max(2.5, sc_h * 0.4))  # adaptive text height mm (capped)
+    th = min(_TH_MAX, max(MIN_TEXT_MM, sc_h * 0.4))  # adaptive text height mm (capped)
 
     # ── Datum / chainage axis (LISP `layout()`: axis → ticks → axis title) ─
     line(msp, (draw_x0, draw_y0), (hx(total_len), draw_y0), layer="CIVIL-CHAINAGE")
@@ -203,32 +274,53 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
         height=th * 0.9,
         layer="TEXT-LEVEL",
     )
-    # xincr pitch — uniform ticks + chainage text at a constant interval.
+    # xincr pitch — two-tier grid (SS3 §A2): unlabelled ticks at half the
+    # pitch, a labelled tick on it. At 270 m the old single tier printed 21
+    # numbers into a 20 mm band; halving the tick spacing and labelling only the
+    # majors keeps the grid readable without the numbers colliding.
     ch_pitch = _chainage_pitch(total_len)
-    ch_mark = 0.0
-    while ch_mark <= total_len + 1e-6:
+    ch_minor = ch_pitch / 2.0
+    _step = round(ch_pitch / ch_minor)  # majors every `_step` minor ticks
+    tick = 0
+    while tick * ch_minor <= total_len + 1e-6:
+        ch_mark = tick * ch_minor
         xt = hx(ch_mark)
-        line(msp, (xt, draw_y0), (xt, draw_y0 - th * 1.0), layer="CIVIL-CHAINAGE")
-        text(
+        major = tick % _step == 0
+        line(
             msp,
-            f"{ch_mark:.0f}",
-            xt,
-            draw_y0 - th * 2.6,
-            height=th * 0.7,
-            layer="TEXT-LEVEL",
-            halign="CENTER",
+            (xt, draw_y0),
+            (xt, draw_y0 - th * (1.0 if major else 0.55)),
+            layer="CIVIL-CHAINAGE",
         )
-        ch_mark += ch_pitch
-    # Chainage markers every span
+        if major:
+            text(
+                msp,
+                f"{ch_mark:.0f}",
+                xt,
+                draw_y0 - th * 2.6,
+                height=th * 0.7,
+                layer="TEXT-LEVEL",
+                halign="CENTER",
+            )
+        tick += 1
+
+    def _near_grid_label(ch: float) -> bool:
+        """True when a span tag at *ch* would sit on a labelled grid tick."""
+        nearest = round(ch / ch_pitch) * ch_pitch
+        return abs(ch - nearest) < ch_pitch * 0.25
+
+    # Chainage markers every span — suppressed when they would collide with a
+    # labelled grid tick (SS3 §A2). The terminal tag is never suppressed.
     cumul = 0.0
     for slen in span_lens:
-        chainage_tag(
-            msp,
-            hx(cumul),
-            draw_y0 - 2.0,
-            (float(gi.chainage_start_km or 0) * 1000 + cumul) / 1000.0,
-            text_height=th * 0.8,
-        )
+        if not _near_grid_label(cumul):
+            chainage_tag(
+                msp,
+                hx(cumul),
+                draw_y0 - 2.0,
+                (float(gi.chainage_start_km or 0) * 1000 + cumul) / 1000.0,
+                text_height=th * 0.8,
+            )
         cumul += slen
     chainage_tag(
         msp,
@@ -462,17 +554,53 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
 
     # ── Pier shafts ───────────────────────────────────────────────────────
     pier_w_mm = float(sub.pier_shaft_width_m or 1.5) * sc_h
-    pier_cap_h = float(sub.pier_cap_depth_m or 0.8) * sc_v * v_exag
-    pier_ped_h = float(sub.pier_pedestal_height_m or 0.2) * sc_v * v_exag
+    pier_cap_h = sy(float(sub.pier_cap_depth_m or 0.8))
+    pier_ped_h = sy(float(sub.pier_pedestal_height_m or 0.2))
 
     # FR-4: pull authoritative T.O.C. RLs from LongSectionGeometry (tie to
     # plan-northern-edge reference via same top-of-deck / soffit datum chain)
     toc_rls = ls.pier_top_of_cap_rl_m
     plan_ref_rl = ls.plan_northern_edge_reference_rl
 
+    # Annotation density governor (SS3 §A2): a span's paper length decides how
+    # much the pier line can carry. On a 270 m nine-span at 1:400 a span is
+    # 75 mm — "full"; swept to 1:250 it is 120 mm — still "full"; a many-span
+    # type at a coarse rung drops to index tags only.
+    _mean_span_m = (total_len / len(span_lens)) if span_lens else 0.0
+    _span_mm = _mean_span_m * sc_h
+    annot = _annot_mode(_span_mm, _span_mm)
+
+    def _span_tag(i: int, slen: float) -> tuple[str, int]:
+        """Span label and its rotation for the current annotation tier."""
+        if annot == "full":
+            return _span_label(i, slen), 0
+        return f"S{i+1}", (90 if annot == "index-narrow" else 0)
+
+    # Consolidated pier table (SS3 §A2) — one row per pier, right gutter. Built
+    # here, drawn after the loop so it sits above everything the loop plotted.
+    _pier_rows: list[str] = []
+
     cumul = 0.0
     for i, slen in enumerate(span_lens[:-1]):
         cumul += slen
+
+        # Span label at mid-span — drawn whether or not a support exists there.
+        _stext, _srot = _span_tag(i, slen)
+        text(
+            msp,
+            _stext,
+            hx(cumul - slen / 2.0),
+            sof_y_mm + (top_y_mm - sof_y_mm) / 2,
+            height=th * 1.1,
+            layer="TEXT-GENERAL",
+            halign="CENTER",
+            rotation=_srot,
+        )
+
+        # Presence gate: a box culvert has no intermediate pier/cap/pedestal.
+        if not has_piers:
+            continue
+
         px = hx(cumul) - pier_w_mm / 2.0
 
         # FR-4: pier TOP of pier-cap is authoritative vy(toc_rls[i]) — not the
@@ -513,52 +641,43 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
             layer="STRUC-HATCHING",
         )
 
-        # FR-4: T.O.C. P{i} level tag + dashed horizontal guide to level-axis
-        # so reader can verify alignment with plan's northern-edge reference RL.
-        level_tag(
-            msp,
-            px + pier_w_mm + sc_h * 0.5,
-            py_toc,
-            toc_rls[i] if i < len(toc_rls) else (ls.soffit_rl - pier_ped_h - pier_cap_h),
-            text_height=th * 0.85,
-        )
-        text(
-            msp,
-            f"T.O.C. P{i+1}",
-            px + pier_w_mm + sc_h * 0.5 + th * 10,
-            py_toc,
-            height=th * 0.9,
-            layer="TEXT-HEADER",
-        )
+        # FR-4: T.O.C. P{i} level tag + dashed guide to the level axis so the
+        # reader can verify alignment with the plan's northern-edge RL. Only
+        # drawn at "full" density (SS3 §A2) — at the coarser tiers these tags
+        # are what collided into a single unreadable stack. The ΔREF value is
+        # never drawn in-line any more; it goes into the table below.
+        _toc = toc_rls[i] if i < len(toc_rls) else (ls.soffit_rl - pier_ped_h - pier_cap_h)
+        if annot == "full":
+            level_tag(
+                msp,
+                px + pier_w_mm + sc_h * 0.5,
+                py_toc,
+                _toc,
+                text_height=th * 0.85,
+            )
+            text(
+                msp,
+                f"T.O.C. P{i+1}",
+                px + pier_w_mm + sc_h * 0.5 + th * 10,
+                py_toc,
+                height=th * 0.9,
+                layer="TEXT-HEADER",
+            )
 
-        # FR-4: fine dashed STRUC-SECTION guide line from T.O.C. rightwards to
-        # level axis — proves visually that T.O.C. sits at correct offset from
-        # the plan_northern_edge_reference_rl (top-of-deck datum).
-        guide_x1 = px + pier_w_mm * 1.5 + sc_h
-        guide_x2 = draw_x0 - th * 2.5
-        line(
-            msp,
-            (guide_x1, py_toc),
-            (guide_x2, py_toc),
-            layer="STRUC-SECTION",
-            color=8,
-            linetype="DASHED",
-        )
-        # mini-tag at level-axis end showing the reference delta
-        ref_delta = (
-            toc_rls[i] if i < len(toc_rls) else (ls.soffit_rl - pier_ped_h - pier_cap_h)
-        ) - plan_ref_rl
-        text(
-            msp,
-            f"ΔREF={ref_delta:+.2f}m",
-            # Clamp inside the margin: on the multi-span fit the unclamped
-            # `guide_x2 - th * 12` landed at x = -42 mm, ~42 mm off the sheet.
-            max(_MARGIN + 1.0, guide_x2 - th * 12),
-            py_toc - th * 1.1,
-            height=th * 0.65,
-            layer="TEXT-SPEC",
-            color=8,
-        )
+            # Fine dashed STRUC-SECTION guide from the T.O.C. rightwards to the
+            # level axis — visual proof of the offset from the top-of-deck datum.
+            guide_x1 = px + pier_w_mm * 1.5 + sc_h
+            guide_x2 = draw_x0 - th * 2.5
+            line(
+                msp,
+                (guide_x1, py_toc),
+                (guide_x2, py_toc),
+                layer="STRUC-SECTION",
+                color=8,
+                linetype="DASHED",
+            )
+
+        _pier_rows.append(f"P{i+1}  {float(_toc):.3f}  {(float(_toc) - float(plan_ref_rl)):+.2f}")
 
         text(
             msp,
@@ -567,35 +686,51 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
             py_bot - th * 2,
             height=th,
             layer="TEXT-GENERAL",
+            rotation=(90 if annot == "index-narrow" else 0),
         )
 
-        # Span label at mid-span
-        mid_x = hx(cumul - slen / 2.0)
+    # ── Consolidated ΔREF table (SS3 §A2) ─────────────────────────────────
+    # Eight strings clamped to the same x at the same y was the old output;
+    # one sorted row per pier in the right gutter replaces it.
+    if annot == "full" and _pier_rows:
+        _tab_x = hx(total_len) + sc_h * 0.3 + th * 9.0
+        _tab_top = vy(top_rl) - th * 2.0
         text(
             msp,
-            _span_label(i, slen),
-            mid_x,
-            sof_y_mm + (top_y_mm - sof_y_mm) / 2,
-            height=th * 1.1,
-            layer="TEXT-GENERAL",
-            halign="CENTER",
+            "PIER   T.O.C.RL   ΔREF",
+            _tab_x,
+            _tab_top,
+            height=th * 0.8,
+            layer="TEXT-HEADER",
         )
+        for _r, _row in enumerate(_pier_rows, 1):
+            text(
+                msp,
+                _row,
+                _tab_x,
+                _tab_top - _r * th * 1.6,
+                height=th * 0.75,
+                layer="TEXT-SPEC",
+                color=8,
+            )
 
     # Last span label
     mid_x = hx(total_len - span_lens[-1] / 2.0)
+    _lstext, _lsrot = _span_tag(len(span_lens) - 1, span_lens[-1])
     text(
         msp,
-        _span_label(len(span_lens) - 1, span_lens[-1]),
+        _lstext,
         mid_x,
         sof_y_mm + (top_y_mm - sof_y_mm) / 2,
         height=th * 1.1,
         layer="TEXT-GENERAL",
         halign="CENTER",
+        rotation=_lsrot,
     )
 
     # ── Abutments ─────────────────────────────────────────────────────────
     abt_w_mm = float(sub.abutment_width_m or 1.2) * sc_h
-    abt_h_mm = float(sub.abutment_height_m or 3.2) * sc_v * v_exag
+    abt_h_mm = sy(float(sub.abutment_height_m or 3.2))
     cap_d2 = float(sub.abutment_cap_depth_mm or 600) / 1000.0
     cap_proj2 = float(sub.abutment_cap_projection_front_mm or 300) / 1000.0
     cap_proj2_r = float(sub.abutment_cap_projection_rear_mm or 300) / 1000.0
@@ -605,7 +740,7 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
     app_t2 = float(sub.approach_slab_thickness_mm or 200) / 1000.0
 
     def sy2(m: float) -> float:
-        return m * sc_v * v_exag
+        return sy(m)
 
     for ch, label, sgn in [(0.0, "A1", -1.0), (total_len, "A2", +1.0)]:
         ax = hx(ch) - abt_w_mm if sgn < 0 else hx(ch)
@@ -704,38 +839,40 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
         )
 
     # ── Piles / foundations ───────────────────────────────────────────────
-    pile_dia_mm = float(fd.pile_diameter_mm or 1200) / 1000.0 * sc_h
-    pile_tip_y = vy(pile_tip_rl)
-    pile_cut_y = vy(float(fd.pile_cutoff_level_m or scour_rl) - 1.0)
+    # Presence gate (SS3 §A4): only a PILE foundation has piles. A raft or an
+    # open footing previously inherited a pile group under every support.
+    if has_piles:
+        pile_dia_mm = float(fd.pile_diameter_mm or 1200) / 1000.0 * sc_h
+        pile_tip_y = vy(pile_tip_rl)
+        pile_cut_y = vy(float(fd.pile_cutoff_level_m or scour_rl) - 1.0)
 
-    piles_per_pier = int(fd.piles_per_pier or 4)
-    cols = max(1, round(piles_per_pier**0.5))
+        piles_per_pier = int(fd.piles_per_pier or 4)
+        cols = max(1, round(piles_per_pier**0.5))
 
-    # Show pile group elevation under each support
-    for ch, is_abut in [(0.0, True), (total_len, True)] + [
-        (sum(span_lens[: i + 1]), False) for i in range(len(span_lens) - 1)
-    ]:
-        for c in range(cols):
-            offset = (c - (cols - 1) / 2.0) * float(fd.pile_spacing_m or 2.4) * sc_h
-            px = hx(ch) + offset - pile_dia_mm / 2.0
-            line(
-                msp,
-                (hx(ch) + offset, pile_cut_y),
-                (hx(ch) + offset, pile_tip_y),
-                layer="FOUND-PILE",
-                lw=35,
-            )
-            circle(msp, hx(ch) + offset, pile_cut_y, pile_dia_mm / 2.0, layer="FOUND-PILE")
+        # Show pile group elevation under each support
+        for ch, is_abut in [(0.0, True), (total_len, True)] + [
+            (sum(span_lens[: i + 1]), False) for i in range(len(span_lens) - 1)
+        ]:
+            for c in range(cols):
+                offset = (c - (cols - 1) / 2.0) * float(fd.pile_spacing_m or 2.4) * sc_h
+                line(
+                    msp,
+                    (hx(ch) + offset, pile_cut_y),
+                    (hx(ch) + offset, pile_tip_y),
+                    layer="FOUND-PILE",
+                    lw=35,
+                )
+                circle(msp, hx(ch) + offset, pile_cut_y, pile_dia_mm / 2.0, layer="FOUND-PILE")
 
-    level_tag(msp, draw_x0 - 2.0, pile_tip_y, pile_tip_rl, text_height=th * 0.85)
-    text(
-        msp,
-        "PILE TIP LEVEL",
-        hx(total_len) + sc_h * 0.3,
-        pile_tip_y,
-        height=th * 0.85,
-        layer="TEXT-GENERAL",
-    )
+        level_tag(msp, draw_x0 - 2.0, pile_tip_y, pile_tip_rl, text_height=th * 0.85)
+        text(
+            msp,
+            "PILE TIP LEVEL",
+            hx(total_len) + sc_h * 0.3,
+            pile_tip_y,
+            height=th * 0.85,
+            layer="TEXT-GENERAL",
+        )
 
     # ── Freeboard annotation ──────────────────────────────────────────────
     fb_mid_x = hx(total_len * 0.7)
@@ -751,10 +888,10 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
     )
 
     # ── View label ────────────────────────────────────────────────────────
-    # The offsets above the deck are scale-proportional (`sc_v * v_exag`), so a
-    # compact structure (small RL range → large mm-per-metre) pushes the label
-    # stack through the top border. Shift the whole stack down by the overflow.
-    _lbl_top = vy(top_rl) + sc_v * v_exag * 2.5
+    # The offsets above the deck are scale-proportional (`sy`), so a compact
+    # structure (small RL range → large mm-per-metre) pushes the label stack
+    # through the top border. Shift the whole stack down by the overflow.
+    _lbl_top = vy(top_rl) + sy(2.5)
     _lbl_shift = max(0.0, (_lbl_top + th * 1.5) - (_SHEET_H - _MARGIN))
     text(
         msp,
@@ -765,20 +902,23 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
         layer="TEXT-HEADER",
         halign="CENTER",
     )
+    # The printed scales are the ones the geometry was drawn at: H is the ladder
+    # rung, V is the height fit, and the exaggeration is their ratio. The old
+    # caption typed a constant ("1:100 V, V.E.=2×") beside a fitted view.
     text(
         msp,
-        f"H Scale 1:{scale_denom}   V Scale 1:{int(scale_denom/v_exag)} (V.E.={v_exag}×)",
+        f"H Scale {fit.scale_str}   V Scale 1:{round(1000.0 / sc_v)}  (V.E.={v_eff:.2f}x)",
         draw_x0 + draw_w / 2,
-        vy(top_rl) + sc_v * v_exag * 1.0 - _lbl_shift,
+        vy(top_rl) + sy(1.0) - _lbl_shift,
         height=th * 0.9,
         layer="TEXT-SPEC",
         halign="CENTER",
     )
     text(
         msp,
-        "(Not to Scale — indicative)",
+        "ALL DIMENSIONS IN METRES UNLESS NOTED",
         draw_x0 + draw_w / 2,
-        vy(top_rl) + sc_v * v_exag * 0.15 - _lbl_shift,
+        vy(top_rl) + sy(0.15) - _lbl_shift,
         height=th * 0.9 * 0.9,
         layer="TEXT-SPEC",
         halign="CENTER",
@@ -792,6 +932,15 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
     # each measured against the datum baseline.
     deck_t = float(getattr(project.superstructure, "deck_thickness_mm", 0) or 0) / 1000.0
     base_y = vy(datum_rl)
+    # The abutment staff only carries a PILE leg when the foundation has piles
+    # (SS3 §A4 — a raft/open footing must not claim a pile-tip dimension).
+    abt_levels = [
+        (f"ABUT={float(stack.cap_top) - float(stack.app_bot):.3f}m", float(stack.app_bot)),
+    ]
+    if has_piles:
+        abt_levels.append(
+            (f"PILE={pile_tip_rl - float(fd.pile_cutoff_level_m or scour_rl):.3f}m", pile_tip_rl)
+        )
     staffs = (
         (draw_x0 + draw_w * 0.97, (
             ("T.O.DECK", top_rl),
@@ -805,10 +954,7 @@ def _draw_long_section(msp: Any, project: Any, scale_denom: int = 100, v_exag: f
         (draw_x0 + draw_w * 0.89, (
             (f"SCOUR={hfl_rl - scour_rl:.3f}m", scour_rl),
         )),
-        (draw_x0 + draw_w * 0.85, (
-            (f"ABUT={float(stack.cap_top) - float(stack.app_bot):.3f}m", float(stack.app_bot)),
-            (f"PILE={pile_tip_rl - float(fd.pile_cutoff_level_m or scour_rl):.3f}m", pile_tip_rl),
-        )),
+        (draw_x0 + draw_w * 0.85, tuple(abt_levels)),
     )
     for staff_x, levels in staffs:
         for lv_label, lv_rl in levels:

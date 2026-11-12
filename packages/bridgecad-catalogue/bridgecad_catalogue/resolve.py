@@ -21,6 +21,12 @@ DECK_MIN_RATIO = {
 }
 EMBEDMENT_ROCK_M = Decimal("0.60")
 EMBEDMENT_SOIL_M = Decimal("2.00")
+#: The value model floors ``carriageway_width_m`` at 3.5 m (the IRC vehicular
+#: minimum).  A pedestrian F.O.B. (type 014) is 2.0 m in the booklet.
+MIN_CARRIAGEWAY_M = Decimal("3.5")
+#: Superstructures that carry discrete longitudinal girders, and so must have a
+#: girder count the value model will accept (``girders_per_deck_count >= 1``).
+GIRDER_SST = frozenset({"RCC_T_BEAM", "PSC_I_GIRDER", "PSC_BOX", "PSC_BOX_GIRDER"})
 
 
 class ResolvedParams(dict):  # type: ignore[type-arg]
@@ -38,7 +44,7 @@ class ResolvedParams(dict):  # type: ignore[type-arg]
         self.trace.append({"field": key, "from": str(old), "to": str(new), "why": why})
 
 
-def _derive(p: ResolvedParams) -> None:
+def _derive(p: ResolvedParams, *, cw_overridden: bool = False) -> None:
     """Derived fields, in dependency order.  Order matters — do not shuffle."""
     lens = cast("list[Decimal]", p["span_lengths"])
     span_count = cast("int", p["span_count"])
@@ -46,6 +52,20 @@ def _derive(p: ResolvedParams) -> None:
         raise Violation(f"span_count={span_count} but {len(lens)} span lengths supplied")
     p.note("total_length_m", p.get("total_length_m"), sum(lens), "Σ span_lengths")
     p["total_length_m"] = sum(lens)
+
+    # The value model floors the carriageway at 3.5 m.  Type 014 is a 2.0 m
+    # pedestrian F.O.B. in the booklet, which is below that floor: the card
+    # keeps the booklet value and the engine geometry is clamped, with the
+    # deviation stated rather than hidden.
+    cw = Decimal(str(p["carriageway_width"]))
+    if cw < MIN_CARRIAGEWAY_M:
+        p.note("carriageway_width", cw, MIN_CARRIAGEWAY_M,
+               "below the 3.5 m model carriageway floor — clamped")
+        p.warnings.append(
+            f"carriageway {cw} m is below the 3.5 m model floor — clamped to "
+            "3.5 m (deviation stated, not hidden)"
+        )
+        p["carriageway_width"] = MIN_CARRIAGEWAY_M
 
     ss = cast("str", p["superstructure_type"])
     # A box cell IS its own substructure — there are no piers to count.
@@ -86,14 +106,22 @@ def _derive(p: ResolvedParams) -> None:
     else:
         p["bearing_type"] = "ELASTOMERIC"
 
-    # girders must actually carry the carriageway
-    if p.get("girders_per_deck"):
-        need = math.ceil(
-            float(str(p["carriageway_width"])) / float(str(p["girder_spacing_m"]))
-        ) + 1
-        if cast("int", p["girders_per_deck"]) < need:
-            p.note("girders_per_deck", p["girders_per_deck"], need, "spacing vs carriageway")
-            p["girders_per_deck"] = need
+    # Girders must carry the carriageway.  A card that states its girder count
+    # is stating a booklet identity — 007/008 are "THREE GIRDER" decks (3 @
+    # 2.0 m per their booklet fixtures), 009/010 are "4-GIRDER" decks (4 @
+    # 2.5 m) — and no (carriageway, spacing) formula reproduces both, so the
+    # card value wins at the baseline.  A *carriageway override* re-checks
+    # capacity (a wider deck must gain girders), and a card that is silent
+    # still gets a buildable minimum.
+    if ss in GIRDER_SST:
+        spacing = Decimal(str(p.get("girder_spacing_m") or "2.5"))
+        stated = int(p.get("girders_per_deck") or 0)
+        if cw_overridden or not stated:
+            need = math.ceil(float(str(p["carriageway_width"])) / float(spacing)) + 1
+            if stated < need:
+                p.note("girders_per_deck", p.get("girders_per_deck"), need,
+                       "spacing vs carriageway")
+                p["girders_per_deck"] = need
 
 
 def _check(p: ResolvedParams) -> None:
@@ -148,6 +176,6 @@ def resolve(card: Mapping[str, object], overrides: Mapping[str, object], *, forc
             continue
         p[key] = spec.coerce(raw)
 
-    _derive(p)
+    _derive(p, cw_overridden="carriageway_width" in overrides)
     _check(p)
     return p

@@ -464,6 +464,14 @@ class SuperstructureType(LabeledEnum):
     MOVABLE_BRIDGE_BASCULE = "MOVABLE_BRIDGE_BASCULE"
     MOVABLE_BRIDGE_SWING = "MOVABLE_BRIDGE_SWING"
     MOVABLE_BRIDGE_LIFT = "MOVABLE_BRIDGE_LIFT"
+    # ── SS3 PWD booklet families (004 / 014 / 015) ────────────────────────
+    # Appended, never spliced in: the earlier members keep the identities the
+    # stored fixtures and the enum registry already reference. Until now a 004
+    # box cell and a 014 arch were both reported as SOLID_SLAB, so every
+    # family-driven rule silently treated them as a slab.
+    BOX_CELL_MULTI = "BOX_CELL_MULTI"
+    RCC_ARCH_OPEN_SPANDREL = "RCC_ARCH_OPEN_SPANDREL"
+    PRECAST_ARCH = "PRECAST_ARCH"
 
 
 class SpanConfiguration(LabeledEnum):

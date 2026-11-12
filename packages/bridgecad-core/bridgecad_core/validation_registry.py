@@ -1096,24 +1096,169 @@ _INFO_RULES: list[RuleSpec] = [
 assert len(_INFO_RULES) == 50, f"I-group expected 50, got {len(_INFO_RULES)}"
 
 
-ALL_RULES: list[RuleSpec] = _CRITICAL_RULES + _WARNING_RULES + _INFO_RULES
-assert len(ALL_RULES) == 150, f"ALL_RULES expected 150, got {len(ALL_RULES)}"
+# ---------------------------------------------------------------------------
+# W76-W84 / I51-I54 — drawing-audit rows (SS3 Part B).
+#
+# Deliberately appended *after* the info block rather than merged into
+# ``_WARNING_RULES``: the registry exists to hand out identifiers that survive
+# renumbering, and inserting nine warning rows ahead of the I-group would have
+# silently moved I01 from V101 to V110. Appending keeps V001..V150 pinned to
+# the rule each already owns. The design-code IDs still continue past the old
+# maxima (W75, I50), which is what "never renumber" asks for.
+# ---------------------------------------------------------------------------
+_DRAWING_AUDIT_RULES: list[RuleSpec] = [
+    RuleSpec(
+        "W76",
+        ValidationSeverity.WARNING,
+        _a(["SuperstructureType"]),
+        "QA-BX-CELL-CLOSED — each box-cell cell outline must close on six edges",
+        "PWD Booklet 004 Note 3",
+    ),
+    RuleSpec(
+        "W77",
+        ValidationSeverity.CRITICAL,
+        _a(["SuperstructureType"]),
+        "QA-BX-CUTOFF-LEN — box-cell cut-off length >= max(2.5d, 5.0 m)",
+        "IRC:78 Clause 703",
+    ),
+    RuleSpec(
+        "W78",
+        ValidationSeverity.CRITICAL,
+        _a(["SuperstructureType", "SpanConfiguration"]),
+        "QA-AR-SCHEDULE-CLOSED — arch rib schedule endpoints return to Y = 0",
+        "PWD Booklet 014 Schedule",
+    ),
+    RuleSpec(
+        "W79",
+        ValidationSeverity.CRITICAL,
+        _a(["SuperstructureType", "SpanConfiguration"]),
+        "QA-AR-RIB-ON-CURVE — arch rib nodes lie on the design curve within 1 mm",
+        "PWD Booklet 014",
+    ),
+    RuleSpec(
+        "W80",
+        ValidationSeverity.WARNING,
+        _a(["SuperstructureType"]),
+        "QA-PA-STRIP-GAP-100 — 52 precast-arch strip gaps at 100 mm ± 2 mm",
+        "PWD Booklet 015 Note 9",
+    ),
+    RuleSpec(
+        "W81",
+        ValidationSeverity.CRITICAL,
+        frozenset(),
+        "QA-SH-SCALE-ON-LADDER — every printed scale is a rung of the scale ladder",
+        "ISO 5455",
+    ),
+    RuleSpec(
+        "W82",
+        ValidationSeverity.CRITICAL,
+        frozenset(),
+        "QA-SH-TEXT-NO-OVERLAP — no two sheet text bounding boxes may overlap",
+        "ISO 128-22",
+    ),
+    RuleSpec(
+        "W83",
+        ValidationSeverity.CRITICAL,
+        frozenset(),
+        "QA-SH-ENTITY-IN-FRAME — every drawn entity must lie inside the sheet frame",
+        "ISO 5457",
+    ),
+    RuleSpec(
+        "W84",
+        ValidationSeverity.WARNING,
+        frozenset(),
+        "QA-SH-PRESENCE-BY-TYPE — no pile geometry on a raft or box-cell foundation",
+        "BridgeCAD model contract",
+    ),
+    RuleSpec(
+        "I51",
+        ValidationSeverity.INFO,
+        _a(["SuperstructureType", "SpanConfiguration"]),
+        "QA-AR-PARABOLA-DEVIATION — report the maximum arch curve deviation",
+        "PWD Booklet 014",
+    ),
+    RuleSpec(
+        "I52",
+        ValidationSeverity.INFO,
+        frozenset(),
+        "QA-SH-BAND-COUNT — report how many bands a broken view was split into",
+        "BridgeCAD drawing contract",
+    ),
+    RuleSpec(
+        "I53",
+        ValidationSeverity.INFO,
+        frozenset(),
+        "QA-DR-LAYER-COVERAGE — every drawn layer is present in the layer registry",
+        "ISO 13567",
+    ),
+    RuleSpec(
+        "I54",
+        ValidationSeverity.INFO,
+        frozenset(),
+        "QA-DR-NTS-CLAIM — a broken view carries its not-to-scale claim",
+        "BridgeCAD drawing contract",
+    ),
+]
+assert len(_DRAWING_AUDIT_RULES) == 13, (
+    f"drawing-audit group expected 13, got {len(_DRAWING_AUDIT_RULES)}"
+)
+
+
+ALL_RULES: list[RuleSpec] = (
+    _CRITICAL_RULES + _WARNING_RULES + _INFO_RULES + _DRAWING_AUDIT_RULES
+)
+assert len(ALL_RULES) == 163, f"ALL_RULES expected 163, got {len(ALL_RULES)}"
 
 
 # ---------------------------------------------------------------------------
 # Wing-14 — QA registry integrity.
 #
-# ALL_RULES above is keyed by the design-code IDs (C01…I50). Downstream tooling
+# ALL_RULES above is keyed by the design-code IDs (C01…I54). Downstream tooling
 # needs an identifier that survives renumbering and deprecation, a readable
 # tier, the standard / clause a rule cites, and an honest "is this really
-# wired up?" flag. RULES is that self-describing view: the same 150 rules,
-# re-keyed V001…V150 (never reused), in critical → warning → info order.
+# wired up?" flag. RULES is that self-describing view: every rule re-keyed
+# V001…V163 (never reused). The first 150 keep the identifiers they already
+# own; the drawing-audit block is appended rather than spliced in, so no
+# pre-existing V-ID moves.
 # ---------------------------------------------------------------------------
 
-#: The original M1W1-D4 set — 25 critical + 5 warning checks — is the only part
-#: that has a live check function. Everything after it is a spec stub: counted
-#: and reported, deliberately not implemented.
-_IMPLEMENTED_COUNT = 30
+#: Design-code IDs that have a live ``check_*()`` function. Membership is an
+#: explicit set, not the old positional ``n <= _IMPLEMENTED_COUNT``: under that
+#: rule a newly-added live check was marked a stub unless it happened to be
+#: inserted inside the first 30 slots.
+IMPLEMENTED_CHECK_IDS: frozenset[str] = frozenset(
+    {
+        # M1W1-D4 — 25 critical (C01–C25) + 5 warning (W01–W05).
+        *(f"C{n:02d}" for n in range(1, 26)),
+        "W01",
+        "W02",
+        "W03",
+        "W04",
+        "W05",
+        # SS3 Part B drawing-audit rows — live check functions in validation.py.
+        "W76",
+        "W77",
+        "W78",
+        "W79",
+        "W80",
+        "W81",
+        "W82",
+        "W83",
+        "W84",
+        "I51",
+        "I52",
+        "I53",
+        "I54",
+    }
+)
+
+#: Derived, so the 30-check M1W1-D4 floor and the 13 drawing-audit additions
+#: stay visible as two numbers rather than collapsing into one opaque total.
+_IMPLEMENTED_COUNT = len(IMPLEMENTED_CHECK_IDS)
+assert _IMPLEMENTED_COUNT == 43, (
+    "implemented-rule count moved: expected 30 M1W1-D4 checks + 13 "
+    f"drawing-audit rows, got {_IMPLEMENTED_COUNT}"
+)
 
 _TIER_BY_SEVERITY: dict[ValidationSeverity, str] = {
     ValidationSeverity.CRITICAL: "critical",
@@ -1159,16 +1304,23 @@ def _build_rules() -> list[RegistryRule]:
                 standard=standard,
                 clause=clause,
                 source_rule_id=spec.rule_id,
-                implemented=n <= _IMPLEMENTED_COUNT,
+                implemented=spec.rule_id in IMPLEMENTED_CHECK_IDS,
             )
         )
     return rules
 
 
 RULES: list[RegistryRule] = _build_rules()
-assert len(RULES) == 150, f"RULES expected 150, got {len(RULES)}"
+assert len(RULES) == 163, f"RULES expected 163, got {len(RULES)}"
 
 #: design-code ID ("C01") → stable registry ID ("V001"), for tagging findings.
 RULE_ID_BY_CHECK: dict[str, str] = {r.source_rule_id: r.id for r in RULES}
 
-__all__ = ["RuleSpec", "ALL_RULES", "RegistryRule", "RULES", "RULE_ID_BY_CHECK"]
+__all__ = [
+    "RuleSpec",
+    "ALL_RULES",
+    "IMPLEMENTED_CHECK_IDS",
+    "RegistryRule",
+    "RULES",
+    "RULE_ID_BY_CHECK",
+]

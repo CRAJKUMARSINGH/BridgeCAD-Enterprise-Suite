@@ -1,0 +1,58 @@
+{
+  "resolved": {
+    "title": "Open Fdn + RCC Pier + PSC 4-Girder (with footpath)",
+    "spans": "4\u00d725 m, 10.50 m overall",
+    "span_count": 4,
+    "span_lengths": [
+      "25.0",
+      "25.0",
+      "25.0",
+      "25.0"
+    ],
+    "carriageway_width": 7.5,
+    "footpath_width": 1.5,
+    "foundation_type": "OPEN",
+    "pier_material": "M30",
+    "superstructure_type": "PSC_I_GIRDER",
+    "deck_thickness_mm": 200,
+    "girder_depth_mm": 1800,
+    "girder_spacing_m": 2.5,
+    "girders_per_deck": 4,
+    "pier_shaft_width_m": 2.0,
+    "pier_height_m": 10.0,
+    "abutment_type": "OPEN",
+    "hfl_m": 100.0,
+    "road_level": 103.5,
+    "scour_depth_m": 3.0,
+    "freeboard_m": 1.0,
+    "sbc_t_per_m2": 30,
+    "submersible": false,
+    "total_length_m": "100.0",
+    "pier_count": 3,
+    "soffit_level": "101.425",
+    "foundation_level": "96.40",
+    "bearing_type": "POT",
+    "id": "BR-I-2022-009"
+  },
+  "trace": [
+    {
+      "field": "total_length_m",
+      "from": "None",
+      "to": "100.0",
+      "why": "\u03a3 span_lengths"
+    },
+    {
+      "field": "soffit_level",
+      "from": "None",
+      "to": "101.425",
+      "why": "RTL \u2212 deck \u2212 WC \u2212 girder"
+    },
+    {
+      "field": "foundation_level",
+      "from": "None",
+      "to": "96.40",
+      "why": "OPEN embedment"
+    }
+  ],
+  "warnings": []
+}

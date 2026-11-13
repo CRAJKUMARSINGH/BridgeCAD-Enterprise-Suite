@@ -114,6 +114,14 @@ class ViewSpec(BaseModel):
     An elevation looks *along* one axis, so it permits the other two:
     abutment elevation → {TRANSVERSE, VERTICAL}; abutment section →
     {LONGITUDINAL, VERTICAL}.
+
+    ``scale_denom`` is the view's *nominal* plotting scale, for planning and
+    review only — nothing enforces it. The self-fitting sheets (1, 2, 3, 8)
+    choose the largest rung of ``fit.LADDER`` that fits at draw time and print
+    that rung, so the drawn scale can be coarser than the value here on a long
+    or wide bridge; the printed caption always reports the drawn scale. The
+    pinned sheets (4 at 1:50, 5 at 1:75) match their tile in
+    ``booklet._SHEET_MANIFEST``.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -138,25 +146,25 @@ VIEW_SPECS: dict[str, ViewSpec] = {
             sheet_no=5,
             view_name="pier_elevation",
             allowed=frozenset({ViewAxis.TRANSVERSE, ViewAxis.VERTICAL}),
-            scale_denom=50,
+            scale_denom=75,
         ),
         ViewSpec(
             sheet_no=5,
             view_name="pier_section",
             allowed=frozenset({ViewAxis.LONGITUDINAL, ViewAxis.TRANSVERSE}),
-            scale_denom=50,
+            scale_denom=75,
         ),
         ViewSpec(
             sheet_no=5,
             view_name="abutment_elevation",
             allowed=frozenset({ViewAxis.TRANSVERSE, ViewAxis.VERTICAL}),
-            scale_denom=50,
+            scale_denom=75,
         ),
         ViewSpec(
             sheet_no=5,
             view_name="abutment_section",
             allowed=frozenset({ViewAxis.LONGITUDINAL, ViewAxis.VERTICAL}),
-            scale_denom=50,
+            scale_denom=75,
         ),
         ViewSpec(
             sheet_no=5,

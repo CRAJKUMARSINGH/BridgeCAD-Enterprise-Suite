@@ -22,13 +22,22 @@
     "freeboard_m": 0.0,
     "sbc_t_per_m2": 20,
     "submersible": true,
-    "approximation": true,
-    "fidelity_note": "no multi-unit box-cell primitive \u2014 three unit-lengths stand in for the cell grid (5\u00d75 m clear, 500 walls, 1100 raft)",
+    "unit_cell_counts": [
+      4,
+      3,
+      4
+    ],
+    "cell_clear_m": 5.0,
+    "cell_wall_mm": 500,
+    "cell_haunch_mm": 500,
+    "unit_joint_mm": 100,
+    "raft_thickness_mm": 1100,
     "total_length_m": "61.25",
     "pier_count": 0,
     "soffit_level": "100.415",
     "foundation_level": "96.98",
     "bearing_type": "NONE",
+    "camber_mm": 22,
     "id": "BR-I-2022-004"
   },
   "trace": [
@@ -49,10 +58,15 @@
       "from": "None",
       "to": "96.98",
       "why": "RAFT embedment"
+    },
+    {
+      "field": "camber_mm",
+      "from": "None",
+      "to": "22",
+      "why": "L/1000 default, min 10 mm"
     }
   ],
   "warnings": [
-    "RCC_BOX_CELL: approximation \u2014 span/depth governor not applied",
     "submersible: soffit above HFL+freeboard \u2014 check afflux"
   ]
 }

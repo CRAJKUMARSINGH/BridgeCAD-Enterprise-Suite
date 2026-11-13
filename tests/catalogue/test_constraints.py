@@ -72,8 +72,11 @@ def test_locked_needs_force(card_014: dict) -> None:
     # ``superstructure_type`` is booklet identity — changing it needs --force.
     with pytest.raises(Violation, match="locked"):
         resolve(card_014, {"superstructure_type": "RCC_SOLID_SLAB"})
-    forced = resolve(card_014, {"superstructure_type": "RCC_SOLID_SLAB"}, force=True)
-    assert forced["superstructure_type"] == "RCC_SOLID_SLAB"
+    # The forced family must still be structurally sound.  An arch card carries
+    # a 350 mm deck, which no *bending* family can span at 25.7 m, so the
+    # override is made to a non-bending family — the deep cell carries the span.
+    forced = resolve(card_014, {"superstructure_type": "RCC_BOX_CELL"}, force=True)
+    assert forced["superstructure_type"] == "RCC_BOX_CELL"
 
 
 def test_unknown_variable_rejected(card_001: dict) -> None:
@@ -100,10 +103,11 @@ def test_box_cell_soffit_is_rtl_minus_deck(card_004: dict) -> None:
     assert p["soffit_level"] == Decimal(str(p["road_level"])) - Decimal("0.500")
 
 
-def test_approximation_is_reported(card_004: dict) -> None:
+def test_box_cell_carries_its_lattice_not_an_apology(card_004: dict) -> None:
+    """004 carries the box-cell primitive now, so it is no longer an approximation."""
     p = resolve(card_004, {})
-    assert p.get("approximation") is True
-    assert any("approximation" in w for w in p.warnings)
+    assert not p.get("approximation")
+    assert p["unit_cell_counts"] == [4, 3, 4]
 
 
 # ── the trace ────────────────────────────────────────────────────────────────

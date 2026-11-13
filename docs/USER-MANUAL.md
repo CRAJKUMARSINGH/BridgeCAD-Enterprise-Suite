@@ -22,8 +22,7 @@ documentation package:
 - Bar bending schedule (CSV + Excel, IS 2502 column order)
 - Export ZIP bundle + `manifest.json` audit trail
 
-**The workbook is the only input contract.** Hand-building it is not supported —
-generate it (see §5).
+**Workbook workflow:** generate the workbook as described in §5. The separate PWD booklet CLI also accepts validated catalogue overrides and sweeps; it is not a replacement Excel schema. See the supplement below.
 
 ---
 
@@ -231,6 +230,8 @@ BridgeCAD supports **three output formats** and two layout modes for every proje
 
 In the **Streamlit console** (§3) the "📐 Drawing Gen" tab offers a **scale selector** (Auto / 1:50 / 1:100 / 1:200 / 1:500) and a **format toggle** (DXF-only or DXF + PNG preview). The ZIP download always contains both.
 
+In the **deployed workspace** the same two choices live in the **Format & variants** dock: format chips (DXF / PDF / PNG) are passed to the engine as `?output_format=`, and the plot-scale chips are passed as `?scale=` (omitted when set to Auto so the ladder decides).
+
 ### Layout / scale selection
 
 The drawing engine picks the **largest standard IRC SP:55 scale rung** (50 / 75 / 100 / 150 / 200 / 250 / 300 / 400 / 500) that keeps text ≥ 2.5 mm and annotation gaps ≥ 8 mm per pier. For very long bridges (e.g. 270 m 9-span) it falls to 1:500 and splits Sheet 2 into two horizontal bands with match-lines.
@@ -258,6 +259,14 @@ Or in the Streamlit console: select the "Plot scale" dropdown before clicking **
 The **PWD Generator** tab in the Streamlit console (§3) lets you pick any of the
 15 Maharashtra PWD standard bridge types and vary its parameters interactively.
 No Excel workbook needed — the catalogue provides the base values.
+
+The deployed workspace exposes the same variable surface: the **Drawing
+workspace** dock holds the FREE dials (project identity, `Spans`,
+`Span length (m)`, `Deck width (m)`, `Datum (m)`, plus the twelve foundation and
+wing-wall detail fields) and the **Format & variants** dock carries the class
+reference plus the format/scale controls. The booklet identity
+(`foundation_type`, `superstructure_type`, `bearing_type`) stays LOCKED, and the
+catalogue's DERIVED values are recalculated on every edit.
 
 ### How it works
 
@@ -322,3 +331,36 @@ python scripts/generate_all_pwd_gads.py \
 | `sbc_t_per_m2` | t/m² | 10 – 200 | IRC 78 cl.701 |
 
 ---
+
+
+## PWD drawing selection, variables, layout and verification
+
+For the 15 reference configurations, page mapping, supported CLI keys, units,
+code-declared ranges and layout-selection steps, use
+[BRIDGECAD_SUPPLEMENTARY_PATCH.md](BRIDGECAD_SUPPLEMENTARY_PATCH.md).
+The root [master guide](../GUIDE.md) remains authoritative.
+
+Choose foundation and superstructure identity before changing free variables.
+Keep derived levels and lengths read-only. Preserve approximation warnings for
+004/014/015. Example, from the repository root:
+
+```powershell
+python scripts/generate_all_pwd_gads.py --type BR-I-2022-009 --sweep carriageway_width=3.5,7.5,11 --dry-run
+python scripts/generate_all_pwd_gads.py --type BR-I-2022-006 --sweep pier_height_m=6:12:3
+```
+
+Choice fields use comma lists; continuous ranges use `lo:hi:step`.
+Overrides write `out/pwd_sweep`, not the baseline `EXAMPLES_PWD` corpus.
+Rejected variants make the batch unsuccessful even if some jobs resolve.
+Requested PNG renders must be nonblank; a render error or all-white result
+fails the package. `SKIP_PNG=1` is a DXF-only check and is recorded as skipped
+in `render-status.json`. It must not be used to claim raster/PDF fidelity.
+
+Paper format is a presentation choice, not a geometry override. Match the
+reference page, reserve notes/tables/title-block space and fit each viewport
+independently. Check print text height and clipping. The companion workspace
+prepares scenarios and CLI commands; it cannot run local Python or deliver
+browser CAD generation until connected to the existing backend.
+
+See [V_INSTRUCTIONS_APPLIED.md](V_INSTRUCTIONS_APPLIED.md) for which uploaded
+instructions were applied, already present, or left open with reasons.

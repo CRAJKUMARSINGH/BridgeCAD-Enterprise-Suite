@@ -4,8 +4,8 @@
 **Fixture ID:** `e_sh35_mjb_psc_box`  
 **Sheets generated:** 9 DXF  
 **Rendered PNGs:** 9  
-**PDF booklet:** [`e_sh35_mjb_psc_box_GAD_Booklet.pdf`](e_sh35_mjb_psc_box_GAD_Booklet.pdf) (2422 KB, 9 pages)  
-**Total DXF size:** 844 KB  
+**PDF booklet:** [`e_sh35_mjb_psc_box_GAD_Booklet.pdf`](e_sh35_mjb_psc_box_GAD_Booklet.pdf) (2421 KB, 9 pages)  
+**Total DXF size:** 836 KB  
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets

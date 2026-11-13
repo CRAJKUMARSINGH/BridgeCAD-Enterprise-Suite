@@ -36,9 +36,11 @@
     "submersible": false,
     "total_length_m": "270.0",
     "pier_count": 8,
+    "pier_batter_1n": "10",
     "soffit_level": "102.025",
     "foundation_level": "69.50",
     "bearing_type": "POT",
+    "camber_mm": 30,
     "id": "BR-I-2022-010"
   },
   "trace": [
@@ -47,6 +49,12 @@
       "from": "None",
       "to": "270.0",
       "why": "\u03a3 span_lengths"
+    },
+    {
+      "field": "pier_batter_1n",
+      "from": "None",
+      "to": "10",
+      "why": "IRC practice default 1:10 batter"
     },
     {
       "field": "soffit_level",
@@ -59,6 +67,12 @@
       "from": "None",
       "to": "69.50",
       "why": "PILE embedment"
+    },
+    {
+      "field": "camber_mm",
+      "from": "None",
+      "to": "30",
+      "why": "L/1000 default, min 10 mm"
     }
   ],
   "warnings": []

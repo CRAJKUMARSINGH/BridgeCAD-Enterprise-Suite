@@ -65,9 +65,44 @@ def _chainage_pitch(total_m: float) -> float:
     return 200.0
 
 
+def _arch_kind(project: Any) -> str:
+    """``"schedule"`` (booklet 014), ``"precast"`` (015) or ``""`` — which arch.
+
+    Keyed off the model, never off the sheet: the card names the family and the
+    primitive it carries decides whether the sheet can draw the arch at all.  A
+    type that carries neither is drawn by the generic girder / slab branch.
+    """
+    ss = getattr(project, "superstructure", None)
+    if ss is None:
+        return ""
+    name = str(getattr(ss.type, "name", ss.type)).upper()
+    if not getattr(ss, "arch_block_count", None) and not getattr(ss, "arch_schedule_mm", None):
+        return ""
+    if "OPEN_SPANDREL" in name and ss.arch_schedule_mm:
+        return "schedule"
+    if "PRECAST" in name and ss.arch_block_count:
+        return "precast"
+    return ""
+
+
+def _is_box_cell(project: Any) -> bool:
+    """True for booklet 004 — the multi-unit R.C.C. box cell.
+
+    Keyed off the model: the card carries the cell lattice and the foundation
+    carries the unit cell counts.  The lattice runs *along* the deck (three
+    units on a 5.55 m pitch), so it is drawn here on the long section where the
+    horizontal axis is the chainage and the printed scale is the chainage scale.
+    """
+    ss = getattr(project, "superstructure", None)
+    fd = getattr(project, "foundation_details", None)
+    if ss is None or fd is None:
+        return False
+    name = str(getattr(ss.type, "name", ss.type)).upper()
+    return "BOX_CELL" in name and bool(getattr(fd, "unit_cell_counts", None))
+
+
 def _annot_mode(span_mm: float, pier_pitch_mm: float) -> str:
     """How much annotation the pier line can carry on paper — SS3 §A2.
-
     The section used to print its full annotation set regardless of how small
     it had been drawn, so on a 270 m nine-span the eight `ΔREF=` strings and the
     per-pier labels all landed on the same few millimetres. Gate each tier on
@@ -359,10 +394,13 @@ def _draw_long_section(
     # Axis title along the level axis (LISP `layout()` label "BED LEVEL").
     # Anchored at the bottom of the axis: rotated 90° it grows upward, so a
     # bottom anchor keeps it inside the frame (a top anchor ran 35 mm past it).
+    # Rotated 90° the glyph height runs in -x, so the insertion point must clear
+    # the border by its own height as well — at `_MARGIN + 2.0` the box started
+    # at x=7.2 on the deeper sections and 2.8 mm of it was clipped off on plot.
     text(
         msp,
         "BED LEVEL",
-        _MARGIN + 2.0,
+        _MARGIN + 0.5 + th,
         draw_y0 + 2.0,
         height=th * 0.9,
         layer="TEXT-LEVEL",
@@ -449,21 +487,26 @@ def _draw_long_section(
     slab_top_y = vy(top_rl - wc_t)  # top of deck slab = road level less the coat
 
     # Deck slab outline — the slab, and only the slab, breaks at each joint.
-    line(msp, (hx(0), slab_top_y), (hx(total_len), slab_top_y), layer="SUPER-DECK")
-    line(msp, (hx(0), sof_y_mm), (hx(total_len), sof_y_mm), layer="SUPER-DECK")
-    hatch_rect(
-        msp,
-        hx(0),
-        sof_y_mm,
-        total_len * sc_h,
-        slab_top_y - sof_y_mm,
-        pattern="ANSI31",
-        scale=sc_h * 0.04,
-        layer="STRUC-HATCHING",
-        color=8,
-    )
-    for jx in (0.0, total_len):  # break the slab at each joint — never the coat
-        line(msp, (hx(jx), sof_y_mm), (hx(jx), slab_top_y), layer="SUPER-DECK", lw=25)
+    # A precast block arch has no separate deck slab: its 400 mm ring *is* the
+    # deck (the card's ring and deck thicknesses are the same figure), so the
+    # flat band is suppressed and the ring is drawn by the arch block below.
+    arch = _arch_kind(project)
+    if arch != "precast":
+        line(msp, (hx(0), slab_top_y), (hx(total_len), slab_top_y), layer="SUPER-DECK")
+        line(msp, (hx(0), sof_y_mm), (hx(total_len), sof_y_mm), layer="SUPER-DECK")
+        hatch_rect(
+            msp,
+            hx(0),
+            sof_y_mm,
+            total_len * sc_h,
+            slab_top_y - sof_y_mm,
+            pattern="ANSI31",
+            scale=sc_h * 0.04,
+            layer="STRUC-HATCHING",
+            color=8,
+        )
+        for jx in (0.0, total_len):  # break the slab at each joint — never the coat
+            line(msp, (hx(jx), sof_y_mm), (hx(jx), slab_top_y), layer="SUPER-DECK", lw=25)
 
     level_tag(msp, draw_x0 - 2.0, sof_y_mm, soffit_rl, text_height=th * 0.85)
     level_tag(msp, draw_x0 - 2.0, top_y_mm, top_rl, text_height=th * 0.85)
@@ -836,6 +879,207 @@ def _draw_long_section(
             shaft_bot + abt_h_mm / 2,
             height=th,
             layer="TEXT-GENERAL",
+        )
+
+    # ── Arch family (booklet 014 / 015) ───────────────────────────────────
+    # The booklet prints the arch's *shape* — a 25-row coordinate schedule for
+    # 014, 27 equal precast blocks for 015 — but no absolute arch RLs.  The one
+    # datum it does print is the deck soffit, so the intrados at the crown is
+    # set on it and the springings follow one rise below it; the arch is centred
+    # in the longest span it sits in.  Nothing here is invented, and the shift
+    # is stated on the sheet so a reader can see the assumption.
+    if arch:
+        from .geometry import parabola_deviation, rib_stations, ring_outline, stations
+
+        rise_m = float(ss.arch_rise_mm or 0) / 1000.0
+        ring_t = float(ss.arch_ring_thickness_mm or 0) / 1000.0
+        spring_rl = soffit_rl - rise_m
+        _longest = max(range(len(span_lens)), key=lambda i: span_lens[i])
+        span_mid = sum(span_lens[:_longest]) + span_lens[_longest] / 2.0
+
+        if arch == "schedule":
+            sched = [(float(x), float(y)) for x, y in ss.arch_schedule_mm]
+            arch_len = sched[-1][0] / 1000.0
+            ch0 = span_mid - arch_len / 2.0
+            sofs = stations(sched, ch0, spring_rl)
+            polyline(msp, [(hx(c), vy(r)) for c, r in sofs], layer="SUPER-ARCH-SOFFIT", lw=50)
+            polyline(
+                msp,
+                [(hx(c), vy(r)) for c, r in ring_outline(sofs, ring_t)],
+                layer="SUPER-ARCH-RING",
+                close=True,
+                lw=35,
+            )
+            # Spandrel columns stand on the ribs.  The ribs sit on the printed
+            # stations, so no point is interpolated and no kink is invented; a
+            # rib whose extrados has already reached the soffit is skipped
+            # rather than drawn as a zero-length line.
+            for c, r in rib_stations(sofs):
+                top_c = min(r + ring_t, soffit_rl)
+                if top_c > r:
+                    line(
+                        msp,
+                        (hx(c), vy(r + ring_t)),
+                        (hx(c), vy(top_c)),
+                        layer="SUPER-ARCH-COLUMN",
+                        lw=35,
+                    )
+            for i, (x_mm, y_mm) in enumerate(sched, 1):
+                text(
+                    msp,
+                    f"{i:02d}",
+                    hx(ch0 + x_mm / 1000.0),
+                    vy(spring_rl + y_mm / 1000.0) - th * 1.2,
+                    height=th * 0.55,
+                    layer="TEXT-SCHED",
+                    halign="CENTER",
+                )
+            text(
+                msp,
+                f"ARCH: 25-POINT BOOKLET SCHEDULE, H = {rise_m:.3f} m, RING "
+                f"{ring_t * 1000:.0f} mm; SPRINGING AT DECK SOFFIT − H "
+                f"(BOOKLET PRINTS NO ARCH RLs). MAX DEVIATION FROM Y=AX² "
+                f"{parabola_deviation(sched):.0f} mm",
+                draw_x0,
+                draw_y0 + draw_h - th * 2.6,
+                height=th * 0.8,
+                layer="TEXT-SPEC",
+                color=8,
+            )
+            level_tag(msp, draw_x0 - 2.0, vy(spring_rl), spring_rl, text_height=th * 0.85)
+
+        else:  # precast
+            from .geometry.precast_arch import blocks as precast_blocks
+            from .geometry.precast_arch import gap_pairs, socket
+
+            span_m = float(gi.total_length_m)
+            n_blocks = int(ss.arch_block_count or 0)
+            n_strips = int(ss.arch_strip_count or 0)
+            for blk in precast_blocks(span_m, rise_m, n_blocks, ring_t):
+                quad = [
+                    blk.p0,
+                    blk.p1,
+                    (blk.p1[0], blk.p1[1] + ring_t),
+                    (blk.p0[0], blk.p0[1] + ring_t),
+                ]
+                polyline(
+                    msp,
+                    [(hx(span_m / 2.0 + x), vy(spring_rl + y)) for x, y in quad],
+                    layer="SUPER-PRECAST-BLOCK",
+                    close=True,
+                    lw=50,
+                )
+                sx, sy_m, sw, sd = socket(blk)
+                rectangle(
+                    msp,
+                    hx(span_m / 2.0 + sx),
+                    vy(spring_rl + sy_m) - sy(sd) / 2.0,
+                    sw * sc_h,
+                    sy(sd),
+                    layer="SUPER-SOCKET",
+                    lw=25,
+                )
+            text(
+                msp,
+                f"PRECAST BLOCK ARCH: {n_blocks} BLOCKS, RING {ring_t * 1000:.0f} mm, "
+                f"H = {rise_m:.3f} m; {n_strips} STRIPS × {n_strips - 1} LONGITUDINAL "
+                f"GAPS × {n_blocks - 1} RADIAL JOINTS = "
+                f"{gap_pairs(n_strips, 0.0, 0.0) * (n_blocks - 1)} GAP ENTITIES "
+                f"(DRAWN ON SHT 3, WHERE THE WIDTH IS REAL)",
+                draw_x0,
+                draw_y0 + draw_h - th * 2.6,
+                height=th * 0.8,
+                layer="TEXT-SPEC",
+                color=8,
+            )
+            level_tag(msp, draw_x0 - 2.0, vy(spring_rl), spring_rl, text_height=th * 0.85)
+
+    # ── Box-cell lattice (booklet 004) ────────────────────────────────────
+    # The lattice runs *along* the deck — three units of 4 / 3 / 4 cells on a
+    # 5.55 m pitch — so it is drawn here, where the horizontal axis is the
+    # chainage and the printed scale is the chainage scale.  Before this block
+    # the type fell through to the PSC mono-box girder branch and the sheet drew
+    # a superstructure the booklet does not describe.
+    if _is_box_cell(project):
+        from .geometry import Violation
+        from .geometry.box_cell import CellGrid, assert_closed
+
+        grid = CellGrid(
+            tuple(fd.unit_cell_counts),
+            float(fd.cell_clear_m),
+            float(fd.cell_wall_mm) / 1000.0,
+            float(fd.cell_haunch_mm) / 1000.0,
+            soffit_rl,
+        )
+        assert_closed(grid)
+        x_off = (total_len - grid.total_length()) / 2.0  # centre on the deck
+        for cell in grid.cells():
+            for x0, y0, x1, y1 in cell.bands():
+                line(
+                    msp,
+                    (hx(x_off + x0), vy(y0)),
+                    (hx(x_off + x1), vy(y1)),
+                    layer="SUB-BOX-CELL",
+                    lw=35,
+                )
+            for hp in cell.haunches():
+                polyline(
+                    msp,
+                    [(hx(x_off + x), vy(y)) for x, y in hp],
+                    layer="SUB-BOX-HAUNCH",
+                    lw=25,
+                )
+
+        # Raft under the bottom slab, with a 900 mm rubble apron on each face.
+        raft_m = float(fd.raft_thickness_mm or 0) / 1000.0
+        raft_bottom_rl = grid.soffit_rl - grid.clear_m - raft_m
+        rx0, rx1 = x_off - 0.55, x_off + grid.total_length() + 0.55
+        if raft_m:
+            rectangle(
+                msp, hx(rx0), vy(raft_bottom_rl), (rx1 - rx0) * sc_h, sy(raft_m),
+                layer="SUB-RAFT", lw=50,
+            )
+            for ax, sgn in ((rx0, -1), (rx1, +1)):
+                rectangle(
+                    msp, hx(ax - 0.9) if sgn < 0 else hx(ax), vy(raft_bottom_rl),
+                    0.9 * sc_h, sy(raft_m), layer="SUB-APRON", lw=25,
+                )
+
+        # Cut-off wall — booklet note 14, measured from the raft *underside*.
+        # On this card the box is already founded below the design scour, so no
+        # wall is required; the sheet states that finding rather than inventing
+        # a depth the booklet does not give.
+        try:
+            ch, cut_len, cut_d = grid.cutoff_wall(raft_bottom_rl, float(scour_rl))
+        except Violation:
+            text(
+                msp,
+                f"BOX UNDERSIDE RL {raft_bottom_rl:.3f} IS BELOW DESIGN SCOUR "
+                f"{float(scour_rl):.3f} — CUT-OFF WALL NOT REQUIRED (BOOKLET NOTE 14)",
+                hx(x_off), vy(raft_bottom_rl) - sy(1.2),
+                height=th * 0.85, layer="TEXT-SPEC", color=8,
+            )
+        else:
+            rectangle(
+                msp, hx(x_off + ch), vy(raft_bottom_rl - cut_d), cut_len * sc_h,
+                sy(cut_d), layer="SUB-CUTOFF", lw=50,
+            )
+            text(
+                msp,
+                f"DETACHED CUT-OFF WALL — DEPTH {cut_d:.2f} m, LENGTH {cut_len:.2f} m "
+                f"(MIN 2.5×d, NOT LESS THAN 5.0 m)",
+                hx(x_off), vy(raft_bottom_rl - cut_d) - sy(1.2),
+                height=th * 0.85, layer="TEXT-SPEC", color=8,
+            )
+
+        text(
+            msp,
+            f"BOX CELL — {sum(fd.unit_cell_counts)} CELLS IN "
+            f"{len(fd.unit_cell_counts)} UNITS ON A {grid.pitch:.2f} m PITCH, "
+            f"CLEAR {grid.clear_m:.2f} m, WALL {grid.wall_m * 1000:.0f} mm, "
+            f"HAUNCH {grid.haunch_m * 1000:.0f} mm",
+            draw_x0, draw_y0 + draw_h - th * 2.6,
+            height=th * 0.8, layer="TEXT-SPEC", color=8,
         )
 
     # ── Piles / foundations ───────────────────────────────────────────────

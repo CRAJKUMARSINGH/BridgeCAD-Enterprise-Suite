@@ -32,19 +32,41 @@ def _family_for(abutment_type: Any) -> str:
     return family_for(abutment_type)
 
 
-def generate(project: Any, output_path: str | Path, scale_denom: int = 50) -> Path:
+#: The ladder rung the four views on this sheet are laid out at.  Sheet 5 has
+#: a pinned layout (each view sits in a fixed box), so its scale is a property
+#: of the sheet rather than of the bridge; 1:75 is the rung nearest the
+#: 12 mm/m these details have always been drawn at.  The title block prints
+#: whatever ``scale_denom`` resolves to, so caption and geometry agree.
+_DEFAULT_SCALE = 75
+
+
+def generate(project: Any, output_path: str | Path,
+             scale_denom: int | None = None) -> Path:
+    """Generate Sheet 5 — Pier & Abutment Details.
+
+    Four views share one sheet at one scale.  ``scale_denom=None`` uses the
+    sheet's own laid-out rung (1:75); an int is honoured as given.  Either way
+    the title block prints the denominator the details were drawn at — they used
+    to be drawn at 12 mm/m (1:83) under a stated 1:50, which was not a scale any
+    view was at.
+    """
     doc, msp = new_sheet("S5 Pier Abutment Details")
     _draw(msp, project, scale_denom)
     return save(doc, output_path)
 
 
-def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
+def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     from bridgecad_core.abutment_stack import resolve_abutment_stack
 
     sub = project.substructure
     hd = project.hydraulic_data
     pm = project.project_master
     stack = resolve_abutment_stack(project)
+
+    # Every view on this sheet is drawn at one scale, and the title block prints
+    # that same denominator.  The denominator used to be stated (50) while the
+    # details were drawn at 12 mm/m — a 1:83 drawing captioned 1:50.
+    denom = int(scale_denom) if scale_denom else _DEFAULT_SCALE
 
     draw_border(msp, "A1")
     draw_title_block(
@@ -54,11 +76,12 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         drawing_no=getattr(pm, "drawing_no", "GAD-005") or "GAD-005",
         drawing_title="PIER AND ABUTMENT DETAILS",
         revision=getattr(getattr(pm, "revision", None), "name", "R0") or "R0",
+        scale_str=f"1:{denom}",
         sheet_no="5",
         total_sheets="9",
     )
 
-    sc = 12.0  # mm per metre
+    sc = 1000.0 / denom  # mm per metre
     th = 2.5
 
     # ══════════════════════════════════════════════════════════════════════
@@ -206,7 +229,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     )
     text(
         msp,
-        f"Scale 1:{scale_denom}",
+        f"Scale 1:{denom}",
         pier_cx,
         cap_bot_y + cap_d_mm + ped_h_mm + th * 7,
         height=th,

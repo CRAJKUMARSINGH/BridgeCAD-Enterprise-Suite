@@ -1,0 +1,38 @@
+name: PWD catalogue and supported sweeps
+on:
+  pull_request:
+    paths:
+      - 'packages/bridgecad-draw/**'
+      - 'packages/bridgecad-catalogue/**'
+      - 'scripts/generate_all_pwd_gads.py'
+      - 'tests/catalogue/**'
+      - '.github/workflows/pwd-sweep.yml'
+  workflow_dispatch:
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        args:
+          - '--type BR-I-2022-010 --sweep span_length_m=20:35:5'
+          - '--type BR-I-2022-006 --sweep skew_deg=0:30:15'
+          - '--type BR-I-2022-009 --sweep carriageway_width=3.5,7.5,11'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-suite
+        with:
+          extras: dev,draw
+      - run: python -m pytest tests/catalogue -q
+      - name: Resolve supported variants
+        run: python scripts/generate_all_pwd_gads.py ${{ matrix.args }} --dry-run
+      - name: Generate structural DXF packages (PNG deliberately skipped)
+        env:
+          SKIP_PNG: '1'
+        run: python scripts/generate_all_pwd_gads.py ${{ matrix.args }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pwd-sweep-${{ strategy.job-index }}
+          path: out/pwd_sweep

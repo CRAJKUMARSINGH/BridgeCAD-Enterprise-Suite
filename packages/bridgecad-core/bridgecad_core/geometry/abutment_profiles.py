@@ -34,7 +34,15 @@ _TOP_BATTER_FRAC = 0.25  # face run-back at the top (gravity)
 
 
 def family_for(abutment_type: Any) -> Family:
-    """Map an AbutmentType (enum, .name, or .value) to a shape family."""
+    """Map an AbutmentType (enum, .name, or .value) to a shape family.
+
+    The fall-through is deliberate, not sloppiness.  An integral abutment
+    (``INTEGRAL_ABUTMENT``) or an RCC portal frame is cast monolithic with the
+    deck: a full-height wall carrying the deck directly, with no bearing shelf
+    and no cantilever stem.  That elevation *is* the plain rectangle this module
+    draws for BATTERED, so those types share it rather than inventing a fourth
+    family that the JS mirror (``detailGeometry.js``) does not model.
+    """
     raw = getattr(abutment_type, "name", None) or getattr(abutment_type, "value", None)
     name = str(raw if raw is not None else abutment_type or "").upper()
     if "GRAVITY" in name:

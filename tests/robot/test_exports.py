@@ -1,6 +1,6 @@
 """File-integrity and determinism oracles for the real export surface.
 
-Bound to ``bridgecad_draw.booklet.generate_package`` (which emits **8** sheets,
+Bound to ``bridgecad_draw.booklet.generate_package`` (which emits **9** sheets,
 not the 7 the older docs claim), ``bridgecad_export.orchestrator.export_all``,
 and the ``bridgecad_io`` workbook round-trip. A green UI over a corrupt or
 nondeterministic drawing is still a FAIL.
@@ -65,6 +65,25 @@ def test_every_sheet_carries_real_geometry(package):
         doc = ezdxf.readfile(str(sheet))
         entities = sum(1 for _ in doc.modelspace())
         assert entities >= 20, f"{sheet.name} has only {entities} entities (title block only?)"
+
+
+def test_no_sheet_prints_a_none_scale(project, tmp_path):
+    """No sheet may caption itself ``1:None``.
+
+    ``generate_package`` hands the self-fitting sheets ``scale_denom=None``. A
+    sheet that had not been taught to accept ``None`` still rendered and still
+    "passed", printing ``1:None`` in the title block and ``1 : None`` on the
+    scale bar — a package that misstates its own scale is worse than one that
+    refuses to build. The caption is the one thing on a drawing an engineer
+    reads without measuring, so it may never read ``None``.
+    """
+    from bridgecad_draw.booklet import generate_package
+
+    sheets = generate_package(project, tmp_path, prefix="GAD")
+    for sheet in sheets:
+        text = sheet.read_text(encoding="utf-8", errors="ignore")
+        assert "1:None" not in text, f"{sheet.name}: title block says 1:None"
+        assert "1 : None" not in text, f"{sheet.name}: scale bar says 1 : None"
 
 
 def test_output_is_deterministic(project, tmp_path):

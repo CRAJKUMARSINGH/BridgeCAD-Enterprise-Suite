@@ -38,6 +38,10 @@ def _draw(msp: Any, project: Any, scale_denom: int = 20) -> None:
         drawing_no=getattr(pm, "drawing_no", "GAD-006") or "GAD-006",
         drawing_title="BEARINGS AND EXPANSION JOINTS SCHEDULE",
         revision=getattr(getattr(pm, "revision", None), "name", "R0") or "R0",
+        # A schedule is tabulated, not plotted to an engineering scale — the two
+        # sketches carry their own governing dimensions.  NTS is the honest
+        # caption; the previous default ("1:100") was fiction.
+        scale_str="NTS",
         sheet_no="6",
         total_sheets="9",
     )
@@ -125,7 +129,6 @@ def _draw(msp: Any, project: Any, scale_denom: int = 20) -> None:
 
     # POT bearing sketch
     px2, py2 = 530.0, 330.0
-    25 * sc / 100
     circle(msp, px2 + bw / 2, py2 + bw / 2, bw / 2, layer="SUB-BEARING")
     circle(msp, px2 + bw / 2, py2 + bw / 2, bw / 2 * 0.6, layer="SUB-BEARING")
     text(

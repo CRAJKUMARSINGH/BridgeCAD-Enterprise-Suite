@@ -27,6 +27,10 @@ MIN_CARRIAGEWAY_M = Decimal("3.5")
 #: Superstructures that carry discrete longitudinal girders, and so must have a
 #: girder count the value model will accept (``girders_per_deck_count >= 1``).
 GIRDER_SST = frozenset({"RCC_T_BEAM", "PSC_I_GIRDER", "PSC_BOX", "PSC_BOX_GIRDER"})
+#: Superstructures whose span is carried in thrust or in a deep cell rather than
+#: by the bending depth of the deck slab, so the span/depth governor — a girder
+#: / slab rule — does not apply to them.
+NON_BENDING_SS = frozenset({"RCC_ARCH", "RCC_BOX_CELL"})
 
 
 class ResolvedParams(dict):  # type: ignore[type-arg]
@@ -146,12 +150,14 @@ def _check(p: ResolvedParams) -> None:
     depth = deck + girder
 
     ratio = DECK_MIN_RATIO[ss]
-    if p.get("approximation"):
-        # 004 / 014 / 015 have no engine primitive yet (a multi-unit box cell,
-        # an arch coordinate schedule, a precast block arch).  Their span/depth
-        # governor is not meaningful, so it is reported rather than faked.
-        p.warnings.append(f"{ss}: approximation — span/depth governor not applied")
-    elif depth < span / ratio:
+    # The span/depth governor is a girder / slab rule: it asks whether the deck
+    # is deep enough to bend across its own span.  Two families do not bend
+    # that way and the rule does not reach them — an arch carries its span in
+    # thrust (a legitimate F.O.B. rib is span/70, so testing the 350 mm deck
+    # against span/18 would reject every arch in the booklet) and a multi-cell
+    # box carries it in the height of the cell, not in the deck slab.  Their
+    # structural depth is asserted by their own primitive and sheet instead.
+    if ss not in NON_BENDING_SS and depth < span / ratio:
         raise Violation(
             f"depth {depth:.3f} m < span/{ratio} = {span / ratio:.3f} m for {ss} "
             f"@ {span} m span"

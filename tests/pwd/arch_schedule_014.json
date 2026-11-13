@@ -1,0 +1,15 @@
+{
+  "drawing": "BR-I-2022-014",
+  "origin": "springing 'O', pedestrian FOB",
+  "pitch_mm": 1045.833,
+  "station_count": 25,
+  "note": "Booklet prints Y=AX² (A=0.04955), X from the crown, Y the drop — that is 4·rise/span² for this arch (4 × 7.805/25.10² = 0.04955). It reproduces the crown and both springings to under 1 mm; the tabulated haunches sit up to 825 mm above it. Schedule is authoritative.",
+  "schedule_mm": [
+    [0, 0], [1045.83, 1006], [2091.67, 1943], [3137.5, 2810], [4183.33, 3608],
+    [5229.17, 4336], [6275.0, 5029], [7320.83, 5675], [8366.67, 6273], [9412.5, 6819],
+    [10458.33, 7313], [11504.17, 7752], [12550.0, 7805], [13595.83, 7752],
+    [14641.67, 7313], [15687.5, 6819], [16733.33, 6273], [17779.17, 5675],
+    [18825.0, 5029], [19870.83, 4336], [20916.67, 3608], [21962.5, 2810],
+    [23008.33, 1943], [24054.17, 1006], [25100.0, 0]
+  ]
+}

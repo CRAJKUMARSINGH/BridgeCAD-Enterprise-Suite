@@ -79,3 +79,10 @@ Every doc in this repo, what it is, and whether to trust it.
 
 Put it in `docs/`, add a row here, and link it from `GUIDE.md` §14. A doc that
 is not in this index does not exist.
+
+
+## PWD verification supplement — 2026-11-13
+
+See [the executed PWD checks, reference inventory, parameter/layout guidance and patch priorities](docs/BRIDGECAD_SUPPLEMENTARY_PATCH.md). At commit `5d5f99e`, all 15 types generated nine-sheet DXF packages, but the completed full rendering run produced 24 all-white PNGs. Successful generation is not reference fidelity or engineering approval.
+
+- [Uploaded v.md instruction ledger](docs/V_INSTRUCTIONS_APPLIED.md): applied safeguards, already present fixes, pending engineering/reference work and validation results.

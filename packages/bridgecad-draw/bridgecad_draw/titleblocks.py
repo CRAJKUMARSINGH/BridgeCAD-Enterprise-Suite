@@ -37,6 +37,27 @@ _REV_W = 45.0  # revision strip width mm
 #: multiplied by the sheet's plot scale — see ``draw_sheet_frame``.
 TEXT_HEIGHT_MM = 2.5
 
+#: Measured advance of the sheet text style: millimetres of run per millimetre
+#: of text height, including the inter-character space.  It is used to keep a
+#: long caption inside its cell instead of running it past the frame —
+#: "DRAWING TITLE: GENERAL ARRANGEMENT — LONGITUDINAL SECTION" (57 characters)
+#: at 3.8 mm measured 185 mm of run and ended 2 mm past the 831 mm border.
+_ADVANCE_FRAC = 0.86
+
+#: Height of the bold DRAWING TITLE caption.  Reduced from 3.8 so the longest
+#: sheet title fits the 185 mm block untruncated.
+_DRAWING_TITLE_H = 3.2
+
+
+def _clip(s: str, max_w_mm: float, h_mm: float) -> str:
+    """Truncate *s* to the characters that cannot run past *max_w_mm*.
+
+    A best-effort guard, not a text engine: it stops a long project name or
+    drawing title from bleeding off the sheet, which a plot clips silently.
+    """
+    room = int(max_w_mm / max(_ADVANCE_FRAC * h_mm, 0.01))
+    return s if len(s) <= room else s[: max(1, room)]
+
 
 def draw_border(msp: Any, sheet_size: str = "A1") -> tuple[float, float]:
     """Draw outer and inner sheet borders.
@@ -68,7 +89,7 @@ def draw_title_block(
     approved_by: str = "",
     client: str = "",
     consultant: str = "",
-    scale_str: str = "1:100",
+    scale_str: str = "",
     sheet_no: str = "1",
     total_sheets: str = "1",
     sheet_size: str = "A1",
@@ -117,7 +138,7 @@ def draw_title_block(
     ) -> None:
         rectangle(msp, x0, y0, w, h, layer="TITLEBLK-BOX", lw=18)
         if val:
-            display = str(val)[:35]
+            display = _clip(str(val), w - 3.0, th)
             lyr = "TEXT-TITLE" if bold else "TITLEBLK-TEXT"
             text(msp, display, x0 + 1.5, y0 + h / 2 - th / 2, height=th, layer=lyr)
 
@@ -148,18 +169,26 @@ def draw_title_block(
     rectangle(msp, tb_x0, r4y, _TB_W, r4h, layer="TITLEBLK-BOX", lw=30)
     text(
         msp,
-        f"DRAWING TITLE: {drawing_title}"[:60],
+        _clip(f"DRAWING TITLE: {drawing_title}", _TB_W - 3.5, _DRAWING_TITLE_H),
         tb_x0 + 2.0,
         r4y + r4h / 2 - 2.0,
-        height=3.8,
+        height=_DRAWING_TITLE_H,
         layer="TEXT-TITLE",
     )
 
     # ── Project title + bridge name above block ───────────────────────────────
-    text(msp, f"PROJECT: {project_title}"[:70], tb_x0, tb_y1 + 3.5, height=3.2, layer="TEXT-TITLE")
+    _cap_w = sw - m - tb_x0 - 1.0
     text(
         msp,
-        f"BRIDGE: {bridge_name}"[:50],
+        _clip(f"PROJECT: {project_title}", _cap_w, 3.2),
+        tb_x0,
+        tb_y1 + 3.5,
+        height=3.2,
+        layer="TEXT-TITLE",
+    )
+    text(
+        msp,
+        _clip(f"BRIDGE: {bridge_name}", _cap_w, 2.8),
         tb_x0,
         tb_y1 + 8.5,
         height=2.8,

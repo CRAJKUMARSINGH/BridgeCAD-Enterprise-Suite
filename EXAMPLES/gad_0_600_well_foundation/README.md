@@ -4,8 +4,8 @@
 **Fixture ID:** `gad_0_600_well_foundation`  
 **Sheets generated:** 9 DXF  
 **Rendered PNGs:** 9  
-**PDF booklet:** [`gad_0_600_well_foundation_GAD_Booklet.pdf`](gad_0_600_well_foundation_GAD_Booklet.pdf) (2317 KB, 9 pages)  
-**Total DXF size:** 813 KB  
+**PDF booklet:** [`gad_0_600_well_foundation_GAD_Booklet.pdf`](gad_0_600_well_foundation_GAD_Booklet.pdf) (2302 KB, 9 pages)  
+**Total DXF size:** 800 KB  
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets

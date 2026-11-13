@@ -48,6 +48,12 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
 
     layout = compute_pile_group_layout(project)
 
+    # The scale printed in the title block must be the scale the details are
+    # drawn at.  ``sc`` is derived from the denominator rather than hard-coded
+    # beside it, so a caller that asks for a different denominator gets a sheet
+    # drawn at it (a hard-coded 20 mm/m under a requested 1:100 caption lied).
+    denom = max(int(scale_denom), 1)
+
     draw_border(msp, "A1")
     draw_title_block(
         msp,
@@ -56,11 +62,12 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         drawing_no=getattr(pm, "drawing_no", "GAD-004") or "GAD-004",
         drawing_title="FOUNDATION DETAILS — TYPICAL PIER",
         revision=getattr(getattr(pm, "revision", None), "name", "R0") or "R0",
+        scale_str=f"1:{denom}",
         sheet_no="4",
         total_sheets="9",
     )
 
-    sc = 20.0  # mm per metre
+    sc = 1000.0 / denom  # mm per metre
     th = 2.5  # text height
 
     # ── PLAN VIEW (top-left) ──────────────────────────────────────────────

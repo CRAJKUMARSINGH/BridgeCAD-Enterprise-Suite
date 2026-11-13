@@ -4,8 +4,8 @@
 **Fixture ID:** `shiwalay_3x30m_psc_box`  
 **Sheets generated:** 9 DXF  
 **Rendered PNGs:** 9  
-**PDF booklet:** [`shiwalay_3x30m_psc_box_GAD_Booklet.pdf`](shiwalay_3x30m_psc_box_GAD_Booklet.pdf) (2407 KB, 9 pages)  
-**Total DXF size:** 835 KB  
+**PDF booklet:** [`shiwalay_3x30m_psc_box_GAD_Booklet.pdf`](shiwalay_3x30m_psc_box_GAD_Booklet.pdf) (2402 KB, 9 pages)  
+**Total DXF size:** 825 KB  
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets

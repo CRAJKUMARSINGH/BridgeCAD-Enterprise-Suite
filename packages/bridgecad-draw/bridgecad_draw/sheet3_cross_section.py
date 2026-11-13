@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any
 
 from .dxf_engine import new_sheet, save
+from .fit import LADDER
 from .primitives import (
     dim_linear_h,
     dim_linear_v,
@@ -55,16 +56,23 @@ _OFF_GS = 12.0  # girder-spacing dimension, below girder soffit
 _OFF_CW = 26.0  # carriageway dimension, below girder soffit
 _OFF_OW = 46.0  # overall-width dimension, below girder soffit
 _OFF_SB = 70.0  # scale-bar baseline, below girder soffit
+_SC_MAX_MM_PER_M = 40.0  # largest drawing scale (1:25) for a narrow section
 
 
-def generate(project: Any, output_path: str | Path, scale_denom: int = 50) -> Path:
-    """Generate Sheet 3 — Typical Mid-Span Cross Section (production quality)."""
+def generate(project: Any, output_path: str | Path, scale_denom: int | None = None) -> Path:
+    """Generate Sheet 3 — Typical Mid-Span Cross Section (production quality).
+
+    ``scale_denom=None`` lets the sheet pick the largest rung of the shared
+    ladder that fits the transverse budget, and prints that rung; an explicit
+    rung is honoured when it still fits.  Either way the printed scale is the
+    scale the section was drawn at.
+    """
     doc, msp = new_sheet("S3 Cross Section")
     _draw(msp, project, scale_denom)
     return save(doc, output_path)
 
 
-def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
+def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     from bridgecad_core.geometry import compute_cross_section_geometry
 
     gi = project.geometry_input
@@ -73,16 +81,31 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
 
     cs = compute_cross_section_geometry(project)
     sst = str(getattr(ss.type, "name", ss.type)).upper()
-    is_box = "BOX" in sst
+    is_cell = "BOX_CELL" in sst
+    is_box = "BOX" in sst and not is_cell
     is_t = "T_BEAM" in sst or "TBEAM" in sst
     is_psc = "PSC" in sst or "I_GIRDER" in sst
     is_slab = "SLAB" in sst and "VOID" not in sst
+    is_arch = "ARCH" in sst
 
     # ── Scale: fit overall width into the transverse budget ──────────────────
+    # The printed scale must be a rung of the ladder (W81 / QA-SH-SCALE-ON-LADDER)
+    # and it must be the scale the section is drawn at, or the title block lies —
+    # the sheet used to fit itself (min(budget/width, 35)) and then print a
+    # constant "1:100", so a 24 m wide deck drew near 1:19 under a "1:100" title.
+    # A caller's explicit ``scale_denom`` is honoured when it is a rung that
+    # still fits the transverse budget; otherwise the largest rung that fits is
+    # taken.  Either way the section is drawn at exactly the printed scale.
     ow_m = float(cs.overall_width_m)
-    sc = min(_FIT_W / max(ow_m, 0.1), 35.0)
+    avail = min(_FIT_W / max(ow_m, 0.1), _SC_MAX_MM_PER_M)
+    asked = int(scale_denom or 0)
+    denom = (
+        asked
+        if asked in LADDER and 1000.0 / asked <= avail
+        else next((d for d in LADDER if 1000.0 / d <= avail), LADDER[-1])
+    )
+    sc = 1000.0 / denom
     cx = _SHEET_CX
-    base_y = _BASE_Y
 
     deck_t_m = float(ss.deck_thickness_mm or 230) / 1000.0
     wc_t_m = float(ss.wearing_coat_thickness_mm or 65) / 1000.0
@@ -101,9 +124,17 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
 
     # Adaptive text height, capped so the right-hand annotation block (RL value
     # plus descriptive label) still fits the ~130 mm gutter that the 560 mm fit
-    # budget leaves. Un-capped, a narrow section draws at sc=35 → th=8.75, and on
+    # budget leaves. Un-capped, a narrow section draws at sc=40 → th=10, and on
     # a wide box the "GIRDER SOFFIT / RL" label ran ~24 mm past the right border.
     th = min(6.0, max(2.2, sc * 0.25))
+
+    # Vertical budget.  The section, the three dimension staffs, the scale bar
+    # and the bar's metre labels all hang below the road surface; a deep girder
+    # at a large scale pushed the bar and its labels through the bottom border
+    # (011 and 013 — labels at y=6.4 and y=-9.6 against a border at y=10).
+    # Raise the road surface by the shortfall so the whole stack stays inside.
+    base_y = max(_BASE_Y, 12.0 + (wc_t_m + deck_t_m + gd_m) * sc
+                 + _OFF_SB + th * 1.2 + 4.0)
 
     def hx(x_m):
         return cx + x_m * sc  # transverse offset → sheet X
@@ -120,6 +151,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         drawing_no=getattr(pm, "drawing_no", "GAD-003") or "GAD-003",
         drawing_title="TYPICAL MID-SPAN CROSS SECTION",
         revision=getattr(getattr(pm, "revision", None), "name", "R0") or "R0",
+        scale_str=f"1:{denom}",
         sheet_no="3",
         total_sheets="9",
     )
@@ -292,6 +324,149 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
             layer="TEXT-GENERAL",
             halign="CENTER",
         )
+
+    elif is_cell:
+        # R.C.C. multi-cell box (booklet 004).  The cell lattice runs *along*
+        # the deck — three units of 4 / 3 / 4 cells on a 5.55 m pitch — so the
+        # long section (sheet 2) carries that arrangement at the chainage scale.
+        # A *cross* section cuts a single typical cell, drawn here at this
+        # sheet's transverse scale.  Before this branch the type fell through to
+        # the PSC mono-box girder code and the sheet drew a superstructure the
+        # booklet does not describe.
+        from .geometry.box_cell import CellGrid, assert_closed
+
+        fd = project.foundation_details
+        grid = CellGrid(
+            tuple(fd.unit_cell_counts),
+            float(fd.cell_clear_m),
+            float(fd.cell_wall_mm) / 1000.0,
+            float(fd.cell_haunch_mm) / 1000.0,
+            0.0,  # the RL datum is irrelevant: everything hangs off the soffit
+        )
+        assert_closed(grid)
+        clear, wall, hch = grid.clear_m, grid.wall_m, grid.haunch_m
+        raft = float(fd.raft_thickness_mm or 0) / 1000.0
+        outer_half = clear / 2.0 + wall
+
+        def bx(m: float) -> float:
+            return hx(m)
+
+        def by(m: float) -> float:
+            """Metres *below* the deck soffit → sheet Y (the section hangs down)."""
+            return slab_bot - m * sc
+
+        # The two side walls run the clear height; the top slab is the deck (drawn
+        # above) and the bottom slab is the raft (drawn below).
+        for sx in (-1, 1):
+            x0 = -outer_half if sx < 0 else clear / 2.0
+            rectangle(msp, bx(x0), by(clear), wall * sc, clear * sc, layer="SUB-BOX-CELL", lw=35)
+            hatch_rect(
+                msp, bx(x0), by(clear), wall * sc, clear * sc,
+                pattern="ANSI31", scale=sc * 0.016, layer="STRUC-HATCHING",
+            )
+
+        # Four 45° haunches at the inner corners.
+        for haunch in (
+            [(-clear / 2.0, hch), (-clear / 2.0 + hch, 0.0)],
+            [(clear / 2.0 - hch, 0.0), (clear / 2.0, hch)],
+            [(clear / 2.0, clear - hch), (clear / 2.0 - hch, clear)],
+            [(-clear / 2.0 + hch, clear), (-clear / 2.0, clear - hch)],
+        ):
+            polyline(msp, [(bx(x), by(d)) for x, d in haunch], layer="SUB-BOX-HAUNCH", lw=25)
+
+        # Raft under the bottom slab, with a 900 mm rubble apron on each face.
+        if raft:
+            rectangle(
+                msp, bx(-outer_half - 0.55), by(clear + raft),
+                (2.0 * (outer_half + 0.55)) * sc, raft * sc, layer="SUB-RAFT", lw=50,
+            )
+            for ax in (-outer_half - 0.9, outer_half):
+                rectangle(
+                    msp, bx(ax), by(clear + raft), 0.9 * sc, raft * sc,
+                    layer="SUB-APRON", lw=25,
+                )
+        gird_bot = by(clear + raft)
+
+        text(
+            msp,
+            f"RCC BOX CELL — TYPICAL CELL, CLEAR {clear:.2f} m, WALL {wall * 1000:.0f} mm, "
+            f"HAUNCH {hch * 1000:.0f} mm",
+            hx(0), gird_bot - th * 2.4, height=th * 1.0,
+            layer="TEXT-GENERAL", halign="CENTER",
+        )
+        text(
+            msp,
+            f"{sum(fd.unit_cell_counts)} CELLS IN {len(fd.unit_cell_counts)} UNITS "
+            f"ALONG THE DECK — SEE LONGITUDINAL SECTION",
+            hx(0), gird_bot - th * 3.8, height=th * 0.85,
+            layer="TEXT-SPEC", halign="CENTER", color=8,
+        )
+
+    elif is_arch:
+        # Deck arch (booklet 014 open-spandrel, 015 precast block).  A transverse
+        # section cuts the arch at its crown, where the ring sits directly under
+        # the deck.  The *profile* — the 25-station soffit schedule, the block
+        # and socket run — is longitudinal and lives on sheet 2.  What belongs
+        # here is the ring's real depth and, for the precast type, the three
+        # longitudinal strips and their 100 mm gaps, which are a *width* feature
+        # and so are drawn on this sheet, where the width is true.
+        from .geometry.precast_arch import gap_pairs, strip_offsets
+
+        ring_m = float(getattr(ss, "arch_ring_thickness_mm", 0) or 350) / 1000.0
+        ring_w = ow_m
+        ring_top = gird_top
+        ring_bot = ring_top - ring_m * sc
+        rectangle(
+            msp, hx(-ring_w / 2.0), ring_bot, ring_w * sc, ring_m * sc,
+            layer="SUPER-ARCH-RING", lw=35,
+        )
+        hatch_rect(
+            msp, hx(-ring_w / 2.0), ring_bot, ring_w * sc, ring_m * sc,
+            pattern="ANSI31", scale=sc * 0.016, layer="STRUC-HATCHING",
+        )
+        line(
+            msp, (hx(-ring_w / 2.0), ring_top), (hx(ring_w / 2.0), ring_top),
+            layer="SUPER-ARCH-SOFFIT", lw=50,
+        )
+
+        if "PRECAST" in sst:
+            gap_m = float(getattr(ss, "arch_strip_gap_mm", 100) or 100) / 1000.0
+            n_str = int(getattr(ss, "arch_strip_count", 3) or 3)
+            strip_w = (ring_w - gap_m * (n_str - 1)) / n_str
+            # Strip centrelines (radial cut faces run the ring's depth), then the
+            # gap bands between them.  ``strip_offsets`` places the strips and
+            # ``gap_pairs`` counts the gaps — the same primitive sheet 2's front
+            # view and the BOQ use, so the strip arrangement cannot drift.
+            for gc in strip_offsets(n_str, strip_w, gap_m):
+                line(
+                    msp, (hx(gc), ring_bot), (hx(gc), ring_top),
+                    layer="SUPER-PRECAST-BLOCK", lw=25,
+                )
+            for i in range(gap_pairs(n_str, strip_w, gap_m)):
+                gx = -ring_w / 2.0 + (i + 1) * strip_w + i * gap_m
+                rectangle(
+                    msp, hx(gx), ring_bot, gap_m * sc, ring_m * sc,
+                    layer="SUPER-STRIP-GAP", lw=18,
+                )
+            text(
+                msp,
+                f"PRECAST BLOCK ARCH — {n_str} STRIPS @ {strip_w:.2f} m WITH "
+                f"{gap_m * 1000:.0f} mm GAPS ({gap_pairs(n_str, strip_w, gap_m)} LONGITUDINAL), "
+                f"{int(getattr(ss, 'arch_block_count', 0))} BLOCKS",
+                hx(0), ring_bot - th * 2.4, height=th * 0.85,
+                layer="TEXT-SPEC", halign="CENTER", color=8,
+            )
+        else:
+            text(
+                msp,
+                f"OPEN-SPANDREL ARCH — RING {ring_m * 1000:.0f} mm, "
+                f"RISE {float(getattr(ss, 'arch_rise_mm', 0) or 0) / 1000.0:.2f} m "
+                f"(25-STATION SOFFIT SCHEDULE ON LONGITUDINAL SECTION)",
+                hx(0), ring_bot - th * 2.4, height=th * 0.85,
+                layer="TEXT-SPEC", halign="CENTER", color=8,
+            )
+
+        gird_bot = ring_bot
 
     # ── KERBS ─────────────────────────────────────────────────────────────────
     kerb_h = 0.22 * sc
@@ -616,7 +791,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         msp,
         sb_x,
         sb_y,
-        scale_denom,
+        denom,
         segments=4,
         seg_len_m=sb_seg_m * sc,
         text_height=th * 0.85,
@@ -640,7 +815,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     )
     text(
         msp,
-        f"{sst_label}  |  Scale 1:{scale_denom}  |  IRC:112-2020",
+        f"{sst_label}  |  Scale 1:{denom}  |  IRC:112-2020",
         cx,
         view_y - th * 4,
         height=th * 1.0,

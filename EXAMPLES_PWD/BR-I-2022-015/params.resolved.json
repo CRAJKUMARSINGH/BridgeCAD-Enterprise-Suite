@@ -20,13 +20,19 @@
     "freeboard_m": 1.0,
     "sbc_t_per_m2": 27.233,
     "submersible": false,
-    "approximation": true,
-    "fidelity_note": "no precast-block / socket primitive \u2014 drawn as a single-curve approximation",
+    "arch_rise_mm": 1996,
+    "arch_ring_thickness_mm": 400,
+    "arch_strip_count": 3,
+    "arch_strip_gap_mm": 100,
+    "arch_block_count": 27,
+    "spandrel_wall_thickness_mm": 400,
     "total_length_m": "61.94",
     "pier_count": 0,
+    "pier_batter_1n": "10",
     "soffit_level": "102.525",
     "foundation_level": "96.90",
     "bearing_type": "NONE",
+    "camber_mm": 61,
     "id": "BR-I-2022-015"
   },
   "trace": [
@@ -35,6 +41,12 @@
       "from": "None",
       "to": "61.94",
       "why": "\u03a3 span_lengths"
+    },
+    {
+      "field": "pier_batter_1n",
+      "from": "None",
+      "to": "10",
+      "why": "IRC practice default 1:10 batter"
     },
     {
       "field": "soffit_level",
@@ -47,9 +59,13 @@
       "from": "None",
       "to": "96.90",
       "why": "OPEN embedment"
+    },
+    {
+      "field": "camber_mm",
+      "from": "None",
+      "to": "61",
+      "why": "L/1000 default, min 10 mm"
     }
   ],
-  "warnings": [
-    "RCC_ARCH: approximation \u2014 span/depth governor not applied"
-  ]
+  "warnings": []
 }

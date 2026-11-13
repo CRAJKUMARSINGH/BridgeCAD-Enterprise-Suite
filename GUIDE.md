@@ -53,7 +53,7 @@ model, not bolted on.
 | Capability | Status | Where |
 |---|---|---|
 | Excel → `BridgeProject` model | ✅ implemented | `packages/bridgecad-io` |
-| 8-sheet DXF drawing engine | ✅ implemented | `packages/bridgecad-draw` |
+| PWD booklet nine-sheet DXF path | Generation tested for 15 types; reference fidelity unverified | `scripts/generate_all_pwd_gads.py` / `bridgecad_draw.booklet` |
 | 53 IRC SP:55 layer definitions | ✅ implemented | `bridgecad_draw/layers.py` |
 | Abutment cap + dirt wall + WC geometry | ✅ implemented | `sheet2/4/5/8` + `abutment_stack.py` |
 | Abutment shape families (GRAVITY/CANTILEVER/BATTERED) | ✅ implemented | `geometry/abutment_profiles.py` |
@@ -556,3 +556,10 @@ will render the correct shape automatically.
 | 2026-10-22 | `main` | Initial authoritative guide; consolidated the scattered, drifted docs into one master document. |
 | 2026-10-26 | `2acef08` | §9: replaced the non-existent weekly `bench.yml` with the real budget file (`tests/benchmarks/budgets.json`). §10: replaced the ghcr.io/wheels claim with the real `release.yml` — a legacy Windows PyInstaller build for `src/bridge_gad`. |
 | 2026-11-07 | `2d9dca9` / `4bcc9c9` | Venice-patch applied (§V) and D-13 closed (§16). §5.2 sheet list corrected. §11 limitations updated. §9 test count updated. |
+
+
+## PWD verification supplement — 2026-11-13
+
+See [the executed PWD checks, reference inventory, parameter/layout guidance and patch priorities](docs/BRIDGECAD_SUPPLEMENTARY_PATCH.md). At commit `5d5f99e`, all 15 types generated nine-sheet DXF packages, but the completed full rendering run produced 24 all-white PNGs. Successful generation is not reference fidelity or engineering approval.
+
+See also [the v.md applicability and implementation ledger](docs/V_INSTRUCTIONS_APPLIED.md). PNG rendering now fails explicitly on all-white output; DXF-only checks do not certify reference matching.

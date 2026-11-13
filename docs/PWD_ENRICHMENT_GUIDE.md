@@ -1,35 +1,35 @@
 # PWD GAD Enrichment Guide
 
-**Status:** 15/15 Maharashtra PWD booklet types generate 9-sheet DXF packages.  
-**Parametric variation:** 23/23 resolver tests pass.  
-**Entity audit:** 26/28 layer checks pass (2 minor threshold gaps, not geometric errors).
+**Executed baseline (2026-11-13, commit `5d5f99e`):** 15/15 types generated nine-sheet DXF packages; all 135 DXFs passed structural audit. The full default run nevertheless produced **24 entirely white PNGs**. Generation is not a reference-match or construction-approval result.
+
+**Historical claims below:** earlier resolver/entity counts and PDF-match labels were not established by this audit. See [the executed verification supplement](BRIDGECAD_SUPPLEMENTARY_PATCH.md) and [the v.md application ledger](V_INSTRUCTIONS_APPLIED.md). Current changes add choice sweeps, strict identity mapping, deterministic output and nonblank-render failure reporting.
 
 ---
 
-## ✅ What works perfectly with varied variables
+## Historical capability claims requiring reference verification
 
-| Capability | Test result | PDF match |
+| Capability | Historical claim | Current reference verdict |
 |---|---|---|
-| `total_length` tracks span overrides | ✅ | Exact |
-| `soffit_level` moves when `deck_thickness` changes | ✅ | Correct |
-| `pier_count = span_count − 1` (or 0 for box-cell/arch) | ✅ | Correct |
-| `bearing_type` auto-derives (PSC→POT, Arch→NONE) | ✅ | Correct |
-| Skew angle stored and passed through (`skew_deg`) | ✅ | Stored |
-| Freeboard constraint (soffit < HFL + freeboard) rejected | ✅ | Enforced |
-| Weak SBC for open foundation rejected | ✅ | Enforced |
-| Sweep matrix (`pier_height_m=6:12:3`) produces 3 valid variants | ✅ | — |
-| Abutment battered profile (LISP `abt1()`, 14 vertices) | ✅ | Exact |
-| Dirt wall + construction joint + water-bar note | ✅ | Exact |
-| Continuous wearing coat over approach slabs | ✅ | Exact |
-| Abutment cap projections (front/rear) | ✅ | Exact |
-| Level tags (BEARING SEAT, TOP OF CAP, BASE OF SHAFT) | ✅ | Correct |
-| Scale caption matches geometry (`fit.py` ladder) | ✅ | Correct |
-| 270 m type 010 uses correct 1:500 scale (not 1:100) | ✅ | Exact |
-| T-beam girder cross-section (3 or 4 girders) | ✅ | Correct |
-| PSC I-girder cross-section | ✅ | Correct |
-| PSC Box girder cross-section | ✅ | Correct |
-| Pile foundation plan + elevation | ✅ | Correct |
-| Well foundation plan | ✅ | Correct |
+| `total_length` tracks span overrides | ✅ | Not independently verified |
+| `soffit_level` moves when `deck_thickness` changes | ✅ | Not independently verified |
+| `pier_count = span_count − 1` (or 0 for box-cell/arch) | ✅ | Not independently verified |
+| `bearing_type` auto-derives (PSC→POT, Arch→NONE) | ✅ | Not independently verified |
+| Skew angle stored and passed through (`skew_deg`) | ✅ | Not independently verified |
+| Freeboard constraint (soffit < HFL + freeboard) rejected | ✅ | Not independently verified |
+| Weak SBC for open foundation rejected | ✅ | Not independently verified |
+| Sweep matrix (`pier_height_m=6:12:3`) produces 3 valid variants | ✅ | Not independently verified |
+| Abutment battered profile (LISP `abt1()`, 14 vertices) | ✅ | Not independently verified |
+| Dirt wall + construction joint + water-bar note | ✅ | Not independently verified |
+| Continuous wearing coat over approach slabs | ✅ | Not independently verified |
+| Abutment cap projections (front/rear) | ✅ | Not independently verified |
+| Level tags (BEARING SEAT, TOP OF CAP, BASE OF SHAFT) | ✅ | Not independently verified |
+| Scale caption matches geometry (`fit.py` ladder) | ✅ | Not independently verified |
+| 270 m type 010 uses correct 1:500 scale (not 1:100) | ✅ | Not independently verified |
+| T-beam girder cross-section (3 or 4 girders) | ✅ | Not independently verified |
+| PSC I-girder cross-section | ✅ | Not independently verified |
+| PSC Box girder cross-section | ✅ | Not independently verified |
+| Pile foundation plan + elevation | ✅ | Not independently verified |
+| Well foundation plan | ✅ | Not independently verified |
 
 ---
 
@@ -41,7 +41,7 @@
 500 mm walls, 500×500 haunches at every corner, 100 mm CJ between units, 1100 mm raft,
 900 mm rubble apron, cut-off wall at scour+0.3 m depth, PCC toe wall.
 
-**What engine draws now:** Plain slab proxy (single rectangle per span). Cell geometry,
+**Earlier engine description (recheck current code):** Plain slab proxy (single rectangle per span). Cell geometry,
 haunches, CJs, apron and cut-off wall are all absent.
 
 **Fix:** Implement `bridgecad_draw/geometry/box_cell.py` as specified in SS3.txt Primitive 1.
@@ -67,7 +67,7 @@ class CellGrid:
 **What the PDF shows (type 014):** 31-point soffit coordinate table, parabola
 `Y = 0.04955X²`, 350 mm ring, 200×200 haunches at 900 c/c, spandrel columns.
 
-**What engine draws now:** Rectangular deck approximation. Arch ring, columns,
+**Earlier engine description (recheck current code):** Rectangular deck approximation. Arch ring, columns,
 haunches and the schedule table are absent.
 
 **Fix:** Implement `arch_schedule.py` from SS3.txt Primitive 2:
@@ -83,7 +83,7 @@ haunches and the schedule table are absent.
 **What the PDF shows (type 015):** 61.94 m span, 3 strips, 27 blocks @ 400 thick,
 sockets 800×620×200, 100 mm strip gaps, spandrel openings, 10.0 m carriageway.
 
-**What engine draws now:** Rectangular deck approximation.
+**Earlier engine description (recheck current code):** Rectangular deck approximation.
 
 **Fix:** Implement `precast_arch.py` from SS3.txt Primitive 3:
 - `block_chain(span_m, rise_m, n_blocks)` — 27 blocks on the arch curve
@@ -97,7 +97,7 @@ sockets 800×620×200, 100 mm strip gaps, spandrel openings, 10.0 m carriageway.
 **What the PDF shows:** Pier shafts in types 006/007/008 are visibly tapered
 (wider at base, narrower at cap) with a 1:10 batter.
 
-**What engine draws now:** Rectangular pier on Sheet 5 — `pier_batter_1n` field
+**Earlier engine description (recheck current code):** Rectangular pier on Sheet 5 — `pier_batter_1n` field
 exists but fixtures leave it `None`, so the batter-trapezoid branch never fires.
 
 **Fix:** Set a default in the resolver:
@@ -120,7 +120,7 @@ the Venice-patch) and will draw the tapered shape automatically.
 **What the PDF shows:** Stepped footing with PCC levelling course (100 mm M-15),
 soil strata hatch, and scour line annotation with arrow.
 
-**What engine draws now:** Plain rectangle footing without steps or soil profile.
+**Earlier engine description (recheck current code):** Plain rectangle footing without steps or soil profile.
 
 **Fix:** Extend `sheet4_foundation.py` with:
 1. PCC toe course: `rectangle(msp, x, y_base-0.1, w, 0.1, layer="FOUND-OPEN")`
@@ -134,7 +134,7 @@ soil strata hatch, and scour line annotation with arrow.
 **What the PDF shows (type 006, skew 20°):** Pier and abutment lines on the
 longitudinal section are drawn at the skew angle, not perpendicular.
 
-**What engine draws now:** Perpendicular pier rectangles regardless of skew.
+**Earlier engine description (recheck current code):** Perpendicular pier rectangles regardless of skew.
 
 **Fix:** In `sheet2_long_section.py` pier loop, replace the rectangle with the
 rotated outline from `bridgecad_core.skew.support_line()` (already wired in
@@ -153,7 +153,7 @@ sl = support_line(project, chainage_m=cumul)
 **What the PDF shows:** Wing wall drawn as a filled trapezoid with the top face
 falling at 1:10 from the full cap top.
 
-**What engine draws now:** Dashed indicator line only (correct slope, wrong layer/style).
+**Earlier engine description (recheck current code):** Dashed indicator line only (correct slope, wrong layer/style).
 
 **Fix:** In `sheet8_side_elevations.py` `_draw_abutment_endface()`:
 ```python
@@ -169,7 +169,7 @@ line(msp, start, end, layer="SUB-ABUT", color=3, linetype="DASHED")
 **What the PDF shows:** Each pier on the longitudinal section has inline cap
 width, cap depth, and shaft width dimensions.
 
-**What engine draws now:** T.O.C. level tags only; no cap dimensional strings.
+**Earlier engine description (recheck current code):** T.O.C. level tags only; no cap dimensional strings.
 
 **Fix:** In the pier cap loop in `sheet2_long_section.py`, add:
 ```python
@@ -183,7 +183,7 @@ dim_linear_h(msp, cap_x0, cap_top_y - th*4, cap_x1, cap_top_y - th*4,
 
 **What the PDF shows:** Dashed camber parabola on the cross-section.
 
-**What engine draws now:** Camber is omitted when `camber_mm = 0` (the default
+**Earlier engine description (recheck current code):** Camber is omitted when `camber_mm = 0` (the default
 for all PWD fixtures).
 
 **Fix:** In `resolve.py`, derive a minimum camber from span:
@@ -223,11 +223,11 @@ there is no indication in the title block that this is a variant.
 10. GAP 09  precast arch            → ~100 lines new file (precast_arch.py)
 ```
 
-Steps 1–7 are each < 20 lines and have no risk. Steps 8–10 are SS3.txt primitives.
+These are historical proposals, not approved patches. Line count does not establish risk. Reconcile the current model, reference dimensions and regression evidence before changing geometry.
 
 ---
 
-## Quick wins (implement right now, < 5 minutes each)
+## Historical proposals (validate engineering assumptions before applying)
 
 ```bash
 # GAP 04: pier batter default
@@ -240,6 +240,6 @@ Steps 1–7 are each < 20 lines and have no risk. Steps 8–10 are SS3.txt primi
 #   if not p.get("camber_mm"):
 #       p["camber_mm"] = max(10, int(float(max(p["span_lengths"])) * 1000 / 1000))
 
-# Regenerate and re-certify:
+# Resolve only; dry-run does not generate or certify drawings:
 python scripts/generate_all_pwd_gads.py --dry-run
 ```

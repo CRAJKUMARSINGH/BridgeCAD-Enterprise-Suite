@@ -4,8 +4,8 @@
 **Fixture ID:** `chambakkara_5x25m`  
 **Sheets generated:** 9 DXF  
 **Rendered PNGs:** 9  
-**PDF booklet:** [`chambakkara_5x25m_GAD_Booklet.pdf`](chambakkara_5x25m_GAD_Booklet.pdf) (2450 KB, 9 pages)  
-**Total DXF size:** 867 KB  
+**PDF booklet:** [`chambakkara_5x25m_GAD_Booklet.pdf`](chambakkara_5x25m_GAD_Booklet.pdf) (2439 KB, 9 pages)  
+**Total DXF size:** 841 KB  
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets

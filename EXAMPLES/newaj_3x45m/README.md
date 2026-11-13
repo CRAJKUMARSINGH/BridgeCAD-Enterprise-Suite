@@ -4,8 +4,8 @@
 **Fixture ID:** `newaj_3x45m`  
 **Sheets generated:** 9 DXF  
 **Rendered PNGs:** 9  
-**PDF booklet:** [`newaj_3x45m_GAD_Booklet.pdf`](newaj_3x45m_GAD_Booklet.pdf) (2418 KB, 9 pages)  
-**Total DXF size:** 851 KB  
+**PDF booklet:** [`newaj_3x45m_GAD_Booklet.pdf`](newaj_3x45m_GAD_Booklet.pdf) (2398 KB, 9 pages)  
+**Total DXF size:** 826 KB  
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets

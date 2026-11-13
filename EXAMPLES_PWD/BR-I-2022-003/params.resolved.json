@@ -29,6 +29,7 @@
     "soffit_level": "101.925",
     "foundation_level": "96.0",
     "bearing_type": "ELASTOMERIC",
+    "camber_mm": 10,
     "id": "BR-I-2022-003"
   },
   "trace": [
@@ -49,6 +50,12 @@
       "from": "None",
       "to": "96.0",
       "why": "RAFT embedment"
+    },
+    {
+      "field": "camber_mm",
+      "from": "None",
+      "to": "10",
+      "why": "L/1000 default, min 10 mm"
     }
   ],
   "warnings": []

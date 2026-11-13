@@ -4,8 +4,8 @@
 **Fixture ID:** `srctip_4x20m`  
 **Sheets generated:** 9 DXF  
 **Rendered PNGs:** 9  
-**PDF booklet:** [`srctip_4x20m_GAD_Booklet.pdf`](srctip_4x20m_GAD_Booklet.pdf) (2425 KB, 9 pages)  
-**Total DXF size:** 864 KB  
+**PDF booklet:** [`srctip_4x20m_GAD_Booklet.pdf`](srctip_4x20m_GAD_Booklet.pdf) (2411 KB, 9 pages)  
+**Total DXF size:** 847 KB  
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets

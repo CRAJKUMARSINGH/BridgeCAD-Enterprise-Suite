@@ -22,13 +22,117 @@
     "freeboard_m": 1.0,
     "sbc_t_per_m2": 30,
     "submersible": false,
-    "approximation": true,
-    "fidelity_note": "no arch coordinate-schedule primitive \u2014 span/depth governor not applied; arch drawn as a single-curve approximation",
+    "arch_rise_mm": 7805,
+    "arch_ring_thickness_mm": 350,
+    "arch_schedule_mm": [
+      [
+        0,
+        0
+      ],
+      [
+        1045.83,
+        1006
+      ],
+      [
+        2091.67,
+        1943
+      ],
+      [
+        3137.5,
+        2810
+      ],
+      [
+        4183.33,
+        3608
+      ],
+      [
+        5229.17,
+        4336
+      ],
+      [
+        6275.0,
+        5029
+      ],
+      [
+        7320.83,
+        5675
+      ],
+      [
+        8366.67,
+        6273
+      ],
+      [
+        9412.5,
+        6819
+      ],
+      [
+        10458.33,
+        7313
+      ],
+      [
+        11504.17,
+        7752
+      ],
+      [
+        12550.0,
+        7805
+      ],
+      [
+        13595.83,
+        7752
+      ],
+      [
+        14641.67,
+        7313
+      ],
+      [
+        15687.5,
+        6819
+      ],
+      [
+        16733.33,
+        6273
+      ],
+      [
+        17779.17,
+        5675
+      ],
+      [
+        18825.0,
+        5029
+      ],
+      [
+        19870.83,
+        4336
+      ],
+      [
+        20916.67,
+        3608
+      ],
+      [
+        21962.5,
+        2810
+      ],
+      [
+        23008.33,
+        1943
+      ],
+      [
+        24054.17,
+        1006
+      ],
+      [
+        25100.0,
+        0
+      ]
+    ],
     "total_length_m": "48.3",
     "pier_count": 2,
+    "pier_batter_1n": "10",
     "soffit_level": "102.075",
     "foundation_level": "97.40",
     "bearing_type": "NONE",
+    "camber_mm": 25,
     "id": "BR-I-2022-014"
   },
   "trace": [
@@ -45,6 +149,12 @@
       "why": "below the 3.5 m model carriageway floor \u2014 clamped"
     },
     {
+      "field": "pier_batter_1n",
+      "from": "None",
+      "to": "10",
+      "why": "IRC practice default 1:10 batter"
+    },
+    {
       "field": "soffit_level",
       "from": "None",
       "to": "102.075",
@@ -55,10 +165,15 @@
       "from": "None",
       "to": "97.40",
       "why": "OPEN embedment"
+    },
+    {
+      "field": "camber_mm",
+      "from": "None",
+      "to": "25",
+      "why": "L/1000 default, min 10 mm"
     }
   ],
   "warnings": [
-    "carriageway 2.0 m is below the 3.5 m model floor \u2014 clamped to 3.5 m (deviation stated, not hidden)",
-    "RCC_ARCH: approximation \u2014 span/depth governor not applied"
+    "carriageway 2.0 m is below the 3.5 m model floor \u2014 clamped to 3.5 m (deviation stated, not hidden)"
   ]
 }

@@ -30,6 +30,7 @@
     "foundation_level": "88.5",
     "bearing_type": "POT",
     "girders_per_deck": 4,
+    "camber_mm": 50,
     "id": "BR-I-2022-011"
   },
   "trace": [
@@ -56,6 +57,12 @@
       "from": "None",
       "to": "4",
       "why": "spacing vs carriageway"
+    },
+    {
+      "field": "camber_mm",
+      "from": "None",
+      "to": "50",
+      "why": "L/1000 default, min 10 mm"
     }
   ],
   "warnings": []

@@ -4,10 +4,10 @@ Corrected per the SS3 fidelity table.  These are the LOCKED baselines: an
 engineer overrides the FREE dials through :mod:`bridgecad_catalogue.resolve`,
 never by editing these cards.
 
-Three types (004, 014, 015) are carried as *approximations* because the engine
-has no multi-unit box-cell, open-spandrel arch schedule or precast-block arch
-primitive yet.  They are marked ``approximation: True`` with a ``fidelity_note``
-so the gap is reported instead of hidden.
+Types 004 (multi-unit box cell), 014 (open-spandrel arch) and 015 (precast-block
+arch) each carry their family primitive as card data — the cell lattice, the
+25-point soffit schedule and the block/strip counts — so the sheets draw them
+from the booklet values rather than falling back to a generic girder / slab.
 """
 from __future__ import annotations
 
@@ -79,9 +79,10 @@ PWD_CARDS: list[dict] = [
     },
     {
         # Booklet: 3-unit multi-cell box, 61.25 m, 5×5 m cells, no piers.
-        # The engine has no box-cell primitive yet, so the three units are
-        # carried as three "spans" that sum to 61.25 m and the deck soffit is
-        # pinned to the printed value (100.415).  Approximation only.
+        # The cell lattice is carried as real geometry now: the three unit
+        # cell-counts, the clear cell, the wall and the haunch build it, and
+        # the raft is a measured slab under it.  The three "spans" remain only
+        # so the plan/long-section chainage reads the printed 61.25 m.
         "id": "BR-I-2022-004",
         "title": "Raft Foundation + RCC Box Cell (Multi-unit)",
         "spans": "3-unit multi-cell, 61.25 m",
@@ -101,9 +102,18 @@ PWD_CARDS: list[dict] = [
         "freeboard_m": 0.0,
         "sbc_t_per_m2": 20,
         "submersible": True,
-        "approximation": True,
-        "fidelity_note": "no multi-unit box-cell primitive — three unit-lengths "
-        "stand in for the cell grid (5×5 m clear, 500 walls, 1100 raft)",
+        # --- Box-cell lattice (booklet 004) ---------------------------------
+        "unit_cell_counts": [4, 3, 4],
+        "cell_clear_m": 5.0,
+        "cell_wall_mm": 500,
+        "cell_haunch_mm": 500,
+        "unit_joint_mm": 100,
+        "raft_thickness_mm": 1100,
+        # No ``cutoff_wall_depth_m``: with this card's own levels (deck soffit
+        # 100.415, 5.0 m cell, 1.1 m raft → raft underside 94.315) the box is
+        # already 3.7 m below the 97.98 scour, so a cut-off wall is not
+        # required and QA-BX-CUTOFF-LEN reports that finding rather than a
+        # fabricated depth.
     },
     {
         "id": "BR-I-2022-005",
@@ -324,9 +334,9 @@ PWD_CARDS: list[dict] = [
         "submersible": False,
     },
     {
-        # Booklet: open-spandrel arch 11.3 + 25.7 + 11.3, 2.0 m cw, 31-point
-        # soffit schedule, y = 0.04955 x².  The schedule primitive is deferred,
-        # so the arch is drawn as a single-curve approximation.
+        # Booklet: open-spandrel arch 11.3 + 25.7 + 11.3, 2.0 m cw, 25-point
+        # soffit schedule, y = 0.04955 x² measured from the crown.  The schedule
+        # below is the printed table and drives the arch soffit directly.
         "id": "BR-I-2022-014",
         "title": "Open Fdn + RCC Open-Spandrel Arch (Pedestrian F.O.B.)",
         "spans": "11.3 + 25.7 + 11.3 m, 2.0 m carriageway",
@@ -346,13 +356,23 @@ PWD_CARDS: list[dict] = [
         "freeboard_m": 1.0,
         "sbc_t_per_m2": 30,
         "submersible": False,
-        "approximation": True,
-        "fidelity_note": "no arch coordinate-schedule primitive — span/depth "
-        "governor not applied; arch drawn as a single-curve approximation",
+        # --- Open-spandrel arch (booklet 014) --------------------------------
+        # The printed 25-row soffit schedule, X in mm from the springing and Y
+        # in mm above it.  X = 12550 is the crown at Y = 7805.
+        "arch_rise_mm": 7805,
+        "arch_ring_thickness_mm": 350,
+        "arch_schedule_mm": [
+            [0, 0], [1045.83, 1006], [2091.67, 1943], [3137.5, 2810], [4183.33, 3608],
+            [5229.17, 4336], [6275.0, 5029], [7320.83, 5675], [8366.67, 6273], [9412.5, 6819],
+            [10458.33, 7313], [11504.17, 7752], [12550.0, 7805], [13595.83, 7752],
+            [14641.67, 7313], [15687.5, 6819], [16733.33, 6273], [17779.17, 5675],
+            [18825.0, 5029], [19870.83, 4336], [20916.67, 3608], [21962.5, 2810],
+            [23008.33, 1943], [24054.17, 1006], [25100.0, 0],
+        ],
     },
     {
         # Booklet: precast block arch 61.94 m, 27 blocks, 3 strips, 10.0 m cw.
-        # Socket / strip-gap primitives are deferred.
+        # Block, socket and strip-gap primitives all draw now.
         "id": "BR-I-2022-015",
         "title": "Open Fdn + RCC Precast Block Arch (Vehicular)",
         "spans": "61.94 m, 10.0 m carriageway, 27 blocks",
@@ -372,9 +392,16 @@ PWD_CARDS: list[dict] = [
         "freeboard_m": 1.0,
         "sbc_t_per_m2": 27.233,
         "submersible": False,
-        "approximation": True,
-        "fidelity_note": "no precast-block / socket primitive — drawn as a "
-        "single-curve approximation",
+        # --- Precast block arch (booklet 015) --------------------------------
+        # 27 is the booklet's printed block count; the derivation in
+        # ``geometry.precast_arch.block_count`` returns 28 for this span and is
+        # only the fallback when no book value is given.
+        "arch_rise_mm": 1996,
+        "arch_ring_thickness_mm": 400,
+        "arch_strip_count": 3,
+        "arch_strip_gap_mm": 100,
+        "arch_block_count": 27,
+        "spandrel_wall_thickness_mm": 400,
     },
 ]
 

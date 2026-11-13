@@ -2128,3 +2128,32 @@ No changes this session.
 | 2026-11-13 19:10 | User prompt received |
 | 2026-11-13 19:12 | User prompt received |
 | 2026-11-13 19:13 | User prompt received |
+
+### Session — docs/*.md + docs/*.txt audit — 5 patches applied · 07:10
+
+- User requested "apply if due docs/*.md" and "apply if due docs/*.txt".
+- Read all 24 docs/*.md files + 1 docs/*.txt file.
+- Classified: 9 pure reference (no action), 15 instruction files.
+- Found **5 pending items**; applied all 5:
+
+| File | Patch | Applied to |
+|---|---|---|
+| PATCH_GUIDE.md §4 | DXF INSUNITS=4 (mm) | dxf_engine.py new_sheet() |
+| PATCH_GUIDE.md §6 | File size guard (empty / >50 MB) | app.py Drawing Gen + Export Bundle |
+| PATCH_GUIDE.md §7 | Exception UUID reference | app.py PackageGenerationError handler |
+| PATCH_GUIDE.md §9 | Filename injection — _safe_prefix() | app.py all ZIP filenames |
+| BRIDGE_GAD_STANDARDS Phase 3 §1 | generate_phase_two_package() wired | app.py Export Bundle tab |
+
+- Added `_safe_prefix()` helper to app.py.
+- Syntax verified: `py_compile` clean on both files.
+- All 5 patches confirmed in code via Python string search.
+- Committed: `5d5f99e` — "fix(docs,app): apply 5 pending items from docs/*.md audit" (3 files, 254 insertions)
+- Pushed: `f5b4693..5d5f99e  main -> main` ✅
+
+**docs/*.txt:** Only `requirements-docs.txt` found — pure reference, no action.
+
+**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+
+---
+| 2026-11-13 20:51 | User prompt received |
+| 2026-11-13 21:14 | User prompt received |

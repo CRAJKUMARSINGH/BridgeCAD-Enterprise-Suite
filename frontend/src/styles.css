@@ -187,6 +187,13 @@ select { appearance: none; background-image: linear-gradient(45deg, transparent 
 .boq-totals .grand { padding-top: 8px; border-top: 1px solid var(--line); color: #e7edf3; font-size: 12px; }
 .boq-totals .grand strong { color: var(--cyan); font-size: 12px; }
 
+/* ── Format & variants reference tables ────────────────────────────────── */
+.ref-table { width: 100%; margin: 4px 0 12px; border-collapse: collapse; font-size: 9px; }
+.ref-table th { text-align: left; padding: 5px 4px; color: #71818f; font: 500 8px "DM Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+.ref-table td { padding: 6px 4px; border-top: 1px solid rgba(210, 226, 235, .07); color: #a5b1b9; vertical-align: top; line-height: 1.5; }
+.ref-table td.ref-cls { white-space: nowrap; color: var(--cyan); font: 500 9px "DM Mono", monospace; }
+.ref-table td.ref-eg { color: #71818f; font: 8px "DM Mono", monospace; }
+
 @media (max-width: 1180px) {
   .workspace-grid { grid-template-columns: 1fr; }
   .right-rail { grid-template-columns: 1fr; align-items: start; }

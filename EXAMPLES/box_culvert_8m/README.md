@@ -4,8 +4,8 @@
 **Fixture ID:** `box_culvert_8m`  
 **Sheets generated:** 9 DXF  
 **Rendered PNGs:** 9  
-**PDF booklet:** [`box_culvert_8m_GAD_Booklet.pdf`](box_culvert_8m_GAD_Booklet.pdf) (2304 KB, 9 pages)  
-**Total DXF size:** 808 KB  
+**PDF booklet:** [`box_culvert_8m_GAD_Booklet.pdf`](box_culvert_8m_GAD_Booklet.pdf) (2267 KB, 9 pages)  
+**Total DXF size:** 785 KB  
 **Standard:** IRC 5 / IRC 6 / IRC 21 / IRC 78 / IRC SP:55 / MoRTH 2024-25
 
 ## Sheets

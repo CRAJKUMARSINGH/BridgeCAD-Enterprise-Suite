@@ -47,16 +47,20 @@ class PackageGenerationError(RuntimeError):
 
 # Each entry: (sheet_no, module_attr, filename_stem, default_scale)
 # A ``None`` default means "let the sheet pick its own scale": the plan (1),
-# the long section (2) and the end elevations (8) choose the largest rung of
-# ``fit.LADDER`` that fits their view, so the scale printed in their title
-# block is the scale they were drawn at. A fixed default there produced a
-# caption that disagreed with the geometry on every long bridge.
+# the long section (2), the cross section (3), the pier & abutment details (5)
+# and the end elevations (8) each resolve their own rung — sheets 1/2/3/8 fit
+# the largest rung of ``fit.LADDER`` that fits the view, sheet 5 uses the rung
+# its pinned layout was designed at — and print that rung in the title block.
+# A fixed default there produced a caption that disagreed with the geometry.
+# Sheet 4 (foundation) is pinned at 1:50 and prints it. Sheets 6, 7 and 9 are
+# schedules, tabulated rather than plotted: their title blocks honestly read
+# NTS, so the entry here is a nominal placeholder the sheet ignores.
 _SHEET_MANIFEST = [
     (1, "sheet1_plan", "Sheet1_Plan", None),
     (2, "sheet2_long_section", "Sheet2_LongSection", None),
-    (3, "sheet3_cross_section", "Sheet3_CrossSection", 50),
+    (3, "sheet3_cross_section", "Sheet3_CrossSection", None),
     (4, "sheet4_foundation", "Sheet4_Foundation", 50),
-    (5, "sheet5_pier_abutment_details", "Sheet5_PierAbutment", 50),
+    (5, "sheet5_pier_abutment_details", "Sheet5_PierAbutment", None),
     (6, "sheet6_bearings_joints", "Sheet6_BearingsJoints", 20),
     (7, "sheet7_bill_of_quantities", "Sheet7_BOQ", 1),
     (8, "sheet8_side_elevations", "Sheet8_SideElevations", None),

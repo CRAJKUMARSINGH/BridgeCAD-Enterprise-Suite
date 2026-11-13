@@ -12,7 +12,8 @@ import { SUPERSTRUCTURE_TYPES, STANDARD_PRESETS, presetBundle, typeById, applySu
 import { buildBoq, formatINR } from "./sheets/boq";
 
 type BackendState = "checking" | "online" | "demo" | "offline";
-type DockTab = "geometry" | "checks" | "boq" | "export";
+type DockTab = "geometry" | "variants" | "checks" | "boq" | "export";
+type OutputFormat = "dxf" | "pdf" | "png";
 
 const initialProject: ProjectState = {
   name: "Yogendra Borse Bridge",
@@ -40,13 +41,46 @@ const DETAIL_FIELDS: Array<{ key: string; label: string; step?: string }> = [
   { key: "foundingRl", label: "Founding level RL", step: "0.1" },
 ];
 
-// The sidebar nav and the right-rail dock are the same four destinations, so a
-// click in either place lands on the same panel — no dead nav entries.
+// The sidebar nav and the right-rail dock are the same destinations, so a click
+// in either place lands on the same panel — no dead nav entries.
 const NAV: Array<{ id: DockTab; label: string; icon: string }> = [
   { id: "geometry", label: "Drawing workspace", icon: "▧" },
+  { id: "variants", label: "Format & variants", icon: "🎛" },
   { id: "checks", label: "IRC / MoRTH checks", icon: "✓" },
   { id: "boq", label: "Bill of quantities", icon: "₹" },
   { id: "export", label: "Export package", icon: "⇩" },
+];
+
+// Output formats the /predict endpoint actually converts to; the format chip
+// selection is passed straight through as ?output_format=.
+const OUTPUT_FORMATS: Array<{ id: OutputFormat; label: string; note: string }> = [
+  { id: "dxf", label: "DXF", note: "Full 9-sheet CAD package — open in AutoCAD, BricsCAD or LibreCAD." },
+  { id: "pdf", label: "PDF", note: "Issued set, converted from the DXF river-side by the Python engine." },
+  { id: "png", label: "PNG", note: "Raster preview for checking geometry without a CAD viewer." },
+];
+
+// IRC SP:55 rungs. "Auto" lets the ladder pick the largest rung that keeps
+// text ≥ 2.5 mm and annotation gaps ≥ 8 mm per pier.
+const PLOT_SCALES: Array<{ id: string; label: string }> = [
+  { id: "auto", label: "Auto" },
+  { id: "50", label: "1:50" },
+  { id: "100", label: "1:100" },
+  { id: "200", label: "1:200" },
+  { id: "500", label: "1:500" },
+];
+
+const VARIABLE_CLASSES: Array<{ cls: string; meaning: string; examples: string }> = [
+  { cls: "FREE", meaning: "Engineer's dials — full range, bounded by IRC clauses", examples: "span_length_m, pier_height_m, skew_deg, carriageway_width" },
+  { cls: "LOCKED", meaning: "Booklet identity — fixed for the standard type", examples: "foundation_type, superstructure_type, bearing_type" },
+  { cls: "DERIVED", meaning: "Auto-calculated — never typed by hand", examples: "total_length_m, soffit_level, pier_count, bearing_type" },
+];
+
+const DRAWING_SETS: Array<{ purpose: string; set: string }> = [
+  { purpose: "Tender submission", set: "Full 9-sheet DXF + PDF" },
+  { purpose: "Site reference", set: "Sheets 1 (plan) + 2 (long section) + 5 (pier/abutment)" },
+  { purpose: "Design check", set: "Sheets 3 (cross-section) + 5 + 8 (end elevations)" },
+  { purpose: "BOQ pricing", set: "Sheet 7 (BOQ) + boq.xlsx" },
+  { purpose: "QA review", set: "qa.html + Sheet 7" },
 ];
 
 function App() {
@@ -60,9 +94,10 @@ function App() {
   const [backend, setBackend] = useState<BackendState>("checking");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
-  const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
-  const [generatedPdfUrl, setGeneratedPdfUrl] = useState<string | null>(null);
+  const [generated, setGenerated] = useState<Array<{ format: OutputFormat; url: string; filename: string }>>([]);
   const [notice, setNotice] = useState("Detail sheets 04 and 05 render locally — no Python engine required.");
+  const [outputFormat, setOutputFormat] = useState<OutputFormat>("dxf");
+  const [plotScale, setPlotScale] = useState<string>("auto");
   const [theme, setTheme] = useState<SheetTheme>(INK);
   const [zoom, setZoom] = useState<number | "fit">("fit");
 
@@ -162,25 +197,30 @@ function App() {
       return;
     }
     setBusy(true);
-    setNotice("Generating the coordinated GAD sheet…");
+    setNotice(`Generating ${outputFormat.toUpperCase()} output…`);
     const formData = new FormData();
     formData.append("excel_file", selectedFile);
+    const query = new URLSearchParams({ output_format: outputFormat });
+    // Only pin a scale when the engineer overrides Auto; the Python generator
+    // resolves the IRC SP:55 ladder itself when the parameter is absent.
+    if (plotScale !== "auto") query.set("scale", plotScale);
     try {
-      const dxfResponse = await fetch("/api/predict?output_format=dxf", { method: "POST", body: formData });
-      if (!dxfResponse.ok) throw new Error("DXF generation failed");
-      const dxfBlob = await dxfResponse.blob();
-      if (generatedUrl) URL.revokeObjectURL(generatedUrl);
-      setGeneratedUrl(URL.createObjectURL(dxfBlob));
-
-      setNotice("Generating PDF output…");
-      const pdfResponse = await fetch("/api/predict?output_format=pdf", { method: "POST", body: formData });
-      if (!pdfResponse.ok) throw new Error("PDF generation failed");
-      const pdfBlob = await pdfResponse.blob();
-      if (generatedPdfUrl) URL.revokeObjectURL(generatedPdfUrl);
-      setGeneratedPdfUrl(URL.createObjectURL(pdfBlob));
-
+      const response = await fetch(`/api/predict?${query.toString()}`, { method: "POST", body: formData });
+      if (!response.ok) throw new Error("Generation failed");
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      setGenerated((current) => {
+        // Supersede any earlier artifact of the same format so the object URL
+        // does not leak and the panel never offers two versions of one format.
+        current.filter((entry) => entry.format === outputFormat).forEach((entry) => URL.revokeObjectURL(entry.url));
+        return [
+          ...current.filter((entry) => entry.format !== outputFormat),
+          { format: outputFormat, url, filename: `${project.number}.${outputFormat}` },
+        ];
+      });
       setBackend("online");
-      setNotice("DXF and PDF generated successfully. Download them from the export panel.");
+      const scaleLabel = plotScale === "auto" ? "Auto (IRC SP:55 ladder)" : `1:${plotScale}`;
+      setNotice(`${outputFormat.toUpperCase()} generated at plot scale ${scaleLabel}. Download it from the export panel.`);
     } catch {
       setBackend("demo");
       setNotice("Python engine offline — sheets 04/05 still render locally; use the local DXF button.");
@@ -427,6 +467,99 @@ function App() {
                 </section>
               )}
 
+              {dock === "variants" && (
+                <section className="dock-body">
+                  <div className="panel-heading compact">
+                    <div><span className="eyebrow">DELIVERABLE</span><h2>Output format</h2></div>
+                  </div>
+                  <div className="chip-row">
+                    {OUTPUT_FORMATS.map((format) => (
+                      <button
+                        key={format.id}
+                        type="button"
+                        title={format.note}
+                        className={outputFormat === format.id ? "chip-button on" : "chip-button"}
+                        onClick={() => setOutputFormat(format.id)}
+                      >
+                        {format.label}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="notice">{OUTPUT_FORMATS.find((f) => f.id === outputFormat)?.note}</p>
+
+                  <div className="panel-heading compact">
+                    <div><span className="eyebrow">LAYOUT</span><h2>Plot scale</h2></div>
+                  </div>
+                  <div className="chip-row">
+                    {PLOT_SCALES.map((scale) => (
+                      <button
+                        key={scale.id}
+                        type="button"
+                        className={plotScale === scale.id ? "chip-button on" : "chip-button"}
+                        onClick={() => setPlotScale(scale.id)}
+                      >
+                        {scale.label}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="notice">
+                    {plotScale === "auto"
+                      ? "Auto picks the largest IRC SP:55 rung (50 / 75 / 100 / 150 / 200 / 250 / 300 / 400 / 500) that keeps text ≥ 2.5 mm and annotation gaps ≥ 8 mm per pier. A 270 m deck falls to 1:500 and splits Sheet 2 into two bands with match-lines."
+                      : `Pinned to 1:${plotScale}. Sent to the generator as ?scale=${plotScale}; a workbook that pins SCALE1 / SCALE2 still takes precedence.`}
+                  </p>
+                  {backend !== "online" && (
+                    <div className="callout">
+                      <span className="callout-mark">i</span>
+                      The Python engine is {backend === "checking" ? "still being probed" : "not reachable from this deployment"}. Format and scale are recorded with the request; on a static deploy set <strong>FASTAPI_URL</strong> or use the review catalogue.
+                    </div>
+                  )}
+
+                  <div className="panel-heading compact">
+                    <div><span className="eyebrow">CONTROLS</span><h2>Vary the variables</h2></div>
+                  </div>
+                  <p className="notice">
+                    The 15 Maharashtra PWD standard types can all be re-drawn with your own parameters. Three classes of variable decide what you may change.
+                  </p>
+                  <table className="ref-table">
+                    <thead><tr><th>Class</th><th>Meaning</th><th>Examples</th></tr></thead>
+                    <tbody>
+                      {VARIABLE_CLASSES.map((row) => (
+                        <tr key={row.cls}>
+                          <td className="ref-cls">{row.cls}</td>
+                          <td>{row.meaning}</td>
+                          <td className="ref-eg">{row.examples}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <button className="button button-outline" type="button" onClick={() => setDock("geometry")}>
+                    Open the parameter dials →
+                  </button>
+
+                  <div className="panel-heading compact">
+                    <div><span className="eyebrow">GUIDANCE</span><h2>Which drawing set for which purpose</h2></div>
+                  </div>
+                  <table className="ref-table">
+                    <thead><tr><th>Purpose</th><th>Recommended set</th></tr></thead>
+                    <tbody>
+                      {DRAWING_SETS.map((row) => (
+                        <tr key={row.purpose}>
+                          <td className="ref-cls">{row.purpose}</td>
+                          <td>{row.set}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  <div className="callout">
+                    <span className="callout-mark">i</span>
+                    <span>
+                      <strong>Fidelity note — 12 of 15 types reproduce the booklet exactly.</strong> Types 004 (RCC box cell), 014 (RCC arch) and 015 (precast block arch) are declared approximations: they are drawn as simplified primitives and the engine flags this with <strong>approximation: true</strong> plus a fidelity note rather than hiding it.
+                    </span>
+                  </div>
+                </section>
+              )}
+
               {dock === "checks" && (
                 <section className="dock-body">
                   <div className="panel-heading compact">
@@ -522,8 +655,14 @@ function App() {
                     <div><span className="eyebrow">DELIVERABLES</span><h2>Export package</h2></div>
                   </div>
                   <div className="export-actions">
-                    {generatedUrl && <a className="button button-outline" href={generatedUrl} download={`${project.number}.dxf`}>Download generated DXF</a>}
-                    {generatedPdfUrl && <a className="button button-outline" href={generatedPdfUrl} download={`${project.number}.pdf`}>Download generated PDF</a>}
+                    {generated.map((artifact) => (
+                      <a key={artifact.format} className="button button-outline" href={artifact.url} download={artifact.filename}>
+                        Download {artifact.format.toUpperCase()}
+                      </a>
+                    ))}
+                    {generated.length === 0 && (
+                      <p className="notice">No engine output yet — pick a format in the <strong>Format &amp; variants</strong> dock and generate.</p>
+                    )}
                     <button className="button button-outline" onClick={downloadLocalDxf} type="button">Download local DXF</button>
                     <a className="button button-outline" href="/bridge-catalogue-11.pdf" target="_blank" rel="noreferrer">Open 11-bridge PDF catalogue ↗</a>
                     <a className="button button-outline" href="/samples/sample_input.xlsx" download>Download sample workbook</a>

@@ -150,3 +150,29 @@ construction."*
 - [ ] Database backed up
 - [ ] `python rc1_smoke.py` green on the release commit
 - [ ] Volume smoke test run (see *Capacity / volume smoke test (proxy)*)
+
+
+## Browser landing page and Netlify frontend
+
+A Netlify static frontend does not execute Python CAD generation. Deploy the
+existing backend separately and configure the actual frontend's API base URL
+or same-origin proxy. Verify its build command and output directory rather
+than copying example values without inspection. Never place secrets in
+frontend `VITE_` variables.
+
+Expose drawing selection, sample scenario, existing-workbook import, layout
+choice, variable help, verification status and the manual from the landing
+page. Disable unsupported drawing/export choices and disconnected Generate
+controls. Preserve approximation warnings and show job failures.
+
+Before release, test desktop, mobile and keyboard journeys through a real
+staging backend: choose implemented drawing, change inputs, validate, preview,
+generate, download and inspect manifest. Retain frontend/backend commit IDs,
+fixtures, logs, per-view reference acceptance and rollback targets. Configure
+CORS, health checks, request/job limits and authenticated artifact downloads.
+The supplied P.W.D. reference is marked in-house use only; keep it private.
+No Netlify deployment or complete browser-generation journey was executed in
+this audit. The companion Site publication failed at the hosting provider.
+
+See [the supplementary workflow guide](BRIDGECAD_SUPPLEMENTARY_PATCH.md) and
+[the uploaded-instruction ledger](V_INSTRUCTIONS_APPLIED.md).

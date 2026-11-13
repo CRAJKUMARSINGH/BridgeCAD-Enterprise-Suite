@@ -1,0 +1,292 @@
+{
+  "source": "Maharashtra PWD booklet, C.E. Designs letter No. 2473 dt. 31.12.2022 — 'Booklet of General Arrangement Drawings for Various Types of Bridges'. Cross-checked against ATTACHED ASSETS/GENERAL ARRANGEMENT DRAWINGS.pdf.",
+  "note": "Per-type expectations so a PASS is a claim about the drawing, not an entity-count floor. 'superstructure_member' is the SuperstructureType the booklet family must resolve to; 'plan.must_contain' / 'plan.must_not_contain' are the layers the PLAN sheet must and must not carry; 'foundation.*' likewise for the FOUNDATION sheet. 'approximation' is retained as a schema key but is false for every type: 004 (box-cell lattice), 014 (25-point arch schedule) and 015 (precast block arch) now carry their family primitive and are drawn from it.",
+  "types": {
+    "BR-I-2022-001": {
+      "title": "Open Foundation + PCC Pier + Solid Slab",
+      "spans": [10.0, 10.0, 10.0, 10.0],
+      "total_length_m": 40.0,
+      "carriageway_width": 7.5,
+      "skew_deg": 0,
+      "foundation_type": "OPEN",
+      "superstructure_type": "RCC_SOLID_SLAB",
+      "superstructure_member": "SOLID_SLAB",
+      "approximation": false,
+      "plan": {
+        "must_contain": ["STRUC-OUTLINE", "SUPER-DECK", "SUB-ABUT", "SUB-DIRT-WALL", "SUB-PIER", "SUB-BEARING"],
+        "must_not_contain": ["FOUND-PILE", "FOUND-WELL"]
+      },
+      "foundation": {
+        "must_contain": [],
+        "must_not_contain": ["FOUND-PILE", "FOUND-WELL"]
+      }
+    },
+    "BR-I-2022-002": {
+      "title": "Open Foundation + RCC Pier + Solid Slab",
+      "spans": [10.0, 10.0, 10.0, 10.0],
+      "total_length_m": 40.0,
+      "carriageway_width": 7.5,
+      "skew_deg": 0,
+      "foundation_type": "OPEN",
+      "superstructure_type": "RCC_SOLID_SLAB",
+      "superstructure_member": "SOLID_SLAB",
+      "approximation": false,
+      "plan": {
+        "must_contain": ["STRUC-OUTLINE", "SUPER-DECK", "SUB-ABUT", "SUB-DIRT-WALL", "SUB-PIER", "SUB-BEARING"],
+        "must_not_contain": ["FOUND-PILE", "FOUND-WELL"]
+      },
+      "foundation": {
+        "must_contain": [],
+        "must_not_contain": ["FOUND-PILE", "FOUND-WELL"]
+      }
+    },
+    "BR-I-2022-003": {
+      "title": "Raft Foundation + RCC Pier + Solid Slab",
+      "spans": [10.0, 10.0, 10.0, 10.0, 10.0],
+      "total_length_m": 50.0,
+      "carriageway_width": 7.5,
+      "skew_deg": 0,
+      "foundation_type": "RAFT",
+      "superstructure_type": "RCC_SOLID_SLAB",
+      "superstructure_member": "SOLID_SLAB",
+      "approximation": false,
+      "plan": {
+        "must_contain": ["STRUC-OUTLINE", "SUPER-DECK", "SUB-ABUT", "SUB-DIRT-WALL", "SUB-PIER", "SUB-BEARING"],
+        "must_not_contain": ["FOUND-PILE", "FOUND-WELL"]
+      },
+      "foundation": {
+        "must_contain": [],
+        "must_not_contain": ["FOUND-PILE", "FOUND-WELL"]
+      }
+    },
+    "BR-I-2022-004": {
+      "title": "Raft Foundation + RCC Box Cell (Multi-unit)",
+      "spans": [22.2, 16.8, 22.25],
+      "total_length_m": 61.25,
+      "carriageway_width": 7.5,
+      "skew_deg": 0,
+      "foundation_type": "RAFT",
+      "superstructure_type": "RCC_BOX_CELL",
+      "superstructure_member": "BOX_CELL_MULTI",
+      "approximation": false,
+      "plan": {
+        "must_contain": ["STRUC-OUTLINE", "SUPER-DECK", "SUB-ABUT", "SUB-DIRT-WALL"],
+        "must_not_contain": ["SUB-PIER", "SUB-BEARING", "FOUND-PILE", "FOUND-WELL"]
+      },
+      "foundation": {
+        "must_contain": [],
+        "must_not_contain": ["FOUND-PILE", "FOUND-WELL"]
+      }
+    },
+    "BR-I-2022-005": {
+      "title": "RCC Portal + Open Foundation (Submersible)",
+      "spans": [15.0, 15.0, 15.0, 15.0, 15.0, 15.0],
+      "total_length_m": 90.0,
+      "carriageway_width": 7.5,
+      "skew_deg": 0,
+      "foundation_type": "OPEN",
+      "superstructure_type": "RCC_PORTAL",
+      "superstructure_member": "RCC_FRAME_CULVERT",
+      "approximation": false,
+      "plan": {
+        "must_contain": ["STRUC-OUTLINE", "SUPER-DECK", "SUB-ABUT", "SUB-DIRT-WALL", "SUB-PIER"],
+        "must_not_contain": ["SUB-BEARING", "FOUND-PILE", "FOUND-WELL"]
+      },
+      "foundation": {
+        "must_contain": [],
+        "must_not_contain": ["FOUND-PILE", "FOUND-WELL"]
+      }
+    },
+    "BR-I-2022-006": {
+      "title": "Open Fdn + RCC Pier + Pier Cap + Solid Slab (Skew 20 deg)",
+      "spans": [10.0, 10.0, 10.0, 10.0, 10.0],
+      "total_length_m": 50.0,
+      "carriageway_width": 7.5,
+      "skew_deg": 20,
+      "foundation_type": "OPEN",
+      "superstructure_type": "RCC_SOLID_SLAB",
+      "superstructure_member": "SOLID_SLAB",
+      "approximation": false,
+      "plan": {
+        "must_contain": ["STRUC-OUTLINE", "SUPER-DECK", "SUB-ABUT", "SUB-DIRT-WALL", "SUB-PIER", "SUB-BEARING"],
+        "must_not_contain": ["FOUND-PILE", "FOUND-WELL"]
+      },
+      "foundation": {
+        "must_contain": [],
+        "must_not_contain": ["FOUND-PILE", "FOUND-WELL"]
+      }
+    },
+    "BR-I-2022-007": {
+      "title": "Open Fdn + RCC Pier + RCC 3-Girder (T-Beam)",
+      "spans": [15.0, 15.0, 15.0, 15.0],
+      "total_length_m": 60.0,
+      "carriageway_width": 7.5,
+      "skew_deg": 0,
+      "foundation_type": "OPEN",
+      "superstructure_type": "RCC_T_BEAM",
+      "superstructure_member": "RCC_TBEAM",
+      "approximation": false,
+      "plan": {
+        "must_contain": ["STRUC-OUTLINE", "SUPER-DECK", "SUB-ABUT", "SUB-DIRT-WALL", "SUB-PIER", "SUB-BEARING"],
+        "must_not_contain": ["FOUND-PILE", "FOUND-WELL"]
+      },
+      "foundation": {
+        "must_contain": [],
+        "must_not_contain": ["FOUND-PILE", "FOUND-WELL"]
+      }
+    },
+    "BR-I-2022-008": {
+      "title": "Pile Fdn + RCC Pier + RCC 3-Girder (T-Beam)",
+      "spans": [25.0, 25.0, 25.0],
+      "total_length_m": 75.0,
+      "carriageway_width": 7.5,
+      "skew_deg": 0,
+      "foundation_type": "PILE",
+      "superstructure_type": "RCC_T_BEAM",
+      "superstructure_member": "RCC_TBEAM",
+      "approximation": false,
+      "plan": {
+        "must_contain": ["STRUC-OUTLINE", "SUPER-DECK", "SUB-ABUT", "SUB-DIRT-WALL", "SUB-PIER", "SUB-BEARING"],
+        "must_not_contain": ["FOUND-WELL"]
+      },
+      "foundation": {
+        "must_contain": ["FOUND-PILE"],
+        "must_not_contain": ["FOUND-WELL"]
+      }
+    },
+    "BR-I-2022-009": {
+      "title": "Open Fdn + RCC Pier + PSC 4-Girder (with footpath)",
+      "spans": [25.0, 25.0, 25.0, 25.0],
+      "total_length_m": 100.0,
+      "carriageway_width": 7.5,
+      "skew_deg": 0,
+      "foundation_type": "OPEN",
+      "superstructure_type": "PSC_I_GIRDER",
+      "superstructure_member": "PSC_IGIRDER",
+      "approximation": false,
+      "plan": {
+        "must_contain": ["STRUC-OUTLINE", "SUPER-DECK", "SUB-ABUT", "SUB-DIRT-WALL", "SUB-PIER", "SUB-BEARING"],
+        "must_not_contain": ["FOUND-PILE", "FOUND-WELL"]
+      },
+      "foundation": {
+        "must_contain": [],
+        "must_not_contain": ["FOUND-PILE", "FOUND-WELL"]
+      }
+    },
+    "BR-I-2022-010": {
+      "title": "Pile Fdn + RCC Pier + PSC 4-Girder (9 spans, 270 m)",
+      "spans": [30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0],
+      "total_length_m": 270.0,
+      "carriageway_width": 7.5,
+      "skew_deg": 0,
+      "foundation_type": "PILE",
+      "superstructure_type": "PSC_I_GIRDER",
+      "superstructure_member": "PSC_IGIRDER",
+      "approximation": false,
+      "plan": {
+        "must_contain": ["STRUC-OUTLINE", "SUPER-DECK", "SUB-ABUT", "SUB-DIRT-WALL", "SUB-PIER", "SUB-BEARING"],
+        "must_not_contain": ["FOUND-WELL"]
+      },
+      "foundation": {
+        "must_contain": ["FOUND-PILE"],
+        "must_not_contain": ["FOUND-WELL"]
+      }
+    },
+    "BR-I-2022-011": {
+      "title": "Open/Well Fdn + RCC Pier + PSC Box (Navigational)",
+      "spans": [35.0, 50.0, 35.0],
+      "total_length_m": 120.0,
+      "carriageway_width": 7.5,
+      "skew_deg": 0,
+      "foundation_type": "WELL",
+      "superstructure_type": "PSC_BOX",
+      "superstructure_member": "PSC_BOX_GIRDER",
+      "approximation": false,
+      "plan": {
+        "must_contain": ["STRUC-OUTLINE", "SUPER-DECK", "SUB-ABUT", "SUB-DIRT-WALL", "SUB-PIER", "SUB-BEARING"],
+        "must_not_contain": ["FOUND-PILE"]
+      },
+      "foundation": {
+        "must_contain": ["FOUND-WELL"],
+        "must_not_contain": ["FOUND-PILE"]
+      }
+    },
+    "BR-I-2022-012": {
+      "title": "Pile Fdn + RCC Pier + PSC Box",
+      "spans": [32.5, 32.5],
+      "total_length_m": 65.0,
+      "carriageway_width": 7.5,
+      "skew_deg": 0,
+      "foundation_type": "PILE",
+      "superstructure_type": "PSC_BOX",
+      "superstructure_member": "PSC_BOX_GIRDER",
+      "approximation": false,
+      "plan": {
+        "must_contain": ["STRUC-OUTLINE", "SUPER-DECK", "SUB-ABUT", "SUB-DIRT-WALL", "SUB-PIER", "SUB-BEARING"],
+        "must_not_contain": ["FOUND-WELL"]
+      },
+      "foundation": {
+        "must_contain": ["FOUND-PILE"],
+        "must_not_contain": ["FOUND-WELL"]
+      }
+    },
+    "BR-I-2022-013": {
+      "title": "Well Fdn + RCC Pier + PSC Box",
+      "spans": [47.5, 47.5],
+      "total_length_m": 95.0,
+      "carriageway_width": 7.5,
+      "skew_deg": 0,
+      "foundation_type": "WELL",
+      "superstructure_type": "PSC_BOX",
+      "superstructure_member": "PSC_BOX_GIRDER",
+      "approximation": false,
+      "plan": {
+        "must_contain": ["STRUC-OUTLINE", "SUPER-DECK", "SUB-ABUT", "SUB-DIRT-WALL", "SUB-PIER", "SUB-BEARING"],
+        "must_not_contain": ["FOUND-PILE"]
+      },
+      "foundation": {
+        "must_contain": ["FOUND-WELL"],
+        "must_not_contain": ["FOUND-PILE"]
+      }
+    },
+    "BR-I-2022-014": {
+      "title": "Open Fdn + RCC Open-Spandrel Arch (Pedestrian F.O.B.)",
+      "spans": [11.3, 25.7, 11.3],
+      "total_length_m": 48.3,
+      "carriageway_width": 2.0,
+      "model_carriageway_width": 3.5,
+      "skew_deg": 0,
+      "foundation_type": "OPEN",
+      "superstructure_type": "RCC_ARCH",
+      "superstructure_member": "RCC_ARCH_OPEN_SPANDREL",
+      "approximation": false,
+      "plan": {
+        "must_contain": ["STRUC-OUTLINE", "SUPER-DECK", "SUB-ABUT", "SUB-DIRT-WALL", "SUB-PIER"],
+        "must_not_contain": ["SUB-BEARING", "FOUND-PILE", "FOUND-WELL"]
+      },
+      "foundation": {
+        "must_contain": [],
+        "must_not_contain": ["FOUND-PILE", "FOUND-WELL"]
+      }
+    },
+    "BR-I-2022-015": {
+      "title": "Open Fdn + RCC Precast Block Arch (Vehicular)",
+      "spans": [61.94],
+      "total_length_m": 61.94,
+      "carriageway_width": 10.0,
+      "skew_deg": 0,
+      "foundation_type": "OPEN",
+      "superstructure_type": "RCC_ARCH",
+      "superstructure_member": "PRECAST_ARCH",
+      "approximation": false,
+      "plan": {
+        "must_contain": ["STRUC-OUTLINE", "SUPER-DECK", "SUB-ABUT", "SUB-DIRT-WALL"],
+        "must_not_contain": ["SUB-PIER", "SUB-BEARING", "FOUND-PILE", "FOUND-WELL"]
+      },
+      "foundation": {
+        "must_contain": [],
+        "must_not_contain": ["FOUND-PILE", "FOUND-WELL"]
+      }
+    }
+  }
+}

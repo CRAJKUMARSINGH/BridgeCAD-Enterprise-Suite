@@ -1044,18 +1044,31 @@ class Superstructure(BaseModel):
     )
     # --- SS3 arch-family schedules -------------------------------------------
     # Read by the drawing-audit rows QA-AR-SCHEDULE-CLOSED / QA-AR-RIB-ON-CURVE /
-    # QA-AR-PARABOLA-DEVIATION / QA-PA-STRIP-GAP-100. They are declared here but
-    # left unset until the arch primitives that emit them land; a row whose
-    # parameter is absent reports "not evaluable" rather than a clean pass.
-    arch_schedule_mm: list[tuple[int, int]] | None = Field(
+    # QA-AR-PARABOLA-DEVIATION / QA-PA-STRIP-GAP-100 and drawn by sheet 2.  A
+    # card that does not carry them leaves them unset, and a row whose parameter
+    # is absent reports "not evaluable" rather than a clean pass.
+    arch_schedule_mm: list[tuple[float, float]] | None = Field(
         default=None,
-        description="Arch soffit coordinate schedule (x, y) in mm, origin at springing",
+        description="Arch soffit coordinate schedule (x, y) in mm, x measured "
+        "from the springing.  Floats: the booklet's pitch is 1045.833 mm.",
     )
     arch_rise_mm: int | None = Field(
         default=None, description="Arch rise H in mm, springing to crown soffit"
     )
     arch_strip_gap_mm: int | None = Field(
         default=None, description="Precast-arch strip joint gap in mm (booklet 015: 100)"
+    )
+    arch_ring_thickness_mm: int | None = DI(
+        "Arch rib / ring thickness, mm (014: 350, 015: 400)", ge=250, le=800
+    )
+    arch_strip_count: int | None = DI(
+        "Precast-arch strips across the width (booklet 015: 3)", ge=1, le=6
+    )
+    arch_block_count: int | None = DI(
+        "Precast-arch voussoir blocks along the arc (booklet 015: 27)", ge=5, le=60
+    )
+    spandrel_wall_thickness_mm: int | None = DI(
+        "Open-spandrel wall thickness, mm (booklet 015: 400)", ge=200, le=800
     )
     truss_configuration: TrussConfigurationClass | None = Field(
         default=None,

@@ -67,6 +67,8 @@ def _draw(msp: Any, project: Any) -> None:
         drawing_no=getattr(pm, "drawing_no", "GAD-007") or "GAD-007",
         drawing_title="ABSTRACT BILL OF QUANTITIES",
         revision=getattr(getattr(pm, "revision", None), "name", "R0") or "R0",
+        # A bill of quantities is a schedule, not a plotted view.
+        scale_str="NTS",
         sheet_no="7",
         total_sheets="9",
     )

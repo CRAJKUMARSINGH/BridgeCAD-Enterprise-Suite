@@ -317,16 +317,20 @@ def _check_completeness(sheets: list[Path]) -> list[str]:
     return issues
 
 
-def _render_pngs(sheets: list[Path], out_dir: Path, dpi: int = 150) -> list[str]:
+def _render_pngs(sheets: list[Path], out_dir: Path, dpi: int = 150,
+                 render_paper: str = "A2", render_orientation: str = "landscape") -> list[str]:
     """Return rendering failures, including decoded but entirely blank images."""
-    from bridgecad_draw.engines.png_engine import render_png
+    from bridgecad_draw.engines.png_engine import render_png, paper_size_inches
     from PIL import Image, ImageChops
 
     issues = []
     for s in sheets:
         png_out = out_dir / (s.stem + ".png")
         try:
-            render_png(s, png_out, dpi=dpi)
+            if render_paper == "A2" and render_orientation == "landscape":
+                render_png(s, png_out, dpi=dpi)
+            else:
+                render_png(s, png_out, dpi=dpi, size_in=paper_size_inches(render_paper, render_orientation))
             with Image.open(png_out) as image:
                 rgba = image.convert("RGBA")
                 rgb = Image.new("RGBA", rgba.size, "white")
@@ -402,7 +406,8 @@ def _canonicalise(sheets: list[Path]) -> None:
 
 
 def generate_one(params: dict, out_root: Path,
-                 label: str | None = None) -> tuple[str, bool, str]:
+                 label: str | None = None, *, render_paper: str = "A2",
+                 render_orientation: str = "landscape") -> tuple[str, bool, str]:
     """Generate one variant into ``out_root/<label>``.
 
     Returns ``(label, success, message)``.
@@ -437,11 +442,12 @@ def generate_one(params: dict, out_root: Path,
     render_issues = []
     skipped = os.getenv("SKIP_PNG") == "1"
     if not skipped:
-        render_issues = _render_pngs(sheets, out_dir)
+        render_issues = _render_pngs(sheets, out_dir, render_paper=render_paper, render_orientation=render_orientation)
         issues.extend(render_issues)
     (out_dir / "render-status.json").write_text(
         json.dumps({"png": "skipped" if skipped else ("failed" if render_issues else "nonblank"),
-                    "render_issues": render_issues, "reference_fidelity": "not_verified"}, indent=2),
+                    "render_issues": render_issues, "render_paper": render_paper,
+                    "render_orientation": render_orientation, "reference_fidelity": "not_verified"}, indent=2),
         encoding="utf-8",
     )
     dxf_kb = sum(s.stat().st_size for s in sheets) // 1024
@@ -482,6 +488,10 @@ def main(argv: list[str] | None = None) -> int:
                     help="allow LOCKED (booklet identity) edits")
     ap.add_argument("--dry-run", action="store_true",
                     help="resolve and print the variants, generate nothing")
+    ap.add_argument("--render-paper", choices=["A0", "A1", "A2", "A3", "A4"], default="A2",
+                    help="PNG output media only; does not change DXF layout/scale")
+    ap.add_argument("--render-orientation", choices=["landscape", "portrait"], default="landscape",
+                    help="PNG output orientation only")
     a = ap.parse_args(argv)
 
     cards = registry.load()
@@ -523,7 +533,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"\n  dry-run: {len(jobs)} variant(s) resolved, nothing written.")
         return 1 if rejected else 0
 
-    root = SWEEP_ROOT if (a.set or a.sweep) else OUTPUT_ROOT
+    root = SWEEP_ROOT if (a.set or a.sweep or a.render_paper != "A2" or a.render_orientation != "landscape") else OUTPUT_ROOT
 
     print(f"\n{'='*72}")
     print("  Maharashtra PWD Booklet — GAD Generator")
@@ -532,7 +542,7 @@ def main(argv: list[str] | None = None) -> int:
 
     passed, failed = 0, []
     for p, label in jobs:
-        fid, ok, msg = generate_one(p, root, label)
+        fid, ok, msg = generate_one(p, root, label, render_paper=a.render_paper, render_orientation=a.render_orientation)
         print(f"  [{'DONE' if ok else 'FAIL':4s}] {label:<28} {p['title']:<46} {msg}")
         if ok:
             passed += 1

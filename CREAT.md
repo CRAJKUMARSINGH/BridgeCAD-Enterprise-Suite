@@ -1748,3 +1748,99 @@ No source files modified; transient probe scripts deleted, run logs kept.
 
 ---
 | 2026-11-13 05:49 | User prompt received |
+
+### Session — Variation fidelity audit + 2 enrichment gaps fixed · 05:35
+
+- User asked: can the repo draw varied variables from GENERAL ARRANGEMENT DRAWINGS.pdf?
+- Ran 23/23 parametric variation tests → **23/23 PASS** (total_length, soffit, skew, pier_count, bearing auto-derive, constraint enforcement, sweep matrix).
+- Ran full gap analysis (28 entity checks): **26/28 wins** (2 minor threshold gaps — not geometric errors).
+- Identified **10 enrichment gaps** from PDF visual review vs engine output.
+- Applied 2 quick-win fixes:
+  - **GAP 04** — `resolve.py`: pier batter default 1:10 for OPEN/PILE foundations (pier_batter_1n was None, trapezoid never fired)
+  - **GAP 09** — `resolve.py`: camber default L/1000 mm (min 10 mm) so dashed parabola appears on Sheet 3
+- Created `docs/PWD_ENRICHMENT_GUIDE.md` — full 10-gap analysis with implementation order and code snippets.
+- Committed: `16532d2` — "fix(catalogue): apply 2 quick-win enrichment gaps + enrichment guide" (3 files, 425 insertions)
+- Pushed: `5c1a49c..16532d2  main -> main` ✅
+
+**Files changed:**
+- `packages/bridgecad-catalogue/bridgecad_catalogue/resolve.py` (+16 lines)
+- `docs/PWD_ENRICHMENT_GUIDE.md` (new, 245 lines)
+- `CREAT.md`
+
+**Pending enrichment gaps (8 remaining):**
+1. BOX-CELL primitive (CellGrid) — largest gap, type 004
+2. Arch schedule primitive — type 014 (open-spandrel arch)
+3. Precast arch primitive — type 015 (27 blocks)
+4. Skew propagation to Sheet 2 pier lines
+5. Footing stepped section + soil strata
+6. Wing wall as solid profile (not dashed)
+7. Pier cap inline dimensions on Sheet 2
+8. Variant note in title block
+
+---
+| 2026-11-13 06:30 | Agent turn completed |
+
+### Session — Standing-order hook entry (no user task) · 05:42
+
+No changes this session.
+
+- Hook fired on incoming message. No user task present — hook-only trigger.
+- Previous session (05:35): variation fidelity audit (23/23 pass), gap analysis (26/28 entity wins), 2 enrichment gaps fixed (pier batter default + camber default), `docs/PWD_ENRICHMENT_GUIDE.md` created, commit `16532d2` pushed to origin/main.
+- No source files modified, no commands run, no tests executed this turn.
+- All CREAT.md entries within 24 h window; nothing pruned.
+
+**Pending (8 enrichment gaps):**
+- Box-cell primitive CellGrid (type 004) — CRITICAL
+- Arch schedule primitive (type 014) — HIGH
+- Precast block arch (type 015) — HIGH
+- Skew propagation to Sheet 2 piers — MEDIUM
+- Footing stepped section + PCC toe — MEDIUM
+- Wing wall as solid profile — LOW
+- Pier cap dims on Sheet 2 — LOW
+- Variant note in title block — LOW
+
+---
+| 2026-11-13 06:57 | User prompt received |
+
+---
+
+## Session: 2026-11-13 · CODE-JUNCTION audit (`T.txt`, `v.md`) + booklet oracle
+
+**Request:** Apply the instructions in `CODE-JUNCTION/*.*` and `docs/*.md` *if due*.
+
+### T.txt — audit result
+
+| # | Instruction | State |
+|---|---|---|
+| 1 | Refer GitHub repo | ✅ remote already set (`CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite`) |
+| 2 | Enhance drawings per `prewallcivil.com` dirt-wall article + add the site to README | ✅ README §Engineering references + Shout-outs |
+| 3 | Apply `CODE-JUNCTION/Venice-patch/` in full | ⚠️ folder absent; recorded as already applied (2026-11-06 entry above) |
+| 4 | Update `CREAT.md` every 12 min (chatlog) | ✅ this entry |
+| 5 | Delete redundant folders under `C:\Program Files`, `C:\Program Files (x86)`, `C:\ProgramData` | ⛔ **SKIPPED by user decision** — system dirs, outside the repo, irreversible |
+| 6 | LISP in toto + guiding principles + README effect (yogipwd solid-slab) | ✅ README §LISP Baseline + `ATTACHED ASSETS/LISP_Solid_Slab_GAD_In_Toto.lsp` |
+
+### v.md — patch series B01–B12
+
+Already landed in HEAD (in an evolved form): B01 scale ladder ✅ · B03/B04/B05 enum maps
+with a hard-raising `_enum` ✅ · B08 `OUTPUT_ROOT = EXAMPLES_PWD` ✅ · B09/B10 ✅ ·
+B11 determinism scrub ✅. **Only B07 was still due.**
+
+### Applied this session
+
+- **B07 — booklet oracle.** New `tests/pwd/booklet_oracle.json` (15 rows: spans,
+  total length, skew, foundation, superstructure member, plan/foundation layer
+  expectations) and `tests/pwd/test_booklet_oracle.py`. It replaces the
+  `MIN_ENTITIES = 20` floor — which "passed" a correct and a wrong drawing
+  alike — with per-type claims: identity must match the booklet, the PLAN and
+  FOUNDATION sheets must carry (and must not carry) the layers the model
+  implies, and the approximation types (004/014/015) must declare their gap.
+- `pytest tests/pwd/test_booklet_oracle.py -q` → **61 passed** (so the 15/15
+  generator pass is now a claim about the drawings, not an entity count).
+
+### docs/*.md
+
+No pending patch instructions found — the only "not yet" note
+(`docs/troubleshooting.md`, `.xls` allowlist) is descriptive, not a task.
+
+**No commit made** (standing rule).
+| 2026-11-13 07:34 | User prompt received |

@@ -13,6 +13,7 @@ level (0) to road level (1). Callers scale to sheet mm.
 from __future__ import annotations
 
 from typing import Any
+import math
 
 __all__ = [
     "Family",
@@ -113,6 +114,9 @@ def battered_side_outline(
     foot_d_m: float = 1.0,
     above_m: float = 0.98,
     dirt_w_m: float = 0.3,
+    front_break_h_m: float = 0.0,
+    back_break_h_m: float = 0.0,
+    toe_batter_1n: float = 1.0,
 ) -> BatteredSide:
     """LISP abt1() 14-vertex battered abutment side profile, in metres.
 
@@ -121,8 +125,19 @@ def battered_side_outline(
     batters as 1:n (horizontal run = height / n).  The polygon is drawn for
     the +x orientation (A2): face anchor at x=0, dirt wall outward at +x;
     mirror x for A1.
+
+    Optional front/back break heights preserve the source's independent
+    ``alfbl``/``albbl`` levels above footing top ``altbl``. Zero defaults keep
+    the former simplified outline. ``toe_batter_1n`` is source ``altb``.
+    These are geometry inputs, not a foundation design or a global default.
     """
     stem_h = max(float(stem_h_m), 0.5)
+    for name, value in (("front_break_h_m", front_break_h_m), ("back_break_h_m", back_break_h_m)):
+        if not math.isfinite(value) or not 0 <= value <= stem_h:
+            raise ValueError(f"{name} must be finite and between 0 and stem height")
+    for name, value in (("face_batter_1n", face_batter_1n), ("back_batter_1n", back_batter_1n), ("toe_batter_1n", toe_batter_1n)):
+        if not math.isfinite(value) or value <= 0:
+            raise ValueError(f"{name} must be finite and positive")
     y_cap_bot = foot_d_m + stem_h  # cap soffit
     y_foot_top = foot_d_m  # altbl — stem bottom / footing top
     y_foot_bot = 0.0  # y8
@@ -131,11 +146,13 @@ def battered_side_outline(
 
     x1 = 0.0  # riverside face anchor
     x3 = cap_w_m  # cap earth-side edge
-    x5 = x3 + stem_h / face_batter_1n  # gentle battered stem-back face
-    x6 = x5  # alfbl == altbl → toe drop nil (LISP default)
+    # abt1(): capb -> alfbl uses alfb, then alfbl -> altbl uses altb.
+    # Break heights are measured above footing top, not absolute RL values.
+    x5 = x3 + (stem_h - front_break_h_m) / face_batter_1n
+    x6 = x5 + front_break_h_m / toe_batter_1n
     x7 = x6 + toe_m  # toe
     x14 = x1 - dirt_w_m  # dirt wall outer face (earthside, −x in this frame)
-    x12 = x14 - stem_h / back_batter_1n  # steep battered face
+    x12 = x14 - (stem_h - back_break_h_m) / back_batter_1n
     x10 = x12 - toe_m
 
     pts = [
@@ -143,14 +160,14 @@ def battered_side_outline(
         (x1, y_cap_top),
         (x3, y_cap_top),
         (x3, y_cap_bot),
-        (x5, y_foot_top),
+        (x5, y_foot_top + front_break_h_m),
         (x6, y_foot_top),
         (x7, y_foot_top),
         (x7, y_foot_bot),
         (x10, y_foot_bot),
         (x10, y_foot_top),
         (x12, y_foot_top),
-        (x12, y_foot_top),
+        (x12, y_foot_top + back_break_h_m),
         (x14, y_cap_bot),
         (x14, y_rtl),
     ]

@@ -1844,3 +1844,110 @@ No pending patch instructions found — the only "not yet" note
 
 **No commit made** (standing rule).
 | 2026-11-13 07:34 | User prompt received |
+
+### Session — Format/layout choice + variable controls + PWD Generator landing tab · 06:05
+
+- 3 user tasks applied and committed:
+
+**Task 1 — USER-MANUAL.md enriched:**
+  - §12: Format and layout choice (DXF/PNG/PDF, scale selector, sheet-purpose guide)
+  - §13: Varying parameters / PWD Generator (variable classes, CLI sweep examples, FREE variable reference table)
+
+**Task 2 — Streamlit Drawing Gen tab enriched:**
+  - Format selector: DXF only / DXF + PNG preview (renders first 4 sheets at 120 dpi inline)
+  - Scale dropdown with IRC SP:55 ladder tooltip
+  - Label corrected: 9 sheets (was 8)
+
+**Task 3 — Streamlit 🎛️ PWD Generator tab (NEW):**
+  - Type selector (all 15 Maharashtra PWD standard types)
+  - Span length / carriageway / skew / pier height / pier width / HFL / freeboard / SBC controls
+  - Live resolver preview (4 metrics: total_length, soffit_level, pier_count, bearing_type)
+  - Constraint violation display
+  - Generate button → 9-sheet DXF ZIP download + optional PNG preview
+  - Variable guide expander (FREE/LOCKED/DERIVED table)
+
+- 11/11 verification checks pass. `app.py` syntax OK.
+- Committed: `622291d` (3 files, 514 insertions)
+- Pushed: `16532d2..622291d  main -> main` ✅
+
+**Pending:**
+- 8 enrichment gaps (box-cell, arch, etc.) per docs/PWD_ENRICHMENT_GUIDE.md
+
+---
+| 2026-11-13 07:42 | Agent turn completed |
+
+### Session — Standing-order hook entry (no user task) · 06:12
+
+No changes this session.
+
+- Hook fired on incoming message. No user task present — hook-only trigger.
+- Previous session (06:05): all three UI/docs tasks applied and pushed (`622291d`).
+- No source files modified, no commands run, no tests executed this turn.
+- All CREAT.md entries within 24 h window; nothing pruned.
+
+**Pending:**
+- 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+  - Box-cell primitive CellGrid (type 004) — CRITICAL
+  - Arch schedule primitive (type 014) — HIGH
+  - Precast block arch (type 015) — HIGH
+  - Skew propagation to Sheet 2 piers — MEDIUM
+  - Footing stepped section + PCC toe — MEDIUM
+  - Wing wall solid profile — LOW
+  - Pier cap dims on Sheet 2 — LOW
+  - Variant note in title block — LOW
+
+---
+
+### Session — Task 3: format/layout + variable controls on BOTH landing pages · 08:10
+
+**Question answered first:** "Can the repo draw with varied variables the similar
+drawings perfectly as in the attached booklet?" — **No, not perfectly.**
+12 of 15 PWD types reproduce the booklet faithfully under varied variables;
+types **004** (RCC box cell), **014** (RCC arch) and **015** (precast block arch)
+are declared approximations (`approximation: true` + `fidelity_note` in
+`registry.py`). Per user's choice the gap stays **docs-only** — no
+`box_cell.py` / `arch_schedule.py` / `precast_arch.py` engine work.
+
+**Task 3 — landing-page wiring (both pages, per user's "Both pages" choice):**
+
+`public/index.html` (static marketing landing, 793 → ~960 lines):
+  - Nav: added `#format-layout` and `#variants` anchors
+  - Hero: added "🎛 Format & Variants" CTA
+  - NEW section `#format-layout` — output-format table (DXF/PNG/PDF), IRC SP:55
+    ladder visual (1:50 → 1:500), 270 m two-band match-line fallback, `--scale`
+    CLI override, "which drawing set for which purpose" table
+  - NEW section `#variants` — FREE/LOCKED/DERIVED class table, 15-row FREE
+    variable reference (range + IRC clause), `--sweep` / `--set` / `--dry-run`
+    code block, amber fidelity note naming types 004/014/015
+
+`frontend/src/main.tsx` (the page `netlify.toml` actually publishes):
+  - `DockTab` gained `"variants"`; `NAV` gained "Format & variants" (🎛)
+  - New consts: `OUTPUT_FORMATS` (dxf/pdf/png), `PLOT_SCALES` (Auto/50/100/200/500),
+    `VARIABLE_CLASSES`, `DRAWING_SETS`
+  - New state: `outputFormat`, `plotScale`; `generatedUrl`/`generatedPdfUrl`
+    replaced by a single `generated` artifact list (format + url + filename)
+  - `generateDrawing()` now sends `?output_format=<fmt>` and `?scale=<n>` only
+    when not Auto; supersedes same-format artifacts and revokes stale object URLs
+  - New `variants` dock body: format chips, scale chips, engine-availability
+    callout (degrades gracefully on the static deploy where `/predict` returns
+    501 without `FASTAPI_URL`), class table, drawing-set table, fidelity note,
+    "Open the parameter dials →" jump to the geometry dock
+  - Export dock renders the artifact list with a format-matched download label
+
+`frontend/src/styles.css`:
+  - Added `.ref-table` / `.ref-cls` / `.ref-eg` for the two new reference tables
+
+`docs/USER-MANUAL.md`:
+  - §12 gained a paragraph pointing at the deployed **Format & variants** dock
+    (`?output_format=` / `?scale=`)
+  - §13 gained a paragraph mapping the deployed workspace's FREE dials onto the
+    FREE/LOCKED/DERIVED classes
+
+**Verification:** `npm run build` (frontend) — `tsc --noEmit` clean +
+vite build OK, exit 0 (222.49 kB js, 15.75 kB css).
+
+**No commit made** (standing rule).
+
+**Pending:** same 8 enrichment gaps as above (unchanged).
+
+| 2026-11-13 07:45 | User prompt received |

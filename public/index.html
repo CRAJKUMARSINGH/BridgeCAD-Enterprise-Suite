@@ -3,516 +3,761 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Bridge GAD Generator — RKS LEGAL</title>
-  <meta name="description" content="Professional Bridge General Arrangement Drawing Generator. Excel to DXF, PDF, 3D and more. By RKS LEGAL Techno Legal Consultants, Udaipur."/>
+  <title>BridgeCAD Enterprise Suite — Bridge GAD Generator</title>
+  <meta name="description"
+        content="Parametric Bridge General Arrangement Drawing generator. 15 Maharashtra PWD standard types. 9-sheet DXF/PDF/PNG. IRC/MoRTH compliant. By Er. Rajkumar Singh Chauhan, Retd. Addl. Chief Engineer, PWD Rajasthan."/>
+  <meta property="og:title" content="BridgeCAD Enterprise Suite"/>
+  <meta property="og:description" content="Excel → 9-sheet bridge GAD. 15 PWD standard types. IRC compliant."/>
   <style>
+    /* ── Reset & tokens ──────────────────────────────────────────────────── */
     :root{
-      --bg:#0d1117;--surface:#161b22;--elevated:#1c2333;
-      --cyan:#00d4ff;--amber:#ffb347;--green:#39ff14;--purple:#bf5fff;
-      --text:#e6edf3;--muted:#8b949e;--border:rgba(255,255,255,.08);
-      --radius:14px;
+      --bg:#080e18;--surface:#0e1621;--elevated:#14202e;--card:#1a2535;
+      --cyan:#00d4ff;--amber:#ffb347;--green:#3ddc84;--purple:#b48eff;
+      --red:#ff5370;--text:#e8f0f8;--muted:#7a8fa6;--border:rgba(255,255,255,.07);
+      --radius:12px;--shadow:0 4px 24px rgba(0,0,0,.35);
+      --glow-c:rgba(0,212,255,.18);--glow-a:rgba(255,179,71,.15);
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html{scroll-behavior:smooth}
-    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      background:linear-gradient(135deg,#0d1117 0%,#0f1923 50%,#0d1117 100%);
-      color:var(--text);min-height:100vh;line-height:1.6}
+    html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+      background:var(--bg);color:var(--text);min-height:100vh;line-height:1.65;
+      background-image:radial-gradient(ellipse 80% 60% at 50% -20%,rgba(0,80,120,.18),transparent)}
 
-    /* NAV */
-    nav{display:flex;align-items:center;justify-content:space-between;
-      padding:.85rem 2rem;border-bottom:1px solid var(--border);
-      backdrop-filter:blur(12px);position:sticky;top:0;z-index:100;
-      background:rgba(13,17,23,.9)}
-    .nav-brand{font-size:1rem;font-weight:700;color:var(--cyan);letter-spacing:.05em}
-    .nav-links{display:flex;gap:1.4rem;flex-wrap:wrap}
-    .nav-links a{color:var(--muted);text-decoration:none;font-size:.83rem;transition:color .2s}
-    .nav-links a:hover{color:var(--cyan)}
+    /* ── Utility ─────────────────────────────────────────────────────────── */
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+      overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    a{color:var(--cyan);text-decoration:none}
+    a:hover{text-decoration:underline}
+    code{background:var(--elevated);padding:.12rem .4rem;border-radius:4px;
+      font-size:.82em;color:var(--amber);font-family:"SF Mono","Fira Code",monospace}
 
-    /* HERO */
-    .hero{text-align:center;padding:5rem 2rem 3rem;position:relative;overflow:hidden}
-    .hero::before{content:'';position:absolute;inset:0;
-      background:radial-gradient(ellipse at 50% 0%,rgba(0,212,255,.07) 0%,transparent 65%);
-      pointer-events:none}
-    .hero-icon{font-size:4rem;display:block;margin-bottom:1rem}
-    h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;
-      background:linear-gradient(90deg,var(--cyan),var(--purple),var(--amber));
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-      background-clip:text;letter-spacing:-.5px;margin-bottom:1rem}
-    .hero-sub{color:var(--muted);font-size:1.05rem;max-width:580px;margin:0 auto 2rem}
-    .badges{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:2.5rem}
-    .badge{padding:.25rem .75rem;border-radius:999px;font-size:.72rem;font-weight:600}
-    .badge-cyan  {background:rgba(0,212,255,.12);color:var(--cyan);  border:1px solid rgba(0,212,255,.3)}
-    .badge-amber {background:rgba(255,179,71,.12);color:var(--amber); border:1px solid rgba(255,179,71,.3)}
-    .badge-green {background:rgba(57,255,20,.10); color:var(--green); border:1px solid rgba(57,255,20,.25)}
-    .badge-purple{background:rgba(191,95,255,.12);color:var(--purple);border:1px solid rgba(191,95,255,.3)}
+    /* ── NAV ─────────────────────────────────────────────────────────────── */
+    nav{position:sticky;top:0;z-index:200;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:.7rem 2rem;border-bottom:1px solid var(--border);
+      background:rgba(8,14,24,.88);backdrop-filter:blur(16px);gap:1rem;flex-wrap:wrap}
+    .nav-brand{font-size:.95rem;font-weight:800;color:var(--cyan);
+      letter-spacing:.04em;white-space:nowrap;display:flex;align-items:center;gap:.5rem}
+    .nav-brand .v{font-size:.68rem;background:rgba(0,212,255,.12);
+      border:1px solid rgba(0,212,255,.3);border-radius:999px;
+      padding:.08rem .5rem;color:var(--cyan);font-weight:600;letter-spacing:.06em}
+    .nav-links{display:flex;gap:1.2rem;flex-wrap:wrap;align-items:center}
+    .nav-links a{color:var(--muted);font-size:.82rem;font-weight:500;
+      transition:color .18s;white-space:nowrap}
+    .nav-links a:hover{color:var(--cyan);text-decoration:none}
+    .nav-links .nav-cta{background:linear-gradient(135deg,rgba(0,212,255,.2),rgba(0,120,180,.2));
+      color:var(--cyan);border:1px solid rgba(0,212,255,.4);
+      padding:.35rem .9rem;border-radius:var(--radius);font-size:.8rem;font-weight:700;
+      transition:all .18s}
+    .nav-links .nav-cta:hover{background:linear-gradient(135deg,rgba(0,212,255,.35),rgba(0,120,180,.35));
+      box-shadow:0 0 16px rgba(0,212,255,.3);text-decoration:none;transform:translateY(-1px)}
 
-    /* BUTTONS */
-    .cta-group{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
-    .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.75rem;
-      border-radius:var(--radius);font-size:.9rem;font-weight:600;text-decoration:none;
-      transition:all .22s cubic-bezier(.4,0,.2,1);cursor:pointer;border:none}
-    .btn-primary{background:linear-gradient(135deg,rgba(0,212,255,.25),rgba(0,150,200,.25));
-      color:var(--cyan);border:1px solid var(--cyan);box-shadow:0 0 12px rgba(0,212,255,.2)}
-    .btn-primary:hover{background:linear-gradient(135deg,rgba(0,212,255,.4),rgba(0,150,200,.4));
-      box-shadow:0 0 24px rgba(0,212,255,.45);transform:translateY(-2px)}
-    .btn-secondary{background:rgba(255,255,255,.05);color:var(--text);border:1px solid var(--border)}
-    .btn-secondary:hover{border-color:rgba(0,212,255,.3);transform:translateY(-2px)}
-    .btn-dl{background:rgba(57,255,20,.1);color:var(--green);
-      border:1px solid rgba(57,255,20,.3);padding:.5rem 1.1rem;
-      border-radius:8px;font-size:.78rem;font-weight:600;text-decoration:none;
-      display:inline-flex;align-items:center;gap:.4rem;transition:all .2s}
-    .btn-dl:hover{background:rgba(57,255,20,.2);box-shadow:0 0 12px rgba(57,255,20,.25);transform:translateY(-1px)}
+    /* ── HERO ────────────────────────────────────────────────────────────── */
+    .hero{text-align:center;padding:5.5rem 2rem 3.5rem;position:relative;overflow:hidden}
+    .hero::before{content:'';position:absolute;inset:0;pointer-events:none;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 80%,rgba(0,212,255,.05),transparent),
+        radial-gradient(ellipse 60% 50% at 80% 20%,rgba(180,142,255,.05),transparent)}
+    .hero-eyebrow{font-size:.72rem;font-weight:700;text-transform:uppercase;
+      letter-spacing:.18em;color:var(--cyan);margin-bottom:1.2rem;
+      display:inline-flex;align-items:center;gap:.5rem;
+      background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.2);
+      padding:.35rem 1rem;border-radius:999px}
+    h1{font-size:clamp(2.2rem,5.5vw,3.6rem);font-weight:900;
+      line-height:1.12;letter-spacing:-.03em;margin-bottom:1.2rem;
+      background:linear-gradient(135deg,#e8f8ff 0%,var(--cyan) 40%,var(--purple) 70%,var(--amber) 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero-sub{color:var(--muted);font-size:1.08rem;max-width:600px;
+      margin:0 auto 1.8rem;line-height:1.7}
+    .hero-author{font-size:.78rem;color:rgba(255,255,255,.35);margin-bottom:2.2rem}
 
-    /* STATUS */
-    #status-bar{display:flex;align-items:center;justify-content:center;gap:.5rem;
-      font-size:.78rem;color:var(--muted);margin-top:1.5rem}
-    .dot{width:8px;height:8px;border-radius:50%;animation:blink 2s ease-in-out infinite}
-    .dot-green{background:var(--green);box-shadow:0 0 6px var(--green)}
-    .dot-amber{background:var(--amber);box-shadow:0 0 6px var(--amber)}
-    @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+    /* Badges */
+    .badges{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:2.4rem}
+    .badge{padding:.22rem .7rem;border-radius:999px;font-size:.7rem;font-weight:600;letter-spacing:.03em}
+    .bc{background:rgba(0,212,255,.1);color:var(--cyan);border:1px solid rgba(0,212,255,.25)}
+    .ba{background:rgba(255,179,71,.1);color:var(--amber);border:1px solid rgba(255,179,71,.25)}
+    .bg{background:rgba(61,220,132,.1);color:var(--green);border:1px solid rgba(61,220,132,.25)}
+    .bp{background:rgba(180,142,255,.1);color:var(--purple);border:1px solid rgba(180,142,255,.25)}
 
-    /* SECTIONS */
-    .section{padding:4rem 2rem;max-width:1100px;margin:0 auto}
-    .section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;
-      letter-spacing:.12em;color:var(--cyan);text-shadow:0 0 8px rgba(0,212,255,.4);
-      margin-bottom:2rem;display:flex;align-items:center;gap:.5rem}
+    /* CTA */
+    .cta-row{display:flex;gap:.85rem;justify-content:center;flex-wrap:wrap;margin-bottom:2rem}
+    .btn{display:inline-flex;align-items:center;gap:.45rem;padding:.7rem 1.6rem;
+      border-radius:var(--radius);font-size:.88rem;font-weight:700;
+      text-decoration:none;transition:all .2s cubic-bezier(.4,0,.2,1);
+      cursor:pointer;border:none;white-space:nowrap}
+    .btn:hover{text-decoration:none;transform:translateY(-2px)}
+    .btn-primary{background:linear-gradient(135deg,rgba(0,212,255,.22),rgba(0,140,200,.22));
+      color:var(--cyan);border:1px solid rgba(0,212,255,.5);
+      box-shadow:0 0 16px rgba(0,212,255,.2)}
+    .btn-primary:hover{background:linear-gradient(135deg,rgba(0,212,255,.38),rgba(0,140,200,.38));
+      box-shadow:0 0 32px rgba(0,212,255,.4)}
+    .btn-secondary{background:rgba(255,255,255,.04);color:var(--text);
+      border:1px solid var(--border)}
+    .btn-secondary:hover{border-color:rgba(0,212,255,.3);color:var(--cyan)}
+    .btn-green{background:rgba(61,220,132,.12);color:var(--green);
+      border:1px solid rgba(61,220,132,.3)}
+    .btn-green:hover{background:rgba(61,220,132,.22);box-shadow:0 0 16px rgba(61,220,132,.25)}
+    .btn-amber{background:rgba(255,179,71,.12);color:var(--amber);
+      border:1px solid rgba(255,179,71,.3)}
+    .btn-amber:hover{background:rgba(255,179,71,.22)}
+
+    /* Status pill */
+    .status-pill{display:inline-flex;align-items:center;gap:.5rem;
+      font-size:.75rem;color:var(--muted);padding:.3rem .8rem;
+      background:var(--surface);border:1px solid var(--border);border-radius:999px}
+    .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+    .dot-green{background:var(--green);box-shadow:0 0 6px var(--green);
+      animation:blink 2.4s ease-in-out infinite}
+    .dot-amber{background:var(--amber);box-shadow:0 0 6px var(--amber);
+      animation:blink 2.4s ease-in-out infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+    /* ── STAT STRIP ──────────────────────────────────────────────────────── */
+    .stat-strip{background:var(--surface);border-top:1px solid var(--border);
+      border-bottom:1px solid var(--border);padding:1.4rem 2rem;
+      display:flex;justify-content:center;gap:3rem;flex-wrap:wrap}
+    .stat{text-align:center}
+    .stat-num{font-size:1.5rem;font-weight:900;color:var(--cyan);display:block}
+    .stat-lbl{font-size:.72rem;color:var(--muted);text-transform:uppercase;
+      letter-spacing:.08em;margin-top:.1rem;display:block}
+
+    /* ── SECTION WRAPPER ─────────────────────────────────────────────────── */
+    .section{padding:4rem 2rem;max-width:1120px;margin:0 auto}
+    .section-title{font-size:.7rem;font-weight:700;text-transform:uppercase;
+      letter-spacing:.15em;color:var(--cyan);margin-bottom:1.8rem;
+      display:flex;align-items:center;gap:.7rem}
     .section-title::after{content:'';flex:1;height:1px;
       background:linear-gradient(90deg,rgba(0,212,255,.4),transparent)}
 
-    /* GRID */
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem}
-    .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1rem}
-    .card{background:rgba(22,27,34,.72);backdrop-filter:blur(18px);
-      border:1px solid var(--border);border-radius:var(--radius);padding:1.4rem;
-      transition:all .22s cubic-bezier(.4,0,.2,1)}
-    .card:hover{border-color:rgba(0,212,255,.3);
-      box-shadow:0 8px 32px rgba(0,212,255,.1);transform:translateY(-3px)}
-    .card-icon{font-size:1.8rem;margin-bottom:.75rem;display:block}
-    .card h3{font-size:.95rem;font-weight:700;margin-bottom:.4rem;color:var(--text)}
-    .card p{font-size:.82rem;color:var(--muted);line-height:1.6}
+    /* ── CARDS ───────────────────────────────────────────────────────────── */
+    .grid{display:grid;gap:1rem}
+    .g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+    .g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+    .g4{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+    .card{background:var(--card);border:1px solid var(--border);
+      border-radius:var(--radius);padding:1.4rem;
+      transition:all .2s cubic-bezier(.4,0,.2,1)}
+    .card:hover{border-color:rgba(0,212,255,.28);
+      box-shadow:0 8px 32px rgba(0,212,255,.08);transform:translateY(-3px)}
+    .card-icon{font-size:1.8rem;margin-bottom:.7rem;display:block}
+    .card h3{font-size:.93rem;font-weight:700;margin-bottom:.35rem;color:var(--text)}
+    .card p{font-size:.8rem;color:var(--muted);line-height:1.65}
 
-    /* PIPELINE */
-    .pipeline{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;
-      justify-content:center;padding:2rem;margin:2rem 0;
-      background:var(--surface);border-radius:var(--radius);border:1px solid var(--border)}
+    /* Feature highlight card */
+    .feat-card{background:linear-gradient(135deg,var(--card),var(--elevated));
+      border:1px solid rgba(0,212,255,.15)}
+    .feat-card:hover{border-color:rgba(0,212,255,.4)}
+    .feat-new::after{content:'NEW';font-size:.6rem;font-weight:800;
+      background:var(--green);color:#000;padding:.1rem .4rem;
+      border-radius:4px;margin-left:.5rem;vertical-align:middle}
+
+    /* ── PIPELINE ────────────────────────────────────────────────────────── */
+    .pipeline{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;
+      justify-content:center;padding:1.8rem;
+      background:var(--surface);border-radius:var(--radius);
+      border:1px solid var(--border);margin:1.5rem 0}
     .pipe-step{background:var(--elevated);border:1px solid var(--border);
-      border-radius:8px;padding:.5rem 1rem;font-size:.78rem;font-weight:600;
-      color:var(--text);white-space:nowrap}
-    .pipe-arrow{color:var(--cyan);font-size:1.1rem}
+      border-radius:8px;padding:.42rem .9rem;font-size:.77rem;font-weight:600;
+      color:var(--text);white-space:nowrap;transition:border-color .2s}
+    .pipe-step:hover{border-color:rgba(0,212,255,.35)}
+    .pipe-arrow{color:var(--cyan);opacity:.6;font-size:1rem}
 
-    /* MANUAL */
-    .manual-step{display:flex;gap:1.2rem;align-items:flex-start;
-      padding:1.2rem;background:var(--surface);border-radius:var(--radius);
-      border:1px solid var(--border);margin-bottom:.75rem;
+    /* ── MANUAL STEPS ────────────────────────────────────────────────────── */
+    .steps{display:flex;flex-direction:column;gap:.7rem}
+    .step{display:flex;gap:1.1rem;align-items:flex-start;
+      padding:1.1rem 1.3rem;background:var(--surface);
+      border-radius:var(--radius);border:1px solid var(--border);
       transition:border-color .2s}
-    .manual-step:hover{border-color:rgba(0,212,255,.25)}
-    .step-num{min-width:2.2rem;height:2.2rem;border-radius:50%;
-      background:linear-gradient(135deg,rgba(0,212,255,.2),rgba(191,95,255,.2));
-      border:1px solid rgba(0,212,255,.35);display:flex;align-items:center;
-      justify-content:center;font-size:.85rem;font-weight:800;color:var(--cyan);
-      flex-shrink:0}
-    .step-body h4{font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.3rem}
-    .step-body p{font-size:.82rem;color:var(--muted);line-height:1.6}
-    .step-body code{background:var(--elevated);padding:.1rem .4rem;border-radius:4px;
-      font-size:.78rem;color:var(--amber)}
+    .step:hover{border-color:rgba(0,212,255,.2)}
+    .step-num{min-width:2rem;height:2rem;border-radius:50%;
+      background:linear-gradient(135deg,rgba(0,212,255,.2),rgba(180,142,255,.2));
+      border:1px solid rgba(0,212,255,.3);display:flex;align-items:center;
+      justify-content:center;font-size:.82rem;font-weight:900;color:var(--cyan);
+      flex-shrink:0;margin-top:.1rem}
+    .step h4{font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:.3rem}
+    .step p,.step ul{font-size:.8rem;color:var(--muted);line-height:1.7}
+    .step ul{margin:.35rem 0 0 1.1rem}
 
-    /* SAMPLES TABLE */
-    .samples-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:.75rem}
+    /* ── SAMPLE CARDS ────────────────────────────────────────────────────── */
     .sample-card{background:var(--surface);border:1px solid var(--border);
-      border-radius:var(--radius);padding:1rem 1.2rem;
+      border-radius:var(--radius);padding:.9rem 1.1rem;
       display:flex;align-items:center;justify-content:space-between;gap:1rem;
       transition:border-color .2s}
-    .sample-card:hover{border-color:rgba(57,255,20,.3)}
-    .sample-info{flex:1}
-    .sample-name{font-size:.88rem;font-weight:700;color:var(--text)}
-    .sample-desc{font-size:.75rem;color:var(--muted);margin-top:.15rem}
-    .sample-meta{font-size:.7rem;color:rgba(0,212,255,.7);margin-top:.2rem}
+    .sample-card:hover{border-color:rgba(61,220,132,.3)}
+    .sample-name{font-size:.86rem;font-weight:700;color:var(--text)}
+    .sample-desc{font-size:.74rem;color:var(--muted);margin-top:.12rem}
+    .sample-meta{font-size:.68rem;color:rgba(0,212,255,.65);margin-top:.18rem}
+    .btn-dl{background:rgba(61,220,132,.1);color:var(--green);
+      border:1px solid rgba(61,220,132,.3);padding:.38rem .85rem;
+      border-radius:8px;font-size:.75rem;font-weight:700;text-decoration:none;
+      display:inline-flex;align-items:center;gap:.35rem;
+      transition:all .18s;white-space:nowrap;flex-shrink:0}
+    .btn-dl:hover{background:rgba(61,220,132,.22);text-decoration:none;
+      box-shadow:0 0 10px rgba(61,220,132,.25);transform:translateY(-1px)}
 
-    /* PARAM TABLE */
-    .param-table{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:.75rem}
-    .param-table th{background:var(--elevated);color:var(--cyan);
-      padding:.5rem .75rem;text-align:left;font-size:.72rem;
-      text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)}
-    .param-table td{padding:.45rem .75rem;border-bottom:1px solid rgba(255,255,255,.04);
+    /* ── PWD TYPE TABLE ──────────────────────────────────────────────────── */
+    .pwd-table{width:100%;border-collapse:collapse;font-size:.79rem;overflow:hidden;
+      border-radius:var(--radius);border:1px solid var(--border)}
+    .pwd-table thead tr{background:var(--elevated)}
+    .pwd-table th{padding:.55rem .9rem;text-align:left;color:var(--cyan);
+      font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;
+      border-bottom:1px solid var(--border)}
+    .pwd-table td{padding:.5rem .9rem;border-bottom:1px solid rgba(255,255,255,.04);
       color:var(--muted)}
-    .param-table tr:hover td{background:rgba(0,212,255,.03);color:var(--text)}
-    .param-table td:first-child{color:var(--amber);font-family:monospace;font-size:.78rem}
+    .pwd-table tbody tr{background:var(--surface);transition:background .15s}
+    .pwd-table tbody tr:hover{background:var(--elevated)}
+    .pwd-table tbody tr:hover td{color:var(--text)}
+    .pwd-table td:first-child{color:var(--amber);font-family:monospace;font-size:.76rem}
+    .pwd-table td:nth-child(2){color:var(--text);font-weight:500}
+    .tag{display:inline-block;padding:.08rem .5rem;border-radius:4px;
+      font-size:.64rem;font-weight:700;margin-left:.3rem}
+    .tag-open{background:rgba(61,220,132,.12);color:var(--green)}
+    .tag-pile{background:rgba(0,212,255,.12);color:var(--cyan)}
+    .tag-well{background:rgba(180,142,255,.12);color:var(--purple)}
+    .tag-raft{background:rgba(255,179,71,.12);color:var(--amber)}
 
-    /* CODE BLOCK */
-    .code-block{background:var(--surface);border:1px solid var(--border);
-      border-radius:var(--radius);padding:1.2rem 1.4rem;
-      font-family:"SF Mono","Fira Code",monospace;font-size:.8rem;
-      color:#a8d8a8;overflow-x:auto;margin:1rem 0}
-    .code-block .cm{color:var(--muted)}
-    .code-block .kw{color:var(--cyan)}
-    .code-block .vl{color:var(--amber)}
-
-    /* ACCORDION */
+    /* ── PARAM TABLES ────────────────────────────────────────────────────── */
     details{background:var(--surface);border:1px solid var(--border);
-      border-radius:var(--radius);margin-bottom:.5rem;overflow:hidden}
-    details[open]{border-color:rgba(0,212,255,.25)}
-    summary{padding:1rem 1.2rem;cursor:pointer;font-size:.88rem;font-weight:600;
+      border-radius:var(--radius);margin-bottom:.5rem;overflow:hidden;
+      transition:border-color .2s}
+    details[open]{border-color:rgba(0,212,255,.22)}
+    summary{padding:.85rem 1.1rem;cursor:pointer;font-size:.86rem;font-weight:600;
       color:var(--text);list-style:none;display:flex;align-items:center;
       justify-content:space-between;user-select:none}
     summary::-webkit-details-marker{display:none}
-    summary::after{content:'＋';color:var(--cyan);font-size:1rem;transition:transform .2s}
+    summary::after{content:'＋';color:var(--cyan);font-size:.95rem;transition:.2s}
     details[open] summary::after{content:'－'}
-    .details-body{padding:0 1.2rem 1.2rem;font-size:.83rem;color:var(--muted);line-height:1.7}
+    .details-body{padding:0 1.1rem 1.1rem}
+    .param-tbl{width:100%;border-collapse:collapse;font-size:.78rem}
+    .param-tbl th{background:var(--elevated);color:var(--cyan);
+      padding:.45rem .7rem;text-align:left;font-size:.68rem;
+      text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border)}
+    .param-tbl td{padding:.4rem .7rem;border-bottom:1px solid rgba(255,255,255,.03);
+      color:var(--muted)}
+    .param-tbl tr:hover td{color:var(--text);background:rgba(0,212,255,.025)}
+    .param-tbl td:first-child{color:var(--amber);font-family:monospace;font-size:.76rem}
+    .param-tbl td:nth-child(3){color:var(--text)}
 
-    /* FOOTER */
-    footer{border-top:1px solid var(--border);padding:2rem;
-      text-align:center;font-size:.78rem;color:var(--muted)}
-    footer a{color:var(--cyan);text-decoration:none}
-    footer a:hover{text-decoration:underline}
+    /* ── VAR CONTROLS ────────────────────────────────────────────────────── */
+    .var-class{display:inline-block;padding:.1rem .5rem;border-radius:4px;
+      font-size:.64rem;font-weight:700}
+    .vc-free  {background:rgba(61,220,132,.12);color:var(--green)}
+    .vc-locked{background:rgba(255,83,112,.12);color:var(--red)}
+    .vc-derive{background:rgba(0,212,255,.12);color:var(--cyan)}
 
-    /* RESPONSIVE */
-    @media(max-width:600px){
-      .nav-links{gap:.8rem}
+    /* ── CODE BLOCK ──────────────────────────────────────────────────────── */
+    .codeblock{background:var(--surface);border:1px solid var(--border);
+      border-radius:var(--radius);padding:1.1rem 1.3rem;
+      font-family:"SF Mono","Fira Code",monospace;font-size:.79rem;
+      color:#90c0a0;overflow-x:auto;line-height:1.75}
+    .codeblock .cm{color:#4a6274}
+    .codeblock .kw{color:var(--cyan)}
+    .codeblock .vl{color:var(--amber)}
+    .codeblock .fl{color:var(--green)}
+    .codeblock .path{color:var(--purple)}
+
+    /* ── ALERT ───────────────────────────────────────────────────────────── */
+    .alert{display:flex;gap:.75rem;align-items:flex-start;padding:.85rem 1.1rem;
+      border-radius:var(--radius);font-size:.82rem;line-height:1.6;margin:1rem 0}
+    .alert-info{background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.2);
+      color:rgba(200,235,255,.85)}
+    .alert-warn{background:rgba(255,179,71,.07);border:1px solid rgba(255,179,71,.22);
+      color:rgba(255,220,160,.85)}
+    .alert-icon{font-size:1.1rem;flex-shrink:0;margin-top:.05rem}
+
+    /* ── FOOTER ──────────────────────────────────────────────────────────── */
+    footer{border-top:1px solid var(--border);padding:2.2rem 2rem;
+      text-align:center;font-size:.77rem;color:var(--muted);line-height:2}
+    footer a{color:var(--cyan)}
+    footer strong{color:var(--text)}
+
+    /* ── RESPONSIVE ──────────────────────────────────────────────────────── */
+    @media(max-width:720px){
+      nav{padding:.6rem 1rem}
+      .nav-links{gap:.7rem}
+      .hero{padding:3.5rem 1rem 2.5rem}
       .section{padding:2.5rem 1rem}
+      .stat-strip{gap:1.5rem;padding:1.2rem 1rem}
+      .pwd-table th:nth-child(4),.pwd-table td:nth-child(4),
+      .pwd-table th:nth-child(5),.pwd-table td:nth-child(5){display:none}
     }
   </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
-  <span class="nav-brand">&#127751; BRIDGE GAD</span>
+<!-- NAV ─────────────────────────────────────────────────────────────────── -->
+<nav aria-label="Site navigation">
+  <span class="nav-brand">
+    &#127751; BRIDGECAD
+    <span class="v">v0.1.0-RC1</span>
+  </span>
   <div class="nav-links">
     <a href="#how-to-use">How to Use</a>
-    <a href="#samples">Sample Files</a>
-    <a href="#templates">Templates</a>
-    <a href="#parameters">Parameters</a>
+    <a href="#pwd-types">PWD Types</a>
+    <a href="#variants">Vary Variables</a>
+    <a href="#format-layout">Format &amp; Layout</a>
+    <a href="#samples">Downloads</a>
     <a href="#api">API</a>
-    <a href="/app" target="_blank" rel="noopener">Open App &#8599;</a>
+    <a href="https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite"
+       target="_blank" rel="noopener">GitHub</a>
+    <a href="/app" class="nav-cta" target="_blank" rel="noopener">&#128640; Open App</a>
   </div>
 </nav>
 
-<!-- HERO -->
-<section class="hero" role="banner" aria-label="Bridge GAD Generator">
-  <span class="hero-icon" aria-hidden="true">&#127751;</span>
+<!-- HERO ─────────────────────────────────────────────────────────────────── -->
+<section class="hero" aria-label="BridgeCAD Enterprise Suite landing">
+  <div class="hero-eyebrow">&#127751; Maharashtra PWD &bull; IRC/MoRTH &bull; BRIDGECAD-OSS-1.0</div>
   <h1>Bridge GAD Generator</h1>
   <p class="hero-sub">
-    Professional Bridge General Arrangement Drawings from Excel.<br>
-    DXF &middot; PDF &middot; 3D &middot; Bill Generation &middot; AI Optimizer &middot; IRC/IS Compliance
+    Excel → 9-sheet DXF drawing package.<br>
+    15 Maharashtra PWD standard types &bull; parametric variation &bull; IRC compliant.
   </p>
-  <div class="badges" aria-label="Feature highlights">
-    <span class="badge badge-cyan">DXF Drawing</span>
-    <span class="badge badge-amber">Bill Generation</span>
-    <span class="badge badge-green">10+ Exports</span>
-    <span class="badge badge-purple">AI Optimizer</span>
-    <span class="badge badge-cyan">IRC/IS Validated</span>
-    <span class="badge badge-amber">Batch Processing</span>
+  <p class="hero-author">
+    By <strong style="color:rgba(255,255,255,.55)">Er. Rajkumar Singh Chauhan</strong>
+    &mdash; Retd. Addl. Chief Engineer, PWD Rajasthan
+  </p>
+  <div class="badges">
+    <span class="badge bc">9-Sheet DXF</span>
+    <span class="badge ba">15 PWD Types</span>
+    <span class="badge bg">IRC / MoRTH</span>
+    <span class="badge bp">Parametric Variation</span>
+    <span class="badge bc">BOQ Generator</span>
+    <span class="badge ba">QA Report</span>
+    <span class="badge bg">28 E2E Fixtures</span>
+    <span class="badge bp">Open Source</span>
   </div>
-  <div class="cta-group">
+  <div class="cta-row">
     <a href="/app" class="btn btn-primary" target="_blank" rel="noopener">&#128640; Open App</a>
+    <a href="#pwd-types" class="btn btn-amber">&#127751; PWD Generator</a>
     <a href="#how-to-use" class="btn btn-secondary">&#128214; How to Use</a>
-    <a href="#samples" class="btn btn-secondary">&#128190; Sample Files</a>
-    <a href="https://github.com/CRAJKUMARSINGH/Bridge_GAD_Yogendra_Borse"
+    <a href="#samples" class="btn btn-green">&#11015; Sample Files</a>
+    <a href="https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite"
        class="btn btn-secondary" target="_blank" rel="noopener">&#11088; GitHub</a>
   </div>
-  <div id="status-bar" aria-live="polite">
-    <span class="dot dot-amber" id="api-dot"></span>
-    <span id="api-status">Checking API&hellip;</span>
+  <div style="margin-top:1.5rem;display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap">
+    <div class="status-pill">
+      <span class="dot dot-green" id="api-dot"></span>
+      <span id="api-status">Checking service&hellip;</span>
+    </div>
+    <div class="status-pill">
+      <span class="dot dot-green"></span>
+      <span>15/15 PWD types &bull; 28/28 E2E fixtures</span>
+    </div>
   </div>
 </section>
 
-<!-- PIPELINE -->
+<!-- STAT STRIP ───────────────────────────────────────────────────────────── -->
+<div class="stat-strip" role="region" aria-label="Key statistics">
+  <div class="stat"><span class="stat-num">9</span><span class="stat-lbl">Drawing Sheets</span></div>
+  <div class="stat"><span class="stat-num">15</span><span class="stat-lbl">PWD Bridge Types</span></div>
+  <div class="stat"><span class="stat-num">427</span><span class="stat-lbl">Model Fields</span></div>
+  <div class="stat"><span class="stat-num">28</span><span class="stat-lbl">E2E Fixtures</span></div>
+  <div class="stat"><span class="stat-num">150+</span><span class="stat-lbl">QA Rules</span></div>
+  <div class="stat"><span class="stat-num">270 m</span><span class="stat-lbl">Longest Span Set</span></div>
+</div>
+
+<!-- PIPELINE ─────────────────────────────────────────────────────────────── -->
 <div class="section">
   <p class="section-title">&#9889; Workflow Pipeline</p>
-  <div class="pipeline" role="list" aria-label="Processing pipeline">
-    <span class="pipe-step" role="listitem">&#128194; Upload Excel</span>
-    <span class="pipe-arrow" aria-hidden="true">&rarr;</span>
-    <span class="pipe-step" role="listitem">&#128269; Parse &amp; Validate</span>
-    <span class="pipe-arrow" aria-hidden="true">&rarr;</span>
-    <span class="pipe-step" role="listitem">&#9881;&#65039; Auto Calculate</span>
-    <span class="pipe-arrow" aria-hidden="true">&rarr;</span>
-    <span class="pipe-step" role="listitem">&#9999;&#65039; Edit Parameters</span>
-    <span class="pipe-arrow" aria-hidden="true">&rarr;</span>
-    <span class="pipe-step" role="listitem">&#128247; Preview Drawing</span>
-    <span class="pipe-arrow" aria-hidden="true">&rarr;</span>
-    <span class="pipe-step" role="listitem">&#128229; Export DXF/PDF</span>
+  <div class="pipeline">
+    <span class="pipe-step">&#128194; Upload Excel</span>
+    <span class="pipe-arrow">&rarr;</span>
+    <span class="pipe-step">&#128269; Parse &amp; Validate</span>
+    <span class="pipe-arrow">&rarr;</span>
+    <span class="pipe-step">&#9881;&#65039; Derive Geometry</span>
+    <span class="pipe-arrow">&rarr;</span>
+    <span class="pipe-step">&#128247; 9-Sheet DXF</span>
+    <span class="pipe-arrow">&rarr;</span>
+    <span class="pipe-step">&#127919; QA Report</span>
+    <span class="pipe-arrow">&rarr;</span>
+    <span class="pipe-step">&#128229; ZIP Bundle</span>
+  </div>
+
+  <!-- Feature cards -->
+  <div class="grid g4" style="margin-top:1.5rem">
+    <div class="card feat-card">
+      <span class="card-icon">&#128247;</span>
+      <h3>9 Drawing Sheets</h3>
+      <p>Plan, long section, cross-section, foundation, pier/abutment, bearings, BOQ, side elevations, reinforcement. All parametric.</p>
+    </div>
+    <div class="card feat-card">
+      <span class="card-icon">&#127751;</span>
+      <h3 class="feat-new">PWD Generator</h3>
+      <p>All 15 Maharashtra PWD standard bridge types. Pick a type, adjust FREE variables — the engine auto-derives everything else.</p>
+    </div>
+    <div class="card feat-card">
+      <span class="card-icon">&#127899;&#65039;</span>
+      <h3>Parametric Variation</h3>
+      <p>Vary span, pier height, skew, carriageway, HFL, SBC via sliders. Constraints enforced per IRC clause. Soffit/total length auto-derived.</p>
+    </div>
+    <div class="card feat-card">
+      <span class="card-icon">&#127919;</span>
+      <h3>IRC QA Report</h3>
+      <p>150+ rules across IRC 5, 6, 21, 78, 83, SP:55. Grade A+–F with per-clause citations. HTML download.</p>
+    </div>
   </div>
 </div>
 
-<!-- HOW TO USE MANUAL -->
+<!-- HOW TO USE ───────────────────────────────────────────────────────────── -->
 <div class="section" id="how-to-use">
   <p class="section-title">&#128214; How to Use — Step by Step</p>
+  <div class="steps">
 
-  <div class="manual-step">
-    <div class="step-num">1</div>
-    <div class="step-body">
-      <h4>Download a Template or Sample File</h4>
-      <p>Go to the <a href="#templates" style="color:var(--cyan)">Templates</a> or
-        <a href="#samples" style="color:var(--cyan)">Sample Files</a> section below.
-        Download the Excel file that best matches your bridge type.
-        Templates have all required parameters pre-filled with standard values.
-        Samples are real project inputs you can study and modify.</p>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <h4>Download a Template or Sample</h4>
+        <p>Go to <a href="#samples">Downloads</a> and grab an Excel template matching your bridge type.
+          Templates have all required parameters pre-filled to IRC standards.
+          Alternatively, pick a Maharashtra PWD standard type in the
+          <a href="#pwd-types">PWD Generator</a> tab — no Excel needed.</p>
+      </div>
     </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <h4>Edit the Excel File (if using workbook input)</h4>
+        <p>Open the <code>.xlsx</code> in Excel or LibreOffice Calc. Edit only the <strong style="color:var(--amber)">Value column</strong>. Key parameters:</p>
+        <ul>
+          <li><code>NSPAN</code> &mdash; Number of spans</li>
+          <li><code>SPAN1</code> &mdash; Span length (m)</li>
+          <li><code>CCBR</code> &mdash; Carriageway width (m)</li>
+          <li><code>DATUM</code> / <code>TOPRL</code> &mdash; Datum and road formation levels (m RL)</li>
+          <li><code>SKEW</code> &mdash; Skew angle in degrees (0 = straight)</li>
+        </ul>
+        <p style="margin-top:.5rem">Full parameter reference: <a href="#parameters">see §Parameters below</a>.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <h4>Open the App and Choose Your Path</h4>
+        <p><a href="/app" target="_blank" rel="noopener">Open App &#8599;</a> in a new tab. You have three entry points:</p>
+        <ul>
+          <li><strong style="color:var(--cyan)">📐 Drawing Gen tab</strong> — upload your Excel file, pick scale &amp; format, generate 9-sheet DXF/ZIP.</li>
+          <li><strong style="color:var(--cyan)">🎛️ PWD Generator tab</strong> — no Excel needed. Select a PWD bridge type, adjust sliders, generate directly.</li>
+          <li><strong style="color:var(--cyan)">📁 Load Project tab</strong> — parse a workbook and explore metadata before generating.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div>
+        <h4>Choose Format and Scale</h4>
+        <p>In the Drawing Gen or PWD Generator tab, select:</p>
+        <ul>
+          <li><strong>Format:</strong> DXF only &bull; DXF + PNG preview &bull; Full ZIP (DXF + PDF + BOQ + QA)</li>
+          <li><strong>Scale:</strong> Auto (largest IRC SP:55 rung that fits) &bull; 1:50 &bull; 1:100 &bull; 1:200 &bull; 1:500</li>
+        </ul>
+        <p style="margin-top:.4rem">For 270 m bridges (9 spans) the auto-scale selects 1:500 and splits Sheet 2 into two bands with match-lines.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div>
+        <h4>Run QA Check (Recommended)</h4>
+        <p>Go to <strong style="color:var(--amber)">✅ Validate tab</strong>. The IRC compliance engine scores your bridge 0–100 and flags
+        issues like insufficient freeboard, weak SBC for open foundation, or span/depth ratio below IRC 112 minimum. Download the HTML report.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">6</div>
+      <div>
+        <h4>Download DXF Package</h4>
+        <p>Click <strong style="color:var(--amber)">⬇ Download DXF Package (ZIP)</strong>. The ZIP contains all 9 DXF sheets plus a
+        <code>params.resolved.json</code> with the exact parameter set that produced the drawings — a provenance record.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">7</div>
+      <div>
+        <h4>Open in CAD / Viewer</h4>
+        <p>Open the DXF files in AutoCAD, BricsCAD, LibreCAD, or the free
+        <a href="https://viewer.autodesk.com" target="_blank" rel="noopener">Autodesk A360 viewer</a>
+        (drag &amp; drop). To convert to PDF: <code>ezdxf draw -o out.pdf file.dxf</code>.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PWD GENERATOR ────────────────────────────────────────────────────────── -->
+<div class="section" id="pwd-types">
+  <p class="section-title">&#127751; Maharashtra PWD Standard Bridge Types (15)</p>
+  <p style="color:var(--muted);font-size:.84rem;margin-bottom:1.2rem">
+    Source: Maharashtra PWD booklet "General Arrangement Drawings for Various Types of Bridges",
+    C.E. Designs, letter No. 2473 dt. 31.12.2022.
+    All 15 types generate 9-sheet DXF packages. <a href="/app" target="_blank" rel="noopener">Open the PWD Generator tab &#8599;</a>
+  </p>
+
+  <div class="alert alert-info">
+    <span class="alert-icon">&#8505;&#65039;</span>
+    <span>In the app's <strong>🎛️ PWD Generator</strong> tab you can pick any type, adjust span length, pier height,
+    carriageway width, skew, HFL, freeboard and SBC — the resolver auto-derives total length, soffit level,
+    pier count and bearing type, enforcing all IRC constraints before generation.</span>
   </div>
 
-  <div class="manual-step">
-    <div class="step-num">2</div>
-    <div class="step-body">
-      <h4>Edit the Excel File</h4>
-      <p>Open the downloaded <code>.xlsx</code> file in Excel or LibreOffice Calc.
-        The file has three columns: <code>Value</code>, <code>Variable</code>, <code>Description</code>.
-        Edit only the <strong style="color:var(--amber)">Value</strong> column (column A).
-        Do not rename or reorder the Variable column. Key parameters to set:</p>
-      <ul style="margin:.5rem 0 0 1rem;font-size:.82rem;color:var(--muted);line-height:2">
-        <li><code>NSPAN</code> &mdash; Number of spans (1, 2, 3&hellip;)</li>
-        <li><code>SPAN1</code> &mdash; Span length in metres</li>
-        <li><code>CCBR</code> &mdash; Carriageway width in metres</li>
-        <li><code>DATUM</code> &mdash; Datum level (reduced level of river bed)</li>
-        <li><code>TOPRL</code> &mdash; Top of road level</li>
-        <li><code>SKEW</code> &mdash; Skew angle in degrees (0 for straight)</li>
-      </ul>
-    </div>
+  <div style="overflow-x:auto;margin-top:1rem">
+    <table class="pwd-table">
+      <thead>
+        <tr>
+          <th>Drawing No.</th>
+          <th>Type</th>
+          <th>Spans</th>
+          <th>Foundation</th>
+          <th>Superstructure</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>BR-I/2022-001</td><td>Open Fdn + PCC Pier + Solid Slab</td><td>4&#215;10 m</td>
+            <td><span class="tag tag-open">Open</span></td><td>RCC Solid Slab</td></tr>
+        <tr><td>BR-I/2022-002</td><td>Open Fdn + RCC Pier + Solid Slab</td><td>4&#215;10 m</td>
+            <td><span class="tag tag-open">Open</span></td><td>RCC Solid Slab</td></tr>
+        <tr><td>BR-I/2022-003</td><td>Raft Fdn + RCC Pier + Solid Slab</td><td>5&#215;10 m</td>
+            <td><span class="tag tag-raft">Raft</span></td><td>RCC Solid Slab</td></tr>
+        <tr><td>BR-I/2022-004</td><td>Raft Fdn + RCC Box Cell</td><td>3-unit 61.25 m</td>
+            <td><span class="tag tag-raft">Raft</span></td><td>RCC Box Cell</td></tr>
+        <tr><td>BR-I/2022-005</td><td>RCC Portal + Open Fdn (Submersible)</td><td>6&#215;15 m</td>
+            <td><span class="tag tag-open">Open</span></td><td>RCC Portal</td></tr>
+        <tr><td>BR-I/2022-006</td><td>Open Fdn + RCC Pier + Cap + Slab (Skew 20°)</td><td>5&#215;10 m</td>
+            <td><span class="tag tag-open">Open</span></td><td>RCC Solid Slab</td></tr>
+        <tr><td>BR-I/2022-007</td><td>Open Fdn + RCC Pier + 3-Girder T-Beam</td><td>4&#215;15 m</td>
+            <td><span class="tag tag-open">Open</span></td><td>RCC T-Beam</td></tr>
+        <tr><td>BR-I/2022-008</td><td>Pile Fdn + RCC Pier + 3-Girder T-Beam</td><td>3&#215;25 m</td>
+            <td><span class="tag tag-pile">Pile</span></td><td>RCC T-Beam</td></tr>
+        <tr><td>BR-I/2022-009</td><td>Open Fdn + RCC Pier + PSC 4-Girder</td><td>4&#215;25 m</td>
+            <td><span class="tag tag-open">Open</span></td><td>PSC I-Girder</td></tr>
+        <tr><td>BR-I/2022-010</td><td>Pile Fdn + RCC Pier + PSC 4-Girder (270 m)</td><td>9&#215;30 m</td>
+            <td><span class="tag tag-pile">Pile</span></td><td>PSC I-Girder</td></tr>
+        <tr><td>BR-I/2022-011</td><td>Well Fdn + RCC Pier + PSC Box (Navigational)</td><td>2&#215;35+1&#215;50 m</td>
+            <td><span class="tag tag-well">Well</span></td><td>PSC Box</td></tr>
+        <tr><td>BR-I/2022-012</td><td>Pile Fdn + RCC Pier + PSC Box</td><td>2&#215;32.5 m</td>
+            <td><span class="tag tag-pile">Pile</span></td><td>PSC Box</td></tr>
+        <tr><td>BR-I/2022-013</td><td>Well Fdn + RCC Pier + PSC Box</td><td>2&#215;47.5 m</td>
+            <td><span class="tag tag-well">Well</span></td><td>PSC Box</td></tr>
+        <tr><td>BR-I/2022-014</td><td>Open Fdn + RCC Arch (Pedestrian F.O.B.)</td><td>11+25.7+11 m</td>
+            <td><span class="tag tag-open">Open</span></td><td>RCC Arch</td></tr>
+        <tr><td>BR-I/2022-015</td><td>Open Fdn + Precast Block Arch (Vehicular)</td><td>61.94 m</td>
+            <td><span class="tag tag-open">Open</span></td><td>Precast Arch</td></tr>
+      </tbody>
+    </table>
   </div>
+</div>
 
-  <div class="manual-step">
-    <div class="step-num">3</div>
-    <div class="step-body">
-      <h4>Open the App and Upload</h4>
-      <p>Click <a href="/app" target="_blank" rel="noopener" style="color:var(--cyan)">Open App &#8599;</a>
-        to launch the Streamlit interface. Go to the
-        <strong style="color:var(--amber)">Drawing tab</strong> (Tab 1).
-        Click <em>Browse files</em> and upload your edited Excel file.
-        The app will instantly show a parameter preview and bridge stats
-        (spans, span length, width).</p>
-    </div>
-  </div>
+<!-- VARY VARIABLES ───────────────────────────────────────────────────────── -->
+<div class="section" id="variants">
+  <p class="section-title">&#127899;&#65039; Vary Variables — Parametric Control</p>
 
-  <div class="manual-step">
-    <div class="step-num">4</div>
-    <div class="step-body">
-      <h4>Run Quality Check (Optional but Recommended)</h4>
-      <p>Switch to the <strong style="color:var(--amber)">Quality tab</strong> (Tab 4)
-        after uploading. The IRC/IS compliance checker will score your design out of 100
-        and flag issues like insufficient vertical clearance (&lt;5.5m per IRC 5:2015),
-        slab thickness violations (L/20 rule), or narrow carriageway width.</p>
-    </div>
-  </div>
-
-  <div class="manual-step">
-    <div class="step-num">5</div>
-    <div class="step-body">
-      <h4>Generate the Drawing</h4>
-      <p>Back in Tab 1, select your <strong style="color:var(--amber)">AutoCAD version</strong>
-        (R2010 recommended, R2006 for older software) and
-        <strong style="color:var(--amber)">output format</strong> (DXF, PDF, PNG, SVG&hellip;).
-        Click <em>Generate Drawing</em>. Generation takes 1&ndash;3 seconds.
-        A download button appears immediately when ready.</p>
-    </div>
-  </div>
-
-  <div class="manual-step">
-    <div class="step-num">6</div>
-    <div class="step-body">
-      <h4>Explore Other Tabs</h4>
+  <div class="grid g2" style="margin-bottom:1.5rem">
+    <div class="card">
+      <span class="card-icon">&#128274;</span>
+      <h3>Variable Classes</h3>
       <p>
-        <strong style="color:var(--cyan)">Tab 2 &mdash; Bill:</strong> Generate statutory contractor bills with hierarchical items.<br>
-        <strong style="color:var(--cyan)">Tab 3 &mdash; Templates:</strong> Download any of 5 standard bridge templates as Excel.<br>
-        <strong style="color:var(--cyan)">Tab 5 &mdash; 3D:</strong> Interactive Plotly 3D model of your bridge.<br>
-        <strong style="color:var(--cyan)">Tab 7 &mdash; AI:</strong> Cost estimation and material quantity predictions.<br>
-        <strong style="color:var(--cyan)">Tab 8 &mdash; Export:</strong> Batch export to Excel, CSV, HTML, ZIP.
+        <span class="var-class vc-free">FREE</span> — Engineer dials. Full IRC-bounded range.<br>
+        <span class="var-class vc-locked">LOCKED</span> — Booklet identity. Fixed per standard type.<br>
+        <span class="var-class vc-derive">DERIVED</span> — Auto-calculated. Never type by hand.
+      </p>
+    </div>
+    <div class="card">
+      <span class="card-icon">&#9881;&#65039;</span>
+      <h3>Auto-Derived Fields</h3>
+      <p>When you change any FREE variable, the engine instantly recalculates:<br>
+        <code>total_length</code> = &#931; span_lengths &bull;
+        <code>soffit_level</code> = RTL &#8722; deck &#8722; WC &#8722; girder &bull;
+        <code>pier_count</code> = spans &#8722; 1 &bull;
+        <code>bearing_type</code> from superstructure + span
       </p>
     </div>
   </div>
 
-  <div class="manual-step">
-    <div class="step-num">7</div>
-    <div class="step-body">
-      <h4>Batch Processing</h4>
-      <p>In <strong style="color:var(--amber)">Tab 3</strong>, scroll to the Batch Processing section.
-        Upload multiple Excel files at once. Click <em>Generate All</em>.
-        All DXF files are bundled into a single ZIP for download.</p>
+  <details open>
+    <summary>FREE Variable Reference — all 15 controllable dials</summary>
+    <div class="details-body">
+      <table class="param-tbl" style="margin-top:.5rem">
+        <thead><tr><th>Variable</th><th>Unit</th><th>Range</th><th>IRC Clause</th></tr></thead>
+        <tbody>
+          <tr><td>span_length_m</td><td>m</td><td>6 – 50 (step 0.5)</td><td>IRC 112 Table 12.1</td></tr>
+          <tr><td>span_count</td><td>—</td><td>1 – 12</td><td>IRC 5 cl.101</td></tr>
+          <tr><td>carriageway_width</td><td>m</td><td>3.5 / 7.5 / 11.0</td><td>IRC 73</td></tr>
+          <tr><td>footpath_width</td><td>m</td><td>0 – 2.0 (step 0.25)</td><td>IRC 103</td></tr>
+          <tr><td>skew_deg</td><td>°</td><td>0 – 30 (step 5)</td><td>IRC 5 cl.101.3</td></tr>
+          <tr><td>pier_height_m</td><td>m</td><td>3 – 25</td><td>site datum</td></tr>
+          <tr><td>pier_shaft_width_m</td><td>m</td><td>0.8 – 3.0 (step 0.1)</td><td>IRC 112 cl.16</td></tr>
+          <tr><td>deck_thickness_mm</td><td>mm</td><td>200 – 900 (step 25)</td><td>IRC 112</td></tr>
+          <tr><td>girder_depth_mm</td><td>mm</td><td>600 – 3000 (step 50)</td><td>IRC 112</td></tr>
+          <tr><td>hfl_m</td><td>m RL</td><td>0 – 1000</td><td>PSD</td></tr>
+          <tr><td>freeboard_m</td><td>m</td><td>0.6 – 4.0 (step 0.05)</td><td>IRC 5 cl.104</td></tr>
+          <tr><td>scour_depth_m</td><td>m</td><td>0.5 – 8.0</td><td>IRC 78 cl.703</td></tr>
+          <tr><td>pile_diameter_mm</td><td>mm</td><td>1000 / 1200 / 1500</td><td>IRC 78 cl.709</td></tr>
+          <tr><td>pile_length_m</td><td>m</td><td>6 – 45 (step 0.5)</td><td>IRC 78 cl.709</td></tr>
+          <tr><td>sbc_t_per_m2</td><td>t/m²</td><td>10 – 200</td><td>IRC 78 cl.701</td></tr>
+        </tbody>
+      </table>
     </div>
-  </div>
+  </details>
 
-  <div class="manual-step">
-    <div class="step-num">8</div>
-    <div class="step-body">
-      <h4>API Usage (Developers)</h4>
-      <p>POST your Excel file directly to the REST API and receive a DXF back.
-        No browser needed &mdash; integrate into your own pipeline.</p>
-      <div class="code-block" style="margin-top:.75rem">
-        <span class="cm"># Generate DXF via API</span><br>
-        curl -X POST /api/predict \<br>
-        &nbsp;&nbsp;-F <span class="vl">"excel_file=@my_bridge.xlsx"</span> \<br>
-        &nbsp;&nbsp;-G -d <span class="vl">"format=dxf"</span> \<br>
-        &nbsp;&nbsp;--output bridge_drawing.dxf
-      </div>
+  <div style="margin-top:1.2rem">
+    <h3 style="font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:.7rem">
+      &#128187; CLI sweep examples
+    </h3>
+    <div class="codeblock">
+<span class="cm"># Vary pier height 6–12 m in 3 m steps for type 001</span><br>
+<span class="kw">python</span> scripts/generate_all_pwd_gads.py <span class="fl">\</span><br>
+&nbsp;&nbsp;<span class="vl">--type</span> BR-I-2022-001 <span class="vl">--sweep</span> pier_height_m=6:12:3<br>
+<br>
+<span class="cm"># Change span length and carriageway together</span><br>
+<span class="kw">python</span> scripts/generate_all_pwd_gads.py <span class="fl">\</span><br>
+&nbsp;&nbsp;<span class="vl">--type</span> BR-I-2022-007 <span class="vl">--set</span> span_length_m=18 <span class="vl">--set</span> carriageway_width=11.0<br>
+<br>
+<span class="cm"># Dry run — resolve and print without generating DXF</span><br>
+<span class="kw">python</span> scripts/generate_all_pwd_gads.py <span class="fl">\</span><br>
+&nbsp;&nbsp;<span class="vl">--type</span> BR-I-2022-010 <span class="vl">--sweep</span> pier_height_m=10:16:2 <span class="vl">--dry-run</span>
     </div>
   </div>
 </div>
 
-<!-- TEMPLATE DOWNLOADS -->
-<div class="section" id="templates">
-  <p class="section-title">&#128203; Excel Templates — Ready to Use</p>
-  <p style="color:var(--muted);font-size:.88rem;margin-bottom:1.5rem">
-    All parameters pre-filled to IRC standards. Download, edit the Value column, upload to the app.
-  </p>
-  <div class="samples-grid">
-
-    <div class="sample-card">
-      <div class="sample-info">
-        <div class="sample-name">Simple Span 12m</div>
-        <div class="sample-desc">Single span RCC slab bridge</div>
-        <div class="sample-meta">1 span &middot; 12m &middot; 8.0m wide &middot; 54 params</div>
-      </div>
-      <a href="/samples/template_simple_12m.xlsx" download class="btn-dl">
-        &#11015; .xlsx
-      </a>
+<!-- FORMAT & LAYOUT ──────────────────────────────────────────────────────── -->
+<div class="section" id="format-layout">
+  <p class="section-title">&#127899;&#65039; Format &amp; Layout Choice</p>
+  <div class="grid g3" style="margin-bottom:1.5rem">
+    <div class="card">
+      <span class="card-icon">&#128247;</span>
+      <h3>DXF (default)</h3>
+      <p>Full 9-sheet package. Open in AutoCAD, BricsCAD, LibreCAD, or the
+      <a href="https://viewer.autodesk.com" target="_blank" rel="noopener">A360 viewer</a> (drag &amp; drop).</p>
     </div>
-
-    <div class="sample-card">
-      <div class="sample-info">
-        <div class="sample-name">Continuous 3&times;12m</div>
-        <div class="sample-desc">3-span continuous RCC slab</div>
-        <div class="sample-meta">3 spans &middot; 36m total &middot; 10.5m wide &middot; 54 params</div>
-      </div>
-      <a href="/samples/template_continuous_3x12m.xlsx" download class="btn-dl">
-        &#11015; .xlsx
-      </a>
+    <div class="card">
+      <span class="card-icon">&#128444;&#65039;</span>
+      <h3>PNG Preview</h3>
+      <p>150–200 dpi raster of each sheet. Check geometry without a CAD viewer. Generated inline in the app.</p>
     </div>
-
-    <div class="sample-card">
-      <div class="sample-info">
-        <div class="sample-name">Girder Bridge 4&times;18m</div>
-        <div class="sample-desc">4-span RCC girder bridge</div>
-        <div class="sample-meta">4 spans &middot; 72m total &middot; 12.0m wide &middot; 54 params</div>
-      </div>
-      <a href="/samples/template_girder_4x18m.xlsx" download class="btn-dl">
-        &#11015; .xlsx
-      </a>
+    <div class="card">
+      <span class="card-icon">&#128196;</span>
+      <h3>PDF via ZIP</h3>
+      <p>Full bundle — DXF + PDF + BOQ Excel/CSV + QA HTML + <code>manifest.json</code>. Generated by <strong>Export Bundle</strong> tab.</p>
     </div>
-
-    <div class="sample-card">
-      <div class="sample-info">
-        <div class="sample-name">Box Culvert 8m</div>
-        <div class="sample-desc">Single cell box culvert</div>
-        <div class="sample-meta">1 span &middot; 8m &middot; 8.0m wide &middot; 54 params</div>
-      </div>
-      <a href="/samples/template_box_culvert_8m.xlsx" download class="btn-dl">
-        &#11015; .xlsx
-      </a>
-    </div>
-
-    <div class="sample-card">
-      <div class="sample-info">
-        <div class="sample-name">Arch Bridge 24m</div>
-        <div class="sample-desc">RCC arch bridge</div>
-        <div class="sample-meta">1 span &middot; 24m &middot; 11.0m wide &middot; 54 params</div>
-      </div>
-      <a href="/samples/template_arch_24m.xlsx" download class="btn-dl">
-        &#11015; .xlsx
-      </a>
-    </div>
-
   </div>
+
+  <details>
+    <summary>Scale selection — how the engine picks the right rung</summary>
+    <div class="details-body" style="margin-top:.5rem">
+      <p>The engine picks the <strong>largest IRC SP:55 standard rung</strong> (1:50 → 1:500)
+      where text ≥ 2.5 mm and annotation gaps ≥ 8 mm per pier label.
+      For the 270 m 9-span type 010 this produces 1:500 with two horizontal bands and match-lines.</p>
+      <p style="margin-top:.5rem">Override on the CLI: <code>bridgecad draw booklet bridge.xlsx -o out/ --scale 200</code></p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Which sheet set for which purpose</summary>
+    <div class="details-body">
+      <table class="param-tbl" style="margin-top:.5rem">
+        <thead><tr><th>Purpose</th><th>Sheets to use</th><th>Command</th></tr></thead>
+        <tbody>
+          <tr><td>Tender submission</td><td>All 9 DXF + PDF</td><td><code>bridgecad export all</code></td></tr>
+          <tr><td>Site reference</td><td>Sheet 1 + 2 + 5</td><td>Extract from ZIP</td></tr>
+          <tr><td>Design check</td><td>Sheet 3 + 5 + 8</td><td>Extract from ZIP</td></tr>
+          <tr><td>BOQ pricing</td><td>Sheet 7 + boq.xlsx</td><td><code>bridgecad bill gen</code></td></tr>
+          <tr><td>QA review</td><td>qa.html + Sheet 7</td><td><code>bridgecad validate</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
 </div>
 
-<!-- SAMPLE INPUT FILES -->
+<!-- DOWNLOAD TEMPLATES ───────────────────────────────────────────────────── -->
 <div class="section" id="samples">
-  <p class="section-title">&#128190; Sample Input Files — Real Projects</p>
-  <p style="color:var(--muted);font-size:.88rem;margin-bottom:1.5rem">
-    Real bridge parameter files. Use as reference or upload directly to the app to see a generated drawing.
+  <p class="section-title">&#11015; Downloads — Templates &amp; Samples</p>
+  <p style="color:var(--muted);font-size:.84rem;margin-bottom:1.3rem">
+    Excel templates have all parameters pre-filled to IRC standards. Edit the Value column, upload to the app.
   </p>
-  <div class="samples-grid">
 
+  <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;
+    letter-spacing:.08em;color:var(--amber);margin-bottom:.8rem">Excel Templates</h3>
+  <div class="grid g2" style="margin-bottom:1.5rem">
     <div class="sample-card">
       <div class="sample-info">
-        <div class="sample-name">Standard Sample</div>
+        <div class="sample-name">Simple Span 12 m</div>
+        <div class="sample-desc">Single span RCC slab bridge</div>
+        <div class="sample-meta">1 span &bull; 12 m &bull; 7.5 m wide &bull; 54 params</div>
+      </div>
+      <a href="/samples/template_simple_12m.xlsx" download class="btn-dl">&#11015; .xlsx</a>
+    </div>
+    <div class="sample-card">
+      <div class="sample-info">
+        <div class="sample-name">Continuous 3&times;12 m</div>
+        <div class="sample-desc">3-span continuous RCC slab</div>
+        <div class="sample-meta">3 spans &bull; 36 m total &bull; 7.5 m wide</div>
+      </div>
+      <a href="/samples/template_continuous_3x12m.xlsx" download class="btn-dl">&#11015; .xlsx</a>
+    </div>
+    <div class="sample-card">
+      <div class="sample-info">
+        <div class="sample-name">Girder Bridge 4&times;18 m</div>
+        <div class="sample-desc">4-span RCC T-beam girder</div>
+        <div class="sample-meta">4 spans &bull; 72 m total &bull; 7.5 m wide</div>
+      </div>
+      <a href="/samples/template_girder_4x18m.xlsx" download class="btn-dl">&#11015; .xlsx</a>
+    </div>
+    <div class="sample-card">
+      <div class="sample-info">
+        <div class="sample-name">Box Culvert 8 m</div>
+        <div class="sample-desc">Single cell RCC box culvert</div>
+        <div class="sample-meta">1 span &bull; 8 m &bull; 7.5 m wide</div>
+      </div>
+      <a href="/samples/template_box_culvert_8m.xlsx" download class="btn-dl">&#11015; .xlsx</a>
+    </div>
+    <div class="sample-card">
+      <div class="sample-info">
+        <div class="sample-name">Arch Bridge 24 m</div>
+        <div class="sample-desc">RCC arch bridge</div>
+        <div class="sample-meta">1 span &bull; 24 m &bull; 7.5 m wide</div>
+      </div>
+      <a href="/samples/template_arch_24m.xlsx" download class="btn-dl">&#11015; .xlsx</a>
+    </div>
+    <div class="sample-card">
+      <div class="sample-info">
+        <div class="sample-name">Generic Sample</div>
         <div class="sample-desc">Typical 3-span slab bridge input</div>
-        <div class="sample-meta">Excel &middot; 6.2 KB &middot; 57 parameters</div>
+        <div class="sample-meta">Excel &bull; 57 parameters &bull; real values</div>
       </div>
       <a href="/samples/sample_input.xlsx" download class="btn-dl">&#11015; .xlsx</a>
     </div>
+  </div>
 
-    <div class="sample-card">
-      <div class="sample-info">
-        <div class="sample-name">Simple Bridge</div>
-        <div class="sample-desc">Minimal parameter set for quick testing</div>
-        <div class="sample-meta">Excel &middot; 6.3 KB &middot; 35 parameters</div>
-      </div>
-      <a href="/samples/bridge_simple_12m.xlsx" download class="btn-dl">&#11015; .xlsx</a>
-    </div>
-
-    <div class="sample-card">
-      <div class="sample-info">
-        <div class="sample-name">Comprehensive</div>
-        <div class="sample-desc">Full parameter set with all optional fields</div>
-        <div class="sample-meta">Excel &middot; 7.6 KB &middot; 54 parameters</div>
-      </div>
-      <a href="/samples/bridge_comprehensive.xlsx" download class="btn-dl">&#11015; .xlsx</a>
-    </div>
-
-    <div class="sample-card">
-      <div class="sample-info">
-        <div class="sample-name">23-Span Bridge</div>
-        <div class="sample-desc">Large multi-span bridge (real project)</div>
-        <div class="sample-meta">Excel &middot; 6.8 KB &middot; 79 parameters</div>
-      </div>
-      <a href="/samples/bridge_23span.xlsx" download class="btn-dl">&#11015; .xlsx</a>
-    </div>
-
-    <div class="sample-card">
-      <div class="sample-info">
-        <div class="sample-name">Large Bridge</div>
-        <div class="sample-desc">Wide carriageway with skew angle</div>
-        <div class="sample-meta">Excel &middot; 6.8 KB &middot; 61 parameters</div>
-      </div>
-      <a href="/samples/bridge_large.xlsx" download class="btn-dl">&#11015; .xlsx</a>
-    </div>
-
-    <div class="sample-card">
-      <div class="sample-info">
-        <div class="sample-name">JSON Format</div>
-        <div class="sample-desc">Parameters as JSON (API / programmatic use)</div>
-        <div class="sample-meta">JSON &middot; 0.2 KB</div>
-      </div>
-      <a href="/samples/bridge_parameters.json" download class="btn-dl">&#11015; .json</a>
-    </div>
-
-    <div class="sample-card">
-      <div class="sample-info">
-        <div class="sample-name">Text Format</div>
-        <div class="sample-desc">Plain text key=value parameter file</div>
-        <div class="sample-meta">TXT &middot; 0.1 KB</div>
-      </div>
-      <a href="/samples/bridge_parameters.txt" download class="btn-dl">&#11015; .txt</a>
-    </div>
-
+  <div class="alert alert-warn">
+    <span class="alert-icon">&#128161;</span>
+    <span>For the Maharashtra PWD standard types, use the <strong>🎛️ PWD Generator</strong> tab in the app — no Excel file needed.
+    The catalogue provides all baseline values and auto-derives geometry from your variable adjustments.</span>
   </div>
 </div>
 
-<!-- PARAMETER REFERENCE -->
+<!-- PARAMETER REFERENCE ─────────────────────────────────────────────────── -->
 <div class="section" id="parameters">
-  <p class="section-title">&#128211; Parameter Reference</p>
-  <p style="color:var(--muted);font-size:.88rem;margin-bottom:1.5rem">
-    All parameters use SI units (metres, degrees). The Excel file must have columns:
-    <code style="color:var(--amber)">Value</code>,
-    <code style="color:var(--amber)">Variable</code>,
-    <code style="color:var(--amber)">Description</code>.
-    Edit only the Value column.
+  <p class="section-title">&#128211; Parameter Reference (Excel Workbook)</p>
+  <p style="color:var(--muted);font-size:.84rem;margin-bottom:1.2rem">
+    Three columns in the Excel file: <code>Value</code> (edit this), <code>Variable</code>, <code>Description</code>.
+    Units are metres and degrees unless stated.
   </p>
 
   <details open>
     <summary>Geometry &amp; Scale</summary>
     <div class="details-body">
-      <table class="param-table">
-        <thead><tr><th>Variable</th><th>Description</th><th>Typical Value</th><th>Unit</th></tr></thead>
+      <table class="param-tbl">
+        <thead><tr><th>Variable</th><th>Description</th><th>Typical</th><th>Unit</th></tr></thead>
         <tbody>
-          <tr><td>SCALE1</td><td>Drawing scale numerator</td><td>186</td><td>&mdash;</td></tr>
-          <tr><td>SCALE2</td><td>Drawing scale denominator</td><td>1</td><td>&mdash;</td></tr>
-          <tr><td>SKEW</td><td>Skew angle (0 = straight)</td><td>0</td><td>degrees</td></tr>
-          <tr><td>DATUM</td><td>Datum / river bed level</td><td>95.000</td><td>m RL</td></tr>
-          <tr><td>TOPRL</td><td>Top of road level</td><td>100.000</td><td>m RL</td></tr>
-          <tr><td>LEFT</td><td>Left chainage origin</td><td>0</td><td>m</td></tr>
-          <tr><td>RIGHT</td><td>Right chainage limit</td><td>100</td><td>m</td></tr>
-          <tr><td>XINCR</td><td>Chainage grid increment</td><td>5</td><td>m</td></tr>
-          <tr><td>YINCR</td><td>Level grid increment</td><td>1</td><td>m</td></tr>
-          <tr><td>NOCH</td><td>Number of chainage columns</td><td>2</td><td>&mdash;</td></tr>
+          <tr><td>SCALE1</td><td>Drawing scale numerator</td><td>186</td><td>—</td></tr>
+          <tr><td>SKEW</td><td>Skew angle (0 = straight)</td><td>0</td><td>deg</td></tr>
+          <tr><td>DATUM</td><td>Datum / river bed RL</td><td>95.000</td><td>m RL</td></tr>
+          <tr><td>TOPRL</td><td>Top of road formation level</td><td>100.000</td><td>m RL</td></tr>
+          <tr><td>LEFT/RIGHT</td><td>Chainage limits</td><td>0 / 100</td><td>m</td></tr>
+          <tr><td>XINCR/YINCR</td><td>Grid increments</td><td>5 / 1</td><td>m</td></tr>
         </tbody>
       </table>
     </div>
@@ -521,45 +766,36 @@
   <details>
     <summary>Superstructure</summary>
     <div class="details-body">
-      <table class="param-table">
-        <thead><tr><th>Variable</th><th>Description</th><th>Typical Value</th><th>Unit</th></tr></thead>
+      <table class="param-tbl">
+        <thead><tr><th>Variable</th><th>Description</th><th>Typical</th><th>Unit</th></tr></thead>
         <tbody>
-          <tr><td>NSPAN</td><td>Number of spans</td><td>3</td><td>&mdash;</td></tr>
+          <tr><td>NSPAN</td><td>Number of spans</td><td>3</td><td>—</td></tr>
           <tr><td>SPAN1</td><td>Span length</td><td>12</td><td>m</td></tr>
-          <tr><td>LBRIDGE</td><td>Total bridge length (NSPAN &times; SPAN1)</td><td>36</td><td>m</td></tr>
-          <tr><td>CCBR</td><td>Carriageway width (kerb to kerb)</td><td>10.5</td><td>m</td></tr>
+          <tr><td>CCBR</td><td>Carriageway width (kerb-to-kerb)</td><td>7.5</td><td>m</td></tr>
           <tr><td>RTL</td><td>Road top level at bridge</td><td>100.98</td><td>m RL</td></tr>
-          <tr><td>SOFL</td><td>Soffit level (underside of deck)</td><td>99.5</td><td>m RL</td></tr>
+          <tr><td>SOFL</td><td>Soffit level (deck underside)</td><td>99.5</td><td>m RL</td></tr>
           <tr><td>SLBTHC</td><td>Slab thickness at centre</td><td>0.75</td><td>m</td></tr>
-          <tr><td>SLBTHE</td><td>Slab thickness at edge</td><td>0.75</td><td>m</td></tr>
-          <tr><td>SLBTHT</td><td>Slab thickness total</td><td>0.75</td><td>m</td></tr>
-          <tr><td>KERBW</td><td>Kerb width</td><td>0.23</td><td>m</td></tr>
-          <tr><td>KERBD</td><td>Kerb depth</td><td>0.15</td><td>m</td></tr>
-          <tr><td>WCTH</td><td>Wearing course thickness</td><td>0.08</td><td>m</td></tr>
-          <tr><td>LASLAB</td><td>Approach slab length</td><td>3.5</td><td>m</td></tr>
-          <tr><td>APTHK</td><td>Approach slab thickness</td><td>0.2</td><td>m</td></tr>
+          <tr><td>WCTH</td><td>Wearing course thickness</td><td>0.075</td><td>m</td></tr>
+          <tr><td>KERBW / KERBD</td><td>Kerb width / depth</td><td>0.23 / 0.15</td><td>m</td></tr>
+          <tr><td>LASLAB / APTHK</td><td>Approach slab length / thickness</td><td>3.5 / 0.2</td><td>m</td></tr>
         </tbody>
       </table>
     </div>
   </details>
 
   <details>
-    <summary>Pier &amp; Cap</summary>
+    <summary>Pier, Cap &amp; Footing</summary>
     <div class="details-body">
-      <table class="param-table">
-        <thead><tr><th>Variable</th><th>Description</th><th>Typical Value</th><th>Unit</th></tr></thead>
+      <table class="param-tbl">
+        <thead><tr><th>Variable</th><th>Description</th><th>Typical</th><th>Unit</th></tr></thead>
         <tbody>
-          <tr><td>PIERN</td><td>Number of piers (NSPAN &minus; 1)</td><td>2</td><td>&mdash;</td></tr>
           <tr><td>PIERTW</td><td>Pier top width</td><td>1.5</td><td>m</td></tr>
-          <tr><td>PIERST</td><td>Pier stem height</td><td>5</td><td>m</td></tr>
-          <tr><td>BATTR</td><td>Pier batter (1 in N)</td><td>10</td><td>&mdash;</td></tr>
-          <tr><td>CAPT</td><td>Pier cap top level</td><td>100.5</td><td>m RL</td></tr>
-          <tr><td>CAPB</td><td>Pier cap bottom level</td><td>99.3</td><td>m RL</td></tr>
+          <tr><td>PIERST</td><td>Pier straight height</td><td>5</td><td>m</td></tr>
+          <tr><td>BATTR</td><td>Pier batter (1:N)</td><td>10</td><td>—</td></tr>
+          <tr><td>CAPT / CAPB</td><td>Pier cap top / bottom RL</td><td>100.5 / 99.3</td><td>m RL</td></tr>
           <tr><td>CAPW</td><td>Pier cap width</td><td>1.2</td><td>m</td></tr>
-          <tr><td>FUTRL</td><td>Footing top level</td><td>90</td><td>m RL</td></tr>
-          <tr><td>FUTD</td><td>Footing depth</td><td>2</td><td>m</td></tr>
-          <tr><td>FUTW</td><td>Footing width</td><td>4.5</td><td>m</td></tr>
-          <tr><td>FUTL</td><td>Footing length</td><td>3.5</td><td>m</td></tr>
+          <tr><td>FUTRL</td><td>Footing founding RL</td><td>90</td><td>m RL</td></tr>
+          <tr><td>FUTD / FUTW / FUTL</td><td>Footing depth / width / length</td><td>2 / 4.5 / 3.5</td><td>m</td></tr>
         </tbody>
       </table>
     </div>
@@ -568,227 +804,95 @@
   <details>
     <summary>Abutment</summary>
     <div class="details-body">
-      <table class="param-table">
-        <thead><tr><th>Variable</th><th>Description</th><th>Typical Value</th><th>Unit</th></tr></thead>
+      <table class="param-tbl">
+        <thead><tr><th>Variable</th><th>Description</th><th>Typical</th><th>Unit</th></tr></thead>
         <tbody>
-          <tr><td>ABTL</td><td>Abutment left offset</td><td>0</td><td>m</td></tr>
-          <tr><td>ABTLEN</td><td>Abutment length</td><td>11.0</td><td>m</td></tr>
-          <tr><td>APWTH</td><td>Approach width</td><td>11.0</td><td>m</td></tr>
           <tr><td>DWTH</td><td>Dirt wall thickness</td><td>0.3</td><td>m</td></tr>
-          <tr><td>ALCW</td><td>Abutment cap width</td><td>0.75</td><td>m</td></tr>
-          <tr><td>ALCD</td><td>Abutment cap depth</td><td>1.2</td><td>m</td></tr>
-          <tr><td>ALFB</td><td>Front batter (1 in N)</td><td>10</td><td>&mdash;</td></tr>
-          <tr><td>ALFBL</td><td>Front batter level (left)</td><td>101</td><td>m RL</td></tr>
-          <tr><td>ALFBR</td><td>Front batter level (right)</td><td>100.75</td><td>m RL</td></tr>
-          <tr><td>ALTB</td><td>Top batter (1 in N)</td><td>10</td><td>&mdash;</td></tr>
-          <tr><td>ALTBL</td><td>Top batter level (left)</td><td>100.5</td><td>m RL</td></tr>
-          <tr><td>ALTBR</td><td>Top batter level (right)</td><td>100.5</td><td>m RL</td></tr>
-          <tr><td>ALFO</td><td>Front offset</td><td>0.5</td><td>m</td></tr>
-          <tr><td>ALFD</td><td>Front depth</td><td>1.5</td><td>m</td></tr>
-          <tr><td>ALBB</td><td>Back batter (1 in N)</td><td>5</td><td>&mdash;</td></tr>
-          <tr><td>ALBBL</td><td>Back batter level (left)</td><td>101.5</td><td>m RL</td></tr>
-          <tr><td>ALBBR</td><td>Back batter level (right)</td><td>101.5</td><td>m RL</td></tr>
-          <tr><td>ALFL</td><td>Abutment footing level (left)</td><td>95</td><td>m RL</td></tr>
-          <tr><td>ARFL</td><td>Abutment footing level (right)</td><td>95</td><td>m RL</td></tr>
+          <tr><td>ALCW / ALCD</td><td>Cap width / depth</td><td>0.75 / 1.2</td><td>m</td></tr>
+          <tr><td>ALFB / ALTB</td><td>Front / top batter (1:N)</td><td>10 / 10</td><td>—</td></tr>
+          <tr><td>ALTBL / ALTBR</td><td>Batter levels, left / right</td><td>100.5 / 100.5</td><td>m RL</td></tr>
+          <tr><td>ABTLEN</td><td>Abutment length (transverse)</td><td>11.0</td><td>m</td></tr>
         </tbody>
       </table>
     </div>
   </details>
 </div>
 
-<!-- FEATURES -->
-<div class="section" id="features">
-  <p class="section-title">&#127919; Features</p>
-  <div class="grid">
-    <div class="card">
-      <span class="card-icon" aria-hidden="true">&#128208;</span>
-      <h3>DXF Drawing Generation</h3>
-      <p>AutoCAD R2006/R2010. Full elevation, plan, cross-section, side view, title block. 1&ndash;3 seconds.</p>
-    </div>
-    <div class="card">
-      <span class="card-icon" aria-hidden="true">&#128176;</span>
-      <h3>Bill Generation</h3>
-      <p>Statutory-compliant contractor bills. Hierarchical items, tender premium, draft management.</p>
-    </div>
-    <div class="card">
-      <span class="card-icon" aria-hidden="true">&#127912;</span>
-      <h3>3D Visualization</h3>
-      <p>Interactive Plotly 3D model. Deck, piers, abutments, footings. Drag to rotate, scroll to zoom.</p>
-    </div>
-    <div class="card">
-      <span class="card-icon" aria-hidden="true">&#9989;</span>
-      <h3>IRC/IS Quality Check</h3>
-      <p>Compliance scoring 0&ndash;100. Checks clearance (IRC 5:2015), L/20 rule, pier width, skew limits.</p>
-    </div>
-    <div class="card">
-      <span class="card-icon" aria-hidden="true">&#129302;</span>
-      <h3>AI Optimizer</h3>
-      <p>Cost estimation, material quantities, performance predictions. No external API required.</p>
-    </div>
-    <div class="card">
-      <span class="card-icon" aria-hidden="true">&#128228;</span>
-      <h3>10+ Export Formats</h3>
-      <p>DXF, PDF, PNG, SVG, Excel, CSV, HTML, ZIP. Batch export with timestamp and custom prefix.</p>
-    </div>
-    <div class="card">
-      <span class="card-icon" aria-hidden="true">&#128230;</span>
-      <h3>Batch Processing</h3>
-      <p>Upload multiple Excel files at once. All DXF outputs bundled into a single ZIP download.</p>
-    </div>
-    <div class="card">
-      <span class="card-icon" aria-hidden="true">&#128203;</span>
-      <h3>5 Standard Templates</h3>
-      <p>Simple slab, continuous slab, girder, box culvert, arch. IRC-compliant defaults. Download as Excel.</p>
-    </div>
-    <div class="card">
-      <span class="card-icon" aria-hidden="true">&#128279;</span>
-      <h3>REST API</h3>
-      <p>POST Excel &rarr; GET DXF. Async job queue with SSE status streaming. Integrate into any pipeline.</p>
-    </div>
-  </div>
-</div>
-
-<!-- API -->
+<!-- API ──────────────────────────────────────────────────────────────────── -->
 <div class="section" id="api">
-  <p class="section-title">&#128299; REST API</p>
-  <p style="color:var(--muted);font-size:.88rem;margin-bottom:1rem">
-    Proxied via Netlify Functions &rarr; FastAPI backend. Set <code style="color:var(--amber)">FASTAPI_URL</code> in Netlify env vars.
-  </p>
-  <div class="grid-2">
+  <p class="section-title">&#128187; API &amp; CLI — Developer Reference</p>
+  <div class="grid g2">
     <div>
-      <div class="code-block">
-        <span class="cm"># Sync: upload Excel, get DXF back immediately</span><br>
-        curl -X POST /api/predict \<br>
-        &nbsp;&nbsp;-F <span class="vl">"excel_file=@bridge.xlsx"</span> \<br>
-        &nbsp;&nbsp;-G -d <span class="vl">"format=dxf"</span> \<br>
-        &nbsp;&nbsp;--output bridge.dxf<br><br>
-        <span class="cm"># Async: enqueue job, poll for result</span><br>
-        curl -X POST /api/jobs \<br>
-        &nbsp;&nbsp;-F <span class="vl">"excel_file=@bridge.xlsx"</span><br>
-        <span class="cm"># returns {"job_id": "abc123"}</span><br><br>
-        curl /api/jobs/abc123<br><br>
-        <span class="cm"># Health check</span><br>
-        curl /api/health
+      <h3 style="font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:.7rem">REST API</h3>
+      <div class="codeblock">
+<span class="cm"># Generate DXF via REST API</span><br>
+curl -X POST <span class="vl">/api/predict</span> <span class="fl">\</span><br>
+&nbsp;&nbsp;-F <span class="vl">"excel_file=@bridge.xlsx"</span> <span class="fl">\</span><br>
+&nbsp;&nbsp;-G -d <span class="vl">"format=dxf"</span> <span class="fl">\</span><br>
+&nbsp;&nbsp;--output bridge.dxf<br>
+<br>
+<span class="cm"># Full ZIP bundle</span><br>
+curl -X POST <span class="vl">/api/package</span> <span class="fl">\</span><br>
+&nbsp;&nbsp;-F <span class="vl">"excel_file=@bridge.xlsx"</span> <span class="fl">\</span><br>
+&nbsp;&nbsp;--output bridge_bundle.zip
       </div>
     </div>
-    <div class="grid" style="align-content:start">
-      <div class="card">
-        <span class="card-icon" aria-hidden="true">&#9889;</span>
-        <h3>POST /api/predict</h3>
-        <p>Synchronous. Blocks until drawing is ready. Best for small files.</p>
-      </div>
-      <div class="card">
-        <span class="card-icon" aria-hidden="true">&#128225;</span>
-        <h3>POST /api/jobs</h3>
-        <p>Async queue. Returns job_id. Poll or stream via SSE for status.</p>
-      </div>
-      <div class="card">
-        <span class="card-icon" aria-hidden="true">&#128154;</span>
-        <h3>GET /api/health</h3>
-        <p>Netlify function + FastAPI backend health. JSON status response.</p>
+    <div>
+      <h3 style="font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:.7rem">CLI Commands</h3>
+      <div class="codeblock">
+<span class="cm"># 9-sheet DXF package</span><br>
+<span class="kw">bridgecad</span> draw booklet bridge.xlsx -o out/<br>
+<br>
+<span class="cm"># Generate all 15 PWD types</span><br>
+<span class="kw">python</span> scripts/generate_all_pwd_gads.py<br>
+<br>
+<span class="cm"># Validate against IRC rules</span><br>
+<span class="kw">bridgecad</span> validate bridge.xlsx<br>
+<br>
+<span class="cm"># Price the BOQ</span><br>
+<span class="kw">bridgecad</span> bill gen bridge.xlsx -o out/
       </div>
     </div>
   </div>
 </div>
 
-<!-- FAQ -->
-<div class="section" id="faq">
-  <p class="section-title">&#10067; FAQ</p>
-
-  <details>
-    <summary>What Excel format does the app accept?</summary>
-    <div class="details-body">
-      Three-column format: <strong>Value</strong> (column A), <strong>Variable</strong> (column B),
-      <strong>Description</strong> (column C). No header row required, but if present it is auto-skipped.
-      Download any template above to see the exact format.
-    </div>
-  </details>
-
-  <details>
-    <summary>Which AutoCAD version should I choose?</summary>
-    <div class="details-body">
-      <strong>R2010</strong> (DXF AC1024) is recommended for AutoCAD 2010 and later, and for all modern
-      CAD viewers. Choose <strong>R2006</strong> (DXF AC1018) only if you are using AutoCAD 2006 or
-      older software that cannot open R2010 files.
-    </div>
-  </details>
-
-  <details>
-    <summary>My drawing looks empty / wrong. What should I check?</summary>
-    <div class="details-body">
-      1. Ensure <code>NSPAN</code>, <code>SPAN1</code>, <code>LBRIDGE</code> are consistent
-         (<code>LBRIDGE = NSPAN &times; SPAN1</code>).<br>
-      2. Check that <code>TOPRL &gt; DATUM</code> (road level above river bed).<br>
-      3. Verify <code>RTL &gt; SOFL</code> (road top above soffit).<br>
-      4. Run the Quality Check tab &mdash; it will flag the specific issue.
-    </div>
-  </details>
-
-  <details>
-    <summary>Can I use JSON or text files instead of Excel?</summary>
-    <div class="details-body">
-      Yes. The Smart Input Processor accepts <code>.xlsx</code>, <code>.xls</code>,
-      <code>.csv</code>, <code>.json</code>, and <code>.txt</code> (key=value format).
-      Download the JSON and TXT samples above to see the expected structure.
-    </div>
-  </details>
-
-  <details>
-    <summary>How do I run the app locally?</summary>
-    <div class="details-body">
-      <div class="code-block">
-        git clone https://github.com/CRAJKUMARSINGH/Bridge_GAD_Yogendra_Borse<br>
-        pip install -r requirements.txt<br>
-        streamlit run streamlit_app_ultimate.py
-      </div>
-      Or use Docker: <code>docker compose up</code>
-    </div>
-  </details>
-
-  <details>
-    <summary>Who developed this?</summary>
-    <div class="details-body">
-      Developed by <strong>Er. Rajkumar Singh Chauhan</strong>, Retd. Addl. Chief Engineer, PWD Rajasthan.
-      Maintained by <strong>RKS LEGAL Techno Legal Consultants</strong>, Udaipur.
-      Open source under MIT License.
-    </div>
-  </details>
-</div>
-
-<!-- FOOTER -->
+<!-- FOOTER ───────────────────────────────────────────────────────────────── -->
 <footer>
   <p>
-    &#127751; Bridge GAD Generator &nbsp;&middot;&nbsp;
-    <a href="https://github.com/CRAJKUMARSINGH/Bridge_GAD_Yogendra_Borse" target="_blank" rel="noopener">GitHub</a>
-    &nbsp;&middot;&nbsp;
-    <a href="/app" target="_blank" rel="noopener">Open App</a>
-    &nbsp;&middot;&nbsp;
-    <a href="#how-to-use">How to Use</a>
-    &nbsp;&middot;&nbsp;
-    <a href="#samples">Sample Files</a>
-    &nbsp;&middot;&nbsp;
-    RKS LEGAL Techno Legal Consultants, Udaipur
+    <strong>BridgeCAD Enterprise Suite</strong> &mdash; v0.1.0-RC1 &bull; BRIDGECAD-OSS-1.0<br>
+    IRC 5 &bull; IRC 6 &bull; IRC 21 &bull; IRC 78 &bull; IRC 83 &bull; IRC SP:55 &bull; MoRTH 2024-25
+  </p>
+  <p style="margin-top:.7rem">
+    By <strong>Er. Rajkumar Singh Chauhan</strong>, Retd. Addl. Chief Engineer, PWD Rajasthan &bull;
+    <a href="https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite" target="_blank" rel="noopener">GitHub &#11088;</a> &bull;
+    <a href="/app" target="_blank" rel="noopener">Open App &#128640;</a>
+  </p>
+  <p style="margin-top:.5rem;font-size:.7rem;color:rgba(255,255,255,.2)">
+    MIT Licence &bull; Generated drawings are for review only — not for construction until signed by a competent engineer.
   </p>
 </footer>
 
+<!-- API STATUS CHECK ─────────────────────────────────────────────────────── -->
 <script>
-  async function checkHealth() {
-    const dot = document.getElementById('api-dot');
-    const status = document.getElementById('api-status');
-    try {
-      const res = await fetch('/api/health', { signal: AbortSignal.timeout(6000) });
-      const data = await res.json();
-      if (data.netlify_function === 'ok') {
-        dot.className = 'dot dot-green';
-        const be = data.fastapi_backend === 'ok' ? ' · Backend online' : ' · Backend offline';
-        status.textContent = 'API online' + be;
-      } else { throw new Error(); }
-    } catch {
-      dot.className = 'dot dot-amber';
-      status.textContent = 'API status unknown (backend may be sleeping)';
-    }
-  }
-  checkHealth();
+(function(){
+  var dot=document.getElementById('api-dot');
+  var txt=document.getElementById('api-status');
+  if(!dot||!txt) return;
+  fetch('/api/health',{method:'GET',signal:AbortSignal.timeout(5000)})
+    .then(function(r){
+      if(r.ok){
+        dot.className='dot dot-green';
+        txt.textContent='Service online \u2022 15/15 PWD types ready';
+      } else {
+        dot.className='dot dot-amber';
+        txt.textContent='Service starting\u2026';
+      }
+    })
+    .catch(function(){
+      dot.className='dot dot-amber';
+      txt.textContent='Static demo \u2022 App available via Open App';
+    });
+})();
 </script>
 </body>
 </html>

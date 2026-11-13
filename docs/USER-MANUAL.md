@@ -230,8 +230,6 @@ BridgeCAD supports **three output formats** and two layout modes for every proje
 
 In the **Streamlit console** (§3) the "📐 Drawing Gen" tab offers a **scale selector** (Auto / 1:50 / 1:100 / 1:200 / 1:500) and a **format toggle** (DXF-only or DXF + PNG preview). The ZIP download always contains both.
 
-In the **deployed workspace** the same two choices live in the **Format & variants** dock: format chips (DXF / PDF / PNG) are passed to the engine as `?output_format=`, and the plot-scale chips are passed as `?scale=` (omitted when set to Auto so the ladder decides).
-
 ### Layout / scale selection
 
 The drawing engine picks the **largest standard IRC SP:55 scale rung** (50 / 75 / 100 / 150 / 200 / 250 / 300 / 400 / 500) that keeps text ≥ 2.5 mm and annotation gaps ≥ 8 mm per pier. For very long bridges (e.g. 270 m 9-span) it falls to 1:500 and splits Sheet 2 into two horizontal bands with match-lines.
@@ -259,14 +257,6 @@ Or in the Streamlit console: select the "Plot scale" dropdown before clicking **
 The **PWD Generator** tab in the Streamlit console (§3) lets you pick any of the
 15 Maharashtra PWD standard bridge types and vary its parameters interactively.
 No Excel workbook needed — the catalogue provides the base values.
-
-The deployed workspace exposes the same variable surface: the **Drawing
-workspace** dock holds the FREE dials (project identity, `Spans`,
-`Span length (m)`, `Deck width (m)`, `Datum (m)`, plus the twelve foundation and
-wing-wall detail fields) and the **Format & variants** dock carries the class
-reference plus the format/scale controls. The booklet identity
-(`foundation_type`, `superstructure_type`, `bearing_type`) stays LOCKED, and the
-catalogue's DERIVED values are recalculated on every edit.
 
 ### How it works
 

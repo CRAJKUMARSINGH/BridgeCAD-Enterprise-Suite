@@ -2157,3 +2157,47 @@ No changes this session.
 ---
 | 2026-11-13 20:51 | User prompt received |
 | 2026-11-13 21:14 | User prompt received |
+
+### Session — CODE-JUNCTION today's patches applied · 08:20
+
+- Found `CODE-JUNCTION/BridgeCAD-Apply-Instructions/` with structured patch package (baseline commit `5d5f99e`).
+- Git patch failed directly (repo ahead of baseline) — applied file-by-file instead.
+- Copied 4 unambiguously new files: `sweep.py`, `test_instruction_updates.py`, `pwd-sweep.yml`, `V_INSTRUCTIONS_APPLIED.md`.
+- Copied 5 updated docs: `PWD_ENRICHMENT_GUIDE.md`, `USER-MANUAL.md`, `GUIDE.md`, `DOCS_INDEX.md`, `deployment.md`.
+- Ran `pytest tests/catalogue/test_instruction_updates.py` → **36/36 PASS** (23.4 s).
+- Confirmed all other generator improvements already present (blank PNG gate, render-status.json, fail-closed identity, partial rejection).
+- Committed `f5f563a` — "feat(catalogue,ci): apply CODE-JUNCTION patch — sweep guards, blank-PNG gate, CI workflow, docs update (36 new tests pass)"
+- Pushed: `b9a4534..f5f563a  main -> main` ✅
+
+**What the patch added:**
+- `sweep.py`: NaN/Infinity/reversed-range/comma-list guards; LOCKED/DERIVED fields rejected
+- `test_instruction_updates.py`: choice sweep, bad sweeps (10 cases), identity still builds (15), misspelled identity raises KeyError (5), blank/failed/nonblank PNG (3), partial rejection, determinism + render-status (1)
+- `pwd-sweep.yml`: CI for span_length, skew_deg, carriageway_width sweeps on types 006/009/010
+- `V_INSTRUCTIONS_APPLIED.md`: full applicability ledger for all proposal decisions
+
+**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+
+---
+| 2026-11-13 22:31 | Agent turn completed |
+
+### Session — Standing-order hook entry (no user task) · 08:28
+
+No changes this session.
+
+- Hook fired on incoming message. No user task present — hook-only trigger.
+- Previous session (08:20): CODE-JUNCTION today's patches applied; 36/36 new tests pass; commits `f5f563a` and `882591a` pushed to origin/main.
+- No source files modified, no commands run, no tests executed this turn.
+- All CREAT.md entries within 24 h window; nothing pruned.
+
+**Pending:**
+- 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+  - Box-cell primitive CellGrid (type 004) — CRITICAL
+  - Arch schedule primitive (type 014) — HIGH
+  - Precast block arch (type 015) — HIGH
+  - Skew propagation to Sheet 2 piers — MEDIUM
+  - Footing stepped section + PCC toe — MEDIUM
+  - Wing wall solid profile — LOW
+  - Pier cap dims on Sheet 2 — LOW
+  - Variant note in title block — LOW
+
+---

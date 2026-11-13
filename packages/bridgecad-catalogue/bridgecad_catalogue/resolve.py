@@ -68,8 +68,16 @@ def _derive(p: ResolvedParams, *, cw_overridden: bool = False) -> None:
         p["carriageway_width"] = MIN_CARRIAGEWAY_M
 
     ss = cast("str", p["superstructure_type"])
+    fnd = cast("str", p["foundation_type"])
     # A box cell IS its own substructure — there are no piers to count.
     p["pier_count"] = 0 if ss == "RCC_BOX_CELL" else span_count - 1
+
+    # GAP 04 — pier batter default: IRC practice is 1:10 batter for open/pile piers.
+    # The pier_batter_1n field was added in the Venice-patch; fixtures leave it None
+    # so the tapered-trapezoid branch in sheet5 never fires. Derive a default here.
+    if p.get("pier_batter_1n") is None and fnd in ("OPEN", "PILE"):
+        p.note("pier_batter_1n", None, Decimal("10"), "IRC practice default 1:10 batter")
+        p["pier_batter_1n"] = Decimal("10")
 
     deck = Decimal(str(p["deck_thickness_mm"])) / 1000
     gird = Decimal(str(p.get("girder_depth_mm") or 0)) / 1000
@@ -86,7 +94,6 @@ def _derive(p: ResolvedParams, *, cw_overridden: bool = False) -> None:
 
     hfl = Decimal(str(p["hfl_m"]))
     scour = Decimal(str(p["scour_depth_m"]))
-    fnd = cast("str", p["foundation_type"])
     if fnd == "OPEN":
         fl = hfl - scour - EMBEDMENT_ROCK_M
     elif fnd == "PILE":
@@ -122,6 +129,13 @@ def _derive(p: ResolvedParams, *, cw_overridden: bool = False) -> None:
                 p.note("girders_per_deck", p.get("girders_per_deck"), need,
                        "spacing vs carriageway")
                 p["girders_per_deck"] = need
+
+    # GAP 09 — camber default: derive L/1000 (minimum 10 mm) so the dashed
+    # camber parabola appears on cross-sections as the PDF shows.
+    if not p.get("camber_mm"):
+        cam = max(10, int(float(str(max(lens))) * 1000 / 1000))
+        p.note("camber_mm", None, cam, "L/1000 default, min 10 mm")
+        p["camber_mm"] = cam
 
 
 def _check(p: ResolvedParams) -> None:

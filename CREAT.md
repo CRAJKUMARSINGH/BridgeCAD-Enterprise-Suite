@@ -1951,3 +1951,180 @@ vite build OK, exit 0 (222.49 kB js, 15.75 kB css).
 **Pending:** same 8 enrichment gaps as above (unchanged).
 
 | 2026-11-13 07:45 | User prompt received |
+
+### Session — Landing page full redesign for browser/Netlify · 06:30
+
+- User requested: "landing page for browser test and netlify deployment need overall redesign"
+- Read current `public/index.html`, `netlify.toml`, frontend structure.
+- Rewrote `public/index.html` from scratch (51 KB, self-contained, zero external deps):
+
+**Design:** Dark navy (#080e18) with cyan/amber/green/purple accents, glassmorphism cards,
+  sticky nav, radial-gradient hero glow, responsive grid.
+
+**New sections:**
+  - Hero: updated badges (PWD types, parametric variation), 5-button CTA, dual status pills
+  - Stat strip: 9 sheets / 15 PWD types / 427 fields / 28 fixtures / 150+ rules / 270 m max
+  - Pipeline: 6-step flow (Upload → Parse → Derive → 9-Sheet DXF → QA → ZIP)
+  - How to Use (8 steps): includes PWD Generator path + format/scale choice
+  - PWD Generator: full 15-type table with foundation colour tags
+  - Vary Variables: FREE/LOCKED/DERIVED legend, 15-row variable table, CLI sweep examples
+  - Format & Layout: DXF/PNG/PDF cards, scale ladder, sheet-purpose table
+  - Downloads: 6 templates + sample with green download buttons
+  - Parameter Reference: 4 accordions (Geometry, Superstructure, Pier/Cap, Abutment)
+  - API & CLI: two-column code block (REST + CLI)
+  - Footer: author, standards, licence caveat
+
+**Netlify-ready:**
+  - Inline JS API health check (GET /api/health → status pill update)
+  - SPA redirect already in netlify.toml
+  - Zero external CSS/JS — loads instantly on CDN
+
+- Opened in browser: OK
+- Committed: `7293020` (2 files, 826 insertions)
+- Pushed: `622291d..7293020  main -> main` ✅
+
+**Pending:**
+- 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+
+---
+| 2026-11-13 08:02 | User prompt received |
+
+### Session — `CODE-JUNCTION` "apply if due": v.md order steps 1–2 · 08:40
+
+**Request (verbatim):** `apply if due >>>>E:\Rajkumar\BridgeCAD-Enterprise-Suite\CODE-JUNCTION\*.*`
+Clarifications answered earlier: geometry primitives 004/014/015 → **apply all three now**
+(accepting v.md's 25 schedule Y-values as printed, no re-read of booklet page 27);
+`C:\Program Files[ (x86)]` / `C:\ProgramData` cleanup → **delete, one approval each**.
+
+**Standing order honoured:** no commit made.
+
+#### Step 1 of v.md's `## Order` — layers — DONE
+
+17 new `LayerDef`s + their ISO 13567 names appended to `layers.py`
+(`SUB-BOX-CELL`, `SUB-BOX-HAUNCH`, `SUB-RAFT`, `SUB-CUTOFF`, `SUB-APRON`, `JOINT-CJ`,
+`SUPER-ARCH-{SOFFIT,RING,COLUMN,HAUNCH}`, `SUPER-CORBEL`,
+`SUPER-PRECAST-BLOCK`, `SUPER-BLOCK-JOINT`, `SUPER-SOCKET`, `SUPER-STRIP-GAP`,
+`SUPER-SPANDREL`, `TEXT-SCHED`).
+- v.md writes these as `(iso, color, linetype, lw)` tuples with `"CONTINUOUS"` and an
+  `A-…` agent prefix; the repo's registry is `LayerDef(...)` kwargs, `"Continuous"`,
+  agent/status `B-…-N`. Rewritten to the file's real form.
+- **Five weights in v.md are off the ISO 128 series** and would have failed
+  `audit_layers.py`: `SUB-CUTOFF` 40→**50**, `SUPER-ARCH-RING` 40→**35**,
+  `SUPER-SOCKET` 30→**25**, `SUPER-STRIP-GAP` 30→**25**, `SUPER-SPANDREL` 40→**35**.
+- Gate: `python scripts/audit_layers.py` → `layers: PASS (84 project layers, 84 ISO names, 7 weights)`, exit 0.
+
+#### Step 2 of v.md's `## Order` — the three geometry modules — DONE
+
+New sub-package `packages/bridgecad-draw/bridgecad_draw/geometry/`:
+`_errors.py`, `box_cell.py`, `arch_schedule.py`, `precast_arch.py`, `__init__.py`.
+- `_errors.py` exists because v.md's `from bridgecad_catalogue.schema import Violation`
+  is unimportable from `bridgecad-draw` (its `pyproject.toml` does not depend on the
+  catalogue). Local `Violation(ValueError)` instead; the sheets let it propagate.
+- **`unit_lengths()` corrected:** v.md's `n·pitch + wall_m` double-counts the junction
+  wall, making the 004 lattice 62.15 m against a printed 61.25 m deck. `n × pitch`
+  (units abut, sharing the wall) gives **61.05 m** and 44 haunches — the booklet layout.
+- `rib_stations()` takes v.md's *corrected* "whole multiple of pitch" form (raises
+  rather than interpolating); 4.183 m is exactly four 1043.83 mm pitches → 5 ribs.
+- `gap_pairs = count − 1` kept, **`gap_segments(block_count, strip_count)` added**
+  because 52 cannot come from `gap_pairs` alone: 52 = 2 gaps × (27 − 1) joints.
+
+#### Two open reconciliations in v.md (recorded, not papered over)
+
+| Item | v.md says | Module now returns | Why |
+|---|---|---|---|
+| `parabola_deviation(sched)` | `approx(3469, ±20)` | **824.94 mm** | 3469 is the **drop from the crown** at X=5229 (7805−4336), and v.md's worked example pairs X=4183 with the 4336 row. `X` must be measured **from the crown** — that is the only reading under which v.md's own prose ("reproduces the crown") holds, and it makes `A` the ordinary `4·rise/span²` (`4×7.805/25.10² = 0.04955`). Referenced from the springing the equation diverges to 31 217 mm at the far end. |
+| `block_count(61.94, 1.996)` | `27` | **28** | The rule (arc ÷ 2.25 m midpoint) gives 28 for the 62.115 m arc; 28's mean block 2.218 m is inside v.md's own 2.0–2.5 m window. **27 is the booklet's printed count** (v.md L515/L1208) and belongs on the card as a locked identity, not in the derivation. |
+| `gap_pairs(3, 10.0, 0.1) * 2 == 52` | 52 | 2 · 2 = **4** | v.md's test is arithmetically impossible; 52 is 2 gaps × 26 block joints. |
+
+`tests/pwd/arch_schedule_014.json` `note` corrected from the stale "deviate up to
+3078 mm" to the computed 825 mm crown-referenced figure.
+
+#### Tests — `tests/pwd/test_geometry_primitives.py` (new, 17 tests)
+
+`pytest tests/pwd/test_geometry_primitives.py -q` → **17 passed** (1.25 s).
+Pins the booklet's own counts: 11 cells / 61.05 m / 44 haunches; 25 stations;
+5 ribs at 4.183 / 8.367 / 12.550 / 16.733 / 20.917 m; ring 0.350 m at every station
+and closed at 52 points; cut-off `(0.0, 5.0, 0.90)` from the raft underside and a
+refusal when the raft is above scour; 28 blocks, 52 gaps, symmetric strips, socket
+620 × 200 centred on its block. Marked `pytest.mark.draw` (the suite runs
+`--strict-markers`).
+
+#### Not yet applied — remaining v.md items (next)
+
+v.md's `## Order` steps 2–6 sheet wiring is **blocked** on data that v.md does not
+supply coherently, found while preparing it:
+
+1. `scripts/generate_all_pwd_gads.py::_build_project` never passes
+   `unit_cell_counts` / `cell_clear_m` / `cell_wall_mm` / `cell_haunch_mm` /
+   `raft_thickness_mm` / `arch_schedule_mm` / … so every new sheet branch would read
+   `None`. The cards (004/014/015) do not carry those keys yet either.
+2. `Superstructure` has no `arch_block_count`, `arch_strip_count`,
+   `arch_ring_thickness_mm` or `spandrel_wall_thickness_mm` field — v.md's sheet-2
+   snippet reads all four, so the value model needs them added.
+3. **Card 004's RLs make the cut-off wall come out negative:** shed soffit 100.415,
+   clear cell 5.0 m, raft 1.1 m → raft underside **94.315**, but card
+   `hfl 99.48 − scour 1.5` puts scour at **97.98**. `cutoff_wall()` therefore raises
+   "raft is above scour" — i.e. for this card the box is already founded 3.7 m below
+   scour and needs no detached wall, which contradicts v.md's step-3 gate
+   "`SUB-CUTOFF` present". v.md's own `cutoff_wall_depth_m: 2.3` does not follow from
+   its data either.
+4. QA rows **W76–W84 and I51 already exist** in
+   `packages/bridgecad-core/bridgecad_core/validation.py` with `_skip(...)` guards;
+   only **W85 `QA-BQ-ITEM-PRESENT`** is missing. But W79 (`|y − a·x²| ≤ 1 mm`,
+   `a = rise/(span/2)²`) can never pass on the 014 schedule, which deviates 825 mm
+   from any parabola by design — the row needs re-specifying, not just un-skipping.
+
+**Pending (unchanged) — v.md steps 2–6 sheet wiring, catalogue locks, sweep choices,
+oracle flip for 004/014/015, CI lane, 28-set fingerprint guard**, plus the separate
+`C:\` cleanup workstream (one approval per deletion).
+| 2026-11-13 08:22 | User prompt received |
+
+### Session — Remove "Maharashtra" from landing page · 06:40
+
+- User requested removal of the word "Maharashtra" from landing page (twice, repeated request).
+- Found 8 occurrences in `public/index.html`: meta description, hero eyebrow, hero sub, feature card, how-to-use step, section title, source credit, download alert.
+- Replaced all 8 occurrences with empty string using PowerShell `$c -replace 'Maharashtra ', '' -replace 'Maharashtra', ''`.
+- Verified: 0 remaining occurrences.
+- Committed: `f5b4693` — "fix(landing): remove 'Maharashtra' from all landing page text" (1 file, 9 insertions, 9 deletions)
+- Pushed: `7293020..f5b4693  main -> main` ✅
+
+**Files changed:** `public/index.html`, `CREAT.md`
+
+**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+
+---
+| 2026-11-13 08:39 | Agent turn completed |
+
+### Session — Standing-order hook entry (no user task) · 06:48
+
+No changes this session.
+
+- Hook fired on incoming message. No user task present — hook-only trigger.
+- Previous session (06:40): "Maharashtra" removed from all 8 occurrences in `public/index.html`, commit `f5b4693` pushed to `origin/main`.
+- No source files modified, no commands run, no tests executed this turn.
+- All CREAT.md entries within 24 h window; nothing pruned.
+
+**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+
+---
+| 2026-11-13 13:26 | User prompt received |
+| 2026-11-13 13:28 | User prompt received |
+
+### Session — Confirmed "Maharashtra" already removed · 06:52
+
+No changes this session.
+
+- User re-sent "remove Maharashtra from landing page".
+- Ran `Select-String public/index.html "Maharashtra"` → **0 occurrences**.
+- Already removed in commit `f5b4693` (previous session 06:40).
+- No source files modified, no commands run, no tests executed this turn.
+
+**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+
+---
+| 2026-11-13 13:29 | Agent turn completed |
+| 2026-11-13 13:29 | User prompt received |
+| 2026-11-13 14:35 | User prompt received |
+| 2026-11-13 19:10 | User prompt received |
+| 2026-11-13 19:12 | User prompt received |
+| 2026-11-13 19:13 | User prompt received |

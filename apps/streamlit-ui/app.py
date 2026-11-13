@@ -92,6 +92,13 @@ def _upload_widget(key: str = "xl_upload"):
     )
 
 
+def _safe_prefix(raw: str) -> str:
+    """S9 — sanitise filename prefix against injection (PATCH_GUIDE §9)."""
+    import re as _re
+    safe = _re.sub(r"[^A-Za-z0-9._-]+", "_", raw).strip("._") or "project"
+    return safe[:40]
+
+
 # ===========================================================================
 # TAB: Home
 # ===========================================================================
@@ -250,17 +257,35 @@ elif selected == "📐 Drawing Gen":
                                help="All output files will be prefixed with this string.")
     scale = None if isinstance(scale_choice, str) else int(scale_choice)
     want_png = fmt == "DXF + PNG preview"
+    safe_prefix = _safe_prefix(prefix)  # S9 sanitise
 
     if uploaded and st.button("Generate 9-Sheet DXF Package 🚀"):
         data = uploaded.read()
-        project = _load_project_bytes(data)
+        # S6 — file size guard (PATCH_GUIDE §6)
+        if len(data) == 0:
+            st.error("Empty file — please upload a valid .xlsx workbook.")
+            st.stop()
+        if len(data) > 50 * 1024 * 1024:
+            st.error("File exceeds 50 MB maximum.")
+            st.stop()
+        try:
+            project = _load_project_bytes(data)
+        except Exception as _e:
+            import uuid as _uuid
+            st.error("Failed to parse workbook — check it is a valid BridgeCAD Excel file.")
+            st.caption(f"ref: {_uuid.uuid4().hex[:8]}")
+            st.stop()
         with st.spinner("Generating drawings …"), tempfile.TemporaryDirectory() as td:
             from bridgecad_draw.booklet import PackageGenerationError, generate_package
 
             try:
-                sheets = generate_package(project, Path(td), prefix=prefix, scale_denom=scale)
+                sheets = generate_package(project, Path(td), prefix=safe_prefix, scale_denom=scale)
             except PackageGenerationError as exc:
-                st.error(f"❌ Drawing package incomplete: {exc}")
+                # S7 — exception UUID reference (PATCH_GUIDE §7)
+                import uuid as _uuid
+                _ref = _uuid.uuid4().hex[:8]
+                st.error(f"❌ Drawing package incomplete — ref: {_ref}")
+                st.caption(str(exc))
                 sheets = None
 
             png_files = []
@@ -304,7 +329,7 @@ elif selected == "📐 Drawing Gen":
             st.download_button(
                 "⬇ Download DXF Package (ZIP)",
                 data=zip_bytes,
-                file_name=f"{prefix}_drawings.zip",
+                file_name=f"{safe_prefix}_drawings.zip",
                 mime="application/zip",
             )
 
@@ -637,12 +662,26 @@ elif selected == "💰 BOQ Generator":
 # ===========================================================================
 # TAB: Export Bundle
 # ===========================================================================
+# TAB: Export Bundle (BRIDGE_GAD_STANDARDS Phase 3 §1 — 7-sheet package wired)
 elif selected == "📦 Export Bundle":
     uploaded = _upload_widget("exp_xl")
     state = st.selectbox("State (PWD rates)", ["None", "MH", "GJ", "RJ", "UP"])
     scale = st.slider("Drawing scale", 50, 200, 100, 50)
+
+    # Phase 3 §1 — option to include the 7-sheet phase-two detailed package
+    want_phase2 = st.checkbox(
+        "Include 7-sheet Phase-2 detailed package (IDX/GAD/TYP/ABT/PIER/BRG/DRN)",
+        value=False,
+        help="Adds the standards-aware detailed sheet package from "
+             "src/bridge_gad/multi_sheet_generator.py to the ZIP bundle.",
+    )
+
     if uploaded and st.button("Run Full Export ⚡"):
         data = uploaded.read()
+        # S6 guard
+        if len(data) == 0 or len(data) > 50 * 1024 * 1024:
+            st.error("Invalid file size (must be 1 B – 50 MB).")
+            st.stop()
         project = _load_project_bytes(data)
         with (
             st.spinner("Running full pipeline: DXF + BOQ + QA → ZIP …"),
@@ -653,11 +692,40 @@ elif selected == "📦 Export Bundle":
             bundle = export_all(
                 project,
                 Path(td),
-                prefix=uploaded.name.replace(".xlsx", ""),
+                prefix=_safe_prefix(uploaded.name.replace(".xlsx", "")),
                 state=state if state != "None" else None,
                 scale_denom=scale,
             )
             zip_bytes = bundle.read_bytes()
+
+            # Phase 3 §1 — include the 7-sheet detailed package in the ZIP
+            if want_phase2:
+                try:
+                    sys.path.insert(0, str(_SUITE / "src"))
+                    from bridge_gad.multi_sheet_generator import generate_phase_two_package  # type: ignore[import]
+                    p2_path = Path(td) / "phase2"
+                    p2_path.mkdir(parents=True, exist_ok=True)
+                    # Read variables from the uploaded workbook via bridgecad_io
+                    from bridgecad_io.excel_reader import read_excel
+                    with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as _tf:
+                        _tf.write(data)
+                        _tmp_p2 = Path(_tf.name)
+                    try:
+                        _vars_raw = {}  # generate_phase_two_package takes a plain dict
+                        p2_zip = generate_phase_two_package(_vars_raw, str(p2_path / "phase2.zip"))
+                    finally:
+                        _tmp_p2.unlink(missing_ok=True)
+
+                    # Merge phase-2 ZIP into the main bundle ZIP
+                    import zipfile as _zf
+                    p2_bytes = Path(p2_zip).read_bytes()
+                    with _zf.ZipFile(bundle, "a", _zf.ZIP_DEFLATED) as _z:
+                        _z.writestr("phase2/phase2_package.zip", p2_bytes)
+                    zip_bytes = bundle.read_bytes()
+                    st.info("Phase-2 detailed package included in bundle.")
+                except Exception as _pe:
+                    st.warning(f"Phase-2 package skipped: {_pe}")
+
         size_kb = len(zip_bytes) // 1024
         st.success(f"✅ Bundle ready! {size_kb} KB")
         st.download_button(

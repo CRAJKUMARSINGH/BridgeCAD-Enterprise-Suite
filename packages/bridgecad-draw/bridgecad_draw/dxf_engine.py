@@ -75,6 +75,10 @@ def new_sheet(title: str = "", acad_ver: str = ACAD_VERSION) -> tuple[Any, Any]:
     # Global dimension style — set once, document-wide (LISP `st()`)
     _setup_dimstyle(doc)
 
+    # S4 — declare drawing units so CAD validators don't see float noise
+    # (PATCH_GUIDE §4: set $INSUNITS = 4 = millimetres, always)
+    doc.header["$INSUNITS"] = 4  # 4 = mm per AutoCAD INSUNITS table
+
     msp = doc.modelspace()
     return doc, msp
 

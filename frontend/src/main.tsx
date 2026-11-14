@@ -1,3 +1,5 @@
+import * as LandingReact from "react";
+import WorkflowLanding from "./WorkflowLanding";
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
@@ -677,4 +679,13 @@ function App() {
   );
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+function WorkflowRoot() {
+  const [route, setRoute] = LandingReact.useState(window.location.hash);
+  LandingReact.useEffect(() => {
+    const update = () => setRoute(window.location.hash);
+    window.addEventListener("hashchange", update);
+    return () => window.removeEventListener("hashchange", update);
+  }, []);
+  return route.startsWith("#workspace") ? <><a className="workflow-back" href="#home">← Drawing selection & manual</a><App /></> : <WorkflowLanding />;
+}
+createRoot(document.getElementById("root")!).render(<WorkflowRoot />);

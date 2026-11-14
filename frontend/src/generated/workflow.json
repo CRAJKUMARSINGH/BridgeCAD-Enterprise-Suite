@@ -1,0 +1,1778 @@
+{
+  "schemaVersion": 1,
+  "cards": [
+    {
+      "id": "BR-I-2022-001",
+      "title": "Open Foundation + PCC Pier + Solid Slab",
+      "spans": "4\u00d710 m",
+      "span_count": 4,
+      "span_lengths": [
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "carriageway_width": 7.5,
+      "foundation_type": "OPEN",
+      "pier_material": "M20",
+      "superstructure_type": "RCC_SOLID_SLAB",
+      "deck_thickness_mm": 500,
+      "pier_shaft_width_m": 1.5,
+      "pier_height_m": 6.0,
+      "abutment_type": "OPEN",
+      "hfl_m": 100.0,
+      "road_level": 102.5,
+      "scour_depth_m": 2.0,
+      "freeboard_m": 1.0,
+      "sbc_t_per_m2": 30,
+      "submersible": false,
+      "referencePdfPages": [
+        5
+      ],
+      "resolved": {
+        "title": "Open Foundation + PCC Pier + Solid Slab",
+        "spans": "4\u00d710 m",
+        "span_count": 4,
+        "span_lengths": [
+          10,
+          10,
+          10,
+          10
+        ],
+        "carriageway_width": 7.5,
+        "foundation_type": "OPEN",
+        "pier_material": "M20",
+        "superstructure_type": "RCC_SOLID_SLAB",
+        "deck_thickness_mm": 500,
+        "pier_shaft_width_m": 1.5,
+        "pier_height_m": 6.0,
+        "abutment_type": "OPEN",
+        "hfl_m": 100.0,
+        "road_level": 102.5,
+        "scour_depth_m": 2.0,
+        "freeboard_m": 1.0,
+        "sbc_t_per_m2": 30,
+        "submersible": false,
+        "total_length_m": 40,
+        "pier_count": 3,
+        "pier_batter_1n": 10,
+        "soffit_level": 101.925,
+        "foundation_level": 97.4,
+        "bearing_type": "ELASTOMERIC",
+        "camber_mm": 10
+      },
+      "warnings": [],
+      "fields": [
+        "span_count",
+        "span_length_m",
+        "carriageway_width",
+        "footpath_width",
+        "skew_deg",
+        "deck_thickness_mm",
+        "hfl_m",
+        "freeboard_m",
+        "scour_depth_m",
+        "sbc_t_per_m2",
+        "pier_height_m",
+        "pier_shaft_width_m"
+      ]
+    },
+    {
+      "id": "BR-I-2022-002",
+      "title": "Open Foundation + RCC Pier + Solid Slab",
+      "spans": "4\u00d710 m",
+      "span_count": 4,
+      "span_lengths": [
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "carriageway_width": 7.5,
+      "foundation_type": "OPEN",
+      "pier_material": "M25",
+      "superstructure_type": "RCC_SOLID_SLAB",
+      "deck_thickness_mm": 500,
+      "pier_shaft_width_m": 1.5,
+      "pier_height_m": 6.0,
+      "abutment_type": "OPEN",
+      "hfl_m": 100.0,
+      "road_level": 102.5,
+      "scour_depth_m": 2.0,
+      "freeboard_m": 1.0,
+      "sbc_t_per_m2": 30,
+      "submersible": false,
+      "referencePdfPages": [
+        6
+      ],
+      "resolved": {
+        "title": "Open Foundation + RCC Pier + Solid Slab",
+        "spans": "4\u00d710 m",
+        "span_count": 4,
+        "span_lengths": [
+          10,
+          10,
+          10,
+          10
+        ],
+        "carriageway_width": 7.5,
+        "foundation_type": "OPEN",
+        "pier_material": "M25",
+        "superstructure_type": "RCC_SOLID_SLAB",
+        "deck_thickness_mm": 500,
+        "pier_shaft_width_m": 1.5,
+        "pier_height_m": 6.0,
+        "abutment_type": "OPEN",
+        "hfl_m": 100.0,
+        "road_level": 102.5,
+        "scour_depth_m": 2.0,
+        "freeboard_m": 1.0,
+        "sbc_t_per_m2": 30,
+        "submersible": false,
+        "total_length_m": 40,
+        "pier_count": 3,
+        "pier_batter_1n": 10,
+        "soffit_level": 101.925,
+        "foundation_level": 97.4,
+        "bearing_type": "ELASTOMERIC",
+        "camber_mm": 10
+      },
+      "warnings": [],
+      "fields": [
+        "span_count",
+        "span_length_m",
+        "carriageway_width",
+        "footpath_width",
+        "skew_deg",
+        "deck_thickness_mm",
+        "hfl_m",
+        "freeboard_m",
+        "scour_depth_m",
+        "sbc_t_per_m2",
+        "pier_height_m",
+        "pier_shaft_width_m"
+      ]
+    },
+    {
+      "id": "BR-I-2022-003",
+      "title": "Raft Foundation + RCC Pier + Solid Slab",
+      "spans": "5\u00d710 m",
+      "span_count": 5,
+      "span_lengths": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "carriageway_width": 7.5,
+      "foundation_type": "RAFT",
+      "pier_material": "M25",
+      "superstructure_type": "RCC_SOLID_SLAB",
+      "deck_thickness_mm": 500,
+      "pier_shaft_width_m": 1.5,
+      "pier_height_m": 7.0,
+      "abutment_type": "OPEN",
+      "hfl_m": 100.0,
+      "road_level": 102.5,
+      "scour_depth_m": 3.0,
+      "freeboard_m": 1.0,
+      "sbc_t_per_m2": 15,
+      "submersible": false,
+      "referencePdfPages": [
+        7
+      ],
+      "resolved": {
+        "title": "Raft Foundation + RCC Pier + Solid Slab",
+        "spans": "5\u00d710 m",
+        "span_count": 5,
+        "span_lengths": [
+          10,
+          10,
+          10,
+          10,
+          10
+        ],
+        "carriageway_width": 7.5,
+        "foundation_type": "RAFT",
+        "pier_material": "M25",
+        "superstructure_type": "RCC_SOLID_SLAB",
+        "deck_thickness_mm": 500,
+        "pier_shaft_width_m": 1.5,
+        "pier_height_m": 7.0,
+        "abutment_type": "OPEN",
+        "hfl_m": 100.0,
+        "road_level": 102.5,
+        "scour_depth_m": 3.0,
+        "freeboard_m": 1.0,
+        "sbc_t_per_m2": 15,
+        "submersible": false,
+        "total_length_m": 50,
+        "pier_count": 4,
+        "soffit_level": 101.925,
+        "foundation_level": 96,
+        "bearing_type": "ELASTOMERIC",
+        "camber_mm": 10
+      },
+      "warnings": [],
+      "fields": [
+        "span_count",
+        "span_length_m",
+        "carriageway_width",
+        "footpath_width",
+        "skew_deg",
+        "deck_thickness_mm",
+        "hfl_m",
+        "freeboard_m",
+        "scour_depth_m",
+        "sbc_t_per_m2",
+        "pier_height_m",
+        "pier_shaft_width_m"
+      ]
+    },
+    {
+      "id": "BR-I-2022-004",
+      "title": "Raft Foundation + RCC Box Cell (Multi-unit)",
+      "spans": "3-unit multi-cell, 61.25 m",
+      "span_count": 3,
+      "span_lengths": [
+        22.2,
+        16.8,
+        22.25
+      ],
+      "carriageway_width": 7.5,
+      "foundation_type": "RAFT",
+      "pier_material": "M35",
+      "superstructure_type": "RCC_BOX_CELL",
+      "deck_thickness_mm": 500,
+      "pier_shaft_width_m": 0.5,
+      "pier_height_m": 5.0,
+      "abutment_type": "INTEGRAL",
+      "hfl_m": 99.48,
+      "road_level": 100.915,
+      "scour_depth_m": 1.5,
+      "freeboard_m": 0.0,
+      "sbc_t_per_m2": 20,
+      "submersible": true,
+      "unit_cell_counts": [
+        4,
+        3,
+        4
+      ],
+      "cell_clear_m": 5.0,
+      "cell_wall_mm": 500,
+      "cell_haunch_mm": 500,
+      "unit_joint_mm": 100,
+      "raft_thickness_mm": 1100,
+      "referencePdfPages": [
+        8
+      ],
+      "resolved": {
+        "title": "Raft Foundation + RCC Box Cell (Multi-unit)",
+        "spans": "3-unit multi-cell, 61.25 m",
+        "span_count": 3,
+        "span_lengths": [
+          22.2,
+          16.8,
+          22.25
+        ],
+        "carriageway_width": 7.5,
+        "foundation_type": "RAFT",
+        "pier_material": "M35",
+        "superstructure_type": "RCC_BOX_CELL",
+        "deck_thickness_mm": 500,
+        "pier_shaft_width_m": 0.5,
+        "pier_height_m": 5.0,
+        "abutment_type": "INTEGRAL",
+        "hfl_m": 99.48,
+        "road_level": 100.915,
+        "scour_depth_m": 1.5,
+        "freeboard_m": 0.0,
+        "sbc_t_per_m2": 20,
+        "submersible": true,
+        "unit_cell_counts": [
+          4,
+          3,
+          4
+        ],
+        "cell_clear_m": 5.0,
+        "cell_wall_mm": 500,
+        "cell_haunch_mm": 500,
+        "unit_joint_mm": 100,
+        "raft_thickness_mm": 1100,
+        "total_length_m": 61.25,
+        "pier_count": 0,
+        "soffit_level": 100.415,
+        "foundation_level": 96.98,
+        "bearing_type": "NONE",
+        "camber_mm": 22
+      },
+      "warnings": [
+        "submersible: soffit above HFL+freeboard \u2014 check afflux"
+      ],
+      "fields": [
+        "span_count",
+        "span_length_m",
+        "carriageway_width",
+        "footpath_width",
+        "skew_deg",
+        "deck_thickness_mm",
+        "hfl_m",
+        "freeboard_m",
+        "scour_depth_m",
+        "sbc_t_per_m2"
+      ]
+    },
+    {
+      "id": "BR-I-2022-005",
+      "title": "RCC Portal + Open Foundation (Submersible)",
+      "spans": "6\u00d715 m",
+      "span_count": 6,
+      "span_lengths": [
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0
+      ],
+      "carriageway_width": 7.5,
+      "foundation_type": "OPEN",
+      "pier_material": "M30",
+      "superstructure_type": "RCC_PORTAL",
+      "deck_thickness_mm": 700,
+      "pier_shaft_width_m": 2.0,
+      "pier_height_m": 8.0,
+      "abutment_type": "PORTAL",
+      "hfl_m": 100.0,
+      "road_level": 102.0,
+      "scour_depth_m": 3.0,
+      "freeboard_m": 0.0,
+      "sbc_t_per_m2": 30,
+      "submersible": true,
+      "referencePdfPages": [
+        9,
+        10
+      ],
+      "resolved": {
+        "title": "RCC Portal + Open Foundation (Submersible)",
+        "spans": "6\u00d715 m",
+        "span_count": 6,
+        "span_lengths": [
+          15,
+          15,
+          15,
+          15,
+          15,
+          15
+        ],
+        "carriageway_width": 7.5,
+        "foundation_type": "OPEN",
+        "pier_material": "M30",
+        "superstructure_type": "RCC_PORTAL",
+        "deck_thickness_mm": 700,
+        "pier_shaft_width_m": 2.0,
+        "pier_height_m": 8.0,
+        "abutment_type": "PORTAL",
+        "hfl_m": 100.0,
+        "road_level": 102.0,
+        "scour_depth_m": 3.0,
+        "freeboard_m": 0.0,
+        "sbc_t_per_m2": 30,
+        "submersible": true,
+        "total_length_m": 90,
+        "pier_count": 5,
+        "pier_batter_1n": 10,
+        "soffit_level": 101.225,
+        "foundation_level": 96.4,
+        "bearing_type": "NONE",
+        "camber_mm": 15
+      },
+      "warnings": [
+        "submersible: soffit above HFL+freeboard \u2014 check afflux"
+      ],
+      "fields": [
+        "span_count",
+        "span_length_m",
+        "carriageway_width",
+        "footpath_width",
+        "skew_deg",
+        "deck_thickness_mm",
+        "hfl_m",
+        "freeboard_m",
+        "scour_depth_m",
+        "sbc_t_per_m2",
+        "pier_height_m",
+        "pier_shaft_width_m"
+      ]
+    },
+    {
+      "id": "BR-I-2022-006",
+      "title": "Open Fdn + RCC Pier + Pier Cap + Solid Slab (Skew 20\u00b0)",
+      "spans": "5\u00d710 m, skew 20\u00b0",
+      "span_count": 5,
+      "span_lengths": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "carriageway_width": 7.5,
+      "foundation_type": "OPEN",
+      "pier_material": "M25",
+      "superstructure_type": "RCC_SOLID_SLAB",
+      "deck_thickness_mm": 600,
+      "pier_shaft_width_m": 1.8,
+      "pier_height_m": 7.0,
+      "pier_cap_depth_m": 0.8,
+      "abutment_type": "OPEN",
+      "hfl_m": 100.0,
+      "road_level": 102.5,
+      "scour_depth_m": 2.5,
+      "skew_deg": 20,
+      "freeboard_m": 1.0,
+      "sbc_t_per_m2": 30,
+      "submersible": false,
+      "referencePdfPages": [
+        11
+      ],
+      "resolved": {
+        "title": "Open Fdn + RCC Pier + Pier Cap + Solid Slab (Skew 20\u00b0)",
+        "spans": "5\u00d710 m, skew 20\u00b0",
+        "span_count": 5,
+        "span_lengths": [
+          10,
+          10,
+          10,
+          10,
+          10
+        ],
+        "carriageway_width": 7.5,
+        "foundation_type": "OPEN",
+        "pier_material": "M25",
+        "superstructure_type": "RCC_SOLID_SLAB",
+        "deck_thickness_mm": 600,
+        "pier_shaft_width_m": 1.8,
+        "pier_height_m": 7.0,
+        "pier_cap_depth_m": 0.8,
+        "abutment_type": "OPEN",
+        "hfl_m": 100.0,
+        "road_level": 102.5,
+        "scour_depth_m": 2.5,
+        "skew_deg": 20,
+        "freeboard_m": 1.0,
+        "sbc_t_per_m2": 30,
+        "submersible": false,
+        "total_length_m": 50,
+        "pier_count": 4,
+        "pier_batter_1n": 10,
+        "soffit_level": 101.825,
+        "foundation_level": 96.9,
+        "bearing_type": "ELASTOMERIC",
+        "camber_mm": 10
+      },
+      "warnings": [],
+      "fields": [
+        "span_count",
+        "span_length_m",
+        "carriageway_width",
+        "footpath_width",
+        "skew_deg",
+        "deck_thickness_mm",
+        "hfl_m",
+        "freeboard_m",
+        "scour_depth_m",
+        "sbc_t_per_m2",
+        "pier_height_m",
+        "pier_shaft_width_m"
+      ]
+    },
+    {
+      "id": "BR-I-2022-007",
+      "title": "Open Fdn + RCC Pier + RCC 3-Girder (T-Beam)",
+      "spans": "4\u00d715 m",
+      "span_count": 4,
+      "span_lengths": [
+        15.0,
+        15.0,
+        15.0,
+        15.0
+      ],
+      "carriageway_width": 7.5,
+      "foundation_type": "OPEN",
+      "pier_material": "M25",
+      "superstructure_type": "RCC_T_BEAM",
+      "deck_thickness_mm": 200,
+      "girder_depth_mm": 1200,
+      "girder_spacing_m": 2.0,
+      "girders_per_deck": 3,
+      "pier_shaft_width_m": 1.5,
+      "pier_height_m": 8.0,
+      "abutment_type": "OPEN",
+      "hfl_m": 100.0,
+      "road_level": 103.0,
+      "scour_depth_m": 2.5,
+      "freeboard_m": 1.0,
+      "sbc_t_per_m2": 30,
+      "submersible": false,
+      "referencePdfPages": [
+        12,
+        13
+      ],
+      "resolved": {
+        "title": "Open Fdn + RCC Pier + RCC 3-Girder (T-Beam)",
+        "spans": "4\u00d715 m",
+        "span_count": 4,
+        "span_lengths": [
+          15,
+          15,
+          15,
+          15
+        ],
+        "carriageway_width": 7.5,
+        "foundation_type": "OPEN",
+        "pier_material": "M25",
+        "superstructure_type": "RCC_T_BEAM",
+        "deck_thickness_mm": 200,
+        "girder_depth_mm": 1200,
+        "girder_spacing_m": 2.0,
+        "girders_per_deck": 3,
+        "pier_shaft_width_m": 1.5,
+        "pier_height_m": 8.0,
+        "abutment_type": "OPEN",
+        "hfl_m": 100.0,
+        "road_level": 103.0,
+        "scour_depth_m": 2.5,
+        "freeboard_m": 1.0,
+        "sbc_t_per_m2": 30,
+        "submersible": false,
+        "total_length_m": 60,
+        "pier_count": 3,
+        "pier_batter_1n": 10,
+        "soffit_level": 101.525,
+        "foundation_level": 96.9,
+        "bearing_type": "ELASTOMERIC",
+        "camber_mm": 15
+      },
+      "warnings": [],
+      "fields": [
+        "span_count",
+        "span_length_m",
+        "carriageway_width",
+        "footpath_width",
+        "skew_deg",
+        "deck_thickness_mm",
+        "hfl_m",
+        "freeboard_m",
+        "scour_depth_m",
+        "sbc_t_per_m2",
+        "pier_height_m",
+        "pier_shaft_width_m",
+        "girder_depth_mm",
+        "girder_spacing_m",
+        "girders_per_deck"
+      ]
+    },
+    {
+      "id": "BR-I-2022-008",
+      "title": "Pile Fdn + RCC Pier + RCC 3-Girder (T-Beam)",
+      "spans": "3\u00d725 m",
+      "span_count": 3,
+      "span_lengths": [
+        25.0,
+        25.0,
+        25.0
+      ],
+      "carriageway_width": 7.5,
+      "foundation_type": "PILE",
+      "pier_material": "M25",
+      "superstructure_type": "RCC_T_BEAM",
+      "deck_thickness_mm": 200,
+      "girder_depth_mm": 1800,
+      "girder_spacing_m": 2.0,
+      "girders_per_deck": 3,
+      "pier_shaft_width_m": 1.5,
+      "pier_height_m": 10.0,
+      "pile_diameter_mm": 1200,
+      "pile_length_m": 20.0,
+      "piles_per_pier": 4,
+      "abutment_type": "OPEN",
+      "hfl_m": 100.0,
+      "road_level": 103.5,
+      "scour_depth_m": 3.0,
+      "freeboard_m": 1.0,
+      "sbc_t_per_m2": 15,
+      "submersible": false,
+      "referencePdfPages": [
+        14,
+        15
+      ],
+      "resolved": {
+        "title": "Pile Fdn + RCC Pier + RCC 3-Girder (T-Beam)",
+        "spans": "3\u00d725 m",
+        "span_count": 3,
+        "span_lengths": [
+          25,
+          25,
+          25
+        ],
+        "carriageway_width": 7.5,
+        "foundation_type": "PILE",
+        "pier_material": "M25",
+        "superstructure_type": "RCC_T_BEAM",
+        "deck_thickness_mm": 200,
+        "girder_depth_mm": 1800,
+        "girder_spacing_m": 2.0,
+        "girders_per_deck": 3,
+        "pier_shaft_width_m": 1.5,
+        "pier_height_m": 10.0,
+        "pile_diameter_mm": 1200,
+        "pile_length_m": 20.0,
+        "piles_per_pier": 4,
+        "abutment_type": "OPEN",
+        "hfl_m": 100.0,
+        "road_level": 103.5,
+        "scour_depth_m": 3.0,
+        "freeboard_m": 1.0,
+        "sbc_t_per_m2": 15,
+        "submersible": false,
+        "total_length_m": 75,
+        "pier_count": 2,
+        "pier_batter_1n": 10,
+        "soffit_level": 101.425,
+        "foundation_level": 75,
+        "bearing_type": "ELASTOMERIC",
+        "camber_mm": 25
+      },
+      "warnings": [],
+      "fields": [
+        "span_count",
+        "span_length_m",
+        "carriageway_width",
+        "footpath_width",
+        "skew_deg",
+        "deck_thickness_mm",
+        "hfl_m",
+        "freeboard_m",
+        "scour_depth_m",
+        "sbc_t_per_m2",
+        "pier_height_m",
+        "pier_shaft_width_m",
+        "girder_depth_mm",
+        "girder_spacing_m",
+        "girders_per_deck",
+        "pile_diameter_mm",
+        "pile_length_m",
+        "piles_per_pier"
+      ]
+    },
+    {
+      "id": "BR-I-2022-009",
+      "title": "Open Fdn + RCC Pier + PSC 4-Girder (with footpath)",
+      "spans": "4\u00d725 m, 10.50 m overall",
+      "span_count": 4,
+      "span_lengths": [
+        25.0,
+        25.0,
+        25.0,
+        25.0
+      ],
+      "carriageway_width": 7.5,
+      "footpath_width": 1.5,
+      "foundation_type": "OPEN",
+      "pier_material": "M30",
+      "superstructure_type": "PSC_I_GIRDER",
+      "deck_thickness_mm": 200,
+      "girder_depth_mm": 1800,
+      "girder_spacing_m": 2.5,
+      "girders_per_deck": 4,
+      "pier_shaft_width_m": 2.0,
+      "pier_height_m": 10.0,
+      "abutment_type": "OPEN",
+      "hfl_m": 100.0,
+      "road_level": 103.5,
+      "scour_depth_m": 3.0,
+      "freeboard_m": 1.0,
+      "sbc_t_per_m2": 30,
+      "submersible": false,
+      "referencePdfPages": [
+        16,
+        17
+      ],
+      "resolved": {
+        "title": "Open Fdn + RCC Pier + PSC 4-Girder (with footpath)",
+        "spans": "4\u00d725 m, 10.50 m overall",
+        "span_count": 4,
+        "span_lengths": [
+          25,
+          25,
+          25,
+          25
+        ],
+        "carriageway_width": 7.5,
+        "footpath_width": 1.5,
+        "foundation_type": "OPEN",
+        "pier_material": "M30",
+        "superstructure_type": "PSC_I_GIRDER",
+        "deck_thickness_mm": 200,
+        "girder_depth_mm": 1800,
+        "girder_spacing_m": 2.5,
+        "girders_per_deck": 4,
+        "pier_shaft_width_m": 2.0,
+        "pier_height_m": 10.0,
+        "abutment_type": "OPEN",
+        "hfl_m": 100.0,
+        "road_level": 103.5,
+        "scour_depth_m": 3.0,
+        "freeboard_m": 1.0,
+        "sbc_t_per_m2": 30,
+        "submersible": false,
+        "total_length_m": 100,
+        "pier_count": 3,
+        "pier_batter_1n": 10,
+        "soffit_level": 101.425,
+        "foundation_level": 96.4,
+        "bearing_type": "POT",
+        "camber_mm": 25
+      },
+      "warnings": [],
+      "fields": [
+        "span_count",
+        "span_length_m",
+        "carriageway_width",
+        "footpath_width",
+        "skew_deg",
+        "deck_thickness_mm",
+        "hfl_m",
+        "freeboard_m",
+        "scour_depth_m",
+        "sbc_t_per_m2",
+        "pier_height_m",
+        "pier_shaft_width_m",
+        "girder_depth_mm",
+        "girder_spacing_m",
+        "girders_per_deck"
+      ]
+    },
+    {
+      "id": "BR-I-2022-010",
+      "title": "Pile Fdn + RCC Pier + PSC 4-Girder (9 spans, 270 m)",
+      "spans": "9\u00d730 m = 270 m",
+      "span_count": 9,
+      "span_lengths": [
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0
+      ],
+      "carriageway_width": 7.5,
+      "foundation_type": "PILE",
+      "pier_material": "M30",
+      "superstructure_type": "PSC_I_GIRDER",
+      "deck_thickness_mm": 200,
+      "girder_depth_mm": 2200,
+      "girder_spacing_m": 2.5,
+      "girders_per_deck": 4,
+      "pier_shaft_width_m": 2.0,
+      "pier_height_m": 12.0,
+      "pile_diameter_mm": 1200,
+      "pile_length_m": 25.0,
+      "piles_per_pier": 6,
+      "abutment_type": "OPEN",
+      "hfl_m": 100.0,
+      "road_level": 104.5,
+      "scour_depth_m": 3.5,
+      "freeboard_m": 1.0,
+      "sbc_t_per_m2": 15,
+      "submersible": false,
+      "referencePdfPages": [
+        18,
+        19
+      ],
+      "resolved": {
+        "title": "Pile Fdn + RCC Pier + PSC 4-Girder (9 spans, 270 m)",
+        "spans": "9\u00d730 m = 270 m",
+        "span_count": 9,
+        "span_lengths": [
+          30,
+          30,
+          30,
+          30,
+          30,
+          30,
+          30,
+          30,
+          30
+        ],
+        "carriageway_width": 7.5,
+        "foundation_type": "PILE",
+        "pier_material": "M30",
+        "superstructure_type": "PSC_I_GIRDER",
+        "deck_thickness_mm": 200,
+        "girder_depth_mm": 2200,
+        "girder_spacing_m": 2.5,
+        "girders_per_deck": 4,
+        "pier_shaft_width_m": 2.0,
+        "pier_height_m": 12.0,
+        "pile_diameter_mm": 1200,
+        "pile_length_m": 25.0,
+        "piles_per_pier": 6,
+        "abutment_type": "OPEN",
+        "hfl_m": 100.0,
+        "road_level": 104.5,
+        "scour_depth_m": 3.5,
+        "freeboard_m": 1.0,
+        "sbc_t_per_m2": 15,
+        "submersible": false,
+        "total_length_m": 270,
+        "pier_count": 8,
+        "pier_batter_1n": 10,
+        "soffit_level": 102.025,
+        "foundation_level": 69.5,
+        "bearing_type": "POT",
+        "camber_mm": 30
+      },
+      "warnings": [],
+      "fields": [
+        "span_count",
+        "span_length_m",
+        "carriageway_width",
+        "footpath_width",
+        "skew_deg",
+        "deck_thickness_mm",
+        "hfl_m",
+        "freeboard_m",
+        "scour_depth_m",
+        "sbc_t_per_m2",
+        "pier_height_m",
+        "pier_shaft_width_m",
+        "girder_depth_mm",
+        "girder_spacing_m",
+        "girders_per_deck",
+        "pile_diameter_mm",
+        "pile_length_m",
+        "piles_per_pier"
+      ]
+    },
+    {
+      "id": "BR-I-2022-011",
+      "title": "Open/Well Fdn + RCC Pier + PSC Box (Navigational)",
+      "spans": "2\u00d735 + 1\u00d750 m (navigational)",
+      "span_count": 3,
+      "span_lengths": [
+        35.0,
+        50.0,
+        35.0
+      ],
+      "carriageway_width": 7.5,
+      "foundation_type": "WELL",
+      "pier_material": "M35",
+      "superstructure_type": "PSC_BOX",
+      "deck_thickness_mm": 250,
+      "girder_depth_mm": 3000,
+      "pier_shaft_width_m": 2.5,
+      "pier_height_m": 14.0,
+      "well_diameter_m": 6.0,
+      "abutment_type": "OPEN",
+      "hfl_m": 100.0,
+      "road_level": 110.0,
+      "scour_depth_m": 4.0,
+      "freeboard_m": 1.0,
+      "sbc_t_per_m2": 25,
+      "submersible": false,
+      "referencePdfPages": [
+        20,
+        21
+      ],
+      "resolved": {
+        "title": "Open/Well Fdn + RCC Pier + PSC Box (Navigational)",
+        "spans": "2\u00d735 + 1\u00d750 m (navigational)",
+        "span_count": 3,
+        "span_lengths": [
+          35,
+          50,
+          35
+        ],
+        "carriageway_width": 7.5,
+        "foundation_type": "WELL",
+        "pier_material": "M35",
+        "superstructure_type": "PSC_BOX",
+        "deck_thickness_mm": 250,
+        "girder_depth_mm": 3000,
+        "pier_shaft_width_m": 2.5,
+        "pier_height_m": 14.0,
+        "well_diameter_m": 6.0,
+        "abutment_type": "OPEN",
+        "hfl_m": 100.0,
+        "road_level": 110.0,
+        "scour_depth_m": 4.0,
+        "freeboard_m": 1.0,
+        "sbc_t_per_m2": 25,
+        "submersible": false,
+        "total_length_m": 120,
+        "pier_count": 2,
+        "soffit_level": 106.675,
+        "foundation_level": 88.5,
+        "bearing_type": "POT",
+        "girders_per_deck": 4,
+        "camber_mm": 50
+      },
+      "warnings": [],
+      "fields": [
+        "span_count",
+        "span_length_m",
+        "carriageway_width",
+        "footpath_width",
+        "skew_deg",
+        "deck_thickness_mm",
+        "hfl_m",
+        "freeboard_m",
+        "scour_depth_m",
+        "sbc_t_per_m2",
+        "pier_height_m",
+        "pier_shaft_width_m",
+        "girder_depth_mm",
+        "girder_spacing_m",
+        "girders_per_deck",
+        "well_diameter_m"
+      ]
+    },
+    {
+      "id": "BR-I-2022-012",
+      "title": "Pile Fdn + RCC Pier + PSC Box",
+      "spans": "2\u00d732.5 m",
+      "span_count": 2,
+      "span_lengths": [
+        32.5,
+        32.5
+      ],
+      "carriageway_width": 7.5,
+      "foundation_type": "PILE",
+      "pier_material": "M35",
+      "superstructure_type": "PSC_BOX",
+      "deck_thickness_mm": 250,
+      "girder_depth_mm": 2800,
+      "pier_shaft_width_m": 2.5,
+      "pier_height_m": 12.0,
+      "pile_diameter_mm": 1500,
+      "pile_length_m": 30.0,
+      "piles_per_pier": 6,
+      "abutment_type": "OPEN",
+      "hfl_m": 100.0,
+      "road_level": 104.5,
+      "scour_depth_m": 4.0,
+      "freeboard_m": 1.0,
+      "sbc_t_per_m2": 15,
+      "submersible": false,
+      "referencePdfPages": [
+        22,
+        23
+      ],
+      "resolved": {
+        "title": "Pile Fdn + RCC Pier + PSC Box",
+        "spans": "2\u00d732.5 m",
+        "span_count": 2,
+        "span_lengths": [
+          32.5,
+          32.5
+        ],
+        "carriageway_width": 7.5,
+        "foundation_type": "PILE",
+        "pier_material": "M35",
+        "superstructure_type": "PSC_BOX",
+        "deck_thickness_mm": 250,
+        "girder_depth_mm": 2800,
+        "pier_shaft_width_m": 2.5,
+        "pier_height_m": 12.0,
+        "pile_diameter_mm": 1500,
+        "pile_length_m": 30.0,
+        "piles_per_pier": 6,
+        "abutment_type": "OPEN",
+        "hfl_m": 100.0,
+        "road_level": 104.5,
+        "scour_depth_m": 4.0,
+        "freeboard_m": 1.0,
+        "sbc_t_per_m2": 15,
+        "submersible": false,
+        "total_length_m": 65,
+        "pier_count": 1,
+        "pier_batter_1n": 10,
+        "soffit_level": 101.375,
+        "foundation_level": 64,
+        "bearing_type": "POT",
+        "girders_per_deck": 4,
+        "camber_mm": 32
+      },
+      "warnings": [],
+      "fields": [
+        "span_count",
+        "span_length_m",
+        "carriageway_width",
+        "footpath_width",
+        "skew_deg",
+        "deck_thickness_mm",
+        "hfl_m",
+        "freeboard_m",
+        "scour_depth_m",
+        "sbc_t_per_m2",
+        "pier_height_m",
+        "pier_shaft_width_m",
+        "girder_depth_mm",
+        "girder_spacing_m",
+        "girders_per_deck",
+        "pile_diameter_mm",
+        "pile_length_m",
+        "piles_per_pier"
+      ]
+    },
+    {
+      "id": "BR-I-2022-013",
+      "title": "Well Fdn + RCC Pier + PSC Box",
+      "spans": "2\u00d747.5 m",
+      "span_count": 2,
+      "span_lengths": [
+        47.5,
+        47.5
+      ],
+      "carriageway_width": 7.5,
+      "foundation_type": "WELL",
+      "pier_material": "M35",
+      "superstructure_type": "PSC_BOX",
+      "deck_thickness_mm": 250,
+      "girder_depth_mm": 3500,
+      "pier_shaft_width_m": 2.5,
+      "pier_height_m": 15.0,
+      "well_diameter_m": 8.0,
+      "abutment_type": "OPEN",
+      "hfl_m": 100.0,
+      "road_level": 105.5,
+      "scour_depth_m": 4.5,
+      "freeboard_m": 1.0,
+      "sbc_t_per_m2": 25,
+      "submersible": false,
+      "referencePdfPages": [
+        24,
+        25
+      ],
+      "resolved": {
+        "title": "Well Fdn + RCC Pier + PSC Box",
+        "spans": "2\u00d747.5 m",
+        "span_count": 2,
+        "span_lengths": [
+          47.5,
+          47.5
+        ],
+        "carriageway_width": 7.5,
+        "foundation_type": "WELL",
+        "pier_material": "M35",
+        "superstructure_type": "PSC_BOX",
+        "deck_thickness_mm": 250,
+        "girder_depth_mm": 3500,
+        "pier_shaft_width_m": 2.5,
+        "pier_height_m": 15.0,
+        "well_diameter_m": 8.0,
+        "abutment_type": "OPEN",
+        "hfl_m": 100.0,
+        "road_level": 105.5,
+        "scour_depth_m": 4.5,
+        "freeboard_m": 1.0,
+        "sbc_t_per_m2": 25,
+        "submersible": false,
+        "total_length_m": 95,
+        "pier_count": 1,
+        "soffit_level": 101.675,
+        "foundation_level": 88,
+        "bearing_type": "POT",
+        "girders_per_deck": 4,
+        "camber_mm": 47
+      },
+      "warnings": [],
+      "fields": [
+        "span_count",
+        "span_length_m",
+        "carriageway_width",
+        "footpath_width",
+        "skew_deg",
+        "deck_thickness_mm",
+        "hfl_m",
+        "freeboard_m",
+        "scour_depth_m",
+        "sbc_t_per_m2",
+        "pier_height_m",
+        "pier_shaft_width_m",
+        "girder_depth_mm",
+        "girder_spacing_m",
+        "girders_per_deck",
+        "well_diameter_m"
+      ]
+    },
+    {
+      "id": "BR-I-2022-014",
+      "title": "Open Fdn + RCC Open-Spandrel Arch (Pedestrian F.O.B.)",
+      "spans": "11.3 + 25.7 + 11.3 m, 2.0 m carriageway",
+      "span_count": 3,
+      "span_lengths": [
+        11.3,
+        25.7,
+        11.3
+      ],
+      "carriageway_width": 2.0,
+      "foundation_type": "OPEN",
+      "pier_material": "M25",
+      "superstructure_type": "RCC_ARCH",
+      "deck_thickness_mm": 350,
+      "pier_shaft_width_m": 1.0,
+      "pier_height_m": 5.0,
+      "abutment_type": "OPEN",
+      "hfl_m": 100.0,
+      "road_level": 102.5,
+      "scour_depth_m": 2.0,
+      "freeboard_m": 1.0,
+      "sbc_t_per_m2": 30,
+      "submersible": false,
+      "arch_rise_mm": 7805,
+      "arch_ring_thickness_mm": 350,
+      "arch_schedule_mm": [
+        [
+          0,
+          0
+        ],
+        [
+          1045.83,
+          1006
+        ],
+        [
+          2091.67,
+          1943
+        ],
+        [
+          3137.5,
+          2810
+        ],
+        [
+          4183.33,
+          3608
+        ],
+        [
+          5229.17,
+          4336
+        ],
+        [
+          6275.0,
+          5029
+        ],
+        [
+          7320.83,
+          5675
+        ],
+        [
+          8366.67,
+          6273
+        ],
+        [
+          9412.5,
+          6819
+        ],
+        [
+          10458.33,
+          7313
+        ],
+        [
+          11504.17,
+          7752
+        ],
+        [
+          12550.0,
+          7805
+        ],
+        [
+          13595.83,
+          7752
+        ],
+        [
+          14641.67,
+          7313
+        ],
+        [
+          15687.5,
+          6819
+        ],
+        [
+          16733.33,
+          6273
+        ],
+        [
+          17779.17,
+          5675
+        ],
+        [
+          18825.0,
+          5029
+        ],
+        [
+          19870.83,
+          4336
+        ],
+        [
+          20916.67,
+          3608
+        ],
+        [
+          21962.5,
+          2810
+        ],
+        [
+          23008.33,
+          1943
+        ],
+        [
+          24054.17,
+          1006
+        ],
+        [
+          25100.0,
+          0
+        ]
+      ],
+      "referencePdfPages": [
+        26
+      ],
+      "resolved": {
+        "title": "Open Fdn + RCC Open-Spandrel Arch (Pedestrian F.O.B.)",
+        "spans": "11.3 + 25.7 + 11.3 m, 2.0 m carriageway",
+        "span_count": 3,
+        "span_lengths": [
+          11.3,
+          25.7,
+          11.3
+        ],
+        "carriageway_width": 3.5,
+        "foundation_type": "OPEN",
+        "pier_material": "M25",
+        "superstructure_type": "RCC_ARCH",
+        "deck_thickness_mm": 350,
+        "pier_shaft_width_m": 1.0,
+        "pier_height_m": 5.0,
+        "abutment_type": "OPEN",
+        "hfl_m": 100.0,
+        "road_level": 102.5,
+        "scour_depth_m": 2.0,
+        "freeboard_m": 1.0,
+        "sbc_t_per_m2": 30,
+        "submersible": false,
+        "arch_rise_mm": 7805,
+        "arch_ring_thickness_mm": 350,
+        "arch_schedule_mm": [
+          [
+            0,
+            0
+          ],
+          [
+            1045.83,
+            1006
+          ],
+          [
+            2091.67,
+            1943
+          ],
+          [
+            3137.5,
+            2810
+          ],
+          [
+            4183.33,
+            3608
+          ],
+          [
+            5229.17,
+            4336
+          ],
+          [
+            6275.0,
+            5029
+          ],
+          [
+            7320.83,
+            5675
+          ],
+          [
+            8366.67,
+            6273
+          ],
+          [
+            9412.5,
+            6819
+          ],
+          [
+            10458.33,
+            7313
+          ],
+          [
+            11504.17,
+            7752
+          ],
+          [
+            12550.0,
+            7805
+          ],
+          [
+            13595.83,
+            7752
+          ],
+          [
+            14641.67,
+            7313
+          ],
+          [
+            15687.5,
+            6819
+          ],
+          [
+            16733.33,
+            6273
+          ],
+          [
+            17779.17,
+            5675
+          ],
+          [
+            18825.0,
+            5029
+          ],
+          [
+            19870.83,
+            4336
+          ],
+          [
+            20916.67,
+            3608
+          ],
+          [
+            21962.5,
+            2810
+          ],
+          [
+            23008.33,
+            1943
+          ],
+          [
+            24054.17,
+            1006
+          ],
+          [
+            25100.0,
+            0
+          ]
+        ],
+        "total_length_m": 48.3,
+        "pier_count": 2,
+        "pier_batter_1n": 10,
+        "soffit_level": 102.075,
+        "foundation_level": 97.4,
+        "bearing_type": "NONE",
+        "camber_mm": 25
+      },
+      "warnings": [
+        "carriageway 2.0 m is below the 3.5 m model floor \u2014 clamped to 3.5 m (deviation stated, not hidden)"
+      ],
+      "fields": [
+        "span_count",
+        "span_length_m",
+        "carriageway_width",
+        "footpath_width",
+        "skew_deg",
+        "deck_thickness_mm",
+        "hfl_m",
+        "freeboard_m",
+        "scour_depth_m",
+        "sbc_t_per_m2",
+        "pier_height_m",
+        "pier_shaft_width_m"
+      ]
+    },
+    {
+      "id": "BR-I-2022-015",
+      "title": "Open Fdn + RCC Precast Block Arch (Vehicular)",
+      "spans": "61.94 m, 10.0 m carriageway, 27 blocks",
+      "span_count": 1,
+      "span_lengths": [
+        61.94
+      ],
+      "carriageway_width": 10.0,
+      "foundation_type": "OPEN",
+      "pier_material": "M30",
+      "superstructure_type": "RCC_ARCH",
+      "deck_thickness_mm": 400,
+      "pier_shaft_width_m": 1.5,
+      "pier_height_m": 6.0,
+      "abutment_type": "OPEN",
+      "hfl_m": 100.0,
+      "road_level": 103.0,
+      "scour_depth_m": 2.5,
+      "freeboard_m": 1.0,
+      "sbc_t_per_m2": 27.233,
+      "submersible": false,
+      "arch_rise_mm": 1996,
+      "arch_ring_thickness_mm": 400,
+      "arch_strip_count": 3,
+      "arch_strip_gap_mm": 100,
+      "arch_block_count": 27,
+      "spandrel_wall_thickness_mm": 400,
+      "referencePdfPages": [
+        27
+      ],
+      "resolved": {
+        "title": "Open Fdn + RCC Precast Block Arch (Vehicular)",
+        "spans": "61.94 m, 10.0 m carriageway, 27 blocks",
+        "span_count": 1,
+        "span_lengths": [
+          61.94
+        ],
+        "carriageway_width": 10.0,
+        "foundation_type": "OPEN",
+        "pier_material": "M30",
+        "superstructure_type": "RCC_ARCH",
+        "deck_thickness_mm": 400,
+        "pier_shaft_width_m": 1.5,
+        "pier_height_m": 6.0,
+        "abutment_type": "OPEN",
+        "hfl_m": 100.0,
+        "road_level": 103.0,
+        "scour_depth_m": 2.5,
+        "freeboard_m": 1.0,
+        "sbc_t_per_m2": 27.233,
+        "submersible": false,
+        "arch_rise_mm": 1996,
+        "arch_ring_thickness_mm": 400,
+        "arch_strip_count": 3,
+        "arch_strip_gap_mm": 100,
+        "arch_block_count": 27,
+        "spandrel_wall_thickness_mm": 400,
+        "total_length_m": 61.94,
+        "pier_count": 0,
+        "pier_batter_1n": 10,
+        "soffit_level": 102.525,
+        "foundation_level": 96.9,
+        "bearing_type": "NONE",
+        "camber_mm": 61
+      },
+      "warnings": [],
+      "fields": [
+        "span_count",
+        "span_length_m",
+        "carriageway_width",
+        "footpath_width",
+        "skew_deg",
+        "deck_thickness_mm",
+        "hfl_m",
+        "freeboard_m",
+        "scour_depth_m",
+        "sbc_t_per_m2"
+      ]
+    }
+  ],
+  "variables": {
+    "span_count": {
+      "unit": "no",
+      "kind": "free",
+      "min": 1,
+      "max": 12,
+      "step": null,
+      "choices": [],
+      "note": ""
+    },
+    "span_length_m": {
+      "unit": "m",
+      "kind": "free",
+      "min": 6,
+      "max": 50,
+      "step": 0.5,
+      "choices": [],
+      "note": "applies to every span; use span_overrides for a mix"
+    },
+    "carriageway_width": {
+      "unit": "m",
+      "kind": "free",
+      "min": null,
+      "max": null,
+      "step": null,
+      "choices": [
+        3.5,
+        7.5,
+        11.0
+      ],
+      "note": ""
+    },
+    "footpath_width": {
+      "unit": "m",
+      "kind": "free",
+      "min": 0,
+      "max": 2,
+      "step": 0.25,
+      "choices": [],
+      "note": ""
+    },
+    "skew_deg": {
+      "unit": "deg",
+      "kind": "free",
+      "min": 0,
+      "max": 30,
+      "step": 5,
+      "choices": [],
+      "note": ""
+    },
+    "pier_height_m": {
+      "unit": "m",
+      "kind": "free",
+      "min": 3,
+      "max": 25,
+      "step": null,
+      "choices": [],
+      "note": ""
+    },
+    "pier_shaft_width_m": {
+      "unit": "m",
+      "kind": "free",
+      "min": 0.8,
+      "max": 3,
+      "step": 0.1,
+      "choices": [],
+      "note": ""
+    },
+    "deck_thickness_mm": {
+      "unit": "mm",
+      "kind": "free",
+      "min": 200,
+      "max": 900,
+      "step": 25,
+      "choices": [],
+      "note": ""
+    },
+    "girder_depth_mm": {
+      "unit": "mm",
+      "kind": "free",
+      "min": 600,
+      "max": 3000,
+      "step": 50,
+      "choices": [],
+      "note": ""
+    },
+    "girder_spacing_m": {
+      "unit": "m",
+      "kind": "free",
+      "min": 1.5,
+      "max": 3.5,
+      "step": 0.1,
+      "choices": [],
+      "note": ""
+    },
+    "girders_per_deck": {
+      "unit": "no",
+      "kind": "free",
+      "min": 1,
+      "max": 8,
+      "step": null,
+      "choices": [],
+      "note": ""
+    },
+    "hfl_m": {
+      "unit": "m",
+      "kind": "free",
+      "min": 0,
+      "max": 1000,
+      "step": null,
+      "choices": [],
+      "note": ""
+    },
+    "freeboard_m": {
+      "unit": "m",
+      "kind": "free",
+      "min": 0.6,
+      "max": 4,
+      "step": 0.05,
+      "choices": [],
+      "note": ""
+    },
+    "scour_depth_m": {
+      "unit": "m",
+      "kind": "free",
+      "min": 0.5,
+      "max": 8,
+      "step": null,
+      "choices": [],
+      "note": ""
+    },
+    "pile_diameter_mm": {
+      "unit": "mm",
+      "kind": "free",
+      "min": null,
+      "max": null,
+      "step": null,
+      "choices": [
+        1000,
+        1200,
+        1500
+      ],
+      "note": ""
+    },
+    "pile_length_m": {
+      "unit": "m",
+      "kind": "free",
+      "min": 6,
+      "max": 45,
+      "step": 0.5,
+      "choices": [],
+      "note": ""
+    },
+    "piles_per_pier": {
+      "unit": "no",
+      "kind": "free",
+      "min": 2,
+      "max": 12,
+      "step": null,
+      "choices": [],
+      "note": ""
+    },
+    "well_diameter_m": {
+      "unit": "m",
+      "kind": "free",
+      "min": 4,
+      "max": 8,
+      "step": 0.5,
+      "choices": [],
+      "note": ""
+    },
+    "sbc_t_per_m2": {
+      "unit": "t/m\u00b2",
+      "kind": "free",
+      "min": 10,
+      "max": 200,
+      "step": null,
+      "choices": [],
+      "note": ""
+    },
+    "foundation_type": {
+      "unit": "-",
+      "kind": "locked",
+      "min": null,
+      "max": null,
+      "step": null,
+      "choices": [],
+      "note": ""
+    },
+    "superstructure_type": {
+      "unit": "-",
+      "kind": "locked",
+      "min": null,
+      "max": null,
+      "step": null,
+      "choices": [],
+      "note": ""
+    },
+    "abutment_type": {
+      "unit": "-",
+      "kind": "locked",
+      "min": null,
+      "max": null,
+      "step": null,
+      "choices": [],
+      "note": ""
+    },
+    "bearing_type": {
+      "unit": "-",
+      "kind": "locked",
+      "min": null,
+      "max": null,
+      "step": null,
+      "choices": [],
+      "note": ""
+    },
+    "pier_material": {
+      "unit": "-",
+      "kind": "locked",
+      "min": null,
+      "max": null,
+      "step": null,
+      "choices": [],
+      "note": ""
+    },
+    "submersible": {
+      "unit": "bool",
+      "kind": "locked",
+      "min": null,
+      "max": null,
+      "step": null,
+      "choices": [],
+      "note": ""
+    },
+    "dirt_wall_thickness_mm": {
+      "unit": "mm",
+      "kind": "locked",
+      "min": null,
+      "max": null,
+      "step": null,
+      "choices": [],
+      "note": ""
+    },
+    "total_length_m": {
+      "unit": "m",
+      "kind": "derived",
+      "min": null,
+      "max": null,
+      "step": null,
+      "choices": [],
+      "note": ""
+    },
+    "soffit_level": {
+      "unit": "m",
+      "kind": "derived",
+      "min": null,
+      "max": null,
+      "step": null,
+      "choices": [],
+      "note": ""
+    },
+    "road_level": {
+      "unit": "m",
+      "kind": "derived",
+      "min": null,
+      "max": null,
+      "step": null,
+      "choices": [],
+      "note": ""
+    },
+    "foundation_level": {
+      "unit": "m",
+      "kind": "derived",
+      "min": null,
+      "max": null,
+      "step": null,
+      "choices": [],
+      "note": ""
+    },
+    "pier_count": {
+      "unit": "no",
+      "kind": "derived",
+      "min": null,
+      "max": null,
+      "step": null,
+      "choices": [],
+      "note": ""
+    },
+    "span_lengths": {
+      "unit": "m[]",
+      "kind": "derived",
+      "min": null,
+      "max": null,
+      "step": null,
+      "choices": [],
+      "note": ""
+    }
+  }
+}

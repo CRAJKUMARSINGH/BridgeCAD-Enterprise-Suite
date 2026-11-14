@@ -4,6 +4,21 @@
 
 ---
 
+### Session — Complete themed PWD landing installed (recovery patch) · 09:05
+
+- Applied `CODE-JUNCTION/BridgeCAD-Complete-Themed-Landing` (payload + installer) for request "apply patch as per CODE-JUNCTION".
+- Installer prerequisite check wants `sheets/registry.ts` / `sheets/presets.ts`; repo has `registry.tsx` / `presets.js`. Check aborted, so the payload was installed and `main.tsx` wired manually, exactly as the installer's `wire()` would (patch doc permits manual wiring).
+- Added `frontend/src/WorkflowLanding.tsx`, `workflow.css` (finished burgundy/vermilion/saffron/cream theme), `workflowScenarios.ts`, `generated/workflow.json` (15 cards), `scripts/export_workflow_catalogue.py`.
+- Wired `frontend/src/main.tsx`: `WorkflowRoot` mounts `WorkflowLanding` at the default route; `#workspace` renders the original `App` with a back link to `#home`.
+- Backup written to `CODE-JUNCTION/landing-backup-20261114-070117-218126` (manifest.json + prior `main.tsx`).
+- `python scripts/export_workflow_catalogue.py` → regenerated catalogue is byte-identical to the bundled snapshot (`git diff` empty).
+- `npm run build` (`tsc --noEmit && vite build`) → PASS, 42 modules, 6.68 s.
+- Not committed yet; browser/mobile checks pending.
+
+**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+
+---
+
 ### Session — Task 3: format/layout + variable controls on BOTH landing pages · 08:10
 
 - Enriched `docs/USER-MANUAL.md` with §12 (format/layout choice) and §13 (varying parameters / PWD Generator).
@@ -98,3 +113,4 @@ No changes this session.
   - Variant note in title block — LOW
 
 ---
+| 2026-11-14 00:18 | User prompt received |

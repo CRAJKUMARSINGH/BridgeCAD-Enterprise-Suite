@@ -1,6 +1,6 @@
 import * as LandingReact from "react";
 import WorkflowLanding from "./WorkflowLanding";
-import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 import "./sheets/sheets.css";
@@ -16,6 +16,9 @@ import { buildBoq, formatINR } from "./sheets/boq";
 type BackendState = "checking" | "online" | "demo" | "offline";
 type DockTab = "geometry" | "variants" | "checks" | "boq" | "export";
 type OutputFormat = "dxf" | "pdf" | "png";
+// B03 — one job-scoped artifact: the object URL, its download name and the job
+// that produced it, so a failed run B can never be presented as run A's output.
+type Artifact = { format: OutputFormat; url: string; filename: string; jobId: string };
 
 const initialProject: ProjectState = {
   name: "Yogendra Borse Bridge",
@@ -96,12 +99,18 @@ function App() {
   const [backend, setBackend] = useState<BackendState>("checking");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
-  const [generated, setGenerated] = useState<Array<{ format: OutputFormat; url: string; filename: string }>>([]);
+  const [generated, setGenerated] = useState<Artifact[]>([]);
   const [notice, setNotice] = useState("Detail sheets 04 and 05 render locally — no Python engine required.");
   const [outputFormat, setOutputFormat] = useState<OutputFormat>("dxf");
   const [plotScale, setPlotScale] = useState<string>("auto");
   const [theme, setTheme] = useState<SheetTheme>(INK);
   const [zoom, setZoom] = useState<number | "fit">("fit");
+
+  // B04 — lifecycle handles: the latest artifact set (for unmount revocation)
+  // and the in-flight generation request (aborted on a new job or unmount).
+  const generatedRef = useRef<Artifact[]>([]);
+  generatedRef.current = generated;
+  const jobAbortRef = useRef<AbortController | null>(null);
 
   // The detail-sheet title block must track the project form: the identity
   // fields are read straight off `project` on every render rather than seeded
@@ -134,31 +143,48 @@ function App() {
     };
   }, []);
 
-  // Report the deployment's engine state once at mount.
+  // B08 — report the deployment's engine state once at mount. The request is
+  // aborted on unmount so a slow or late response never sets state on a dead
+  // component, and the AbortError is not misread as an offline backend.
   useEffect(() => {
-    fetch("/api/health")
+    const controller = new AbortController();
+    fetch("/api/health", { signal: controller.signal })
       .then((response) => {
         if (!response.ok) throw new Error("Backend unavailable");
         return response.json() as Promise<{ mode?: string }>;
       })
       .then((payload) => setBackend(payload.mode === "demo" ? "demo" : "online"))
-      .catch(() => setBackend("offline"));
+      .catch((error: unknown) => {
+        if ((error as { name?: string })?.name === "AbortError") return;
+        setBackend("offline");
+      });
+    return () => controller.abort();
   }, []);
 
+  // B04 — revoke every generated blob URL when the workspace unmounts (hash
+  // routing back to the landing page) and cancel any in-flight generation.
+  useEffect(() => () => {
+    jobAbortRef.current?.abort();
+    generatedRef.current.forEach((artifact) => URL.revokeObjectURL(artifact.url));
+  }, []);
+
+  // B01 — every consumer (preview, audit, compliance, BOQ and DXF export) reads
+  // the one canonical resolved detail with project identity merged in, so the
+  // exported file can never disagree with the sheet on screen.
   const verdict = useMemo(() => {
     try {
       const issues = [
-        ...audit(buildSheet4(detail)).issues,
-        ...audit(buildSheet5(detail)).issues,
+        ...audit(buildSheet4(liveDetail)).issues,
+        ...audit(buildSheet5(liveDetail)).issues,
       ];
       return { count: issues.length, codes: issues.map((i) => i.code) };
     } catch (err) {
       return { count: -1, codes: [String(err)] };
     }
-  }, [detail]);
+  }, [liveDetail]);
 
-  const compliance = useMemo(() => buildComplianceReport(project, detail), [project, detail]);
-  const boq = useMemo(() => buildBoq(project, detail), [project, detail]);
+  const compliance = useMemo(() => buildComplianceReport(project, liveDetail), [project, liveDetail]);
+  const boq = useMemo(() => buildBoq(project, liveDetail), [project, liveDetail]);
 
   function updateProject<K extends keyof ProjectState>(key: K, value: ProjectState[K]) {
     setProject((current) => ({ ...current, [key]: value }));
@@ -198,6 +224,13 @@ function App() {
       setNotice("Choose an .xlsx parameter workbook first.");
       return;
     }
+    // B03 — job identity: the input fingerprint plus a monotonic suffix, so
+    // every artifact stays attributable to the workbook/format/scale that made it.
+    const fingerprint = `${selectedFile.name}|${selectedFile.size}|${project.number}|${outputFormat}|${plotScale}`;
+    const jobId = `${fingerprint}#${Date.now().toString(36)}`;
+    jobAbortRef.current?.abort();
+    const controller = new AbortController();
+    jobAbortRef.current = controller;
     setBusy(true);
     setNotice(`Generating ${outputFormat.toUpperCase()} output…`);
     const formData = new FormData();
@@ -207,8 +240,17 @@ function App() {
     // resolves the IRC SP:55 ladder itself when the parameter is absent.
     if (plotScale !== "auto") query.set("scale", plotScale);
     try {
-      const response = await fetch(`/api/predict?${query.toString()}`, { method: "POST", body: formData });
-      if (!response.ok) throw new Error("Generation failed");
+      const response = await fetch(`/api/predict?${query.toString()}`, {
+        method: "POST",
+        body: formData,
+        signal: controller.signal,
+      });
+      // B02 — surface the real HTTP status and server message instead of
+      // blaming the Python engine for every failure mode.
+      if (!response.ok) {
+        const serverMessage = await response.text().catch(() => "");
+        throw new Error(`HTTP ${response.status}${serverMessage ? ` · ${serverMessage.slice(0, 160)}` : ""}`);
+      }
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       setGenerated((current) => {
@@ -217,22 +259,25 @@ function App() {
         current.filter((entry) => entry.format === outputFormat).forEach((entry) => URL.revokeObjectURL(entry.url));
         return [
           ...current.filter((entry) => entry.format !== outputFormat),
-          { format: outputFormat, url, filename: `${project.number}.${outputFormat}` },
+          { format: outputFormat, url, filename: `${project.number}.${outputFormat}`, jobId },
         ];
       });
       setBackend("online");
       const scaleLabel = plotScale === "auto" ? "Auto (IRC SP:55 ladder)" : `1:${plotScale}`;
-      setNotice(`${outputFormat.toUpperCase()} generated at plot scale ${scaleLabel}. Download it from the export panel.`);
-    } catch {
-      setBackend("demo");
-      setNotice("Python engine offline — sheets 04/05 still render locally; use the local DXF button.");
+      setNotice(`${outputFormat.toUpperCase()} generated at plot scale ${scaleLabel} (job ${jobId.slice(-6)}). Download it from the export panel.`);
+    } catch (error) {
+      if ((error as { name?: string })?.name === "AbortError") return;
+      // B02 — leave the probed backend status untouched; report the actual error.
+      const message = error instanceof Error ? error.message : String(error);
+      setNotice(`Generation failed — ${message}. Sheets 04/05 still render locally; use the local DXF button.`);
     } finally {
-      setBusy(false);
+      if (jobAbortRef.current === controller) setBusy(false);
     }
   }
 
   function downloadLocalDxf() {
-    const built = sheetIndex === 4 ? buildSheet4(detail) : buildSheet5(detail);
+    // B01 — build from the same canonical detail the sheet previews.
+    const built = sheetIndex === 4 ? buildSheet4(liveDetail) : buildSheet5(liveDetail);
     const blob = new Blob([toDxf(built)], { type: "application/dxf" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -658,7 +703,13 @@ function App() {
                   </div>
                   <div className="export-actions">
                     {generated.map((artifact) => (
-                      <a key={artifact.format} className="button button-outline" href={artifact.url} download={artifact.filename}>
+                      <a
+                        key={artifact.format}
+                        className="button button-outline"
+                        href={artifact.url}
+                        download={artifact.filename}
+                        title={`Job ${artifact.jobId}`}
+                      >
                         Download {artifact.format.toUpperCase()}
                       </a>
                     ))}

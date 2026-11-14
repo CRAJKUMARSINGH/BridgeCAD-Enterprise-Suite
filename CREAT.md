@@ -4,6 +4,23 @@
 
 ---
 
+### Session — Frontend review fixes (B01–B06, B08) · 14:15
+
+- Applied the priority queue in `CODE-JUNCTION/BRIDGECAD_FRONTEND_REVIEW_AND_OPTIMIZATION.md` to the workspace frontend.
+- B01 canonical detail: preview, audit, compliance, BOQ and the local DXF export now read one resolved detail (project identity merged in), so a downloaded file cannot disagree with the sheet on screen.
+- B02 real backend status: generation failures now report the actual HTTP status and sanitised server message instead of always claiming "Python offline"; a caught error no longer flips the probed backend to `demo`.
+- B03 job-scoped artifacts: each export carries an input fingerprint + job id; the download link is labelled with its job so a failed run cannot be presented as an earlier run's output.
+- B04 lifecycle: generated blob URLs are revoked on workspace unmount; generation uses an `AbortController` aborted on a new job or unmount.
+- B05 dev health stub is now opt-in (`BRIDGECAD_DEV_HEALTH_STUB=1`); dev reports the true backend state by default.
+- B06 scenario validation: reject a stored `savedAt` no date parser accepts; collapse duplicate stored ids.
+- Already in place: B07 single-scenario export vs `{schemaVersion:2, scenarios:[...]}` import envelope; B09 atomic import merge (limit + dedupe before a single persist).
+- `npm run build` (`tsc --noEmit && vite build`) → PASS, 42 modules; JS 280.75 kB (gzip 87.58 kB), CSS 37.20 kB (gzip 8.97 kB).
+- Video upload already complete — `learn-media/bridgecad-quickstart.mp4` is tracked and pushed (ebd9285); CODE-JUNCTION held no new video.
+
+**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+
+---
+
 ### Session — Learning centre video + GitHub visitor notes · 09:40
 
 - Applied `CODE-JUNCTION/BridgeCAD-Video-and-Manual/github-readme-and-manual.patch` (`git apply --check` exit 0, then applied cleanly).

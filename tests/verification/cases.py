@@ -216,7 +216,7 @@ def _check_pier_toc_list(ctx: BenchContext) -> None:
     project = ctx.span_variant([10.0, 12.0, 14.0])
     geo = long_section.compute_long_section_geometry(project)
     sub = project.substructure
-    expected = geo.soffit_rl - float(sub.pier_pedestal_height_m) - float(sub.pier_cap_depth_m)
+    expected = geo.soffit_rl - float(sub.pier_pedestal_height_m)
     assert len(geo.pier_top_of_cap_rl_m) == len(geo.pier_chainage_m)
     for value in geo.pier_top_of_cap_rl_m:
         assert_within_tier("A", value, expected)

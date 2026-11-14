@@ -329,7 +329,7 @@ function App() {
         </nav>
 
         <div className="sidebar-footer">
-          <div className="status-line">
+          <div className="status-line" role="status" aria-live="polite">
             <span className={`status-dot ${backend}`} />
             <span>Python engine {backend === "online" ? "online" : backend}</span>
           </div>

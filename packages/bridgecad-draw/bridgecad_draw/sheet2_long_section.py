@@ -649,7 +649,7 @@ def _draw_long_section(
         # FR-4: pier TOP of pier-cap is authoritative vy(toc_rls[i]) — not the
         # old `soffit − pedestal − cap` manual in-place calc.  Pier cap sits
         # *below* this datum; pedestal above carries the soffit.
-        py_toc = vy(toc_rls[i]) if i < len(toc_rls) else (sof_y_mm - pier_ped_h - pier_cap_h)
+        py_toc = vy(toc_rls[i]) if i < len(toc_rls) else (sof_y_mm - pier_ped_h)
         py_cap_bot = py_toc - pier_cap_h  # cap bottom
         py_shaft_top = py_cap_bot  # pier shaft top = cap bottom
         py_bot = vy(hfl_rl - float(sub.pier_height_typical_m or 8.0))
@@ -684,12 +684,18 @@ def _draw_long_section(
             layer="STRUC-HATCHING",
         )
 
+        # Schematic support seat, not an independently designed bearing detail.
+        seat_w = min(pier_w_mm, cap_w)
+        if sof_y_mm > py_toc:
+            rectangle(msp, hx(cumul) - seat_w / 2, py_toc,
+                      seat_w, sof_y_mm - py_toc, layer="SUB-PIER", lw=40)
+
         # FR-4: T.O.C. P{i} level tag + dashed guide to the level axis so the
         # reader can verify alignment with the plan's northern-edge RL. Only
         # drawn at "full" density (SS3 §A2) — at the coarser tiers these tags
         # are what collided into a single unreadable stack. The ΔREF value is
         # never drawn in-line any more; it goes into the table below.
-        _toc = toc_rls[i] if i < len(toc_rls) else (ls.soffit_rl - pier_ped_h - pier_cap_h)
+        _toc = toc_rls[i] if i < len(toc_rls) else (ls.soffit_rl - float(sub.pier_pedestal_height_m or 0.2))
         if annot == "full":
             level_tag(
                 msp,

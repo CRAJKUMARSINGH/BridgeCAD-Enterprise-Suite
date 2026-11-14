@@ -176,3 +176,8 @@ this audit. The companion Site publication failed at the hosting provider.
 
 See [the supplementary workflow guide](BRIDGECAD_SUPPLEMENTARY_PATCH.md) and
 [the uploaded-instruction ledger](V_INSTRUCTIONS_APPLIED.md).
+
+
+### Explicit development health mode
+
+Vite now proxies `/api/health` to the configured local backend by default. For a deliberate static-demo development session, set `VITE_DEMO_HEALTH=1` in `frontend/.env.local` (or the shell) before starting Vite. This switch only enables a demo health response; it does not enable Python generation. Never put private credentials in VITE_ variables. Production health remains handled by the deployment backend.

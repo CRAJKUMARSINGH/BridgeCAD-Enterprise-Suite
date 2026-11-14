@@ -4,6 +4,22 @@
 
 ---
 
+### Session — MASTER-APP-TESTER applied to the built frontend · 08:19
+
+- Ran the 8-phase MASTER-APP-TESTER protocol against the current checkout (HEAD `5161370`); the previous frontend review (`CODE-JUNCTION/BRIDGECAD_FRONTEND_REVIEW_AND_OPTIMIZATION.md`, B01–B09) was reconfirmed against the live build before any code was touched.
+- No `AGENTS.md` exists in the repository (glob: no match), so only `CODE-JUNCTION/T.txt` standing orders applied. README already carries both required references (prewallcivil.com lines 167/171/228, yogipwd.com lines 173/231/278).
+- **Patched (2 findings):** workspace sidebar status line and the landing header status chip now expose `role="status"` / `aria-live="polite"`, so a backend-state change is announced instead of silently re-rendering (WCAG 2.1 AA 4.1.3). `.gitignore` now ignores `.env` / `.env.*` while keeping `.env.example` — the template's own header says "NEVER commit .env" but no rule matched it.
+- **Measured baseline before optimising:** LCP 764–936 ms (target <2500 ms) PASS; CLS 0.0005 on `/` and `/#home` PASS, but **0.1763 on `/#workspace`** FAIL. Attribution is not inferred: blocking `fonts.googleapis.com`/`fonts.gstatic.com` in a control run drops CLS to 0.0000, and the Google Fonts `@import` in `styles.css` swaps at ~1280 ms — a ~3 px global reflow. Fix deferred (needs self-hosted fonts + preload, or `font-display: optional`); it changes typography, so it was not applied unilaterally.
+- **Measured failure:** the workspace overflows horizontally at a 390 px viewport — `scrollWidth 449` vs `innerWidth 390` (59 px), rooted at `.canvas-panel`. Reproducible in 5/5 mobile sessions. Not patched (layout redesign, outside the export-correctness scope).
+- Simulated users **scaled to what is runnable**: 4 personas x 5 sessions = 20 sessions, 5 concurrent workers, 17–18 s wall clock, 0 uncaught page errors. The 125/75/51 volumes named in the protocol were NOT run and are not claimed.
+- Separate lane results: browser preview PASS (3 routes, 200, no page errors); Python generation NOT TESTED (no engine; `/api/predict` → 500 locally); integration tests PASS (7); reference-drawing acceptance NOT TESTED (no independent engineering review).
+- Added: `a11y_perf_probe.py`, `phase5_users_probe.py` and retained JSON captures under `E:\Rajkumar\bridgecad-app-tester-logs\`. Evidence and the finding table live there; no commit or push was made this turn.
+- `npm run build` (`tsc --noEmit && vite build`) → PASS, 42 modules; JS 280.82 kB (gzip 87.59 kB), CSS 37.20 kB (gzip 8.97 kB), 3.61 s.
+
+**Pending:** CLS 0.176 on `/#workspace` (font swap); workspace 390 px overflow; learning-centre link in README/manual returns 401 on the external host; 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`.
+
+---
+
 ### Session — Frontend review fixes (B01–B06, B08) · 14:15
 
 - Applied the priority queue in `CODE-JUNCTION/BRIDGECAD_FRONTEND_REVIEW_AND_OPTIMIZATION.md` to the workspace frontend.
@@ -189,3 +205,15 @@ No changes this session.
 - 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`.
 
 ---
+| 2026-11-14 08:07 | User prompt received |
+| 2026-11-14 08:19 | MASTER-APP-TESTER applied — 2 findings patched, 2 measured failures recorded, no commit |
+| 2026-11-14 08:33 | User prompt received |
+| 2026-11-14 08:38 | User prompt received |
+
+
+## 2026-11-14 — repository audit started
+User requested repository-wide checking and corrections after inaccurate nine-span GAD. Preserving prior local changes. Inventory captured; test baseline initially blocked by missing pytest, installing test tools. No claim of complete verification.
+
+
+## 2026-11-14 — repository audit results
+Inventory: 2011 tracked files; 406 Python AST parses; 18 TOML and 23 YAML configurations parsed without error. First suite: 1335 passed, 11 failed, 6 skipped, 5 xfailed. Corrected catalogue parsing/captions, scale selection and shared ladder, PDF serialization, frontend export/data lifecycle/scenario recovery, and documentation registration/guards. Full rerun: 1359 passed, 6 skipped, 5 xfailed; two further pier-datum checks passed separately. Frontend TypeScript/Vite build passed; cloud-browser verification blocked by local connection refusal. Drawing engineering acceptance remains blocked by foundation-level consistency, incomplete details/layout and lack of PDF comparison. No E: write, GitHub push or deployment.

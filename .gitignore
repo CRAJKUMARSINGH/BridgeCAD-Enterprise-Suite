@@ -106,6 +106,13 @@ Bridge_GAD_PluginRegistry.json
 # Debug environment files — may contain local secrets; never commit
 .dbg/
 
+# Local environment files. .env.example's own header instructs `cp .env.example
+# .env` and "NEVER commit .env", but no rule matched a real .env, so it would
+# have been staged by `git add .`. Keep the tracked template.
+.env
+.env.*
+!.env.example
+
 # Temp upload directory (app_lean.py legacy)
 temp/
 

@@ -86,3 +86,11 @@ is not in this index does not exist.
 See [the executed PWD checks, reference inventory, parameter/layout guidance and patch priorities](docs/BRIDGECAD_SUPPLEMENTARY_PATCH.md). At commit `5d5f99e`, all 15 types generated nine-sheet DXF packages, but the completed full rendering run produced 24 all-white PNGs. Successful generation is not reference fidelity or engineering approval.
 
 - [Uploaded v.md instruction ledger](docs/V_INSTRUCTIONS_APPLIED.md): applied safeguards, already present fixes, pending engineering/reference work and validation results.
+
+
+## Additional implementation and audit notes
+
+- [BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md](docs/BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md)
+- [BRIDGECAD_ATTACHED_ASSETS_LISP_PATCH.md](docs/BRIDGECAD_ATTACHED_ASSETS_LISP_PATCH.md)
+- [BRIDGECAD_USER_MANUAL.md](docs/BRIDGECAD_USER_MANUAL.md)
+- [PWD_ENRICHMENT_GUIDE.md](docs/PWD_ENRICHMENT_GUIDE.md)

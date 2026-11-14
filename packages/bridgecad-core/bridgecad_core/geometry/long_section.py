@@ -64,7 +64,7 @@ class LongSectionGeometry:
 
     pier_top_of_cap_rl_m: list[float] = field(default_factory=list)
     """Per-pier Top-Of-Concrete pier-cap RL; index aligned with pier_chainage_m.
-    Derived from soffit_rl minus pedestal_h minus pier_cap_depth_m
+    Derived from soffit_rl minus pedestal_h (cap depth lies below this level)
     (substructure real values, not guesswork). For 0-internal-pier projects
     this list is empty — use abutment_top_of_rail_rl_m instead.
     """
@@ -194,8 +194,7 @@ def compute_long_section_geometry(project: BridgeProject) -> LongSectionGeometry
     pedestal_h = (
         float(sub.pier_pedestal_height_m) if sub.pier_pedestal_height_m is not None else 0.20
     )
-    pier_cap_depth_m = float(sub.pier_cap_depth_m) if sub.pier_cap_depth_m is not None else 0.80
-    pier_top_of_cap_rl_m: list[float] = [soffit_rl - pedestal_h - pier_cap_depth_m for _ in pier_ch]
+    pier_top_of_cap_rl_m: list[float] = [soffit_rl - pedestal_h for _ in pier_ch]
 
     abutment_top_of_rail_rl_m = top_of_deck_rl
 

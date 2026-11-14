@@ -4,6 +4,18 @@
 
 ---
 
+### Session — Learning centre video + GitHub visitor notes · 09:40
+
+- Applied `CODE-JUNCTION/BridgeCAD-Video-and-Manual/github-readme-and-manual.patch` (`git apply --check` exit 0, then applied cleanly).
+- `README.md` gains the `BRIDGECAD-LEARNING` visitor section (+27 lines); added `docs/BRIDGECAD_USER_MANUAL.md` (8-chapter manual).
+- Uploaded the learning-centre assets to the repo root: `learn.html` and `learn-media/` — `bridgecad-quickstart.mp4` (541,892 B, valid `ftypisom` header), `captions.vtt` (2,011 B), `poster.png` (45,853 B, valid PNG signature).
+- `learn.html` resolves `./learn-media/*` relatively, so the media sits beside it; offline use is `python -m http.server 8080` → `/learn.html`.
+- Committed and pushed.
+
+**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+
+---
+
 ### Session — Complete themed PWD landing installed (recovery patch) · 09:05
 
 - Applied `CODE-JUNCTION/BridgeCAD-Complete-Themed-Landing` (payload + installer) for request "apply patch as per CODE-JUNCTION".
@@ -114,3 +126,34 @@ No changes this session.
 
 ---
 | 2026-11-14 00:18 | User prompt received |
+| 2026-11-14 07:14 | User prompt received |
+
+### Session — Stopped on user instruction · 08:50
+
+No changes this session.
+
+- User ran "apply patches per CODE-JUNCTION" then issued "stop here".
+- Found new file: `CODE-JUNCTION/BRIDGECAD_PWD_COLOUR_THEME_PATCH.md` — a CSS-only colour theme patch (burgundy/amber PWD palette for `frontend/src/workflow.css`).
+- Patch extraction and `git apply` were cancelled before any files were changed.
+- No source files modified, no commits made.
+
+**Pending:**
+- Apply `CODE-JUNCTION/BRIDGECAD_PWD_COLOUR_THEME_PATCH.md` (CSS colour theme for workflow.css) when ready.
+- 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`.
+
+---
+| 2026-11-14 07:14 | Agent turn completed |
+| 2026-11-14 07:18 | User prompt received |
+
+### Session — Standing-order hook entry — another agent is active · 08:55
+
+No changes this session.
+
+- Hook fired. User confirmed another agent is currently working on the repo.
+- No source files modified by this session — standing aside to avoid conflicts.
+
+**Pending:**
+- Apply `CODE-JUNCTION/BRIDGECAD_PWD_COLOUR_THEME_PATCH.md` (CSS colour theme) when other agent finishes.
+- 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`.
+
+---

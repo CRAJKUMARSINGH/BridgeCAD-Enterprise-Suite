@@ -1,5 +1,32 @@
 # 🌉 BridgeCAD Enterprise Suite
 
+<!-- BRIDGECAD-LEARNING-START -->
+## 🎬 New to BridgeCAD? Watch, read, then create
+
+**Explore bridge drawing workflows with a guided starting point.** Choose a drawing family, understand its variables, plan your sheet media and keep a clear verification trail.
+
+**[▶ Open the learning centre](https://bridgecad-workflow.tallflag3.chatgpt.site/learn.html)** · **[Explore the workflow](https://bridgecad-workflow.tallflag3.chatgpt.site/)** · **[Read the user manual](docs/BRIDGECAD_USER_MANUAL.md)**
+
+The learning centre includes a **2-minute captioned video**, eight jump-to chapters, a readable manual and an integration checklist. The hosted Site may require the owner's access permission.
+
+| Your task | Where to start |
+|---|---|
+| Find a matching foundation and superstructure | Drawing catalogue |
+| Vary spans, skew, widths or levels | Variables & layout |
+| Compare edits with catalogue defaults | Baseline comparison |
+| Reuse a study | Saved scenarios; export a backup |
+| Understand capabilities and limitations | Video guide & user manual |
+| Check generated outputs against the reference PDF | Verification |
+| Prepare a browser or Netlify release | Browser & Netlify |
+
+**Try this first:** choose `BR-I-2022-001`, set `skew_deg=25`, inspect the comparison, save the scenario, then prepare a Python dry run. Run that command in your own isolated checkout and retain its actual result.
+
+**Know the current scope:** browser preview has three views and two deck families. The separate Python catalogue has 15 configurations; types 004, 014 and 015 are approximate. A static website cannot launch local Python, proposed CAD scale is planning guidance, and perfect matching with the reference PDF remains unverified.
+
+**Help improve BridgeCAD:** report the configuration ID, changed variables, command/exit code, reference page, expected behaviour and actual drawing. Separate reproducible bugs from requested geometry or layout enrichment.
+<!-- BRIDGECAD-LEARNING-END -->
+
+
 [![version](https://img.shields.io/badge/version-0.1.0--rc1-blue.svg)](CHANGELOG.md)
 [![python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)

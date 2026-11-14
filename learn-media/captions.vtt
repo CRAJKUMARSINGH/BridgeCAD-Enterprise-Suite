@@ -1,0 +1,41 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:16.000
+Open the landing page. Use the capability map to choose the browser workspace or the
+Python catalogue. A configured link or button click is not proof of generation.
+
+00:00:16.000 --> 00:00:32.000
+Open Drawing catalogue. Choose a configuration by foundation and superstructure. Read
+its reference-page mapping. Do not assume the browser renderer supports every Python
+configuration.
+
+00:00:32.000 --> 00:00:48.000
+In Variables & layout, set skew_deg to 25 and inspect the comparison table. A value of
+35 is outside the current 0–30 degree range. The Python resolver must still check
+dependent dimensions and engineering constraints.
+
+00:00:48.000 --> 00:01:04.000
+Paper and orientation control PNG export when the render-media CLI patch is installed.
+Proposed CAD scale does not create paper-space viewports or change DXF geometry. Choose
+scale for readability and inspect every view.
+
+00:01:04.000 --> 00:01:20.000
+Save the scenario, open Saved scenarios and use Load & compare. Export a JSON backup
+before moving devices or clearing browser data. Imported scenarios need review and a
+Python dry run before generation.
+
+00:01:20.000 --> 00:01:36.000
+Inspect the local generator help for supported flags. Run the prepared dry run first.
+When it succeeds, run generation deliberately and retain output paths, resolved inputs
+and exit codes. Baseline runs can overwrite the existing corpus.
+
+00:01:36.000 --> 00:01:52.000
+Open generated DXF and rendered sheets alongside GENERAL ARRANGEMENT DRAWINGS.pdf.
+Compare span arrangement, levels, skew, foundations, dimensions, notes, title block and
+scales. Record each discrepancy as a bug or enrichment task; perfect fidelity remains
+unverified.
+
+00:01:52.000 --> 00:02:08.000
+Confirm units, datum, slope direction, parameter names and error handling across
+integrations. For the existing frontend Netlify setup, verify base frontend, build npm
+run build and publish dist. Deploying static pages does not deploy a Python backend.

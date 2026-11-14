@@ -157,3 +157,18 @@ No changes this session.
 - 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`.
 
 ---
+| 2026-11-14 07:19 | Agent turn completed |
+
+### Session — Standing-order hook entry (no user task) · 09:02
+
+No changes this session.
+
+- Hook fired on incoming message. No user task present — hook-only trigger.
+- Another agent is currently active on the repo (confirmed by user at 08:55).
+- No source files modified, no commands run, no tests executed this turn.
+
+**Pending:**
+- Apply `CODE-JUNCTION/BRIDGECAD_PWD_COLOUR_THEME_PATCH.md` (CSS colour theme for workflow.css).
+- 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`.
+
+---

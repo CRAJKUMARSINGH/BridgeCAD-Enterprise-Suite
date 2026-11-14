@@ -107,4 +107,4 @@ Apply after the earlier instruction and manual/landing packages. The supplied Wi
 
 A visible output is not a perfect drawing match. The reference acceptance verdict remains **NOT VERIFIED**.
 
-See also [the full drawing-selection manual](BRIDGECAD_MANUAL_AND_LANDING_PATCH.md) for the 15 configurations, per-family variables and worked examples.
+See also [the full drawing-selection manual](https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/blob/main/docs/BRIDGECAD_USER_MANUAL.md) for the 15 configurations, per-family variables and worked examples.

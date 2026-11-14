@@ -9,7 +9,6 @@ an unset dirt wall still resolves (the resolver is total).
 from __future__ import annotations
 
 import itertools
-from decimal import Decimal
 
 from bridgecad_core.abutment_stack import AbutmentStack, resolve_abutment_stack
 
@@ -32,11 +31,16 @@ def test_stack_is_strictly_ordered_from_road_down(project):
 
 
 def test_unset_dirt_wall_still_resolves(blank_project):
-    """An unset dirt wall must not make the resolver raise — it defaults to the
-    approach-slab thickness, the thinnest wall ABT-005 permits."""
+    """An unset dirt wall must not make the resolver raise.
+
+    The dirt wall is no longer an input that *sets* the cap top: §3 makes the
+    cap seat-driven (soffit − bearing − pedestal) and the wall height the
+    derived clearance between the cap top and the approach-slab soffit. An
+    unset field therefore still resolves to an ordered, positive wall.
+    """
     blank_project.substructure = blank_project.substructure.model_copy(
         update={"dirt_wall_height_m": None}
     )
     st = resolve_abutment_stack(blank_project)
-    app_t = Decimal(str(blank_project.substructure.approach_slab_thickness_mm)) / Decimal("1000")
-    assert st.app_bot - st.cap_top == app_t
+    assert st.cap_top < st.app_bot
+    assert st.dirt_wall_h > 0

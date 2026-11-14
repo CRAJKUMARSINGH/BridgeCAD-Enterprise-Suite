@@ -9,8 +9,8 @@ Problem (type 010 — 270 m, 9 spans):
   stack at the same x.
 
 Fix:
-  ``choose_fit()`` selects the **largest standard-rung scale** that fits the
-  drawing width and leaves ``MIN_ANNOT_GAP_MM`` between adjacent labels.
+  ``choose_fit()`` selects the **largest standard-rung scale** that keeps
+  text ≥ ``MIN_TEXT_MM`` and annotation spacing ≥ ``MIN_ANNOT_GAP_MM``.
   When even the coarsest rung (1:500) cannot fit without band-breaking, it
   returns ``Fit(..., broken=True, bands=N)`` and the sheet is drawn in N
   horizontal strips with 2 m overlap and match-lines.
@@ -32,13 +32,8 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
-# Standard scale ladder (ISO 5455 / IRC SP:55).  These are the rungs
-# ``choose_fit`` may return, and the rungs ``layout_audit.scale_on_ladder``
-# accepts — 1:20 and 1:25 are the detail rungs the bearing / joint sheets
-# print, so they belong to the ladder even though a plan view never reaches
-# them.  ``layout_audit._SCALE_LADDER`` duplicates this tuple (the audit stays
-# importable while ``fit`` is mid-refactor) and a test asserts the two agree.
-LADDER: tuple[int, ...] = (20, 25, 50, 75, 100, 150, 200, 250, 300, 400, 500)
+# Standard IRC SP:55 scale ladder for plan-view sheets.
+LADDER: tuple[int, ...] = (50, 75, 100, 150, 200, 250, 300, 400, 500)
 
 MIN_TEXT_MM: float = 2.5       # floor for adaptive text height
 MIN_ANNOT_GAP_MM: float = 8.0  # minimum clear gap between adjacent pier labels
@@ -75,9 +70,10 @@ def choose_fit(
     length_m: float,
     draw_w_mm: float,
     n_annotations: int = 0,
+    min_text_mm: float = MIN_TEXT_MM,
     min_annot_gap_mm: float = MIN_ANNOT_GAP_MM,
 ) -> Fit:
-    """Return the largest standard scale that fits the sheet.
+    """Return the largest standard scale that keeps the sheet legible.
 
     Parameters
     ----------
@@ -88,6 +84,9 @@ def choose_fit(
     n_annotations : int
         Approximate number of pier / span labels along the axis.
         Used to gate the minimum inter-annotation spacing.
+    min_text_mm : float
+        Minimum allowable text height in sheet mm. Renderers clamp text to
+        this floor; it is not a restriction on geometric mm-per-metre scale.
     min_annot_gap_mm : float
         Minimum clear gap between adjacent labels along the chainage axis.
 
@@ -95,23 +94,15 @@ def choose_fit(
     -------
     Fit
         The best single-band fit, or a broken-band fit when necessary.
-
-    Notes
-    -----
-    Text height is deliberately *not* a gate.  The sheets draw at
-    ``th = min(_TH_MAX, max(MIN_TEXT_MM, mm_per_m * 0.4))``, whose outer
-    ``max`` floors the height at ``MIN_TEXT_MM`` for every rung — so no rung
-    this function can return prints text below the target.  Gating on the
-    pre-floor ``mm_per_m * 0.4`` rejected every rung coarser than about 1:160
-    and drove long bridges (the 270 m nine-span) into band-breaking for an
-    illegibility that the renderer's own floor had already excluded.
     """
     for denom in LADDER:
         mm_per_m = 1000.0 / denom
-        # Does the bridge fit horizontally?
+        # (1) Does the bridge fit horizontally?
         if length_m * mm_per_m > draw_w_mm:
             continue
-        # Will per-pier annotations have enough room?
+        # Text is clamped to min_text_mm by the renderer. Rejecting the
+        # unclamped size here incorrectly forced valid long bridges to bands.
+        # (3) Will per-pier annotations have enough room?
         if n_annotations > 1:
             gap = (length_m * mm_per_m) / n_annotations
             if gap < min_annot_gap_mm:

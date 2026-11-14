@@ -78,6 +78,7 @@ def generate(project: Any, output_path: str | Path, scale_denom: int | None = No
 
 
 def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
+    from bridgecad_core.abutment_stack import resolve_abutment_stack
     from bridgecad_core.geometry import compute_long_section_geometry
 
     gi = project.geometry_input
@@ -91,6 +92,9 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     has_internal_pier = span_count > 1
 
     ls = compute_long_section_geometry(project)
+    # §3 — one abutment ladder for the whole suite; this sheet reads it rather
+    # than subtracting its own bearing/pedestal/cap constants.
+    stack = resolve_abutment_stack(project)
 
     # ── Derived geometry (metres) ──────────────────────────────────────────
     cw = float(gi.carriageway_width_m)
@@ -163,12 +167,16 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     abt_base_rl = sof_rl - abt_h_m  # bottom of abutment shaft
     # If pile foundation, abutment sits on pile cap top (= pile_cut + pile_cap_t)
     if "PILE" in found_type:
-        cap_top_rl = pile_cut_rl + pile_cap_t_m
-        abt_base_rl = min(abt_base_rl, cap_top_rl)
+        # §3 — the pile-cap top is the canonical record's footing top, not a
+        # local re-add of the two pile-cap inputs.
+        _foot_top = stack.record.footing_top_rl_m if stack.record else None
+        pile_cap_top_rl = (
+            float(_foot_top) if _foot_top is not None else pile_cut_rl + pile_cap_t_m
+        )
+        abt_base_rl = min(abt_base_rl, pile_cap_top_rl)
     hfl_rl = float(hd.hfl_m or 0)
     scour_rl = float(hd.scour_level_m or 0)
 
-    _cap_d_m_abt = float(sub.abutment_cap_depth_mm or 600) / 1000.0
     _cap_proj_m_abt = float(sub.abutment_cap_projection_front_mm or 300) / 1000.0
     _dirt_t_m_abt = float(sub.dirt_wall_thickness_mm or 300) / 1000.0
 
@@ -284,7 +292,9 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
         scour_rl,
         found_type,
         view_label="VIEW 1 — SECTION A-A  |  ABUTMENT A2 END-FACE (LOOKING A1)",
-        cap_d_m=_cap_d_m_abt,
+        bear_rl=float(stack.bear_rl),
+        cap_top_rl=float(stack.cap_top),
+        cap_bot_rl=float(stack.cap_bot),
         cap_proj_m=_cap_proj_m_abt,
         dirt_t_m=_dirt_t_m_abt,
     )
@@ -298,6 +308,20 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
         return _VIEW_Y0 + (rl - (tod_rl + par_h_m + 0.8)) * (-sc)
 
     if has_internal_pier:
+        # §3 — the pier cap datums come from the canonical support record (all
+        # internal piers share one seat datum). The local pedestal/cap-depth
+        # fallback only stands in for a project that produced no record.
+        _prec = ls.support_level_records[0] if ls.support_level_records else None
+        pier_cap_top_rl = (
+            float(_prec.cap_top_rl_m)
+            if _prec is not None and _prec.cap_top_rl_m is not None
+            else float(ls.soffit_rl) - pier_ped_h_m
+        )
+        pier_cap_bot_rl = (
+            float(_prec.cap_bottom_rl_m)
+            if _prec is not None and _prec.cap_bottom_rl_m is not None
+            else pier_cap_top_rl - pier_cap_d_m
+        )
         _draw_pier_transverse(
             msp,
             v2hx,
@@ -321,7 +345,6 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
             n_girders,
             par_h_m,
             pier_cap_w_m,
-            pier_cap_d_m,
             float(sub.pier_cap_length_m or pier_shaft_l_m),
             pier_shaft_w_m,
             pier_shaft_l_m,
@@ -335,6 +358,8 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
             pile_tip_rl,
             tod_rl,
             sof_rl,
+            pier_cap_top_rl,
+            pier_cap_bot_rl,
             hfl_rl,
             scour_rl,
             found_type,
@@ -388,7 +413,9 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
             scour_rl,
             found_type,
             view_label="VIEW 2 — TYPICAL ABUTMENT TRANSVERSE SECTION",
-            cap_d_m=_cap_d_m_abt,
+            bear_rl=float(stack.bear_rl),
+            cap_top_rl=float(stack.cap_top),
+            cap_bot_rl=float(stack.cap_bot),
             cap_proj_m=_cap_proj_m_abt,
             dirt_t_m=_dirt_t_m_abt,
         )
@@ -476,7 +503,9 @@ def _draw_abutment_endface(
     scour_rl,
     found_type,
     view_label,
-    cap_d_m: float = 0.60,
+    bear_rl: float,
+    cap_top_rl: float,
+    cap_bot_rl: float,
     cap_proj_m: float = 0.15,
     dirt_t_m: float = 0.30,
 ):
@@ -611,18 +640,18 @@ def _draw_abutment_endface(
             color=8,
         )
 
-    # ── Vertical stack — top-down from girder soffit ─────────────────────
+    # ── Vertical stack — read from the canonical §3 abutment ladder ───────
+    # Bearing seat, cap top and cap bottom come from ``resolve_abutment_stack``:
+    # this view must not re-derive them from a local bearing depth (the old
+    # hard-coded 0.10 m put the abutment cap datum 100 mm off Sheet 5's).
     bearing_w_m = 0.40
-    bearing_t_m = 0.10
     # Cap and dirt wall geometry — passed in from _draw via model fields.
-    _cap_d_m = cap_d_m
     _cap_proj_m = cap_proj_m
     _dirt_t_m = dirt_t_m
 
-    ped_top_rl = sof_rl - bearing_t_m
-    ped_bot_rl = ped_top_rl - ped_h_m
-    cap_top_rl_s8 = ped_bot_rl
-    cap_bot_rl_s8 = cap_top_rl_s8 - _cap_d_m
+    ped_top_rl = bear_rl
+    ped_bot_rl = cap_top_rl_s8 = cap_top_rl
+    cap_bot_rl_s8 = cap_bot_rl
 
     shaft_half_w_m = min(overall_w * 0.46, abt_len_m * 0.5)
     cap_half_m = shaft_half_w_m + _cap_proj_m
@@ -1087,7 +1116,6 @@ def _draw_pier_transverse(
     n_girders,
     par_h_m,
     pier_cap_w_m,
-    pier_cap_d_m,
     pier_cap_length_m,
     pier_shaft_w_m,
     pier_shaft_l_m,
@@ -1101,12 +1129,19 @@ def _draw_pier_transverse(
     pile_tip_rl,
     tod_rl,
     sof_rl,
+    cap_top_rl,
+    cap_bot_rl,
     hfl_rl,
     scour_rl,
     found_type,
     view_label,
 ):
-    """Pier transverse cut (Section B-B): deck + girder + bearings + cap + shaft + piles."""
+    """Pier transverse cut (Section B-B): deck + girder + bearings + cap + shaft + piles.
+
+    ``cap_top_rl`` / ``cap_bot_rl`` are the canonical §3 pier-cap datums from
+    ``ls.support_level_records`` — not re-derived here from pedestal + cap depth,
+    so a declared bearing depth shifts this view with the long section.
+    """
 
     # ── Header label ───────────────────────────────────────────────────────
     hdr_y = vvy(tod_rl + par_h_m + 0.55)
@@ -1219,7 +1254,7 @@ def _draw_pier_transverse(
 
     # ── Pedestal ──────────────────────────────────────────────────────────
     ped_y_top = vvy(sof_rl)
-    ped_y_bot = vvy(sof_rl - pier_ped_h_m)
+    ped_y_bot = vvy(cap_top_rl)
     ped_half = pier_shaft_l_m * 0.42
     rectangle(
         msp,
@@ -1233,7 +1268,7 @@ def _draw_pier_transverse(
 
     # ── Pier cap ──────────────────────────────────────────────────────────
     cap_y_top = ped_y_bot
-    cap_y_bot = vvy(sof_rl - pier_ped_h_m - pier_cap_d_m)
+    cap_y_bot = vvy(cap_bot_rl)
     # Cap is sized by its own length field, not the shaft length — a cap
     # shorter than the shaft is legal and the old code could never show it.
     cap_half_l = pier_cap_length_m / 2.0
@@ -1257,7 +1292,7 @@ def _draw_pier_transverse(
         layer="STRUC-HATCHING",
     )
     level_tag(
-        msp, vhx(-cap_half_l) - th * 3, cap_y_top, sof_rl - pier_ped_h_m, text_height=th * 0.85
+        msp, vhx(-cap_half_l) - th * 3, cap_y_top, cap_top_rl, text_height=th * 0.85
     )
     text(
         msp,
@@ -1359,7 +1394,7 @@ def _draw_pier_transverse(
     levels = [
         ("T.O.D. / FORMATION RL", tod_rl),
         ("SOFFIT RL", sof_rl),
-        ("TOP OF PIER CAP RL", sof_rl - pier_ped_h_m),
+        ("TOP OF PIER CAP RL", cap_top_rl),
         ("BASE OF PIER SHAFT", shaft_y_bot if shaft_y_bot else pile_cut_rl),
     ]
     if "PILE" in found_type:

@@ -217,3 +217,72 @@ User requested repository-wide checking and corrections after inaccurate nine-sp
 
 ## 2026-11-14 — repository audit results
 Inventory: 2011 tracked files; 406 Python AST parses; 18 TOML and 23 YAML configurations parsed without error. First suite: 1335 passed, 11 failed, 6 skipped, 5 xfailed. Corrected catalogue parsing/captions, scale selection and shared ladder, PDF serialization, frontend export/data lifecycle/scenario recovery, and documentation registration/guards. Full rerun: 1359 passed, 6 skipped, 5 xfailed; two further pier-datum checks passed separately. Frontend TypeScript/Vite build passed; cloud-browser verification blocked by local connection refusal. Drawing engineering acceptance remains blocked by foundation-level consistency, incomplete details/layout and lack of PDF comparison. No E: write, GitHub push or deployment.
+
+## 2026-11-14 — GAD acceptance resolution program (§8.1 freeze)
+Governing spec: `CODE-JUNCTION/BRIDGECAD_GAD_ACCEPTANCE_RESOLUTION.md` (owner selected the full P0+P1 program; abutment geometry to be built from the spec text). §8.1 executed: base commit `cba78cbc` recorded with the uncommitted 12-file diff (99 insertions, 37 deletions) and the untracked tree preserved. Evidence retained under `artifacts/test-results/` (freeze summary, binary diff, status, base-commit id). No commit, push or deploy. Status remains **generated draft — GAD acceptance pending** per §10.
+
+### Session — BridgeCAD-GAD-Partial-Correction patch applied · 09:20
+
+- Applied `support-datum-correction.patch` from `CODE-JUNCTION/BridgeCAD-GAD-Partial-Correction/`.
+- `git apply --check` passed (exit 0); `git apply` succeeded.
+- 7 files changed:
+  - `long_section.py` — fix cap-top datum: was subtracting cap_depth twice; corrected to `soffit_rl - pedestal_height_m`
+  - `sheet2_long_section.py` — added schematic seat between cap and soffit using modelled pedestal interval
+  - `tests/verification/cases.py` — updated `_check_pier_toc_list` expectation to match corrected datum
+  - `frontend/src/WorkflowLanding.tsx`, `frontend/src/main.tsx` — frontend routing/UI updates from patch
+  - `.gitignore` — additions from patch
+  - `CREAT.md` — session log
+- Tests run:
+  - `pytest tests/verification/` → **53/53 PASS** (3.5 s)
+  - `pytest tests/catalogue/ tests/draw/ tests/unit/ tests/verification/` → **158/158 PASS** (29.3 s)
+- Committed `cba78cb`, pushed: `5161370..cba78cb  main -> main` ✅
+- Note from CORRECTION_STATUS.md: 7 remaining blockers for full acceptance (foundation datum inconsistency, sparse sheets, skew verification, etc.). This is a narrow interim fix only.
+
+**Pending:**
+- Apply `CODE-JUNCTION/BRIDGECAD_PWD_COLOUR_THEME_PATCH.md` (CSS colour theme for workflow.css).
+- 7 remaining GAD acceptance blockers per `CORRECTION_STATUS.md`.
+- 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`.
+
+---
+| 2026-11-14 11:34 | Agent turn completed |
+
+### Session — Standing-order hook entry (no user task) · 09:28
+
+No changes this session.
+
+- Hook fired on incoming message. No user task present — hook-only trigger.
+- Previous session (09:20): BridgeCAD-GAD-Partial-Correction patch applied; 158/158 tests pass; commit `cba78cb` pushed to origin/main.
+- No source files modified, no commands run, no tests executed this turn.
+
+**Pending:**
+- Apply `CODE-JUNCTION/BRIDGECAD_PWD_COLOUR_THEME_PATCH.md` (CSS colour theme for workflow.css).
+- 7 remaining GAD acceptance blockers per `CORRECTION_STATUS.md`.
+- 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`.
+
+---
+| 2026-11-14 11:42 | User prompt received |
+| 2026-11-14 18:25 | User prompt received |
+| 2026-11-14 18:37 | User prompt received |
+
+### Session — CODE-JUNCTION patch application audit · 18:40
+
+Task: "APPLY PATCHes AS PER `CODE-JUNCTION\*.*`".
+
+Findings — the bundles are already applied or superseded by the working tree:
+
+- `repository-audit-fixes.patch`: 16/20 `changed-sources` files are byte-identical to the live tree. `Apply-Audit.ps1` reports *Baseline differs* (reverse-check and forward-check both fail), so `git apply` is refused. The 4 divergent files are **newer locally** (live `main.tsx` keeps the `Artifact[]`/B03/B04/B08 hardening, `workflowScenarios.ts` keeps B06/B09, `WorkflowLanding.tsx` keeps B09); `CREAT.md` is this journal.
+- `support-datum-correction.patch`: applied — `sheet2_long_section.py` and `tests/verification/cases.py` carry the correction; `long_section.py` was superseded by the canonical `support_levels.py` resolver.
+
+Fixed (regression introduced by the earlier partial application):
+
+- `tests/docs/conftest.py`: added `dist` and `CODE-JUNCTION` to `SKIP_DIRS`; `scripts/prove_detection.py`: same two names added to `IGNORE_DIRS` — both are gitignored generated/intake trees, so their reference copies must not be scanned as product docs.
+- `DOCS_INDEX.md`: repointed the stale `docs/BRIDGECAD_MANUAL_AND_LANDING_PATCH.md` link (file does not exist) to `docs/BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md`.
+- `mkdocs.yml`: removed the nav row for the same non-existent document.
+
+Validation:
+
+- `pytest tests/docs -q` → 25/25 PASS.
+- `pytest tests/unit/test_support_levels.py tests/unit/test_pier_cap_datum.py tests/unit/test_abutment_stack.py tests/catalogue/test_audit_regressions.py tests/frontend/test_scenario_recovery.py tests/docs/test_doc_integrity.py -q` → 66/66 PASS.
+- `npm --prefix frontend run build` → `tsc --noEmit` clean, Vite build OK (42 modules, 5.04 s).
+
+**Pending (unchanged):** GAD acceptance blockers per `CODE-JUNCTION/BRIDGECAD_GAD_ACCEPTANCE_RESOLUTION.md`; reference-PDF comparison still BLOCKED (no approved PDF supplied).

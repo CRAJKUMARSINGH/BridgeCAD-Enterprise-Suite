@@ -12,6 +12,15 @@ from .long_section import (
     span_lengths_m,
 )
 from .plan import BridgePlanGeometry, compute_plan_geometry
+from .support_levels import (
+    AuthorityMode,
+    BearingTopology,
+    FieldSource,
+    ResolutionStatus,
+    SupportLevelInput,
+    SupportLevelRecord,
+    resolve_support_levels,
+)
 
 __all__ = [
     "BridgePlanGeometry",
@@ -32,4 +41,12 @@ __all__ = [
     "Family",
     "family_for",
     "elevation_outline",
+    # canonical support-level contract (§3)
+    "AuthorityMode",
+    "ResolutionStatus",
+    "FieldSource",
+    "BearingTopology",
+    "SupportLevelInput",
+    "SupportLevelRecord",
+    "resolve_support_levels",
 ]

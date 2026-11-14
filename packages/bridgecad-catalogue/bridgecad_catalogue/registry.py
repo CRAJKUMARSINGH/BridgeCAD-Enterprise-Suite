@@ -369,6 +369,10 @@ PWD_CARDS: list[dict] = [
             [18825.0, 5029], [19870.83, 4336], [20916.67, 3608], [21962.5, 2810],
             [23008.33, 1943], [24054.17, 1006], [25100.0, 0],
         ],
+        # The span/depth governor compares deck_thickness_mm to span/ratio, but for
+        # an arch bridge the structural depth is the arch rise (7805 mm), not the
+        # deck slab (350 mm).  Mark as approximation so _check() reports, not rejects.
+        "approximation": True,
     },
     {
         # Booklet: precast block arch 61.94 m, 27 blocks, 3 strips, 10.0 m cw.
@@ -402,6 +406,10 @@ PWD_CARDS: list[dict] = [
         "arch_strip_gap_mm": 100,
         "arch_block_count": 27,
         "spandrel_wall_thickness_mm": 400,
+        # The span/depth governor compares deck_thickness_mm to span/ratio, but for
+        # an arch bridge the structural depth is the arch rise, not the deck slab.
+        # Mark as approximation so _check() reports, not rejects.
+        "approximation": True,
     },
 ]
 

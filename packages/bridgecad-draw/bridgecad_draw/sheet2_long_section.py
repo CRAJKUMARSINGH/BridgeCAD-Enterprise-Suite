@@ -784,8 +784,6 @@ def _draw_long_section(
     cap_proj2 = float(sub.abutment_cap_projection_front_mm or 300) / 1000.0
     cap_proj2_r = float(sub.abutment_cap_projection_rear_mm or 300) / 1000.0
     dw_t2 = float(sub.dirt_wall_thickness_mm or 300) / 1000.0
-    ped_h2 = float(sub.abutment_pedestal_height_m or 0.15)
-    brg_t2 = 0.10
     app_t2 = float(sub.approach_slab_thickness_mm or 200) / 1000.0
 
     def sy2(m: float) -> float:
@@ -794,9 +792,12 @@ def _draw_long_section(
     for ch, label, sgn in [(0.0, "A1", -1.0), (total_len, "A2", +1.0)]:
         ax = hx(ch) - abt_w_mm if sgn < 0 else hx(ch)
         shaft_bot = sof_y_mm - abt_h_mm
-        # Cap levels
-        cap_bot_y2 = sof_y_mm - sy2(brg_t2 + ped_h2)
-        cap_top_y2 = cap_bot_y2 - sy2(cap_d2)
+        # §3 — cap datums come from the one abutment ladder (Sheets 5 and 8 read
+        # the same object). This sheet's local naming is by drawing order, where
+        # y grows with RL: `cap_bot_y2` is the cap TOP, `cap_top_y2` its underside.
+        cap_bot_y2 = vy(float(stack.cap_top))
+        cap_top_y2 = vy(float(stack.cap_bot))
+        y_bear_rl = vy(float(stack.bear_rl))
 
         # Shaft stops at the cap soffit
         rectangle(msp, ax, shaft_bot, abt_w_mm, cap_bot_y2 - shaft_bot, layer="SUB-ABUT", lw=40)
@@ -818,53 +819,63 @@ def _draw_long_section(
         cap_x0_2 = ax - (cap_front_off if sgn > 0 else cap_rear_off)
         cap_x1_2 = ax + abt_w_mm + (cap_rear_off if sgn > 0 else cap_front_off)
         cap_w2 = cap_x1_2 - cap_x0_2
-        rectangle(msp, cap_x0_2, cap_top_y2, cap_w2, sy2(cap_d2), layer="SUB-ABUT", lw=40)
+        rectangle(msp, cap_x0_2, cap_top_y2, cap_w2, cap_bot_y2 - cap_top_y2, layer="SUB-ABUT", lw=40)
         hatch_rect(
             msp,
             cap_x0_2,
             cap_top_y2,
             cap_w2,
-            sy2(cap_d2),
+            cap_bot_y2 - cap_top_y2,
             pattern="ANSI31",
             scale=sc_h * 0.04,
             layer="STRUC-HATCHING",
         )
 
-        # Pedestal + bearing
+        # Pedestal + bearing — seat band and bearing band, both from the ladder.
+        # With no declared bearing unit the bearing depth is an assumed zero, so
+        # the band is not drawn at all rather than drawn at an invented height.
         ped_w_mm2 = abt_w_mm * 0.55
         ped_x_2 = ax + (abt_w_mm - ped_w_mm2) / 2.0
         rectangle(
             msp,
             ped_x_2,
-            sof_y_mm - sy2(brg_t2 + ped_h2),
+            cap_bot_y2,
             ped_w_mm2,
-            sy2(ped_h2),
+            y_bear_rl - cap_bot_y2,
             layer="SUB-ABUT",
             lw=30,
         )
-        rectangle(
-            msp, ped_x_2, sof_y_mm - sy2(brg_t2), ped_w_mm2, sy2(brg_t2), layer="SUB-BEARING", lw=30
-        )
+        if sof_y_mm > y_bear_rl:
+            rectangle(
+                msp,
+                ped_x_2,
+                y_bear_rl,
+                ped_w_mm2,
+                sof_y_mm - y_bear_rl,
+                layer="SUB-BEARING",
+                lw=30,
+            )
 
-        # Dirt wall on the rear (approach) face, up to approach-slab soffit
+        # Dirt wall on the rear (approach) face, standing ON the cap top and up
+        # to the approach-slab soffit.
         dirt_x_2 = cap_x0_2 if sgn < 0 else cap_x0_2 + cap_w2 - sy2(dw_t2)
         dw_top_y2 = vy(top_rl - wc_t) - sy2(app_t2)
-        if dw_top_y2 > cap_top_y2:
+        if dw_top_y2 > cap_bot_y2:
             rectangle(
                 msp,
                 dirt_x_2,
-                cap_top_y2,
+                cap_bot_y2,
                 sy2(dw_t2),
-                dw_top_y2 - cap_top_y2,
+                dw_top_y2 - cap_bot_y2,
                 layer="SUB-DIRT-WALL",
                 lw=40,
             )
             hatch_rect(
                 msp,
                 dirt_x_2,
-                cap_top_y2,
+                cap_bot_y2,
                 sy2(dw_t2),
-                dw_top_y2 - cap_top_y2,
+                dw_top_y2 - cap_bot_y2,
                 pattern="ANSI31",
                 scale=sc_h * 0.04,
                 layer="STRUC-HATCHING",
@@ -873,7 +884,7 @@ def _draw_long_section(
                 msp,
                 "DIRT WALL",
                 dirt_x_2 + sy2(dw_t2) + th * 0.6 if sgn > 0 else dirt_x_2 - th * 4,
-                cap_top_y2 + (dw_top_y2 - cap_top_y2) * 0.5,
+                cap_bot_y2 + (dw_top_y2 - cap_bot_y2) * 0.5,
                 height=th * 0.75,
                 layer="TEXT-SPEC",
             )

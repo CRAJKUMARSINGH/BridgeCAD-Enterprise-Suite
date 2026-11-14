@@ -6,6 +6,7 @@ test_gates_selfcheck.py, which works on a throwaway copy.
 from __future__ import annotations
 
 import re
+from urllib.parse import unquote
 from pathlib import Path
 from typing import Iterator
 
@@ -20,10 +21,14 @@ STAGED_BY_HOOK = frozenset({
     "security.md", "code-of-conduct.md", "docs-index.md",
 })
 
-# Build output and caches — never scan these.
+# Build output and caches — never scan these. `dist` is the Vite/vite build
+# output and `CODE-JUNCTION` is the gitignored patch-intake tree; both hold
+# generated or reference copies, not product documentation, so a relative link
+# inside them cannot be dead.
 SKIP_DIRS = frozenset({
     ".git", "node_modules", ".venv", "__pycache__",
     "site", "site-api", "_build", "htmlcov", ".benchmarks",
+    "dist", "CODE-JUNCTION",
 })
 
 FENCE = re.compile(r"```[^\n]*\n(.*?)```", re.DOTALL)
@@ -78,7 +83,7 @@ def resolve_link(doc: Path, target: str, root: Path) -> Path | None:
     """Resolve a relative link. Returns None if it is not a repo-local file."""
     if target.startswith("/"):
         return None
-    candidate = (doc.parent / target).resolve()
+    candidate = (doc.parent / unquote(target)).resolve()
     try:
         candidate.relative_to(root.resolve())
     except ValueError:

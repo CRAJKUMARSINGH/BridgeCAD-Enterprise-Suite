@@ -184,11 +184,27 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     # 111 mm past the top border.  Horizontal scale stays `sc * 1.5`.
     elev_cx = 560.0
     scour_rl = float(hd.scour_level_m or 0)
-    pile_cut = float(fd.pile_cutoff_level_m or 0) if fd.pile_cutoff_level_m else scour_rl + 2.0
     pile_len = float(fd.pile_length_m or 15.0)
+
+    # Founding levels come from the canonical §3 record, not from re-adding the
+    # cap thickness here: ``footing_top = footing_bottom + footing_depth`` is
+    # that record's equation alone. A pile cap IS the pier's footing —
+    # ``pile_cutoff_level_m`` is its underside and ``pile_cap_thickness_mm`` its
+    # thickness. When the record cannot resolve the foundation (a missing
+    # thickness or cutoff), the sheet falls back to the raw model values so it
+    # still renders a draft, but the level then carries no approved datum.
+    from bridgecad_core.geometry.long_section import typical_pier_support_level
+
+    _prec = typical_pier_support_level(project)
+    if _prec.footing_top_rl_m is not None:
+        pile_cut = float(_prec.footing_bottom_rl_m)
+        cap_thk = float(_prec.footing_depth_m)
+        cap_top = float(_prec.footing_top_rl_m)
+    else:
+        pile_cut = float(fd.pile_cutoff_level_m or 0) if fd.pile_cutoff_level_m else scour_rl + 2.0
+        cap_thk = float(fd.pile_cap_thickness_mm or 1500) / 1000.0
+        cap_top = pile_cut + cap_thk
     pile_tip = pile_cut - pile_len
-    cap_thk = float(fd.pile_cap_thickness_mm or 1500) / 1000.0
-    cap_top = pile_cut + cap_thk
 
     _EV_BOT = 200.0  # paper y of the pile tip (just above the inset band)
     _EV_TOP = 560.0  # highest paper y the elevation may occupy

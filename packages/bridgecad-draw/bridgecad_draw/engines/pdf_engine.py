@@ -94,7 +94,13 @@ def to_pdf_a1b(pdf_bytes: bytes) -> bytes:
     pdf.xref_set_key(root, "Metadata", f"{pdf.xref_xml_metadata()} 0 R")
     pdf.set_metadata({"title": "GAD", "author": "BridgeCAD", "producer": "BridgeCAD"})
 
-    return pdf.tobytes(garbage=4, deflate=True, clean=True, no_new_id=True, reproducible=True)
+    # Use the public serialization options supported by our PyMuPDF range.
+    # IDs/metadata are already controlled above; `reproducible` is not a
+    # supported Document.write keyword in all supported releases.
+    try:
+        return pdf.tobytes(garbage=4, deflate=True, clean=True, no_new_id=True)
+    finally:
+        pdf.close()
 
 
 def export_pdf_a(

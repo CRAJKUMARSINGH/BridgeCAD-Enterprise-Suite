@@ -273,8 +273,8 @@ def test_issue_template_labels_are_all_defined(repo_root: Path):
 
 def test_lychee_config_has_required_keys(repo_root: Path):
     cfg = tomllib.loads(read(repo_root / ".lychee.toml"))
-    assert cfg.get("include_fragments") is True, "anchor checking disabled"
-    assert cfg.get("exclude_mail") is True
+    assert cfg.get("include_fragments") == "full", "anchor checking disabled"
+    assert cfg.get("include_mail") is False
     assert 429 in cfg.get("accept", []), "rate-limit responses treated as dead"
 
 

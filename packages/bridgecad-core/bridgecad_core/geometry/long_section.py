@@ -9,10 +9,20 @@ All X values are chainage relative to A1 abutment face (metres).
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from decimal import Decimal
 from typing import TYPE_CHECKING
+
+from .support_levels import (
+    AuthorityMode,
+    SupportLevelInput,
+    SupportLevelRecord,
+    resolve_support_levels,
+)
 
 if TYPE_CHECKING:
     from bridgecad_core.models import BridgeProject
+
+_MM_PER_M = Decimal("1000")
 
 
 # ---------------------------------------------------------------------------
@@ -74,6 +84,12 @@ class LongSectionGeometry:
     equals top_of_deck_rl (same datum as plan-northern-edge reference).
     """
 
+    support_level_records: list[SupportLevelRecord] = field(default_factory=list)
+    """Canonical §3 support-level contract, one record per intermediate pier,
+    index-aligned with ``pier_chainage_m``. Sheets 1/2/4/5/8 take their RLs
+    from these records instead of re-deriving them.
+    """
+
     # ---- convenience aliases (y = rl for flat drawing baseline) ---------
     @property
     def hfl_y(self) -> float:
@@ -103,6 +119,99 @@ class LongSectionGeometry:
 # ---------------------------------------------------------------------------
 # Factory function
 # ---------------------------------------------------------------------------
+
+
+def _dec_or_none(value: object) -> Decimal | None:
+    """Coerce an optional model value to ``Decimal`` (``None`` stays ``None``)."""
+    if value is None:
+        return None
+    return Decimal(str(value)) if not isinstance(value, Decimal) else value
+
+
+def _pier_support_level_input(
+    project: "BridgeProject",
+    *,
+    support_id: str,
+    top_of_deck_rl: float,
+    soffit_rl: float | None,
+) -> SupportLevelInput:
+    """Build the canonical §3 input for one intermediate pier from the model.
+
+    The seat is the SEPARATE topology: ``bearing_depth_mm`` (a real bearing
+    unit) sits above ``pier_pedestal_height_m``. An undeclared bearing depth
+    becomes an explicit zero marked ASSUMED, so the historical
+    ``soffit − pedestal`` datum is reproduced from one contract rather than
+    re-derived by each renderer. The pier foundation is the pile cap:
+    ``pile_cutoff_level_m`` is its underside and ``pile_cap_thickness_mm`` its
+    thickness; when either is absent the footing stays UNRESOLVED rather than
+    inventing a depth.
+    """
+    ss = project.superstructure
+    sub = project.substructure
+    fd = project.foundation_details
+    pm = project.project_master
+    hd = project.hydraulic_data
+
+    bearing_mm = getattr(ss, "bearing_depth_mm", None)
+    bearing = (
+        Decimal("0") if bearing_mm is None else Decimal(str(bearing_mm)) / _MM_PER_M
+    )
+
+    wearing_m = Decimal(str(ss.wearing_coat_thickness_mm or 0)) / _MM_PER_M
+    structural_m = Decimal(str(ss.deck_thickness_mm or 0)) / _MM_PER_M
+    if getattr(ss, "girder_depth_mm", None):
+        structural_m += Decimal(str(ss.girder_depth_mm)) / _MM_PER_M
+
+    cap_thk_mm = getattr(fd, "pile_cap_thickness_mm", None)
+    return SupportLevelInput(
+        support_id=support_id,
+        road_rl_m=Decimal(str(top_of_deck_rl)),
+        wearing_depth_m=wearing_m,
+        structural_depth_m=structural_m,
+        supplied_soffit_rl_m=(
+            None if soffit_rl is None else Decimal(str(soffit_rl))
+        ),
+        bearing_depth_m=bearing,
+        bearing_depth_assumed=bearing_mm is None,
+        pedestal_height_m=_dec_or_none(getattr(sub, "pier_pedestal_height_m", None))
+        or Decimal("0.20"),
+        cap_depth_m=_dec_or_none(getattr(sub, "pier_cap_depth_m", None)),
+        footing_bottom_rl_m=_dec_or_none(getattr(fd, "pile_cutoff_level_m", None)),
+        footing_depth_m=(
+            None if cap_thk_mm is None else Decimal(str(cap_thk_mm)) / _MM_PER_M
+        ),
+        ground_level_rl_m=_dec_or_none(getattr(pm, "ground_level_rl_m", None)),
+        scour_level_rl_m=_dec_or_none(getattr(hd, "scour_level_m", None)),
+        pile_cutoff_rl_m=_dec_or_none(getattr(fd, "pile_cutoff_level_m", None)),
+        authority=AuthorityMode.LEVEL_CONTROLLED,
+    )
+
+
+def typical_pier_support_level(project: "BridgeProject") -> SupportLevelRecord:
+    """The canonical §3 record for a *typical* pier.
+
+    Sheet 4 (Foundation Details) details one typical pier. On a multi-span
+    bridge that is the first real pier's record; on a single-span bridge there
+    is no intermediate pier, so the same input builder derives a nominal one.
+    Either way the sheet reads its pile-cap (footing) top from one contract
+    rather than re-adding the cap thickness itself.
+    """
+    ls = compute_long_section_geometry(project)
+    if ls.support_level_records:
+        return ls.support_level_records[0]
+    hd = project.hydraulic_data
+    return resolve_support_levels(
+        _pier_support_level_input(
+            project,
+            support_id="P-typical",
+            top_of_deck_rl=ls.top_of_deck_rl,
+            soffit_rl=(
+                float(hd.actual_soffit_level_m)
+                if hd.actual_soffit_level_m is not None
+                else None
+            ),
+        )
+    )
 
 
 def compute_long_section_geometry(project: BridgeProject) -> LongSectionGeometry:
@@ -191,10 +300,26 @@ def compute_long_section_geometry(project: BridgeProject) -> LongSectionGeometry
     # ---- plan-northern-edge datum + pier T.O.C. values ------------------
     plan_northern_edge_reference_rl = top_of_deck_rl
 
-    pedestal_h = (
-        float(sub.pier_pedestal_height_m) if sub.pier_pedestal_height_m is not None else 0.20
-    )
-    pier_top_of_cap_rl_m: list[float] = [soffit_rl - pedestal_h for _ in pier_ch]
+    # Canonical §3 contract: one resolver computes every pier's cap datum.
+    # Sheets read these records; they must not re-derive ``soffit − pedestal``.
+    support_records: list[SupportLevelRecord] = [
+        resolve_support_levels(
+            _pier_support_level_input(
+                project,
+                support_id=f"P{i + 1}",
+                top_of_deck_rl=top_of_deck_rl,
+                soffit_rl=(
+                    float(hd.actual_soffit_level_m)
+                    if hd.actual_soffit_level_m is not None
+                    else None
+                ),
+            )
+        )
+        for i in range(len(pier_ch))
+    ]
+    pier_top_of_cap_rl_m: list[float] = [
+        float(rec.cap_top_rl_m) for rec in support_records if rec.cap_top_rl_m is not None
+    ]
 
     abutment_top_of_rail_rl_m = top_of_deck_rl
 
@@ -215,6 +340,7 @@ def compute_long_section_geometry(project: BridgeProject) -> LongSectionGeometry
         plan_northern_edge_reference_rl=plan_northern_edge_reference_rl,
         pier_top_of_cap_rl_m=pier_top_of_cap_rl_m,
         abutment_top_of_rail_rl_m=abutment_top_of_rail_rl_m,
+        support_level_records=support_records,
     )
 
 
@@ -264,6 +390,7 @@ def pier_positions(project: BridgeProject) -> list[float]:
 __all__ = [
     "LongSectionGeometry",
     "compute_long_section_geometry",
+    "typical_pier_support_level",
     "span_lengths_m",
     "span_boundaries",
     "pier_positions",

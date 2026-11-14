@@ -88,9 +88,13 @@ See [the executed PWD checks, reference inventory, parameter/layout guidance and
 - [Uploaded v.md instruction ledger](docs/V_INSTRUCTIONS_APPLIED.md): applied safeguards, already present fixes, pending engineering/reference work and validation results.
 
 
+## Drawing selection and landing-page workflow
+
+See [the practical manual and reference-fidelity enrichment](docs/BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md) for interface capabilities, drawing selection, family-specific variables, paper/layout planning, worked CLI examples and Netlify/browser release gates; it also records the white-paper PNG visibility fix, real A0–A4 paper/orientation selection and the remaining exact-match gates. The root Netlify frontend now opens a guided landing page; the existing renderer remains at `#workspace`.
+
+
 ## Additional implementation and audit notes
 
-- [BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md](docs/BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md)
 - [BRIDGECAD_ATTACHED_ASSETS_LISP_PATCH.md](docs/BRIDGECAD_ATTACHED_ASSETS_LISP_PATCH.md)
 - [BRIDGECAD_USER_MANUAL.md](docs/BRIDGECAD_USER_MANUAL.md)
 - [PWD_ENRICHMENT_GUIDE.md](docs/PWD_ENRICHMENT_GUIDE.md)

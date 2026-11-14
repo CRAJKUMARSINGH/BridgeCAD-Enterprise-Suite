@@ -41,7 +41,19 @@ class VariableSpec:
     note: str = ""
 
     def coerce(self, raw: object) -> object:
+        if isinstance(raw, bool):
+            raise Violation(f"{self.key}: booleans are not valid variable values")
         if self.choices:
+            if all(isinstance(choice, (int, float, Decimal)) for choice in self.choices):
+                try:
+                    candidate = Decimal(str(raw))
+                except Exception as exc:
+                    raise Violation(f"{self.key}: {raw!r} is not numeric") from exc
+                if not candidate.is_finite():
+                    raise Violation(f"{self.key}: value must be finite")
+                for choice in self.choices:
+                    if candidate == Decimal(str(choice)):
+                        return choice
             if raw not in self.choices:
                 raise Violation(
                     f"{self.key}: {raw!r} not in {list(self.choices)} [{self.clause}]"
@@ -56,6 +68,10 @@ class VariableSpec:
             val = Decimal(str(raw))
         except Exception as exc:
             raise Violation(f"{self.key}: {raw!r} is not numeric ({self.unit})") from exc
+        if not val.is_finite():
+            raise Violation(f"{self.key}: value must be finite")
+        if self.key in {"span_count", "girders_per_deck", "piles_per_pier"} and val != val.to_integral_value():
+            raise Violation(f"{self.key}: must be a whole number")
         if self.lo is not None and val < self.lo:
             raise Violation(f"{self.key}: {val} < min {self.lo} {self.unit} [{self.clause}]")
         if self.hi is not None and val > self.hi:

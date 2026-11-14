@@ -976,6 +976,14 @@ class Superstructure(BaseModel):
         le=Decimal("3"),
         dp=3,
     )
+    bearing_depth_mm: int | None = DI(
+        "Vertical depth of the bearing unit itself (pad/pot height), millimetres. "
+        "This is the SEPARATE piece above the pedestal: the canonical support-level "
+        "contract subtracts bearing_depth + pedestal_height once. Unset = not yet "
+        "declared; 0 = a monolithic/integral joint with no bearing pad.",
+        ge=0,
+        le=2000,
+    )
     kerb_elevation_mm: int | None = DI(
         "Raised kerb mount height above deck, millimetres",
         ge=0,

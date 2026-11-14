@@ -27,10 +27,6 @@ MIN_CARRIAGEWAY_M = Decimal("3.5")
 #: Superstructures that carry discrete longitudinal girders, and so must have a
 #: girder count the value model will accept (``girders_per_deck_count >= 1``).
 GIRDER_SST = frozenset({"RCC_T_BEAM", "PSC_I_GIRDER", "PSC_BOX", "PSC_BOX_GIRDER"})
-#: Superstructures whose span is carried in thrust or in a deep cell rather than
-#: by the bending depth of the deck slab, so the span/depth governor — a girder
-#: / slab rule — does not apply to them.
-NON_BENDING_SS = frozenset({"RCC_ARCH", "RCC_BOX_CELL"})
 
 
 class ResolvedParams(dict):  # type: ignore[type-arg]
@@ -147,17 +143,25 @@ def _check(p: ResolvedParams) -> None:
     span = max(cast("list[Decimal]", p["span_lengths"]))
     deck = Decimal(str(p["deck_thickness_mm"])) / 1000
     girder = Decimal(str(p.get("girder_depth_mm") or 0)) / 1000
-    depth = deck + girder
+
+    # For a box-cell with its lattice primitive, the structural depth is the full
+    # box height (top slab + clear cell + bottom slab), not just the deck slab.
+    # cell_wall_mm is the nominal web/bottom-slab thickness; fall back to deck
+    # thickness if not present (conservative).
+    if ss == "RCC_BOX_CELL" and p.get("cell_clear_m") is not None:
+        cell_clear = Decimal(str(p["cell_clear_m"]))
+        bot_slab = Decimal(str(p.get("cell_wall_mm") or p["deck_thickness_mm"])) / 1000
+        depth = deck + cell_clear + bot_slab
+    else:
+        depth = deck + girder
 
     ratio = DECK_MIN_RATIO[ss]
-    # The span/depth governor is a girder / slab rule: it asks whether the deck
-    # is deep enough to bend across its own span.  Two families do not bend
-    # that way and the rule does not reach them — an arch carries its span in
-    # thrust (a legitimate F.O.B. rib is span/70, so testing the 350 mm deck
-    # against span/18 would reject every arch in the booklet) and a multi-cell
-    # box carries it in the height of the cell, not in the deck slab.  Their
-    # structural depth is asserted by their own primitive and sheet instead.
-    if ss not in NON_BENDING_SS and depth < span / ratio:
+    if p.get("approximation"):
+        # 014 / 015 (arch types) have no engine span/depth governor comparable
+        # to girder bridges — the arch rise governs, not the deck slab.  Report
+        # rather than reject.
+        p.warnings.append(f"{ss}: approximation — span/depth governor not applied")
+    elif depth < span / ratio:
         raise Violation(
             f"depth {depth:.3f} m < span/{ratio} = {span / ratio:.3f} m for {ss} "
             f"@ {span} m span"
@@ -192,10 +196,24 @@ def resolve(card: Mapping[str, object], overrides: Mapping[str, object], *, forc
         if spec.kind is Kind.LOCKED and not force:
             raise Violation(f"{key} is booklet-locked — pass --force to override")
         if key == "span_length_m":
-            p["span_lengths"] = [spec.coerce(raw)] * cast("int", p["span_count"])
-            continue
-        p[key] = spec.coerce(raw)
+            continue  # Apply after span_count, independently of CLI argument order.
+        value = spec.coerce(raw)
+        if key == "span_count":
+            count = Decimal(str(value))
+            if count != count.to_integral_value():
+                raise Violation("span_count must be a whole number")
+            value = int(count)
+        p[key] = value
+
+    if "span_length_m" in overrides:
+        p["span_lengths"] = [VARIABLES["span_length_m"].coerce(overrides["span_length_m"])] * int(p["span_count"])
 
     _derive(p, cw_overridden="carriageway_width" in overrides)
+    if "span_count" in overrides or "span_length_m" in overrides:
+        lengths = p["span_lengths"]
+        if len(set(lengths)) == 1:
+            p["spans"] = f"{p['span_count']}×{lengths[0]:g} m"
+        else:
+            p["spans"] = " + ".join(f"{length:g}" for length in lengths) + " m"
     _check(p)
     return p

@@ -52,7 +52,7 @@ _CACHE: dict[int, LayoutAudit] = {}
 #: First rung of the scale ladder — kept in step with ``fit.LADDER``. Duplicated
 #: rather than imported so ``layout_audit`` stays importable when ``fit`` is
 #: mid-refactor; ``test_scale_ladder`` asserts the two agree.
-_SCALE_LADDER = (20, 25, 50, 75, 100, 150, 200, 250, 300, 400, 500)
+from .fit import LADDER as _SCALE_LADDER
 
 #: A1 landscape, matching ``titleblocks._SHEET_SIZES["A1"]``.
 _SHEET_W_MM = 841.0

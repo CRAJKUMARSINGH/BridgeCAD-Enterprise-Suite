@@ -57,6 +57,8 @@ IGNORE_DIRS = frozenset(
         "test_run_sample",
         "TEST_RUN_OUTPUT",
         "docs/api/_build",
+        "dist",
+        "CODE-JUNCTION",
     }
 )
 
@@ -185,7 +187,7 @@ def _x02(root: Path) -> None:
 
 
 def _x03(root: Path) -> None:
-    replace(root, ".lychee.toml", "include_fragments = true", "include_fragments = false")
+    replace(root, ".lychee.toml", 'include_fragments = "full"', 'include_fragments = "none"')
 
 
 def _guard(test_name: str) -> str:

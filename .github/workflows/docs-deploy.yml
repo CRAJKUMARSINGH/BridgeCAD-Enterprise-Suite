@@ -1,4 +1,9 @@
-name: Docs site
+name: API reference
+
+# The MkDocs documentation site was retired with the repository's markdown
+# corpus (owner instruction: all *.md removed). What remains is the Sphinx
+# API reference, which renders from docs/api/**.rst and the package docstrings,
+# so it does not depend on any markdown file.
 
 on:
   push:
@@ -7,40 +12,8 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0   # git-revision-date needs history
-      - uses: ./.github/actions/setup-suite
-        with:
-          extras: docs
-      - run: pip install -r docs/requirements-docs.txt
-      - run: mkdocs build --strict
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/configure-pages@v5
-      - id: deployment
-        uses: actions/deploy-pages@v4
-
   sphinx:
     name: API reference (Sphinx)
     runs-on: ubuntu-latest

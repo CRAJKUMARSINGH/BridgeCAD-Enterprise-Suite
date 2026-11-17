@@ -117,19 +117,6 @@ repos:
 
   - repo: local
     hooks:
-      - id: doc-paths
-        name: doc code-block paths exist
-        entry: python scripts/check_doc_paths.py
-        language: system
-        files: \.md$
-
-      - id: doc-integrity-fast
-        name: doc integrity (fast)
-        entry: python scripts/verify_docs.py --only paths,integrity --quiet
-        language: system
-        pass_filenames: false
-        files: \.md$
-
       # ── Version single-source (release gate parity with suite-ci) ───────────
       # The root [project].version is the only version. A member pyproject or a
       # package __version__ that drifts from it fails here, at commit time,

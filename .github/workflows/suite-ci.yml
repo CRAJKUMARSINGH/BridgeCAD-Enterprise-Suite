@@ -135,10 +135,8 @@ jobs:
           extra-pip: "pytest pytest-cov openpyxl pyyaml"
 
       - name: Run unit + integration tests
-        # `-m "not slow"`: the mutation harness (tests/docs/test_detection_proof.py)
-        # copies the whole repo per mutation and is owned by docs-verify.yml's
-        # dedicated `detection-proof` job. Running it here duplicates ~20 min of
-        # work and makes the unit job a hostage to file-I/O contention.
+        # `-m "not slow"`: heavy mutation / browser lanes are marked slow and run
+        # in their own dedicated workflows, not in this fast unit job.
         run: |
           pytest tests/ \
             --ignore=tests/e2e \

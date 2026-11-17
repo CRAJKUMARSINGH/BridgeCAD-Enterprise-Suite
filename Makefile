@@ -1,7 +1,6 @@
 .PHONY: help install dev lint format typecheck test cov test-e2e test-integration \
         verify smoke robotic robot robot-full gates bench build clean docker-up \
         docker-down api ui web \
-        verify-docs verify-docs-fast test-docs mutate-docs prove prove-fast \
         refs-extract refs-check refs-coverage refs-verify refs-verify-crops \
         drawing-standards green-stack hooks hooks-check
 
@@ -138,48 +137,10 @@ audit-draw:      ## Dead-geometry audit — discarded pure expressions in sheet*
 green-stack:     ## Full pre-push sweep incl. draw lanes (ROBOTIC-TEST-GUIDE §3)
 	ruff check packages apps scripts
 	ruff format --check packages apps scripts
-	pytest tests/docs -q -m "not slow"
-	python scripts/verify_docs.py
 	python scripts/robotic_smoke.py --persona all --seed 42
 	pytest tests/draw -m draw -q
 	pytest tests/drawings --regression -q
 	python tests/e2e/run_e2e.py
-
-links:           ## Check external + internal links
-	lychee --config .lychee.toml --no-progress '**/*.md'
-
-docpaths:        ## Check paths referenced in code blocks
-	python scripts/check_doc_paths.py
-
-docs-check: links docpaths  ## Both
-
-docs-serve:      ## Live docs site
-	mkdocs serve
-
-docs-build:      ## Strict build
-	mkdocs build --strict
-
-docs-clean:
-	rm -rf site site-api docs/guide.md docs/index.md docs/contributing.md \
-	       docs/changelog.md docs/security.md docs/code-of-conduct.md docs/docs-index.md
-
-verify-docs:     ## Full documentation verification (JSON)
-	python scripts/verify_docs.py --json
-
-verify-docs-fast: ## Integrity + path gates only
-	python scripts/verify_docs.py --only paths,integrity
-
-test-docs:       ## Doc test suite, verbose
-	pytest tests/docs -v
-
-mutate-docs:     ## Gate self-tests only — proves the guards fire
-	pytest tests/docs/test_gates_selfcheck.py -v
-
-prove:           ## Prove every defect is detectable (17/17)
-	python scripts/prove_detection.py
-
-prove-fast:      ## Critical defects only
-	python scripts/prove_detection.py --only D01,D02,D03,D04 --jobs 8
 
 refs-extract:      ## Pull facts off references (text layer + OCR)
 	python scripts/refs_extract.py

@@ -33,7 +33,6 @@ jobs:
             --name Bridge_GAD_GUI ^
             --icon=bridge.ico ^
             --version-file file_version_info.txt ^
-            --add-data "docs\Bridge_GAD_User_Manual.md;docs" ^
             --add-data "docs\Bridge_GAD_User_Manual.pdf;docs" ^
             src\bridge_gad\gui.py
           pyinstaller --onefile --noconsole ^
@@ -41,8 +40,15 @@ jobs:
             src\bridge_gad\__main__.py
 
       - name: Generate PDF Manual
+        # The markdown source corpus was retired; build_manual.py reads
+        # docs/manual_template.md, which no longer exists. Ship the committed
+        # PDF instead of regenerating it.
         run: |
-          python docs\build_manual.py
+          if (Test-Path docs\manual_template.md) {
+            python docs\build_manual.py
+          } else {
+            echo "manual_template.md retired — shipping the committed Bridge_GAD_User_Manual.pdf"
+          }
 
       - name: Sign Executables (if certificate available)
         # NOTE: `secrets` is NOT an available context in `jobs.<job_id>.steps.if`

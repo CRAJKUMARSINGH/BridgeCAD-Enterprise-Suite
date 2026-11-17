@@ -259,7 +259,7 @@
       "foundation_type": "OPEN",
       "superstructure_type": "RCC_ARCH",
       "superstructure_member": "RCC_ARCH_OPEN_SPANDREL",
-      "approximation": false,
+      "approximation": true,
       "plan": {
         "must_contain": ["STRUC-OUTLINE", "SUPER-DECK", "SUB-ABUT", "SUB-DIRT-WALL", "SUB-PIER"],
         "must_not_contain": ["SUB-BEARING", "FOUND-PILE", "FOUND-WELL"]
@@ -278,7 +278,7 @@
       "foundation_type": "OPEN",
       "superstructure_type": "RCC_ARCH",
       "superstructure_member": "PRECAST_ARCH",
-      "approximation": false,
+      "approximation": true,
       "plan": {
         "must_contain": ["STRUC-OUTLINE", "SUPER-DECK", "SUB-ABUT", "SUB-DIRT-WALL"],
         "must_not_contain": ["SUB-PIER", "SUB-BEARING", "FOUND-PILE", "FOUND-WELL"]

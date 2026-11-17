@@ -1,0 +1,1 @@
+﻿{"detail":"1 validation error for BridgeProject\nsuperstructure\n  Value error, superstructure.type=RCC_TBEAM requires girder_depth_mm >= 200 (got None) [type=value_error, input_value={'type': <SuperstructureT...ncreteGrade.M30: 'M30'>}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/value_error"}

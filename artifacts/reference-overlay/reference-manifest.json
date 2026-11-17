@@ -1,0 +1,139 @@
+{
+  "filename": "CODE-JUNCTION/GENERAL ARRANGEMENT DRAWINGS.pdf",
+  "sha256": "38C224549A50CC72A20AAA01E07B33618789DC4D3881844363BDA199DD44A23D",
+  "bytes": 11284253,
+  "page_count": 27,
+  "page_size_pt": [
+    1684.0,
+    1191.0
+  ],
+  "page_size_mm": [
+    594.1,
+    420.2
+  ],
+  "page_size_all_pages_identical": true,
+  "paper": "A2 landscape (nominal 594 x 420 mm); measured 594.1 x 420.2 mm",
+  "revision": "No revision number printed. The REVISION block on the sheet (PDF page 6, label at pt (1305,934)-(1333,941)) is blank. Title stamp reads 'G. A. D.  Dt. 31.12.2022'; issued for in-house circulation vide letter No. CE/2473, Dt. 31.12.2022.",
+  "index_mapping_note": "Index is PDF page 3. Printed booklet 'PAGE No.' is NOT the PDF page: printed page n == PDF page n + 3 (printed 01 GLOSSARY is PDF page 4).",
+  "index": [
+    {
+      "sr": "01",
+      "description": "GLOSSARY",
+      "drawing_number": "",
+      "printed_page": "01",
+      "pdf_page": "4"
+    },
+    {
+      "sr": "02",
+      "description": "OPEN FOUNDATION WITH P.C.C. PIER & SOLID SLAB SUPER STRUCTURE",
+      "drawing_number": "BR- I / 2022 - 001",
+      "printed_page": "02",
+      "pdf_page": "5"
+    },
+    {
+      "sr": "03",
+      "description": "OPEN FOUNDATION WITH R.C.C. PIER &SOLID SLAB SUPER STRUCTURE",
+      "drawing_number": "BR- I / 2022 - 002",
+      "printed_page": "03",
+      "pdf_page": "6"
+    },
+    {
+      "sr": "04",
+      "description": "RAFT FOUNDATION WITH R.C.C. PIER & SOLID SLAB SUPER STRUCTURE",
+      "drawing_number": "BR- I / 2022 - 003",
+      "printed_page": "04",
+      "pdf_page": "7"
+    },
+    {
+      "sr": "05",
+      "description": "RAFT FOUNDATION WITH R.C.C. BOX CELL SUPER STRUCTURE",
+      "drawing_number": "BR- I / 2022 - 004",
+      "printed_page": "05",
+      "pdf_page": "8"
+    },
+    {
+      "sr": "06",
+      "description": "R.C.C. PORTAL WITH OPEN FOUNDATION",
+      "drawing_number": "BR- I / 2022 - 005 A & B",
+      "printed_page": "06-07",
+      "pdf_page": "09-10"
+    },
+    {
+      "sr": "07",
+      "description": "OPEN FOUNDATION WITH R.C.C. PIER, PIER CAP & SOLID SLAB SUPER STRUCTURE",
+      "drawing_number": "BR- I / 2022 - 006",
+      "printed_page": "08",
+      "pdf_page": "11"
+    },
+    {
+      "sr": "08",
+      "description": "OPEN FOUNDATION WITH R.C.C. PIER & R.C.C. THREE GIRDER SUPER STRUCTURE",
+      "drawing_number": "BR- I / 2022 - 007 A & B",
+      "printed_page": "09-10",
+      "pdf_page": "12-13"
+    },
+    {
+      "sr": "09",
+      "description": "PILE FOUNDATION WITH R.C.C. PIER & R.C.C. THREE GIRDER SUPER STRUCTURE",
+      "drawing_number": "BR- I / 2022 - 008 A & B",
+      "printed_page": "11-12",
+      "pdf_page": "14-15"
+    },
+    {
+      "sr": "10",
+      "description": "OPEN FOUNDATION WITH R.C.C. PIER & P.S.C. FOUR GIRDER SUPER STRUCTURE",
+      "drawing_number": "BR- I / 2022 - 009 A & B",
+      "printed_page": "13-14",
+      "pdf_page": "16-17"
+    },
+    {
+      "sr": "11",
+      "description": "PILE FOUNDATION WITH R.C.C. PIER & P.S.C. FOUR GIRDER SUPER STRUCTURE",
+      "drawing_number": "BR- I / 2022 - 010 A & B",
+      "printed_page": "15-16",
+      "pdf_page": "18-19"
+    },
+    {
+      "sr": "12",
+      "description": "OPEN / WELL FOUNDATION WITH R.C.C. PIER & P.S.C. BOX SUPER STRUCTURE",
+      "drawing_number": "BR- I / 2022 - 011 A & B",
+      "printed_page": "17-18",
+      "pdf_page": "20-21"
+    },
+    {
+      "sr": "13",
+      "description": "PILE FOUNDATION WITH R.C.C. PIER & P.S.C. BOX SUPER STRUCTURE",
+      "drawing_number": "BR- I / 2022 - 012 A & B",
+      "printed_page": "19-20",
+      "pdf_page": "22-23"
+    },
+    {
+      "sr": "14",
+      "description": "WELL FOUNDATION WITH R.C.C. PIER & P.S.C. BOX SUPER STRUCTURE",
+      "drawing_number": "BR- I / 2022 - 013 A & B",
+      "printed_page": "21-22",
+      "pdf_page": "24-25"
+    },
+    {
+      "sr": "15",
+      "description": "OPEN FOUNDATION WITH R.C.C. ARCH / SLAB SUPER STRUCTURE. (PEDESTRIAN)",
+      "drawing_number": "BR- I / 2022 - 014",
+      "printed_page": "23",
+      "pdf_page": "26"
+    },
+    {
+      "sr": "16",
+      "description": "OPEN FOUNDATION WITH R.C.C. ARCH SUPER STRUCTURE. (VEHICULAR)",
+      "drawing_number": "BR- I / 2022 - 015",
+      "printed_page": "24",
+      "pdf_page": "27"
+    }
+  ],
+  "baseline_family_page": {
+    "drawing_number": "BR- I / 2022 - 002",
+    "description": "OPEN FOUNDATION WITH R.C.C. PIER &SOLID SLAB SUPER STRUCTURE",
+    "printed_page": "03",
+    "pdf_page": 6,
+    "why": "Chosen family baseline: the generated package resolves title 'Open Foundation + RCC Pier + Solid Slab' / superstructure RCC_SOLID_SLAB / foundation OPEN, which is the same drawing family as this reference entry. It is the only reference page that depicts an open-foundation R.C.C. pier with a solid-slab superstructure, so it is the correct page for the invariant-convention comparison. It is NOT a nine-span sheet (it is a 4-span drawing), so it cannot be used for pixel-identity."
+  }
+}

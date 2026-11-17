@@ -1,0 +1,25 @@
+﻿ CREAT.md                                           |  69 +++++++++++
+ DOCS_INDEX.md                                      |   6 +-
+ docs/BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md    |   2 +-
+ .../BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md     |   2 +-
+ frontend/src/workflowScenarios.ts                  |   8 +-
+ frontend/vite.config.ts                            |  20 +--
+ mkdocs.yml                                         |   7 ++
+ .../bridgecad_catalogue/registry.py                |   8 ++
+ .../bridgecad_catalogue/resolve.py                 |  50 +++++---
+ .../bridgecad_catalogue/schema.py                  |  16 +++
+ .../bridgecad_core/abutment_stack.py               |  85 +++++++++++--
+ .../bridgecad_core/geometry/__init__.py            |  17 +++
+ .../bridgecad_core/geometry/long_section.py        | 135 ++++++++++++++++++++-
+ packages/bridgecad-core/bridgecad_core/models.py   |   8 ++
+ .../bridgecad_draw/engines/pdf_engine.py           |   8 +-
+ packages/bridgecad-draw/bridgecad_draw/fit.py      |  35 ++----
+ .../bridgecad-draw/bridgecad_draw/layout_audit.py  |   2 +-
+ .../bridgecad_draw/sheet2_long_section.py          |  51 +++++---
+ .../bridgecad_draw/sheet4_foundation.py            |  22 +++-
+ .../bridgecad_draw/sheet8_side_elevations.py       |  75 +++++++++---
+ scripts/prove_detection.py                         |   4 +-
+ tests/docs/conftest.py                             |   9 +-
+ tests/docs/test_doc_integrity.py                   |   4 +-
+ tests/unit/test_abutment_stack.py                  |  14 ++-
+ 24 files changed, 536 insertions(+), 121 deletions(-)

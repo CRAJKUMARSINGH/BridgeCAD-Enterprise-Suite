@@ -1499,6 +1499,16 @@ class FoundationDetails(BaseModel):
         le=Decimal("9000"),
         dp=4,
     )
+    footing_bottom_rl_m: Decimal | None = DM(
+        "EXPLICITLY SUPPLIED founding RL (underside of the footing/pile cap), m. "
+        "This is a designed level, not a rule-of-thumb embedment: when supplied "
+        "WITH a footing depth the canonical support-level contract becomes "
+        "LEVEL_CONTROLLED and the shaft height is derived from it. Left unset "
+        "the contract stays HEIGHT_CONTROLLED and only PROPOSES a founding RL.",
+        ge=Decimal("-100"),
+        le=Decimal("9000"),
+        dp=4,
+    )
     under_ream_count: UnderReamCount | None = Field(
         default=None,
         description="Number of under-ream bulbs (0/1/2/3) for under-reamed piles",

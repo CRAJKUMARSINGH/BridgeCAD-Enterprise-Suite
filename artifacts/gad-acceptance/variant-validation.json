@@ -1,0 +1,4268 @@
+{
+  "commit": "e969b72979196f78e2d04129c2462268d6caf099",
+  "card_id": "BR-I-2022-002",
+  "base_overrides": {
+    "span_count": "9",
+    "span_length_m": "10"
+  },
+  "supplied_stack": {
+    "wearing_coat_thickness_mm": "75",
+    "bearing_depth_mm": "50",
+    "pier_pedestal_height_m": "0.15",
+    "pier_cap_depth_m": "0.8",
+    "pile_cap_thickness_mm": "1500",
+    "footing_bottom_rl_m": "93.425"
+  },
+  "variants": [
+    {
+      "fixture": "nine_span_slab",
+      "commit": "e969b72979196f78e2d04129c2462268d6caf099",
+      "overrides": {
+        "span_count": "9",
+        "span_length_m": "10"
+      },
+      "generated": true,
+      "message": "STRUCTURAL PASS (reference fidelity not verified) \u2014 9 sheets, 766 KB, 0 issue(s)",
+      "package_dir": "E:\\Rajkumar\\BridgeCAD-Enterprise-Suite\\artifacts\\gad-acceptance\\nine_span_slab\\e969b72979196f78e2d04129c2462268d6caf099",
+      "supports": [
+        {
+          "support_id": "P1",
+          "status": "UNRESOLVED",
+          "authority": "HEIGHT_CONTROLLED",
+          "cap_top_rl_m": "101.775",
+          "cap_bottom_rl_m": "100.975",
+          "shaft_base_rl_m": "94.975",
+          "shaft_height_m": "6.0",
+          "issue_codes": [
+            "E-MISSING-FOOTING-DEPTH"
+          ]
+        },
+        {
+          "support_id": "P2",
+          "status": "UNRESOLVED",
+          "authority": "HEIGHT_CONTROLLED",
+          "cap_top_rl_m": "101.775",
+          "cap_bottom_rl_m": "100.975",
+          "shaft_base_rl_m": "94.975",
+          "shaft_height_m": "6.0",
+          "issue_codes": [
+            "E-MISSING-FOOTING-DEPTH"
+          ]
+        },
+        {
+          "support_id": "P3",
+          "status": "UNRESOLVED",
+          "authority": "HEIGHT_CONTROLLED",
+          "cap_top_rl_m": "101.775",
+          "cap_bottom_rl_m": "100.975",
+          "shaft_base_rl_m": "94.975",
+          "shaft_height_m": "6.0",
+          "issue_codes": [
+            "E-MISSING-FOOTING-DEPTH"
+          ]
+        },
+        {
+          "support_id": "P4",
+          "status": "UNRESOLVED",
+          "authority": "HEIGHT_CONTROLLED",
+          "cap_top_rl_m": "101.775",
+          "cap_bottom_rl_m": "100.975",
+          "shaft_base_rl_m": "94.975",
+          "shaft_height_m": "6.0",
+          "issue_codes": [
+            "E-MISSING-FOOTING-DEPTH"
+          ]
+        },
+        {
+          "support_id": "P5",
+          "status": "UNRESOLVED",
+          "authority": "HEIGHT_CONTROLLED",
+          "cap_top_rl_m": "101.775",
+          "cap_bottom_rl_m": "100.975",
+          "shaft_base_rl_m": "94.975",
+          "shaft_height_m": "6.0",
+          "issue_codes": [
+            "E-MISSING-FOOTING-DEPTH"
+          ]
+        },
+        {
+          "support_id": "P6",
+          "status": "UNRESOLVED",
+          "authority": "HEIGHT_CONTROLLED",
+          "cap_top_rl_m": "101.775",
+          "cap_bottom_rl_m": "100.975",
+          "shaft_base_rl_m": "94.975",
+          "shaft_height_m": "6.0",
+          "issue_codes": [
+            "E-MISSING-FOOTING-DEPTH"
+          ]
+        },
+        {
+          "support_id": "P7",
+          "status": "UNRESOLVED",
+          "authority": "HEIGHT_CONTROLLED",
+          "cap_top_rl_m": "101.775",
+          "cap_bottom_rl_m": "100.975",
+          "shaft_base_rl_m": "94.975",
+          "shaft_height_m": "6.0",
+          "issue_codes": [
+            "E-MISSING-FOOTING-DEPTH"
+          ]
+        },
+        {
+          "support_id": "P8",
+          "status": "UNRESOLVED",
+          "authority": "HEIGHT_CONTROLLED",
+          "cap_top_rl_m": "101.775",
+          "cap_bottom_rl_m": "100.975",
+          "shaft_base_rl_m": "94.975",
+          "shaft_height_m": "6.0",
+          "issue_codes": [
+            "E-MISSING-FOOTING-DEPTH"
+          ]
+        }
+      ],
+      "statuses": [
+        "UNRESOLVED"
+      ],
+      "authorities": [
+        "HEIGHT_CONTROLLED"
+      ],
+      "sheets": [
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet1_Plan.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet2_LongSection.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet3_CrossSection.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet4_Foundation.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet5_PierAbutment.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet6_BearingsJoints.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet7_BOQ.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet8_SideElevations.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet9_Reinforcement.dxf"
+      ],
+      "layout_checks_passed": true,
+      "required_content": {
+        "manifest_version": "1.0.0",
+        "sheets_found": [
+          "Sheet1_Plan",
+          "Sheet2_LongSection",
+          "Sheet3_CrossSection",
+          "Sheet4_Foundation",
+          "Sheet5_PierAbutment",
+          "Sheet6_BearingsJoints",
+          "Sheet7_BOQ",
+          "Sheet8_SideElevations",
+          "Sheet9_Reinforcement"
+        ],
+        "applicable": 71,
+        "not_applicable": 4,
+        "failures": 0,
+        "passed": true,
+        "requirements": [
+          {
+            "id": "RC-PLAN-01",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 16,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'SUB-PIER' \u00d7 16"
+          },
+          {
+            "id": "RC-PLAN-02",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 12,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'SUB-ABUT' \u00d7 12"
+          },
+          {
+            "id": "RC-PLAN-03",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 10,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'DIM-CHAINAGE' \u00d7 10"
+          },
+          {
+            "id": "RC-PLAN-04",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 10,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'CIVIL-CHAINAGE' \u00d7 10"
+          },
+          {
+            "id": "RC-PLAN-05",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 10,
+            "required_count": 2,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'STRUC-SECTION' \u00d7 10"
+          },
+          {
+            "id": "RC-PLAN-06",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'SYM-SCALE' \u00d7 3"
+          },
+          {
+            "id": "RC-PLAN-07",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 8,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: drawing text /^P\\d+$/ \u00d7 8"
+          },
+          {
+            "id": "RC-PLAN-08",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 10,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: drawing text /^CH / \u00d7 10"
+          },
+          {
+            "id": "RC-PLAN-09",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: drawing text /PLAN VIEW/ \u00d7 1"
+          },
+          {
+            "id": "RC-PLAN-10",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: drawing text /SCALE 1:\\d+/ \u00d7 1"
+          },
+          {
+            "id": "RC-PLAN-11",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 4,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: drawing text /WING|SPLAY|RETURN/ \u00d7 4"
+          },
+          {
+            "id": "RC-LSEC-01",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 28,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'DIM-LEVEL' \u00d7 28"
+          },
+          {
+            "id": "RC-LSEC-02",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'DIM-CHAINAGE' \u00d7 1"
+          },
+          {
+            "id": "RC-LSEC-03",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: drawing text /HFL/ \u00d7 1"
+          },
+          {
+            "id": "RC-LSEC-04",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: drawing text /LWL/ \u00d7 1"
+          },
+          {
+            "id": "RC-LSEC-05",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: drawing text /SCOUR/ \u00d7 1"
+          },
+          {
+            "id": "RC-LSEC-06",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: drawing text /GROUND/ \u00d7 1"
+          },
+          {
+            "id": "RC-LSEC-07",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 24,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'SUB-PIER' \u00d7 24"
+          },
+          {
+            "id": "RC-LSEC-08",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'SUB-BEARING' \u00d7 2"
+          },
+          {
+            "id": "RC-LSEC-09",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'SUB-DIRT-WALL' \u00d7 2"
+          },
+          {
+            "id": "RC-LSEC-10",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'ABUT-PROF' \u00d7 2"
+          },
+          {
+            "id": "RC-XSEC-01",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'SUPER-DECK' \u00d7 1"
+          },
+          {
+            "id": "RC-XSEC-02",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'SUPER-WEARING' \u00d7 2"
+          },
+          {
+            "id": "RC-XSEC-03",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 8,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'DIM-LINEAR' \u00d7 8"
+          },
+          {
+            "id": "RC-XSEC-04",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'DIM-SLOPE' \u00d7 3"
+          },
+          {
+            "id": "RC-XSEC-05",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'SUPER-KERB' \u00d7 2"
+          },
+          {
+            "id": "RC-XSEC-06",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'SUPER-PARAPET' \u00d7 2"
+          },
+          {
+            "id": "RC-XSEC-07",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: drawing text /CW \\d/ \u00d7 1"
+          },
+          {
+            "id": "RC-XSEC-08",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: drawing text /SECTION/ \u00d7 1"
+          },
+          {
+            "id": "RC-XSEC-09",
+            "area": "Cross section",
+            "declared_status": "MISSING",
+            "applicable": false,
+            "measured": 0,
+            "required_count": 1,
+            "present": false,
+            "ok": false,
+            "detail": "not applicable for ['footpath_width']={'footpath_width': None}"
+          },
+          {
+            "id": "RC-FDN-01",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: present (119 entities)"
+          },
+          {
+            "id": "RC-FDN-02",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: layer 'CIVIL-SCOUR' \u00d7 2"
+          },
+          {
+            "id": "RC-FDN-03",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 11,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: layer 'DIM-LINEAR' \u00d7 11"
+          },
+          {
+            "id": "RC-FDN-04",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: drawing text /SCOUR/ \u00d7 1"
+          },
+          {
+            "id": "RC-FDN-05",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: drawing text /OPEN FOOTING|FOOTING PLAN|OPEN FOUNDATION/ \u00d7 2"
+          },
+          {
+            "id": "RC-FDN-06",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: drawing text /CAP THICKNESS/ \u00d7 1"
+          },
+          {
+            "id": "RC-FDN-07",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: drawing text /WEEP HOLE/ \u00d7 2"
+          },
+          {
+            "id": "RC-FDN-08",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: drawing text /ABUTMENT A1|ABUTMENT A2/ \u00d7 2"
+          },
+          {
+            "id": "RC-FDN-09",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": false,
+            "measured": 0,
+            "required_count": 1,
+            "present": false,
+            "ok": false,
+            "detail": "not applicable for ['foundation_type']={'foundation_type': 'OPEN'}"
+          },
+          {
+            "id": "RC-CABT-01",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 7,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: layer 'ABUT-PROF' \u00d7 7"
+          },
+          {
+            "id": "RC-CABT-02",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: layer 'SUB-DIRT-WALL' \u00d7 3"
+          },
+          {
+            "id": "RC-CABT-03",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: drawing text /ABUTMENT ELEVATION/ \u00d7 1"
+          },
+          {
+            "id": "RC-CABT-04",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: drawing text /ABUTMENT SECTION/ \u00d7 1"
+          },
+          {
+            "id": "RC-CABT-05",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: drawing text /APPROACH/ \u00d7 2"
+          },
+          {
+            "id": "RC-CABT-06",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 4,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: drawing text /WEEP/ \u00d7 4"
+          },
+          {
+            "id": "RC-CABT-07",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: drawing text /TOE|HEEL|BASE SLAB|FOOTING/ \u00d7 2"
+          },
+          {
+            "id": "RC-BABT-01",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": false,
+            "measured": 0,
+            "required_count": 1,
+            "present": false,
+            "ok": false,
+            "detail": "not applicable for ['abutment_shape_family']={'abutment_shape_family': 'cantilever'}"
+          },
+          {
+            "id": "RC-BABT-02",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": false,
+            "measured": 0,
+            "required_count": 1,
+            "present": false,
+            "ok": false,
+            "detail": "not applicable for ['abutment_shape_family']={'abutment_shape_family': 'cantilever'}"
+          },
+          {
+            "id": "RC-BABT-03",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet8_SideElevations: drawing text /RETURN WALL/ \u00d7 2"
+          },
+          {
+            "id": "RC-BABT-04",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet8_SideElevations: drawing text /SPLAY/ \u00d7 2"
+          },
+          {
+            "id": "RC-BABT-05",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet8_SideElevations: drawing text /APPROACH SLAB/ \u00d7 1"
+          },
+          {
+            "id": "RC-BABT-06",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet8_SideElevations: drawing text /DIRT WALL/ \u00d7 3"
+          },
+          {
+            "id": "RC-BABT-07",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet8_SideElevations: drawing text /SECTION A-A|A2 END-FACE/ \u00d7 1"
+          },
+          {
+            "id": "RC-BRG-01",
+            "area": "Bearings/joints",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet6_BearingsJoints: drawing text /BEARING SCHEDULE/ \u00d7 1"
+          },
+          {
+            "id": "RC-BRG-02",
+            "area": "Bearings/joints",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet6_BearingsJoints: drawing text /EXPANSION JOINT/ \u00d7 2"
+          },
+          {
+            "id": "RC-BRG-03",
+            "area": "Bearings/joints",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet6_BearingsJoints: layer 'SUB-BEARING' \u00d7 3"
+          },
+          {
+            "id": "RC-BRG-04",
+            "area": "Bearings/joints",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet6_BearingsJoints: layer 'SUB-EXPJOINT' \u00d7 3"
+          },
+          {
+            "id": "RC-BRG-05",
+            "area": "Bearings/joints",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 5,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet6_BearingsJoints: drawing text /ELASTOMERIC|POT/ \u00d7 5"
+          },
+          {
+            "id": "RC-RFT-01",
+            "area": "Reinforcement",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 4,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet9_Reinforcement: drawing text /ELEMENT-FACE|SPACING/ \u00d7 4"
+          },
+          {
+            "id": "RC-RFT-02",
+            "area": "Reinforcement",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet9_Reinforcement: drawing text /MARK/ \u00d7 2"
+          },
+          {
+            "id": "RC-RFT-03",
+            "area": "Reinforcement",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet9_Reinforcement: drawing text /TOTAL STEEL/ \u00d7 1"
+          },
+          {
+            "id": "RC-RFT-04",
+            "area": "Reinforcement",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 4,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet9_Reinforcement: drawing text /ABUTMENT_CAP|ABUTMENT_SHAFT/ \u00d7 4"
+          },
+          {
+            "id": "RC-RFT-05",
+            "area": "Reinforcement",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet9_Reinforcement: drawn layers ['REBAR', 'STRUC-DETAIL']"
+          },
+          {
+            "id": "RC-BOQ-01",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /ABSTRACT/ \u00d7 1"
+          },
+          {
+            "id": "RC-BOQ-02",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /QUANTITY/ \u00d7 1"
+          },
+          {
+            "id": "RC-BOQ-03",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /RATE/ \u00d7 2"
+          },
+          {
+            "id": "RC-BOQ-04",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /AMOUNT/ \u00d7 1"
+          },
+          {
+            "id": "RC-BOQ-05",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 17,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /MORTH|IRC|IS \\d/ \u00d7 17"
+          },
+          {
+            "id": "RC-BOQ-06",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /TOTAL LENGTH/ \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-01",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: title-block text /^DRG: / \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-02",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: title-block text /^REVISION: / \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-03",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: title-block text /^SHEET \\d+ OF \\d+$/ \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-04",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: title-block text /^SCALE: / \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-05",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: title-block text /^DRAWING TITLE: / \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-06",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 4,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: drawing text /UNRESOLVED|ASSUMPTION/ \u00d7 4"
+          }
+        ]
+      },
+      "required_content_failures": [],
+      "quality": {
+        "generation": "SUCCEEDED",
+        "model_validation": "UNRESOLVED",
+        "geometry_contract": "PASSED",
+        "required_content": "PASSED",
+        "layout": "PASSED",
+        "reference_fidelity": "BLOCKED",
+        "engineering_review": "PENDING",
+        "generation_gates_passed": false,
+        "quality_and_layout_passed": false,
+        "accepted": false,
+        "status": "DRAFT \u2014 generation gates not all passed",
+        "fixture": "nine_span_slab",
+        "commit": "e969b72979196f78e2d04129c2462268d6caf099",
+        "annotation_overlap_count": 0,
+        "issues": [
+          {
+            "gate": "model_validation",
+            "code": "E-MISSING-FOOTING-DEPTH",
+            "message": "cannot propose a founding RL without a footing depth",
+            "detail": "P1"
+          },
+          {
+            "gate": "model_validation",
+            "code": "E-MISSING-FOOTING-DEPTH",
+            "message": "cannot propose a founding RL without a footing depth",
+            "detail": "P2"
+          },
+          {
+            "gate": "model_validation",
+            "code": "E-MISSING-FOOTING-DEPTH",
+            "message": "cannot propose a founding RL without a footing depth",
+            "detail": "P3"
+          },
+          {
+            "gate": "model_validation",
+            "code": "E-MISSING-FOOTING-DEPTH",
+            "message": "cannot propose a founding RL without a footing depth",
+            "detail": "P4"
+          },
+          {
+            "gate": "model_validation",
+            "code": "E-MISSING-FOOTING-DEPTH",
+            "message": "cannot propose a founding RL without a footing depth",
+            "detail": "P5"
+          },
+          {
+            "gate": "model_validation",
+            "code": "E-MISSING-FOOTING-DEPTH",
+            "message": "cannot propose a founding RL without a footing depth",
+            "detail": "P6"
+          },
+          {
+            "gate": "model_validation",
+            "code": "E-MISSING-FOOTING-DEPTH",
+            "message": "cannot propose a founding RL without a footing depth",
+            "detail": "P7"
+          },
+          {
+            "gate": "model_validation",
+            "code": "E-MISSING-FOOTING-DEPTH",
+            "message": "cannot propose a founding RL without a footing depth",
+            "detail": "P8"
+          },
+          {
+            "gate": "reference_fidelity",
+            "code": "E-NO-NINE-SPAN-REFERENCE",
+            "message": "reference booklet contains no nine-span sheet; convention/geometry comparison is PARTIAL",
+            "detail": ""
+          }
+        ],
+        "notes": [
+          "model_validation=UNRESOLVED: support statuses: ['UNRESOLVED']",
+          "geometry_contract=PASSED: 8 supports: cap_bottom=shaft_top, footing_top=shaft_base, footing_top=footing_bottom+depth",
+          "required_content=PASSED: required content: 71 applicable requirement(s) present on 9 sheet(s); 9 sheets each >= 20 entities",
+          "layout=PASSED: title-block/notes zones clear, frame, scale ladder and text floor all hold",
+          "reference_fidelity=BLOCKED: reference booklet contains no nine-span sheet \u2014 exact nine-span reproduction claim not possible; booklet convention + independently verified geometry comparison is PARTIAL and the calibrated per-reference-page comparison (\u00a76) awaits the approved reference PDF (artifacts/reference-overlay/comparison.json)",
+          "engineering_review=PENDING: structural/geotechnical adequacy is a human verdict; not claimed here"
+        ]
+      }
+    },
+    {
+      "fixture": "nine_span_slab_resolved",
+      "commit": "e969b72979196f78e2d04129c2462268d6caf099",
+      "overrides": {
+        "span_count": "9",
+        "span_length_m": "10",
+        "wearing_coat_thickness_mm": "75",
+        "bearing_depth_mm": "50",
+        "pier_pedestal_height_m": "0.15",
+        "pier_cap_depth_m": "0.8",
+        "pile_cap_thickness_mm": "1500",
+        "footing_bottom_rl_m": "93.425"
+      },
+      "generated": true,
+      "message": "STRUCTURAL PASS (reference fidelity not verified) \u2014 9 sheets, 765 KB, 0 issue(s)",
+      "package_dir": "E:\\Rajkumar\\BridgeCAD-Enterprise-Suite\\artifacts\\gad-acceptance\\nine_span_slab_resolved\\e969b72979196f78e2d04129c2462268d6caf099",
+      "supports": [
+        {
+          "support_id": "P1",
+          "status": "RESOLVED",
+          "authority": "LEVEL_CONTROLLED",
+          "cap_top_rl_m": "101.725",
+          "cap_bottom_rl_m": "100.925",
+          "shaft_base_rl_m": "94.925",
+          "shaft_height_m": "6.000",
+          "issue_codes": []
+        },
+        {
+          "support_id": "P2",
+          "status": "RESOLVED",
+          "authority": "LEVEL_CONTROLLED",
+          "cap_top_rl_m": "101.725",
+          "cap_bottom_rl_m": "100.925",
+          "shaft_base_rl_m": "94.925",
+          "shaft_height_m": "6.000",
+          "issue_codes": []
+        },
+        {
+          "support_id": "P3",
+          "status": "RESOLVED",
+          "authority": "LEVEL_CONTROLLED",
+          "cap_top_rl_m": "101.725",
+          "cap_bottom_rl_m": "100.925",
+          "shaft_base_rl_m": "94.925",
+          "shaft_height_m": "6.000",
+          "issue_codes": []
+        },
+        {
+          "support_id": "P4",
+          "status": "RESOLVED",
+          "authority": "LEVEL_CONTROLLED",
+          "cap_top_rl_m": "101.725",
+          "cap_bottom_rl_m": "100.925",
+          "shaft_base_rl_m": "94.925",
+          "shaft_height_m": "6.000",
+          "issue_codes": []
+        },
+        {
+          "support_id": "P5",
+          "status": "RESOLVED",
+          "authority": "LEVEL_CONTROLLED",
+          "cap_top_rl_m": "101.725",
+          "cap_bottom_rl_m": "100.925",
+          "shaft_base_rl_m": "94.925",
+          "shaft_height_m": "6.000",
+          "issue_codes": []
+        },
+        {
+          "support_id": "P6",
+          "status": "RESOLVED",
+          "authority": "LEVEL_CONTROLLED",
+          "cap_top_rl_m": "101.725",
+          "cap_bottom_rl_m": "100.925",
+          "shaft_base_rl_m": "94.925",
+          "shaft_height_m": "6.000",
+          "issue_codes": []
+        },
+        {
+          "support_id": "P7",
+          "status": "RESOLVED",
+          "authority": "LEVEL_CONTROLLED",
+          "cap_top_rl_m": "101.725",
+          "cap_bottom_rl_m": "100.925",
+          "shaft_base_rl_m": "94.925",
+          "shaft_height_m": "6.000",
+          "issue_codes": []
+        },
+        {
+          "support_id": "P8",
+          "status": "RESOLVED",
+          "authority": "LEVEL_CONTROLLED",
+          "cap_top_rl_m": "101.725",
+          "cap_bottom_rl_m": "100.925",
+          "shaft_base_rl_m": "94.925",
+          "shaft_height_m": "6.000",
+          "issue_codes": []
+        }
+      ],
+      "statuses": [
+        "RESOLVED"
+      ],
+      "authorities": [
+        "LEVEL_CONTROLLED"
+      ],
+      "sheets": [
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet1_Plan.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet2_LongSection.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet3_CrossSection.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet4_Foundation.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet5_PierAbutment.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet6_BearingsJoints.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet7_BOQ.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet8_SideElevations.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet9_Reinforcement.dxf"
+      ],
+      "layout_checks_passed": true,
+      "required_content": {
+        "manifest_version": "1.0.0",
+        "sheets_found": [
+          "Sheet1_Plan",
+          "Sheet2_LongSection",
+          "Sheet3_CrossSection",
+          "Sheet4_Foundation",
+          "Sheet5_PierAbutment",
+          "Sheet6_BearingsJoints",
+          "Sheet7_BOQ",
+          "Sheet8_SideElevations",
+          "Sheet9_Reinforcement"
+        ],
+        "applicable": 71,
+        "not_applicable": 4,
+        "failures": 0,
+        "passed": true,
+        "requirements": [
+          {
+            "id": "RC-PLAN-01",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 16,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'SUB-PIER' \u00d7 16"
+          },
+          {
+            "id": "RC-PLAN-02",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 12,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'SUB-ABUT' \u00d7 12"
+          },
+          {
+            "id": "RC-PLAN-03",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 10,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'DIM-CHAINAGE' \u00d7 10"
+          },
+          {
+            "id": "RC-PLAN-04",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 10,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'CIVIL-CHAINAGE' \u00d7 10"
+          },
+          {
+            "id": "RC-PLAN-05",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 10,
+            "required_count": 2,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'STRUC-SECTION' \u00d7 10"
+          },
+          {
+            "id": "RC-PLAN-06",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'SYM-SCALE' \u00d7 3"
+          },
+          {
+            "id": "RC-PLAN-07",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 8,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: drawing text /^P\\d+$/ \u00d7 8"
+          },
+          {
+            "id": "RC-PLAN-08",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 10,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: drawing text /^CH / \u00d7 10"
+          },
+          {
+            "id": "RC-PLAN-09",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: drawing text /PLAN VIEW/ \u00d7 1"
+          },
+          {
+            "id": "RC-PLAN-10",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: drawing text /SCALE 1:\\d+/ \u00d7 1"
+          },
+          {
+            "id": "RC-PLAN-11",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 4,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: drawing text /WING|SPLAY|RETURN/ \u00d7 4"
+          },
+          {
+            "id": "RC-LSEC-01",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 28,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'DIM-LEVEL' \u00d7 28"
+          },
+          {
+            "id": "RC-LSEC-02",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'DIM-CHAINAGE' \u00d7 1"
+          },
+          {
+            "id": "RC-LSEC-03",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: drawing text /HFL/ \u00d7 1"
+          },
+          {
+            "id": "RC-LSEC-04",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: drawing text /LWL/ \u00d7 1"
+          },
+          {
+            "id": "RC-LSEC-05",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: drawing text /SCOUR/ \u00d7 1"
+          },
+          {
+            "id": "RC-LSEC-06",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: drawing text /GROUND/ \u00d7 1"
+          },
+          {
+            "id": "RC-LSEC-07",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 24,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'SUB-PIER' \u00d7 24"
+          },
+          {
+            "id": "RC-LSEC-08",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'SUB-BEARING' \u00d7 2"
+          },
+          {
+            "id": "RC-LSEC-09",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'SUB-DIRT-WALL' \u00d7 2"
+          },
+          {
+            "id": "RC-LSEC-10",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'ABUT-PROF' \u00d7 2"
+          },
+          {
+            "id": "RC-XSEC-01",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'SUPER-DECK' \u00d7 1"
+          },
+          {
+            "id": "RC-XSEC-02",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'SUPER-WEARING' \u00d7 2"
+          },
+          {
+            "id": "RC-XSEC-03",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 8,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'DIM-LINEAR' \u00d7 8"
+          },
+          {
+            "id": "RC-XSEC-04",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'DIM-SLOPE' \u00d7 3"
+          },
+          {
+            "id": "RC-XSEC-05",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'SUPER-KERB' \u00d7 2"
+          },
+          {
+            "id": "RC-XSEC-06",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'SUPER-PARAPET' \u00d7 2"
+          },
+          {
+            "id": "RC-XSEC-07",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: drawing text /CW \\d/ \u00d7 1"
+          },
+          {
+            "id": "RC-XSEC-08",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: drawing text /SECTION/ \u00d7 1"
+          },
+          {
+            "id": "RC-XSEC-09",
+            "area": "Cross section",
+            "declared_status": "MISSING",
+            "applicable": false,
+            "measured": 0,
+            "required_count": 1,
+            "present": false,
+            "ok": false,
+            "detail": "not applicable for ['footpath_width']={'footpath_width': None}"
+          },
+          {
+            "id": "RC-FDN-01",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: present (118 entities)"
+          },
+          {
+            "id": "RC-FDN-02",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: layer 'CIVIL-SCOUR' \u00d7 2"
+          },
+          {
+            "id": "RC-FDN-03",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 11,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: layer 'DIM-LINEAR' \u00d7 11"
+          },
+          {
+            "id": "RC-FDN-04",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: drawing text /SCOUR/ \u00d7 1"
+          },
+          {
+            "id": "RC-FDN-05",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: drawing text /OPEN FOOTING|FOOTING PLAN|OPEN FOUNDATION/ \u00d7 2"
+          },
+          {
+            "id": "RC-FDN-06",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: drawing text /CAP THICKNESS/ \u00d7 1"
+          },
+          {
+            "id": "RC-FDN-07",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: drawing text /WEEP HOLE/ \u00d7 2"
+          },
+          {
+            "id": "RC-FDN-08",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: drawing text /ABUTMENT A1|ABUTMENT A2/ \u00d7 2"
+          },
+          {
+            "id": "RC-FDN-09",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": false,
+            "measured": 0,
+            "required_count": 1,
+            "present": false,
+            "ok": false,
+            "detail": "not applicable for ['foundation_type']={'foundation_type': 'OPEN'}"
+          },
+          {
+            "id": "RC-CABT-01",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 7,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: layer 'ABUT-PROF' \u00d7 7"
+          },
+          {
+            "id": "RC-CABT-02",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: layer 'SUB-DIRT-WALL' \u00d7 3"
+          },
+          {
+            "id": "RC-CABT-03",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: drawing text /ABUTMENT ELEVATION/ \u00d7 1"
+          },
+          {
+            "id": "RC-CABT-04",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: drawing text /ABUTMENT SECTION/ \u00d7 1"
+          },
+          {
+            "id": "RC-CABT-05",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: drawing text /APPROACH/ \u00d7 2"
+          },
+          {
+            "id": "RC-CABT-06",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 4,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: drawing text /WEEP/ \u00d7 4"
+          },
+          {
+            "id": "RC-CABT-07",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: drawing text /TOE|HEEL|BASE SLAB|FOOTING/ \u00d7 2"
+          },
+          {
+            "id": "RC-BABT-01",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": false,
+            "measured": 0,
+            "required_count": 1,
+            "present": false,
+            "ok": false,
+            "detail": "not applicable for ['abutment_shape_family']={'abutment_shape_family': 'cantilever'}"
+          },
+          {
+            "id": "RC-BABT-02",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": false,
+            "measured": 0,
+            "required_count": 1,
+            "present": false,
+            "ok": false,
+            "detail": "not applicable for ['abutment_shape_family']={'abutment_shape_family': 'cantilever'}"
+          },
+          {
+            "id": "RC-BABT-03",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet8_SideElevations: drawing text /RETURN WALL/ \u00d7 2"
+          },
+          {
+            "id": "RC-BABT-04",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet8_SideElevations: drawing text /SPLAY/ \u00d7 2"
+          },
+          {
+            "id": "RC-BABT-05",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet8_SideElevations: drawing text /APPROACH SLAB/ \u00d7 1"
+          },
+          {
+            "id": "RC-BABT-06",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet8_SideElevations: drawing text /DIRT WALL/ \u00d7 3"
+          },
+          {
+            "id": "RC-BABT-07",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet8_SideElevations: drawing text /SECTION A-A|A2 END-FACE/ \u00d7 1"
+          },
+          {
+            "id": "RC-BRG-01",
+            "area": "Bearings/joints",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet6_BearingsJoints: drawing text /BEARING SCHEDULE/ \u00d7 1"
+          },
+          {
+            "id": "RC-BRG-02",
+            "area": "Bearings/joints",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet6_BearingsJoints: drawing text /EXPANSION JOINT/ \u00d7 2"
+          },
+          {
+            "id": "RC-BRG-03",
+            "area": "Bearings/joints",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet6_BearingsJoints: layer 'SUB-BEARING' \u00d7 3"
+          },
+          {
+            "id": "RC-BRG-04",
+            "area": "Bearings/joints",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet6_BearingsJoints: layer 'SUB-EXPJOINT' \u00d7 3"
+          },
+          {
+            "id": "RC-BRG-05",
+            "area": "Bearings/joints",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 5,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet6_BearingsJoints: drawing text /ELASTOMERIC|POT/ \u00d7 5"
+          },
+          {
+            "id": "RC-RFT-01",
+            "area": "Reinforcement",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 4,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet9_Reinforcement: drawing text /ELEMENT-FACE|SPACING/ \u00d7 4"
+          },
+          {
+            "id": "RC-RFT-02",
+            "area": "Reinforcement",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet9_Reinforcement: drawing text /MARK/ \u00d7 2"
+          },
+          {
+            "id": "RC-RFT-03",
+            "area": "Reinforcement",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet9_Reinforcement: drawing text /TOTAL STEEL/ \u00d7 1"
+          },
+          {
+            "id": "RC-RFT-04",
+            "area": "Reinforcement",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 4,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet9_Reinforcement: drawing text /ABUTMENT_CAP|ABUTMENT_SHAFT/ \u00d7 4"
+          },
+          {
+            "id": "RC-RFT-05",
+            "area": "Reinforcement",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet9_Reinforcement: drawn layers ['REBAR', 'STRUC-DETAIL']"
+          },
+          {
+            "id": "RC-BOQ-01",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /ABSTRACT/ \u00d7 1"
+          },
+          {
+            "id": "RC-BOQ-02",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /QUANTITY/ \u00d7 1"
+          },
+          {
+            "id": "RC-BOQ-03",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /RATE/ \u00d7 2"
+          },
+          {
+            "id": "RC-BOQ-04",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /AMOUNT/ \u00d7 1"
+          },
+          {
+            "id": "RC-BOQ-05",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 17,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /MORTH|IRC|IS \\d/ \u00d7 17"
+          },
+          {
+            "id": "RC-BOQ-06",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /TOTAL LENGTH/ \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-01",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: title-block text /^DRG: / \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-02",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: title-block text /^REVISION: / \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-03",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: title-block text /^SHEET \\d+ OF \\d+$/ \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-04",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: title-block text /^SCALE: / \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-05",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: title-block text /^DRAWING TITLE: / \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-06",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: drawing text /UNRESOLVED|ASSUMPTION/ \u00d7 3"
+          }
+        ]
+      },
+      "required_content_failures": [],
+      "quality": {
+        "generation": "SUCCEEDED",
+        "model_validation": "PASSED",
+        "geometry_contract": "PASSED",
+        "required_content": "PASSED",
+        "layout": "PASSED",
+        "reference_fidelity": "BLOCKED",
+        "engineering_review": "PENDING",
+        "generation_gates_passed": true,
+        "quality_and_layout_passed": true,
+        "accepted": false,
+        "status": "GENERATION/CONTENT/LAYOUT GATES PASSED \u2014 acceptance pending reference/review",
+        "fixture": "nine_span_slab_resolved",
+        "commit": "e969b72979196f78e2d04129c2462268d6caf099",
+        "annotation_overlap_count": 0,
+        "issues": [
+          {
+            "gate": "reference_fidelity",
+            "code": "E-NO-NINE-SPAN-REFERENCE",
+            "message": "reference booklet contains no nine-span sheet; convention/geometry comparison is PARTIAL",
+            "detail": ""
+          }
+        ],
+        "notes": [
+          "model_validation=PASSED: all 8 supports RESOLVED (LEVEL_CONTROLLED)",
+          "geometry_contract=PASSED: 8 supports: cap_bottom=shaft_top, footing_top=shaft_base, footing_top=footing_bottom+depth",
+          "required_content=PASSED: required content: 71 applicable requirement(s) present on 9 sheet(s); 9 sheets each >= 20 entities",
+          "layout=PASSED: title-block/notes zones clear, frame, scale ladder and text floor all hold",
+          "reference_fidelity=BLOCKED: reference booklet contains no nine-span sheet \u2014 exact nine-span reproduction claim not possible; booklet convention + independently verified geometry comparison is PARTIAL and the calibrated per-reference-page comparison (\u00a76) awaits the approved reference PDF (artifacts/reference-overlay/comparison.json)",
+          "engineering_review=PENDING: structural/geotechnical adequacy is a human verdict; not claimed here"
+        ]
+      }
+    },
+    {
+      "fixture": "nine_span_slab_conflict",
+      "commit": "e969b72979196f78e2d04129c2462268d6caf099",
+      "overrides": {
+        "span_count": "9",
+        "span_length_m": "10",
+        "wearing_coat_thickness_mm": "75",
+        "bearing_depth_mm": "50",
+        "pier_pedestal_height_m": "0.15",
+        "pier_cap_depth_m": "0.8",
+        "pile_cap_thickness_mm": "1500",
+        "footing_bottom_rl_m": "93.425",
+        "pier_height_m": "8.0"
+      },
+      "generated": false,
+      "message": "REJECTED \u2014 conflict in support records; no DXF written",
+      "failed_run_label": "FAILED-RUN: this directory contains evidence from a rejected generation attempt.  It is not a deliverable package.",
+      "statuses": [
+        "CONFLICT"
+      ],
+      "authorities": [
+        "LEVEL_CONTROLLED"
+      ],
+      "sheets": [],
+      "supports": [
+        {
+          "support_id": "P1",
+          "status": "CONFLICT",
+          "authority": "LEVEL_CONTROLLED",
+          "issue_codes": [
+            "E-CONFLICT-SHAFT-HEIGHT"
+          ]
+        },
+        {
+          "support_id": "P2",
+          "status": "CONFLICT",
+          "authority": "LEVEL_CONTROLLED",
+          "issue_codes": [
+            "E-CONFLICT-SHAFT-HEIGHT"
+          ]
+        },
+        {
+          "support_id": "P3",
+          "status": "CONFLICT",
+          "authority": "LEVEL_CONTROLLED",
+          "issue_codes": [
+            "E-CONFLICT-SHAFT-HEIGHT"
+          ]
+        },
+        {
+          "support_id": "P4",
+          "status": "CONFLICT",
+          "authority": "LEVEL_CONTROLLED",
+          "issue_codes": [
+            "E-CONFLICT-SHAFT-HEIGHT"
+          ]
+        },
+        {
+          "support_id": "P5",
+          "status": "CONFLICT",
+          "authority": "LEVEL_CONTROLLED",
+          "issue_codes": [
+            "E-CONFLICT-SHAFT-HEIGHT"
+          ]
+        },
+        {
+          "support_id": "P6",
+          "status": "CONFLICT",
+          "authority": "LEVEL_CONTROLLED",
+          "issue_codes": [
+            "E-CONFLICT-SHAFT-HEIGHT"
+          ]
+        },
+        {
+          "support_id": "P7",
+          "status": "CONFLICT",
+          "authority": "LEVEL_CONTROLLED",
+          "issue_codes": [
+            "E-CONFLICT-SHAFT-HEIGHT"
+          ]
+        },
+        {
+          "support_id": "P8",
+          "status": "CONFLICT",
+          "authority": "LEVEL_CONTROLLED",
+          "issue_codes": [
+            "E-CONFLICT-SHAFT-HEIGHT"
+          ]
+        }
+      ],
+      "quality": {
+        "generation": "FAILED",
+        "model_validation": "FAILED",
+        "geometry_contract": "NOT_TESTED",
+        "required_content": "NOT_TESTED",
+        "layout": "NOT_TESTED",
+        "reference_fidelity": "BLOCKED",
+        "engineering_review": "PENDING",
+        "generation_gates_passed": false,
+        "quality_and_layout_passed": false,
+        "accepted": false,
+        "status": "DRAFT \u2014 generation gates not all passed",
+        "fixture": "nine_span_slab_conflict",
+        "commit": "e969b72979196f78e2d04129c2462268d6caf099",
+        "annotation_overlap_count": -1,
+        "issues": [
+          {
+            "gate": "model_validation",
+            "code": "E-CONFLICT-SHAFT-HEIGHT",
+            "message": "supplied shaft height 8.0 m conflicts with the derived 6.000 m (tolerance 0.000001 m)",
+            "detail": "P1"
+          },
+          {
+            "gate": "model_validation",
+            "code": "E-CONFLICT-SHAFT-HEIGHT",
+            "message": "supplied shaft height 8.0 m conflicts with the derived 6.000 m (tolerance 0.000001 m)",
+            "detail": "P2"
+          },
+          {
+            "gate": "model_validation",
+            "code": "E-CONFLICT-SHAFT-HEIGHT",
+            "message": "supplied shaft height 8.0 m conflicts with the derived 6.000 m (tolerance 0.000001 m)",
+            "detail": "P3"
+          },
+          {
+            "gate": "model_validation",
+            "code": "E-CONFLICT-SHAFT-HEIGHT",
+            "message": "supplied shaft height 8.0 m conflicts with the derived 6.000 m (tolerance 0.000001 m)",
+            "detail": "P4"
+          },
+          {
+            "gate": "model_validation",
+            "code": "E-CONFLICT-SHAFT-HEIGHT",
+            "message": "supplied shaft height 8.0 m conflicts with the derived 6.000 m (tolerance 0.000001 m)",
+            "detail": "P5"
+          },
+          {
+            "gate": "model_validation",
+            "code": "E-CONFLICT-SHAFT-HEIGHT",
+            "message": "supplied shaft height 8.0 m conflicts with the derived 6.000 m (tolerance 0.000001 m)",
+            "detail": "P6"
+          },
+          {
+            "gate": "model_validation",
+            "code": "E-CONFLICT-SHAFT-HEIGHT",
+            "message": "supplied shaft height 8.0 m conflicts with the derived 6.000 m (tolerance 0.000001 m)",
+            "detail": "P7"
+          },
+          {
+            "gate": "model_validation",
+            "code": "E-CONFLICT-SHAFT-HEIGHT",
+            "message": "supplied shaft height 8.0 m conflicts with the derived 6.000 m (tolerance 0.000001 m)",
+            "detail": "P8"
+          }
+        ],
+        "notes": [
+          "generation=FAILED: conflict in support records; generation aborted before any DXF written",
+          "model_validation=FAILED: at least one support CONFLICT",
+          "reference_fidelity=BLOCKED: reference booklet contains no nine-span sheet",
+          "engineering_review=PENDING: structural/geotechnical adequacy is a human verdict; not claimed here"
+        ]
+      }
+    },
+    {
+      "fixture": "seven_span_slab_resolved",
+      "commit": "e969b72979196f78e2d04129c2462268d6caf099",
+      "overrides": {
+        "span_count": "7",
+        "span_length_m": "10",
+        "wearing_coat_thickness_mm": "75",
+        "bearing_depth_mm": "50",
+        "pier_pedestal_height_m": "0.15",
+        "pier_cap_depth_m": "0.8",
+        "pile_cap_thickness_mm": "1500",
+        "footing_bottom_rl_m": "93.425"
+      },
+      "generated": true,
+      "message": "STRUCTURAL PASS (reference fidelity not verified) \u2014 9 sheets, 745 KB, 0 issue(s)",
+      "package_dir": "E:\\Rajkumar\\BridgeCAD-Enterprise-Suite\\artifacts\\gad-acceptance\\seven_span_slab_resolved\\e969b72979196f78e2d04129c2462268d6caf099",
+      "supports": [
+        {
+          "support_id": "P1",
+          "status": "RESOLVED",
+          "authority": "LEVEL_CONTROLLED",
+          "cap_top_rl_m": "101.725",
+          "cap_bottom_rl_m": "100.925",
+          "shaft_base_rl_m": "94.925",
+          "shaft_height_m": "6.000",
+          "issue_codes": []
+        },
+        {
+          "support_id": "P2",
+          "status": "RESOLVED",
+          "authority": "LEVEL_CONTROLLED",
+          "cap_top_rl_m": "101.725",
+          "cap_bottom_rl_m": "100.925",
+          "shaft_base_rl_m": "94.925",
+          "shaft_height_m": "6.000",
+          "issue_codes": []
+        },
+        {
+          "support_id": "P3",
+          "status": "RESOLVED",
+          "authority": "LEVEL_CONTROLLED",
+          "cap_top_rl_m": "101.725",
+          "cap_bottom_rl_m": "100.925",
+          "shaft_base_rl_m": "94.925",
+          "shaft_height_m": "6.000",
+          "issue_codes": []
+        },
+        {
+          "support_id": "P4",
+          "status": "RESOLVED",
+          "authority": "LEVEL_CONTROLLED",
+          "cap_top_rl_m": "101.725",
+          "cap_bottom_rl_m": "100.925",
+          "shaft_base_rl_m": "94.925",
+          "shaft_height_m": "6.000",
+          "issue_codes": []
+        },
+        {
+          "support_id": "P5",
+          "status": "RESOLVED",
+          "authority": "LEVEL_CONTROLLED",
+          "cap_top_rl_m": "101.725",
+          "cap_bottom_rl_m": "100.925",
+          "shaft_base_rl_m": "94.925",
+          "shaft_height_m": "6.000",
+          "issue_codes": []
+        },
+        {
+          "support_id": "P6",
+          "status": "RESOLVED",
+          "authority": "LEVEL_CONTROLLED",
+          "cap_top_rl_m": "101.725",
+          "cap_bottom_rl_m": "100.925",
+          "shaft_base_rl_m": "94.925",
+          "shaft_height_m": "6.000",
+          "issue_codes": []
+        }
+      ],
+      "statuses": [
+        "RESOLVED"
+      ],
+      "authorities": [
+        "LEVEL_CONTROLLED"
+      ],
+      "sheets": [
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet1_Plan.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet2_LongSection.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet3_CrossSection.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet4_Foundation.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet5_PierAbutment.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet6_BearingsJoints.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet7_BOQ.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet8_SideElevations.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet9_Reinforcement.dxf"
+      ],
+      "layout_checks_passed": true,
+      "required_content": {
+        "manifest_version": "1.0.0",
+        "sheets_found": [
+          "Sheet1_Plan",
+          "Sheet2_LongSection",
+          "Sheet3_CrossSection",
+          "Sheet4_Foundation",
+          "Sheet5_PierAbutment",
+          "Sheet6_BearingsJoints",
+          "Sheet7_BOQ",
+          "Sheet8_SideElevations",
+          "Sheet9_Reinforcement"
+        ],
+        "applicable": 71,
+        "not_applicable": 4,
+        "failures": 0,
+        "passed": true,
+        "requirements": [
+          {
+            "id": "RC-PLAN-01",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 12,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'SUB-PIER' \u00d7 12"
+          },
+          {
+            "id": "RC-PLAN-02",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 12,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'SUB-ABUT' \u00d7 12"
+          },
+          {
+            "id": "RC-PLAN-03",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 8,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'DIM-CHAINAGE' \u00d7 8"
+          },
+          {
+            "id": "RC-PLAN-04",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 8,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'CIVIL-CHAINAGE' \u00d7 8"
+          },
+          {
+            "id": "RC-PLAN-05",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 10,
+            "required_count": 2,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'STRUC-SECTION' \u00d7 10"
+          },
+          {
+            "id": "RC-PLAN-06",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'SYM-SCALE' \u00d7 3"
+          },
+          {
+            "id": "RC-PLAN-07",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 6,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: drawing text /^P\\d+$/ \u00d7 6"
+          },
+          {
+            "id": "RC-PLAN-08",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 8,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: drawing text /^CH / \u00d7 8"
+          },
+          {
+            "id": "RC-PLAN-09",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: drawing text /PLAN VIEW/ \u00d7 1"
+          },
+          {
+            "id": "RC-PLAN-10",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: drawing text /SCALE 1:\\d+/ \u00d7 1"
+          },
+          {
+            "id": "RC-PLAN-11",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 4,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: drawing text /WING|SPLAY|RETURN/ \u00d7 4"
+          },
+          {
+            "id": "RC-LSEC-01",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 24,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'DIM-LEVEL' \u00d7 24"
+          },
+          {
+            "id": "RC-LSEC-02",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'DIM-CHAINAGE' \u00d7 1"
+          },
+          {
+            "id": "RC-LSEC-03",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: drawing text /HFL/ \u00d7 1"
+          },
+          {
+            "id": "RC-LSEC-04",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: drawing text /LWL/ \u00d7 1"
+          },
+          {
+            "id": "RC-LSEC-05",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: drawing text /SCOUR/ \u00d7 1"
+          },
+          {
+            "id": "RC-LSEC-06",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: drawing text /GROUND/ \u00d7 1"
+          },
+          {
+            "id": "RC-LSEC-07",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 18,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'SUB-PIER' \u00d7 18"
+          },
+          {
+            "id": "RC-LSEC-08",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'SUB-BEARING' \u00d7 2"
+          },
+          {
+            "id": "RC-LSEC-09",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'SUB-DIRT-WALL' \u00d7 2"
+          },
+          {
+            "id": "RC-LSEC-10",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'ABUT-PROF' \u00d7 2"
+          },
+          {
+            "id": "RC-XSEC-01",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'SUPER-DECK' \u00d7 1"
+          },
+          {
+            "id": "RC-XSEC-02",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'SUPER-WEARING' \u00d7 2"
+          },
+          {
+            "id": "RC-XSEC-03",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 8,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'DIM-LINEAR' \u00d7 8"
+          },
+          {
+            "id": "RC-XSEC-04",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'DIM-SLOPE' \u00d7 3"
+          },
+          {
+            "id": "RC-XSEC-05",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'SUPER-KERB' \u00d7 2"
+          },
+          {
+            "id": "RC-XSEC-06",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'SUPER-PARAPET' \u00d7 2"
+          },
+          {
+            "id": "RC-XSEC-07",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: drawing text /CW \\d/ \u00d7 1"
+          },
+          {
+            "id": "RC-XSEC-08",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: drawing text /SECTION/ \u00d7 1"
+          },
+          {
+            "id": "RC-XSEC-09",
+            "area": "Cross section",
+            "declared_status": "MISSING",
+            "applicable": false,
+            "measured": 0,
+            "required_count": 1,
+            "present": false,
+            "ok": false,
+            "detail": "not applicable for ['footpath_width']={'footpath_width': None}"
+          },
+          {
+            "id": "RC-FDN-01",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: present (118 entities)"
+          },
+          {
+            "id": "RC-FDN-02",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: layer 'CIVIL-SCOUR' \u00d7 2"
+          },
+          {
+            "id": "RC-FDN-03",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 11,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: layer 'DIM-LINEAR' \u00d7 11"
+          },
+          {
+            "id": "RC-FDN-04",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: drawing text /SCOUR/ \u00d7 1"
+          },
+          {
+            "id": "RC-FDN-05",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: drawing text /OPEN FOOTING|FOOTING PLAN|OPEN FOUNDATION/ \u00d7 2"
+          },
+          {
+            "id": "RC-FDN-06",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: drawing text /CAP THICKNESS/ \u00d7 1"
+          },
+          {
+            "id": "RC-FDN-07",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: drawing text /WEEP HOLE/ \u00d7 2"
+          },
+          {
+            "id": "RC-FDN-08",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: drawing text /ABUTMENT A1|ABUTMENT A2/ \u00d7 2"
+          },
+          {
+            "id": "RC-FDN-09",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": false,
+            "measured": 0,
+            "required_count": 1,
+            "present": false,
+            "ok": false,
+            "detail": "not applicable for ['foundation_type']={'foundation_type': 'OPEN'}"
+          },
+          {
+            "id": "RC-CABT-01",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 7,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: layer 'ABUT-PROF' \u00d7 7"
+          },
+          {
+            "id": "RC-CABT-02",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: layer 'SUB-DIRT-WALL' \u00d7 3"
+          },
+          {
+            "id": "RC-CABT-03",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: drawing text /ABUTMENT ELEVATION/ \u00d7 1"
+          },
+          {
+            "id": "RC-CABT-04",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: drawing text /ABUTMENT SECTION/ \u00d7 1"
+          },
+          {
+            "id": "RC-CABT-05",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: drawing text /APPROACH/ \u00d7 2"
+          },
+          {
+            "id": "RC-CABT-06",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 4,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: drawing text /WEEP/ \u00d7 4"
+          },
+          {
+            "id": "RC-CABT-07",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: drawing text /TOE|HEEL|BASE SLAB|FOOTING/ \u00d7 2"
+          },
+          {
+            "id": "RC-BABT-01",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": false,
+            "measured": 0,
+            "required_count": 1,
+            "present": false,
+            "ok": false,
+            "detail": "not applicable for ['abutment_shape_family']={'abutment_shape_family': 'cantilever'}"
+          },
+          {
+            "id": "RC-BABT-02",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": false,
+            "measured": 0,
+            "required_count": 1,
+            "present": false,
+            "ok": false,
+            "detail": "not applicable for ['abutment_shape_family']={'abutment_shape_family': 'cantilever'}"
+          },
+          {
+            "id": "RC-BABT-03",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet8_SideElevations: drawing text /RETURN WALL/ \u00d7 2"
+          },
+          {
+            "id": "RC-BABT-04",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet8_SideElevations: drawing text /SPLAY/ \u00d7 2"
+          },
+          {
+            "id": "RC-BABT-05",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet8_SideElevations: drawing text /APPROACH SLAB/ \u00d7 1"
+          },
+          {
+            "id": "RC-BABT-06",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet8_SideElevations: drawing text /DIRT WALL/ \u00d7 3"
+          },
+          {
+            "id": "RC-BABT-07",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet8_SideElevations: drawing text /SECTION A-A|A2 END-FACE/ \u00d7 1"
+          },
+          {
+            "id": "RC-BRG-01",
+            "area": "Bearings/joints",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet6_BearingsJoints: drawing text /BEARING SCHEDULE/ \u00d7 1"
+          },
+          {
+            "id": "RC-BRG-02",
+            "area": "Bearings/joints",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet6_BearingsJoints: drawing text /EXPANSION JOINT/ \u00d7 2"
+          },
+          {
+            "id": "RC-BRG-03",
+            "area": "Bearings/joints",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet6_BearingsJoints: layer 'SUB-BEARING' \u00d7 3"
+          },
+          {
+            "id": "RC-BRG-04",
+            "area": "Bearings/joints",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet6_BearingsJoints: layer 'SUB-EXPJOINT' \u00d7 3"
+          },
+          {
+            "id": "RC-BRG-05",
+            "area": "Bearings/joints",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 5,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet6_BearingsJoints: drawing text /ELASTOMERIC|POT/ \u00d7 5"
+          },
+          {
+            "id": "RC-RFT-01",
+            "area": "Reinforcement",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 4,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet9_Reinforcement: drawing text /ELEMENT-FACE|SPACING/ \u00d7 4"
+          },
+          {
+            "id": "RC-RFT-02",
+            "area": "Reinforcement",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet9_Reinforcement: drawing text /MARK/ \u00d7 2"
+          },
+          {
+            "id": "RC-RFT-03",
+            "area": "Reinforcement",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet9_Reinforcement: drawing text /TOTAL STEEL/ \u00d7 1"
+          },
+          {
+            "id": "RC-RFT-04",
+            "area": "Reinforcement",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 4,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet9_Reinforcement: drawing text /ABUTMENT_CAP|ABUTMENT_SHAFT/ \u00d7 4"
+          },
+          {
+            "id": "RC-RFT-05",
+            "area": "Reinforcement",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet9_Reinforcement: drawn layers ['REBAR', 'STRUC-DETAIL']"
+          },
+          {
+            "id": "RC-BOQ-01",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /ABSTRACT/ \u00d7 1"
+          },
+          {
+            "id": "RC-BOQ-02",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /QUANTITY/ \u00d7 1"
+          },
+          {
+            "id": "RC-BOQ-03",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /RATE/ \u00d7 2"
+          },
+          {
+            "id": "RC-BOQ-04",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /AMOUNT/ \u00d7 1"
+          },
+          {
+            "id": "RC-BOQ-05",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 17,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /MORTH|IRC|IS \\d/ \u00d7 17"
+          },
+          {
+            "id": "RC-BOQ-06",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /TOTAL LENGTH/ \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-01",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: title-block text /^DRG: / \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-02",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: title-block text /^REVISION: / \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-03",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: title-block text /^SHEET \\d+ OF \\d+$/ \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-04",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: title-block text /^SCALE: / \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-05",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: title-block text /^DRAWING TITLE: / \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-06",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: drawing text /UNRESOLVED|ASSUMPTION/ \u00d7 3"
+          }
+        ]
+      },
+      "required_content_failures": [],
+      "quality": {
+        "generation": "SUCCEEDED",
+        "model_validation": "PASSED",
+        "geometry_contract": "PASSED",
+        "required_content": "PASSED",
+        "layout": "PASSED",
+        "reference_fidelity": "BLOCKED",
+        "engineering_review": "PENDING",
+        "generation_gates_passed": true,
+        "quality_and_layout_passed": true,
+        "accepted": false,
+        "status": "GENERATION/CONTENT/LAYOUT GATES PASSED \u2014 acceptance pending reference/review",
+        "fixture": "seven_span_slab_resolved",
+        "commit": "e969b72979196f78e2d04129c2462268d6caf099",
+        "annotation_overlap_count": 0,
+        "issues": [
+          {
+            "gate": "reference_fidelity",
+            "code": "E-NO-NINE-SPAN-REFERENCE",
+            "message": "reference booklet contains no nine-span sheet; convention/geometry comparison is PARTIAL",
+            "detail": ""
+          }
+        ],
+        "notes": [
+          "model_validation=PASSED: all 6 supports RESOLVED (LEVEL_CONTROLLED)",
+          "geometry_contract=PASSED: 6 supports: cap_bottom=shaft_top, footing_top=shaft_base, footing_top=footing_bottom+depth",
+          "required_content=PASSED: required content: 71 applicable requirement(s) present on 9 sheet(s); 9 sheets each >= 20 entities",
+          "layout=PASSED: title-block/notes zones clear, frame, scale ladder and text floor all hold",
+          "reference_fidelity=BLOCKED: reference booklet contains no nine-span sheet \u2014 exact nine-span reproduction claim not possible; booklet convention + independently verified geometry comparison is PARTIAL and the calibrated per-reference-page comparison (\u00a76) awaits the approved reference PDF (artifacts/reference-overlay/comparison.json)",
+          "engineering_review=PENDING: structural/geotechnical adequacy is a human verdict; not claimed here"
+        ]
+      }
+    },
+    {
+      "fixture": "nine_span_slab_skew15_resolved",
+      "commit": "e969b72979196f78e2d04129c2462268d6caf099",
+      "overrides": {
+        "span_count": "9",
+        "span_length_m": "10",
+        "skew_deg": "15",
+        "wearing_coat_thickness_mm": "75",
+        "bearing_depth_mm": "50",
+        "pier_pedestal_height_m": "0.15",
+        "pier_cap_depth_m": "0.8",
+        "pile_cap_thickness_mm": "1500",
+        "footing_bottom_rl_m": "93.425"
+      },
+      "generated": true,
+      "message": "STRUCTURAL PASS (reference fidelity not verified) \u2014 9 sheets, 765 KB, 0 issue(s)",
+      "package_dir": "E:\\Rajkumar\\BridgeCAD-Enterprise-Suite\\artifacts\\gad-acceptance\\nine_span_slab_skew15_resolved\\e969b72979196f78e2d04129c2462268d6caf099",
+      "supports": [
+        {
+          "support_id": "P1",
+          "status": "RESOLVED",
+          "authority": "LEVEL_CONTROLLED",
+          "cap_top_rl_m": "101.725",
+          "cap_bottom_rl_m": "100.925",
+          "shaft_base_rl_m": "94.925",
+          "shaft_height_m": "6.000",
+          "issue_codes": []
+        },
+        {
+          "support_id": "P2",
+          "status": "RESOLVED",
+          "authority": "LEVEL_CONTROLLED",
+          "cap_top_rl_m": "101.725",
+          "cap_bottom_rl_m": "100.925",
+          "shaft_base_rl_m": "94.925",
+          "shaft_height_m": "6.000",
+          "issue_codes": []
+        },
+        {
+          "support_id": "P3",
+          "status": "RESOLVED",
+          "authority": "LEVEL_CONTROLLED",
+          "cap_top_rl_m": "101.725",
+          "cap_bottom_rl_m": "100.925",
+          "shaft_base_rl_m": "94.925",
+          "shaft_height_m": "6.000",
+          "issue_codes": []
+        },
+        {
+          "support_id": "P4",
+          "status": "RESOLVED",
+          "authority": "LEVEL_CONTROLLED",
+          "cap_top_rl_m": "101.725",
+          "cap_bottom_rl_m": "100.925",
+          "shaft_base_rl_m": "94.925",
+          "shaft_height_m": "6.000",
+          "issue_codes": []
+        },
+        {
+          "support_id": "P5",
+          "status": "RESOLVED",
+          "authority": "LEVEL_CONTROLLED",
+          "cap_top_rl_m": "101.725",
+          "cap_bottom_rl_m": "100.925",
+          "shaft_base_rl_m": "94.925",
+          "shaft_height_m": "6.000",
+          "issue_codes": []
+        },
+        {
+          "support_id": "P6",
+          "status": "RESOLVED",
+          "authority": "LEVEL_CONTROLLED",
+          "cap_top_rl_m": "101.725",
+          "cap_bottom_rl_m": "100.925",
+          "shaft_base_rl_m": "94.925",
+          "shaft_height_m": "6.000",
+          "issue_codes": []
+        },
+        {
+          "support_id": "P7",
+          "status": "RESOLVED",
+          "authority": "LEVEL_CONTROLLED",
+          "cap_top_rl_m": "101.725",
+          "cap_bottom_rl_m": "100.925",
+          "shaft_base_rl_m": "94.925",
+          "shaft_height_m": "6.000",
+          "issue_codes": []
+        },
+        {
+          "support_id": "P8",
+          "status": "RESOLVED",
+          "authority": "LEVEL_CONTROLLED",
+          "cap_top_rl_m": "101.725",
+          "cap_bottom_rl_m": "100.925",
+          "shaft_base_rl_m": "94.925",
+          "shaft_height_m": "6.000",
+          "issue_codes": []
+        }
+      ],
+      "statuses": [
+        "RESOLVED"
+      ],
+      "authorities": [
+        "LEVEL_CONTROLLED"
+      ],
+      "sheets": [
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet1_Plan.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet2_LongSection.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet3_CrossSection.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet4_Foundation.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet5_PierAbutment.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet6_BearingsJoints.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet7_BOQ.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet8_SideElevations.dxf",
+        "e969b72979196f78e2d04129c2462268d6caf099_Sheet9_Reinforcement.dxf"
+      ],
+      "layout_checks_passed": true,
+      "required_content": {
+        "manifest_version": "1.0.0",
+        "sheets_found": [
+          "Sheet1_Plan",
+          "Sheet2_LongSection",
+          "Sheet3_CrossSection",
+          "Sheet4_Foundation",
+          "Sheet5_PierAbutment",
+          "Sheet6_BearingsJoints",
+          "Sheet7_BOQ",
+          "Sheet8_SideElevations",
+          "Sheet9_Reinforcement"
+        ],
+        "applicable": 71,
+        "not_applicable": 4,
+        "failures": 0,
+        "passed": true,
+        "requirements": [
+          {
+            "id": "RC-PLAN-01",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 16,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'SUB-PIER' \u00d7 16"
+          },
+          {
+            "id": "RC-PLAN-02",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 12,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'SUB-ABUT' \u00d7 12"
+          },
+          {
+            "id": "RC-PLAN-03",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 10,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'DIM-CHAINAGE' \u00d7 10"
+          },
+          {
+            "id": "RC-PLAN-04",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 10,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'CIVIL-CHAINAGE' \u00d7 10"
+          },
+          {
+            "id": "RC-PLAN-05",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 10,
+            "required_count": 2,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'STRUC-SECTION' \u00d7 10"
+          },
+          {
+            "id": "RC-PLAN-06",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: layer 'SYM-SCALE' \u00d7 3"
+          },
+          {
+            "id": "RC-PLAN-07",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 8,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: drawing text /^P\\d+$/ \u00d7 8"
+          },
+          {
+            "id": "RC-PLAN-08",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 10,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: drawing text /^CH / \u00d7 10"
+          },
+          {
+            "id": "RC-PLAN-09",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: drawing text /PLAN VIEW/ \u00d7 1"
+          },
+          {
+            "id": "RC-PLAN-10",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: drawing text /SCALE 1:\\d+/ \u00d7 1"
+          },
+          {
+            "id": "RC-PLAN-11",
+            "area": "Plan",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 4,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: drawing text /WING|SPLAY|RETURN/ \u00d7 4"
+          },
+          {
+            "id": "RC-LSEC-01",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 28,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'DIM-LEVEL' \u00d7 28"
+          },
+          {
+            "id": "RC-LSEC-02",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'DIM-CHAINAGE' \u00d7 1"
+          },
+          {
+            "id": "RC-LSEC-03",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: drawing text /HFL/ \u00d7 1"
+          },
+          {
+            "id": "RC-LSEC-04",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: drawing text /LWL/ \u00d7 1"
+          },
+          {
+            "id": "RC-LSEC-05",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: drawing text /SCOUR/ \u00d7 1"
+          },
+          {
+            "id": "RC-LSEC-06",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: drawing text /GROUND/ \u00d7 1"
+          },
+          {
+            "id": "RC-LSEC-07",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 24,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'SUB-PIER' \u00d7 24"
+          },
+          {
+            "id": "RC-LSEC-08",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'SUB-BEARING' \u00d7 2"
+          },
+          {
+            "id": "RC-LSEC-09",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'SUB-DIRT-WALL' \u00d7 2"
+          },
+          {
+            "id": "RC-LSEC-10",
+            "area": "Longitudinal section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: layer 'ABUT-PROF' \u00d7 2"
+          },
+          {
+            "id": "RC-XSEC-01",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'SUPER-DECK' \u00d7 1"
+          },
+          {
+            "id": "RC-XSEC-02",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'SUPER-WEARING' \u00d7 2"
+          },
+          {
+            "id": "RC-XSEC-03",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 8,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'DIM-LINEAR' \u00d7 8"
+          },
+          {
+            "id": "RC-XSEC-04",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'DIM-SLOPE' \u00d7 3"
+          },
+          {
+            "id": "RC-XSEC-05",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'SUPER-KERB' \u00d7 2"
+          },
+          {
+            "id": "RC-XSEC-06",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: layer 'SUPER-PARAPET' \u00d7 2"
+          },
+          {
+            "id": "RC-XSEC-07",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: drawing text /CW \\d/ \u00d7 1"
+          },
+          {
+            "id": "RC-XSEC-08",
+            "area": "Cross section",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet3_CrossSection: drawing text /SECTION/ \u00d7 1"
+          },
+          {
+            "id": "RC-XSEC-09",
+            "area": "Cross section",
+            "declared_status": "MISSING",
+            "applicable": false,
+            "measured": 0,
+            "required_count": 1,
+            "present": false,
+            "ok": false,
+            "detail": "not applicable for ['footpath_width']={'footpath_width': None}"
+          },
+          {
+            "id": "RC-FDN-01",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: present (118 entities)"
+          },
+          {
+            "id": "RC-FDN-02",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: layer 'CIVIL-SCOUR' \u00d7 2"
+          },
+          {
+            "id": "RC-FDN-03",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 11,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: layer 'DIM-LINEAR' \u00d7 11"
+          },
+          {
+            "id": "RC-FDN-04",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: drawing text /SCOUR/ \u00d7 1"
+          },
+          {
+            "id": "RC-FDN-05",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: drawing text /OPEN FOOTING|FOOTING PLAN|OPEN FOUNDATION/ \u00d7 2"
+          },
+          {
+            "id": "RC-FDN-06",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: drawing text /CAP THICKNESS/ \u00d7 1"
+          },
+          {
+            "id": "RC-FDN-07",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: drawing text /WEEP HOLE/ \u00d7 2"
+          },
+          {
+            "id": "RC-FDN-08",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet4_Foundation: drawing text /ABUTMENT A1|ABUTMENT A2/ \u00d7 2"
+          },
+          {
+            "id": "RC-FDN-09",
+            "area": "Foundation",
+            "declared_status": "IMPLEMENTED",
+            "applicable": false,
+            "measured": 0,
+            "required_count": 1,
+            "present": false,
+            "ok": false,
+            "detail": "not applicable for ['foundation_type']={'foundation_type': 'OPEN'}"
+          },
+          {
+            "id": "RC-CABT-01",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 7,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: layer 'ABUT-PROF' \u00d7 7"
+          },
+          {
+            "id": "RC-CABT-02",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: layer 'SUB-DIRT-WALL' \u00d7 3"
+          },
+          {
+            "id": "RC-CABT-03",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: drawing text /ABUTMENT ELEVATION/ \u00d7 1"
+          },
+          {
+            "id": "RC-CABT-04",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: drawing text /ABUTMENT SECTION/ \u00d7 1"
+          },
+          {
+            "id": "RC-CABT-05",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: drawing text /APPROACH/ \u00d7 2"
+          },
+          {
+            "id": "RC-CABT-06",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 4,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: drawing text /WEEP/ \u00d7 4"
+          },
+          {
+            "id": "RC-CABT-07",
+            "area": "Cantilever abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet5_PierAbutment: drawing text /TOE|HEEL|BASE SLAB|FOOTING/ \u00d7 2"
+          },
+          {
+            "id": "RC-BABT-01",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": false,
+            "measured": 0,
+            "required_count": 1,
+            "present": false,
+            "ok": false,
+            "detail": "not applicable for ['abutment_shape_family']={'abutment_shape_family': 'cantilever'}"
+          },
+          {
+            "id": "RC-BABT-02",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": false,
+            "measured": 0,
+            "required_count": 1,
+            "present": false,
+            "ok": false,
+            "detail": "not applicable for ['abutment_shape_family']={'abutment_shape_family': 'cantilever'}"
+          },
+          {
+            "id": "RC-BABT-03",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet8_SideElevations: drawing text /RETURN WALL/ \u00d7 2"
+          },
+          {
+            "id": "RC-BABT-04",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet8_SideElevations: drawing text /SPLAY/ \u00d7 2"
+          },
+          {
+            "id": "RC-BABT-05",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet8_SideElevations: drawing text /APPROACH SLAB/ \u00d7 1"
+          },
+          {
+            "id": "RC-BABT-06",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet8_SideElevations: drawing text /DIRT WALL/ \u00d7 3"
+          },
+          {
+            "id": "RC-BABT-07",
+            "area": "Battered abutment",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet8_SideElevations: drawing text /SECTION A-A|A2 END-FACE/ \u00d7 1"
+          },
+          {
+            "id": "RC-BRG-01",
+            "area": "Bearings/joints",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet6_BearingsJoints: drawing text /BEARING SCHEDULE/ \u00d7 1"
+          },
+          {
+            "id": "RC-BRG-02",
+            "area": "Bearings/joints",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet6_BearingsJoints: drawing text /EXPANSION JOINT/ \u00d7 2"
+          },
+          {
+            "id": "RC-BRG-03",
+            "area": "Bearings/joints",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet6_BearingsJoints: layer 'SUB-BEARING' \u00d7 3"
+          },
+          {
+            "id": "RC-BRG-04",
+            "area": "Bearings/joints",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet6_BearingsJoints: layer 'SUB-EXPJOINT' \u00d7 3"
+          },
+          {
+            "id": "RC-BRG-05",
+            "area": "Bearings/joints",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 5,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet6_BearingsJoints: drawing text /ELASTOMERIC|POT/ \u00d7 5"
+          },
+          {
+            "id": "RC-RFT-01",
+            "area": "Reinforcement",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 4,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet9_Reinforcement: drawing text /ELEMENT-FACE|SPACING/ \u00d7 4"
+          },
+          {
+            "id": "RC-RFT-02",
+            "area": "Reinforcement",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet9_Reinforcement: drawing text /MARK/ \u00d7 2"
+          },
+          {
+            "id": "RC-RFT-03",
+            "area": "Reinforcement",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet9_Reinforcement: drawing text /TOTAL STEEL/ \u00d7 1"
+          },
+          {
+            "id": "RC-RFT-04",
+            "area": "Reinforcement",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 4,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet9_Reinforcement: drawing text /ABUTMENT_CAP|ABUTMENT_SHAFT/ \u00d7 4"
+          },
+          {
+            "id": "RC-RFT-05",
+            "area": "Reinforcement",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet9_Reinforcement: drawn layers ['REBAR', 'STRUC-DETAIL']"
+          },
+          {
+            "id": "RC-BOQ-01",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /ABSTRACT/ \u00d7 1"
+          },
+          {
+            "id": "RC-BOQ-02",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /QUANTITY/ \u00d7 1"
+          },
+          {
+            "id": "RC-BOQ-03",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 2,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /RATE/ \u00d7 2"
+          },
+          {
+            "id": "RC-BOQ-04",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /AMOUNT/ \u00d7 1"
+          },
+          {
+            "id": "RC-BOQ-05",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 17,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /MORTH|IRC|IS \\d/ \u00d7 17"
+          },
+          {
+            "id": "RC-BOQ-06",
+            "area": "BOQ/schedules",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet7_BOQ: drawing text /TOTAL LENGTH/ \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-01",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: title-block text /^DRG: / \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-02",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: title-block text /^REVISION: / \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-03",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: title-block text /^SHEET \\d+ OF \\d+$/ \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-04",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: title-block text /^SCALE: / \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-05",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 1,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet1_Plan: title-block text /^DRAWING TITLE: / \u00d7 1"
+          },
+          {
+            "id": "RC-TTL-06",
+            "area": "Title/notes",
+            "declared_status": "IMPLEMENTED",
+            "applicable": true,
+            "measured": 3,
+            "required_count": 1,
+            "present": true,
+            "ok": true,
+            "detail": "Sheet2_LongSection: drawing text /UNRESOLVED|ASSUMPTION/ \u00d7 3"
+          }
+        ]
+      },
+      "required_content_failures": [],
+      "quality": {
+        "generation": "SUCCEEDED",
+        "model_validation": "PASSED",
+        "geometry_contract": "PASSED",
+        "required_content": "PASSED",
+        "layout": "PASSED",
+        "reference_fidelity": "BLOCKED",
+        "engineering_review": "PENDING",
+        "generation_gates_passed": true,
+        "quality_and_layout_passed": true,
+        "accepted": false,
+        "status": "GENERATION/CONTENT/LAYOUT GATES PASSED \u2014 acceptance pending reference/review",
+        "fixture": "nine_span_slab_skew15_resolved",
+        "commit": "e969b72979196f78e2d04129c2462268d6caf099",
+        "annotation_overlap_count": 0,
+        "issues": [
+          {
+            "gate": "reference_fidelity",
+            "code": "E-NO-NINE-SPAN-REFERENCE",
+            "message": "reference booklet contains no nine-span sheet; convention/geometry comparison is PARTIAL",
+            "detail": ""
+          }
+        ],
+        "notes": [
+          "model_validation=PASSED: all 8 supports RESOLVED (LEVEL_CONTROLLED)",
+          "geometry_contract=PASSED: 8 supports: cap_bottom=shaft_top, footing_top=shaft_base, footing_top=footing_bottom+depth",
+          "required_content=PASSED: required content: 71 applicable requirement(s) present on 9 sheet(s); 9 sheets each >= 20 entities",
+          "layout=PASSED: title-block/notes zones clear, frame, scale ladder and text floor all hold",
+          "reference_fidelity=BLOCKED: reference booklet contains no nine-span sheet \u2014 exact nine-span reproduction claim not possible; booklet convention + independently verified geometry comparison is PARTIAL and the calibrated per-reference-page comparison (\u00a76) awaits the approved reference PDF (artifacts/reference-overlay/comparison.json)",
+          "engineering_review=PENDING: structural/geotechnical adequacy is a human verdict; not claimed here"
+        ]
+      }
+    }
+  ],
+  "invariant_checks": [
+    {
+      "check": "deliverable: every support RESOLVED",
+      "passed": true,
+      "detail": "statuses=['RESOLVED']"
+    },
+    {
+      "check": "deliverable: quality/layout gates pass",
+      "passed": true,
+      "detail": "quality=GENERATION/CONTENT/LAYOUT GATES PASSED \u2014 acceptance pending reference/review"
+    },
+    {
+      "check": "deliverable: layout gate passes",
+      "passed": true,
+      "detail": "layout_checks.passed"
+    },
+    {
+      "check": "deliverable: level-controlled authority",
+      "passed": true,
+      "detail": "authorities=['LEVEL_CONTROLLED']"
+    },
+    {
+      "check": "deliverable: required-content manifest measured",
+      "passed": true,
+      "detail": "applicable=71 of 75"
+    },
+    {
+      "check": "deliverable: every applicable requirement is credited",
+      "passed": true,
+      "detail": "unmet: "
+    },
+    {
+      "check": "deliverable: required-content gate passes",
+      "passed": true,
+      "detail": "unmet=0 gate=PASSED quality_and_layout_passed=True"
+    },
+    {
+      "check": "deliverable: acceptance withheld pending reference + review",
+      "passed": true,
+      "detail": "accepted=False reference_fidelity=BLOCKED engineering_review=PENDING"
+    },
+    {
+      "check": "default stays honestly UNRESOLVED",
+      "passed": true,
+      "detail": "statuses=['UNRESOLVED']"
+    },
+    {
+      "check": "conflicting founding RL / pier height is rejected",
+      "passed": true,
+      "detail": "statuses=['CONFLICT'] codes=['E-CONFLICT-SHAFT-HEIGHT']"
+    },
+    {
+      "check": "seven_span_slab_resolved: every support RESOLVED, gates pass",
+      "passed": true,
+      "detail": "statuses=['RESOLVED'] layout=True"
+    },
+    {
+      "check": "nine_span_slab_skew15_resolved: every support RESOLVED, gates pass",
+      "passed": true,
+      "detail": "statuses=['RESOLVED'] layout=True"
+    },
+    {
+      "check": "cap_bottom RL is span-invariant",
+      "passed": true,
+      "detail": "9-span=['100.925'] 7-span=['100.925']"
+    }
+  ],
+  "all_checks_passed": true
+}

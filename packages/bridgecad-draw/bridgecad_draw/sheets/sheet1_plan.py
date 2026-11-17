@@ -199,7 +199,7 @@ def build(project):
         cv.frame_h * 0.14,
         cv.scale,
         segments=4,
-        seg_len_m=cv.mm(5.0),
+        seg_len_m=5.0,
         text_height=cv.height,
     )
 

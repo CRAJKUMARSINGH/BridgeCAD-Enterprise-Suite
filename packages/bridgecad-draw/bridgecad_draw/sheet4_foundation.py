@@ -176,6 +176,50 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
             halign="CENTER",
         )
 
+    elif layout.open_footing_steps:
+        # Open / raft foundation — the stepped outline the model already
+        # computes (``open_footing_steps``: (x_left, y_bottom, width, height)
+        # per step, metres about the pier centreline).  This branch did not
+        # exist: an open-foundation card fell straight through with no footing
+        # drawn at all, so the generic pile schedule below stood in for a
+        # footing detail the sheet never carried.  Drawn on FOUND-OPEN, not
+        # FOUND-CAP — FOUND-CAP is a pile cap / raft outline, so using it would
+        # put a pile-only layer on an open sheet.
+        steps = layout.open_footing_steps
+        total_h_m = sum(s[3] for s in steps)
+        y_base = plan_cy - total_h_m * sc / 2.0
+        for x_left, y_bottom, width, height in steps:
+            rectangle(
+                msp,
+                plan_cx + x_left * sc,
+                y_base + y_bottom * sc,
+                width * sc,
+                height * sc,
+                layer="FOUND-OPEN",
+                lw=40,
+            )
+        # Base step width, measured from the drawn outline rather than labelled.
+        base_x, _, base_w, _ = steps[0]
+        dim_linear_h(
+            msp,
+            plan_cx + base_x * sc,
+            y_base - th * 5,
+            plan_cx + (base_x + base_w) * sc,
+            y_base - th * 5,
+            dim_y=y_base - th * 5,
+            label=f"Base = {base_w:.2f} m",
+            text_height=th,
+        )
+        text(
+            msp,
+            "OPEN FOOTING PLAN",
+            plan_cx,
+            y_base + total_h_m * sc + th * 3,
+            height=th * 1.3,
+            layer="TEXT-HEADER",
+            halign="CENTER",
+        )
+
     # ── ELEVATION VIEW (right side) ───────────────────────────────────────
     # The elevation is FITTED, not fixed-scale: the paper distance between the
     # pile tip and the top of the pier stub is budgeted so the whole view — cap,
@@ -192,19 +236,57 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
     # ``pile_cutoff_level_m`` is its underside and ``pile_cap_thickness_mm`` its
     # thickness. When the record cannot resolve the foundation (a missing
     # thickness or cutoff), the sheet falls back to the raw model values so it
-    # still renders a draft, but the level then carries no approved datum.
+    # still renders a draft, but the level then carries no supplied founding datum.
     from bridgecad_core.geometry.long_section import typical_pier_support_level
+    from bridgecad_core.geometry.support_levels import ResolutionStatus
 
     _prec = typical_pier_support_level(project)
-    if _prec.footing_top_rl_m is not None:
+    # Use the canonical footing ONLY when the record is RESOLVED *and* carries a
+    # COMPLETE footing (top, bottom and depth all present). A record can hold all
+    # three fields and still be rejected — a CONFLICT pair (a supplied shaft
+    # height disagreeing with the derived one) fills them in — so testing the
+    # fields alone would draw an apparently complete footing from a rejected
+    # contract. Neither a conflict nor an unresolved record is drawn; both are
+    # marked below instead. (The old `footing_top is not None` test would also
+    # `float(None)`-crash whenever only the top was present.)
+    _has_complete_footing = (
+        _prec.status is ResolutionStatus.RESOLVED
+        and _prec.footing_top_rl_m is not None
+        and _prec.footing_bottom_rl_m is not None
+        and _prec.footing_depth_m is not None
+    )
+    if _has_complete_footing:
         pile_cut = float(_prec.footing_bottom_rl_m)
         cap_thk = float(_prec.footing_depth_m)
         cap_top = float(_prec.footing_top_rl_m)
     else:
-        pile_cut = float(fd.pile_cutoff_level_m or 0) if fd.pile_cutoff_level_m else scour_rl + 2.0
+        # Fit-only placeholders so the view can still be scaled: these are NOT
+        # used to draw a footing (the elevation block is gated below).
+        pile_cut = (
+            float(fd.pile_cutoff_level_m)
+            if fd.pile_cutoff_level_m is not None
+            else scour_rl + 2.0
+        )
         cap_thk = float(fd.pile_cap_thickness_mm or 1500) / 1000.0
         cap_top = pile_cut + cap_thk
     pile_tip = pile_cut - pile_len
+
+    if not _has_complete_footing:
+        # A visible UNRESOLVED/CONFLICT marking: a contract that has not been
+        # resolved to a RESOLVED footing must never be drawn as an apparently
+        # complete footing whose levels came from a fallback.
+        _codes = ", ".join(i.code for i in _prec.issues) or "no footing data"
+        text(
+            msp,
+            f"PIER FOOTING LEVELS {_prec.status.value} ({_codes}) — "
+            "footing not drawn",
+            elev_cx,
+            185.0,
+            height=th * 0.9,
+            layer="TEXT-SPEC",
+            halign="CENTER",
+            color=1,
+        )
 
     _EV_BOT = 200.0  # paper y of the pile tip (just above the inset band)
     _EV_TOP = 560.0  # highest paper y the elevation may occupy
@@ -299,24 +381,52 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
             halign="CENTER",
         )
 
-    # ── Pile schedule table ───────────────────────────────────────────────
+    # ── Foundation schedule table ─────────────────────────────────────────
+    # The table must describe the foundation the plan above actually draws.
+    # It used to print a PILE SCHEDULE on every card, so an open-footing card
+    # carried pile-only rows ("Pile Type BORED_CIS", a blank diameter) for a
+    # footing the sheet never had.  An open card now gets its own schedule
+    # built from the real stepped outline; every other card keeps the pile
+    # schedule exactly as before.
     tx, ty = 60.0, 150.0
     headers = ["PARAMETER", "VALUE", "UNIT"]
     col_w = [80, 60, 40]
     row_h = 8.0
-    rows = [
-        ("Pile Type", str(getattr(getattr(fd, "pile_type", None), "name", "BORED_CIS")), ""),
-        ("Pile Diameter", str(getattr(fd, "pile_diameter_mm", 1200)), "mm"),
-        ("Pile Length", str(float(getattr(fd, "pile_length_m", 15) or 15)), "m"),
-        ("Piles per Pier", str(getattr(fd, "piles_per_pier", 4)), "nos"),
-        ("Spacing c/c", str(float(getattr(fd, "pile_spacing_m", 2.4) or 2.4)), "m"),
-        ("Cap Thickness", str(getattr(fd, "pile_cap_thickness_mm", 1500)), "mm"),
-        ("Pile Cutoff RL", str(float(getattr(fd, "pile_cutoff_level_m", 0) or 0)), "m"),
-        ("FOS Bearing", str(float(getattr(fd, "factor_of_safety_on_bearing", 3) or 3)), "-"),
-        ("Allow. Bearing Cap.", str(float(getattr(fd, "bearing_capacity_kpa", 450) or 450)), "kPa"),
-        ("Scour Level RL", str(float(getattr(hd, "scour_level_m", 0) or 0)), "m"),
-        ("Scour Depth", str(float(getattr(hd, "design_scour_depth_m", 2) or 2)), "m"),
-    ]
+    if layout.open_footing_steps:
+        steps_t = layout.open_footing_steps
+        base_w = steps_t[0][2]
+        base_thk = steps_t[0][3]
+        top_w = steps_t[-1][2]
+        top_thk = steps_t[-1][3]
+        total_step_h = sum(s[3] for s in steps_t)
+        # No number is invented to fill a cell: an unresolved footing depth is
+        # shown as "—" rather than the model's placeholder thickness.
+        cap_thk_cell = f"{cap_thk * 1000.0:.0f}" if _has_complete_footing else "—"
+        rows = [
+            ("Footing Type", "Open / Pad", ""),
+            ("Base Width", f"{base_w:.2f}", "m"),
+            ("Base Thickness", f"{base_thk:.2f}", "m"),
+            ("Top Step Width", f"{top_w:.2f}", "m"),
+            ("Top Step Thickness", f"{top_thk:.2f}", "m"),
+            ("Total Step Height", f"{total_step_h:.2f}", "m"),
+            ("Cap Thickness", cap_thk_cell, "mm"),
+        ]
+        schedule_title = "OPEN FOOTING SCHEDULE"
+    else:
+        rows = [
+            ("Pile Type", str(getattr(getattr(fd, "pile_type", None), "name", "BORED_CIS")), ""),
+            ("Pile Diameter", str(getattr(fd, "pile_diameter_mm", 1200)), "mm"),
+            ("Pile Length", str(float(getattr(fd, "pile_length_m", 15) or 15)), "m"),
+            ("Piles per Pier", str(getattr(fd, "piles_per_pier", 4)), "nos"),
+            ("Spacing c/c", str(float(getattr(fd, "pile_spacing_m", 2.4) or 2.4)), "m"),
+            ("Cap Thickness", str(getattr(fd, "pile_cap_thickness_mm", 1500)), "mm"),
+            ("Pile Cutoff RL", str(float(getattr(fd, "pile_cutoff_level_m", 0) or 0)), "m"),
+            ("FOS Bearing", str(float(getattr(fd, "factor_of_safety_on_bearing", 3) or 3)), "-"),
+            ("Allow. Bearing Cap.", str(float(getattr(fd, "bearing_capacity_kpa", 450) or 450)), "kPa"),
+            ("Scour Level RL", str(float(getattr(hd, "scour_level_m", 0) or 0)), "m"),
+            ("Scour Depth", str(float(getattr(hd, "design_scour_depth_m", 2) or 2)), "m"),
+        ]
+        schedule_title = "PILE SCHEDULE"
     # Header
     x = tx
     for i, (h, w) in enumerate(zip(headers, col_w, strict=False)):
@@ -334,7 +444,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
 
     text(
         msp,
-        "PILE SCHEDULE",
+        schedule_title,
         tx + sum(col_w) / 2,
         ty + row_h * 2.5,
         height=th * 1.2,
@@ -374,8 +484,12 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         n_weep_geom = math.ceil(abt_l / limits.WEEP_HOLE_SPACING_M)
     n_weep_inset = max(1, n_weep_geom)
 
-    # A2 on the right (+x rear face), A1 offset 150 mm to its left (-x rear)
-    for label, sgn, i_cx in (("A2", +1.0, 680.0), ("A1", -1.0, 530.0)):
+    # A2 on the right (+x rear face), A1 offset 150 mm to its left (-x rear).
+    # The band sits in the free bottom-CENTRE strip: the A1 title block reserves
+    # the bottom-right corner (x 646-831, y 10-65 at 185x55), so an inset placed
+    # at the old x=680 drew its cap/dirt-wall outlines and STRUC-HATCHING fill
+    # straight through the title block — the layout gate's title_block_ok=False.
+    for label, sgn, i_cx in (("A2", +1.0, 450.0), ("A1", -1.0, 300.0)):
         i_y0 = 60.0
 
         # Shaft (plan rectangle)

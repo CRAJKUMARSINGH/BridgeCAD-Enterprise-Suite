@@ -15,11 +15,13 @@ Maharashtra PWD booklet:
   draws no ``SUB-BEARING``; a single-span arch has no ``SUB-PIER``).
 
 Types 004 / 014 / 015 used to be carried without their family primitive
-(multi-unit box cell, arch coordinate schedule, precast-block arch), so they
-were checked for identity and honesty rather than for a primitive that did not
-exist.  All three now carry that primitive and are drawn from it, so the
-``approximation`` flag is false for every type and this lane checks each type's
-own layers.
+(multi-unit box cell, arch coordinate schedule, precast-block arch).  004 now
+carries its lattice primitive and is not flagged.  014 / 015 draw their own arch
+primitives too, but are still flagged ``approximation`` because their structural
+depth is carried in the arch rise, not the deck slab, so the girder/slab
+span/depth governor does not apply to them.  The ``approximation`` flag means
+"span/depth governor not applied" here; the family primitive is still enforced
+by the ``must_contain`` layer checks below.
 
 Run:  pytest tests/pwd/test_booklet_oracle.py -q
 """
@@ -145,11 +147,13 @@ def test_foundation_sheet_shows_the_booklet_layers(tid, drawn):
 
 @pytest.mark.parametrize("tid", sorted(EXPECTED))
 def test_no_type_is_drawn_without_its_primitive(tid, drawn):
-    """A type carried without its family primitive must say so, not pass silently.
+    """A type drawn without the full engine path must say so, not pass silently.
 
-    Every booklet type now draws from its own primitive, so the ``approximation``
-    flag is false throughout — this is the guard against a regression that
-    quietly drops a family back onto the generic fallback.
+    Where the booklet expects the girder/slab span/depth governor to apply, the
+    ``approximation`` flag must be absent — the guard against a family quietly
+    dropping back onto the generic fallback.  An arch carries its span in thrust,
+    so its governor is inapplicable and it must be flagged *and* carry a fidelity
+    note and a warning; its primitive is still checked by the layer tests above.
     """
     exp = EXPECTED[tid]
     params = drawn[tid]["params"]

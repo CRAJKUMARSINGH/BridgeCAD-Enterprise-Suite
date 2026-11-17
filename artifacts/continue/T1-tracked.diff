@@ -1,0 +1,1294 @@
+﻿diff --git a/CREAT.md b/CREAT.md
+index 4d42651..bb19c8b 100644
+--- a/CREAT.md
++++ b/CREAT.md
+@@ -217,3 +217,72 @@ User requested repository-wide checking and corrections after inaccurate nine-sp
+ 
+ ## 2026-11-14 — repository audit results
+ Inventory: 2011 tracked files; 406 Python AST parses; 18 TOML and 23 YAML configurations parsed without error. First suite: 1335 passed, 11 failed, 6 skipped, 5 xfailed. Corrected catalogue parsing/captions, scale selection and shared ladder, PDF serialization, frontend export/data lifecycle/scenario recovery, and documentation registration/guards. Full rerun: 1359 passed, 6 skipped, 5 xfailed; two further pier-datum checks passed separately. Frontend TypeScript/Vite build passed; cloud-browser verification blocked by local connection refusal. Drawing engineering acceptance remains blocked by foundation-level consistency, incomplete details/layout and lack of PDF comparison. No E: write, GitHub push or deployment.
++
++## 2026-11-14 — GAD acceptance resolution program (§8.1 freeze)
++Governing spec: `CODE-JUNCTION/BRIDGECAD_GAD_ACCEPTANCE_RESOLUTION.md` (owner selected the full P0+P1 program; abutment geometry to be built from the spec text). §8.1 executed: base commit `cba78cbc` recorded with the uncommitted 12-file diff (99 insertions, 37 deletions) and the untracked tree preserved. Evidence retained under `artifacts/test-results/` (freeze summary, binary diff, status, base-commit id). No commit, push or deploy. Status remains **generated draft — GAD acceptance pending** per §10.
++
++### Session — BridgeCAD-GAD-Partial-Correction patch applied · 09:20
++
++- Applied `support-datum-correction.patch` from `CODE-JUNCTION/BridgeCAD-GAD-Partial-Correction/`.
++- `git apply --check` passed (exit 0); `git apply` succeeded.
++- 7 files changed:
++  - `long_section.py` — fix cap-top datum: was subtracting cap_depth twice; corrected to `soffit_rl - pedestal_height_m`
++  - `sheet2_long_section.py` — added schematic seat between cap and soffit using modelled pedestal interval
++  - `tests/verification/cases.py` — updated `_check_pier_toc_list` expectation to match corrected datum
++  - `frontend/src/WorkflowLanding.tsx`, `frontend/src/main.tsx` — frontend routing/UI updates from patch
++  - `.gitignore` — additions from patch
++  - `CREAT.md` — session log
++- Tests run:
++  - `pytest tests/verification/` → **53/53 PASS** (3.5 s)
++  - `pytest tests/catalogue/ tests/draw/ tests/unit/ tests/verification/` → **158/158 PASS** (29.3 s)
++- Committed `cba78cb`, pushed: `5161370..cba78cb  main -> main` ✅
++- Note from CORRECTION_STATUS.md: 7 remaining blockers for full acceptance (foundation datum inconsistency, sparse sheets, skew verification, etc.). This is a narrow interim fix only.
++
++**Pending:**
++- Apply `CODE-JUNCTION/BRIDGECAD_PWD_COLOUR_THEME_PATCH.md` (CSS colour theme for workflow.css).
++- 7 remaining GAD acceptance blockers per `CORRECTION_STATUS.md`.
++- 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`.
++
++---
++| 2026-11-14 11:34 | Agent turn completed |
++
++### Session — Standing-order hook entry (no user task) · 09:28
++
++No changes this session.
++
++- Hook fired on incoming message. No user task present — hook-only trigger.
++- Previous session (09:20): BridgeCAD-GAD-Partial-Correction patch applied; 158/158 tests pass; commit `cba78cb` pushed to origin/main.
++- No source files modified, no commands run, no tests executed this turn.
++
++**Pending:**
++- Apply `CODE-JUNCTION/BRIDGECAD_PWD_COLOUR_THEME_PATCH.md` (CSS colour theme for workflow.css).
++- 7 remaining GAD acceptance blockers per `CORRECTION_STATUS.md`.
++- 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`.
++
++---
++| 2026-11-14 11:42 | User prompt received |
++| 2026-11-14 18:25 | User prompt received |
++| 2026-11-14 18:37 | User prompt received |
++
++### Session — CODE-JUNCTION patch application audit · 18:40
++
++Task: "APPLY PATCHes AS PER `CODE-JUNCTION\*.*`".
++
++Findings — the bundles are already applied or superseded by the working tree:
++
++- `repository-audit-fixes.patch`: 16/20 `changed-sources` files are byte-identical to the live tree. `Apply-Audit.ps1` reports *Baseline differs* (reverse-check and forward-check both fail), so `git apply` is refused. The 4 divergent files are **newer locally** (live `main.tsx` keeps the `Artifact[]`/B03/B04/B08 hardening, `workflowScenarios.ts` keeps B06/B09, `WorkflowLanding.tsx` keeps B09); `CREAT.md` is this journal.
++- `support-datum-correction.patch`: applied — `sheet2_long_section.py` and `tests/verification/cases.py` carry the correction; `long_section.py` was superseded by the canonical `support_levels.py` resolver.
++
++Fixed (regression introduced by the earlier partial application):
++
++- `tests/docs/conftest.py`: added `dist` and `CODE-JUNCTION` to `SKIP_DIRS`; `scripts/prove_detection.py`: same two names added to `IGNORE_DIRS` — both are gitignored generated/intake trees, so their reference copies must not be scanned as product docs.
++- `DOCS_INDEX.md`: repointed the stale `docs/BRIDGECAD_MANUAL_AND_LANDING_PATCH.md` link (file does not exist) to `docs/BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md`.
++- `mkdocs.yml`: removed the nav row for the same non-existent document.
++
++Validation:
++
++- `pytest tests/docs -q` → 25/25 PASS.
++- `pytest tests/unit/test_support_levels.py tests/unit/test_pier_cap_datum.py tests/unit/test_abutment_stack.py tests/catalogue/test_audit_regressions.py tests/frontend/test_scenario_recovery.py tests/docs/test_doc_integrity.py -q` → 66/66 PASS.
++- `npm --prefix frontend run build` → `tsc --noEmit` clean, Vite build OK (42 modules, 5.04 s).
++
++**Pending (unchanged):** GAD acceptance blockers per `CODE-JUNCTION/BRIDGECAD_GAD_ACCEPTANCE_RESOLUTION.md`; reference-PDF comparison still BLOCKED (no approved PDF supplied).
+diff --git a/DOCS_INDEX.md b/DOCS_INDEX.md
+index 58922e6..5bfee7f 100644
+--- a/DOCS_INDEX.md
++++ b/DOCS_INDEX.md
+@@ -88,9 +88,13 @@ See [the executed PWD checks, reference inventory, parameter/layout guidance and
+ - [Uploaded v.md instruction ledger](docs/V_INSTRUCTIONS_APPLIED.md): applied safeguards, already present fixes, pending engineering/reference work and validation results.
+ 
+ 
++## Drawing selection and landing-page workflow
++
++See [the practical manual and reference-fidelity enrichment](docs/BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md) for interface capabilities, drawing selection, family-specific variables, paper/layout planning, worked CLI examples and Netlify/browser release gates; it also records the white-paper PNG visibility fix, real A0–A4 paper/orientation selection and the remaining exact-match gates. The root Netlify frontend now opens a guided landing page; the existing renderer remains at `#workspace`.
++
++
+ ## Additional implementation and audit notes
+ 
+-- [BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md](docs/BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md)
+ - [BRIDGECAD_ATTACHED_ASSETS_LISP_PATCH.md](docs/BRIDGECAD_ATTACHED_ASSETS_LISP_PATCH.md)
+ - [BRIDGECAD_USER_MANUAL.md](docs/BRIDGECAD_USER_MANUAL.md)
+ - [PWD_ENRICHMENT_GUIDE.md](docs/PWD_ENRICHMENT_GUIDE.md)
+diff --git a/docs/BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md b/docs/BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md
+index 49df4d6..ad6786c 100644
+--- a/docs/BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md
++++ b/docs/BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md
+@@ -107,4 +107,4 @@ Apply after the earlier instruction and manual/landing packages. The supplied Wi
+ 
+ A visible output is not a perfect drawing match. The reference acceptance verdict remains **NOT VERIFIED**.
+ 
+-See also [the full drawing-selection manual](BRIDGECAD_MANUAL_AND_LANDING_PATCH.md) for the 15 configurations, per-family variables and worked examples.
++See also [the full drawing-selection manual](BRIDGECAD_USER_MANUAL.md) for the 15 configurations, per-family variables and worked examples.
+diff --git a/frontend/public/manual/BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md b/frontend/public/manual/BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md
+index 49df4d6..a873061 100644
+--- a/frontend/public/manual/BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md
++++ b/frontend/public/manual/BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md
+@@ -107,4 +107,4 @@ Apply after the earlier instruction and manual/landing packages. The supplied Wi
+ 
+ A visible output is not a perfect drawing match. The reference acceptance verdict remains **NOT VERIFIED**.
+ 
+-See also [the full drawing-selection manual](BRIDGECAD_MANUAL_AND_LANDING_PATCH.md) for the 15 configurations, per-family variables and worked examples.
++See also [the full drawing-selection manual](https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/blob/main/docs/BRIDGECAD_USER_MANUAL.md) for the 15 configurations, per-family variables and worked examples.
+diff --git a/frontend/src/workflowScenarios.ts b/frontend/src/workflowScenarios.ts
+index 1885d09..8da8935 100644
+--- a/frontend/src/workflowScenarios.ts
++++ b/frontend/src/workflowScenarios.ts
+@@ -5,7 +5,7 @@ export type SavedScenario = {
+   scale: string; savedAt: string;
+ };
+ export const SCENARIO_KEY = 'bridgecad.workflow.scenarios.v2';
+-export function readScenarios(raw: string | null, allowedTypes: string[]): SavedScenario[] {
++export function readScenarios(raw: string | null, allowedTypes: string[], validOverrides?: (type: string, values: Record<string, string>) => boolean): SavedScenario[] {
+   if (!raw) return [];
+   try {
+     const list: unknown = JSON.parse(raw);
+@@ -13,7 +13,7 @@ export function readScenarios(raw: string | null, allowedTypes: string[]): Saved
+     const valid = list.filter((item): item is SavedScenario => {
+       if (!item || typeof item !== 'object') return false;
+       const x = item as Partial<SavedScenario>;
+-      return x.schemaVersion === 2 && typeof x.id === 'string' && x.id.trim() !== '' && typeof x.name === 'string'
++      return x.schemaVersion === 2 && typeof x.id === 'string' && x.id.length > 0 && x.id.length <= 100 && typeof x.name === 'string' && x.name.trim().length > 0 && x.name.length <= 80
+         && typeof x.type === 'string' && allowedTypes.includes(x.type)
+         && !!x.overrides && typeof x.overrides === 'object' && !Array.isArray(x.overrides)
+         && Object.values(x.overrides).every(v => typeof v === 'string' && v.trim() !== '' && Number.isFinite(Number(v)))
+@@ -21,7 +21,9 @@ export function readScenarios(raw: string | null, allowedTypes: string[]): Saved
+         && ['Landscape','Portrait'].includes(x.orientation || '')
+         && typeof x.scale === 'string' && Number.isFinite(Number(x.scale)) && Number(x.scale) > 0
+         // B06 — reject a stored timestamp that no date parser accepts.
+-        && typeof x.savedAt === 'string' && !Number.isNaN(Date.parse(x.savedAt));
++        && typeof x.savedAt === 'string' && !Number.isNaN(Date.parse(x.savedAt))
++        // B09 — reject an override set that is invalid for its own type.
++        && (!validOverrides || validOverrides(x.type, x.overrides));
+     }).slice(0, 20);
+     // B06 — collapse duplicate ids rather than trusting stored order.
+     const seen = new Set<string>();
+diff --git a/frontend/vite.config.ts b/frontend/vite.config.ts
+index ac85707..45b2f64 100644
+--- a/frontend/vite.config.ts
++++ b/frontend/vite.config.ts
+@@ -1,4 +1,4 @@
+-import { defineConfig, type Plugin } from "vite";
++import { defineConfig, loadEnv, type Plugin } from "vite";
+ import react from "@vitejs/plugin-react";
+ 
+ /**
+@@ -22,18 +22,14 @@ const skipTypeDeclarations = (): Plugin => ({
+  * `netlify/functions/health.js`, which reports `mode: "demo"` when no FastAPI
+  * engine is wired. In dev the `server.proxy` rule forwards `/api/*` to
+  * `localhost:3000`, and with no engine there the browser logs
+- * `net::ERR_ABORTED` on every page load.
+- *
+- * B05 — the stub is opt-in: set `BRIDGECAD_DEV_HEALTH_STUB=1` when you want the
+- * demo payload and a clean console without an engine. Left off, `/api/health`
+- * reaches the real proxy, so the app reports the true backend state instead of
+- * a stub always answering `demo`.
++ * `net::ERR_ABORTED` on every page load. Registering the middleware directly
++ * (not via the returned post-hook) puts it ahead of Vite's internal proxy, so
++ * dev serves the same demo payload as the deploy and the console stays clean.
+  */
+ const devHealthStub = (): Plugin => ({
+   name: "bridgecad:dev-health-stub",
+   apply: "serve",
+   configureServer(server) {
+-    if (process.env.BRIDGECAD_DEV_HEALTH_STUB !== "1") return;
+     server.middlewares.use((req, res, next) => {
+       if (req.url?.split("?")[0] !== "/api/health") return next();
+       res.setHeader("content-type", "application/json");
+@@ -42,8 +38,11 @@ const devHealthStub = (): Plugin => ({
+   },
+ });
+ 
+-export default defineConfig({
+-  plugins: [react(), skipTypeDeclarations(), devHealthStub()],
++export default defineConfig(({ mode }) => {
++  const env = loadEnv(mode, ".", "VITE_");
++  return {
++  base: "./",
++  plugins: [react(), skipTypeDeclarations(), ...(env.VITE_DEMO_HEALTH === "1" ? [devHealthStub()] : [])],
+   server: {
+     port: 5173,
+     proxy: {
+@@ -59,4 +58,5 @@ export default defineConfig({
+   build: {
+     sourcemap: true,
+   },
++  };
+ });
+diff --git a/mkdocs.yml b/mkdocs.yml
+index c4b70b7..06fb8b1 100644
+--- a/mkdocs.yml
++++ b/mkdocs.yml
+@@ -138,5 +138,12 @@ nav:
+       - User manual (legacy .exe product): Bridge_GAD_User_Manual.md
+       - Roadmap status: ROADMAP_STATUS.md
+ 
++  - Implementation notes:
++      - "BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md": BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md
++      - "BRIDGECAD_ATTACHED_ASSETS_LISP_PATCH.md": BRIDGECAD_ATTACHED_ASSETS_LISP_PATCH.md
++      - "V_INSTRUCTIONS_APPLIED.md": V_INSTRUCTIONS_APPLIED.md
++      - "BRIDGECAD_USER_MANUAL.md": BRIDGECAD_USER_MANUAL.md
++      - "PWD_ENRICHMENT_GUIDE.md": PWD_ENRICHMENT_GUIDE.md
++      - "BRIDGECAD_SUPPLEMENTARY_PATCH.md": BRIDGECAD_SUPPLEMENTARY_PATCH.md
+ extra:
+   generator: false
+diff --git a/packages/bridgecad-catalogue/bridgecad_catalogue/registry.py b/packages/bridgecad-catalogue/bridgecad_catalogue/registry.py
+index aaf50d1..30f6813 100644
+--- a/packages/bridgecad-catalogue/bridgecad_catalogue/registry.py
++++ b/packages/bridgecad-catalogue/bridgecad_catalogue/registry.py
+@@ -369,6 +369,10 @@ PWD_CARDS: list[dict] = [
+             [18825.0, 5029], [19870.83, 4336], [20916.67, 3608], [21962.5, 2810],
+             [23008.33, 1943], [24054.17, 1006], [25100.0, 0],
+         ],
++        # The span/depth governor compares deck_thickness_mm to span/ratio, but for
++        # an arch bridge the structural depth is the arch rise (7805 mm), not the
++        # deck slab (350 mm).  Mark as approximation so _check() reports, not rejects.
++        "approximation": True,
+     },
+     {
+         # Booklet: precast block arch 61.94 m, 27 blocks, 3 strips, 10.0 m cw.
+@@ -402,6 +406,10 @@ PWD_CARDS: list[dict] = [
+         "arch_strip_gap_mm": 100,
+         "arch_block_count": 27,
+         "spandrel_wall_thickness_mm": 400,
++        # The span/depth governor compares deck_thickness_mm to span/ratio, but for
++        # an arch bridge the structural depth is the arch rise, not the deck slab.
++        # Mark as approximation so _check() reports, not rejects.
++        "approximation": True,
+     },
+ ]
+ 
+diff --git a/packages/bridgecad-catalogue/bridgecad_catalogue/resolve.py b/packages/bridgecad-catalogue/bridgecad_catalogue/resolve.py
+index 4d0d5bc..fc70429 100644
+--- a/packages/bridgecad-catalogue/bridgecad_catalogue/resolve.py
++++ b/packages/bridgecad-catalogue/bridgecad_catalogue/resolve.py
+@@ -27,10 +27,6 @@ MIN_CARRIAGEWAY_M = Decimal("3.5")
+ #: Superstructures that carry discrete longitudinal girders, and so must have a
+ #: girder count the value model will accept (``girders_per_deck_count >= 1``).
+ GIRDER_SST = frozenset({"RCC_T_BEAM", "PSC_I_GIRDER", "PSC_BOX", "PSC_BOX_GIRDER"})
+-#: Superstructures whose span is carried in thrust or in a deep cell rather than
+-#: by the bending depth of the deck slab, so the span/depth governor — a girder
+-#: / slab rule — does not apply to them.
+-NON_BENDING_SS = frozenset({"RCC_ARCH", "RCC_BOX_CELL"})
+ 
+ 
+ class ResolvedParams(dict):  # type: ignore[type-arg]
+@@ -147,17 +143,25 @@ def _check(p: ResolvedParams) -> None:
+     span = max(cast("list[Decimal]", p["span_lengths"]))
+     deck = Decimal(str(p["deck_thickness_mm"])) / 1000
+     girder = Decimal(str(p.get("girder_depth_mm") or 0)) / 1000
+-    depth = deck + girder
++
++    # For a box-cell with its lattice primitive, the structural depth is the full
++    # box height (top slab + clear cell + bottom slab), not just the deck slab.
++    # cell_wall_mm is the nominal web/bottom-slab thickness; fall back to deck
++    # thickness if not present (conservative).
++    if ss == "RCC_BOX_CELL" and p.get("cell_clear_m") is not None:
++        cell_clear = Decimal(str(p["cell_clear_m"]))
++        bot_slab = Decimal(str(p.get("cell_wall_mm") or p["deck_thickness_mm"])) / 1000
++        depth = deck + cell_clear + bot_slab
++    else:
++        depth = deck + girder
+ 
+     ratio = DECK_MIN_RATIO[ss]
+-    # The span/depth governor is a girder / slab rule: it asks whether the deck
+-    # is deep enough to bend across its own span.  Two families do not bend
+-    # that way and the rule does not reach them — an arch carries its span in
+-    # thrust (a legitimate F.O.B. rib is span/70, so testing the 350 mm deck
+-    # against span/18 would reject every arch in the booklet) and a multi-cell
+-    # box carries it in the height of the cell, not in the deck slab.  Their
+-    # structural depth is asserted by their own primitive and sheet instead.
+-    if ss not in NON_BENDING_SS and depth < span / ratio:
++    if p.get("approximation"):
++        # 014 / 015 (arch types) have no engine span/depth governor comparable
++        # to girder bridges — the arch rise governs, not the deck slab.  Report
++        # rather than reject.
++        p.warnings.append(f"{ss}: approximation — span/depth governor not applied")
++    elif depth < span / ratio:
+         raise Violation(
+             f"depth {depth:.3f} m < span/{ratio} = {span / ratio:.3f} m for {ss} "
+             f"@ {span} m span"
+@@ -192,10 +196,24 @@ def resolve(card: Mapping[str, object], overrides: Mapping[str, object], *, forc
+         if spec.kind is Kind.LOCKED and not force:
+             raise Violation(f"{key} is booklet-locked — pass --force to override")
+         if key == "span_length_m":
+-            p["span_lengths"] = [spec.coerce(raw)] * cast("int", p["span_count"])
+-            continue
+-        p[key] = spec.coerce(raw)
++            continue  # Apply after span_count, independently of CLI argument order.
++        value = spec.coerce(raw)
++        if key == "span_count":
++            count = Decimal(str(value))
++            if count != count.to_integral_value():
++                raise Violation("span_count must be a whole number")
++            value = int(count)
++        p[key] = value
++
++    if "span_length_m" in overrides:
++        p["span_lengths"] = [VARIABLES["span_length_m"].coerce(overrides["span_length_m"])] * int(p["span_count"])
+ 
+     _derive(p, cw_overridden="carriageway_width" in overrides)
++    if "span_count" in overrides or "span_length_m" in overrides:
++        lengths = p["span_lengths"]
++        if len(set(lengths)) == 1:
++            p["spans"] = f"{p['span_count']}×{lengths[0]:g} m"
++        else:
++            p["spans"] = " + ".join(f"{length:g}" for length in lengths) + " m"
+     _check(p)
+     return p
+diff --git a/packages/bridgecad-catalogue/bridgecad_catalogue/schema.py b/packages/bridgecad-catalogue/bridgecad_catalogue/schema.py
+index 04aae54..8704f81 100644
+--- a/packages/bridgecad-catalogue/bridgecad_catalogue/schema.py
++++ b/packages/bridgecad-catalogue/bridgecad_catalogue/schema.py
+@@ -41,7 +41,19 @@ class VariableSpec:
+     note: str = ""
+ 
+     def coerce(self, raw: object) -> object:
++        if isinstance(raw, bool):
++            raise Violation(f"{self.key}: booleans are not valid variable values")
+         if self.choices:
++            if all(isinstance(choice, (int, float, Decimal)) for choice in self.choices):
++                try:
++                    candidate = Decimal(str(raw))
++                except Exception as exc:
++                    raise Violation(f"{self.key}: {raw!r} is not numeric") from exc
++                if not candidate.is_finite():
++                    raise Violation(f"{self.key}: value must be finite")
++                for choice in self.choices:
++                    if candidate == Decimal(str(choice)):
++                        return choice
+             if raw not in self.choices:
+                 raise Violation(
+                     f"{self.key}: {raw!r} not in {list(self.choices)} [{self.clause}]"
+@@ -56,6 +68,10 @@ class VariableSpec:
+             val = Decimal(str(raw))
+         except Exception as exc:
+             raise Violation(f"{self.key}: {raw!r} is not numeric ({self.unit})") from exc
++        if not val.is_finite():
++            raise Violation(f"{self.key}: value must be finite")
++        if self.key in {"span_count", "girders_per_deck", "piles_per_pier"} and val != val.to_integral_value():
++            raise Violation(f"{self.key}: must be a whole number")
+         if self.lo is not None and val < self.lo:
+             raise Violation(f"{self.key}: {val} < min {self.lo} {self.unit} [{self.clause}]")
+         if self.hi is not None and val > self.hi:
+diff --git a/packages/bridgecad-core/bridgecad_core/abutment_stack.py b/packages/bridgecad-core/bridgecad_core/abutment_stack.py
+index 758fd52..2d6f98e 100644
+--- a/packages/bridgecad-core/bridgecad_core/abutment_stack.py
++++ b/packages/bridgecad-core/bridgecad_core/abutment_stack.py
+@@ -20,6 +20,14 @@ from dataclasses import dataclass
+ from decimal import Decimal
+ from typing import Any
+ 
++from .geometry.support_levels import (
++    AuthorityMode,
++    BearingTopology,
++    SupportLevelInput,
++    SupportLevelRecord,
++    resolve_support_levels,
++)
++
+ __all__ = ["AbutmentStack", "resolve_abutment_stack"]
+ 
+ _MM = Decimal("1000")
+@@ -51,6 +59,9 @@ class AbutmentStack:
+     ``cap_top``   top of the abutment cap
+     ``cap_bot``   underside of the abutment cap
+     ``bear_rl``   bearing seat RL
++    ``record``    the canonical §3 :class:`SupportLevelRecord` this ladder was
++                  read from, so a consumer can cite the provenance/authority
++                  instead of re-deriving a level
+     """
+ 
+     wc_bot: Decimal
+@@ -60,9 +71,15 @@ class AbutmentStack:
+     cap_top: Decimal
+     cap_bot: Decimal
+     bear_rl: Decimal
++    record: SupportLevelRecord | None = None
++
++    @property
++    def dirt_wall_h(self) -> Decimal:
++        """Derived dirt-wall height: cap top up to the approach-slab soffit."""
++        return self.app_bot - self.cap_top
+ 
+ 
+-def resolve_abutment_stack(project: Any) -> AbutmentStack:
++def resolve_abutment_stack(project: Any, support_id: str = "A1") -> AbutmentStack:
+     """Resolve the abutment RL ladder from the road level down.
+ 
+     Every downstream element takes its RL from the returned object; no element
+@@ -71,18 +88,70 @@ def resolve_abutment_stack(project: Any) -> AbutmentStack:
+     road_rl = _dec(project.project_master.road_level_rl_m, Decimal("0"))
+     wc_t = _dec(project.superstructure.wearing_coat_thickness_mm, _DEFAULT_WC_MM) / _MM
+     deck_t = _dec(project.superstructure.deck_thickness_mm, _DEFAULT_DECK_MM) / _MM
++    # The deck underside is the GIRDER soffit where girders exist, so the
++    # structural depth must include them or the abutment's deck lands a girder
++    # depth above the long section's.
++    girder_t = _dec(getattr(project.superstructure, "girder_depth_mm", None), Decimal("0")) / _MM
+     app_t = _dec(project.substructure.approach_slab_thickness_mm, _DEFAULT_APP_MM) / _MM
+-    # An unset dirt wall defaults to the approach-slab thickness — the thinnest
+-    # wall the ABT-005 rule allows, so the default can never fail its own gate.
+-    dw_h = _dec(project.substructure.dirt_wall_height_m, app_t)
+     cap_d = _dec(project.substructure.abutment_cap_depth_mm, _DEFAULT_CAP_MM) / _MM
+     ped_h = _dec(project.substructure.abutment_pedestal_height_m, _DEFAULT_PED_M)
+ 
++    # The wearing coat and slab underside come from the canonical §3 record, so
++    # the abutment view and the long section share one soffit definition rather
++    # than each subtracting the same two thicknesses. An undeclared bearing
++    # depth is an explicit assumed zero — the apron/skew convention here.
++    bearing_mm = getattr(project.superstructure, "bearing_depth_mm", None)
++    supplied_soffit = getattr(project.hydraulic_data, "actual_soffit_level_m", None)
++    footing_bottom = getattr(project.foundation_details, "pile_cutoff_level_m", None)
++    footing_mm = getattr(project.foundation_details, "pile_cap_thickness_mm", None)
++    record = resolve_support_levels(
++        SupportLevelInput(
++            support_id=support_id,
++            road_rl_m=road_rl,
++            wearing_depth_m=wc_t,
++            structural_depth_m=deck_t + girder_t,
++            supplied_soffit_rl_m=(
++                None if supplied_soffit is None else _dec(supplied_soffit, Decimal("0"))
++            ),
++            topology=BearingTopology.SEPARATE_BEARING_PEDESTAL,
++            bearing_depth_m=(
++                Decimal("0") if bearing_mm is None else Decimal(str(bearing_mm)) / _MM
++            ),
++            bearing_depth_assumed=bearing_mm is None,
++            pedestal_height_m=ped_h,
++            cap_depth_m=cap_d,
++            footing_bottom_rl_m=(
++                None if footing_bottom is None else _dec(footing_bottom, Decimal("0"))
++            ),
++            footing_depth_m=(
++                None if footing_mm is None else Decimal(str(footing_mm)) / _MM
++            ),
++            authority=AuthorityMode.LEVEL_CONTROLLED,
++        )
++    )
++
+     wc_bot = road_rl - wc_t
+     slab_top = wc_bot
+-    deck_bot = slab_top - deck_t
++    deck_bot = (
++        record.structural_soffit_rl_m
++        if record.structural_soffit_rl_m is not None
++        else slab_top - deck_t
++    )
+     app_bot = slab_top - app_t
+-    cap_top = app_bot - dw_h
+-    cap_bot = cap_top - cap_d
++    # §3: the cap top is the canonical record's — soffit − bearing − pedestal —
++    # so the abutment and the piers share one seat datum. The earlier
++    # ``app_bot − dirt_wall_height`` chain put the abutment cap a fabricated
++    # bearing-plus-pedestal depth above the pier cap and above its own soffit.
++    cap_top = (
++        record.cap_top_rl_m if record.cap_top_rl_m is not None else deck_bot - ped_h
++    )
++    cap_bot = (
++        record.cap_bottom_rl_m
++        if record.cap_bottom_rl_m is not None
++        else cap_top - cap_d
++    )
++    # Bearing seat = top of the pedestal = soffit minus the bearing unit once.
+     bear_rl = deck_bot - ped_h
+-    return AbutmentStack(wc_bot, slab_top, deck_bot, app_bot, cap_top, cap_bot, bear_rl)
++    return AbutmentStack(
++        wc_bot, slab_top, deck_bot, app_bot, cap_top, cap_bot, bear_rl, record
++    )
+diff --git a/packages/bridgecad-core/bridgecad_core/geometry/__init__.py b/packages/bridgecad-core/bridgecad_core/geometry/__init__.py
+index 09729bd..ae0ca45 100644
+--- a/packages/bridgecad-core/bridgecad_core/geometry/__init__.py
++++ b/packages/bridgecad-core/bridgecad_core/geometry/__init__.py
+@@ -12,6 +12,15 @@ from .long_section import (
+     span_lengths_m,
+ )
+ from .plan import BridgePlanGeometry, compute_plan_geometry
++from .support_levels import (
++    AuthorityMode,
++    BearingTopology,
++    FieldSource,
++    ResolutionStatus,
++    SupportLevelInput,
++    SupportLevelRecord,
++    resolve_support_levels,
++)
+ 
+ __all__ = [
+     "BridgePlanGeometry",
+@@ -32,4 +41,12 @@ __all__ = [
+     "Family",
+     "family_for",
+     "elevation_outline",
++    # canonical support-level contract (§3)
++    "AuthorityMode",
++    "ResolutionStatus",
++    "FieldSource",
++    "BearingTopology",
++    "SupportLevelInput",
++    "SupportLevelRecord",
++    "resolve_support_levels",
+ ]
+diff --git a/packages/bridgecad-core/bridgecad_core/geometry/long_section.py b/packages/bridgecad-core/bridgecad_core/geometry/long_section.py
+index 92bd813..aa2f5f3 100644
+--- a/packages/bridgecad-core/bridgecad_core/geometry/long_section.py
++++ b/packages/bridgecad-core/bridgecad_core/geometry/long_section.py
+@@ -9,11 +9,21 @@ All X values are chainage relative to A1 abutment face (metres).
+ from __future__ import annotations
+ 
+ from dataclasses import dataclass, field
++from decimal import Decimal
+ from typing import TYPE_CHECKING
+ 
++from .support_levels import (
++    AuthorityMode,
++    SupportLevelInput,
++    SupportLevelRecord,
++    resolve_support_levels,
++)
++
+ if TYPE_CHECKING:
+     from bridgecad_core.models import BridgeProject
+ 
++_MM_PER_M = Decimal("1000")
++
+ 
+ # ---------------------------------------------------------------------------
+ # Public dataclass
+@@ -74,6 +84,12 @@ class LongSectionGeometry:
+     equals top_of_deck_rl (same datum as plan-northern-edge reference).
+     """
+ 
++    support_level_records: list[SupportLevelRecord] = field(default_factory=list)
++    """Canonical §3 support-level contract, one record per intermediate pier,
++    index-aligned with ``pier_chainage_m``. Sheets 1/2/4/5/8 take their RLs
++    from these records instead of re-deriving them.
++    """
++
+     # ---- convenience aliases (y = rl for flat drawing baseline) ---------
+     @property
+     def hfl_y(self) -> float:
+@@ -105,6 +121,99 @@ class LongSectionGeometry:
+ # ---------------------------------------------------------------------------
+ 
+ 
++def _dec_or_none(value: object) -> Decimal | None:
++    """Coerce an optional model value to ``Decimal`` (``None`` stays ``None``)."""
++    if value is None:
++        return None
++    return Decimal(str(value)) if not isinstance(value, Decimal) else value
++
++
++def _pier_support_level_input(
++    project: "BridgeProject",
++    *,
++    support_id: str,
++    top_of_deck_rl: float,
++    soffit_rl: float | None,
++) -> SupportLevelInput:
++    """Build the canonical §3 input for one intermediate pier from the model.
++
++    The seat is the SEPARATE topology: ``bearing_depth_mm`` (a real bearing
++    unit) sits above ``pier_pedestal_height_m``. An undeclared bearing depth
++    becomes an explicit zero marked ASSUMED, so the historical
++    ``soffit − pedestal`` datum is reproduced from one contract rather than
++    re-derived by each renderer. The pier foundation is the pile cap:
++    ``pile_cutoff_level_m`` is its underside and ``pile_cap_thickness_mm`` its
++    thickness; when either is absent the footing stays UNRESOLVED rather than
++    inventing a depth.
++    """
++    ss = project.superstructure
++    sub = project.substructure
++    fd = project.foundation_details
++    pm = project.project_master
++    hd = project.hydraulic_data
++
++    bearing_mm = getattr(ss, "bearing_depth_mm", None)
++    bearing = (
++        Decimal("0") if bearing_mm is None else Decimal(str(bearing_mm)) / _MM_PER_M
++    )
++
++    wearing_m = Decimal(str(ss.wearing_coat_thickness_mm or 0)) / _MM_PER_M
++    structural_m = Decimal(str(ss.deck_thickness_mm or 0)) / _MM_PER_M
++    if getattr(ss, "girder_depth_mm", None):
++        structural_m += Decimal(str(ss.girder_depth_mm)) / _MM_PER_M
++
++    cap_thk_mm = getattr(fd, "pile_cap_thickness_mm", None)
++    return SupportLevelInput(
++        support_id=support_id,
++        road_rl_m=Decimal(str(top_of_deck_rl)),
++        wearing_depth_m=wearing_m,
++        structural_depth_m=structural_m,
++        supplied_soffit_rl_m=(
++            None if soffit_rl is None else Decimal(str(soffit_rl))
++        ),
++        bearing_depth_m=bearing,
++        bearing_depth_assumed=bearing_mm is None,
++        pedestal_height_m=_dec_or_none(getattr(sub, "pier_pedestal_height_m", None))
++        or Decimal("0.20"),
++        cap_depth_m=_dec_or_none(getattr(sub, "pier_cap_depth_m", None)),
++        footing_bottom_rl_m=_dec_or_none(getattr(fd, "pile_cutoff_level_m", None)),
++        footing_depth_m=(
++            None if cap_thk_mm is None else Decimal(str(cap_thk_mm)) / _MM_PER_M
++        ),
++        ground_level_rl_m=_dec_or_none(getattr(pm, "ground_level_rl_m", None)),
++        scour_level_rl_m=_dec_or_none(getattr(hd, "scour_level_m", None)),
++        pile_cutoff_rl_m=_dec_or_none(getattr(fd, "pile_cutoff_level_m", None)),
++        authority=AuthorityMode.LEVEL_CONTROLLED,
++    )
++
++
++def typical_pier_support_level(project: "BridgeProject") -> SupportLevelRecord:
++    """The canonical §3 record for a *typical* pier.
++
++    Sheet 4 (Foundation Details) details one typical pier. On a multi-span
++    bridge that is the first real pier's record; on a single-span bridge there
++    is no intermediate pier, so the same input builder derives a nominal one.
++    Either way the sheet reads its pile-cap (footing) top from one contract
++    rather than re-adding the cap thickness itself.
++    """
++    ls = compute_long_section_geometry(project)
++    if ls.support_level_records:
++        return ls.support_level_records[0]
++    hd = project.hydraulic_data
++    return resolve_support_levels(
++        _pier_support_level_input(
++            project,
++            support_id="P-typical",
++            top_of_deck_rl=ls.top_of_deck_rl,
++            soffit_rl=(
++                float(hd.actual_soffit_level_m)
++                if hd.actual_soffit_level_m is not None
++                else None
++            ),
++        )
++    )
++
++
+ def compute_long_section_geometry(project: BridgeProject) -> LongSectionGeometry:
+     """Derive longitudinal-section level markers from a validated BridgeProject.
+ 
+@@ -191,10 +300,26 @@ def compute_long_section_geometry(project: BridgeProject) -> LongSectionGeometry
+     # ---- plan-northern-edge datum + pier T.O.C. values ------------------
+     plan_northern_edge_reference_rl = top_of_deck_rl
+ 
+-    pedestal_h = (
+-        float(sub.pier_pedestal_height_m) if sub.pier_pedestal_height_m is not None else 0.20
+-    )
+-    pier_top_of_cap_rl_m: list[float] = [soffit_rl - pedestal_h for _ in pier_ch]
++    # Canonical §3 contract: one resolver computes every pier's cap datum.
++    # Sheets read these records; they must not re-derive ``soffit − pedestal``.
++    support_records: list[SupportLevelRecord] = [
++        resolve_support_levels(
++            _pier_support_level_input(
++                project,
++                support_id=f"P{i + 1}",
++                top_of_deck_rl=top_of_deck_rl,
++                soffit_rl=(
++                    float(hd.actual_soffit_level_m)
++                    if hd.actual_soffit_level_m is not None
++                    else None
++                ),
++            )
++        )
++        for i in range(len(pier_ch))
++    ]
++    pier_top_of_cap_rl_m: list[float] = [
++        float(rec.cap_top_rl_m) for rec in support_records if rec.cap_top_rl_m is not None
++    ]
+ 
+     abutment_top_of_rail_rl_m = top_of_deck_rl
+ 
+@@ -215,6 +340,7 @@ def compute_long_section_geometry(project: BridgeProject) -> LongSectionGeometry
+         plan_northern_edge_reference_rl=plan_northern_edge_reference_rl,
+         pier_top_of_cap_rl_m=pier_top_of_cap_rl_m,
+         abutment_top_of_rail_rl_m=abutment_top_of_rail_rl_m,
++        support_level_records=support_records,
+     )
+ 
+ 
+@@ -264,6 +390,7 @@ def pier_positions(project: BridgeProject) -> list[float]:
+ __all__ = [
+     "LongSectionGeometry",
+     "compute_long_section_geometry",
++    "typical_pier_support_level",
+     "span_lengths_m",
+     "span_boundaries",
+     "pier_positions",
+diff --git a/packages/bridgecad-core/bridgecad_core/models.py b/packages/bridgecad-core/bridgecad_core/models.py
+index 8f753fa..39c72e7 100644
+--- a/packages/bridgecad-core/bridgecad_core/models.py
++++ b/packages/bridgecad-core/bridgecad_core/models.py
+@@ -976,6 +976,14 @@ class Superstructure(BaseModel):
+         le=Decimal("3"),
+         dp=3,
+     )
++    bearing_depth_mm: int | None = DI(
++        "Vertical depth of the bearing unit itself (pad/pot height), millimetres. "
++        "This is the SEPARATE piece above the pedestal: the canonical support-level "
++        "contract subtracts bearing_depth + pedestal_height once. Unset = not yet "
++        "declared; 0 = a monolithic/integral joint with no bearing pad.",
++        ge=0,
++        le=2000,
++    )
+     kerb_elevation_mm: int | None = DI(
+         "Raised kerb mount height above deck, millimetres",
+         ge=0,
+diff --git a/packages/bridgecad-draw/bridgecad_draw/engines/pdf_engine.py b/packages/bridgecad-draw/bridgecad_draw/engines/pdf_engine.py
+index e6a5129..06c4061 100644
+--- a/packages/bridgecad-draw/bridgecad_draw/engines/pdf_engine.py
++++ b/packages/bridgecad-draw/bridgecad_draw/engines/pdf_engine.py
+@@ -94,7 +94,13 @@ def to_pdf_a1b(pdf_bytes: bytes) -> bytes:
+     pdf.xref_set_key(root, "Metadata", f"{pdf.xref_xml_metadata()} 0 R")
+     pdf.set_metadata({"title": "GAD", "author": "BridgeCAD", "producer": "BridgeCAD"})
+ 
+-    return pdf.tobytes(garbage=4, deflate=True, clean=True, no_new_id=True, reproducible=True)
++    # Use the public serialization options supported by our PyMuPDF range.
++    # IDs/metadata are already controlled above; `reproducible` is not a
++    # supported Document.write keyword in all supported releases.
++    try:
++        return pdf.tobytes(garbage=4, deflate=True, clean=True, no_new_id=True)
++    finally:
++        pdf.close()
+ 
+ 
+ def export_pdf_a(
+diff --git a/packages/bridgecad-draw/bridgecad_draw/fit.py b/packages/bridgecad-draw/bridgecad_draw/fit.py
+index c15dfd4..187f983 100644
+--- a/packages/bridgecad-draw/bridgecad_draw/fit.py
++++ b/packages/bridgecad-draw/bridgecad_draw/fit.py
+@@ -9,8 +9,8 @@ Problem (type 010 — 270 m, 9 spans):
+   stack at the same x.
+ 
+ Fix:
+-  ``choose_fit()`` selects the **largest standard-rung scale** that fits the
+-  drawing width and leaves ``MIN_ANNOT_GAP_MM`` between adjacent labels.
++  ``choose_fit()`` selects the **largest standard-rung scale** that keeps
++  text ≥ ``MIN_TEXT_MM`` and annotation spacing ≥ ``MIN_ANNOT_GAP_MM``.
+   When even the coarsest rung (1:500) cannot fit without band-breaking, it
+   returns ``Fit(..., broken=True, bands=N)`` and the sheet is drawn in N
+   horizontal strips with 2 m overlap and match-lines.
+@@ -32,13 +32,8 @@ from __future__ import annotations
+ import math
+ from dataclasses import dataclass
+ 
+-# Standard scale ladder (ISO 5455 / IRC SP:55).  These are the rungs
+-# ``choose_fit`` may return, and the rungs ``layout_audit.scale_on_ladder``
+-# accepts — 1:20 and 1:25 are the detail rungs the bearing / joint sheets
+-# print, so they belong to the ladder even though a plan view never reaches
+-# them.  ``layout_audit._SCALE_LADDER`` duplicates this tuple (the audit stays
+-# importable while ``fit`` is mid-refactor) and a test asserts the two agree.
+-LADDER: tuple[int, ...] = (20, 25, 50, 75, 100, 150, 200, 250, 300, 400, 500)
++# Standard IRC SP:55 scale ladder for plan-view sheets.
++LADDER: tuple[int, ...] = (50, 75, 100, 150, 200, 250, 300, 400, 500)
+ 
+ MIN_TEXT_MM: float = 2.5       # floor for adaptive text height
+ MIN_ANNOT_GAP_MM: float = 8.0  # minimum clear gap between adjacent pier labels
+@@ -75,9 +70,10 @@ def choose_fit(
+     length_m: float,
+     draw_w_mm: float,
+     n_annotations: int = 0,
++    min_text_mm: float = MIN_TEXT_MM,
+     min_annot_gap_mm: float = MIN_ANNOT_GAP_MM,
+ ) -> Fit:
+-    """Return the largest standard scale that fits the sheet.
++    """Return the largest standard scale that keeps the sheet legible.
+ 
+     Parameters
+     ----------
+@@ -88,6 +84,9 @@ def choose_fit(
+     n_annotations : int
+         Approximate number of pier / span labels along the axis.
+         Used to gate the minimum inter-annotation spacing.
++    min_text_mm : float
++        Minimum allowable text height in sheet mm. Renderers clamp text to
++        this floor; it is not a restriction on geometric mm-per-metre scale.
+     min_annot_gap_mm : float
+         Minimum clear gap between adjacent labels along the chainage axis.
+ 
+@@ -95,23 +94,15 @@ def choose_fit(
+     -------
+     Fit
+         The best single-band fit, or a broken-band fit when necessary.
+-
+-    Notes
+-    -----
+-    Text height is deliberately *not* a gate.  The sheets draw at
+-    ``th = min(_TH_MAX, max(MIN_TEXT_MM, mm_per_m * 0.4))``, whose outer
+-    ``max`` floors the height at ``MIN_TEXT_MM`` for every rung — so no rung
+-    this function can return prints text below the target.  Gating on the
+-    pre-floor ``mm_per_m * 0.4`` rejected every rung coarser than about 1:160
+-    and drove long bridges (the 270 m nine-span) into band-breaking for an
+-    illegibility that the renderer's own floor had already excluded.
+     """
+     for denom in LADDER:
+         mm_per_m = 1000.0 / denom
+-        # Does the bridge fit horizontally?
++        # (1) Does the bridge fit horizontally?
+         if length_m * mm_per_m > draw_w_mm:
+             continue
+-        # Will per-pier annotations have enough room?
++        # Text is clamped to min_text_mm by the renderer. Rejecting the
++        # unclamped size here incorrectly forced valid long bridges to bands.
++        # (3) Will per-pier annotations have enough room?
+         if n_annotations > 1:
+             gap = (length_m * mm_per_m) / n_annotations
+             if gap < min_annot_gap_mm:
+diff --git a/packages/bridgecad-draw/bridgecad_draw/layout_audit.py b/packages/bridgecad-draw/bridgecad_draw/layout_audit.py
+index 509f0dc..016015a 100644
+--- a/packages/bridgecad-draw/bridgecad_draw/layout_audit.py
++++ b/packages/bridgecad-draw/bridgecad_draw/layout_audit.py
+@@ -52,7 +52,7 @@ _CACHE: dict[int, LayoutAudit] = {}
+ #: First rung of the scale ladder — kept in step with ``fit.LADDER``. Duplicated
+ #: rather than imported so ``layout_audit`` stays importable when ``fit`` is
+ #: mid-refactor; ``test_scale_ladder`` asserts the two agree.
+-_SCALE_LADDER = (20, 25, 50, 75, 100, 150, 200, 250, 300, 400, 500)
++from .fit import LADDER as _SCALE_LADDER
+ 
+ #: A1 landscape, matching ``titleblocks._SHEET_SIZES["A1"]``.
+ _SHEET_W_MM = 841.0
+diff --git a/packages/bridgecad-draw/bridgecad_draw/sheet2_long_section.py b/packages/bridgecad-draw/bridgecad_draw/sheet2_long_section.py
+index 7e9e4f3..bd21839 100644
+--- a/packages/bridgecad-draw/bridgecad_draw/sheet2_long_section.py
++++ b/packages/bridgecad-draw/bridgecad_draw/sheet2_long_section.py
+@@ -784,8 +784,6 @@ def _draw_long_section(
+     cap_proj2 = float(sub.abutment_cap_projection_front_mm or 300) / 1000.0
+     cap_proj2_r = float(sub.abutment_cap_projection_rear_mm or 300) / 1000.0
+     dw_t2 = float(sub.dirt_wall_thickness_mm or 300) / 1000.0
+-    ped_h2 = float(sub.abutment_pedestal_height_m or 0.15)
+-    brg_t2 = 0.10
+     app_t2 = float(sub.approach_slab_thickness_mm or 200) / 1000.0
+ 
+     def sy2(m: float) -> float:
+@@ -794,9 +792,12 @@ def _draw_long_section(
+     for ch, label, sgn in [(0.0, "A1", -1.0), (total_len, "A2", +1.0)]:
+         ax = hx(ch) - abt_w_mm if sgn < 0 else hx(ch)
+         shaft_bot = sof_y_mm - abt_h_mm
+-        # Cap levels
+-        cap_bot_y2 = sof_y_mm - sy2(brg_t2 + ped_h2)
+-        cap_top_y2 = cap_bot_y2 - sy2(cap_d2)
++        # §3 — cap datums come from the one abutment ladder (Sheets 5 and 8 read
++        # the same object). This sheet's local naming is by drawing order, where
++        # y grows with RL: `cap_bot_y2` is the cap TOP, `cap_top_y2` its underside.
++        cap_bot_y2 = vy(float(stack.cap_top))
++        cap_top_y2 = vy(float(stack.cap_bot))
++        y_bear_rl = vy(float(stack.bear_rl))
+ 
+         # Shaft stops at the cap soffit
+         rectangle(msp, ax, shaft_bot, abt_w_mm, cap_bot_y2 - shaft_bot, layer="SUB-ABUT", lw=40)
+@@ -818,53 +819,63 @@ def _draw_long_section(
+         cap_x0_2 = ax - (cap_front_off if sgn > 0 else cap_rear_off)
+         cap_x1_2 = ax + abt_w_mm + (cap_rear_off if sgn > 0 else cap_front_off)
+         cap_w2 = cap_x1_2 - cap_x0_2
+-        rectangle(msp, cap_x0_2, cap_top_y2, cap_w2, sy2(cap_d2), layer="SUB-ABUT", lw=40)
++        rectangle(msp, cap_x0_2, cap_top_y2, cap_w2, cap_bot_y2 - cap_top_y2, layer="SUB-ABUT", lw=40)
+         hatch_rect(
+             msp,
+             cap_x0_2,
+             cap_top_y2,
+             cap_w2,
+-            sy2(cap_d2),
++            cap_bot_y2 - cap_top_y2,
+             pattern="ANSI31",
+             scale=sc_h * 0.04,
+             layer="STRUC-HATCHING",
+         )
+ 
+-        # Pedestal + bearing
++        # Pedestal + bearing — seat band and bearing band, both from the ladder.
++        # With no declared bearing unit the bearing depth is an assumed zero, so
++        # the band is not drawn at all rather than drawn at an invented height.
+         ped_w_mm2 = abt_w_mm * 0.55
+         ped_x_2 = ax + (abt_w_mm - ped_w_mm2) / 2.0
+         rectangle(
+             msp,
+             ped_x_2,
+-            sof_y_mm - sy2(brg_t2 + ped_h2),
++            cap_bot_y2,
+             ped_w_mm2,
+-            sy2(ped_h2),
++            y_bear_rl - cap_bot_y2,
+             layer="SUB-ABUT",
+             lw=30,
+         )
+-        rectangle(
+-            msp, ped_x_2, sof_y_mm - sy2(brg_t2), ped_w_mm2, sy2(brg_t2), layer="SUB-BEARING", lw=30
+-        )
++        if sof_y_mm > y_bear_rl:
++            rectangle(
++                msp,
++                ped_x_2,
++                y_bear_rl,
++                ped_w_mm2,
++                sof_y_mm - y_bear_rl,
++                layer="SUB-BEARING",
++                lw=30,
++            )
+ 
+-        # Dirt wall on the rear (approach) face, up to approach-slab soffit
++        # Dirt wall on the rear (approach) face, standing ON the cap top and up
++        # to the approach-slab soffit.
+         dirt_x_2 = cap_x0_2 if sgn < 0 else cap_x0_2 + cap_w2 - sy2(dw_t2)
+         dw_top_y2 = vy(top_rl - wc_t) - sy2(app_t2)
+-        if dw_top_y2 > cap_top_y2:
++        if dw_top_y2 > cap_bot_y2:
+             rectangle(
+                 msp,
+                 dirt_x_2,
+-                cap_top_y2,
++                cap_bot_y2,
+                 sy2(dw_t2),
+-                dw_top_y2 - cap_top_y2,
++                dw_top_y2 - cap_bot_y2,
+                 layer="SUB-DIRT-WALL",
+                 lw=40,
+             )
+             hatch_rect(
+                 msp,
+                 dirt_x_2,
+-                cap_top_y2,
++                cap_bot_y2,
+                 sy2(dw_t2),
+-                dw_top_y2 - cap_top_y2,
++                dw_top_y2 - cap_bot_y2,
+                 pattern="ANSI31",
+                 scale=sc_h * 0.04,
+                 layer="STRUC-HATCHING",
+@@ -873,7 +884,7 @@ def _draw_long_section(
+                 msp,
+                 "DIRT WALL",
+                 dirt_x_2 + sy2(dw_t2) + th * 0.6 if sgn > 0 else dirt_x_2 - th * 4,
+-                cap_top_y2 + (dw_top_y2 - cap_top_y2) * 0.5,
++                cap_bot_y2 + (dw_top_y2 - cap_bot_y2) * 0.5,
+                 height=th * 0.75,
+                 layer="TEXT-SPEC",
+             )
+diff --git a/packages/bridgecad-draw/bridgecad_draw/sheet4_foundation.py b/packages/bridgecad-draw/bridgecad_draw/sheet4_foundation.py
+index 457c56a..87a8c22 100644
+--- a/packages/bridgecad-draw/bridgecad_draw/sheet4_foundation.py
++++ b/packages/bridgecad-draw/bridgecad_draw/sheet4_foundation.py
+@@ -184,11 +184,27 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
+     # 111 mm past the top border.  Horizontal scale stays `sc * 1.5`.
+     elev_cx = 560.0
+     scour_rl = float(hd.scour_level_m or 0)
+-    pile_cut = float(fd.pile_cutoff_level_m or 0) if fd.pile_cutoff_level_m else scour_rl + 2.0
+     pile_len = float(fd.pile_length_m or 15.0)
++
++    # Founding levels come from the canonical §3 record, not from re-adding the
++    # cap thickness here: ``footing_top = footing_bottom + footing_depth`` is
++    # that record's equation alone. A pile cap IS the pier's footing —
++    # ``pile_cutoff_level_m`` is its underside and ``pile_cap_thickness_mm`` its
++    # thickness. When the record cannot resolve the foundation (a missing
++    # thickness or cutoff), the sheet falls back to the raw model values so it
++    # still renders a draft, but the level then carries no approved datum.
++    from bridgecad_core.geometry.long_section import typical_pier_support_level
++
++    _prec = typical_pier_support_level(project)
++    if _prec.footing_top_rl_m is not None:
++        pile_cut = float(_prec.footing_bottom_rl_m)
++        cap_thk = float(_prec.footing_depth_m)
++        cap_top = float(_prec.footing_top_rl_m)
++    else:
++        pile_cut = float(fd.pile_cutoff_level_m or 0) if fd.pile_cutoff_level_m else scour_rl + 2.0
++        cap_thk = float(fd.pile_cap_thickness_mm or 1500) / 1000.0
++        cap_top = pile_cut + cap_thk
+     pile_tip = pile_cut - pile_len
+-    cap_thk = float(fd.pile_cap_thickness_mm or 1500) / 1000.0
+-    cap_top = pile_cut + cap_thk
+ 
+     _EV_BOT = 200.0  # paper y of the pile tip (just above the inset band)
+     _EV_TOP = 560.0  # highest paper y the elevation may occupy
+diff --git a/packages/bridgecad-draw/bridgecad_draw/sheet8_side_elevations.py b/packages/bridgecad-draw/bridgecad_draw/sheet8_side_elevations.py
+index 0c0e6c5..8bfdabe 100644
+--- a/packages/bridgecad-draw/bridgecad_draw/sheet8_side_elevations.py
++++ b/packages/bridgecad-draw/bridgecad_draw/sheet8_side_elevations.py
+@@ -78,6 +78,7 @@ def generate(project: Any, output_path: str | Path, scale_denom: int | None = No
+ 
+ 
+ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
++    from bridgecad_core.abutment_stack import resolve_abutment_stack
+     from bridgecad_core.geometry import compute_long_section_geometry
+ 
+     gi = project.geometry_input
+@@ -91,6 +92,9 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
+     has_internal_pier = span_count > 1
+ 
+     ls = compute_long_section_geometry(project)
++    # §3 — one abutment ladder for the whole suite; this sheet reads it rather
++    # than subtracting its own bearing/pedestal/cap constants.
++    stack = resolve_abutment_stack(project)
+ 
+     # ── Derived geometry (metres) ──────────────────────────────────────────
+     cw = float(gi.carriageway_width_m)
+@@ -163,12 +167,16 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
+     abt_base_rl = sof_rl - abt_h_m  # bottom of abutment shaft
+     # If pile foundation, abutment sits on pile cap top (= pile_cut + pile_cap_t)
+     if "PILE" in found_type:
+-        cap_top_rl = pile_cut_rl + pile_cap_t_m
+-        abt_base_rl = min(abt_base_rl, cap_top_rl)
++        # §3 — the pile-cap top is the canonical record's footing top, not a
++        # local re-add of the two pile-cap inputs.
++        _foot_top = stack.record.footing_top_rl_m if stack.record else None
++        pile_cap_top_rl = (
++            float(_foot_top) if _foot_top is not None else pile_cut_rl + pile_cap_t_m
++        )
++        abt_base_rl = min(abt_base_rl, pile_cap_top_rl)
+     hfl_rl = float(hd.hfl_m or 0)
+     scour_rl = float(hd.scour_level_m or 0)
+ 
+-    _cap_d_m_abt = float(sub.abutment_cap_depth_mm or 600) / 1000.0
+     _cap_proj_m_abt = float(sub.abutment_cap_projection_front_mm or 300) / 1000.0
+     _dirt_t_m_abt = float(sub.dirt_wall_thickness_mm or 300) / 1000.0
+ 
+@@ -284,7 +292,9 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
+         scour_rl,
+         found_type,
+         view_label="VIEW 1 — SECTION A-A  |  ABUTMENT A2 END-FACE (LOOKING A1)",
+-        cap_d_m=_cap_d_m_abt,
++        bear_rl=float(stack.bear_rl),
++        cap_top_rl=float(stack.cap_top),
++        cap_bot_rl=float(stack.cap_bot),
+         cap_proj_m=_cap_proj_m_abt,
+         dirt_t_m=_dirt_t_m_abt,
+     )
+@@ -298,6 +308,20 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
+         return _VIEW_Y0 + (rl - (tod_rl + par_h_m + 0.8)) * (-sc)
+ 
+     if has_internal_pier:
++        # §3 — the pier cap datums come from the canonical support record (all
++        # internal piers share one seat datum). The local pedestal/cap-depth
++        # fallback only stands in for a project that produced no record.
++        _prec = ls.support_level_records[0] if ls.support_level_records else None
++        pier_cap_top_rl = (
++            float(_prec.cap_top_rl_m)
++            if _prec is not None and _prec.cap_top_rl_m is not None
++            else float(ls.soffit_rl) - pier_ped_h_m
++        )
++        pier_cap_bot_rl = (
++            float(_prec.cap_bottom_rl_m)
++            if _prec is not None and _prec.cap_bottom_rl_m is not None
++            else pier_cap_top_rl - pier_cap_d_m
++        )
+         _draw_pier_transverse(
+             msp,
+             v2hx,
+@@ -321,7 +345,6 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
+             n_girders,
+             par_h_m,
+             pier_cap_w_m,
+-            pier_cap_d_m,
+             float(sub.pier_cap_length_m or pier_shaft_l_m),
+             pier_shaft_w_m,
+             pier_shaft_l_m,
+@@ -335,6 +358,8 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
+             pile_tip_rl,
+             tod_rl,
+             sof_rl,
++            pier_cap_top_rl,
++            pier_cap_bot_rl,
+             hfl_rl,
+             scour_rl,
+             found_type,
+@@ -388,7 +413,9 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
+             scour_rl,
+             found_type,
+             view_label="VIEW 2 — TYPICAL ABUTMENT TRANSVERSE SECTION",
+-            cap_d_m=_cap_d_m_abt,
++            bear_rl=float(stack.bear_rl),
++            cap_top_rl=float(stack.cap_top),
++            cap_bot_rl=float(stack.cap_bot),
+             cap_proj_m=_cap_proj_m_abt,
+             dirt_t_m=_dirt_t_m_abt,
+         )
+@@ -476,7 +503,9 @@ def _draw_abutment_endface(
+     scour_rl,
+     found_type,
+     view_label,
+-    cap_d_m: float = 0.60,
++    bear_rl: float,
++    cap_top_rl: float,
++    cap_bot_rl: float,
+     cap_proj_m: float = 0.15,
+     dirt_t_m: float = 0.30,
+ ):
+@@ -611,18 +640,18 @@ def _draw_abutment_endface(
+             color=8,
+         )
+ 
+-    # ── Vertical stack — top-down from girder soffit ─────────────────────
++    # ── Vertical stack — read from the canonical §3 abutment ladder ───────
++    # Bearing seat, cap top and cap bottom come from ``resolve_abutment_stack``:
++    # this view must not re-derive them from a local bearing depth (the old
++    # hard-coded 0.10 m put the abutment cap datum 100 mm off Sheet 5's).
+     bearing_w_m = 0.40
+-    bearing_t_m = 0.10
+     # Cap and dirt wall geometry — passed in from _draw via model fields.
+-    _cap_d_m = cap_d_m
+     _cap_proj_m = cap_proj_m
+     _dirt_t_m = dirt_t_m
+ 
+-    ped_top_rl = sof_rl - bearing_t_m
+-    ped_bot_rl = ped_top_rl - ped_h_m
+-    cap_top_rl_s8 = ped_bot_rl
+-    cap_bot_rl_s8 = cap_top_rl_s8 - _cap_d_m
++    ped_top_rl = bear_rl
++    ped_bot_rl = cap_top_rl_s8 = cap_top_rl
++    cap_bot_rl_s8 = cap_bot_rl
+ 
+     shaft_half_w_m = min(overall_w * 0.46, abt_len_m * 0.5)
+     cap_half_m = shaft_half_w_m + _cap_proj_m
+@@ -1087,7 +1116,6 @@ def _draw_pier_transverse(
+     n_girders,
+     par_h_m,
+     pier_cap_w_m,
+-    pier_cap_d_m,
+     pier_cap_length_m,
+     pier_shaft_w_m,
+     pier_shaft_l_m,
+@@ -1101,12 +1129,19 @@ def _draw_pier_transverse(
+     pile_tip_rl,
+     tod_rl,
+     sof_rl,
++    cap_top_rl,
++    cap_bot_rl,
+     hfl_rl,
+     scour_rl,
+     found_type,
+     view_label,
+ ):
+-    """Pier transverse cut (Section B-B): deck + girder + bearings + cap + shaft + piles."""
++    """Pier transverse cut (Section B-B): deck + girder + bearings + cap + shaft + piles.
++
++    ``cap_top_rl`` / ``cap_bot_rl`` are the canonical §3 pier-cap datums from
++    ``ls.support_level_records`` — not re-derived here from pedestal + cap depth,
++    so a declared bearing depth shifts this view with the long section.
++    """
+ 
+     # ── Header label ───────────────────────────────────────────────────────
+     hdr_y = vvy(tod_rl + par_h_m + 0.55)
+@@ -1219,7 +1254,7 @@ def _draw_pier_transverse(
+ 
+     # ── Pedestal ──────────────────────────────────────────────────────────
+     ped_y_top = vvy(sof_rl)
+-    ped_y_bot = vvy(sof_rl - pier_ped_h_m)
++    ped_y_bot = vvy(cap_top_rl)
+     ped_half = pier_shaft_l_m * 0.42
+     rectangle(
+         msp,
+@@ -1233,7 +1268,7 @@ def _draw_pier_transverse(
+ 
+     # ── Pier cap ──────────────────────────────────────────────────────────
+     cap_y_top = ped_y_bot
+-    cap_y_bot = vvy(sof_rl - pier_ped_h_m - pier_cap_d_m)
++    cap_y_bot = vvy(cap_bot_rl)
+     # Cap is sized by its own length field, not the shaft length — a cap
+     # shorter than the shaft is legal and the old code could never show it.
+     cap_half_l = pier_cap_length_m / 2.0
+@@ -1257,7 +1292,7 @@ def _draw_pier_transverse(
+         layer="STRUC-HATCHING",
+     )
+     level_tag(
+-        msp, vhx(-cap_half_l) - th * 3, cap_y_top, sof_rl - pier_ped_h_m, text_height=th * 0.85
++        msp, vhx(-cap_half_l) - th * 3, cap_y_top, cap_top_rl, text_height=th * 0.85
+     )
+     text(
+         msp,
+@@ -1359,7 +1394,7 @@ def _draw_pier_transverse(
+     levels = [
+         ("T.O.D. / FORMATION RL", tod_rl),
+         ("SOFFIT RL", sof_rl),
+-        ("TOP OF PIER CAP RL", sof_rl - pier_ped_h_m),
++        ("TOP OF PIER CAP RL", cap_top_rl),
+         ("BASE OF PIER SHAFT", shaft_y_bot if shaft_y_bot else pile_cut_rl),
+     ]
+     if "PILE" in found_type:
+diff --git a/scripts/prove_detection.py b/scripts/prove_detection.py
+index 68add23..10d4133 100644
+--- a/scripts/prove_detection.py
++++ b/scripts/prove_detection.py
+@@ -57,6 +57,8 @@ IGNORE_DIRS = frozenset(
+         "test_run_sample",
+         "TEST_RUN_OUTPUT",
+         "docs/api/_build",
++        "dist",
++        "CODE-JUNCTION",
+     }
+ )
+ 
+@@ -185,7 +187,7 @@ def _x02(root: Path) -> None:
+ 
+ 
+ def _x03(root: Path) -> None:
+-    replace(root, ".lychee.toml", "include_fragments = true", "include_fragments = false")
++    replace(root, ".lychee.toml", 'include_fragments = "full"', 'include_fragments = "none"')
+ 
+ 
+ def _guard(test_name: str) -> str:
+diff --git a/tests/docs/conftest.py b/tests/docs/conftest.py
+index 848f8fd..81d6642 100644
+--- a/tests/docs/conftest.py
++++ b/tests/docs/conftest.py
+@@ -6,6 +6,7 @@ test_gates_selfcheck.py, which works on a throwaway copy.
+ from __future__ import annotations
+ 
+ import re
++from urllib.parse import unquote
+ from pathlib import Path
+ from typing import Iterator
+ 
+@@ -20,10 +21,14 @@ STAGED_BY_HOOK = frozenset({
+     "security.md", "code-of-conduct.md", "docs-index.md",
+ })
+ 
+-# Build output and caches — never scan these.
++# Build output and caches — never scan these. `dist` is the Vite/vite build
++# output and `CODE-JUNCTION` is the gitignored patch-intake tree; both hold
++# generated or reference copies, not product documentation, so a relative link
++# inside them cannot be dead.
+ SKIP_DIRS = frozenset({
+     ".git", "node_modules", ".venv", "__pycache__",
+     "site", "site-api", "_build", "htmlcov", ".benchmarks",
++    "dist", "CODE-JUNCTION",
+ })
+ 
+ FENCE = re.compile(r"```[^\n]*\n(.*?)```", re.DOTALL)
+@@ -78,7 +83,7 @@ def resolve_link(doc: Path, target: str, root: Path) -> Path | None:
+     """Resolve a relative link. Returns None if it is not a repo-local file."""
+     if target.startswith("/"):
+         return None
+-    candidate = (doc.parent / target).resolve()
++    candidate = (doc.parent / unquote(target)).resolve()
+     try:
+         candidate.relative_to(root.resolve())
+     except ValueError:
+diff --git a/tests/docs/test_doc_integrity.py b/tests/docs/test_doc_integrity.py
+index 5da66c4..06d2b56 100644
+--- a/tests/docs/test_doc_integrity.py
++++ b/tests/docs/test_doc_integrity.py
+@@ -273,8 +273,8 @@ def test_issue_template_labels_are_all_defined(repo_root: Path):
+ 
+ def test_lychee_config_has_required_keys(repo_root: Path):
+     cfg = tomllib.loads(read(repo_root / ".lychee.toml"))
+-    assert cfg.get("include_fragments") is True, "anchor checking disabled"
+-    assert cfg.get("exclude_mail") is True
++    assert cfg.get("include_fragments") == "full", "anchor checking disabled"
++    assert cfg.get("include_mail") is False
+     assert 429 in cfg.get("accept", []), "rate-limit responses treated as dead"
+ 
+ 
+diff --git a/tests/unit/test_abutment_stack.py b/tests/unit/test_abutment_stack.py
+index 3bab4ab..1e048dd 100644
+--- a/tests/unit/test_abutment_stack.py
++++ b/tests/unit/test_abutment_stack.py
+@@ -9,7 +9,6 @@ an unset dirt wall still resolves (the resolver is total).
+ from __future__ import annotations
+ 
+ import itertools
+-from decimal import Decimal
+ 
+ from bridgecad_core.abutment_stack import AbutmentStack, resolve_abutment_stack
+ 
+@@ -32,11 +31,16 @@ def test_stack_is_strictly_ordered_from_road_down(project):
+ 
+ 
+ def test_unset_dirt_wall_still_resolves(blank_project):
+-    """An unset dirt wall must not make the resolver raise — it defaults to the
+-    approach-slab thickness, the thinnest wall ABT-005 permits."""
++    """An unset dirt wall must not make the resolver raise.
++
++    The dirt wall is no longer an input that *sets* the cap top: §3 makes the
++    cap seat-driven (soffit − bearing − pedestal) and the wall height the
++    derived clearance between the cap top and the approach-slab soffit. An
++    unset field therefore still resolves to an ordered, positive wall.
++    """
+     blank_project.substructure = blank_project.substructure.model_copy(
+         update={"dirt_wall_height_m": None}
+     )
+     st = resolve_abutment_stack(blank_project)
+-    app_t = Decimal(str(blank_project.substructure.approach_slab_thickness_mm)) / Decimal("1000")
+-    assert st.app_bot - st.cap_top == app_t
++    assert st.cap_top < st.app_bot
++    assert st.dirt_wall_h > 0

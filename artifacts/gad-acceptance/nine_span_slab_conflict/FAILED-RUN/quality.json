@@ -1,0 +1,72 @@
+{
+  "generation": "FAILED",
+  "model_validation": "FAILED",
+  "geometry_contract": "NOT_TESTED",
+  "required_content": "NOT_TESTED",
+  "layout": "NOT_TESTED",
+  "reference_fidelity": "BLOCKED",
+  "engineering_review": "PENDING",
+  "generation_gates_passed": false,
+  "quality_and_layout_passed": false,
+  "accepted": false,
+  "status": "DRAFT \u2014 generation gates not all passed",
+  "fixture": "nine_span_slab_conflict",
+  "commit": "e969b72979196f78e2d04129c2462268d6caf099",
+  "annotation_overlap_count": -1,
+  "issues": [
+    {
+      "gate": "model_validation",
+      "code": "E-CONFLICT-SHAFT-HEIGHT",
+      "message": "supplied shaft height 8.0 m conflicts with the derived 6.000 m (tolerance 0.000001 m)",
+      "detail": "P1"
+    },
+    {
+      "gate": "model_validation",
+      "code": "E-CONFLICT-SHAFT-HEIGHT",
+      "message": "supplied shaft height 8.0 m conflicts with the derived 6.000 m (tolerance 0.000001 m)",
+      "detail": "P2"
+    },
+    {
+      "gate": "model_validation",
+      "code": "E-CONFLICT-SHAFT-HEIGHT",
+      "message": "supplied shaft height 8.0 m conflicts with the derived 6.000 m (tolerance 0.000001 m)",
+      "detail": "P3"
+    },
+    {
+      "gate": "model_validation",
+      "code": "E-CONFLICT-SHAFT-HEIGHT",
+      "message": "supplied shaft height 8.0 m conflicts with the derived 6.000 m (tolerance 0.000001 m)",
+      "detail": "P4"
+    },
+    {
+      "gate": "model_validation",
+      "code": "E-CONFLICT-SHAFT-HEIGHT",
+      "message": "supplied shaft height 8.0 m conflicts with the derived 6.000 m (tolerance 0.000001 m)",
+      "detail": "P5"
+    },
+    {
+      "gate": "model_validation",
+      "code": "E-CONFLICT-SHAFT-HEIGHT",
+      "message": "supplied shaft height 8.0 m conflicts with the derived 6.000 m (tolerance 0.000001 m)",
+      "detail": "P6"
+    },
+    {
+      "gate": "model_validation",
+      "code": "E-CONFLICT-SHAFT-HEIGHT",
+      "message": "supplied shaft height 8.0 m conflicts with the derived 6.000 m (tolerance 0.000001 m)",
+      "detail": "P7"
+    },
+    {
+      "gate": "model_validation",
+      "code": "E-CONFLICT-SHAFT-HEIGHT",
+      "message": "supplied shaft height 8.0 m conflicts with the derived 6.000 m (tolerance 0.000001 m)",
+      "detail": "P8"
+    }
+  ],
+  "notes": [
+    "generation=FAILED: conflict in support records; generation aborted before any DXF written",
+    "model_validation=FAILED: at least one support CONFLICT",
+    "reference_fidelity=BLOCKED: reference booklet contains no nine-span sheet",
+    "engineering_review=PENDING: structural/geotechnical adequacy is a human verdict; not claimed here"
+  ]
+}

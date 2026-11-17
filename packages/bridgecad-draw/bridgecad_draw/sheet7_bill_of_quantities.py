@@ -194,8 +194,10 @@ def _draw(msp: Any, project: Any) -> None:
                 layer="TEXT-GENERAL",
             )
             table.advance_x(cw)
-        if is_total and qty_str:
-            # Bold total figure in the Quantity column (index 3 → sum col_w[:3])
+        if is_total and qty_str and qty_str != vals[3]:
+            # Bold total figure in the Quantity column only when it differs from
+            # what TEXT-GENERAL already wrote in that cell (avoids a duplicate
+            # TBD/TBC appearing on the same coordinates on two layers).
             bold_x = row_start_x + sum(col_w[:3])
             text(
                 msp,

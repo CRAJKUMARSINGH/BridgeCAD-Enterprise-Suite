@@ -1,0 +1,20 @@
+﻿ M CREAT.md
+ M packages/bridgecad-catalogue/bridgecad_catalogue/registry.py
+ M packages/bridgecad-core/bridgecad_core/geometry/long_section.py
+ M packages/bridgecad-draw/bridgecad_draw/sheet2_long_section.py
+ M packages/bridgecad-draw/bridgecad_draw/sheet4_foundation.py
+ M packages/bridgecad-draw/bridgecad_draw/sheet5_pier_abutment_details.py
+ M packages/bridgecad-draw/bridgecad_draw/sheet8_side_elevations.py
+ M packages/bridgecad-io/bridgecad_io/excel_reader.py
+ M scripts/prove_detection.py
+ M tests/pwd/booklet_oracle.json
+ M tests/pwd/test_booklet_oracle.py
+ M tests/unit/test_support_levels.py
+?? MASTER-APP-TESTER.md
+?? artifacts/browser-results/
+?? artifacts/continue/
+?? artifacts/gad-acceptance/
+?? artifacts/reference-overlay/
+?? outputs/
+?? scripts/gad_reference_overlay.py
+?? tests/draw/test_nine_span_cross_view.py

@@ -13,7 +13,7 @@ from decimal import Decimal
 from typing import TYPE_CHECKING
 
 from .support_levels import (
-    AuthorityMode,
+    ResolutionStatus,
     SupportLevelInput,
     SupportLevelRecord,
     resolve_support_levels,
@@ -141,10 +141,15 @@ def _pier_support_level_input(
     unit) sits above ``pier_pedestal_height_m``. An undeclared bearing depth
     becomes an explicit zero marked ASSUMED, so the historical
     ``soffit − pedestal`` datum is reproduced from one contract rather than
-    re-derived by each renderer. The pier foundation is the pile cap:
-    ``pile_cutoff_level_m`` is its underside and ``pile_cap_thickness_mm`` its
-    thickness; when either is absent the footing stays UNRESOLVED rather than
-    inventing a depth.
+    re-derived by each renderer. When the model supplies no founding RL, the
+    honest authority is HEIGHT_CONTROLLED: the resolver proposes a founding RL
+    and marks it. When the model DOES supply a founding RL together with a
+    footing thickness the authority becomes LEVEL_CONTROLLED and the shaft
+    height is derived from it. ``pile_cutoff_level_m`` is a
+    rule-of-thumb embedment datum, not a designed founding level, so it is
+    carried through as ``pile_cutoff_rl_m`` only — never as
+    ``footing_bottom_rl_m``. A zero/absent cap thickness leaves the footing
+    depth absent rather than inventing a zero-depth footing.
     """
     ss = project.superstructure
     sub = project.substructure
@@ -163,6 +168,15 @@ def _pier_support_level_input(
         structural_m += Decimal(str(ss.girder_depth_mm)) / _MM_PER_M
 
     cap_thk_mm = getattr(fd, "pile_cap_thickness_mm", None)
+    # A zero or absent cap thickness is a MISSING DIMENSION, not a zero-depth
+    # footing: ``_build_project`` writes ``pile_cap_thickness_mm = 0`` for an
+    # OPEN foundation, and treating that as a 0 m footing let a non-existent
+    # foundation masquerade as a resolved, level-controlled founding level.
+    footing_depth_m = (
+        None
+        if cap_thk_mm is None or float(cap_thk_mm) <= 0
+        else Decimal(str(cap_thk_mm)) / _MM_PER_M
+    )
     return SupportLevelInput(
         support_id=support_id,
         road_rl_m=Decimal(str(top_of_deck_rl)),
@@ -176,14 +190,24 @@ def _pier_support_level_input(
         pedestal_height_m=_dec_or_none(getattr(sub, "pier_pedestal_height_m", None))
         or Decimal("0.20"),
         cap_depth_m=_dec_or_none(getattr(sub, "pier_cap_depth_m", None)),
-        footing_bottom_rl_m=_dec_or_none(getattr(fd, "pile_cutoff_level_m", None)),
-        footing_depth_m=(
-            None if cap_thk_mm is None else Decimal(str(cap_thk_mm)) / _MM_PER_M
-        ),
+        # The explicitly supplied founding RL, when the project supplies one.
+        # The model's ``pile_cutoff_level_m`` is an embedment rule of thumb, so
+        # it is NEVER passed here. Supplying BOTH a founding RL and a footing
+        # thickness makes the resolver's auto-classification (support_levels.py
+        # :396-403) pick LEVEL_CONTROLLED and derive the shaft height; with the
+        # founding RL absent it falls through to the honest HEIGHT_CONTROLLED
+        # default, which only PROPOSES a founding RL and marks it.
+        footing_bottom_rl_m=_dec_or_none(getattr(fd, "footing_bottom_rl_m", None)),
+        footing_depth_m=footing_depth_m,
+        # The catalogue supplies a pier HEIGHT. When no founding RL is
+        # present the auto-classification falls through to HEIGHT_CONTROLLED
+        # (``authority`` stays unset); when both a founding RL and a footing
+        # thickness are present the heights must AGREE or the resolver raises
+        # E-CONFLICT-SHAFT-HEIGHT.
+        shaft_height_m=_dec_or_none(getattr(sub, "pier_height_typical_m", None)),
         ground_level_rl_m=_dec_or_none(getattr(pm, "ground_level_rl_m", None)),
         scour_level_rl_m=_dec_or_none(getattr(hd, "scour_level_m", None)),
         pile_cutoff_rl_m=_dec_or_none(getattr(fd, "pile_cutoff_level_m", None)),
-        authority=AuthorityMode.LEVEL_CONTROLLED,
     )
 
 
@@ -317,6 +341,15 @@ def compute_long_section_geometry(project: BridgeProject) -> LongSectionGeometry
         )
         for i in range(len(pier_ch))
     ]
+    # Fail closed: a CONFLICT must never be drawn as two different versions in
+    # two views. An UNRESOLVED record is reported (and left visible), not fatal.
+    for rec in support_records:
+        if rec.status is ResolutionStatus.CONFLICT:
+            detail = "; ".join(f"{i.code} ({i.field_name}): {i.message}" for i in rec.issues)
+            raise ValueError(
+                f"support {rec.support_id} has a CONFLICTING vertical contract: {detail}"
+            )
+
     pier_top_of_cap_rl_m: list[float] = [
         float(rec.cap_top_rl_m) for rec in support_records if rec.cap_top_rl_m is not None
     ]

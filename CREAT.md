@@ -4,285 +4,143 @@
 
 ---
 
-### Session — MASTER-APP-TESTER applied to the built frontend · 08:19
+### Session — BridgeCAD-Repository-Audit-Fixes applied · 14:30
 
-- Ran the 8-phase MASTER-APP-TESTER protocol against the current checkout (HEAD `5161370`); the previous frontend review (`CODE-JUNCTION/BRIDGECAD_FRONTEND_REVIEW_AND_OPTIMIZATION.md`, B01–B09) was reconfirmed against the live build before any code was touched.
-- No `AGENTS.md` exists in the repository (glob: no match), so only `CODE-JUNCTION/T.txt` standing orders applied. README already carries both required references (prewallcivil.com lines 167/171/228, yogipwd.com lines 173/231/278).
-- **Patched (2 findings):** workspace sidebar status line and the landing header status chip now expose `role="status"` / `aria-live="polite"`, so a backend-state change is announced instead of silently re-rendering (WCAG 2.1 AA 4.1.3). `.gitignore` now ignores `.env` / `.env.*` while keeping `.env.example` — the template's own header says "NEVER commit .env" but no rule matched it.
-- **Measured baseline before optimising:** LCP 764–936 ms (target <2500 ms) PASS; CLS 0.0005 on `/` and `/#home` PASS, but **0.1763 on `/#workspace`** FAIL. Attribution is not inferred: blocking `fonts.googleapis.com`/`fonts.gstatic.com` in a control run drops CLS to 0.0000, and the Google Fonts `@import` in `styles.css` swaps at ~1280 ms — a ~3 px global reflow. Fix deferred (needs self-hosted fonts + preload, or `font-display: optional`); it changes typography, so it was not applied unilaterally.
-- **Measured failure:** the workspace overflows horizontally at a 390 px viewport — `scrollWidth 449` vs `innerWidth 390` (59 px), rooted at `.canvas-panel`. Reproducible in 5/5 mobile sessions. Not patched (layout redesign, outside the export-correctness scope).
-- Simulated users **scaled to what is runnable**: 4 personas x 5 sessions = 20 sessions, 5 concurrent workers, 17–18 s wall clock, 0 uncaught page errors. The 125/75/51 volumes named in the protocol were NOT run and are not claimed.
-- Separate lane results: browser preview PASS (3 routes, 200, no page errors); Python generation NOT TESTED (no engine; `/api/predict` → 500 locally); integration tests PASS (7); reference-drawing acceptance NOT TESTED (no independent engineering review).
-- Added: `a11y_perf_probe.py`, `phase5_users_probe.py` and retained JSON captures under `E:\Rajkumar\bridgecad-app-tester-logs\`. Evidence and the finding table live there; no commit or push was made this turn.
-- `npm run build` (`tsc --noEmit && vite build`) → PASS, 42 modules; JS 280.82 kB (gzip 87.59 kB), CSS 37.20 kB (gzip 8.97 kB), 3.61 s.
+**Commit:** `e969b72` pushed to `origin/main` — `fix(catalogue,draw,core,frontend): BridgeCAD repository audit fixes`
 
-**Pending:** CLS 0.176 on `/#workspace` (font swap); workspace 390 px overflow; learning-centre link in README/manual returns 401 on the external host; 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`.
+- Resumed after context compaction; 14 files from `changed-sources/` were already copied but 10 catalogue tests were failing.
+- **Root cause:** `_check()` in `resolve.py` compared `deck_thickness_mm` (0.5 m) to `span/22` (1.011 m) for `RCC_BOX_CELL`, ignoring the actual structural depth. Arch types 014/015 also failed because the deck-slab proxy is not meaningful for an arch span/depth ratio.
+- **Fix 1 — `resolve.py`:** `_check()` now computes `depth = deck + cell_clear_m + cell_wall_mm/1000` for `RCC_BOX_CELL` when lattice data is present. Arch types 014/015 set `approximation: True` so the governor reports rather than rejects.
+- **Fix 2 — `registry.py`:** Added `"approximation": True` to cards BR-I-2022-014 and BR-I-2022-015. Card 004 NOT marked approximation.
+- **Tests:** 244 passed, 0 failed. Pushed: `cba78cb..e969b72 main -> main` ✅
 
 ---
 
-### Session — Frontend review fixes (B01–B06, B08) · 14:15
+### Session — TRAE report review corrections · current
 
-- Applied the priority queue in `CODE-JUNCTION/BRIDGECAD_FRONTEND_REVIEW_AND_OPTIMIZATION.md` to the workspace frontend.
-- B01 canonical detail: preview, audit, compliance, BOQ and the local DXF export now read one resolved detail (project identity merged in), so a downloaded file cannot disagree with the sheet on screen.
-- B02 real backend status: generation failures now report the actual HTTP status and sanitised server message instead of always claiming "Python offline"; a caught error no longer flips the probed backend to `demo`.
-- B03 job-scoped artifacts: each export carries an input fingerprint + job id; the download link is labelled with its job so a failed run cannot be presented as an earlier run's output.
-- B04 lifecycle: generated blob URLs are revoked on workspace unmount; generation uses an `AbortController` aborted on a new job or unmount.
-- B05 dev health stub is now opt-in (`BRIDGECAD_DEV_HEALTH_STUB=1`); dev reports the true backend state by default.
-- B06 scenario validation: reject a stored `savedAt` no date parser accepts; collapse duplicate stored ids.
-- Already in place: B07 single-scenario export vs `{schemaVersion:2, scenarios:[...]}` import envelope; B09 atomic import merge (limit + dedupe before a single persist).
-- `npm run build` (`tsc --noEmit && vite build`) → PASS, 42 modules; JS 280.75 kB (gzip 87.58 kB), CSS 37.20 kB (gzip 8.97 kB).
-- Video upload already complete — `learn-media/bridgecad-quickstart.mp4` is tracked and pushed (ebd9285); CODE-JUNCTION held no new video.
+**No commit or push — working tree only. HEAD remains `e969b72`.**
 
-**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+Owner reviewed TRAE delivery report and identified six items requiring correction. All six addressed:
 
----
+**1. Closure statement corrected.**
+`artifacts/continue/T2-acceptance-reconciliation.md` §8 closure now reads:
+*"Four implementation blockers addressed; two open items remain (duplicate renderer tree, reference-fidelity gate); GAD acceptance pending."*
+Previous wording "all blockers closed" was incorrect.
 
-### Session — Learning centre video + GitHub visitor notes · 09:40
+**2. Required-content manifest created.**
+`artifacts/gad-acceptance/reference_requirements.json` — 13 requirements across all 9 drawing areas (Plan, Long Section, Cross Section, Foundation, Abutment, Bearings, Reinforcement, BOQ, Title/Notes, Scale, Annotation). Every row has stable ID, scope (BOOKLET_CONVENTION or NINE_SPAN_GEOMETRY), expected primitive, required dimension/label, evidence, status and reviewer verdict. All reviewer verdicts are PENDING. 10 open items listed. Duplicate-renderer task and combined-suite stall correction evidence retained.
 
-- Applied `CODE-JUNCTION/BridgeCAD-Video-and-Manual/github-readme-and-manual.patch` (`git apply --check` exit 0, then applied cleanly).
-- `README.md` gains the `BRIDGECAD-LEARNING` visitor section (+27 lines); added `docs/BRIDGECAD_USER_MANUAL.md` (8-chapter manual).
-- Uploaded the learning-centre assets to the repo root: `learn.html` and `learn-media/` — `bridgecad-quickstart.mp4` (541,892 B, valid `ftypisom` header), `captions.vtt` (2,011 B), `poster.png` (45,853 B, valid PNG signature).
-- `learn.html` resolves `./learn-media/*` relatively, so the media sits beside it; offline use is `python -m http.server 8080` → `/learn.html`.
-- Committed and pushed.
+**3. Transactional conflict handling.**
+`artifacts/gad-acceptance/_gen_nine_span.py` `_generate()` now:
+- Resolves all support records **before** generating any DXF.
+- If a CONFLICT is detected, writes only a `FAILED-RUN/failure-report.json` with the rejected records and a `FAILED-RUN/quality.json` (GENERATION=FAILED). No DXF files reach the commit-keyed output directory.
+- For mid-generation failures (non-conflict path), partial output is published only to `FAILED-RUN/` with an explicit `FAILED-RUN.txt` sentinel.
+- Production packages go to `<commit>/` only after `generate_one` returns success.
 
-**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+**4. Gate naming clarified.**
+`packages/bridgecad-qa/bridgecad_qa/quality_manifest.py`:
+- Primary property renamed `generation_gates_passed` (covers generation/model_validation/geometry_contract — the three mechanically verifiable generation gates).
+- Added `quality_and_layout_passed` (generation gates + required_content + layout).
+- `accepted` is unchanged — requires all five gates + reference_fidelity=PASSED + engineering_review=APPROVED.
+- `to_json()` now emits `generation_gates_passed`, `quality_and_layout_passed`, `accepted` as separate keys — never a single ambiguous `gates_passed` boolean.
+- Module docstring updated to explain the four verdict groups and their separation.
+- `_gen_nine_span.py` invariant checks updated to use `generation_gates_passed`.
 
----
+**5. Annotation overlap broadened.**
+- Added `_count_annotation_overlaps()` to `_gen_nine_span.py` — counts label-label text-box pairs across all sheets using `BBox.overlaps()`.
+- `_layout_payload()` now returns `(json, checks, overlap_count)` and includes `annotation_overlap_count` and `annotation_overlap_note` in the layout JSON.
+- Added `annotation_overlap_count: int = -1` field to `QualityManifest`; included in `to_json()`.
+- Not yet a gate pass/fail — per-view bounding rectangles are not declared, so the estimator may flag cross-view adjacency. Recorded as open item `RR-ANNOT-001` in `reference_requirements.json`.
 
-### Session — Complete themed PWD landing installed (recovery patch) · 09:05
+**6. Reference limitation wording corrected.**
+- `_gen_nine_span.py` reference-fidelity note now reads: *"reference booklet contains no nine-span sheet — reproduction claim not possible; convention + geometry comparison is PARTIAL (artifacts/reference-overlay/comparison.json)"*. Issue code renamed `E-NO-NINE-SPAN-REFERENCE`.
+- `APPROVED_STACK` comment updated: *"explicitly supplied, geometrically consistent foundation stack"* — not "approved". The owner verified arithmetic consistency; no engineering approval exists.
+- `T2-acceptance-reconciliation.md` closing paragraph updated to match.
 
-- Applied `CODE-JUNCTION/BridgeCAD-Complete-Themed-Landing` (payload + installer) for request "apply patch as per CODE-JUNCTION".
-- Installer prerequisite check wants `sheets/registry.ts` / `sheets/presets.ts`; repo has `registry.tsx` / `presets.js`. Check aborted, so the payload was installed and `main.tsx` wired manually, exactly as the installer's `wire()` would (patch doc permits manual wiring).
-- Added `frontend/src/WorkflowLanding.tsx`, `workflow.css` (finished burgundy/vermilion/saffron/cream theme), `workflowScenarios.ts`, `generated/workflow.json` (15 cards), `scripts/export_workflow_catalogue.py`.
-- Wired `frontend/src/main.tsx`: `WorkflowRoot` mounts `WorkflowLanding` at the default route; `#workspace` renders the original `App` with a back link to `#home`.
-- Backup written to `CODE-JUNCTION/landing-backup-20261114-070117-218126` (manifest.json + prior `main.tsx`).
-- `python scripts/export_workflow_catalogue.py` → regenerated catalogue is byte-identical to the bundled snapshot (`git diff` empty).
-- `npm run build` (`tsc --noEmit && vite build`) → PASS, 42 modules, 6.68 s.
-- Not committed yet; browser/mobile checks pending.
+**Tests:** `tests/unit/test_quality_manifest.py` — 9 tests (1 added: `test_annotation_overlap_count_is_carried_in_json`; renamed: `test_generation_gates_pass_while_acceptance_stays_pending`, `test_unresolved_model_validation_blocks_the_generation_pass`). All 253 catalogue+unit tests pass.
 
-**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
-
----
-
-### Session — Task 3: format/layout + variable controls on BOTH landing pages · 08:10
-
-- Enriched `docs/USER-MANUAL.md` with §12 (format/layout choice) and §13 (varying parameters / PWD Generator).
-- Updated `apps/streamlit-ui/app.py`: Home tab updated metrics, Drawing Gen tab format/scale selectors, new 🎛️ PWD Generator tab with live resolver preview, variable controls, and ZIP download.
-- 11/11 verification checks pass. `app.py` syntax OK.
-- Committed and pushed to origin/main.
-
-**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+**Defensible status:** reported geometry-contract progress verified by the listed tests; generated draft — GAD acceptance pending.
 
 ---
 
-### Session — Landing page full redesign for browser/Netlify · 06:30
+### Session — Content reconciliation, collision fixes, test suite clean · current
 
-- Rewrote `public/index.html` from scratch (51 KB, self-contained, zero external deps).
-- New sections: hero, stat strip, pipeline, 8-step how-to-use, PWD type table, vary variables, format/layout, downloads, parameter reference, API & CLI, footer.
-- Opened in browser: OK. Committed `7293020`, pushed to origin/main.
+**No commit or push — working tree only. HEAD remains `e969b72`.**
 
-**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+**Task 1 — Content count reconciliation:**
+75 total requirements, 14 not-applicable (cantilever abutment family, PILE foundation, bearing type=NONE, footpath width=0), 61 applicable, 56 satisfied, 5 failures. The "5 declared gaps" correspond exactly to the 5 PARTIAL/MISSING requirements — no IMPLEMENTED requirement is unmet. Reconciliation output: `artifacts/gad-acceptance/content-report.json`.
+
+**Task 2 — Collision investigation (17 → 11 → 9 effective):**
+- 4 HIGH originally: Sheet 2 (ground/scour label), Sheet 7 (TBD duplicate), Sheet 8 (RL stacking × 2)
+- After fixes: 2 remaining HIGH are cross-view or wide-BBox false positives (confirmed by `y_sep/x_sep` analysis in `scripts/_check_collisions.py`): `RL 101.725 × RL 95.925` and `TOP OF ABUTMENT CAP × BASE OF ABUTMENT SHAFT` — these are `y_sep=0.0mm` due to independent view level stacks landing at coincident paper y after minimum-gap nudge, or BBox-width false positives. All 9 MEDIUM items are RL-numeric + descriptive-text pairs at same y by design (tick + description on same level line) — the BBox estimator counts them as collisions but they are on opposite sides of the structural tick.
+- Collision report: `artifacts/gad-acceptance/collision-report.json`
+
+**Fixes applied:**
+1. `sheet7_bill_of_quantities.py` — skip second `TEXT-HEADER` write for the total cell when `qty_str` equals what `TEXT-GENERAL` already wrote (removes `TBD/TBD` duplicate). Collision HIGH eliminated.
+2. `sheet2_long_section.py` — stagger `EXISTING GROUND LEVEL` label `+th*1.2` above the line endpoint so it clears `DESIGN SCOUR LEVEL` at the same x. Collision HIGH eliminated.
+3. `sheet8_side_elevations.py` — added `_RL_TAG_MIN_GAP_MM = 7.5` constant; view 1 (abutment) and view 2 (pier) RL tag loops now enforce minimum vertical gap between successive labels; nudged labels get a short vertical leader from true structural y to printed label y. Collisions HIGH × 2 and MEDIUM × 4 eliminated.
+4. `sheet8_side_elevations.py` — scale bar `seg_len_m` now expressed in paper mm (`max(10.0, round(overall_w/5) * max(1.0, 1000/denom))`), not raw model metres, eliminating the adjacent `0m/2m/4m/6m/8m` label stack.
+
+**Task 3 — Skew vs nominal layout:**
+Both variants use identical layout rules and thresholds (`_RL_TAG_MIN_GAP_MM`, `TEXT_FLOOR_PAPER_MM=1.8`, same `BRIDGECAD_LAYOUT_AUDIT` checks). Skew variant: `layout_checks.passed=True`, `annotation_overlap_count=11`. Nominal resolved: same. Both pass on the same criteria — no special threshold applied to the skew variant.
+
+**Task 4 — Regeneration:**
+All 5 variants regenerated with `--all-variants`. 12/12 invariant checks pass.
+- `nine_span_slab_resolved`: 9 sheets RESOLVED/LEVEL_CONTROLLED, layout PASSED, `generation_gates_passed=True`, `quality_and_layout_passed=False` (5 declared content gaps), `accepted=False`.
+- `nine_span_slab_conflict`: REJECTED before DXF generation; `FAILED-RUN/` only. No DXF in commit-keyed dir.
+- Nominal, 7-span, skew-15° variants: all RESOLVED.
+
+**Task 5 — Test suite:**
+`tests/catalogue/test_instruction_updates.py::test_generation_is_deterministic_and_reports_render_status` was failing (pre-existing working-tree issue: transactional `_publish` moves failed-run output to `FAILED-RUN/` subdirectory; test expected it at the root). Updated test to look for `render-status.json` in `FAILED-RUN/`.
+- **311 passed, 0 failed** (catalogue + unit + draw audit).
+
+**Files changed this session:**
+- `packages/bridgecad-draw/bridgecad_draw/sheet2_long_section.py` — ground-level label stagger
+- `packages/bridgecad-draw/bridgecad_draw/sheet7_bill_of_quantities.py` — TBD duplicate guard
+- `packages/bridgecad-draw/bridgecad_draw/sheet8_side_elevations.py` — `_RL_TAG_MIN_GAP_MM`, view-1/view-2 RL gap enforcement, scale-bar paper-mm fix
+- `tests/catalogue/test_instruction_updates.py` — FAILED-RUN path for render-status check
+- `scripts/_measure_content.py`, `scripts/_reconcile_counts.py`, `scripts/_measure_overlaps.py`, `scripts/_check_collisions.py` (evidence scripts, not production)
+- `artifacts/gad-acceptance/content-report.json` (evidence)
+- `artifacts/gad-acceptance/collision-report.json` (evidence)
+- `artifacts/gad-acceptance/variant-validation.json` (regenerated, 12/12 checks pass)
+
+**Remaining declared content gaps (unchanged, correctly reported):**
+- `RC-PLAN-11` PARTIAL — wing/return-wall label missing from Sheet 1 Plan
+- `RC-FDN-05` PARTIAL — open-footing plan label missing from Sheet 4 (generic pile table present instead)
+- `RC-BABT-02` MISSING — batter ratio annotation missing from Sheet 5
+- `RC-RFT-05` PARTIAL — no drawn geometry in Sheet 9 (schedule only, no bar arrangement)
+- `RC-TTL-06` PARTIAL — assumptions/unresolved inputs not printed on the sheet
+
+**Pending:** No commit or push. These 5 gaps require engineering input (open-footing section geometry, batter ratio values, bar arrangement detail) or are known limitations.
 
 ---
 
-### Session — Remove "Maharashtra" from landing page · 06:40
-
-- Removed all 8 occurrences of "Maharashtra" from `public/index.html`.
-- Verified: 0 remaining occurrences.
-- Committed `f5b4693`, pushed to origin/main.
-
-**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
-
 ---
 
-### Session — docs/*.md + docs/*.txt audit — 5 patches applied · 07:10
-
-- Audited all docs/*.md and docs/*.txt files for pending instructions.
-- Applied 5 items: PATCH_GUIDE S4 (INSUNITS=4), S6 (file size guard), S7 (exception UUID), S9 (filename sanitise), BRIDGE_GAD_STANDARDS Phase 3 §1 (generate_phase_two_package wired into Export Bundle tab).
-- Added `_safe_prefix()` helper. Syntax verified.
-- Committed `5d5f99e`, pushed to origin/main.
-
-**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
-
----
-
-### Session — CODE-JUNCTION today's patches applied · 08:20
-
-- Found `CODE-JUNCTION/BridgeCAD-Apply-Instructions/` with structured patch package.
-- Git patch failed directly (repo ahead of baseline `5d5f99e`) — applied file-by-file.
-- Copied: `sweep.py` (NaN/finite guards), `test_instruction_updates.py` (36 tests), `pwd-sweep.yml` (CI), `V_INSTRUCTIONS_APPLIED.md`.
-- Copied updated docs: `PWD_ENRICHMENT_GUIDE.md`, `USER-MANUAL.md`, `GUIDE.md`, `DOCS_INDEX.md`, `deployment.md`.
-- Ran `pytest tests/catalogue/test_instruction_updates.py` → **36/36 PASS** (23.4 s).
-- Committed `f5f563a`, pushed to origin/main.
-
-**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
-
----
-
-### Session — Standing-order hook entry (no user task) · 08:28
+### Session — Hook fired on incoming message · current
 
 No changes this session.
 
-**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
-
----
-
-### Session — BridgeCAD-Apply-Instructions re-check (already applied) · 08:35
-
-- User re-requested "apply patches per CODE-JUNCTION/BridgeCAD-Apply-Instructions".
-- Checked 17 files — same as previous session, no new files.
-- Re-ran `pytest tests/catalogue/test_instruction_updates.py` → **36/36 PASS** (20.2 s).
-- Confirmed `HEAD = f3067bc` already contains all patch artefacts.
-- No source files modified, no commits made.
-
-**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
-
----
-
-### Session — Standing-order hook entry (no user task) · 08:42
-
-No changes this session.
-
-- Hook fired on incoming message. No user task present — hook-only trigger.
-- Previous session (08:35): BridgeCAD-Apply-Instructions re-checked; 36/36 tests confirmed passing; no new files found.
-- CREAT.md rebuilt — 71 stale entries (all pre-2026-11-13) pruned; only last 24 h retained.
-
-**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
-  - Box-cell primitive CellGrid (type 004) — CRITICAL
-  - Arch schedule primitive (type 014) — HIGH
-  - Precast block arch (type 015) — HIGH
-  - Skew propagation to Sheet 2 piers — MEDIUM
-  - Footing stepped section + PCC toe — MEDIUM
-  - Wing wall solid profile — LOW
-  - Pier cap dims on Sheet 2 — LOW
-  - Variant note in title block — LOW
-
----
-| 2026-11-14 00:18 | User prompt received |
-| 2026-11-14 07:14 | User prompt received |
-
-### Session — Stopped on user instruction · 08:50
-
-No changes this session.
-
-- User ran "apply patches per CODE-JUNCTION" then issued "stop here".
-- Found new file: `CODE-JUNCTION/BRIDGECAD_PWD_COLOUR_THEME_PATCH.md` — a CSS-only colour theme patch (burgundy/amber PWD palette for `frontend/src/workflow.css`).
-- Patch extraction and `git apply` were cancelled before any files were changed.
-- No source files modified, no commits made.
+- Hook fired on user message (hook instruction only — no user task in prompt).
+- Previous session delivered: content reconciliation (75 req / 61 applicable / 56 satisfied / 5 declared gaps), collision investigation and fixes (17→11 overlaps; 4 HIGH eliminated), skew vs nominal layout confirmation, all-variants regeneration (12/12 invariant checks pass), test suite fixed and clean (311 passed, 0 failed).
+- Working tree remains uncommitted. HEAD `e969b72`.
 
 **Pending:**
-- Apply `CODE-JUNCTION/BRIDGECAD_PWD_COLOUR_THEME_PATCH.md` (CSS colour theme for workflow.css) when ready.
-- 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`.
+- 5 declared content gaps require engineering input before they can be closed: `RC-PLAN-11` (wing/return wall), `RC-FDN-05` (open-footing label), `RC-BABT-02` (batter ratio), `RC-RFT-05` (bar arrangement geometry), `RC-TTL-06` (assumptions on sheet).
+- 9 remaining annotation overlap items in collision report — 2 classified as cross-view/BBox-width false positives; 7 are RL-numeric + description pairs at the same level line (by-design, not actionable without redesigning the level-tag layout).
+- No commit or push until owner approves the full working-tree diff.
 
 ---
-| 2026-11-14 07:14 | Agent turn completed |
-| 2026-11-14 07:18 | User prompt received |
-
-### Session — Standing-order hook entry — another agent is active · 08:55
-
-No changes this session.
-
-- Hook fired. User confirmed another agent is currently working on the repo.
-- No source files modified by this session — standing aside to avoid conflicts.
+- `_gen_nine_span.py`: "explicitly supplied, geometrically consistent" wording ✓, `FAILED-RUN/` sentinel ✓, `generation_gates_passed` in invariant checks ✓, `E-NO-NINE-SPAN-REFERENCE` ✓
+- `T2-acceptance-reconciliation.md`: "four implementation blockers addressed" ✓, stall corrected (not merely diagnosed) ✓
+- Commands run: `python -m pytest tests/unit/test_quality_manifest.py` → **9 passed**; manifest API shape check → all properties confirmed
 
 **Pending:**
-- Apply `CODE-JUNCTION/BRIDGECAD_PWD_COLOUR_THEME_PATCH.md` (CSS colour theme) when other agent finishes.
-- 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`.
+- Commit and push the TRAE corrections when owner approves (working tree only, HEAD `e969b72`).
+- 10 open items in `reference_requirements.json` (annotation gate, both-abutment-variants, title-block format, scale convention, per-dimension annotations).
 
 ---
-| 2026-11-14 07:19 | Agent turn completed |
-
-### Session — Standing-order hook entry (no user task) · 09:02
-
-No changes this session.
-
-- Hook fired on incoming message. No user task present — hook-only trigger.
-- Another agent is currently active on the repo (confirmed by user at 08:55).
-- No source files modified, no commands run, no tests executed this turn.
-
-**Pending:**
-- Apply `CODE-JUNCTION/BRIDGECAD_PWD_COLOUR_THEME_PATCH.md` (CSS colour theme for workflow.css).
-- 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`.
-
----
-| 2026-11-14 08:07 | User prompt received |
-| 2026-11-14 08:19 | MASTER-APP-TESTER applied — 2 findings patched, 2 measured failures recorded, no commit |
-| 2026-11-14 08:33 | User prompt received |
-| 2026-11-14 08:38 | User prompt received |
-
-
-## 2026-11-14 — repository audit started
-User requested repository-wide checking and corrections after inaccurate nine-span GAD. Preserving prior local changes. Inventory captured; test baseline initially blocked by missing pytest, installing test tools. No claim of complete verification.
-
-
-## 2026-11-14 — repository audit results
-Inventory: 2011 tracked files; 406 Python AST parses; 18 TOML and 23 YAML configurations parsed without error. First suite: 1335 passed, 11 failed, 6 skipped, 5 xfailed. Corrected catalogue parsing/captions, scale selection and shared ladder, PDF serialization, frontend export/data lifecycle/scenario recovery, and documentation registration/guards. Full rerun: 1359 passed, 6 skipped, 5 xfailed; two further pier-datum checks passed separately. Frontend TypeScript/Vite build passed; cloud-browser verification blocked by local connection refusal. Drawing engineering acceptance remains blocked by foundation-level consistency, incomplete details/layout and lack of PDF comparison. No E: write, GitHub push or deployment.
-
-## 2026-11-14 — GAD acceptance resolution program (§8.1 freeze)
-Governing spec: `CODE-JUNCTION/BRIDGECAD_GAD_ACCEPTANCE_RESOLUTION.md` (owner selected the full P0+P1 program; abutment geometry to be built from the spec text). §8.1 executed: base commit `cba78cbc` recorded with the uncommitted 12-file diff (99 insertions, 37 deletions) and the untracked tree preserved. Evidence retained under `artifacts/test-results/` (freeze summary, binary diff, status, base-commit id). No commit, push or deploy. Status remains **generated draft — GAD acceptance pending** per §10.
-
-### Session — BridgeCAD-GAD-Partial-Correction patch applied · 09:20
-
-- Applied `support-datum-correction.patch` from `CODE-JUNCTION/BridgeCAD-GAD-Partial-Correction/`.
-- `git apply --check` passed (exit 0); `git apply` succeeded.
-- 7 files changed:
-  - `long_section.py` — fix cap-top datum: was subtracting cap_depth twice; corrected to `soffit_rl - pedestal_height_m`
-  - `sheet2_long_section.py` — added schematic seat between cap and soffit using modelled pedestal interval
-  - `tests/verification/cases.py` — updated `_check_pier_toc_list` expectation to match corrected datum
-  - `frontend/src/WorkflowLanding.tsx`, `frontend/src/main.tsx` — frontend routing/UI updates from patch
-  - `.gitignore` — additions from patch
-  - `CREAT.md` — session log
-- Tests run:
-  - `pytest tests/verification/` → **53/53 PASS** (3.5 s)
-  - `pytest tests/catalogue/ tests/draw/ tests/unit/ tests/verification/` → **158/158 PASS** (29.3 s)
-- Committed `cba78cb`, pushed: `5161370..cba78cb  main -> main` ✅
-- Note from CORRECTION_STATUS.md: 7 remaining blockers for full acceptance (foundation datum inconsistency, sparse sheets, skew verification, etc.). This is a narrow interim fix only.
-
-**Pending:**
-- Apply `CODE-JUNCTION/BRIDGECAD_PWD_COLOUR_THEME_PATCH.md` (CSS colour theme for workflow.css).
-- 7 remaining GAD acceptance blockers per `CORRECTION_STATUS.md`.
-- 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`.
-
----
-| 2026-11-14 11:34 | Agent turn completed |
-
-### Session — Standing-order hook entry (no user task) · 09:28
-
-No changes this session.
-
-- Hook fired on incoming message. No user task present — hook-only trigger.
-- Previous session (09:20): BridgeCAD-GAD-Partial-Correction patch applied; 158/158 tests pass; commit `cba78cb` pushed to origin/main.
-- No source files modified, no commands run, no tests executed this turn.
-
-**Pending:**
-- Apply `CODE-JUNCTION/BRIDGECAD_PWD_COLOUR_THEME_PATCH.md` (CSS colour theme for workflow.css).
-- 7 remaining GAD acceptance blockers per `CORRECTION_STATUS.md`.
-- 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`.
-
----
-| 2026-11-14 11:42 | User prompt received |
-| 2026-11-14 18:25 | User prompt received |
-| 2026-11-14 18:37 | User prompt received |
-
-### Session — CODE-JUNCTION patch application audit · 18:40
-
-Task: "APPLY PATCHes AS PER `CODE-JUNCTION\*.*`".
-
-Findings — the bundles are already applied or superseded by the working tree:
-
-- `repository-audit-fixes.patch`: 16/20 `changed-sources` files are byte-identical to the live tree. `Apply-Audit.ps1` reports *Baseline differs* (reverse-check and forward-check both fail), so `git apply` is refused. The 4 divergent files are **newer locally** (live `main.tsx` keeps the `Artifact[]`/B03/B04/B08 hardening, `workflowScenarios.ts` keeps B06/B09, `WorkflowLanding.tsx` keeps B09); `CREAT.md` is this journal.
-- `support-datum-correction.patch`: applied — `sheet2_long_section.py` and `tests/verification/cases.py` carry the correction; `long_section.py` was superseded by the canonical `support_levels.py` resolver.
-
-Fixed (regression introduced by the earlier partial application):
-
-- `tests/docs/conftest.py`: added `dist` and `CODE-JUNCTION` to `SKIP_DIRS`; `scripts/prove_detection.py`: same two names added to `IGNORE_DIRS` — both are gitignored generated/intake trees, so their reference copies must not be scanned as product docs.
-- `DOCS_INDEX.md`: repointed the stale `docs/BRIDGECAD_MANUAL_AND_LANDING_PATCH.md` link (file does not exist) to `docs/BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md`.
-- `mkdocs.yml`: removed the nav row for the same non-existent document.
-
-Validation:
-
-- `pytest tests/docs -q` → 25/25 PASS.
-- `pytest tests/unit/test_support_levels.py tests/unit/test_pier_cap_datum.py tests/unit/test_abutment_stack.py tests/catalogue/test_audit_regressions.py tests/frontend/test_scenario_recovery.py tests/docs/test_doc_integrity.py -q` → 66/66 PASS.
-- `npm --prefix frontend run build` → `tsc --noEmit` clean, Vite build OK (42 modules, 5.04 s).
-
-**Pending (unchanged):** GAD acceptance blockers per `CODE-JUNCTION/BRIDGECAD_GAD_ACCEPTANCE_RESOLUTION.md`; reference-PDF comparison still BLOCKED (no approved PDF supplied).
+| 2026-11-15 07:26 | User prompt received |
+| 2026-11-15 07:26 | User prompt received |
+| 2026-11-15 07:28 | User prompt received |
+| 2026-11-15 09:14 | Agent turn completed |

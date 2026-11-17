@@ -565,48 +565,35 @@ def scale_bar(
     layer: str = "SYM-SCALE",
     text_height: float = 0.35,
 ) -> None:
-    """Draw a graphic scale bar."""
-    try:
-        total = segments * seg_len_m
-        rectangle(msp, x, y, total, text_height * 0.8, layer=layer)
-        # Alternating fill
-        for i in range(segments):
-            sx = x + i * seg_len_m
-            if i % 2 == 0:
-                hatch_rect(
-                    msp,
-                    sx,
-                    y,
-                    seg_len_m,
-                    text_height * 0.8,
-                    pattern="SOLID",
-                    scale=1.0,
-                    layer=layer,
-                    color=7,
-                )
-        # Labels
-        for i in range(segments + 1):
-            val = i * seg_len_m
-            text(
-                msp,
-                f"{val:.0f}m",
-                x + i * seg_len_m,
-                y - text_height * 1.2,
-                height=text_height,
-                layer="TEXT-GENERAL",
-                halign="CENTER",
-            )
-        text(
-            msp,
-            f"1 : {scale_denom}",
-            x + total / 2,
-            y + text_height * 1.5,
-            height=text_height,
-            layer="TEXT-GENERAL",
-            halign="CENTER",
-        )
-    except Exception:
-        pass
+    """Draw in paper millimetres; seg_len_m and labels are real metres.
+
+    A 2 m segment at 1:100 occupies 20 mm, independently of label style.
+    Callers select a readable real length; never clamp the resulting paper
+    length without changing the real segment length as well.
+    """
+    import math
+
+    for name, value in (("scale_denom", scale_denom), ("seg_len_m", seg_len_m),
+                        ("text_height", text_height)):
+        if isinstance(value, bool) or not math.isfinite(value) or value <= 0:
+            raise ValueError(f"{name} must be finite and positive")
+    if isinstance(segments, bool) or not isinstance(segments, int) or segments <= 0:
+        raise ValueError("segments must be a positive integer")
+    paper_segment_mm = seg_len_m * 1000.0 / scale_denom
+    total_paper_mm = segments * paper_segment_mm
+    rectangle(msp, x, y, total_paper_mm, text_height * 0.8, layer=layer)
+    for i in range(segments):
+        if i % 2 == 0:
+            hatch_rect(msp, x + i * paper_segment_mm, y,
+                       paper_segment_mm, text_height * 0.8,
+                       pattern="SOLID", scale=1.0, layer=layer, color=7)
+    for i in range(segments + 1):
+        text(msp, f"{i * seg_len_m:g}m", x + i * paper_segment_mm,
+             y - text_height * 1.2, height=text_height,
+             layer="TEXT-GENERAL", halign="CENTER")
+    text(msp, f"1 : {scale_denom}", x + total_paper_mm / 2,
+         y + text_height * 1.5, height=text_height,
+         layer="TEXT-GENERAL", halign="CENTER")
 
 
 # ---------------------------------------------------------------------------

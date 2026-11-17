@@ -1,0 +1,162 @@
+﻿{
+  "control_passed": true,
+  "detected": 17,
+  "total": 17,
+  "undetected": [],
+  "ok": true,
+  "results": [
+    {
+      "id": "D01",
+      "defect": "phantom suite directory in a code block",
+      "guard": "tests/docs/test_doc_integrity.py::test_defect_01_no_phantom_suite_directory",
+      "severity": "critical",
+      "detected": true,
+      "detail": "guard fired",
+      "duration_ms": 22188
+    },
+    {
+      "id": "D02",
+      "defect": "dead relative markdown link",
+      "guard": "tests/docs/test_doc_integrity.py::test_defect_02_every_relative_markdown_link_resolves",
+      "severity": "critical",
+      "detected": true,
+      "detail": "guard fired",
+      "duration_ms": 21498
+    },
+    {
+      "id": "D03",
+      "defect": "missing requirements file reference",
+      "guard": "tests/docs/test_doc_integrity.py::test_defect_03_referenced_requirements_files_exist",
+      "severity": "critical",
+      "detected": true,
+      "detail": "guard fired",
+      "duration_ms": 19617
+    },
+    {
+      "id": "D04",
+      "defect": "support routed to a foreign repo",
+      "guard": "tests/docs/test_doc_integrity.py::test_defect_04_no_foreign_support_urls",
+      "severity": "critical",
+      "detected": true,
+      "detail": "guard fired",
+      "duration_ms": 11039
+    },
+    {
+      "id": "D05",
+      "defect": "placeholder release URL",
+      "guard": "tests/docs/test_doc_integrity.py::test_defect_05_no_placeholder_release_urls",
+      "severity": "high",
+      "detected": true,
+      "detail": "guard fired",
+      "duration_ms": 20096
+    },
+    {
+      "id": "D06",
+      "defect": "YOUR_USERNAME in a clone command",
+      "guard": "tests/docs/test_doc_integrity.py::test_defect_06_no_your_username_placeholder",
+      "severity": "high",
+      "detected": true,
+      "detail": "guard fired",
+      "duration_ms": 16836
+    },
+    {
+      "id": "D07",
+      "defect": "README no longer suite-first",
+      "guard": "tests/docs/test_doc_integrity.py::test_defect_07_readme_is_suite_first",
+      "severity": "high",
+      "detected": true,
+      "detail": "guard fired",
+      "duration_ms": 16031
+    },
+    {
+      "id": "D08",
+      "defect": "zero-install entry point undocumented",
+      "guard": "tests/docs/test_doc_integrity.py::test_defect_08_zero_install_entry_point_documented",
+      "severity": "high",
+      "detected": true,
+      "detail": "guard fired",
+      "duration_ms": 15786
+    },
+    {
+      "id": "D09",
+      "defect": "conflicting version claim",
+      "guard": "tests/docs/test_doc_integrity.py::test_defect_09_no_conflicting_version_claims",
+      "severity": "medium",
+      "detected": true,
+      "detail": "guard fired",
+      "duration_ms": 13694
+    },
+    {
+      "id": "D10",
+      "defect": "non-canonical sheet name",
+      "guard": "tests/docs/test_doc_integrity.py::test_defect_10_sheet_names_are_canonical",
+      "severity": "medium",
+      "detected": true,
+      "detail": "guard fired",
+      "duration_ms": 32566
+    },
+    {
+      "id": "D11",
+      "defect": "_NEW variant file reappears",
+      "guard": "tests/docs/test_doc_integrity.py::test_defect_11_no_new_variant_files",
+      "severity": "medium",
+      "detected": true,
+      "detail": "guard fired",
+      "duration_ms": 32884
+    },
+    {
+      "id": "D12",
+      "defect": "orphan doc missing from the index",
+      "guard": "tests/docs/test_doc_integrity.py::test_defect_12_docs_index_lists_every_doc",
+      "severity": "medium",
+      "detected": true,
+      "detail": "guard fired",
+      "duration_ms": 32018
+    },
+    {
+      "id": "D13",
+      "defect": "referenced script does not exist",
+      "guard": "tests/docs/test_doc_integrity.py::test_defect_13_referenced_scripts_exist",
+      "severity": "low",
+      "detected": true,
+      "detail": "guard fired",
+      "duration_ms": 29862
+    },
+    {
+      "id": "D14",
+      "defect": "docs/README reverts to single purpose",
+      "guard": "tests/docs/test_doc_integrity.py::test_defect_14_docs_readme_describes_the_docs_system",
+      "severity": "low",
+      "detected": true,
+      "detail": "guard fired",
+      "duration_ms": 12215
+    },
+    {
+      "id": "X01",
+      "defect": "PII reintroduced into a tracked doc",
+      "guard": "tests/docs/test_doc_integrity.py::test_no_pii_in_tracked_docs",
+      "severity": "cross",
+      "detected": true,
+      "detail": "guard fired",
+      "duration_ms": 13587
+    },
+    {
+      "id": "X02",
+      "defect": "issue template uses an undefined label",
+      "guard": "tests/docs/test_doc_integrity.py::test_issue_template_labels_are_all_defined",
+      "severity": "cross",
+      "detected": true,
+      "detail": "guard fired",
+      "duration_ms": 13030
+    },
+    {
+      "id": "X03",
+      "defect": "anchor checking disabled in lychee config",
+      "guard": "tests/docs/test_doc_integrity.py::test_lychee_config_has_required_keys",
+      "severity": "cross",
+      "detected": true,
+      "detail": "guard fired",
+      "duration_ms": 13492
+    }
+  ]
+}

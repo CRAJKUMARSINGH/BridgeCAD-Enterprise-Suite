@@ -1,0 +1,1662 @@
+﻿diff --git a/CREAT.md b/CREAT.md
+index bb19c8b..a04cd66 100644
+--- a/CREAT.md
++++ b/CREAT.md
+@@ -4,285 +4,74 @@
+ 
+ ---
+ 
+-### Session — MASTER-APP-TESTER applied to the built frontend · 08:19
++### Session — BridgeCAD-Repository-Audit-Fixes applied · 14:30
+ 
+-- Ran the 8-phase MASTER-APP-TESTER protocol against the current checkout (HEAD `5161370`); the previous frontend review (`CODE-JUNCTION/BRIDGECAD_FRONTEND_REVIEW_AND_OPTIMIZATION.md`, B01–B09) was reconfirmed against the live build before any code was touched.
+-- No `AGENTS.md` exists in the repository (glob: no match), so only `CODE-JUNCTION/T.txt` standing orders applied. README already carries both required references (prewallcivil.com lines 167/171/228, yogipwd.com lines 173/231/278).
+-- **Patched (2 findings):** workspace sidebar status line and the landing header status chip now expose `role="status"` / `aria-live="polite"`, so a backend-state change is announced instead of silently re-rendering (WCAG 2.1 AA 4.1.3). `.gitignore` now ignores `.env` / `.env.*` while keeping `.env.example` — the template's own header says "NEVER commit .env" but no rule matched it.
+-- **Measured baseline before optimising:** LCP 764–936 ms (target <2500 ms) PASS; CLS 0.0005 on `/` and `/#home` PASS, but **0.1763 on `/#workspace`** FAIL. Attribution is not inferred: blocking `fonts.googleapis.com`/`fonts.gstatic.com` in a control run drops CLS to 0.0000, and the Google Fonts `@import` in `styles.css` swaps at ~1280 ms — a ~3 px global reflow. Fix deferred (needs self-hosted fonts + preload, or `font-display: optional`); it changes typography, so it was not applied unilaterally.
+-- **Measured failure:** the workspace overflows horizontally at a 390 px viewport — `scrollWidth 449` vs `innerWidth 390` (59 px), rooted at `.canvas-panel`. Reproducible in 5/5 mobile sessions. Not patched (layout redesign, outside the export-correctness scope).
+-- Simulated users **scaled to what is runnable**: 4 personas x 5 sessions = 20 sessions, 5 concurrent workers, 17–18 s wall clock, 0 uncaught page errors. The 125/75/51 volumes named in the protocol were NOT run and are not claimed.
+-- Separate lane results: browser preview PASS (3 routes, 200, no page errors); Python generation NOT TESTED (no engine; `/api/predict` → 500 locally); integration tests PASS (7); reference-drawing acceptance NOT TESTED (no independent engineering review).
+-- Added: `a11y_perf_probe.py`, `phase5_users_probe.py` and retained JSON captures under `E:\Rajkumar\bridgecad-app-tester-logs\`. Evidence and the finding table live there; no commit or push was made this turn.
+-- `npm run build` (`tsc --noEmit && vite build`) → PASS, 42 modules; JS 280.82 kB (gzip 87.59 kB), CSS 37.20 kB (gzip 8.97 kB), 3.61 s.
++**Commit:** `e969b72` pushed to `origin/main` — `fix(catalogue,draw,core,frontend): BridgeCAD repository audit fixes`
+ 
+-**Pending:** CLS 0.176 on `/#workspace` (font swap); workspace 390 px overflow; learning-centre link in README/manual returns 401 on the external host; 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`.
++- Resumed after context compaction; 14 files from `changed-sources/` were already copied but 10 catalogue tests were failing.
++- **Root cause:** `_check()` in `resolve.py` compared `deck_thickness_mm` (0.5 m) to `span/22` (1.011 m) for `RCC_BOX_CELL`, ignoring the actual structural depth. Arch types 014/015 also failed because the deck-slab proxy is not meaningful for an arch span/depth ratio.
++- **Fix 1 — `resolve.py`:** `_check()` now computes `depth = deck + cell_clear_m + cell_wall_mm/1000` for `RCC_BOX_CELL` when lattice data is present. Arch types 014/015 set `approximation: True` so the governor reports rather than rejects.
++- **Fix 2 — `registry.py`:** Added `"approximation": True` to cards BR-I-2022-014 and BR-I-2022-015. Card 004 NOT marked approximation.
++- **Tests:** 244 passed, 0 failed. Pushed: `cba78cb..e969b72 main -> main` ✅
+ 
+ ---
+ 
+-### Session — Frontend review fixes (B01–B06, B08) · 14:15
++### Session — TRAE report review corrections · current
+ 
+-- Applied the priority queue in `CODE-JUNCTION/BRIDGECAD_FRONTEND_REVIEW_AND_OPTIMIZATION.md` to the workspace frontend.
+-- B01 canonical detail: preview, audit, compliance, BOQ and the local DXF export now read one resolved detail (project identity merged in), so a downloaded file cannot disagree with the sheet on screen.
+-- B02 real backend status: generation failures now report the actual HTTP status and sanitised server message instead of always claiming "Python offline"; a caught error no longer flips the probed backend to `demo`.
+-- B03 job-scoped artifacts: each export carries an input fingerprint + job id; the download link is labelled with its job so a failed run cannot be presented as an earlier run's output.
+-- B04 lifecycle: generated blob URLs are revoked on workspace unmount; generation uses an `AbortController` aborted on a new job or unmount.
+-- B05 dev health stub is now opt-in (`BRIDGECAD_DEV_HEALTH_STUB=1`); dev reports the true backend state by default.
+-- B06 scenario validation: reject a stored `savedAt` no date parser accepts; collapse duplicate stored ids.
+-- Already in place: B07 single-scenario export vs `{schemaVersion:2, scenarios:[...]}` import envelope; B09 atomic import merge (limit + dedupe before a single persist).
+-- `npm run build` (`tsc --noEmit && vite build`) → PASS, 42 modules; JS 280.75 kB (gzip 87.58 kB), CSS 37.20 kB (gzip 8.97 kB).
+-- Video upload already complete — `learn-media/bridgecad-quickstart.mp4` is tracked and pushed (ebd9285); CODE-JUNCTION held no new video.
++**No commit or push — working tree only. HEAD remains `e969b72`.**
+ 
+-**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
++Owner reviewed TRAE delivery report and identified six items requiring correction. All six addressed:
+ 
+----
+-
+-### Session — Learning centre video + GitHub visitor notes · 09:40
+-
+-- Applied `CODE-JUNCTION/BridgeCAD-Video-and-Manual/github-readme-and-manual.patch` (`git apply --check` exit 0, then applied cleanly).
+-- `README.md` gains the `BRIDGECAD-LEARNING` visitor section (+27 lines); added `docs/BRIDGECAD_USER_MANUAL.md` (8-chapter manual).
+-- Uploaded the learning-centre assets to the repo root: `learn.html` and `learn-media/` — `bridgecad-quickstart.mp4` (541,892 B, valid `ftypisom` header), `captions.vtt` (2,011 B), `poster.png` (45,853 B, valid PNG signature).
+-- `learn.html` resolves `./learn-media/*` relatively, so the media sits beside it; offline use is `python -m http.server 8080` → `/learn.html`.
+-- Committed and pushed.
+-
+-**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+-
+----
+-
+-### Session — Complete themed PWD landing installed (recovery patch) · 09:05
+-
+-- Applied `CODE-JUNCTION/BridgeCAD-Complete-Themed-Landing` (payload + installer) for request "apply patch as per CODE-JUNCTION".
+-- Installer prerequisite check wants `sheets/registry.ts` / `sheets/presets.ts`; repo has `registry.tsx` / `presets.js`. Check aborted, so the payload was installed and `main.tsx` wired manually, exactly as the installer's `wire()` would (patch doc permits manual wiring).
+-- Added `frontend/src/WorkflowLanding.tsx`, `workflow.css` (finished burgundy/vermilion/saffron/cream theme), `workflowScenarios.ts`, `generated/workflow.json` (15 cards), `scripts/export_workflow_catalogue.py`.
+-- Wired `frontend/src/main.tsx`: `WorkflowRoot` mounts `WorkflowLanding` at the default route; `#workspace` renders the original `App` with a back link to `#home`.
+-- Backup written to `CODE-JUNCTION/landing-backup-20261114-070117-218126` (manifest.json + prior `main.tsx`).
+-- `python scripts/export_workflow_catalogue.py` → regenerated catalogue is byte-identical to the bundled snapshot (`git diff` empty).
+-- `npm run build` (`tsc --noEmit && vite build`) → PASS, 42 modules, 6.68 s.
+-- Not committed yet; browser/mobile checks pending.
+-
+-**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+-
+----
+-
+-### Session — Task 3: format/layout + variable controls on BOTH landing pages · 08:10
++**1. Closure statement corrected.**
++`artifacts/continue/T2-acceptance-reconciliation.md` §8 closure now reads:
++*"Four implementation blockers addressed; two open items remain (duplicate renderer tree, reference-fidelity gate); GAD acceptance pending."*
++Previous wording "all blockers closed" was incorrect.
+ 
+-- Enriched `docs/USER-MANUAL.md` with §12 (format/layout choice) and §13 (varying parameters / PWD Generator).
+-- Updated `apps/streamlit-ui/app.py`: Home tab updated metrics, Drawing Gen tab format/scale selectors, new 🎛️ PWD Generator tab with live resolver preview, variable controls, and ZIP download.
+-- 11/11 verification checks pass. `app.py` syntax OK.
+-- Committed and pushed to origin/main.
++**2. Required-content manifest created.**
++`artifacts/gad-acceptance/reference_requirements.json` — 13 requirements across all 9 drawing areas (Plan, Long Section, Cross Section, Foundation, Abutment, Bearings, Reinforcement, BOQ, Title/Notes, Scale, Annotation). Every row has stable ID, scope (BOOKLET_CONVENTION or NINE_SPAN_GEOMETRY), expected primitive, required dimension/label, evidence, status and reviewer verdict. All reviewer verdicts are PENDING. 10 open items listed. Duplicate-renderer task and combined-suite stall correction evidence retained.
+ 
+-**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
++**3. Transactional conflict handling.**
++`artifacts/gad-acceptance/_gen_nine_span.py` `_generate()` now:
++- Resolves all support records **before** generating any DXF.
++- If a CONFLICT is detected, writes only a `FAILED-RUN/failure-report.json` with the rejected records and a `FAILED-RUN/quality.json` (GENERATION=FAILED). No DXF files reach the commit-keyed output directory.
++- For mid-generation failures (non-conflict path), partial output is published only to `FAILED-RUN/` with an explicit `FAILED-RUN.txt` sentinel.
++- Production packages go to `<commit>/` only after `generate_one` returns success.
+ 
+----
+-
+-### Session — Landing page full redesign for browser/Netlify · 06:30
+-
+-- Rewrote `public/index.html` from scratch (51 KB, self-contained, zero external deps).
+-- New sections: hero, stat strip, pipeline, 8-step how-to-use, PWD type table, vary variables, format/layout, downloads, parameter reference, API & CLI, footer.
+-- Opened in browser: OK. Committed `7293020`, pushed to origin/main.
+-
+-**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+-
+----
+-
+-### Session — Remove "Maharashtra" from landing page · 06:40
+-
+-- Removed all 8 occurrences of "Maharashtra" from `public/index.html`.
+-- Verified: 0 remaining occurrences.
+-- Committed `f5b4693`, pushed to origin/main.
+-
+-**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+-
+----
++**4. Gate naming clarified.**
++`packages/bridgecad-qa/bridgecad_qa/quality_manifest.py`:
++- Primary property renamed `generation_gates_passed` (covers generation/model_validation/geometry_contract — the three mechanically verifiable generation gates).
++- Added `quality_and_layout_passed` (generation gates + required_content + layout).
++- `accepted` is unchanged — requires all five gates + reference_fidelity=PASSED + engineering_review=APPROVED.
++- `to_json()` now emits `generation_gates_passed`, `quality_and_layout_passed`, `accepted` as separate keys — never a single ambiguous `gates_passed` boolean.
++- Module docstring updated to explain the four verdict groups and their separation.
++- `_gen_nine_span.py` invariant checks updated to use `generation_gates_passed`.
+ 
+-### Session — docs/*.md + docs/*.txt audit — 5 patches applied · 07:10
++**5. Annotation overlap broadened.**
++- Added `_count_annotation_overlaps()` to `_gen_nine_span.py` — counts label-label text-box pairs across all sheets using `BBox.overlaps()`.
++- `_layout_payload()` now returns `(json, checks, overlap_count)` and includes `annotation_overlap_count` and `annotation_overlap_note` in the layout JSON.
++- Added `annotation_overlap_count: int = -1` field to `QualityManifest`; included in `to_json()`.
++- Not yet a gate pass/fail — per-view bounding rectangles are not declared, so the estimator may flag cross-view adjacency. Recorded as open item `RR-ANNOT-001` in `reference_requirements.json`.
+ 
+-- Audited all docs/*.md and docs/*.txt files for pending instructions.
+-- Applied 5 items: PATCH_GUIDE S4 (INSUNITS=4), S6 (file size guard), S7 (exception UUID), S9 (filename sanitise), BRIDGE_GAD_STANDARDS Phase 3 §1 (generate_phase_two_package wired into Export Bundle tab).
+-- Added `_safe_prefix()` helper. Syntax verified.
+-- Committed `5d5f99e`, pushed to origin/main.
+-
+-**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+-
+----
+-
+-### Session — CODE-JUNCTION today's patches applied · 08:20
+-
+-- Found `CODE-JUNCTION/BridgeCAD-Apply-Instructions/` with structured patch package.
+-- Git patch failed directly (repo ahead of baseline `5d5f99e`) — applied file-by-file.
+-- Copied: `sweep.py` (NaN/finite guards), `test_instruction_updates.py` (36 tests), `pwd-sweep.yml` (CI), `V_INSTRUCTIONS_APPLIED.md`.
+-- Copied updated docs: `PWD_ENRICHMENT_GUIDE.md`, `USER-MANUAL.md`, `GUIDE.md`, `DOCS_INDEX.md`, `deployment.md`.
+-- Ran `pytest tests/catalogue/test_instruction_updates.py` → **36/36 PASS** (23.4 s).
+-- Committed `f5f563a`, pushed to origin/main.
+-
+-**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+-
+----
+-
+-### Session — Standing-order hook entry (no user task) · 08:28
+-
+-No changes this session.
+-
+-**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+-
+----
+-
+-### Session — BridgeCAD-Apply-Instructions re-check (already applied) · 08:35
+-
+-- User re-requested "apply patches per CODE-JUNCTION/BridgeCAD-Apply-Instructions".
+-- Checked 17 files — same as previous session, no new files.
+-- Re-ran `pytest tests/catalogue/test_instruction_updates.py` → **36/36 PASS** (20.2 s).
+-- Confirmed `HEAD = f3067bc` already contains all patch artefacts.
+-- No source files modified, no commits made.
+-
+-**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+-
+----
+-
+-### Session — Standing-order hook entry (no user task) · 08:42
+-
+-No changes this session.
++**6. Reference limitation wording corrected.**
++- `_gen_nine_span.py` reference-fidelity note now reads: *"reference booklet contains no nine-span sheet — reproduction claim not possible; convention + geometry comparison is PARTIAL (artifacts/reference-overlay/comparison.json)"*. Issue code renamed `E-NO-NINE-SPAN-REFERENCE`.
++- `APPROVED_STACK` comment updated: *"explicitly supplied, geometrically consistent foundation stack"* — not "approved". The owner verified arithmetic consistency; no engineering approval exists.
++- `T2-acceptance-reconciliation.md` closing paragraph updated to match.
+ 
+-- Hook fired on incoming message. No user task present — hook-only trigger.
+-- Previous session (08:35): BridgeCAD-Apply-Instructions re-checked; 36/36 tests confirmed passing; no new files found.
+-- CREAT.md rebuilt — 71 stale entries (all pre-2026-11-13) pruned; only last 24 h retained.
++**Tests:** `tests/unit/test_quality_manifest.py` — 9 tests (1 added: `test_annotation_overlap_count_is_carried_in_json`; renamed: `test_generation_gates_pass_while_acceptance_stays_pending`, `test_unresolved_model_validation_blocks_the_generation_pass`). All 253 catalogue+unit tests pass.
+ 
+-**Pending:** 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`
+-  - Box-cell primitive CellGrid (type 004) — CRITICAL
+-  - Arch schedule primitive (type 014) — HIGH
+-  - Precast block arch (type 015) — HIGH
+-  - Skew propagation to Sheet 2 piers — MEDIUM
+-  - Footing stepped section + PCC toe — MEDIUM
+-  - Wing wall solid profile — LOW
+-  - Pier cap dims on Sheet 2 — LOW
+-  - Variant note in title block — LOW
++**Defensible status:** reported geometry-contract progress verified by the listed tests; generated draft — GAD acceptance pending.
+ 
+ ---
+-| 2026-11-14 00:18 | User prompt received |
+-| 2026-11-14 07:14 | User prompt received |
+ 
+-### Session — Stopped on user instruction · 08:50
++### Session — Hook fired on incoming message · current
+ 
+ No changes this session.
+ 
+-- User ran "apply patches per CODE-JUNCTION" then issued "stop here".
+-- Found new file: `CODE-JUNCTION/BRIDGECAD_PWD_COLOUR_THEME_PATCH.md` — a CSS-only colour theme patch (burgundy/amber PWD palette for `frontend/src/workflow.css`).
+-- Patch extraction and `git apply` were cancelled before any files were changed.
+-- No source files modified, no commits made.
++- Hook fired on user message (empty prompt, hook instruction only).
++- Previous session: six TRAE review corrections applied — closure statement, `reference_requirements.json`, transactional conflict handling, gate renaming (`generation_gates_passed`), annotation overlap count, reference limitation wording. 253 tests pass. No commit or push.
+ 
+ **Pending:**
+-- Apply `CODE-JUNCTION/BRIDGECAD_PWD_COLOUR_THEME_PATCH.md` (CSS colour theme for workflow.css) when ready.
+-- 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`.
++- Commit and push the TRAE corrections when owner approves (working tree only, HEAD `e969b72`).
++- 10 open items in `reference_requirements.json` (annotation gate, both-abutment-variants, title-block format, scale convention, per-dimension annotations).
+ 
+ ---
+-| 2026-11-14 07:14 | Agent turn completed |
+-| 2026-11-14 07:18 | User prompt received |
+-
+-### Session — Standing-order hook entry — another agent is active · 08:55
+-
+-No changes this session.
+-
+-- Hook fired. User confirmed another agent is currently working on the repo.
+-- No source files modified by this session — standing aside to avoid conflicts.
+-
+-**Pending:**
+-- Apply `CODE-JUNCTION/BRIDGECAD_PWD_COLOUR_THEME_PATCH.md` (CSS colour theme) when other agent finishes.
+-- 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`.
+-
+----
+-| 2026-11-14 07:19 | Agent turn completed |
+-
+-### Session — Standing-order hook entry (no user task) · 09:02
+-
+-No changes this session.
+-
+-- Hook fired on incoming message. No user task present — hook-only trigger.
+-- Another agent is currently active on the repo (confirmed by user at 08:55).
+-- No source files modified, no commands run, no tests executed this turn.
+-
+-**Pending:**
+-- Apply `CODE-JUNCTION/BRIDGECAD_PWD_COLOUR_THEME_PATCH.md` (CSS colour theme for workflow.css).
+-- 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`.
+-
+----
+-| 2026-11-14 08:07 | User prompt received |
+-| 2026-11-14 08:19 | MASTER-APP-TESTER applied — 2 findings patched, 2 measured failures recorded, no commit |
+-| 2026-11-14 08:33 | User prompt received |
+-| 2026-11-14 08:38 | User prompt received |
+-
+-
+-## 2026-11-14 — repository audit started
+-User requested repository-wide checking and corrections after inaccurate nine-span GAD. Preserving prior local changes. Inventory captured; test baseline initially blocked by missing pytest, installing test tools. No claim of complete verification.
+-
+-
+-## 2026-11-14 — repository audit results
+-Inventory: 2011 tracked files; 406 Python AST parses; 18 TOML and 23 YAML configurations parsed without error. First suite: 1335 passed, 11 failed, 6 skipped, 5 xfailed. Corrected catalogue parsing/captions, scale selection and shared ladder, PDF serialization, frontend export/data lifecycle/scenario recovery, and documentation registration/guards. Full rerun: 1359 passed, 6 skipped, 5 xfailed; two further pier-datum checks passed separately. Frontend TypeScript/Vite build passed; cloud-browser verification blocked by local connection refusal. Drawing engineering acceptance remains blocked by foundation-level consistency, incomplete details/layout and lack of PDF comparison. No E: write, GitHub push or deployment.
+-
+-## 2026-11-14 — GAD acceptance resolution program (§8.1 freeze)
+-Governing spec: `CODE-JUNCTION/BRIDGECAD_GAD_ACCEPTANCE_RESOLUTION.md` (owner selected the full P0+P1 program; abutment geometry to be built from the spec text). §8.1 executed: base commit `cba78cbc` recorded with the uncommitted 12-file diff (99 insertions, 37 deletions) and the untracked tree preserved. Evidence retained under `artifacts/test-results/` (freeze summary, binary diff, status, base-commit id). No commit, push or deploy. Status remains **generated draft — GAD acceptance pending** per §10.
+-
+-### Session — BridgeCAD-GAD-Partial-Correction patch applied · 09:20
+-
+-- Applied `support-datum-correction.patch` from `CODE-JUNCTION/BridgeCAD-GAD-Partial-Correction/`.
+-- `git apply --check` passed (exit 0); `git apply` succeeded.
+-- 7 files changed:
+-  - `long_section.py` — fix cap-top datum: was subtracting cap_depth twice; corrected to `soffit_rl - pedestal_height_m`
+-  - `sheet2_long_section.py` — added schematic seat between cap and soffit using modelled pedestal interval
+-  - `tests/verification/cases.py` — updated `_check_pier_toc_list` expectation to match corrected datum
+-  - `frontend/src/WorkflowLanding.tsx`, `frontend/src/main.tsx` — frontend routing/UI updates from patch
+-  - `.gitignore` — additions from patch
+-  - `CREAT.md` — session log
+-- Tests run:
+-  - `pytest tests/verification/` → **53/53 PASS** (3.5 s)
+-  - `pytest tests/catalogue/ tests/draw/ tests/unit/ tests/verification/` → **158/158 PASS** (29.3 s)
+-- Committed `cba78cb`, pushed: `5161370..cba78cb  main -> main` ✅
+-- Note from CORRECTION_STATUS.md: 7 remaining blockers for full acceptance (foundation datum inconsistency, sparse sheets, skew verification, etc.). This is a narrow interim fix only.
+-
+-**Pending:**
+-- Apply `CODE-JUNCTION/BRIDGECAD_PWD_COLOUR_THEME_PATCH.md` (CSS colour theme for workflow.css).
+-- 7 remaining GAD acceptance blockers per `CORRECTION_STATUS.md`.
+-- 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`.
+-
+----
+-| 2026-11-14 11:34 | Agent turn completed |
+-
+-### Session — Standing-order hook entry (no user task) · 09:28
+-
+-No changes this session.
+-
+-- Hook fired on incoming message. No user task present — hook-only trigger.
+-- Previous session (09:20): BridgeCAD-GAD-Partial-Correction patch applied; 158/158 tests pass; commit `cba78cb` pushed to origin/main.
+-- No source files modified, no commands run, no tests executed this turn.
+-
+-**Pending:**
+-- Apply `CODE-JUNCTION/BRIDGECAD_PWD_COLOUR_THEME_PATCH.md` (CSS colour theme for workflow.css).
+-- 7 remaining GAD acceptance blockers per `CORRECTION_STATUS.md`.
+-- 8 enrichment gaps per `docs/PWD_ENRICHMENT_GUIDE.md`.
+-
+----
+-| 2026-11-14 11:42 | User prompt received |
+-| 2026-11-14 18:25 | User prompt received |
+-| 2026-11-14 18:37 | User prompt received |
+-
+-### Session — CODE-JUNCTION patch application audit · 18:40
+-
+-Task: "APPLY PATCHes AS PER `CODE-JUNCTION\*.*`".
+-
+-Findings — the bundles are already applied or superseded by the working tree:
+-
+-- `repository-audit-fixes.patch`: 16/20 `changed-sources` files are byte-identical to the live tree. `Apply-Audit.ps1` reports *Baseline differs* (reverse-check and forward-check both fail), so `git apply` is refused. The 4 divergent files are **newer locally** (live `main.tsx` keeps the `Artifact[]`/B03/B04/B08 hardening, `workflowScenarios.ts` keeps B06/B09, `WorkflowLanding.tsx` keeps B09); `CREAT.md` is this journal.
+-- `support-datum-correction.patch`: applied — `sheet2_long_section.py` and `tests/verification/cases.py` carry the correction; `long_section.py` was superseded by the canonical `support_levels.py` resolver.
+-
+-Fixed (regression introduced by the earlier partial application):
+-
+-- `tests/docs/conftest.py`: added `dist` and `CODE-JUNCTION` to `SKIP_DIRS`; `scripts/prove_detection.py`: same two names added to `IGNORE_DIRS` — both are gitignored generated/intake trees, so their reference copies must not be scanned as product docs.
+-- `DOCS_INDEX.md`: repointed the stale `docs/BRIDGECAD_MANUAL_AND_LANDING_PATCH.md` link (file does not exist) to `docs/BRIDGECAD_REFERENCE_FIDELITY_ENRICHMENT.md`.
+-- `mkdocs.yml`: removed the nav row for the same non-existent document.
+-
+-Validation:
+-
+-- `pytest tests/docs -q` → 25/25 PASS.
+-- `pytest tests/unit/test_support_levels.py tests/unit/test_pier_cap_datum.py tests/unit/test_abutment_stack.py tests/catalogue/test_audit_regressions.py tests/frontend/test_scenario_recovery.py tests/docs/test_doc_integrity.py -q` → 66/66 PASS.
+-- `npm --prefix frontend run build` → `tsc --noEmit` clean, Vite build OK (42 modules, 5.04 s).
+-
+-**Pending (unchanged):** GAD acceptance blockers per `CODE-JUNCTION/BRIDGECAD_GAD_ACCEPTANCE_RESOLUTION.md`; reference-PDF comparison still BLOCKED (no approved PDF supplied).
+diff --git a/packages/bridgecad-catalogue/bridgecad_catalogue/registry.py b/packages/bridgecad-catalogue/bridgecad_catalogue/registry.py
+index 30f6813..2b83be5 100644
+--- a/packages/bridgecad-catalogue/bridgecad_catalogue/registry.py
++++ b/packages/bridgecad-catalogue/bridgecad_catalogue/registry.py
+@@ -373,6 +373,10 @@ PWD_CARDS: list[dict] = [
+         # an arch bridge the structural depth is the arch rise (7805 mm), not the
+         # deck slab (350 mm).  Mark as approximation so _check() reports, not rejects.
+         "approximation": True,
++        "fidelity_note": (
++            "Span/depth governor not applied: an open-spandrel arch carries its "
++            "span in thrust, so the 7.805 m arch rise governs, not the 350 mm deck slab."
++        ),
+     },
+     {
+         # Booklet: precast block arch 61.94 m, 27 blocks, 3 strips, 10.0 m cw.
+@@ -410,6 +414,10 @@ PWD_CARDS: list[dict] = [
+         # an arch bridge the structural depth is the arch rise, not the deck slab.
+         # Mark as approximation so _check() reports, not rejects.
+         "approximation": True,
++        "fidelity_note": (
++            "Span/depth governor not applied: a precast-block arch carries its "
++            "span in thrust, so the arch rise governs, not the 400 mm deck slab."
++        ),
+     },
+ ]
+ 
+diff --git a/packages/bridgecad-catalogue/bridgecad_catalogue/schema.py b/packages/bridgecad-catalogue/bridgecad_catalogue/schema.py
+index 8704f81..e70e8b4 100644
+--- a/packages/bridgecad-catalogue/bridgecad_catalogue/schema.py
++++ b/packages/bridgecad-catalogue/bridgecad_catalogue/schema.py
+@@ -141,6 +141,51 @@ VARIABLES: dict[str, VariableSpec] = {
+     "piles_per_pier": _free("piles_per_pier", "no", 2, 12, CLAUSE_PILE),
+     "well_diameter_m": _free("well_diameter_m", "m", 4.0, 8.0, "IRC 78 cl.709", step=0.5),
+     "sbc_t_per_m2": _free("sbc_t_per_m2", "t/m²", 10.0, 200.0, "IRC 78 cl.701"),
++    # ── foundation / seat design dials ──────────────────────────────────────
++    # These feed the canonical support-level contract.  ``footing_bottom_rl_m``
++    # is an EXPLICITLY SUPPLIED founding RL: supplying it (with a footing
++    # thickness) makes the contract LEVEL_CONTROLLED and derives the shaft height
++    # from it. Leaving it unset keeps the honest HEIGHT_CONTROLLED default, where
++    # the contract only PROPOSES a founding RL from the card's pier height.
++    "footing_bottom_rl_m": _free(
++        "footing_bottom_rl_m",
++        "m",
++        -100.0,
++        9000.0,
++        "IRC 78 cl.701",
++        note="explicitly supplied founding RL; unset ⇒ pier height governs (proposed level)",
++    ),
++    "pile_cap_thickness_mm": _free(
++        "pile_cap_thickness_mm",
++        "mm",
++        0.0,
++        6000.0,
++        CLAUSE_PILE,
++        step=50,
++        note="footing thickness; 0 = not designed (contract stays UNRESOLVED)",
++    ),
++    "pile_cutoff_level_m": _free(
++        "pile_cutoff_level_m", "m", -100.0, 9000.0, CLAUSE_PILE,
++        note="embedment rule-of-thumb datum; never the founding level",
++    ),
++    "pier_cap_depth_m": _free(
++        "pier_cap_depth_m", "m", 0.3, 6.0, "IRC 112 cl.16", step=0.05
++    ),
++    "pier_pedestal_height_m": _free(
++        "pier_pedestal_height_m", "m", 0.05, 3.0, CLAUSE_BEARING, step=0.05
++    ),
++    "bearing_depth_mm": _free(
++        "bearing_depth_mm",
++        "mm",
++        0.0,
++        500.0,
++        CLAUSE_BEARING,
++        step=5,
++        note="bearing unit height; 0 = monolithic/unspecified (assumed)",
++    ),
++    "wearing_coat_thickness_mm": _free(
++        "wearing_coat_thickness_mm", "mm", 0.0, 500.0, "MoRTH 500 series", step=5
++    ),
+     # booklet identity — protected
+     "foundation_type": _lock("foundation_type", "-"),
+     "superstructure_type": _lock("superstructure_type", "-"),
+diff --git a/packages/bridgecad-core/bridgecad_core/geometry/long_section.py b/packages/bridgecad-core/bridgecad_core/geometry/long_section.py
+index aa2f5f3..8ca7327 100644
+--- a/packages/bridgecad-core/bridgecad_core/geometry/long_section.py
++++ b/packages/bridgecad-core/bridgecad_core/geometry/long_section.py
+@@ -13,7 +13,7 @@ from decimal import Decimal
+ from typing import TYPE_CHECKING
+ 
+ from .support_levels import (
+-    AuthorityMode,
++    ResolutionStatus,
+     SupportLevelInput,
+     SupportLevelRecord,
+     resolve_support_levels,
+@@ -141,10 +141,15 @@ def _pier_support_level_input(
+     unit) sits above ``pier_pedestal_height_m``. An undeclared bearing depth
+     becomes an explicit zero marked ASSUMED, so the historical
+     ``soffit − pedestal`` datum is reproduced from one contract rather than
+-    re-derived by each renderer. The pier foundation is the pile cap:
+-    ``pile_cutoff_level_m`` is its underside and ``pile_cap_thickness_mm`` its
+-    thickness; when either is absent the footing stays UNRESOLVED rather than
+-    inventing a depth.
++    re-derived by each renderer. When the model supplies no founding RL, the
++    honest authority is HEIGHT_CONTROLLED: the resolver proposes a founding RL
++    and marks it. When the model DOES supply a founding RL together with a
++    footing thickness the authority becomes LEVEL_CONTROLLED and the shaft
++    height is derived from it. ``pile_cutoff_level_m`` is a
++    rule-of-thumb embedment datum, not a designed founding level, so it is
++    carried through as ``pile_cutoff_rl_m`` only — never as
++    ``footing_bottom_rl_m``. A zero/absent cap thickness leaves the footing
++    depth absent rather than inventing a zero-depth footing.
+     """
+     ss = project.superstructure
+     sub = project.substructure
+@@ -163,6 +168,15 @@ def _pier_support_level_input(
+         structural_m += Decimal(str(ss.girder_depth_mm)) / _MM_PER_M
+ 
+     cap_thk_mm = getattr(fd, "pile_cap_thickness_mm", None)
++    # A zero or absent cap thickness is a MISSING DIMENSION, not a zero-depth
++    # footing: ``_build_project`` writes ``pile_cap_thickness_mm = 0`` for an
++    # OPEN foundation, and treating that as a 0 m footing let a non-existent
++    # foundation masquerade as a resolved, level-controlled founding level.
++    footing_depth_m = (
++        None
++        if cap_thk_mm is None or float(cap_thk_mm) <= 0
++        else Decimal(str(cap_thk_mm)) / _MM_PER_M
++    )
+     return SupportLevelInput(
+         support_id=support_id,
+         road_rl_m=Decimal(str(top_of_deck_rl)),
+@@ -176,14 +190,24 @@ def _pier_support_level_input(
+         pedestal_height_m=_dec_or_none(getattr(sub, "pier_pedestal_height_m", None))
+         or Decimal("0.20"),
+         cap_depth_m=_dec_or_none(getattr(sub, "pier_cap_depth_m", None)),
+-        footing_bottom_rl_m=_dec_or_none(getattr(fd, "pile_cutoff_level_m", None)),
+-        footing_depth_m=(
+-            None if cap_thk_mm is None else Decimal(str(cap_thk_mm)) / _MM_PER_M
+-        ),
++        # The explicitly supplied founding RL, when the project supplies one.
++        # The model's ``pile_cutoff_level_m`` is an embedment rule of thumb, so
++        # it is NEVER passed here. Supplying BOTH a founding RL and a footing
++        # thickness makes the resolver's auto-classification (support_levels.py
++        # :396-403) pick LEVEL_CONTROLLED and derive the shaft height; with the
++        # founding RL absent it falls through to the honest HEIGHT_CONTROLLED
++        # default, which only PROPOSES a founding RL and marks it.
++        footing_bottom_rl_m=_dec_or_none(getattr(fd, "footing_bottom_rl_m", None)),
++        footing_depth_m=footing_depth_m,
++        # The catalogue supplies a pier HEIGHT. When no founding RL is
++        # present the auto-classification falls through to HEIGHT_CONTROLLED
++        # (``authority`` stays unset); when both a founding RL and a footing
++        # thickness are present the heights must AGREE or the resolver raises
++        # E-CONFLICT-SHAFT-HEIGHT.
++        shaft_height_m=_dec_or_none(getattr(sub, "pier_height_typical_m", None)),
+         ground_level_rl_m=_dec_or_none(getattr(pm, "ground_level_rl_m", None)),
+         scour_level_rl_m=_dec_or_none(getattr(hd, "scour_level_m", None)),
+         pile_cutoff_rl_m=_dec_or_none(getattr(fd, "pile_cutoff_level_m", None)),
+-        authority=AuthorityMode.LEVEL_CONTROLLED,
+     )
+ 
+ 
+@@ -317,6 +341,15 @@ def compute_long_section_geometry(project: BridgeProject) -> LongSectionGeometry
+         )
+         for i in range(len(pier_ch))
+     ]
++    # Fail closed: a CONFLICT must never be drawn as two different versions in
++    # two views. An UNRESOLVED record is reported (and left visible), not fatal.
++    for rec in support_records:
++        if rec.status is ResolutionStatus.CONFLICT:
++            detail = "; ".join(f"{i.code} ({i.field_name}): {i.message}" for i in rec.issues)
++            raise ValueError(
++                f"support {rec.support_id} has a CONFLICTING vertical contract: {detail}"
++            )
++
+     pier_top_of_cap_rl_m: list[float] = [
+         float(rec.cap_top_rl_m) for rec in support_records if rec.cap_top_rl_m is not None
+     ]
+diff --git a/packages/bridgecad-core/bridgecad_core/models.py b/packages/bridgecad-core/bridgecad_core/models.py
+index 39c72e7..e821e03 100644
+--- a/packages/bridgecad-core/bridgecad_core/models.py
++++ b/packages/bridgecad-core/bridgecad_core/models.py
+@@ -1499,6 +1499,16 @@ class FoundationDetails(BaseModel):
+         le=Decimal("9000"),
+         dp=4,
+     )
++    footing_bottom_rl_m: Decimal | None = DM(
++        "EXPLICITLY SUPPLIED founding RL (underside of the footing/pile cap), m. "
++        "This is a designed level, not a rule-of-thumb embedment: when supplied "
++        "WITH a footing depth the canonical support-level contract becomes "
++        "LEVEL_CONTROLLED and the shaft height is derived from it. Left unset "
++        "the contract stays HEIGHT_CONTROLLED and only PROPOSES a founding RL.",
++        ge=Decimal("-100"),
++        le=Decimal("9000"),
++        dp=4,
++    )
+     under_ream_count: UnderReamCount | None = Field(
+         default=None,
+         description="Number of under-ream bulbs (0/1/2/3) for under-reamed piles",
+diff --git a/packages/bridgecad-draw/bridgecad_draw/layout_audit.py b/packages/bridgecad-draw/bridgecad_draw/layout_audit.py
+index 016015a..e969a76 100644
+--- a/packages/bridgecad-draw/bridgecad_draw/layout_audit.py
++++ b/packages/bridgecad-draw/bridgecad_draw/layout_audit.py
+@@ -31,6 +31,7 @@ from typing import Any
+ __all__ = [
+     "BBox",
+     "LayoutAudit",
++    "Region",
+     "audit_enabled",
+     "collect",
+     "set_enabled",
+@@ -133,6 +134,48 @@ class BBox:
+         )
+ 
+ 
++@dataclass(frozen=True)
++class Region:
++    """A measured rectangle on the sheet, in millimetres.
++
++    Used for the layout zones the specification requires to be *reserved*
++    (§5.1: printable border, title block, notes/schedule zones). The rectangles
++    are measured from the drawn DXF rather than assumed from a paper constant,
++    so a sheet that is laid out on a different paper size cannot silently pass
++    the region gate against the wrong frame.
++    """
++
++    x0: float
++    y0: float
++    x1: float
++    y1: float
++    name: str = ""
++
++    @property
++    def width(self) -> float:
++        return max(0.0, self.x1 - self.x0)
++
++    @property
++    def height(self) -> float:
++        return max(0.0, self.y1 - self.y0)
++
++    @property
++    def area(self) -> float:
++        return self.width * self.height
++
++    def intersects(self, other: Region, tol: float = 0.5) -> bool:
++        """True when the two rectangles overlap by more than *tol* mm per axis."""
++        return (
++            self.x0 < other.x1 - tol
++            and other.x0 < self.x1 - tol
++            and self.y0 < other.y1 - tol
++            and other.y0 < self.y1 - tol
++        )
++
++    def as_tuple(self) -> tuple[float, float, float, float]:
++        return (self.x0, self.y0, self.x1, self.y1)
++
++
+ @dataclass
+ class LayoutAudit:
+     """Everything the drawing-side QA rows need, gathered from the DXF once."""
+@@ -145,6 +188,22 @@ class LayoutAudit:
+     printed_scales: list[tuple[str, int]] = field(default_factory=list)
+     band_counts: dict[str, int] = field(default_factory=dict)
+     nts_claims: list[tuple[str, bool]] = field(default_factory=list)
++    #: Measured layout zones, per sheet name.
++    sheet_regions: dict[str, Region] = field(default_factory=dict)
++    frame_regions: dict[str, Region] = field(default_factory=dict)
++    title_block_regions: dict[str, Region] = field(default_factory=dict)
++    notes_regions: dict[str, Region] = field(default_factory=dict)
++    #: Entities on a drawing layer that intrude into a reserved zone.
++    title_block_intrusions: list[str] = field(default_factory=list)
++    notes_intrusions: list[str] = field(default_factory=list)
++
++
++#: Layers that belong to the sheet furniture rather than to a view. An entity on
++#: one of these is allowed inside a reserved zone; anything else is a view
++#: primitive that has been placed over the title block or the notes.
++_FURNITURE_PREFIXES = ("BORDER-", "TITLEBLK-")
++_FURNITURE_LAYERS = frozenset({"TEXT-SPEC", "TEXT-HEADER", "TEXT-TITLE"})
++
+ 
+ 
+ def _frame() -> tuple[float, float, float, float]:
+@@ -207,7 +266,7 @@ def _collect_uncached(project: Any) -> LayoutAudit:
+         return audit
+ 
+     audit.rendered = True
+-    x0, y0, x1, y1 = _frame()
++    fb_x0, fb_y0, fb_x1, fb_y1 = _frame()  # fallback when a DXF carries no border
+ 
+     for path in dxf_paths:
+         try:
+@@ -218,29 +277,75 @@ def _collect_uncached(project: Any) -> LayoutAudit:
+         msp = doc.modelspace()
+         sheet = path.stem
+ 
++        # -- pass 1: geometry extents and the sheet's own furniture --------
++        extents: list[tuple[Any, str, tuple[float, float, float, float]]] = []
++        sheet_rect: tuple[float, float, float, float] | None = None
++        frame_rect: tuple[float, float, float, float] | None = None
++        tb_candidates: list[tuple[float, float, float, float]] = []
++
+         for e in msp:
+             layer = e.dxf.layer
+             audit.layers_drawn.add(layer)
+-            if layer == "BORDER-OUTER" or e.dxftype() == "DIMENSION":
++            ext = _extent(e, ezbbox)
++            if ext is None:
+                 continue
+-            try:
+-                ext = ezbbox.extents([e])
+-            except Exception:  # noqa: BLE001 — entities without extents are skipped
++            extents.append((e, layer, ext))
++            x0, y0, x1, y1 = ext
++            if layer == "BORDER-OUTER":
++                sheet_rect = _union(sheet_rect, (x0, y0, x1, y1))
+                 continue
+-            # An entity with no computable extent (e.g. an empty polyline) yields
+-            # an empty BoundingBox whose unpack raises; it has nothing to test.
+-            if not getattr(ext, "has_data", True):
++            if layer == "BORDER-INNER":
++                frame_rect = _union(frame_rect, (x0, y0, x1, y1))
+                 continue
+-            lo, hi = ext.extmin, ext.extmax
+-            if lo.x < x0 - 1.0 or lo.y < y0 - 1.0 or hi.x > x1 + 1.0 or hi.y > y1 + 1.0:
+-                audit.outside_frame.append(f"{sheet}:{e.dxftype()}({layer})")
++            if layer == "TITLEBLK-BOX" and e.dxftype() in {"LWPOLYLINE", "POLYLINE"}:
++                tb_candidates.append((x0, y0, x1, y1))
++
++        # The heavy outer title-block rectangle is the largest TITLEBLK-BOX
++        # rectangle; the internal rules are thin lines and never form a loop.
++        tb_rect = max(tb_candidates, key=lambda r: (r[2] - r[0]) * (r[3] - r[1]), default=None)
+ 
++        # -- text boxes and the reserved zones ----------------------------
++        note_corners: list[float] = []
+         for e in msp.query("TEXT MTEXT"):
+             box = BBox.from_entity(e, sheet=sheet)
+             audit.text_boxes.append(box)
+             denom = _parse_scale(box.text)
+             if denom is not None:
+                 audit.printed_scales.append((sheet, denom))
++            if _is_note_line(box.text):
++                note_corners.extend((box.x0, box.y0, box.x1, box.y1))
++
++        if sheet_rect is not None:
++            audit.sheet_regions[sheet] = Region(*sheet_rect, name=sheet)
++        if frame_rect is not None:
++            audit.frame_regions[sheet] = Region(*frame_rect, name=sheet)
++        if tb_rect is not None:
++            audit.title_block_regions[sheet] = Region(*tb_rect, name=sheet)
++        if len(note_corners) >= 4:
++            nx0 = min(note_corners[0::4])
++            ny0 = min(note_corners[1::4])
++            nx1 = max(note_corners[2::4])
++            ny1 = max(note_corners[3::4])
++            pad = 2.0
++            audit.notes_regions[sheet] = Region(
++                nx0 - pad, ny0 - pad, nx1 + pad, ny1 + pad, name=sheet
++            )
++
++        # -- pass 2: clipping and reserved-zone intrusions ----------------
++        bx0, by0, bx1, by1 = frame_rect or (fb_x0, fb_y0, fb_x1, fb_y1)
++        for e, layer, (x0, y0, x1, y1) in extents:
++            if layer == "BORDER-OUTER":
++                continue
++            if x0 < bx0 - 1.0 or y0 < by0 - 1.0 or x1 > bx1 + 1.0 or y1 > by1 + 1.0:
++                audit.outside_frame.append(f"{sheet}:{e.dxftype()}({layer})")
++            if _is_furniture(layer) or e.dxftype() in {"TEXT", "MTEXT"}:
++                continue
++            ent = Region(x0, y0, x1, y1, name=f"{e.dxftype()}({layer})")
++            if tb_rect is not None and ent.intersects(Region(*tb_rect)):
++                audit.title_block_intrusions.append(f"{sheet}:{e.dxftype()}({layer})")
++            notes = audit.notes_regions.get(sheet)
++            if notes is not None and ent.intersects(notes):
++                audit.notes_intrusions.append(f"{sheet}:{e.dxftype()}({layer})")
+ 
+         for text_ent in msp.query("TEXT MTEXT"):
+             content = (
+@@ -256,6 +361,152 @@ def _collect_uncached(project: Any) -> LayoutAudit:
+     return audit
+ 
+ 
++def _extent(e: Any, ezbbox: Any) -> tuple[float, float, float, float] | None:
++    """A DXF entity's extents as ``(x0, y0, x1, y1)``, or ``None``.
++
++    A ``DIMENSION`` carries its captured block and would report the dimension
++    text's own box, not the measured geometry, so it is excluded from every
++    geometric gate. An entity with no computable extent (an empty polyline)
++    yields an empty ``BoundingBox`` and is likewise skipped.
++    """
++    if e.dxftype() == "DIMENSION":
++        return None
++    try:
++        ext = ezbbox.extents([e])
++    except Exception:  # noqa: BLE001 — entities without extents are skipped
++        return None
++    if not getattr(ext, "has_data", True):
++        return None
++    lo, hi = ext.extmin, ext.extmax
++    return (float(lo.x), float(lo.y), float(hi.x), float(hi.y))
++
++
++def _union(
++    a: tuple[float, float, float, float] | None, b: tuple[float, float, float, float]
++) -> tuple[float, float, float, float]:
++    if a is None:
++        return b
++    return (min(a[0], b[0]), min(a[1], b[1]), max(a[2], b[2]), max(a[3], b[3]))
++
++
++def _is_furniture(layer: str) -> bool:
++    """True when *layer* is sheet furniture rather than a view primitive."""
++    return layer in _FURNITURE_LAYERS or layer.startswith(_FURNITURE_PREFIXES)
++
++
++_NOTE_LINE_MARKERS = ("NOTES", "NOTE :-", "NOTE:")
++
++
++def _is_note_line(content: str) -> bool:
++    """True when *content* is a footnote line, so the notes zone can be measured.
++
++    The notes block is a text block with a heading and numbered lines; matching
++    that shape gives a reserved zone that is *measured* from what the sheet
++    actually drew, rather than assumed from a hard-coded rectangle.
++
++    A numbered line is ``"<n>. <text>"`` — a *decimal number is not a note*. The
++    old ``head.isdigit()`` test also accepted ``"10.0 m (eff 9.7)"`` (a
++    span-length dimension label), which manufactured a phantom notes zone across
++    the top of sheet 2 and then reported the deck hatching drawn there as a
++    notes-zone intrusion — a layout failure on a sheet that had drawn no notes
++    at all. Requiring the ``". "`` separator that every note generator emits
++    (``notes.py`` and ``_sheetkit.notes``) keeps the real lines and rejects
++    decimals.
++    """
++    s = content.strip()
++    if not s:
++        return False
++    if any(s.upper().startswith(m) for m in _NOTE_LINE_MARKERS):
++        return True
++    head, sep, rest = s.partition(".")
++    return (
++        head.isdigit()
++        and sep == "."
++        and rest[:1].isspace()
++        and bool(rest.strip())
++        and len(s) > 12
++    )
++
++
++
+ def scale_on_ladder(denom: int) -> bool:
+     """True when *denom* is a rung of the standard scale ladder (ISO 5455)."""
+     return denom in _SCALE_LADDER
++
++
++#: Minimum legible text height on PAPER, millimetres.
++TEXT_FLOOR_PAPER_MM = 1.8
++
++
++@dataclass(frozen=True)
++class LayoutChecks:
++    """The measurable layout verdicts required by the specification §5.
++
++    ``passed`` is the gate. A sub-check that does not apply to a sheet set (no
++    declared notes zone) is reported as not applicable rather than as a pass, so
++    the manifest can state what was and was not measured.
++    """
++
++    rendered: bool
++    clipping_ok: bool
++    title_block_ok: bool
++    notes_zone_declared: bool
++    notes_zone_ok: bool
++    scales_ok: bool
++    text_floor_ok: bool
++    min_text_height_paper_mm: float | None
++    details: dict[str, Any] = field(default_factory=dict)
++
++    @property
++    def passed(self) -> bool:
++        return (
++            self.rendered
++            and self.clipping_ok
++            and self.title_block_ok
++            and (self.notes_zone_ok if self.notes_zone_declared else True)
++            and self.scales_ok
++            and self.text_floor_ok
++        )
++
++
++def layout_checks(audit: LayoutAudit) -> LayoutChecks:
++    """Evaluate the required layout checks against a collected audit.
++
++    The text floor is normalised to PAPER millimetres by the ratio of the
++    measured sheet width to A1 (841 mm). Two unit policies coexist in this
++    codebase — a paper-space 1:1 sheet and a scaled model-space sheet — and the
++    ratio converts either to the paper size the check is stated in, instead of
++    silently trusting one policy.
++    """
++    heights: list[float] = []
++    for sheet, box in ((b.sheet, b) for b in audit.text_boxes):
++        if box.height <= 0:
++            continue
++        region = audit.sheet_regions.get(sheet)
++        if region is None or region.width <= 0:
++            continue
++        heights.append(box.height * (_SHEET_W_MM / region.width))
++    min_h = round(min(heights), 4) if heights else None
++
++    details = {
++        "sheets_audited": sorted(audit.sheet_regions),
++        "clipping_violations": audit.outside_frame,
++        "title_block_intrusions": audit.title_block_intrusions,
++        "notes_intrusions": audit.notes_intrusions,
++        "notes_zone_sheets": sorted(audit.notes_regions),
++        "title_block_sheets": sorted(audit.title_block_regions),
++        "printed_scales": sorted({d for _, d in audit.printed_scales}),
++        "text_floor_paper_mm": TEXT_FLOOR_PAPER_MM,
++    }
++    return LayoutChecks(
++        rendered=audit.rendered and not audit.error,
++        clipping_ok=audit.rendered and not audit.outside_frame,
++        title_block_ok=audit.rendered and not audit.title_block_intrusions,
++        notes_zone_declared=bool(audit.notes_regions),
++        notes_zone_ok=not audit.notes_intrusions,
++        scales_ok=bool(audit.printed_scales)
++        and all(scale_on_ladder(d) for _, d in audit.printed_scales),
++        text_floor_ok=min_h is not None and min_h >= TEXT_FLOOR_PAPER_MM - 1e-6,
++        min_text_height_paper_mm=min_h,
++        details=details,
++    )
+diff --git a/packages/bridgecad-draw/bridgecad_draw/sheet2_long_section.py b/packages/bridgecad-draw/bridgecad_draw/sheet2_long_section.py
+index bd21839..18c1fc7 100644
+--- a/packages/bridgecad-draw/bridgecad_draw/sheet2_long_section.py
++++ b/packages/bridgecad-draw/bridgecad_draw/sheet2_long_section.py
+@@ -205,13 +205,21 @@ def _draw_long_section(
+     pile_tip_rl = ls.pile_tip_rl
+ 
+     # The vertical fit must cover everything the sheet actually draws, not just
+-    # the hydraulic RLs: the pier shafts run down to ``HFL − pier_height_typical``
+-    # and the abutment shafts to ``soffit − abutment_height``.  On the PWD booklet
+-    # fixtures (which print no absolute RLs, so HFL/scour/pile-tip all resolve to
+-    # the same datum) those bases sit several metres below the old
+-    # ``min(pile_tip, scour)`` datum and the shafts — and their ``P1..Pn`` labels —
+-    # plotted 220–294 mm below the sheet frame.
+-    pier_base_rl = hfl_rl - float(sub.pier_height_typical_m or 8.0)
++    # the hydraulic RLs: the pier shafts run down to the canonical record's
++    # ``shaft_base_rl_m`` and the abutment shafts to ``soffit − abutment_height``.
++    # §3 forbids using HFL as the pier's height origin, so the old
++    # ``hfl_rl − pier_height`` expression survives ONLY as an explicit last
++    # resort for a record that genuinely carries no shaft base.
++    _record_shaft_bases = [
++        float(r.shaft_base_rl_m)
++        for r in ls.support_level_records
++        if r.shaft_base_rl_m is not None
++    ]
++    pier_base_rl = (
++        min(_record_shaft_bases)
++        if _record_shaft_bases
++        else hfl_rl - float(sub.pier_height_typical_m or 8.0)
++    )
+     abt_base_rl = soffit_rl - float(sub.abutment_height_m or 3.2)
+     rl_low = min(pile_tip_rl, scour_rl, pier_base_rl, abt_base_rl)
+     datum_rl = rl_low - 2.0  # baseline datum
+@@ -652,7 +660,21 @@ def _draw_long_section(
+         py_toc = vy(toc_rls[i]) if i < len(toc_rls) else (sof_y_mm - pier_ped_h)
+         py_cap_bot = py_toc - pier_cap_h  # cap bottom
+         py_shaft_top = py_cap_bot  # pier shaft top = cap bottom
+-        py_bot = vy(hfl_rl - float(sub.pier_height_typical_m or 8.0))
++        # §3: the pier base is the canonical record's ``shaft_base_rl_m``, not
++        # ``HFL − pier_height_typical`` (HFL is a hydraulic datum, not a pier's
++        # height origin). The old expression survives ONLY as an explicit last
++        # resort when the record genuinely carries no shaft base.
++        _rec_i = (
++            ls.support_level_records[i]
++            if i < len(ls.support_level_records)
++            else None
++        )
++        _shaft_base_rl = (
++            float(_rec_i.shaft_base_rl_m)
++            if _rec_i is not None and _rec_i.shaft_base_rl_m is not None
++            else hfl_rl - float(sub.pier_height_typical_m or 8.0)
++        )
++        py_bot = vy(_shaft_base_rl)
+ 
+         # Pier shaft (rectangle sits from shaft_top DOWN to base RL)
+         rectangle(msp, px, py_bot, pier_w_mm, py_shaft_top - py_bot, layer="SUB-PIER", lw=40)
+diff --git a/packages/bridgecad-draw/bridgecad_draw/sheet4_foundation.py b/packages/bridgecad-draw/bridgecad_draw/sheet4_foundation.py
+index 87a8c22..928b74b 100644
+--- a/packages/bridgecad-draw/bridgecad_draw/sheet4_foundation.py
++++ b/packages/bridgecad-draw/bridgecad_draw/sheet4_foundation.py
+@@ -192,20 +192,58 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
+     # ``pile_cutoff_level_m`` is its underside and ``pile_cap_thickness_mm`` its
+     # thickness. When the record cannot resolve the foundation (a missing
+     # thickness or cutoff), the sheet falls back to the raw model values so it
+-    # still renders a draft, but the level then carries no approved datum.
++    # still renders a draft, but the level then carries no supplied founding datum.
+     from bridgecad_core.geometry.long_section import typical_pier_support_level
++    from bridgecad_core.geometry.support_levels import ResolutionStatus
+ 
+     _prec = typical_pier_support_level(project)
+-    if _prec.footing_top_rl_m is not None:
++    # Use the canonical footing ONLY when the record is RESOLVED *and* carries a
++    # COMPLETE footing (top, bottom and depth all present). A record can hold all
++    # three fields and still be rejected — a CONFLICT pair (a supplied shaft
++    # height disagreeing with the derived one) fills them in — so testing the
++    # fields alone would draw an apparently complete footing from a rejected
++    # contract. Neither a conflict nor an unresolved record is drawn; both are
++    # marked below instead. (The old `footing_top is not None` test would also
++    # `float(None)`-crash whenever only the top was present.)
++    _has_complete_footing = (
++        _prec.status is ResolutionStatus.RESOLVED
++        and _prec.footing_top_rl_m is not None
++        and _prec.footing_bottom_rl_m is not None
++        and _prec.footing_depth_m is not None
++    )
++    if _has_complete_footing:
+         pile_cut = float(_prec.footing_bottom_rl_m)
+         cap_thk = float(_prec.footing_depth_m)
+         cap_top = float(_prec.footing_top_rl_m)
+     else:
+-        pile_cut = float(fd.pile_cutoff_level_m or 0) if fd.pile_cutoff_level_m else scour_rl + 2.0
++        # Fit-only placeholders so the view can still be scaled: these are NOT
++        # used to draw a footing (the elevation block is gated below).
++        pile_cut = (
++            float(fd.pile_cutoff_level_m)
++            if fd.pile_cutoff_level_m is not None
++            else scour_rl + 2.0
++        )
+         cap_thk = float(fd.pile_cap_thickness_mm or 1500) / 1000.0
+         cap_top = pile_cut + cap_thk
+     pile_tip = pile_cut - pile_len
+ 
++    if not _has_complete_footing:
++        # A visible UNRESOLVED/CONFLICT marking: a contract that has not been
++        # resolved to a RESOLVED footing must never be drawn as an apparently
++        # complete footing whose levels came from a fallback.
++        _codes = ", ".join(i.code for i in _prec.issues) or "no footing data"
++        text(
++            msp,
++            f"PIER FOOTING LEVELS {_prec.status.value} ({_codes}) — "
++            "footing not drawn",
++            elev_cx,
++            185.0,
++            height=th * 0.9,
++            layer="TEXT-SPEC",
++            halign="CENTER",
++            color=1,
++        )
++
+     _EV_BOT = 200.0  # paper y of the pile tip (just above the inset band)
+     _EV_TOP = 560.0  # highest paper y the elevation may occupy
+     _ev_extent_m = max(1.0, (cap_top - pile_tip) + cap_thk * 2.2)
+@@ -374,8 +412,12 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
+         n_weep_geom = math.ceil(abt_l / limits.WEEP_HOLE_SPACING_M)
+     n_weep_inset = max(1, n_weep_geom)
+ 
+-    # A2 on the right (+x rear face), A1 offset 150 mm to its left (-x rear)
+-    for label, sgn, i_cx in (("A2", +1.0, 680.0), ("A1", -1.0, 530.0)):
++    # A2 on the right (+x rear face), A1 offset 150 mm to its left (-x rear).
++    # The band sits in the free bottom-CENTRE strip: the A1 title block reserves
++    # the bottom-right corner (x 646-831, y 10-65 at 185x55), so an inset placed
++    # at the old x=680 drew its cap/dirt-wall outlines and STRUC-HATCHING fill
++    # straight through the title block — the layout gate's title_block_ok=False.
++    for label, sgn, i_cx in (("A2", +1.0, 450.0), ("A1", -1.0, 300.0)):
+         i_y0 = 60.0
+ 
+         # Shaft (plan rectangle)
+diff --git a/packages/bridgecad-draw/bridgecad_draw/sheet5_pier_abutment_details.py b/packages/bridgecad-draw/bridgecad_draw/sheet5_pier_abutment_details.py
+index 0e0f8f9..a780882 100644
+--- a/packages/bridgecad-draw/bridgecad_draw/sheet5_pier_abutment_details.py
++++ b/packages/bridgecad-draw/bridgecad_draw/sheet5_pier_abutment_details.py
+@@ -89,7 +89,18 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
+     # ══════════════════════════════════════════════════════════════════════
+     pier_cx = 140.0
+     pier_by = 250.0
+-    pier_h = float(sub.pier_height_typical_m or 8.0)
++    # §3 — the pier shaft height is the canonical support record's
++    # ``shaft_height_m`` (the same value the long section and Side Elevations
++    # draw), not an independently re-read model field. The model value stands in
++    # only when the contract could not resolve a height at all.
++    from bridgecad_core.geometry.long_section import typical_pier_support_level
++
++    _prec = typical_pier_support_level(project)
++    pier_h = (
++        float(_prec.shaft_height_m)
++        if _prec.shaft_height_m is not None
++        else float(sub.pier_height_typical_m or 8.0)
++    )
+     pier_sw = float(sub.pier_shaft_width_m or 1.5)
+     pier_sl = float(sub.pier_shaft_length_m or 11.5)
+     cap_w = float(sub.pier_cap_width_m or 2.0)
+diff --git a/packages/bridgecad-draw/bridgecad_draw/sheet8_side_elevations.py b/packages/bridgecad-draw/bridgecad_draw/sheet8_side_elevations.py
+index 8bfdabe..263053c 100644
+--- a/packages/bridgecad-draw/bridgecad_draw/sheet8_side_elevations.py
++++ b/packages/bridgecad-draw/bridgecad_draw/sheet8_side_elevations.py
+@@ -168,8 +168,17 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
+     # If pile foundation, abutment sits on pile cap top (= pile_cut + pile_cap_t)
+     if "PILE" in found_type:
+         # §3 — the pile-cap top is the canonical record's footing top, not a
+-        # local re-add of the two pile-cap inputs.
+-        _foot_top = stack.record.footing_top_rl_m if stack.record else None
++        # local re-add of the two pile-cap inputs. Only a RESOLVED record has a
++        # meaningful footing top: a CONFLICT/UNRESOLVED record can still carry
++        # the field, and drawing it would publish a rejected level.
++        from bridgecad_core.geometry.support_levels import ResolutionStatus
++
++        _foot_top = (
++            stack.record.footing_top_rl_m
++            if stack.record is not None
++            and stack.record.status is ResolutionStatus.RESOLVED
++            else None
++        )
+         pile_cap_top_rl = (
+             float(_foot_top) if _foot_top is not None else pile_cut_rl + pile_cap_t_m
+         )
+@@ -322,6 +331,15 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
+             if _prec is not None and _prec.cap_bottom_rl_m is not None
+             else pier_cap_top_rl - pier_cap_d_m
+         )
++        # §3 — the shaft base is the canonical record's ``shaft_base_rl_m``, not
++        # a locally re-derived ``cap_bottom − 6.0 m``. The old hard-coded height
++        # put this transverse view's pier base at a different RL than the long
++        # section. ``None`` only when the record genuinely carries no base.
++        pier_shaft_base_rl = (
++            float(_prec.shaft_base_rl_m)
++            if _prec is not None and _prec.shaft_base_rl_m is not None
++            else None
++        )
+         _draw_pier_transverse(
+             msp,
+             v2hx,
+@@ -360,6 +378,7 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
+             sof_rl,
+             pier_cap_top_rl,
+             pier_cap_bot_rl,
++            pier_shaft_base_rl,
+             hfl_rl,
+             scour_rl,
+             found_type,
+@@ -1131,6 +1150,7 @@ def _draw_pier_transverse(
+     sof_rl,
+     cap_top_rl,
+     cap_bot_rl,
++    shaft_base_rl,
+     hfl_rl,
+     scour_rl,
+     found_type,
+@@ -1138,9 +1158,10 @@ def _draw_pier_transverse(
+ ):
+     """Pier transverse cut (Section B-B): deck + girder + bearings + cap + shaft + piles.
+ 
+-    ``cap_top_rl`` / ``cap_bot_rl`` are the canonical §3 pier-cap datums from
+-    ``ls.support_level_records`` — not re-derived here from pedestal + cap depth,
+-    so a declared bearing depth shifts this view with the long section.
++    ``cap_top_rl`` / ``cap_bot_rl`` / ``shaft_base_rl`` are the canonical §3 pier
++    datums from ``ls.support_level_records`` — not re-derived here from pedestal
++    + cap depth or a hard-coded 6 m height, so a declared bearing depth or shaft
++    height shifts this view together with the long section.
+     """
+ 
+     # ── Header label ───────────────────────────────────────────────────────
+@@ -1305,8 +1326,16 @@ def _draw_pier_transverse(
+ 
+     # ── Pier shaft ────────────────────────────────────────────────────────
+     shaft_y_top = cap_y_bot
++    # §3 — the shaft base RL is canonical. ``None`` only when the record carries
++    # no base, in which case the historical ``cap_bottom − 6 m`` is a last resort.
+     shaft_y_bot = (
+-        vvy(pile_cut_rl + pile_cap_t_m) if "PILE" in found_type else (cap_y_bot - 6.0 * sc)
++        vvy(pile_cut_rl + pile_cap_t_m)
++        if "PILE" in found_type
++        else (
++            vvy(shaft_base_rl)
++            if shaft_base_rl is not None
++            else (cap_y_bot - 6.0 * sc)
++        )
+     )
+     sh_half_w_l = pier_shaft_l_m / 2.0
+     rectangle(
+@@ -1395,7 +1424,7 @@ def _draw_pier_transverse(
+         ("T.O.D. / FORMATION RL", tod_rl),
+         ("SOFFIT RL", sof_rl),
+         ("TOP OF PIER CAP RL", cap_top_rl),
+-        ("BASE OF PIER SHAFT", shaft_y_bot if shaft_y_bot else pile_cut_rl),
++        ("BASE OF PIER SHAFT", shaft_base_rl if shaft_base_rl is not None else pile_cut_rl),
+     ]
+     if "PILE" in found_type:
+         levels += [
+diff --git a/packages/bridgecad-io/bridgecad_io/excel_reader.py b/packages/bridgecad-io/bridgecad_io/excel_reader.py
+index 0df8a7b..30e978f 100644
+--- a/packages/bridgecad-io/bridgecad_io/excel_reader.py
++++ b/packages/bridgecad-io/bridgecad_io/excel_reader.py
+@@ -775,10 +775,21 @@ def read_excel(path: str | Path) -> BridgeProject:
+         gi_kwargs["chainage_unit"] = t.ChainageUnit.METER
+ 
+     ss_kwargs = kwargs.setdefault("superstructure", {})
+-    if ss_kwargs.get("type") is None:
++    _type_was_blank = ss_kwargs.get("type") is None
++    if _type_was_blank:
+         ss_kwargs["type"] = t.SuperstructureType.RCC_TBEAM
+     if ss_kwargs.get("deck_material") is None:
+         ss_kwargs["deck_material"] = t.ConcreteGrade.M30
++    # The defaulted RCC_TBEAM above is girder-bearing, and the model validator
++    # requires girder dimensions for that family. A blank workbook leaves those
++    # cells empty, so mirror the prefills the legacy reader and the template
++    # generator use (girder_depth_mm=1200, spacing 2.5 m, 4 per deck). When the
++    # workbook *did* choose a type, its own girder cells must stand on their own
++    # — an explicitly chosen girder type with blank dimensions stays an error.
++    if _type_was_blank:
++        ss_kwargs.setdefault("girder_depth_mm", 1200)
++        ss_kwargs.setdefault("girder_spacing_m", Decimal("2.5"))
++        ss_kwargs.setdefault("girders_per_deck_count", 4)
+ 
+     sub_kwargs = kwargs.setdefault("substructure", {})
+     if sub_kwargs.get("pier_type") is None:
+diff --git a/packages/bridgecad-qa/bridgecad_qa/__init__.py b/packages/bridgecad-qa/bridgecad_qa/__init__.py
+index 62b7d40..2c5ab72 100644
+--- a/packages/bridgecad-qa/bridgecad_qa/__init__.py
++++ b/packages/bridgecad-qa/bridgecad_qa/__init__.py
+@@ -8,6 +8,7 @@ from .compliance_engine import (
+     build_compliance_report,
+     calc_sheet_markdown,
+ )
++from .quality_manifest import Gate, QualityIssue, QualityManifest, Verdict
+ from .reports import generate_html_report
+ from .rules_engine import run_qa
+ 
+@@ -22,4 +23,8 @@ __all__ = [
+     "ComplianceReport",
+     "build_compliance_report",
+     "calc_sheet_markdown",
++    "Gate",
++    "Verdict",
++    "QualityIssue",
++    "QualityManifest",
+ ]
+diff --git a/scripts/generate_all_pwd_gads.py b/scripts/generate_all_pwd_gads.py
+index ced97c7..139f9a3 100644
+--- a/scripts/generate_all_pwd_gads.py
++++ b/scripts/generate_all_pwd_gads.py
+@@ -25,7 +25,9 @@ from __future__ import annotations
+ import argparse
+ import json
+ import math
++import shutil
+ import sys
++import tempfile
+ from decimal import Decimal
+ from pathlib import Path
+ 
+@@ -184,7 +186,11 @@ def _build_project(params: dict):
+         type=sst,
+         deck_material=T.ConcreteGrade.M30,
+         deck_thickness_mm=_int(params.get("deck_thickness_mm", 500)),
+-        wearing_coat_thickness_mm=65,
++        wearing_coat_thickness_mm=_int(params.get("wearing_coat_thickness_mm", 65)),
++        # An undeclared bearing height stays ``None`` so the canonical contract
++        # marks the seat ASSUMED instead of inventing a unit; 0 means a
++        # monolithic / integral joint with no bearing pad.
++        bearing_depth_mm=_int(params.get("bearing_depth_mm")),
+         girder_depth_mm=_int(params.get("girder_depth_mm", 0)),
+         girder_spacing_m=_dec(params.get("girder_spacing_m", 2.5)),
+         girders_per_deck_count=_int(params.get("girders_per_deck", 0)),
+@@ -208,7 +214,7 @@ def _build_project(params: dict):
+         pier_shaft_length_m=cross_len,
+         pier_cap_depth_m=_dec(params.get("pier_cap_depth_m", 0.8)),
+         pier_cap_width_m=Decimal(str(round(float(params.get("pier_shaft_width_m", 1.5)) * 1.3, 3))),
+-        pier_pedestal_height_m=Decimal("0.15"),
++        pier_pedestal_height_m=_dec(params.get("pier_pedestal_height_m", 0.15)),
+         abutment_type=abt,
+         abutment_material=T.ConcreteGrade.M25,
+         abutment_width_m=Decimal("1.2"),
+@@ -235,8 +241,28 @@ def _build_project(params: dict):
+         pile_length_m=_dec(params.get("pile_length_m", 0)),
+         piles_per_pier=_int(params.get("piles_per_pier")) or None,
+         pile_spacing_m=Decimal("2.5"),
+-        pile_cap_thickness_mm=_int(1500 if params["foundation_type"] == "PILE" else 0),
+-        pile_cutoff_level_m=hfl - Decimal("1.0"),
++        # Footing thickness is a design dial.  Absent it the historical default
++        # stands (1.5 m for PILE, 0 / NA otherwise) so an unsupplied footing
++        # stays a MISSING dimension and the contract cannot pretend to resolve.
++        pile_cap_thickness_mm=_int(
++            params["pile_cap_thickness_mm"]
++            if params.get("pile_cap_thickness_mm") is not None
++            else (1500 if params["foundation_type"] == "PILE" else 0)
++        ),
++        # Rule-of-thumb embedment datum: carried through as a reference surface
++        # only, never conflated with the founding level.
++        pile_cutoff_level_m=(
++            _dec(params["pile_cutoff_level_m"])
++            if params.get("pile_cutoff_level_m") is not None
++            else hfl - Decimal("1.0")
++        ),
++        # EXPLICITLY SUPPLIED founding RL.  This is the one input that, together
++        # with a footing thickness, switches the canonical contract to
++        # LEVEL_CONTROLLED (shaft height derived).  It is not an engineering
++        # approval: structural adequacy is a separate human verdict.  Absent by
++        # default — the booklet does not state a founding level, so the honest
++        # default stays HEIGHT_CONTROLLED.
++        footing_bottom_rl_m=_dec(params.get("footing_bottom_rl_m")),
+         well_diameter_m=_dec(params.get("well_diameter_m")),
+         # Box-cell identity (booklet 004).  ``None`` for every other type, and
+         # the box-cell panel on sheet 4 then does not draw.
+@@ -405,37 +431,120 @@ def _canonicalise(sheets: list[Path]) -> None:
+         write_deterministic(ezdxf.readfile(str(s)), s)
+ 
+ 
++def _support_level_chain(project) -> dict:
++    """The canonical §3 named RL chain, per support, for ``params.resolved.json``.
++
++    Exposing the chain (rather than only the scalar ``foundation_level`` dial)
++    lets a variant be compared level-for-level — the ``VAR-SUPPORT-LEVELS``
++    check — instead of by eye.  It is read from the same resolver the sheets
++    consume, so a renderer cannot drift from the evidence.
++    """
++    from bridgecad_core.geometry.long_section import (
++        compute_long_section_geometry,
++        typical_pier_support_level,
++    )
++
++    ls = compute_long_section_geometry(project)
++
++    def _record(r) -> dict:
++        return {
++            "support_id": r.support_id,
++            "status": r.status.value,
++            "authority": r.authority.value,
++            "topology": r.topology.value,
++            "levels_m": {k: (None if v is None else str(v)) for k, v in r.levels().items()},
++            "shaft_height_m": str(r.shaft_height_m),
++            "footing_depth_m": None if r.footing_depth_m is None else str(r.footing_depth_m),
++            "provenance": {k: v.value for k, v in r.provenance.items()},
++            "issues": [
++                {"code": i.code, "field": i.field_name, "message": i.message}
++                for i in r.issues
++            ],
++        }
++
++    return {
++        "typical": _record(typical_pier_support_level(project)),
++        "supports": [_record(r) for r in ls.support_level_records],
++    }
++
++
+ def generate_one(params: dict, out_root: Path,
+                  label: str | None = None, *, render_paper: str = "A2",
+-                 render_orientation: str = "landscape") -> tuple[str, bool, str]:
++                 render_orientation: str = "landscape",
++                 commit: str = "",
++                 publish: bool = True) -> tuple[str, bool, str]:
+     """Generate one variant into ``out_root/<label>``.
+ 
+     Returns ``(label, success, message)``.
+-    """
+-    from bridgecad_draw.booklet import generate_package
+ 
++    Generation is transactional: the sheets are drawn in a temporary directory
++    beside the destination and only moved into ``out_root/<label>`` once the
++    required generation checks have passed.  A run that fails publishes its
++    partial output only under ``out_root/<label>/FAILED-RUN`` with a
++    ``FAILED-RUN.txt`` beside it — never as a package — and the label directory
++    is replaced wholesale, so partial output from a failed run cannot be
++    mistaken for a package nor mixed with a previous run's files.
++
++    ``publish=False`` is for callers that stage and publish themselves (see
++    ``artifacts/gad-acceptance/_gen_nine_span.py``, which passes its own
++    temporary ``out_root``); it writes straight into ``out_root/<label>`` and
++    leaves publication to the caller.
++    """
+     label = label or params["id"]
+-    out_dir = out_root / label
++    out_root = Path(out_root)
++    out_root.mkdir(parents=True, exist_ok=True)
++    stage_root = (
++        Path(tempfile.mkdtemp(prefix=f".gen-{label}-", dir=str(out_root)))
++        if publish else out_root
++    )
++    out_dir = stage_root / label
+     out_dir.mkdir(parents=True, exist_ok=True)
+ 
+-    # Provenance: the exact resolved set (and the trace that produced it) that
+-    # the sheets in this folder were drawn from.
+-    (out_dir / "params.resolved.json").write_text(
+-        json.dumps({"resolved": params, "trace": params.trace,
+-                    "warnings": params.warnings}, indent=2, default=str),
+-        encoding="utf-8",
+-    )
++    ok, msg = _draw_into(out_dir, params, label,
++                         render_paper=render_paper,
++                         render_orientation=render_orientation,
++                         commit=commit)
++    if publish:
++        _publish(out_root / label, out_dir, ok=ok, label=label,
++                 commit=commit, message=msg)
++        shutil.rmtree(stage_root, ignore_errors=True)
++    return label, ok, msg
++
+ 
++def _draw_into(out_dir: Path, params: dict, label: str, *, render_paper: str,
++               render_orientation: str, commit: str) -> tuple[bool, str]:
++    """Draw the package into *out_dir*; return ``(ok, message)``."""
++    from bridgecad_draw.booklet import generate_package
++
++    build_error: str | None = None
++    project = None
+     try:
+         project = _build_project(params)
+     except Exception as exc:
+-        return label, False, f"build failed: {exc}"
++        build_error = f"build failed: {exc}"
++
++    # Provenance: the exact resolved set (and the trace that produced it) that
++    # the sheets in this folder were drawn from, plus the canonical named RL
++    # chain.  Written even when the build failed, so a failure still leaves the
++    # inputs that produced it.
++    payload: dict = {"resolved": params, "trace": params.trace, "warnings": params.warnings}
++    if project is not None:
++        try:
++            payload["support_levels"] = _support_level_chain(project)
++        except Exception as exc:
++            payload["support_levels"] = {"error": f"{type(exc).__name__}: {exc}"}
++    (out_dir / "params.resolved.json").write_text(
++        json.dumps(payload, indent=2, default=str),
++        encoding="utf-8",
++    )
++    if project is None:
++        return False, build_error or "build failed"
+ 
+     try:
+         sheets = generate_package(project, out_dir, prefix=label)
+         _canonicalise(sheets)
+     except Exception as exc:
+-        return label, False, f"DXF failed: {type(exc).__name__}: {exc}"
++        return False, f"DXF failed: {type(exc).__name__}: {exc}"
+ 
+     issues = _check_completeness(sheets)
+     import os
+@@ -453,8 +562,53 @@ def generate_one(params: dict, out_root: Path,
+     dxf_kb = sum(s.stat().st_size for s in sheets) // 1024
+     _write_readme(out_dir, params, sheets, issues, dxf_kb)
+ 
++    # §4 — a fail-closed gate manifest travels with every package. Only the two
++    # gates this script can measure for itself are set; every other gate keeps
++    # the manifest's fail-closed default (UNRESOLVED / NOT_TESTED / PENDING), so
++    # an unmeasured gate can never read as a passed one. The acceptance-side
++    # driver (artifacts/gad-acceptance/_gen_nine_span.py) is what fills the
++    # measured model/geometry/layout gates in.
++    from bridgecad_qa.quality_manifest import Gate, QualityManifest, Verdict
++
++    manifest = QualityManifest(fixture=params["id"], commit=commit)
++    manifest.set(Gate.GENERATION, Verdict.SUCCEEDED)
++    manifest.set(
++        Gate.REQUIRED_CONTENT,
++        Verdict.FAILED if issues else Verdict.PASSED,
++        f"{len(issues)} completeness issue(s)" if issues
++        else f"{len(sheets)} sheets, each >= {MIN_ENTITIES} entities",
++    )
++    for issue in issues:
++        manifest.add_issue(Gate.REQUIRED_CONTENT, "E-SHEET-CONTENT", issue)
++    (out_dir / "quality.json").write_text(
++        json.dumps(manifest.to_json(), indent=2), encoding="utf-8")
++
+     status = "STRUCTURAL PASS (reference fidelity not verified)" if not issues else "FAIL"
+-    return label, not issues, f"{status} — {len(sheets)} sheets, {dxf_kb} KB, {len(issues)} issue(s)"
++    return not issues, f"{status} — {len(sheets)} sheets, {dxf_kb} KB, {len(issues)} issue(s)"
++
++
++def _publish(final: Path, staged: Path, *, ok: bool, label: str, commit: str,
++             message: str) -> None:
++    """Move *staged* into *final*, or label it as failed-run evidence.
++
++    The destination is replaced wholesale in both cases: a successful run must
++    not inherit a previous run's sheet files, and a failed run must not inherit
++    a previous run's *successful* package.
++    """
++    if final.exists():
++        shutil.rmtree(final)
++    if ok:
++        shutil.move(str(staged), str(final))
++        return
++    failed_dir = final / "FAILED-RUN"
++    failed_dir.parent.mkdir(parents=True, exist_ok=True)
++    shutil.move(str(staged), str(failed_dir))
++    (final / "FAILED-RUN.txt").write_text(
++        "FAILED-RUN: this directory contains partial output from a generation "
++        "that did not complete.  It is not a deliverable package.\n"
++        f"label={label}\ncommit={commit}\nmessage={message}\n",
++        encoding="utf-8",
++    )
+ 
+ 
+ def _write_index(root: Path, jobs: list[tuple[dict, str]], failed: set[str]) -> None:
+diff --git a/scripts/prove_detection.py b/scripts/prove_detection.py
+index 10d4133..6601298 100644
+--- a/scripts/prove_detection.py
++++ b/scripts/prove_detection.py
+@@ -39,6 +39,14 @@ ROOT = Path(__file__).resolve().parent.parent
+ INTEGRITY = "tests/docs/test_doc_integrity.py"
+ 
+ # Heavy or generated — never worth copying.
++#
++# The harness copies the whole tree once per mutation (19 copies including the
++# control). Measured on the Windows checkout, the ignore set below still left
++# 7859 files / 303 MB per copy ≈ 45 s each — the copying alone exceeds the
++# 900 s budget of the combined-run test, before a single guard runs. Only
++# markdown, YAML/TOML config and small script/text files are ever read by the
++# documentation guards, so the generated/vendored trees listed here and the
++# binary extensions in ``_IGNORE_EXT`` are pure I/O for this proof.
+ IGNORE_DIRS = frozenset(
+     {
+         ".git",
+@@ -54,11 +62,42 @@ IGNORE_DIRS = frozenset(
+         ".benchmarks",
+         "03_outputs",
+         "outputs",
++        "output",
++        "out",
+         "test_run_sample",
+         "TEST_RUN_OUTPUT",
+         "docs/api/_build",
+         "dist",
+         "CODE-JUNCTION",
++        # Generated / vendored / tooling trees with no product documentation.
++        # NOTE: do NOT add "ATTACHED ASSETS" here — it holds the .md files that
++        # README.md links to, so excluding it makes the control run fail on a
++        # "dead link" that is only dead inside the copy. Its heavy .pdf is
++        # already dropped by _IGNORE_EXT.
++        "vendor",
++        ".agents",
++        ".hypothesis",
++        "sample-gad-drawings",
++        "learn-media",
++        ".deps",
++        ".verify",
++        "temp",
++    }
++)
++
++#: Binary asset types no documentation guard parses. Copied per mutation would
++#: otherwise dominate the run: on the current tree .pdf/.dxf/.dll/.pyd/.png
++#: alone are ~220 MB of the 303 MB kept copy.
++_IGNORE_EXT = frozenset(
++    {
++        ".pdf", ".dxf", ".dwg", ".dgn", ".step", ".stp", ".igs", ".iges", ".stl",
++        ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tif", ".tiff", ".ico", ".webp",
++        ".mp4", ".mov", ".avi", ".webm", ".mkv", ".mp3", ".wav",
++        ".zip", ".tar", ".gz", ".7z", ".whl",
++        ".dll", ".pyd", ".so", ".dylib", ".exe", ".msi", ".bin", ".lib", ".pdb",
++        ".pyc", ".pyo", ".class", ".jar",
++        ".ttf", ".otf", ".woff", ".woff2", ".eot",
++        ".xlsx", ".xls", ".docx", ".pptx",
+     }
+ )
+ 
+@@ -319,7 +358,13 @@ MUTATIONS: list[Mutation] = [
+ 
+ # ── harness ──────────────────────────────────────────────────────────────────
+ def _ignore(_dir: str, names: list[str]) -> list[str]:
+-    return [n for n in names if n in IGNORE_DIRS or n.endswith(".egg-info")]
++    return [
++        n
++        for n in names
++        if n in IGNORE_DIRS
++        or n.endswith(".egg-info")
++        or Path(n).suffix.lower() in _IGNORE_EXT
++    ]
+ 
+ 
+ def _copy(dest: Path) -> Path:
+diff --git a/tests/draw/test_qa_audit_rows.py b/tests/draw/test_qa_audit_rows.py
+index e9a3db8..c712f4c 100644
+--- a/tests/draw/test_qa_audit_rows.py
++++ b/tests/draw/test_qa_audit_rows.py
+@@ -195,6 +195,33 @@ def test_bbox_overlap_semantics():
+     assert a.overlaps(BBox(11, 0, 20, 10), tol=0.5) is False
+ 
+ 
++def test_region_intersects_semantics():
++    from bridgecad_draw.layout_audit import Region
++
++    a = Region(0, 0, 10, 10)
++    assert a.as_tuple() == (0.0, 0.0, 10.0, 10.0)
++    assert a.intersects(Region(5, 5, 15, 15)) is True
++    assert a.intersects(Region(11, 0, 20, 10)) is False
++
++
++def test_note_line_classifier_rejects_decimals_but_keeps_notes():
++    """A decimal is not a numbered note.
++
++    ``"10.0 m (eff 9.7)"`` is a span-length *dimension* label drawn on the
++    longitudinal section. Treating it as a note manufactured a phantom notes
++    zone across that sheet's deck hatching and reported the hatching as an
++    intrusion — a layout failure on a sheet that drew no notes.
++    """
++    from bridgecad_draw.layout_audit import _is_note_line
++
++    assert _is_note_line("10.0 m (eff 9.7)") is False
++    assert _is_note_line("10.0 m") is False
++    assert _is_note_line("93.425") is False
++    assert _is_note_line("") is False
++    assert _is_note_line("1. Quantities are preliminary") is True
++    assert _is_note_line("NOTES") is True
++
++
+ # ── the audit reads the rendered DXF, not the intent ────────────────────────
+ def test_enabled_audit_renders_and_reads_the_document(baseline):
+     from bridgecad_draw import layout_audit as la
+diff --git a/tests/pwd/booklet_oracle.json b/tests/pwd/booklet_oracle.json
+index 482b4c4..6cbe62c 100644
+--- a/tests/pwd/booklet_oracle.json
++++ b/tests/pwd/booklet_oracle.json
+@@ -259,7 +259,7 @@
+       "foundation_type": "OPEN",
+       "superstructure_type": "RCC_ARCH",
+       "superstructure_member": "RCC_ARCH_OPEN_SPANDREL",
+-      "approximation": false,
++      "approximation": true,
+       "plan": {
+         "must_contain": ["STRUC-OUTLINE", "SUPER-DECK", "SUB-ABUT", "SUB-DIRT-WALL", "SUB-PIER"],
+         "must_not_contain": ["SUB-BEARING", "FOUND-PILE", "FOUND-WELL"]
+@@ -278,7 +278,7 @@
+       "foundation_type": "OPEN",
+       "superstructure_type": "RCC_ARCH",
+       "superstructure_member": "PRECAST_ARCH",
+-      "approximation": false,
++      "approximation": true,
+       "plan": {
+         "must_contain": ["STRUC-OUTLINE", "SUPER-DECK", "SUB-ABUT", "SUB-DIRT-WALL"],
+         "must_not_contain": ["SUB-PIER", "SUB-BEARING", "FOUND-PILE", "FOUND-WELL"]
+diff --git a/tests/pwd/test_booklet_oracle.py b/tests/pwd/test_booklet_oracle.py
+index cc32250..8137840 100644
+--- a/tests/pwd/test_booklet_oracle.py
++++ b/tests/pwd/test_booklet_oracle.py
+@@ -15,11 +15,13 @@ Maharashtra PWD booklet:
+   draws no ``SUB-BEARING``; a single-span arch has no ``SUB-PIER``).
+ 
+ Types 004 / 014 / 015 used to be carried without their family primitive
+-(multi-unit box cell, arch coordinate schedule, precast-block arch), so they
+-were checked for identity and honesty rather than for a primitive that did not
+-exist.  All three now carry that primitive and are drawn from it, so the
+-``approximation`` flag is false for every type and this lane checks each type's
+-own layers.
++(multi-unit box cell, arch coordinate schedule, precast-block arch).  004 now
++carries its lattice primitive and is not flagged.  014 / 015 draw their own arch
++primitives too, but are still flagged ``approximation`` because their structural
++depth is carried in the arch rise, not the deck slab, so the girder/slab
++span/depth governor does not apply to them.  The ``approximation`` flag means
++"span/depth governor not applied" here; the family primitive is still enforced
++by the ``must_contain`` layer checks below.
+ 
+ Run:  pytest tests/pwd/test_booklet_oracle.py -q
+ """
+@@ -145,11 +147,13 @@ def test_foundation_sheet_shows_the_booklet_layers(tid, drawn):
+ 
+ @pytest.mark.parametrize("tid", sorted(EXPECTED))
+ def test_no_type_is_drawn_without_its_primitive(tid, drawn):
+-    """A type carried without its family primitive must say so, not pass silently.
++    """A type drawn without the full engine path must say so, not pass silently.
+ 
+-    Every booklet type now draws from its own primitive, so the ``approximation``
+-    flag is false throughout — this is the guard against a regression that
+-    quietly drops a family back onto the generic fallback.
++    Where the booklet expects the girder/slab span/depth governor to apply, the
++    ``approximation`` flag must be absent — the guard against a family quietly
++    dropping back onto the generic fallback.  An arch carries its span in thrust,
++    so its governor is inapplicable and it must be flagged *and* carry a fidelity
++    note and a warning; its primitive is still checked by the layer tests above.
+     """
+     exp = EXPECTED[tid]
+     params = drawn[tid]["params"]
+diff --git a/tests/unit/test_support_levels.py b/tests/unit/test_support_levels.py
+index 2db41be..ec37d8a 100644
+--- a/tests/unit/test_support_levels.py
++++ b/tests/unit/test_support_levels.py
+@@ -281,28 +281,40 @@ def test_abutment_stack_shares_the_canonical_soffit(span_variant):
+ 
+ 
+ def test_typical_pier_foundation_level_reads_the_canonical_contract(project, span_variant):
+-    """Sheet 4 (foundation) reads its pile-cap top from the canonical record.
+-
+-    Sheet 4 used to compute ``cap_top = pile_cutoff + cap_thickness`` itself.
+-    That is the record's own ``footing_top = footing_bottom + footing_depth``,
+-    so it must come from one place. The single-span fixture has no intermediate
+-    pier, so the *nominal* typical-pier record must still resolve the same
+-    founding levels; the nine-span variant's real P1 must agree.
++    """Sheet 4 (foundation) reads its pile-cap (footing) from the canonical record.
++
++    The model supplies a pier HEIGHT and NO supplied founding RL: the modelled
++    ``pile_cutoff_level_m`` is a rule-of-thumb embedment datum, not a designed
++    founding level, so it must NOT be handed to the resolver as the footing
++    bottom. The honest authority is therefore HEIGHT_CONTROLLED — the record
++    derives the shaft base from the supplied height and PROPOSES the founding RL
++    from the footing thickness, marking it ``W-PROPOSED-FOUNDING`` and reporting
++    UNRESOLVED (a proposed level is not a designed one). Sheet 4 draws the same
++    ``footing_top``; the single-span nominal record and the nine-span P1 agree.
+     """
+     from bridgecad_core.geometry.long_section import typical_pier_support_level
+ 
+     fd = project.foundation_details
+-    bottom = D(str(fd.pile_cutoff_level_m))
++    cutoff_datum = D(str(fd.pile_cutoff_level_m))
+     depth = D(str(fd.pile_cap_thickness_mm)) / D("1000")
++    height = D(str(project.substructure.pier_height_typical_m))
+ 
+     single = typical_pier_support_level(project)
+-    assert single.footing_bottom_rl_m == bottom
++    assert single.authority is AuthorityMode.HEIGHT_CONTROLLED
++    assert single.shaft_height_m == height
+     assert single.footing_depth_m == depth
+-    assert single.footing_top_rl_m == bottom + depth
++    assert single.footing_bottom_rl_m == single.footing_top_rl_m - depth
++    assert single.provenance["footing_bottom_rl_m"] is FieldSource.PROPOSED
++    # the modelled embedment datum is NOT a designed founding level
++    assert single.footing_bottom_rl_m != cutoff_datum
++    assert any(i.code == "W-PROPOSED-FOUNDING" for i in single.issues)
++    assert single.status is ResolutionStatus.UNRESOLVED
+ 
+     nine = typical_pier_support_level(span_variant([10] * 9))
+     assert nine.support_id == "P1"
+-    assert nine.footing_top_rl_m == bottom + depth
++    assert nine.authority is AuthorityMode.HEIGHT_CONTROLLED
++    assert nine.footing_depth_m == depth
++    assert nine.footing_top_rl_m == nine.footing_bottom_rl_m + depth
+ 
+ 
+ def test_drawing_conversion_is_the_only_float_boundary():

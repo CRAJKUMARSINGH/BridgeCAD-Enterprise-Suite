@@ -775,10 +775,21 @@ def read_excel(path: str | Path) -> BridgeProject:
         gi_kwargs["chainage_unit"] = t.ChainageUnit.METER
 
     ss_kwargs = kwargs.setdefault("superstructure", {})
-    if ss_kwargs.get("type") is None:
+    _type_was_blank = ss_kwargs.get("type") is None
+    if _type_was_blank:
         ss_kwargs["type"] = t.SuperstructureType.RCC_TBEAM
     if ss_kwargs.get("deck_material") is None:
         ss_kwargs["deck_material"] = t.ConcreteGrade.M30
+    # The defaulted RCC_TBEAM above is girder-bearing, and the model validator
+    # requires girder dimensions for that family. A blank workbook leaves those
+    # cells empty, so mirror the prefills the legacy reader and the template
+    # generator use (girder_depth_mm=1200, spacing 2.5 m, 4 per deck). When the
+    # workbook *did* choose a type, its own girder cells must stand on their own
+    # — an explicitly chosen girder type with blank dimensions stays an error.
+    if _type_was_blank:
+        ss_kwargs.setdefault("girder_depth_mm", 1200)
+        ss_kwargs.setdefault("girder_spacing_m", Decimal("2.5"))
+        ss_kwargs.setdefault("girders_per_deck_count", 4)
 
     sub_kwargs = kwargs.setdefault("substructure", {})
     if sub_kwargs.get("pier_type") is None:

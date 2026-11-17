@@ -205,13 +205,21 @@ def _draw_long_section(
     pile_tip_rl = ls.pile_tip_rl
 
     # The vertical fit must cover everything the sheet actually draws, not just
-    # the hydraulic RLs: the pier shafts run down to ``HFL − pier_height_typical``
-    # and the abutment shafts to ``soffit − abutment_height``.  On the PWD booklet
-    # fixtures (which print no absolute RLs, so HFL/scour/pile-tip all resolve to
-    # the same datum) those bases sit several metres below the old
-    # ``min(pile_tip, scour)`` datum and the shafts — and their ``P1..Pn`` labels —
-    # plotted 220–294 mm below the sheet frame.
-    pier_base_rl = hfl_rl - float(sub.pier_height_typical_m or 8.0)
+    # the hydraulic RLs: the pier shafts run down to the canonical record's
+    # ``shaft_base_rl_m`` and the abutment shafts to ``soffit − abutment_height``.
+    # §3 forbids using HFL as the pier's height origin, so the old
+    # ``hfl_rl − pier_height`` expression survives ONLY as an explicit last
+    # resort for a record that genuinely carries no shaft base.
+    _record_shaft_bases = [
+        float(r.shaft_base_rl_m)
+        for r in ls.support_level_records
+        if r.shaft_base_rl_m is not None
+    ]
+    pier_base_rl = (
+        min(_record_shaft_bases)
+        if _record_shaft_bases
+        else hfl_rl - float(sub.pier_height_typical_m or 8.0)
+    )
     abt_base_rl = soffit_rl - float(sub.abutment_height_m or 3.2)
     rl_low = min(pile_tip_rl, scour_rl, pier_base_rl, abt_base_rl)
     datum_rl = rl_low - 2.0  # baseline datum
@@ -328,11 +336,16 @@ def _draw_long_section(
             layer="CIVIL-CHAINAGE",
         )
         if major:
+            # The grid numbers sit clear of the chainage tags: a `chainage_tag`
+            # runs up from ~6 mm below the axis, so a number on the old
+            # `th * 2.6` line shared its band with the terminal `CH` label and
+            # the two clipped (SS3 §5).  Dropping the numbers one line down is a
+            # uniform shift, so the axis grid stays aligned.
             text(
                 msp,
                 f"{ch_mark:.0f}",
                 xt,
-                draw_y0 - th * 2.6,
+                draw_y0 - th * 3.6,
                 height=th * 0.7,
                 layer="TEXT-LEVEL",
                 halign="CENTER",
@@ -411,11 +424,14 @@ def _draw_long_section(
     gnd_pts = [(hx(ch), vy(rl)) for ch, rl in ls.ground_profile_pts]
     if len(gnd_pts) >= 2:
         polyline(msp, gnd_pts, layer="CIVIL-GROUND", color=3)
+        # Stagger label one full text-height above the line endpoint so it
+        # does not collide with the DESIGN SCOUR LEVEL label that shares the
+        # same right-margin x position.
         text(
             msp,
             "EXISTING GROUND LEVEL",
             gnd_pts[-1][0] + sc_h * 0.5,
-            gnd_pts[-1][1],
+            gnd_pts[-1][1] + th * 1.2,
             height=th * 0.85,
             layer="CIVIL-GROUND",
             color=3,
@@ -652,7 +668,21 @@ def _draw_long_section(
         py_toc = vy(toc_rls[i]) if i < len(toc_rls) else (sof_y_mm - pier_ped_h)
         py_cap_bot = py_toc - pier_cap_h  # cap bottom
         py_shaft_top = py_cap_bot  # pier shaft top = cap bottom
-        py_bot = vy(hfl_rl - float(sub.pier_height_typical_m or 8.0))
+        # §3: the pier base is the canonical record's ``shaft_base_rl_m``, not
+        # ``HFL − pier_height_typical`` (HFL is a hydraulic datum, not a pier's
+        # height origin). The old expression survives ONLY as an explicit last
+        # resort when the record genuinely carries no shaft base.
+        _rec_i = (
+            ls.support_level_records[i]
+            if i < len(ls.support_level_records)
+            else None
+        )
+        _shaft_base_rl = (
+            float(_rec_i.shaft_base_rl_m)
+            if _rec_i is not None and _rec_i.shaft_base_rl_m is not None
+            else hfl_rl - float(sub.pier_height_typical_m or 8.0)
+        )
+        py_bot = vy(_shaft_base_rl)
 
         # Pier shaft (rectangle sits from shaft_top DOWN to base RL)
         rectangle(msp, px, py_bot, pier_w_mm, py_shaft_top - py_bot, layer="SUB-PIER", lw=40)
@@ -742,7 +772,12 @@ def _draw_long_section(
     # Eight strings clamped to the same x at the same y was the old output;
     # one sorted row per pier in the right gutter replaces it.
     if annot == "full" and _pier_rows:
-        _tab_x = hx(total_len) + sc_h * 0.3 + th * 9.0
+        # Cleared right of the A2 abutment's `DIRT WALL` lead-out: that label
+        # hangs off the outer face of the wall (see the abutment loop below),
+        # so the table's left edge must start past it — at `th * 9.0` the two
+        # shared a text box on the row band (SS3 §5 — a schedule may not
+        # overlap a view label).
+        _tab_x = hx(total_len) + sc_h * 0.3 + th * 12.0
         _tab_top = vy(top_rl) - th * 2.0
         text(
             msp,
@@ -880,6 +915,10 @@ def _draw_long_section(
                 scale=sc_h * 0.04,
                 layer="STRUC-HATCHING",
             )
+            # The label leads out on the OUTER side of the wall at each
+            # abutment, so A1 reads to the left and A2 to the right.  The
+            # consolidated ΔREF table is held clear of the A2 lead-out strip
+            # (SS3 §5 — a view label and a schedule may not share a text box).
             text(
                 msp,
                 "DIRT WALL",
@@ -1229,6 +1268,99 @@ def _draw_long_section(
                 label=lv_label,
                 text_height=th * 0.85,
             )
+
+    # ── Assumptions / unresolved inputs / review status (Spec §4, RC-TTL-06) ─
+    # The sheet must state which foundation-stack inputs the caller SUPPLIED
+    # versus which the §3 resolver DERIVED, any assumption or unresolved input,
+    # and the review status. Every claim is read from the canonical contract
+    # ``ls.support_level_records`` — never typed in — so it stays true for
+    # whatever card rendered. An unnumbered, clearly-titled block: the layout
+    # audit derives its notes zone from numbered ``"<n>. "`` lines, so a second
+    # numbering scheme is deliberately avoided. Placed in the clear band
+    # (y ~ 105..170, x < 640) with every glyph above the 1.8 mm paper floor.
+    from bridgecad_core.geometry.support_levels import FieldSource
+
+    def _field_label(name: str) -> str:
+        return name.removesuffix("_rl_m").removesuffix("_m").replace("_", " ")
+
+    _s2_records = list(ls.support_level_records)
+    _by_src: dict[FieldSource, set[str]] = {s: set() for s in FieldSource}
+    _authorities: set[str] = set()
+    _statuses: set[str] = set()
+    _issue_codes: set[str] = set()
+    for _rec in _s2_records:
+        _authorities.add(_rec.authority.value)
+        _statuses.add(_rec.status.value)
+        _issue_codes.update(i.code for i in _rec.issues)
+        for _name, _src in _rec.provenance.items():
+            _by_src[_src].add(_name)
+
+    _supplied = sorted(_field_label(n) for n in _by_src[FieldSource.SUPPLIED])
+    _derived = sorted(_field_label(n) for n in _by_src[FieldSource.DERIVED])
+    _assumed = sorted(
+        _field_label(n)
+        for _s in (FieldSource.ASSUMED, FieldSource.PROPOSED)
+        for n in _by_src[_s]
+    )
+    _unresolved = sorted(_field_label(n) for n in _by_src[FieldSource.UNRESOLVED])
+
+    _lines: list[str] = ["ASSUMPTIONS / UNRESOLVED INPUTS / REVIEW STATUS"]
+    if _s2_records:
+        _n = len(_s2_records)
+        _lines.append(
+            f"FOUNDING STACK ({_n} support{'s' if _n != 1 else ''}, "
+            f"{'/'.join(sorted(_authorities))}, {'/'.join(sorted(_statuses))}): "
+            f"{len(_supplied)} SUPPLIED, {len(_derived)} DERIVED"
+        )
+        if _supplied:
+            _lines.append("SUPPLIED BY CALLER: " + ", ".join(_supplied))
+        if _derived:
+            _lines.append("DERIVED BY RESOLVER: " + ", ".join(_derived))
+        if _assumed:
+            _lines.append(
+                "ASSUMPTIONS: " + ", ".join(_assumed)
+                + " (assumed/proposed, not designed)"
+            )
+        else:
+            _lines.append(
+                "ASSUMPTIONS: none - all founding levels supplied or derived"
+            )
+        if (
+            _unresolved
+            or _issue_codes
+            or "UNRESOLVED" in _statuses
+            or "CONFLICT" in _statuses
+        ):
+            _lines.append(
+                "UNRESOLVED INPUTS: "
+                + (", ".join(_unresolved + sorted(_issue_codes)) or "see status above")
+            )
+        else:
+            _lines.append("UNRESOLVED INPUTS: none on this sheet")
+    else:
+        _lines.append("FOUNDING STACK: no support-level records on this card")
+        _lines.append("ASSUMPTIONS: none recorded on this sheet")
+        _lines.append("UNRESOLVED INPUTS: none recorded on this sheet")
+    _lines.append("REVIEW STATUS: GENERATED - NOT REVIEWED FOR CONSTRUCTION")
+    _lines.append(
+        "STRUCTURAL / GEOTECHNICAL ADEQUACY IS A SEPARATE HUMAN VERDICT "
+        "(NOT CLAIMED HERE)"
+    )
+
+    _hdr_h = max(2.6, th * 0.85)   # both clear TEXT_FLOOR_PAPER_MM (1.8)
+    _body_h = max(2.0, th * 0.72)
+    _pitch = _body_h * 1.6
+    _blk_top = 164.0  # inside the measured clear band, clear of the P labels
+    for _k, _line in enumerate(_lines):
+        text(
+            msp,
+            _line,
+            draw_x0,
+            _blk_top - _k * _pitch,
+            height=_hdr_h if _k == 0 else _body_h,
+            layer="TEXT-SPEC",
+            color=8,
+        )
 
 
 __all__ = ["generate"]

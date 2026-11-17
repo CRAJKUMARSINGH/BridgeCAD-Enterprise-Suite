@@ -1,0 +1,519 @@
+{
+  "status": "PARTIAL",
+  "status_reason": "Convention verdicts and variant geometry are measured from the actual files; overlays were produced. Status is PARTIAL because the reference has no nine-span sheet (so geometry fidelity cannot be claimed) and reference crops are label-anchored estimates. The named support/foundation level chain is now exposed in params.resolved.json and compared level-for-level (VAR-SUPPORT-LEVELS). Raster differences are diagnostic only.",
+  "policy": "Acceptance-resolution  -- 6: separate (1) invariant conventions compared against the same-family reference page from (2) independently derived variant geometry. No pixel-identity comparison across different-span drawings. No arbitrary non-uniform warping; only uniform scale + translation + rotation.",
+  "reference_baseline": {
+    "page": 6,
+    "drawing_number": "BR- I / 2022 - 002",
+    "why": "Chosen family baseline: the generated package resolves title 'Open Foundation + RCC Pier + Solid Slab' / superstructure RCC_SOLID_SLAB / foundation OPEN, which is the same drawing family as this reference entry. It is the only reference page that depicts an open-foundation R.C.C. pier with a solid-slab superstructure, so it is the correct page for the invariant-convention comparison. It is NOT a nine-span sheet (it is a 4-span drawing), so it cannot be used for pixel-identity."
+  },
+  "invariant_conventions": [
+    {
+      "id": "CONV-PAPER",
+      "requirement": "Paper size and orientation",
+      "reference_evidence": {
+        "page": "PDF page 6 (media box)",
+        "text": "page 1684.0 x 1191.0 pt = 594.1 x 420.2 mm -> A2 landscape"
+      },
+      "generated_evidence": {
+        "sheet": "Sheet1_Plan.dxf BORDER-OUTER extents",
+        "text": "841.0 x 594.0 mm -> A1 landscape (bridgecad_draw.coordinates FRAMES: sheet1_plan = A1); render-status.json says render_paper='A2'"
+      },
+      "verdict": "DIFFER",
+      "difference": "Reference paper is A2 landscape (594x420 mm); generated DXF paper is A1 landscape (841.0x594.0 mm). One A-size step larger. Orientation (landscape) agrees."
+    },
+    {
+      "id": "CONV-SCALE",
+      "requirement": "Declared drawing scale convention",
+      "reference_evidence": {
+        "page": "PDF page 6",
+        "text": "per-view 'SCALE-1:<denom>': SCALE-1:250 x2, SCALE-1:100 x4, SCALE-1:50 x1 (standard ladder 1:50/1:100/1:250, uniform, no vertical exaggeration stated)"
+      },
+      "generated_evidence": {
+        "sheet": "title blocks + sheet captions",
+        "text": "plan 'SCALE: 1:150', long-section 'SCALE: 1:150 H   1:24', cross-section 'SCALE: 1:50'; long-section spec ['H Scale 1:150   V Scale 1:24  (V.E.=6.16x)'] (declared V.E. 6.16x)"
+      },
+      "verdict": "DIFFER",
+      "difference": "Notation '1:<denom>' per view agrees in form. Values differ: reference uses standard 1:50/1:100/1:250 with a uniform scale and no declared vertical exaggeration; the generated long section uses non-ladder 1:150 H / 1:26 V with an explicitly declared V.E.=6.16x."
+    },
+    {
+      "id": "CONV-TITLEBLOCK",
+      "requirement": "Title-block field set, order and drawing-number pattern",
+      "reference_evidence": {
+        "page": "PDF page 6",
+        "text": "title-block field strings found on the page (verbatim): 'DRG. No.', 'JOB No.', 'Page-03', 'NOTES :-', 'REVISION', 'PREPARED BY', 'CHECKED BY', 'RECOMMENDED BY', 'APPROVED BY', 'DRN BY', 'GOVT. OF MAHARASHTRA', 'KONKAN BHAVAN, NAVI MUMBAI, PIN-400614', 'NALLA PATNUS', 'LETTER', 'UNIT', 'G. A. D. Dt. 31.12.2022', 'EXCLUSIVE'. Verbatim title-block lines: 'DRG. No. BR-I / 2022 - 002'; 'JOB No.'; 'BR-I /RGD - 442 / 2018'; 'G. A. D. Dt. 31.12.2022'. Order (reading order of the block): DRG. No. | JOB No. | SUB title | 'Page-03' | NOTES | REVISION | authority name/address | PREPARED BY / CHECKED BY / RECOMMENDED BY / APPROVED BY | DRN BY. Drawing number on the sheet is 'BR-I / 2022 - 002'; the spaced form 'BR- I / 2022 - 002' appears only in the INDEX page."
+      },
+      "generated_evidence": {
+        "sheet": "Sheet1_Plan.dxf TITLEBLK-TEXT / TEXT-TITLE",
+        "text": "DRG: BR-I-2022-002; REVISION: R; DATE: ; SHEET 1 OF 9; DRAWN: ; CHECKED: ; APPROVED: ; SCALE: 1:150; CLIENT: STATE_PWD; CONSULTANT: ; BRIDGE: PWD BR-I-2022-002 | DRAWING TITLE: GENERAL ARRANGEMENT - PLAN VIEW | PROJECT: Open Foundation + RCC Pier + Solid Slab | BRIDGE: PWD BR-I-2022-002"
+      },
+      "verdict": "DIFFER",
+      "difference": "Both carry drawing no., title, scale, sheet index, revision and discipline signatures, but the FIELD SET/ORDER differ. Reference adds JOB No., a 'SUB' title, booklet 'Page-No.', a numbered NOTES block, the authority name/address block, RECOMMENDED BY and DRN BY, and an exclusive-property stamp. Generated adds PROJECT/BRIDGE/CLIENT/CONSULTANT and uses 'SHEET n OF 9' instead of a booklet page. Drawing-number pattern differs: reference 'BR-I / 2022 - 002' (spaced) vs generated 'BR-I-2022-002' (hyphenated, e.g. 'DRG: BR-I-2022-002')."
+    },
+    {
+      "id": "CONV-LEVEL",
+      "requirement": "Level-notation convention and level-axis placement",
+      "reference_evidence": {
+        "page": "PDF page 6",
+        "text": "discipline-specific datum abbreviations + 3-dp metres: 'R.T.L. 102.315', 'R.T.L.\n000.000', 'R.T.L.\n0.300', 'SOFFIT R.L. 101.500', 'SOFFIT R.L 101.500', 'SOFFIT R.L101.500', 'F.R.L.  97.210', 'F.R.L.  94.850', 'F.R.L. 91.475', 'F.R.L.  96.920', 'F.R.L.  95.350', 'H.F.L. 99.700'; datum marker 'DATUM LEVEL 90.00M' with stations A/L, P-1, P-2, P-3, A/R along the section."
+      },
+      "generated_evidence": {
+        "sheet": "Sheet2_LongSection.dxf / Sheet3_CrossSection.dxf TEXT-LEVEL",
+        "text": "single generic prefix 'RL <value>' (3-dp) e.g. 'RL 102.500', 'RL 101.935', 'TOP OF WC / RL', 'SOFFIT OF SLAB'; long-section series labels 'CHAINAGE', '0', '10', '20', '30', '40', '50', '60'; HFL/'SCOUR RL 98.000' used for the hydraulic datums."
+      },
+      "verdict": "DIFFER",
+      "difference": "Both write reduced levels in metres to 3 decimals with a prefix. Reference prefixes each level with the discipline datum it belongs to (R.T.L. / SOFFIT R.L. / F.R.L. / H.F.L. / D.H.F.L.). Generated collapses road/soffit/cap/top levels to a single generic 'RL' and uses only 'HFL'/'SCOUR' for datums, so a reader cannot tell R.T.L. from F.R.L. from the label alone. Level-axis placement: reference puts the datum row and station row beneath the elevation with a 'DATUM LEVEL 90.00M' note; generated puts a vertical RL axis (98/100/102/104) plus chainage axis with a 'BED LEVEL' label. Placement is the same idea but the labelling vocabulary differs."
+    },
+    {
+      "id": "CONV-VIEWS",
+      "requirement": "Section-mark / view-labelling convention and view order",
+      "reference_evidence": {
+        "page": "PDF page 6",
+        "text": "view/section label lines found on the page (verbatim): 'DETAILS OF ABUTMENT A/L & BOX RETURN (SCALE-1:100)'; 'ELEVATION (SCALE-1:250)'; 'PART PLAN AT BOTTOM'; 'PART PLAN AT TOP'; 'CROSS SECTION AT P-2'; 'DETAILS OF ABUTMENT A/R & BOX RETURN (SCALE-1:100)'; 'SECTION AT P-2'; 'DETAILS OF CRASH BARRIER'. The elevation is labelled with its scale ('ELEVATION (SCALE-1:250)') and the plan 'PLAN'; part plans 'PART PLAN AT TOP' / 'PART PLAN AT BOTTOM'; cut sections 'CROSS SECTION AT P-2' and 'SECTION AT P-2'; abutment details 'DETAILS OF ABUTMENT A/L & BOX RETURN (SCALE-1:100)' and '... A/R ...'; plus 'DETAILS OF CRASH BARRIER'."
+      },
+      "generated_evidence": {
+        "sheet": "one sheet per view",
+        "text": "section marks 'A-A'/'B-B'; labels 'SECTION A-A - TYPICAL MID-SPAN CROSS SECTION' (Sheet3), 'VIEW 1 - SECTION A-A ...' and 'VIEW 2 - SECTION B-B ...' (Sheet8), 'GENERAL ARRANGEMENT - PLAN VIEW' (Sheet1), 'GENERAL ARRANGEMENT - LONGITUDINAL SECTION' (Sheet2)."
+      },
+      "verdict": "NOT_COMPARABLE",
+      "difference": "Section-mark convention (letter pairs cutting the plan/long section) AGREES. View ORDER cannot be compared: the reference packs elevation + plan + part plans + cross sections + abutment details onto one compressed booklet sheet, whereas the generated package emits one view per sheet (Sheet1..Sheet9). There is no common sheet composition to compare."
+    },
+    {
+      "id": "CONV-LAYERS",
+      "requirement": "Layer / entity vocabulary for corresponding features",
+      "reference_evidence": {
+        "page": "PDF page 6",
+        "text": "flattened PDF: vector paths only, no CAD layer/entity metadata retrievable (page exposes stroke paths and text spans, not layers)."
+      },
+      "generated_evidence": {
+        "sheet": "DXF layer tables",
+        "text": "plan: ['BORDER-INNER', 'BORDER-OUTER', 'CIVIL-CHAINAGE', 'DIM-CHAINAGE', 'DIM-LINEAR', 'STRUC-CENTRE', 'STRUC-HATCHING', 'STRUC-OUTLINE', 'STRUC-SECTION', 'SUB-ABUT', 'SUB-BEARING', 'SUB-DIRT-WALL', 'SUB-PIER', 'SUPER-DECK', 'SYM-NORTHARROW', 'SYM-SCALE', 'TEXT-GENERAL', 'TEXT-HEADER', 'TEXT-SPEC', 'TEXT-TITLE', 'TITLEBLK-BOX', 'TITLEBLK-TEXT']; long-section: ['ABUT-PROF', 'BORDER-INNER', 'BORDER-OUTER', 'CIVIL-CHAINAGE', 'CIVIL-GROUND', 'CIVIL-HFL', 'CIVIL-LWL', 'CIVIL-ROAD', 'CIVIL-SCOUR', 'DIM-CHAINAGE', 'DIM-LEVEL', 'DIM-LINEAR', 'STRUC-HATCHING', 'STRUC-SECTION', 'SUB-ABUT', 'SUB-BEARING', 'SUB-DIRT-WALL', 'SUB-PIER', 'SUPER-DECK', 'SUPER-WEARING', 'TEXT-GENERAL', 'TEXT-HEADER', 'TEXT-LEVEL', 'TEXT-SPEC', 'TEXT-TITLE', 'TITLEBLK-BOX', 'TITLEBLK-TEXT']; cross-section: ['BORDER-INNER', 'BORDER-OUTER', 'DIM-LEVEL', 'DIM-LINEAR', 'DIM-SLOPE', 'STRUC-CENTRE', 'STRUC-HATCHING', 'SUPER-DECK', 'SUPER-KERB', 'SUPER-PARAPET', 'SUPER-WEARING', 'SYM-SCALE', 'TEXT-GENERAL', 'TEXT-HEADER', 'TEXT-LEVEL', 'TEXT-SPEC', 'TEXT-TITLE', 'TITLEBLK-BOX', 'TITLEBLK-TEXT']"
+      },
+      "verdict": "NOT_COMPARABLE",
+      "difference": "The reference is a flattened PDF with no layer model, so layer names cannot be compared. The generated vocabulary is recorded for the corresponding features only: SUPER-DECK (deck), SUB-PIER/SUB-ABUT (supports), SUB-BEARING/SUB-DIRT-WALL (details), CIVIL-HFL/CIVIL-GROUND/CIVIL-LWL/CIVIL-ROAD/CIVIL-SCOUR (civil datums), SUPER-WEARING/SUPER-KERB/SUPER-PARAPET (cross-section), TEXT-LEVEL/DIM-*/TITLEBLK-* (annotation)."
+    }
+  ],
+  "variant_geometry": [
+    {
+      "id": "VAR-TOTAL",
+      "quantity": "Total bridge length / number of spans",
+      "derivation": "9 spans x 10.0 m = 90.0 m",
+      "measured": {
+        "plan_outline_m": 90.0,
+        "long_section_deck_m": 90.0
+      },
+      "source": "params.resolved.json total_length_m; DXF STRUC-OUTLINE / SUPER-DECK measured",
+      "verdict": "AGREE"
+    },
+    {
+      "id": "VAR-PIERS",
+      "quantity": "Intermediate pier chainages",
+      "derivation": "8 piers at 10,20,...,80 m (one at each internal span joint)",
+      "measured": {
+        "plan_pier_chainages_m": [
+          10.0,
+          20.0,
+          30.0,
+          40.0,
+          50.0,
+          60.0,
+          70.0,
+          80.0
+        ],
+        "long_section_pier_chainages_m": [
+          10.0,
+          20.0,
+          30.0,
+          40.0,
+          50.0,
+          60.0,
+          70.0,
+          80.0
+        ]
+      },
+      "source": "plan SUB-PIER centres; long-section SUB-PIER x-centres",
+      "verdict": "AGREE"
+    },
+    {
+      "id": "VAR-ABUTMENTS",
+      "quantity": "Abutment support axes at 0 m and 90 m",
+      "derivation": "2 abutments at the two bridge ends",
+      "measured": {
+        "plan_abutment_axes_m": [
+          0.0,
+          90.0
+        ],
+        "long_section_abutment_footprint_centre_m": [
+          -0.6,
+          -0.6,
+          -0.6,
+          90.6,
+          90.6,
+          90.6
+        ]
+      },
+      "source": "plan SUB-ABUT centres; long-section SUB-ABUT footprint centres",
+      "verdict": "AGREE (plan axes at 0.000/90.000; long-section footprint centres sit just outside the deck ends because the abutment body/dirt-wall extends beyond the bridge axis)"
+    },
+    {
+      "id": "VAR-CW",
+      "quantity": "Carriageway width",
+      "derivation": "params carriageway_width",
+      "measured": {
+        "params_m": 7.5,
+        "cross_section_wearing_width_m": 7.5,
+        "cross_section_caption": "CW 7.50m"
+      },
+      "source": "params.resolved.json; cross-section SUPER-WEARING width / (1000/declared scale)",
+      "verdict": "AGREE"
+    },
+    {
+      "id": "VAR-WIDTH",
+      "quantity": "Overall deck width",
+      "derivation": "carriageway + kerbs (not in params); read from geometry",
+      "measured": {
+        "cross_section_deck_width_m": 8.0,
+        "plan_outline_width_m": 8.0
+      },
+      "source": "cross-section SUPER-DECK polyline width; plan STRUC-OUTLINE width",
+      "verdict": "AGREE (no params value; the two views agree with each other)"
+    },
+    {
+      "id": "VAR-DECK-THK",
+      "quantity": "Deck (slab) thickness",
+      "derivation": "params deck_thickness_mm",
+      "measured": {
+        "params_mm": 500,
+        "cross_section_thickness_mm": 500.0
+      },
+      "source": "params.resolved.json; cross-section SUPER-DECK polyline height",
+      "verdict": "AGREE"
+    },
+    {
+      "id": "VAR-SUPPORT-LEVELS",
+      "quantity": "Support / foundation level chain from the canonical record",
+      "derivation": "expected: full named RL chain (road, soffit, bearing, pedestal, cap top/bottom, shaft top/base, footing) in params.resolved.json",
+      "measured": {
+        "params_resolved_has_full_chain": true,
+        "params_resolved_chain_levels": [
+          "cap_bottom_rl_m",
+          "cap_top_rl_m",
+          "derived_soffit_rl_m",
+          "footing_bottom_rl_m",
+          "footing_top_rl_m",
+          "ground_level_rl_m",
+          "pile_cutoff_rl_m",
+          "pile_tip_rl_m",
+          "scour_level_rl_m",
+          "shaft_base_rl_m",
+          "shaft_top_rl_m",
+          "structural_soffit_rl_m"
+        ],
+        "params_resolved_chain_typical": {
+          "support_id": "P1",
+          "status": "UNRESOLVED",
+          "authority": "HEIGHT_CONTROLLED",
+          "topology": "SEPARATE_BEARING_PEDESTAL",
+          "levels_m": {
+            "structural_soffit_rl_m": "101.925",
+            "derived_soffit_rl_m": "101.935",
+            "cap_top_rl_m": "101.775",
+            "cap_bottom_rl_m": "100.975",
+            "shaft_top_rl_m": "100.975",
+            "shaft_base_rl_m": "94.975",
+            "footing_top_rl_m": "94.975",
+            "footing_bottom_rl_m": null,
+            "ground_level_rl_m": "98.0",
+            "scour_level_rl_m": "98.0",
+            "pile_cutoff_rl_m": "99.0",
+            "pile_tip_rl_m": null
+          },
+          "shaft_height_m": "6.0",
+          "footing_depth_m": null,
+          "provenance": {
+            "structural_soffit_rl_m": "SUPPLIED",
+            "bearing_depth_m": "ASSUMED",
+            "pedestal_height_m": "SUPPLIED",
+            "cap_top_rl_m": "DERIVED",
+            "cap_bottom_rl_m": "DERIVED",
+            "cap_depth_m": "SUPPLIED",
+            "shaft_height_m": "SUPPLIED",
+            "shaft_base_rl_m": "DERIVED",
+            "footing_top_rl_m": "DERIVED",
+            "footing_bottom_rl_m": "UNRESOLVED"
+          },
+          "issues": [
+            {
+              "code": "E-MISSING-FOOTING-DEPTH",
+              "field": "footing_bottom_rl_m",
+              "message": "cannot propose a founding RL without a footing depth"
+            }
+          ]
+        },
+        "params_resolved_chain_support_count": 8,
+        "chain_matches_summary_record": true,
+        "summary_status": "UNRESOLVED",
+        "summary_authority": "HEIGHT_CONTROLLED",
+        "summary_shaft_base_rl_m": "94.975",
+        "summary_footing_bottom_rl_m": null
+      },
+      "source": "params.resolved.json support_levels.typical (written by generate_all_pwd_gads._support_level_chain); summary.json support_level_record",
+      "verdict": "AGREE",
+      "reason": "params.resolved.json now carries the full named chain under support_levels.typical / support_levels.supports, read from the same resolver the sheets consume, and it agrees level-for-level with the canonical record: status=UNRESOLVED, authority=HEIGHT_CONTROLLED, cap_bottom=100.975, shaft_base=94.975, footing_bottom=None. The authority is LEVEL_CONTROLLED only when an explicitly supplied founding RL and an open-footing thickness are both supplied; this card supplies neither, so the chain is honestly UNRESOLVED with E-MISSING-FOOTING-DEPTH rather than a fabricated footing level."
+    },
+    {
+      "id": "VAR-PIER-BASE-DISCREPANCY",
+      "quantity": "Drawn long-section pier base RL vs canonical record",
+      "derivation": "record shaft_base should equal the drawn pier base",
+      "measured": {
+        "long_section_pier_base_rl_m_measured": [
+          94.975,
+          94.975,
+          94.975,
+          94.975,
+          94.975,
+          94.975,
+          94.975,
+          94.975
+        ],
+        "record_shaft_base_rl_m": "94.975",
+        "hfl_minus_pier_height_m": 94.0
+      },
+      "source": "long-section SUB-PIER rect base measured via CIVIL-HFL calibration; summary.json",
+      "verdict": "AGREE",
+      "difference": "The long-section draws every pier base at RL 94.975 m and the canonical record resolves shaft_base at RL 94.975 m \u2014 the drawn base CONSUMES the record's shaft_base (delta <= 1 mm), so this cross-view check now AGREES. The old HFL \u2212 pier_height datum (94.0 m) is no longer used to place the pier base."
+    }
+  ],
+  "variant_geometry_note": "These are the numbers that MUST be recomputed for the 9-span variant; they are NOT copied from the reference page and have no reference sheet.",
+  "transformations": {
+    "plan": {
+      "status": "OK",
+      "reference_crop_pt": [
+        128.0,
+        374.9,
+        846.2,
+        560.2
+      ],
+      "reference_crop_px": [
+        267,
+        781,
+        1763,
+        1167
+      ],
+      "crop_provenance": {
+        "anchor_label_bbox_pt": [
+          458.0,
+          524.9,
+          506.2,
+          547.2
+        ],
+        "expansion_pt": {
+          "left": 330.0,
+          "up": 150.0,
+          "right": 340.0,
+          "down": 13.0
+        },
+        "derivation": "measured label bbox expanded by declared margins"
+      },
+      "generated_crop_model_mm_bbox": [
+        41.2,
+        268.83,
+        726.5,
+        388.17
+      ],
+      "generated_crop_px_before_scale": [
+        428,
+        1246,
+        4144,
+        1923
+      ],
+      "rotation_deg": 0.0,
+      "declared_reference_scale": "1:250",
+      "declared_generated_scale": "1:150",
+      "uniform_scale_applied_to_generated": 0.66,
+      "translation_px": [
+        -484,
+        -30
+      ],
+      "alignment": "ink-bbox centre coincidence (measured control, symmetric anchor)",
+      "declared_vertical_exaggeration": 1.0,
+      "residual_ink_bbox_size_ratio": {
+        "width": 1.6317,
+        "height": 1.158
+      },
+      "note": "Residual is expected to be non-unity: the reference is a 4-span 40 m sheet and the generated sheet is a 9-span 90 m variant. Features are NOT expected to coincide; the overlay tests conventions, not geometry identity.",
+      "artifacts": {
+        "overlay": "overlays/plan_overlay.png",
+        "side_by_side": "overlays/plan_side_by_side.png"
+      }
+    },
+    "long_section": {
+      "status": "OK",
+      "reference_crop_pt": [
+        61.4,
+        34.8,
+        882.0,
+        387.6
+      ],
+      "reference_crop_px": [
+        128,
+        73,
+        1837,
+        808
+      ],
+      "crop_provenance": {
+        "anchor_label_bbox_pt": [
+          421.4,
+          369.8,
+          542.0,
+          381.6
+        ],
+        "expansion_pt": {
+          "left": 360.0,
+          "up": 335.0,
+          "right": 340.0,
+          "down": 6.0
+        },
+        "derivation": "measured label bbox expanded by declared margins"
+      },
+      "generated_crop_model_mm_bbox": [
+        45.0,
+        180.08,
+        691.67,
+        488.92
+      ],
+      "generated_crop_px_before_scale": [
+        449,
+        705,
+        3957,
+        2399
+      ],
+      "rotation_deg": 0.0,
+      "declared_reference_scale": "1:250",
+      "declared_generated_scale": "1:150",
+      "uniform_scale_applied_to_generated": 0.66,
+      "translation_px": [
+        -302,
+        -187
+      ],
+      "alignment": "ink-bbox centre coincidence (measured control, symmetric anchor)",
+      "declared_vertical_exaggeration": 6.16,
+      "residual_ink_bbox_size_ratio": {
+        "width": 1.357,
+        "height": 1.5399
+      },
+      "note": "Residual is expected to be non-unity: the reference is a 4-span 40 m sheet and the generated sheet is a 9-span 90 m variant. Features are NOT expected to coincide; the overlay tests conventions, not geometry identity.",
+      "artifacts": {
+        "overlay": "overlays/long_section_overlay.png",
+        "side_by_side": "overlays/long_section_side_by_side.png"
+      }
+    },
+    "cross_section": {
+      "status": "OK",
+      "reference_crop_pt": [
+        924.9,
+        428.4,
+        1282.9,
+        710.2
+      ],
+      "reference_crop_px": [
+        1927,
+        893,
+        2673,
+        1480
+      ],
+      "crop_provenance": {
+        "anchor_label_bbox_pt": [
+          984.9,
+          448.4,
+          1082.9,
+          470.2
+        ],
+        "expansion_pt": {
+          "left": 60.0,
+          "up": 20.0,
+          "right": 200.0,
+          "down": 240.0
+        },
+        "derivation": "measured label bbox expanded by declared margins"
+      },
+      "generated_crop_model_mm_bbox": [
+        340.0,
+        118.7,
+        500.0,
+        220.0
+      ],
+      "generated_crop_px_before_scale": [
+        2033,
+        2149,
+        2928,
+        2729
+      ],
+      "rotation_deg": 0.0,
+      "declared_reference_scale": "1:100",
+      "declared_generated_scale": "1:50",
+      "uniform_scale_applied_to_generated": 0.55,
+      "translation_px": [
+        127,
+        134
+      ],
+      "alignment": "ink-bbox centre coincidence (measured control, symmetric anchor)",
+      "declared_vertical_exaggeration": 1.0,
+      "residual_ink_bbox_size_ratio": {
+        "width": 0.6595,
+        "height": 0.5434
+      },
+      "note": "Residual is expected to be non-unity: the reference is a 4-span 40 m sheet and the generated sheet is a 9-span 90 m variant. Features are NOT expected to coincide; the overlay tests conventions, not geometry identity.",
+      "artifacts": {
+        "overlay": "overlays/cross_section_overlay.png",
+        "side_by_side": "overlays/cross_section_side_by_side.png"
+      }
+    }
+  },
+  "raster_difference": {
+    "plan": {
+      "mean_abs_gray_diff": 33.59,
+      "label": "DIAGNOSTIC ONLY - not an acceptance oracle (anti-aliasing and fonts differ)"
+    },
+    "long_section": {
+      "mean_abs_gray_diff": 31.35,
+      "label": "DIAGNOSTIC ONLY - not an acceptance oracle (anti-aliasing and fonts differ)"
+    },
+    "cross_section": {
+      "mean_abs_gray_diff": 22.14,
+      "label": "DIAGNOSTIC ONLY - not an acceptance oracle (anti-aliasing and fonts differ)"
+    }
+  },
+  "unresolved": [
+    {
+      "id": "U1",
+      "topic": "Pipeline (reference) sheet has no nine-span page",
+      "status": "BY DESIGN",
+      "reason": "The reference booklet's span counts are 2..5; there is no nine-span drawing. Per acceptance-resolution  -- 6.2, a nine-span reproduction cannot be pixel-identical to any reference page, so no pixel-identity claim is made for the 9-span geometry."
+    },
+    {
+      "id": "U2",
+      "topic": "Named support/foundation level chain exposure",
+      "status": "CLOSED",
+      "reason": "params.resolved.json now carries the full named chain under support_levels.typical / support_levels.supports, written from the same resolver the sheets consume. It is compared level-for-level with the canonical record by VAR-SUPPORT-LEVELS. On this card the chain is honestly UNRESOLVED (open foundation, no supplied founding RL), so no founding level is claimed."
+    },
+    {
+      "id": "U3",
+      "topic": "Reference crop rectangles are label-anchored estimates",
+      "status": "PARTIAL",
+      "reason": "The reference page packs many views; each crop is a measured view label bbox expanded by declared margins (recorded per view). Views were not segmented by an independent layout detector."
+    },
+    {
+      "id": "U4",
+      "topic": "Overlay alignment is not a feature registration",
+      "status": "PARTIAL",
+      "reason": "Alignment uses uniform scale (from declared scales) plus an ink-bbox-centre translation, rotation 0. No non-uniform warping was applied. Because span counts differ, drawn features are not expected to coincide."
+    },
+    {
+      "id": "U5",
+      "topic": "Vector layer vocabulary of the reference",
+      "status": "NOT_COMPARABLE",
+      "reason": "Reference is a flattened PDF with no CAD layers."
+    }
+  ]
+}

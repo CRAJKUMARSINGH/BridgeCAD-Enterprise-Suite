@@ -373,6 +373,10 @@ PWD_CARDS: list[dict] = [
         # an arch bridge the structural depth is the arch rise (7805 mm), not the
         # deck slab (350 mm).  Mark as approximation so _check() reports, not rejects.
         "approximation": True,
+        "fidelity_note": (
+            "Span/depth governor not applied: an open-spandrel arch carries its "
+            "span in thrust, so the 7.805 m arch rise governs, not the 350 mm deck slab."
+        ),
     },
     {
         # Booklet: precast block arch 61.94 m, 27 blocks, 3 strips, 10.0 m cw.
@@ -410,6 +414,10 @@ PWD_CARDS: list[dict] = [
         # an arch bridge the structural depth is the arch rise, not the deck slab.
         # Mark as approximation so _check() reports, not rejects.
         "approximation": True,
+        "fidelity_note": (
+            "Span/depth governor not applied: a precast-block arch carries its "
+            "span in thrust, so the arch rise governs, not the 400 mm deck slab."
+        ),
     },
 ]
 

@@ -1,0 +1,3 @@
+﻿e969b72 fix(catalogue,draw,core,frontend): BridgeCAD repository audit fixes
+cba78cb feat(catalogue,ci): apply CODE-JUNCTION patch — sweep guards, blank-PNG gate, CI workflow, docs update (36 new tests pass)
+5161370 fix(frontend): apply review B01-B06/B08 export-correctness and lifecycle fixes

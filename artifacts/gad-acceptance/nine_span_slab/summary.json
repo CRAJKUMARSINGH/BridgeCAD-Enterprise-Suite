@@ -1,0 +1,632 @@
+{
+  "card_id": "BR-I-2022-002",
+  "commit": "e969b72979196f78e2d04129c2462268d6caf099",
+  "source_state": "HEAD is uncommitted-for-change: the package was rendered from the WORKING TREE, which carries the canonical support-level contract fix (long_section.py, support_levels consumers in sheet2/sheet4/sheet5/sheet8). The commit hash in the path is the HEAD the tree descends from, not the code that produced these DXFs.",
+  "generated_package_dir": "E:\\Rajkumar\\BridgeCAD-Enterprise-Suite\\artifacts\\gad-acceptance\\nine_span_slab\\e969b72979196f78e2d04129c2462268d6caf099",
+  "resolve_overrides_used": {
+    "span_count": "9",
+    "span_length_m": "10"
+  },
+  "resolved_params_subset": {
+    "spans": "9\u00d710 m",
+    "span_count": 9,
+    "total_length_m": "90",
+    "pier_count": 8,
+    "foundation_type": "OPEN",
+    "pier_height_m": 6.0,
+    "hfl_m": 100.0,
+    "road_level": 102.5,
+    "soffit_level": "101.925",
+    "foundation_level": "97.40"
+  },
+  "authority_question": {
+    "question": "What does the resolver/project build do with the card's pier_height_m = 6.0?",
+    "answer": "HEIGHT_CONTROLLED, HONESTLY UNRESOLVED. The card supplies a pier HEIGHT (6.0 m) and an OPEN foundation with NO designed footing thickness or supplied founding RL. The height is now passed into resolve_support_levels as shaft_height_m, so the authority auto-classifies to HEIGHT_CONTROLLED: the record DERIVES the shaft base from the height (cap bottom 100.975 \u2212 6.0 = 94.975 RL) and, because a founding RL cannot be PROPOSED without a footing depth, it raises E-MISSING-FOOTING-DEPTH and stays UNRESOLVED rather than inventing a footing. Every view that draws the pier base (Sheet 2 long section, Sheet 4 foundation, Sheet 5 details, Sheet 8 side elevations) consumes that one shaft_base_rl_m, so the drawn base AGREES with the record and the old 5.0 m view-to-view divergence (the HFL \u2212 pier_height = 94.0 hydraulic datum) is gone.",
+    "conflict_path_proven_on_the_spec_fixture": true,
+    "conflict_code": "E-CONFLICT-SHAFT-HEIGHT",
+    "conflict_proof": "spec fixture (road 102.5 / wearing 0.075 / slab 0.5 / bearing 0.05 assumed / pedestal 0.15 assumed / cap 0.8 / footing bottom 97.4 / depth 1.0) resolves RESOLVED with shaft height 2.525 m; adding shaft_height_m=6.0 yields CONFLICT + E-CONFLICT-SHAFT-HEIGHT, so the guard is real and would fire if this card ever gained a supplied footing"
+  },
+  "support_level_record": {
+    "support_id": "P1",
+    "status": "UNRESOLVED",
+    "authority": "HEIGHT_CONTROLLED",
+    "topology": "SEPARATE_BEARING_PEDESTAL",
+    "issues": [
+      {
+        "code": "E-MISSING-FOOTING-DEPTH",
+        "field": "footing_bottom_rl_m",
+        "message": "cannot propose a founding RL without a footing depth"
+      }
+    ],
+    "levels_m": {
+      "structural_soffit_rl_m": "101.925",
+      "derived_soffit_rl_m": "101.935",
+      "cap_top_rl_m": "101.775",
+      "cap_bottom_rl_m": "100.975",
+      "shaft_top_rl_m": "100.975",
+      "shaft_base_rl_m": "94.975",
+      "footing_top_rl_m": "94.975",
+      "footing_bottom_rl_m": null,
+      "ground_level_rl_m": "98.0",
+      "scour_level_rl_m": "98.0",
+      "pile_cutoff_rl_m": "99.0",
+      "pile_tip_rl_m": null
+    },
+    "shaft_height_m": "6.0",
+    "footing_depth_m": null,
+    "provenance": {
+      "structural_soffit_rl_m": "SUPPLIED",
+      "bearing_depth_m": "ASSUMED",
+      "pedestal_height_m": "SUPPLIED",
+      "cap_top_rl_m": "DERIVED",
+      "cap_bottom_rl_m": "DERIVED",
+      "cap_depth_m": "SUPPLIED",
+      "shaft_height_m": "SUPPLIED",
+      "shaft_base_rl_m": "DERIVED",
+      "footing_top_rl_m": "DERIVED",
+      "footing_bottom_rl_m": "UNRESOLVED"
+    }
+  },
+  "support_level_records_all_8": [
+    {
+      "support_id": "P1",
+      "status": "UNRESOLVED",
+      "authority": "HEIGHT_CONTROLLED",
+      "cap_top_rl_m": "101.775",
+      "cap_bottom_rl_m": "100.975",
+      "shaft_base_rl_m": "94.975",
+      "shaft_height_m": "6.0"
+    },
+    {
+      "support_id": "P2",
+      "status": "UNRESOLVED",
+      "authority": "HEIGHT_CONTROLLED",
+      "cap_top_rl_m": "101.775",
+      "cap_bottom_rl_m": "100.975",
+      "shaft_base_rl_m": "94.975",
+      "shaft_height_m": "6.0"
+    },
+    {
+      "support_id": "P3",
+      "status": "UNRESOLVED",
+      "authority": "HEIGHT_CONTROLLED",
+      "cap_top_rl_m": "101.775",
+      "cap_bottom_rl_m": "100.975",
+      "shaft_base_rl_m": "94.975",
+      "shaft_height_m": "6.0"
+    },
+    {
+      "support_id": "P4",
+      "status": "UNRESOLVED",
+      "authority": "HEIGHT_CONTROLLED",
+      "cap_top_rl_m": "101.775",
+      "cap_bottom_rl_m": "100.975",
+      "shaft_base_rl_m": "94.975",
+      "shaft_height_m": "6.0"
+    },
+    {
+      "support_id": "P5",
+      "status": "UNRESOLVED",
+      "authority": "HEIGHT_CONTROLLED",
+      "cap_top_rl_m": "101.775",
+      "cap_bottom_rl_m": "100.975",
+      "shaft_base_rl_m": "94.975",
+      "shaft_height_m": "6.0"
+    },
+    {
+      "support_id": "P6",
+      "status": "UNRESOLVED",
+      "authority": "HEIGHT_CONTROLLED",
+      "cap_top_rl_m": "101.775",
+      "cap_bottom_rl_m": "100.975",
+      "shaft_base_rl_m": "94.975",
+      "shaft_height_m": "6.0"
+    },
+    {
+      "support_id": "P7",
+      "status": "UNRESOLVED",
+      "authority": "HEIGHT_CONTROLLED",
+      "cap_top_rl_m": "101.775",
+      "cap_bottom_rl_m": "100.975",
+      "shaft_base_rl_m": "94.975",
+      "shaft_height_m": "6.0"
+    },
+    {
+      "support_id": "P8",
+      "status": "UNRESOLVED",
+      "authority": "HEIGHT_CONTROLLED",
+      "cap_top_rl_m": "101.775",
+      "cap_bottom_rl_m": "100.975",
+      "shaft_base_rl_m": "94.975",
+      "shaft_height_m": "6.0"
+    }
+  ],
+  "dxf_files": [
+    {
+      "path": "E:\\Rajkumar\\BridgeCAD-Enterprise-Suite\\artifacts\\gad-acceptance\\nine_span_slab\\e969b72979196f78e2d04129c2462268d6caf099\\e969b72979196f78e2d04129c2462268d6caf099_Sheet1_Plan.dxf",
+      "entities": 247,
+      "size_bytes": 114262
+    },
+    {
+      "path": "E:\\Rajkumar\\BridgeCAD-Enterprise-Suite\\artifacts\\gad-acceptance\\nine_span_slab\\e969b72979196f78e2d04129c2462268d6caf099\\e969b72979196f78e2d04129c2462268d6caf099_Sheet2_LongSection.dxf",
+      "entities": 314,
+      "size_bytes": 118094
+    },
+    {
+      "path": "E:\\Rajkumar\\BridgeCAD-Enterprise-Suite\\artifacts\\gad-acceptance\\nine_span_slab\\e969b72979196f78e2d04129c2462268d6caf099\\e969b72979196f78e2d04129c2462268d6caf099_Sheet3_CrossSection.dxf",
+      "entities": 73,
+      "size_bytes": 58450
+    },
+    {
+      "path": "E:\\Rajkumar\\BridgeCAD-Enterprise-Suite\\artifacts\\gad-acceptance\\nine_span_slab\\e969b72979196f78e2d04129c2462268d6caf099\\e969b72979196f78e2d04129c2462268d6caf099_Sheet4_Foundation.dxf",
+      "entities": 139,
+      "size_bytes": 70502
+    },
+    {
+      "path": "E:\\Rajkumar\\BridgeCAD-Enterprise-Suite\\artifacts\\gad-acceptance\\nine_span_slab\\e969b72979196f78e2d04129c2462268d6caf099\\e969b72979196f78e2d04129c2462268d6caf099_Sheet5_PierAbutment.dxf",
+      "entities": 194,
+      "size_bytes": 87742
+    },
+    {
+      "path": "E:\\Rajkumar\\BridgeCAD-Enterprise-Suite\\artifacts\\gad-acceptance\\nine_span_slab\\e969b72979196f78e2d04129c2462268d6caf099\\e969b72979196f78e2d04129c2462268d6caf099_Sheet6_BearingsJoints.dxf",
+      "entities": 87,
+      "size_bytes": 59797
+    },
+    {
+      "path": "E:\\Rajkumar\\BridgeCAD-Enterprise-Suite\\artifacts\\gad-acceptance\\nine_span_slab\\e969b72979196f78e2d04129c2462268d6caf099\\e969b72979196f78e2d04129c2462268d6caf099_Sheet7_BOQ.dxf",
+      "entities": 276,
+      "size_bytes": 77211
+    },
+    {
+      "path": "E:\\Rajkumar\\BridgeCAD-Enterprise-Suite\\artifacts\\gad-acceptance\\nine_span_slab\\e969b72979196f78e2d04129c2462268d6caf099\\e969b72979196f78e2d04129c2462268d6caf099_Sheet8_SideElevations.dxf",
+      "entities": 263,
+      "size_bytes": 115277
+    },
+    {
+      "path": "E:\\Rajkumar\\BridgeCAD-Enterprise-Suite\\artifacts\\gad-acceptance\\nine_span_slab\\e969b72979196f78e2d04129c2462268d6caf099\\e969b72979196f78e2d04129c2462268d6caf099_Sheet9_Reinforcement.dxf",
+      "entities": 192,
+      "size_bytes": 62792
+    }
+  ],
+  "measured_cross_view_deltas": [
+    {
+      "check": "plan pier chainages vs long-section pier chainages (max |\u0394|)",
+      "delta_m": 0.0,
+      "tolerance_m": 0.001,
+      "verdict": "AGREE"
+    },
+    {
+      "check": "plan support set vs long-section support set (max |\u0394|)",
+      "delta_m": 0.0,
+      "tolerance_m": 0.001,
+      "verdict": "AGREE"
+    },
+    {
+      "check": "plan deck length vs long-section deck length (m)",
+      "delta_m": 0.0,
+      "tolerance_m": 0.001,
+      "verdict": "AGREE"
+    },
+    {
+      "check": "record cap_bottom vs drawn shaft_top (long-section SUB-PIER rect top)",
+      "delta_m": -0.0,
+      "tolerance_m": 0.001,
+      "verdict": "AGREE"
+    },
+    {
+      "check": "record cap_top vs drawn cap_top (long-section SUB-PIER cap rect top)",
+      "delta_m": 0.0,
+      "tolerance_m": 0.001,
+      "verdict": "AGREE"
+    },
+    {
+      "check": "record footing_top vs record shaft_base (pure resolver)",
+      "delta_m": 0.0,
+      "tolerance_m": 1e-06,
+      "verdict": "AGREE"
+    },
+    {
+      "check": "record cap_bottom vs record shaft_top (pure resolver)",
+      "delta_m": 0.0,
+      "tolerance_m": 1e-06,
+      "verdict": "AGREE"
+    },
+    {
+      "check": "DRAWN pier base (long section) vs record shaft_base",
+      "delta_m": 0.0,
+      "tolerance_m": 0.001,
+      "verdict": "AGREE"
+    },
+    {
+      "check": "DRAWN pier base (long section) vs HFL \u2212 pier_height (the OLD datum)",
+      "delta_m": 0.975,
+      "tolerance_m": 0.001,
+      "verdict": "DISAGREE"
+    }
+  ],
+  "layout_audit": {
+    "rendered": true,
+    "error": "",
+    "entities_outside_frame": 0,
+    "outside_frame": [],
+    "printed_scales_all_on_ladder": true,
+    "printed_scales": [
+      50,
+      75,
+      150
+    ],
+    "min_text_height_mm": 1.8,
+    "text_floor_mm": 1.8,
+    "text_floor_holds": true,
+    "layers_drawn": 38,
+    "nts_claims": 6,
+    "overlaps_per_sheet": {
+      "AUDIT_Sheet1_Plan": {
+        "text_boxes": 46,
+        "overlaps": 0,
+        "pairs": []
+      },
+      "AUDIT_Sheet2_LongSection": {
+        "text_boxes": 114,
+        "overlaps": 2,
+        "pairs": [
+          [
+            "EXISTING GROUND LEVEL",
+            "DESIGN SCOUR LEVEL"
+          ],
+          [
+            "APPROACH SLAB",
+            "P2  101.775  -0.72"
+          ]
+        ]
+      },
+      "AUDIT_Sheet3_CrossSection": {
+        "text_boxes": 29,
+        "overlaps": 0,
+        "pairs": []
+      },
+      "AUDIT_Sheet4_Foundation": {
+        "text_boxes": 56,
+        "overlaps": 0,
+        "pairs": []
+      },
+      "AUDIT_Sheet5_PierAbutment": {
+        "text_boxes": 78,
+        "overlaps": 0,
+        "pairs": []
+      },
+      "AUDIT_Sheet6_BearingsJoints": {
+        "text_boxes": 41,
+        "overlaps": 0,
+        "pairs": []
+      },
+      "AUDIT_Sheet7_BOQ": {
+        "text_boxes": 141,
+        "overlaps": 1,
+        "pairs": [
+          [
+            "TBD",
+            "TBD"
+          ]
+        ]
+      },
+      "AUDIT_Sheet8_SideElevations": {
+        "text_boxes": 97,
+        "overlaps": 11,
+        "pairs": [
+          [
+            "RL 102.500",
+            "RL 102.500"
+          ],
+          [
+            "RL 102.500",
+            "TOP OF DECK / FORMATION"
+          ],
+          [
+            "APPROACH SLAB  3.5\u00d7200mm",
+            "TOP OF DECK / FORMATION"
+          ],
+          [
+            "RL 102.500",
+            "T.O.D. / FORMATION RL"
+          ],
+          [
+            "RL 101.925",
+            "TOP OF PIER CAP RL"
+          ],
+          [
+            "RL 101.775",
+            "TOP OF PIER CAP RL"
+          ],
+          [
+            "RL 94.975",
+            "BASE OF PIER SHAFT"
+          ],
+          [
+            "0m",
+            "2m"
+          ],
+          [
+            "2m",
+            "4m"
+          ],
+          [
+            "4m",
+            "6m"
+          ],
+          [
+            "6m",
+            "8m"
+          ]
+        ]
+      },
+      "AUDIT_Sheet9_Reinforcement": {
+        "text_boxes": 97,
+        "overlaps": 0,
+        "pairs": []
+      }
+    },
+    "overlap_note": "layout_audit.BBox estimates text width as 0.6*height*len(text), which over-estimates short labels; the listed pairs are measured, not asserted zero.",
+    "regions": {
+      "sheet": {
+        "AUDIT_Sheet1_Plan": [
+          0.0,
+          0.0,
+          841.0,
+          594.0
+        ],
+        "AUDIT_Sheet2_LongSection": [
+          0.0,
+          0.0,
+          841.0,
+          594.0
+        ],
+        "AUDIT_Sheet3_CrossSection": [
+          0.0,
+          0.0,
+          841.0,
+          594.0
+        ],
+        "AUDIT_Sheet4_Foundation": [
+          0.0,
+          0.0,
+          841.0,
+          594.0
+        ],
+        "AUDIT_Sheet5_PierAbutment": [
+          0.0,
+          0.0,
+          841.0,
+          594.0
+        ],
+        "AUDIT_Sheet6_BearingsJoints": [
+          0.0,
+          0.0,
+          841.0,
+          594.0
+        ],
+        "AUDIT_Sheet7_BOQ": [
+          0.0,
+          0.0,
+          841.0,
+          594.0
+        ],
+        "AUDIT_Sheet8_SideElevations": [
+          0.0,
+          0.0,
+          841.0,
+          594.0
+        ],
+        "AUDIT_Sheet9_Reinforcement": [
+          0.0,
+          0.0,
+          841.0,
+          594.0
+        ]
+      },
+      "frame": {
+        "AUDIT_Sheet1_Plan": [
+          10.0,
+          10.0,
+          831.0,
+          584.0
+        ],
+        "AUDIT_Sheet2_LongSection": [
+          10.0,
+          10.0,
+          831.0,
+          584.0
+        ],
+        "AUDIT_Sheet3_CrossSection": [
+          10.0,
+          10.0,
+          831.0,
+          584.0
+        ],
+        "AUDIT_Sheet4_Foundation": [
+          10.0,
+          10.0,
+          831.0,
+          584.0
+        ],
+        "AUDIT_Sheet5_PierAbutment": [
+          10.0,
+          10.0,
+          831.0,
+          584.0
+        ],
+        "AUDIT_Sheet6_BearingsJoints": [
+          10.0,
+          10.0,
+          831.0,
+          584.0
+        ],
+        "AUDIT_Sheet7_BOQ": [
+          10.0,
+          10.0,
+          831.0,
+          584.0
+        ],
+        "AUDIT_Sheet8_SideElevations": [
+          10.0,
+          10.0,
+          831.0,
+          584.0
+        ],
+        "AUDIT_Sheet9_Reinforcement": [
+          10.0,
+          10.0,
+          831.0,
+          584.0
+        ]
+      },
+      "title_block": {
+        "AUDIT_Sheet1_Plan": [
+          646.0,
+          10.0,
+          831.0,
+          65.0
+        ],
+        "AUDIT_Sheet2_LongSection": [
+          646.0,
+          10.0,
+          831.0,
+          65.0
+        ],
+        "AUDIT_Sheet3_CrossSection": [
+          646.0,
+          10.0,
+          831.0,
+          65.0
+        ],
+        "AUDIT_Sheet4_Foundation": [
+          646.0,
+          10.0,
+          831.0,
+          65.0
+        ],
+        "AUDIT_Sheet5_PierAbutment": [
+          646.0,
+          10.0,
+          831.0,
+          65.0
+        ],
+        "AUDIT_Sheet6_BearingsJoints": [
+          646.0,
+          10.0,
+          831.0,
+          65.0
+        ],
+        "AUDIT_Sheet7_BOQ": [
+          646.0,
+          10.0,
+          831.0,
+          65.0
+        ],
+        "AUDIT_Sheet8_SideElevations": [
+          646.0,
+          10.0,
+          831.0,
+          65.0
+        ],
+        "AUDIT_Sheet9_Reinforcement": [
+          646.0,
+          10.0,
+          831.0,
+          65.0
+        ]
+      },
+      "notes": {
+        "AUDIT_Sheet5_PierAbutment": [
+          23.0,
+          161.0,
+          228.14999999999998,
+          230.25
+        ],
+        "AUDIT_Sheet6_BearingsJoints": [
+          23.0,
+          83.0,
+          129.816,
+          126.88
+        ],
+        "AUDIT_Sheet7_BOQ": [
+          18.0,
+          229.5,
+          126.244,
+          273.8
+        ]
+      }
+    },
+    "title_block_intrusions": [],
+    "notes_intrusions": [],
+    "layout_checks": {
+      "rendered": true,
+      "clipping_ok": true,
+      "title_block_ok": true,
+      "notes_zone_declared": true,
+      "notes_zone_ok": true,
+      "scales_ok": true,
+      "text_floor_ok": true,
+      "min_text_height_paper_mm": 1.8,
+      "details": {
+        "sheets_audited": [
+          "AUDIT_Sheet1_Plan",
+          "AUDIT_Sheet2_LongSection",
+          "AUDIT_Sheet3_CrossSection",
+          "AUDIT_Sheet4_Foundation",
+          "AUDIT_Sheet5_PierAbutment",
+          "AUDIT_Sheet6_BearingsJoints",
+          "AUDIT_Sheet7_BOQ",
+          "AUDIT_Sheet8_SideElevations",
+          "AUDIT_Sheet9_Reinforcement"
+        ],
+        "clipping_violations": [],
+        "title_block_intrusions": [],
+        "notes_intrusions": [],
+        "notes_zone_sheets": [
+          "AUDIT_Sheet5_PierAbutment",
+          "AUDIT_Sheet6_BearingsJoints",
+          "AUDIT_Sheet7_BOQ"
+        ],
+        "title_block_sheets": [
+          "AUDIT_Sheet1_Plan",
+          "AUDIT_Sheet2_LongSection",
+          "AUDIT_Sheet3_CrossSection",
+          "AUDIT_Sheet4_Foundation",
+          "AUDIT_Sheet5_PierAbutment",
+          "AUDIT_Sheet6_BearingsJoints",
+          "AUDIT_Sheet7_BOQ",
+          "AUDIT_Sheet8_SideElevations",
+          "AUDIT_Sheet9_Reinforcement"
+        ],
+        "printed_scales": [
+          50,
+          75,
+          150
+        ],
+        "text_floor_paper_mm": 1.8
+      },
+      "passed": true
+    }
+  },
+  "could_not_verify": [
+    "'footing top = shaft base' as a DRAWN cross-view check: this card's foundation is OPEN, so Sheet 4 renders no pier-footing geometry (layers FOUND-CAP / FOUND-PILE / SUB-PIER / TEXT-LEVEL are absent). The equality is only available from the canonical resolver record.",
+    "'cap bottom = shaft top' as a DRAWN plan\u2194foundation check: the plan does not carry RLs; the drawn comparison is long-section SUB-PIER only, cross-checked against the record.",
+    "reference fidelity: render-status.json records reference_fidelity = not_verified; no reference drawing was compared (the reference PDF contains no nine-span sheet).",
+    "region-level layout gating is now measured, not assumed: layout_audit exposes Region rectangles for the sheet, frame, title block and notes zone, and layout_checks reports clipping / title_block / notes_zone / scales / text_floor. What remains outside the gate is the *view* rectangles: no sheet declares a bounding rectangle for its own views, so 'view vs view' overlap is still reported as measured text-pair counts rather than as a pass/fail region check."
+  ],
+  "assumed_inputs": [
+    "spec fixture input, assumed, not design guidance: road RL 102.500",
+    "spec fixture input, assumed, not design guidance: wearing 0.075",
+    "spec fixture input, assumed, not design guidance: structural slab 0.500",
+    "spec fixture input, assumed, not design guidance: bearing depth 0.050",
+    "spec fixture input, assumed, not design guidance: pedestal height 0.150",
+    "spec fixture input, assumed, not design guidance: cap depth 0.800",
+    "spec fixture input, assumed, not design guidance: footing bottom RL 97.400",
+    "spec fixture input, assumed, not design guidance: footing depth 1.000"
+  ],
+  "tolerances": {
+    "resolver_TOL_M": 1e-06,
+    "drawing_TOL_DRAW_M": 0.001
+  }
+}

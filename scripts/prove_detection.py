@@ -39,6 +39,14 @@ ROOT = Path(__file__).resolve().parent.parent
 INTEGRITY = "tests/docs/test_doc_integrity.py"
 
 # Heavy or generated — never worth copying.
+#
+# The harness copies the whole tree once per mutation (19 copies including the
+# control). Measured on the Windows checkout, the ignore set below still left
+# 7859 files / 303 MB per copy ≈ 45 s each — the copying alone exceeds the
+# 900 s budget of the combined-run test, before a single guard runs. Only
+# markdown, YAML/TOML config and small script/text files are ever read by the
+# documentation guards, so the generated/vendored trees listed here and the
+# binary extensions in ``_IGNORE_EXT`` are pure I/O for this proof.
 IGNORE_DIRS = frozenset(
     {
         ".git",
@@ -54,11 +62,42 @@ IGNORE_DIRS = frozenset(
         ".benchmarks",
         "03_outputs",
         "outputs",
+        "output",
+        "out",
         "test_run_sample",
         "TEST_RUN_OUTPUT",
         "docs/api/_build",
         "dist",
         "CODE-JUNCTION",
+        # Generated / vendored / tooling trees with no product documentation.
+        # NOTE: do NOT add "ATTACHED ASSETS" here — it holds the .md files that
+        # README.md links to, so excluding it makes the control run fail on a
+        # "dead link" that is only dead inside the copy. Its heavy .pdf is
+        # already dropped by _IGNORE_EXT.
+        "vendor",
+        ".agents",
+        ".hypothesis",
+        "sample-gad-drawings",
+        "learn-media",
+        ".deps",
+        ".verify",
+        "temp",
+    }
+)
+
+#: Binary asset types no documentation guard parses. Copied per mutation would
+#: otherwise dominate the run: on the current tree .pdf/.dxf/.dll/.pyd/.png
+#: alone are ~220 MB of the 303 MB kept copy.
+_IGNORE_EXT = frozenset(
+    {
+        ".pdf", ".dxf", ".dwg", ".dgn", ".step", ".stp", ".igs", ".iges", ".stl",
+        ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tif", ".tiff", ".ico", ".webp",
+        ".mp4", ".mov", ".avi", ".webm", ".mkv", ".mp3", ".wav",
+        ".zip", ".tar", ".gz", ".7z", ".whl",
+        ".dll", ".pyd", ".so", ".dylib", ".exe", ".msi", ".bin", ".lib", ".pdb",
+        ".pyc", ".pyo", ".class", ".jar",
+        ".ttf", ".otf", ".woff", ".woff2", ".eot",
+        ".xlsx", ".xls", ".docx", ".pptx",
     }
 )
 
@@ -319,7 +358,13 @@ MUTATIONS: list[Mutation] = [
 
 # ── harness ──────────────────────────────────────────────────────────────────
 def _ignore(_dir: str, names: list[str]) -> list[str]:
-    return [n for n in names if n in IGNORE_DIRS or n.endswith(".egg-info")]
+    return [
+        n
+        for n in names
+        if n in IGNORE_DIRS
+        or n.endswith(".egg-info")
+        or Path(n).suffix.lower() in _IGNORE_EXT
+    ]
 
 
 def _copy(dest: Path) -> Path:

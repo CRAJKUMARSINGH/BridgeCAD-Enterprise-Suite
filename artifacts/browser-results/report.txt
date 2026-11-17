@@ -1,0 +1,60 @@
+﻿
+====================================================================
+  BRIDGECAD BROWSER END-TO-END TEST
+====================================================================
+
+── Step 0: Service Health ─────────────────────────────────────
+  ✅  FastAPI alive   [HTTP 200 http://localhost:8000/health]
+  ✅  Streamlit alive   [HTTP 200 http://localhost:8501/_stcore/health]
+  ✅  React/Vite alive   [HTTP 200 http://localhost:5173/]
+
+── Step 1: API Version ────────────────────────────────────────
+  ✅  API version   [v0.1.0-rc1  [BRIDGECAD-OSS-1.0]]
+
+── Step 2: Plugin Registry ─────────────────────────────────────
+  ✅  3 plugins registered   [['arch_bridge', 'box_culvert', 'cable_stayed', 'pipe_culvert', 'psc_boxgirder', 'psc_igirder', 'rcc_tbeam', 'solid_slab', 'steel_composite', 'voided_slab']]
+
+── Step 3: Generate simple_12m template ────────────────────────
+  ✅  Template generated   [58 KB  (14-sheet xlsx)]
+
+── Step 4: POST /bridges/parse ─────────────────────────────────
+  ✅  Parse xlsx→project   [status=ok  length=12.0m  spans=1  [2366ms]]
+
+── Step 5: POST /bridges/validate ──────────────────────────────
+  ✅  QA validation   [score=0/100  grade=F  critical_fails=7  checks=194  [2414ms]  (blank template)]
+
+── Step 6: POST /draw/gad (8-sheet DXF ZIP) ────────────────────
+  ✅  Draw 8-sheet DXF   [103 KB ZIP  9 DXF files  [4671ms]]
+
+── Step 7: POST /bills/generate ─────────────────────────────────
+  ✅  BOQ generated   [grand_total=INR 3,539,556  sections=8  items=26  [2230ms]]
+
+── Step 8: POST /qa/report (HTML) ───────────────────────────────
+  ✅  QA HTML report   [37 KB  has_table=True  [2511ms]]
+
+── Step 9: POST /exports/bundle (full ZIP) ──────────────────────
+  ✅  Full export bundle   [128 KB  16 files  dxf=True  xlsx=True  html=True  manifest=True  [5768ms]]
+
+── Step 10: Swagger / OpenAPI UI ───────────────────────────────
+  ✅  Swagger UI /docs   [HTTP 200  1023 chars]
+  ✅  OpenAPI schema   [18 paths defined]
+
+── Step 12: Streamlit UI ────────────────────────────────────────
+  ✅  Streamlit health   [HTTP 200  'ok'  → http://localhost:8501]
+  ✅  React Vite   [HTTP 200  608 bytes  → http://localhost:5173]
+
+====================================================================
+  BROWSER TEST SUMMARY
+====================================================================
+  Tests run : 16
+  Passed    : 16
+  Failed    : 0
+
+  ★ ALL BROWSER TESTS PASSED ★
+====================================================================
+
+  Open in your browser:
+    🟢 Streamlit 15-tab  →  http://localhost:8501
+    🔵 FastAPI Swagger   →  http://localhost:8000/docs
+    🟣 React Console     →  http://localhost:5173
+====================================================================

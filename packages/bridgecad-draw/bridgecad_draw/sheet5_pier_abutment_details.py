@@ -89,7 +89,18 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     # ══════════════════════════════════════════════════════════════════════
     pier_cx = 140.0
     pier_by = 250.0
-    pier_h = float(sub.pier_height_typical_m or 8.0)
+    # §3 — the pier shaft height is the canonical support record's
+    # ``shaft_height_m`` (the same value the long section and Side Elevations
+    # draw), not an independently re-read model field. The model value stands in
+    # only when the contract could not resolve a height at all.
+    from bridgecad_core.geometry.long_section import typical_pier_support_level
+
+    _prec = typical_pier_support_level(project)
+    pier_h = (
+        float(_prec.shaft_height_m)
+        if _prec.shaft_height_m is not None
+        else float(sub.pier_height_typical_m or 8.0)
+    )
     pier_sw = float(sub.pier_shaft_width_m or 1.5)
     pier_sl = float(sub.pier_shaft_length_m or 11.5)
     cap_w = float(sub.pier_cap_width_m or 2.0)
@@ -465,6 +476,52 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
         halign="CENTER",
     )
 
+    # ── Cantilever family: stem / toe / heel / base thickness ──────────────
+    # Spec §4 (Cantilever abutment) asks the abutment views to dimension the
+    # stem, toe, heel and base thickness.  The profile drawn above is the shared
+    # shape-family outline (``bridgecad_core.geometry.abutment_profiles
+    # .elevation_outline``), so the two fractions used here are read straight
+    # off the outline that was actually drawn — the stem is 0.50 of the view
+    # length and the base slab is 0.18 of the drawn wall height, projecting each
+    # side of the stem — instead of being re-declared in this sheet and left
+    # free to drift from the shared profile.
+    #
+    # ``Substructure`` declares no abutment footing projection and no base-slab
+    # depth (see models.py), so the toe and heel overhangs are named against the
+    # outline at the fraction they are drawn at, and only the base-slab
+    # thickness — a real drawn length — is stated in metres.  No design input is
+    # invented to fill the dimension: what is not declared in the model is not
+    # dimensioned here.
+    if _fam == "cantilever" and len(_norm_pts) >= 3:
+        _stem_frac = _norm_pts[1][0] - _norm_pts[0][0]
+        _base_frac = _norm_pts[2][1]
+        _over_frac = _norm_pts[0][0]
+        _base_d_m = _base_frac * max(abt_h - cap_ab_d, 0.2)
+        dim_along(
+            _abt_elev,
+            (abt_cx - L_mm / 2, abt_by),
+            (abt_cx - L_mm / 2, abt_by + _base_frac * H_mm),
+            "VERTICAL",
+            msp=msp,
+            dim_x=abt_cx - L_mm / 2 - th * 4.5,
+            label=f"BASE SLAB {_base_d_m:.2f} THK",
+            text_height=th * 0.85,
+        )
+        for _lbl, _frac, _xc in (
+            ("TOE", _over_frac, abt_cx - L_mm / 2 + _over_frac * L_mm / 2.0),
+            ("STEM", _stem_frac, abt_cx),
+            ("HEEL", _over_frac, abt_cx + L_mm / 2 - _over_frac * L_mm / 2.0),
+        ):
+            text(
+                msp,
+                f"{_lbl} {_frac:.2f}L",
+                _xc,
+                abt_by - th * 2.2,
+                height=th * 0.85,
+                layer="TEXT-SPEC",
+                halign="CENTER",
+            )
+
     # ══════════════════════════════════════════════════════════════════════
     # ABUTMENT SECTION — longitudinal (right, lower)
     # ══════════════════════════════════════════════════════════════════════
@@ -479,12 +536,17 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     dw_mm = dw_h * sc
     app_t_mm = app_t * sc
 
-    # Abutment body — GRAVITY family draws the LISP abt1() battered side
-    # profile (different riverside/earthside batters); other families keep the
-    # rectangular stem + cap + dirt wall stack.
+    # Abutment body — the battered families (GRAVITY, and the default
+    # ``battered`` shape family that :func:`family_for` returns for a wall
+    # abutment) draw the LISP abt1() battered side profile with *independent*
+    # riverside / earthside batters and annotate both values on the sheet.  The
+    # model always carries ``abutment_face_batter_1n`` / ``abutment_back_batter_1n``
+    # (defaults 1:10 river / 1:3 earth), so the section shows the batter the
+    # model declares instead of a plain rectangle that hides it.  CANTILEVER and
+    # any other family keep the rectangular stem + cap + dirt wall stack.
     _fam_sec = _family_for(getattr(sub, "abutment_type", None))
     _cap_w_m = abt_w + cap_pf + cap_pr
-    if _fam_sec == "gravity":
+    if _fam_sec in ("gravity", "battered"):
         from bridgecad_core.geometry.abutment_profiles import battered_side_outline
 
         _foot_d_m = 1.0

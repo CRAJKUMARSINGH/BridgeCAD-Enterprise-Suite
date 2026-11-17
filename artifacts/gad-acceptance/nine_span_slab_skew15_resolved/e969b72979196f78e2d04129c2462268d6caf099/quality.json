@@ -1,0 +1,32 @@
+{
+  "generation": "SUCCEEDED",
+  "model_validation": "PASSED",
+  "geometry_contract": "PASSED",
+  "required_content": "PASSED",
+  "layout": "PASSED",
+  "reference_fidelity": "BLOCKED",
+  "engineering_review": "PENDING",
+  "generation_gates_passed": true,
+  "quality_and_layout_passed": true,
+  "accepted": false,
+  "status": "GENERATION/CONTENT/LAYOUT GATES PASSED \u2014 acceptance pending reference/review",
+  "fixture": "nine_span_slab_skew15_resolved",
+  "commit": "e969b72979196f78e2d04129c2462268d6caf099",
+  "annotation_overlap_count": 0,
+  "issues": [
+    {
+      "gate": "reference_fidelity",
+      "code": "E-NO-NINE-SPAN-REFERENCE",
+      "message": "reference booklet contains no nine-span sheet; convention/geometry comparison is PARTIAL",
+      "detail": ""
+    }
+  ],
+  "notes": [
+    "model_validation=PASSED: all 8 supports RESOLVED (LEVEL_CONTROLLED)",
+    "geometry_contract=PASSED: 8 supports: cap_bottom=shaft_top, footing_top=shaft_base, footing_top=footing_bottom+depth",
+    "required_content=PASSED: required content: 71 applicable requirement(s) present on 9 sheet(s); 9 sheets each >= 20 entities",
+    "layout=PASSED: title-block/notes zones clear, frame, scale ladder and text floor all hold",
+    "reference_fidelity=BLOCKED: reference booklet contains no nine-span sheet \u2014 exact nine-span reproduction claim not possible; booklet convention + independently verified geometry comparison is PARTIAL and the calibrated per-reference-page comparison (\u00a76) awaits the approved reference PDF (artifacts/reference-overlay/comparison.json)",
+    "engineering_review=PENDING: structural/geotechnical adequacy is a human verdict; not claimed here"
+  ]
+}

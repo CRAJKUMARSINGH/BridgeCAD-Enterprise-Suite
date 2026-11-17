@@ -1,0 +1,9 @@
+﻿ CREAT.md                                           | 307 +++------------------
+ .../bridgecad_catalogue/registry.py                |   8 +
+ .../bridgecad_core/geometry/long_section.py        |  45 ++-
+ .../bridgecad_draw/sheet2_long_section.py          |  38 ++-
+ .../bridgecad_draw/sheet4_foundation.py            |  38 ++-
+ scripts/prove_detection.py                         |  47 +++-
+ tests/pwd/booklet_oracle.json                      |   4 +-
+ tests/pwd/test_booklet_oracle.py                   |  22 +-
+ 8 files changed, 208 insertions(+), 301 deletions(-)

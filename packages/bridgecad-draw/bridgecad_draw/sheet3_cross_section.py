@@ -781,9 +781,8 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     )
 
     # ── SCALE BAR ─────────────────────────────────────────────────────────────
-    # seg_len_m is a paper length in mm (see primitives.scale_bar), so scale the
-    # chosen number of metres by the fit scale — otherwise the bar plotted a few
-    # millimetres wide with five unreadable labels.
+    # Select the real metre length for a readable paper segment. The shared
+    # helper performs the one metres-to-paper-mm conversion and labels metres.
     sb_x = hx(-half_ow)
     sb_y = gird_bot - _OFF_SB
     sb_seg_m = max(1.0, round(24.0 / max(sc, 1e-6)))
@@ -793,7 +792,7 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
         sb_y,
         denom,
         segments=4,
-        seg_len_m=sb_seg_m * sc,
+        seg_len_m=sb_seg_m,
         text_height=th * 0.85,
     )
 

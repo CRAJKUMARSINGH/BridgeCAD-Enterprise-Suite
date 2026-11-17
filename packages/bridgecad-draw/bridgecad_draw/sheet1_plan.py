@@ -79,6 +79,7 @@ _OFF_ABUT = 11.0  # abutment-width staff
 _OFF_SECTION = 10.0  # section-arrow cut-line overrun
 _NARROW_SIZE = 8.0  # north-arrow symbol size (mm)
 _SECTION_SIZE = 6.0  # section-arrow symbol size (mm)
+_SBAR_SEGMENTS = 4  # graphic scale-bar segment count
 _TEXT_MAX = 5.0  # adaptive text cap (mm) — keeps short bridges legible
 
 
@@ -267,6 +268,16 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int | None = None) -> None:
         )
 
     # ── Abutments ─────────────────────────────────────────────────────────
+    # Wing-wall splay / return-wall footprint (RC-PLAN-11). The abutment
+    # footprints alone left the plan silent about the walls that retain the
+    # approach fill. Both are sized from the DECLARED substructure inputs only
+    # — ``wing_wall_splay_length_m`` / ``return_wall_length_m`` (same 3.0 / 4.0 m
+    # fallbacks Sheet 5 uses) and the abutment length/width already read above.
+    # No new angle is invented: the wing walls run outboard along the chainage
+    # axis, the return walls run transversally, so the two lengths fully define
+    # the footprint.
+    ww_splay = float(getattr(sub, "wing_wall_splay_length_m", None) or 3.0)  # m
+    ret_len = float(getattr(sub, "return_wall_length_m", None) or 4.0)  # m
     for ch, label in [(0.0, "A1"), (total_len, "A2")]:
         ax = hpos(ch) - abt_w * scale / 2.0
         ay = vpos(-abt_l / 2.0)
@@ -290,6 +301,62 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int | None = None) -> None:
             halign="CENTER",
         )
         text(msp, label, ax - text_h * 4, vpos(0), height=text_h * 1.2, layer="TEXT-GENERAL")
+
+        # Wing/return footprint. Outboard runs away from the deck: A1 fills to
+        # -chainage, A2 to +chainage. Drawn as LINEs (not ``rectangle``) so the
+        # SUB-ABUT LWPOLYLINE count stays the two abutment bodies — the
+        # cross-view test counts those to locate the supports.
+        out_dir = -1.0 if label == "A1" else 1.0
+        face_x = ax if label == "A1" else ax + aw
+        splay_mm = ww_splay * scale
+        ret_mm = ret_len * scale
+        ret_x = face_x + out_dir * splay_mm  # outboard end of the wing walls
+        for wy, sgn in ((vpos(-half_w), -1.0), (vpos(half_w), 1.0)):
+            # Wing wall: outboard along chainage from the abutment face.
+            line(msp, (face_x, wy), (ret_x, wy), layer="SUB-ABUT", lw=35)
+            # Return wall: transverse from the wing-wall end.
+            line(msp, (ret_x, wy), (ret_x, wy + sgn * ret_mm), layer="SUB-ABUT", lw=35)
+        # Dimension chain — splay length (longitudinal) + return length (transverse).
+        dim_linear_h(
+            msp,
+            ret_x,
+            vpos(half_w),
+            face_x,
+            vpos(half_w),
+            dim_y=vpos(half_w) + text_h * 1.6,
+            label=f"SPLAY={ww_splay:.1f} m",
+            text_height=text_h * 0.75,
+        )
+        dim_linear_v(
+            msp,
+            ret_x,
+            vpos(half_w),
+            ret_x,
+            vpos(half_w) + ret_mm,
+            dim_x=ret_x + out_dir * text_h * 2.2,
+            label=f"RET={ret_len:.1f} m",
+            text_height=text_h * 0.75,
+        )
+        # Labels — placed in the free outboard column, clear of the support tag.
+        lab_x = ret_x + out_dir * text_h * 9.0
+        text(
+            msp,
+            f"WING WALL SPLAY {ww_splay:.1f}m",
+            lab_x,
+            vpos(half_w) + text_h * 3.2,
+            height=text_h * 0.8,
+            layer="TEXT-SPEC",
+            halign="CENTER",
+        )
+        text(
+            msp,
+            f"RETURN WALL {ret_len:.1f}m",
+            lab_x,
+            vpos(half_w) + text_h * 1.4,
+            height=text_h * 0.8,
+            layer="TEXT-SPEC",
+            halign="CENTER",
+        )
 
     # ── Piers ─────────────────────────────────────────────────────────────
     # Presence gate (SS3 §A6): a box cell / box culvert has no separate pier
@@ -476,17 +543,21 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int | None = None) -> None:
 
     # ── Scale bar ─────────────────────────────────────────────────────────
     # Labelled with the same denominator as the title block, so the two cannot
-    # disagree. (The bar's tick *lengths* are the primitive's own nominal ones
-    # — 1 unit per metre — which is a separate primitive-level defect.)
-    sb_x = hpos(total_len * 0.5) - 40.0
+    # disagree. ``seg_len_m`` is a real metre length; the primitive converts it
+    # to paper millimetres and labels metres from the same number. The bar is
+    # centred on the deck midpoint and its own paper width is measured, so a
+    # long bridge (a wide converted bar) cannot run past the frame.
+    sb_seg_m = min(25.0, max(1.0, round(total_len / 5)))
+    sb_paper = _SBAR_SEGMENTS * sb_seg_m * 1000.0 / denom
+    sb_x = hpos(total_len * 0.5) - sb_paper / 2.0
     sb_y = vpos(-half_w) - _OFF_SBAR
     scale_bar(
         msp,
         sb_x,
         sb_y,
         denom,
-        segments=4,
-        seg_len_m=min(25.0, max(1.0, round(total_len / 5))),
+        segments=_SBAR_SEGMENTS,
+        seg_len_m=sb_seg_m,
         text_height=text_h * 0.85,
     )
 

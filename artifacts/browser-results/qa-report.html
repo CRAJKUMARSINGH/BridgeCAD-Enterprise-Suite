@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QA Report — BRIDGE PROJECT</title>
+<style>
+  body {font-family:Arial,sans-serif;margin:20px;color:#333}
+  h1   {color:#1a237e}
+  .score-box {display:inline-block;padding:20px 40px;border-radius:12px;
+               background:#e74c3c;color:#fff;font-size:2.5em;font-weight:bold;margin:10px}
+  .summary {display:flex;gap:20px;margin:20px 0;flex-wrap:wrap}
+  .card {background:#f5f5f5;border-radius:8px;padding:15px 25px;min-width:140px}
+  .card h3 {margin:0 0 5px;font-size:0.9em;color:#666}
+  .card p  {margin:0;font-size:1.6em;font-weight:bold}
+  table {border-collapse:collapse;width:100%;margin-top:20px}
+  th,td {border:1px solid #ddd;padding:8px 12px;text-align:left;font-size:0.9em}
+  th    {background:#1a237e;color:#fff}
+  tr:hover {background:#f0f4ff}
+</style>
+</head>
+<body>
+<h1>🏗️ BridgeCAD QA Compliance Report</h1>
+<p><strong>Project:</strong> BRIDGE PROJECT<br>
+   <strong>Bridge:</strong>  BRIDGE<br>
+   <strong>Chainage:</strong> 0.0 km</p>
+
+<div class="summary">
+  <div><div class="score-box">0/100</div>
+       <p><strong>Grade F</strong></p></div>
+  <div class="card"><h3>IRC:5 (Hydraulic)</h3><p>60/100</p></div>
+  <div class="card"><h3>IRC:112 (Structural)</h3><p>100/100</p></div>
+  <div class="card"><h3>IRC SP:55 (Drawing)</h3><p>80/100</p></div>
+  <div class="card"><h3>Critical Fails</h3>
+       <p style="color:red">7</p></div>
+  <div class="card"><h3>Warnings</h3>
+       <p style="color:orange">2</p></div>
+  <div class="card"><h3>Total Checks</h3><p>194</p></div>
+</div>
+
+<h2>Check Results</h2>
+<table>
+  <tr><th></th><th>ID</th><th>Severity</th><th>Description</th>
+      <th>Result</th><th>Message</th></tr>
+<tr style='background:#f8d7da'><td>🔴</td><td><code>C12</code></td><td>CRITICAL</td><td>Design return period declared</td><td style='color:red'>FAIL</td><td>hydraulic_data.return_period_yr is None</td></tr>
+<tr style='background:#f8d7da'><td>🔴</td><td><code>C14</code></td><td>CRITICAL</td><td>Soil bearing capacity > 0 kPa declared</td><td style='color:red'>FAIL</td><td>bearing_capacity_kpa = 0.0  (must be > 0)</td></tr>
+<tr style='background:#f8d7da'><td>🔴</td><td><code>C19</code></td><td>CRITICAL</td><td>Bridge chainage reference declared</td><td style='color:red'>FAIL</td><td>project_master.chainage_km is None</td></tr>
+<tr style='background:#f8d7da'><td>🔴</td><td><code>C28</code></td><td>CRITICAL</td><td>IRC:5 afflux check</td><td style='color:red'>FAIL</td><td>hydraulic_data.max_afflux_allowable_m must be declared (> 0)</td></tr>
+<tr style='background:#f8d7da'><td>🔴</td><td><code>C29</code></td><td>CRITICAL</td><td>IRC:5 waterway check</td><td style='color:red'>FAIL</td><td>hydraulic_data.waterway_required_m2 must be declared (> 0)</td></tr>
+<tr style='background:#f8d7da'><td>🔴</td><td><code>C31</code></td><td>CRITICAL</td><td>IRC:78 pile bearing FOS = 0.00  (≥ 2.5)</td><td style='color:red'>FAIL</td><td>factor_of_safety_on_bearing = 0.00 < 2.5 IRC:78 §11.3 minimum</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I01</code></td><td>INFO</td><td>Project stage progression toward DESIGN_DEVELOPED</td><td style='color:red'>FAIL</td><td>current stage=DPR — promote after 60% peer review</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I02</code></td><td>INFO</td><td>Project name includes end stations ('A to B ROB')</td><td style='color:red'>FAIL</td><td>bridge_name='BRIDGE' — MORTH recommends 'VillageX to VillageY ROB'</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I06</code></td><td>INFO</td><td>Pre-design site-visit photos linked to register</td><td style='color:red'>FAIL</td><td>upload site-visit photos + GPS waypoints to register (IRC SP-55 Clause 1.4)</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I19</code></td><td>INFO</td><td>Pre-camber = Δ_DL + 0.5 Δ_LL (IRC:112 Clause 6.5)</td><td style='color:red'>FAIL</td><td>camber_method=NONE — industry standard practice Δ_camber = 1.5 × Δ_DL</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I21</code></td><td>INFO</td><td>Standard RC cast-in-situ slab + I-girder deck</td><td style='color:red'>FAIL</td><td>deck_slab=NONE — CIP RC slab typical for simply-supported I-girder decks</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I23</code></td><td>INFO</td><td>Single-column hammerhead pier aesthetic for viaduct</td><td style='color:red'>FAIL</td><td>pier_type=WALL — popular aesthetic solution per IRC SP-55 8.1</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I24</code></td><td>INFO</td><td>Cantilever abutment preferred H = 4–10 m</td><td style='color:red'>FAIL</td><td>abutment_type=CANTILEVER H=0.0 m — typical range IRC:78 8.2</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I28</code></td><td>INFO</td><td>BC/SDBC 40 mm typical ROB wearing coat</td><td style='color:red'>FAIL</td><td>wearing_coat=NONE t=0mm — MORTH 510 standard BC + SDBC 40 mm</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I29</code></td><td>INFO</td><td>WB2 / 3-beam crash barrier class common urban arterial</td><td style='color:red'>FAIL</td><td>crash_barrier=NONE — WB-2 widely used for urban arterial ROB per IRC SP-55 7.6</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I30</code></td><td>INFO</td><td>Mountable V-kerb for emergency vehicle egress</td><td style='color:red'>FAIL</td><td>kerb_type=NONE — mountable kerb emergency access per IRC:86 4.6</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I31</code></td><td>INFO</td><td>Urban interchange lighting class M2</td><td style='color:red'>FAIL</td><td>lighting= — IRC:86 Annex D M2-class = average maintained 20 lux carriageway</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I32</code></td><td>INFO</td><td>MORTH standard WGS-84 / UTM survey projection</td><td style='color:red'>FAIL</td><td>survey_grid_zone=NONE — MORTH Clause 502 mandates WGS-84 + UTM zone</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I33</code></td><td>INFO</td><td>Cumulative chainage (never reset at structures)</td><td style='color:red'>FAIL</td><td>chainage_system=NONE — continuous cumulative avoids clash at ROB/RUB markers</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I34</code></td><td>INFO</td><td>1:500 topographic survey at structure site</td><td style='color:red'>FAIL</td><td>topographic_scale= — IRC SP-55 2.1 recommends 1:500 for structure footprint</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I35</code></td><td>INFO</td><td>Minimum bore count: 1/pier + 2/abutment</td><td style='color:red'>FAIL</td><td>geotech_investigation= — IRC SP-55 2.2 minimum 1 bore/pier + 2/abutment</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I36</code></td><td>INFO</td><td>Structural analysis software on MORTH accepted list</td><td style='color:red'>FAIL</td><td>analysis_software=NONE — SAP2000 / MIDAS Civil most common (MORTH 507.2)</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I37</code></td><td>INFO</td><td>Sparse direct solver for large bridge FE models</td><td style='color:red'>FAIL</td><td>fem_solver=NONE — sparse-direct (PARDISO/SuperLU) best practice</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I39</code></td><td>INFO</td><td>Typical grades: deck M40 / sub M35 / found M30</td><td style='color:red'>FAIL</td><td>IRC SP-55 10.1 typical grade distribution</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I41</code></td><td>INFO</td><td>ISO 7200 sheet numbering PREFIX/SERIES/SUB</td><td style='color:red'>FAIL</td><td>sheet_numbering= — ISO 7200 format GA-001/01/1</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I42</code></td><td>INFO</td><td>Revision history: PRELIM → A → ISSUE → B</td><td style='color:red'>FAIL</td><td>title_block_rev=NONE rev_field=R0 — IRC SP-55 Annex G full history</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I43</code></td><td>INFO</td><td>BS 1192 / ISO 19650 compliant layer names</td><td style='color:red'>FAIL</td><td>layer_standard=IRC — BS 1192 format: discipline_element_layer</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I44</code></td><td>INFO</td><td>Dual mm + metre dimensioning for large plans</td><td style='color:red'>FAIL</td><td>dimension_style=NONE — best practice on sheet 1 plans</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I47</code></td><td>INFO</td><td>BBS bar marks 1:1 with reinforcement drawing marks</td><td style='color:red'>FAIL</td><td>bbs_class= — MORTH Appendix F one-mark-one-bend rule</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I48</code></td><td>INFO</td><td>QAP approved before first concrete pour</td><td style='color:red'>FAIL</td><td>qap= — MORTH Clause 1007.1 approval required before works</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I52</code></td><td>INFO</td><td>Report how many bands a broken view was split into</td><td style='color:red'>FAIL</td><td>layout audit not evaluated</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I53</code></td><td>INFO</td><td>Every drawn layer is present in the layer registry (ISO 13567)</td><td style='color:red'>FAIL</td><td>layout audit not evaluated</td></tr>
+<tr style='background:#f8d7da'><td>🟡</td><td><code>I54</code></td><td>INFO</td><td>A broken view carries its not-to-scale claim</td><td style='color:red'>FAIL</td><td>layout audit not evaluated</td></tr>
+<tr style='background:#f8d7da'><td>🔴</td><td><code>QA-PLE-CNT</code></td><td>CRITICAL</td><td>At least 2 piles per line / group</td><td style='color:red'>FAIL</td><td>piles per group = 0 — minimum 2</td></tr>
+<tr style='background:#fff3cd'><td>🟡</td><td><code>W06</code></td><td>WARNING</td><td>Rebar ductility detailing review for FE500D+</td><td style='color:red'>FAIL</td><td>reinforcement_steel=FE500D — confirm extra ductility hooks/laps per IS:1786 Clause 4.1</td></tr>
+<tr style='background:#fff3cd'><td>🟡</td><td><code>W51</code></td><td>WARNING</td><td>Dimension round-off tolerance for scale ≤ 1:100</td><td style='color:red'>FAIL</td><td>drawing_scale=1:100 ≤ 100 — use 5 mm round-off class for plan dimensions (IRC SP-55 Clause 11.3)</td></tr>
+<tr style=''><td>✅</td><td><code>ABT-CAP-DEPTH</code></td><td>CRITICAL</td><td>Abutment cap depth >= 450 mm (IRC:21 Clause 305 minimum)</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>ABT-CAP-PROJ</code></td><td>WARNING</td><td>Cap front 100–250 mm (bearing shelf) / rear 250–600 mm (dirt-wall seat)</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>BIL-001</code></td><td>CRITICAL</td><td>Every BOQ line has >= 1 entity_id</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>BIL-002</code></td><td>CRITICAL</td><td>BOQ quantities reconcile with ledger totals</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C01</code></td><td>CRITICAL</td><td>Project stage defined for GAD deliverable</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C02</code></td><td>CRITICAL</td><td>Client / employer identity populated</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C03</code></td><td>CRITICAL</td><td>Bridge category assigned per functional class</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C04</code></td><td>CRITICAL</td><td>Total bridge length coherent with span arrangement</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C05</code></td><td>CRITICAL</td><td>Component widths sum ≤ overall deck width</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C06</code></td><td>CRITICAL</td><td>Horizontal alignment type declared</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C07</code></td><td>CRITICAL</td><td>Vertical gradient ≤ 1:30 (3.33 %) on deck</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C08</code></td><td>CRITICAL</td><td>Superstructure type and deck material declared</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C09</code></td><td>CRITICAL</td><td>Pier and abutment family declared</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C10</code></td><td>CRITICAL</td><td>Bearing schedule populated (≥ 1 row)</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C11</code></td><td>CRITICAL</td><td>Expansion joint schedule populated (≥ 1 row)</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C13</code></td><td>CRITICAL</td><td>Design scour depth > 0 m</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C15</code></td><td>CRITICAL</td><td>Superstructure concrete grade ≥ M25</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C16</code></td><td>CRITICAL</td><td>Seismic zone declared</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C17</code></td><td>CRITICAL</td><td>Basic wind speed zone declared</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C18</code></td><td>CRITICAL</td><td>IRC loading class declared</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C20</code></td><td>CRITICAL</td><td>FEA solver compliance (GAD-stage soft-pass)</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C21</code></td><td>CRITICAL</td><td>Contract package / deliverables phase declared</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C22</code></td><td>CRITICAL</td><td>Drawing validation overall status is not FAIL</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C23</code></td><td>CRITICAL</td><td>Validation quality score ≥ 60 / 100</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C24</code></td><td>CRITICAL</td><td>Lacey silt factor > 0 declared</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C25</code></td><td>CRITICAL</td><td>Vertical curve K-value compliance (GAD-stage soft-pass)</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C26</code></td><td>CRITICAL</td><td>IRC:112 L/d = 10.0 in band [10–15] per IRC:21 Table 12</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C27</code></td><td>CRITICAL</td><td>IRC:5 freeboard HFL→soffit = 2.00m  (≥ 1.00m req.)</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>C30</code></td><td>CRITICAL</td><td>IRC:83 POT-bearing pressure ≤ 35 MPa (0 POT rows OK)</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I03</code></td><td>INFO</td><td>MORTH/NHAI additional Clause 101.1 doc-set flag</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I04</code></td><td>INFO</td><td>BOQ cross-reference for item-rate / DBO package</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I05</code></td><td>INFO</td><td>Class-A firm PE stamp / licensed engineer seal</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I07</code></td><td>INFO</td><td>3rd independent peer review for MAJOR / long-span</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I08</code></td><td>INFO</td><td>Even-span count preferred for balanced construction</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I09</code></td><td>INFO</td><td>Modular span uniformity to minimise formwork sets</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I10</code></td><td>INFO</td><td>Equal pier spacing aesthetic uniformity</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I11</code></td><td>INFO</td><td>Carriageway width aligns with IRC:86 Table 1 classes</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I12</code></td><td>INFO</td><td>Median ≥ 1.5 m for future barrier upgrade</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I13</code></td><td>INFO</td><td>Urban footpath minimum 1.5 m clear width</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I14</code></td><td>INFO</td><td>Skew angle = 0 simplifies detailing</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I15</code></td><td>INFO</td><td>Tangent alignment simplifies bearing layout</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I16</code></td><td>INFO</td><td>Sag-vertical-curve extra deck drainage slope</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I17</code></td><td>INFO</td><td>2% parabolic crown bituminous deck standard</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I18</code></td><td>INFO</td><td>Superelevation ≤ 7% (urban plain terrain)</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I20</code></td><td>INFO</td><td>Span range match for PT box girder (30–60 m)</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I22</code></td><td>INFO</td><td>In-situ RCC substructure typical for H ≤ 25 m</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I25</code></td><td>INFO</td><td>SPT-N ≥ 30 for spread footing founding level</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I26</code></td><td>INFO</td><td>Bearing type appropriate for load magnitude</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I27</code></td><td>INFO</td><td>Joint type matches movement class</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I38</code></td><td>INFO</td><td>Standard nominal cover: deck 40 / sub 50 / pile 60 mm</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I40</code></td><td>INFO</td><td>Fe500D ductile rebar recommended for seismic zones</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I45</code></td><td>INFO</td><td>Drawing scale among IRC SP-55 Annex G set</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I46</code></td><td>INFO</td><td>Minimum GAD sheets: plan + elevation + 3×CS</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I49</code></td><td>INFO</td><td>CRZ clearance if within 500 m HT line</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I50</code></td><td>INFO</td><td>EPC/D&B delivery GAD + detailed merge considerations</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>I51</code></td><td>INFO</td><td>Report the maximum arch curve deviation (PWD Booklet 014)</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>QA-ABT-BAR-SPG</code></td><td>WARNING</td><td>Abutment & cap reinforcement spacing <= 200 mm</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>QA-APP-LEN</code></td><td>WARNING</td><td>Approach slab length >= 2.0 m</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>QA-APP-THK</code></td><td>WARNING</td><td>Approach slab thickness >= 200 mm</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>QA-DRB-PRT</code></td><td>WARNING</td><td>Debris-prone waterway requires scour protection</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>QA-DW-BAR-SPG</code></td><td>WARNING</td><td>Dirt wall reinforcement spacing <= 200 mm</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>QA-DW-THK</code></td><td>CRITICAL</td><td>Dirt wall thickness >= 250 mm (IRC:78 Clause 710 minimum)</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>QA-DW-TOP</code></td><td>CRITICAL</td><td>Dirt wall height reaches approach-slab soffit with 100 mm margin</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>QA-DW-WEEP</code></td><td>WARNING</td><td>Weep hole spacing <= 3.0 m through dirt wall</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>QA-FDN-FOS</code></td><td>WARNING</td><td>Factor of safety on bearing >= 1.5</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>QA-JNT-GAP</code></td><td>WARNING</td><td>Expansion joint gap <= movement capacity</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>QA-JNT-MOV</code></td><td>WARNING</td><td>Design movement covers thermal range</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>QA-PCAP-THK</code></td><td>CRITICAL</td><td>Pile cap thickness >= 600 mm</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>QA-PLE-SPC</code></td><td>WARNING</td><td>Pile spacing >= 2.0 × pile diameter</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>QA-SCR-EMB</code></td><td>WARNING</td><td>Pile tip >= 3 m below design scour level</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>QA-SEA-SEAT</code></td><td>WARNING</td><td>Bearing seat width meets seismic demand</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>QA-VEL-LIM</code></td><td>WARNING</td><td>Modelled max velocity within regime limit</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>SKW-001</code></td><td>CRITICAL</td><td>Skew angle <= 60 deg (IRC limit)</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>SKW-002</code></td><td>WARNING</td><td>Acute corner edge distance >= 150 mm</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>SKW-003</code></td><td>WARNING</td><td>Obtuse corner note when skew > 15 deg</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W01</code></td><td>WARNING</td><td>Overall deck width ≤ 15 m</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W02</code></td><td>WARNING</td><td>Typical pier height ≤ 20 m</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W03</code></td><td>WARNING</td><td>Maximum span ≤ 50 m</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W04</code></td><td>WARNING</td><td>Steel superstructure fatigue detail classification</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W05</code></td><td>WARNING</td><td>Concrete grade ≤ M60 (HPC mix approval needed above M60)</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W07</code></td><td>WARNING</td><td>Elastomeric bearing creep compression-set check</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W08</code></td><td>WARNING</td><td>Expansion joint gap ≤ 100 mm (modular joint check)</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W09</code></td><td>WARNING</td><td>IS:1893 Ah ≈ 0.120g  (zone=ZONE_III  I=1.5  pier_h=0m  max_span=12m)</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W09</code></td><td>WARNING</td><td>Extended curing period for blended cement</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W10</code></td><td>WARNING</td><td>Concrete pumpability review for aggregate > 20 mm</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W11</code></td><td>WARNING</td><td>Aggressive-water protective cover + coating</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W12</code></td><td>WARNING</td><td>Anti-crack surface mesh for cover > 75 mm</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W13</code></td><td>WARNING</td><td>Superplasticizer declaration for slump class ≥ S4</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W14</code></td><td>WARNING</td><td>Membrane-curing surface prep for paint / overlay</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W15</code></td><td>WARNING</td><td>Superelevation transition review for curves R < 300 m</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W16</code></td><td>WARNING</td><td>Skew angle ≤ 30° (torsional stiffness note if higher)</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W17</code></td><td>WARNING</td><td>Well/caisson sinking sequence plan required</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W18</code></td><td>WARNING</td><td>Pile lateral load + group efficiency analysis</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W19</code></td><td>WARNING</td><td>Passive-earth-pressure verification for heavy abutment</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W20</code></td><td>WARNING</td><td>SMA wearing coat mandates polymer-modified binder</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W21</code></td><td>WARNING</td><td>Levelling course for wearing coat thickness > 50 mm</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W22</code></td><td>WARNING</td><td>Waterproofing / tack-coat compatibility review</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W23</code></td><td>WARNING</td><td>Rigid-parapet vehicle-impact load-case review</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W24</code></td><td>WARNING</td><td>High-mount kerb scupper drainage spacing</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W25</code></td><td>WARNING</td><td>Dual-luminaire lighting for Lux class ≥ M4</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W26</code></td><td>WARNING</td><td>Launching-apron stone weight vs design velocity</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W27</code></td><td>WARNING</td><td>2D hydraulic model overlay for braided/meandering reach</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W28</code></td><td>WARNING</td><td>Afflux bund heights for backwater-affected profile</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W29</code></td><td>WARNING</td><td>PMF overlay for return period T > 100 yr</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W30</code></td><td>WARNING</td><td>Culvert peak discharge for 10-min flash storm</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W31</code></td><td>WARNING</td><td>Deck raising study when HFL is within 0.5 m of soffit</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W32</code></td><td>WARNING</td><td>Annual desilting provision note for high sediment</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W33</code></td><td>WARNING</td><td>Independent peer-review hydrology for major crossing</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W34</code></td><td>WARNING</td><td>Across-wind response spectrum for Vb > 50 m/s</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W35</code></td><td>WARNING</td><td>Special moment-frame DCL ductility for Zone V</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W36</code></td><td>WARNING</td><td>Site-specific response spectrum for soil Class C/D</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W37</code></td><td>WARNING</td><td>Fuse-bearing capacity verification for DCL link</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W38</code></td><td>WARNING</td><td>Reduced fatigue stress-range curve for category ≤ C</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W39</code></td><td>WARNING</td><td>Prestress creep/shrinkage loss percentage ≤ 25%</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W40</code></td><td>WARNING</td><td>1.3× creep factor for humidity < 40% region</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W41</code></td><td>WARNING</td><td>Non-linear through-depth ΔT gradient for ΔT > 20 °C</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W42</code></td><td>WARNING</td><td>Dynamic amplification factor DAF for IF > 0.33</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W43</code></td><td>WARNING</td><td>Overstrength Ω factor in ultimate EQ combination</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W44</code></td><td>WARNING</td><td>Stainless-steel mating surface for PTFE μ < 0.08</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W45</code></td><td>WARNING</td><td>TMD feasibility for steel damping ratio < 2%</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W46</code></td><td>WARNING</td><td>Counterfort redesign note for gravity RW > 6 m</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W47</code></td><td>WARNING</td><td>OUT_OF_SERVICE layer confirm plot-suppress flag</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W48</code></td><td>WARNING</td><td>Review print bleed for line weight > 1.0 mm</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W49</code></td><td>WARNING</td><td>User-hatch present in plotter pen-table</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W50</code></td><td>WARNING</td><td>Non-ISO font family PDF embedding flag</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W52</code></td><td>WARNING</td><td>True-length dimension check on 3D isometric views</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W53</code></td><td>WARNING</td><td>Chained-dimension cumulative tolerance statement</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W54</code></td><td>WARNING</td><td>QA sign-off present for IFT revision</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W55</code></td><td>WARNING</td><td>A0+ jumbo plotter media inventory check</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W56</code></td><td>WARNING</td><td>Section cut-plane annotation on half-symmetric view</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W57</code></td><td>WARNING</td><td>Verify border line-style not centreline dash</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W58</code></td><td>WARNING</td><td>Dimension leader arrow style — slash for small features</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W59</code></td><td>WARNING</td><td>Unit-weight declaration for lightweight aggregate</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W60</code></td><td>WARNING</td><td>Accelerator + retarder admixture compatibility</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W61</code></td><td>WARNING</td><td>Full-penetration weld NDT UT/RT inspection plan</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W62</code></td><td>WARNING</td><td>PTFE/stainless Ra surface roughness spec</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W63</code></td><td>WARNING</td><td>10-yr maintenance re-seal note for polysulfide sealant</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W64</code></td><td>WARNING</td><td>Epoxy coated bar coating thickness class T3</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W65</code></td><td>WARNING</td><td>Parallel-thread rebar coupler Type II mill test</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W66</code></td><td>WARNING</td><td>Approved formwork liner for F4 fair-faced finish</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W67</code></td><td>WARNING</td><td>Plywood panel reuse criteria after > 3 pours</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W68</code></td><td>WARNING</td><td>Reactive release-agent bond-degradation check on lift face</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W69</code></td><td>WARNING</td><td>Hot-dip galvanizing post-fabrication straightening plan</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W70</code></td><td>WARNING</td><td>Sa 2.5 near-white blast for zinc-rich primer</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W71</code></td><td>WARNING</td><td>40-day minimum deck cure before polymer overlay</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W72</code></td><td>WARNING</td><td>Cable-stay dehumidification + endoscope monitoring note</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W73</code></td><td>WARNING</td><td>Hanger rod fatigue detail classification for tied-arch</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W74</code></td><td>WARNING</td><td>Secondary bending check in chords of Warren truss (no verticals)</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W75</code></td><td>WARNING</td><td>Drop-cap pier cap soffit reinforcement congestion</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W76</code></td><td>WARNING</td><td>Box-cell outline closes on six edges (PWD Booklet 004 Note 3)</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W77</code></td><td>CRITICAL</td><td>Box-cell cut-off wall length >= max(2.5d, 5.0 m)</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W78</code></td><td>CRITICAL</td><td>Arch rib schedule endpoints return to Y = 0 (PWD Booklet 014 Schedule)</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W79</code></td><td>CRITICAL</td><td>Arch rib nodes lie on the design curve within 1 mm (PWD Booklet 014)</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W80</code></td><td>WARNING</td><td>52 precast-arch strip gaps at 100 mm ± 2 mm (PWD Booklet 015 Note 9)</td><td style='color:green'>PASS</td><td>—</td></tr>
+<tr style=''><td>✅</td><td><code>W81</code></td><td>CRITICAL</td><td>Printed scale is a rung of the standard scale ladder (ISO 5455)</td><td style='color:green'>PASS</td><td>layout audit not evaluated</td></tr>
+<tr style=''><td>✅</td><td><code>W82</code></td><td>CRITICAL</td><td>No two sheet text bounding boxes overlap (ISO 128-22)</td><td style='color:green'>PASS</td><td>layout audit not evaluated</td></tr>
+<tr style=''><td>✅</td><td><code>W83</code></td><td>CRITICAL</td><td>Every drawn entity lies inside the sheet frame (ISO 5457)</td><td style='color:green'>PASS</td><td>layout audit not evaluated</td></tr>
+<tr style=''><td>✅</td><td><code>W84</code></td><td>WARNING</td><td>No pile geometry on a raft, open or box-cell foundation</td><td style='color:green'>PASS</td><td>—</td></tr>
+
+</table>
+
+<p style="color:#999;font-size:0.8em;margin-top:30px">
+Generated by BridgeCAD Enterprise Suite v0.1.0 | IRC SP:55-2019 compliance framework
+</p>
+</body>
+</html>

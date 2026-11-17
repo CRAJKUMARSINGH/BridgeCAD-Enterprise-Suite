@@ -1,0 +1,198 @@
+{
+  "_schema": "reference_requirements/v1",
+  "_note": "Required-content manifest per CODE-JUNCTION/BRIDGECAD_GAD_ACCEPTANCE_RESOLUTION.md §4. Every row needs stable ID, target view/support, expected primitive/semantic entity, required dimension/label, evidence, implementation status and reviewer verdict. Status vocabulary: PRESENT | PARTIAL | MISSING | NOT_APPLICABLE. Reviewer verdict: PENDING | ACCEPTED | REJECTED.",
+  "_wording_note": "The reference booklet (CODE-JUNCTION/GENERAL ARRANGEMENT DRAWINGS.pdf, SHA-256 38C224549A50CC72A20AAA01E07B33618789DC4D3881844363BDA199DD44A23D) contains no nine-span sheet (span counts in booklet: 2-5 only). Rows marked BOOKLET_CONVENTION apply to the invariant drawing conventions across all booklet pages. Rows marked NINE_SPAN_GEOMETRY apply to independently verified nine-span geometry and cannot be pixel-matched to a reference sheet.",
+  "requirements": [
+    {
+      "id": "RR-PLAN-001",
+      "scope": "BOOKLET_CONVENTION",
+      "view": "Plan",
+      "target": "all piers and abutments",
+      "expected_primitive": "support centre-line symbols at correct chainages",
+      "required_dimension_or_label": "span dimension chain totalling overall length; pier IDs (P-1 … P-N)",
+      "evidence": "artifacts/gad-acceptance/nine_span_slab_resolved/e969b72979196f78e2d04129c2462268d6caf099/e969b72979196f78e2d04129c2462268d6caf099_Sheet1_Plan.dxf",
+      "status": "PARTIAL",
+      "status_detail": "9 piers at correct chainages confirmed by cross-view test (delta=0.0 m); span dimension chain present; pier ID labels present. Carriageway and overall-width dimension chain not yet compared against booklet convention.",
+      "reviewer_verdict": "PENDING"
+    },
+    {
+      "id": "RR-PLAN-002",
+      "scope": "BOOKLET_CONVENTION",
+      "view": "Plan",
+      "target": "deck edges",
+      "expected_primitive": "carriageway and overall-width boundary lines",
+      "required_dimension_or_label": "carriageway width 7.5 m; overall width 8.0 m",
+      "evidence": "artifacts/reference-overlay/comparison.json (carriageway 7.50 m AGREE, overall width 8.00 m AGREE)",
+      "status": "PRESENT",
+      "status_detail": "Confirmed AGREE in calibrated comparison.",
+      "reviewer_verdict": "PENDING"
+    },
+    {
+      "id": "RR-PLAN-003",
+      "scope": "BOOKLET_CONVENTION",
+      "view": "Plan",
+      "target": "abutments",
+      "expected_primitive": "abutment cap footprint, wing-wall and return-wall outlines",
+      "required_dimension_or_label": "abutment axes at 0.000 m and 90.000 m",
+      "evidence": "artifacts/reference-overlay/comparison.json (abutment axes AGREE)",
+      "status": "PRESENT",
+      "status_detail": "Abutment axes confirmed AGREE. Wing/return-wall outlines drawn; independent completeness check not done.",
+      "reviewer_verdict": "PENDING"
+    },
+    {
+      "id": "RR-LONGSEC-001",
+      "scope": "BOOKLET_CONVENTION",
+      "view": "Longitudinal section",
+      "target": "all piers P1-P8",
+      "expected_primitive": "connected slab-bearing-pedestal-cap-shaft-foundation stack",
+      "required_dimension_or_label": "RLs for road/soffit/cap-top/cap-bottom/shaft-base/footing-top/footing-bottom; pier height; footing depth",
+      "evidence": "artifacts/gad-acceptance/nine_span_slab_resolved/e969b72979196f78e2d04129c2462268d6caf099/params.resolved.json (support_levels chain); tests/draw/test_nine_span_cross_view.py (12 tests, delta=0.0 m)",
+      "status": "PRESENT",
+      "status_detail": "Full RL chain RESOLVED for all 8 piers: shaft_base=94.925, cap_bottom=100.925, cap_top=101.725, soffit=101.925, road=102.500. Cross-view datum delta=0.0 m. RL label format differs from booklet convention (booklet: 'R.T.L. 102.315', generated: 'RL 102.500') — recorded in comparison.json as DIFFER.",
+      "reviewer_verdict": "PENDING"
+    },
+    {
+      "id": "RR-LONGSEC-002",
+      "scope": "BOOKLET_CONVENTION",
+      "view": "Longitudinal section",
+      "target": "all piers and abutments",
+      "expected_primitive": "HFL line, ground/scour line, datum marker",
+      "required_dimension_or_label": "HFL RL; scour depth; datum level",
+      "evidence": "artifacts/gad-acceptance/nine_span_slab_resolved/e969b72979196f78e2d04129c2462268d6caf099_Sheet2_LongSection.dxf",
+      "status": "PARTIAL",
+      "status_detail": "HFL line drawn at 100.0 m. Datum marker and scour line present. Booklet uses 'F.R.L.' notation and station markers A/L, P-1…P-N, A/R — generated uses generic labels.",
+      "reviewer_verdict": "PENDING"
+    },
+    {
+      "id": "RR-CROSSSEC-001",
+      "scope": "BOOKLET_CONVENTION",
+      "view": "Cross section",
+      "target": "typical pier cross section",
+      "expected_primitive": "carriageway, slab, kerbs/parapets, pier cap and shaft",
+      "required_dimension_or_label": "carriageway width 7.5 m; overall width 8.0 m; slab depth 500 mm; camber/crossfall if applicable",
+      "evidence": "artifacts/gad-acceptance/nine_span_slab_resolved/e969b72979196f78e2d04129c2462268d6caf099_Sheet3_CrossSection.dxf",
+      "status": "PARTIAL",
+      "status_detail": "Carriageway and overall width confirmed AGREE. Slab depth, camber and crossfall annotations not yet compared against booklet convention.",
+      "reviewer_verdict": "PENDING"
+    },
+    {
+      "id": "RR-FOUND-001",
+      "scope": "BOOKLET_CONVENTION",
+      "view": "Foundation",
+      "target": "typical pier OPEN foundation",
+      "expected_primitive": "footing plan and section with correct family (OPEN); top/bottom RLs; footing dimensions",
+      "required_dimension_or_label": "footing-top RL 94.925 m; footing-bottom RL 93.425 m; footing depth 1.500 m; footing plan dimensions",
+      "evidence": "artifacts/gad-acceptance/nine_span_slab_resolved/e969b72979196f78e2d04129c2462268d6caf099_Sheet4_Foundation.dxf; params.resolved.json",
+      "status": "PARTIAL",
+      "status_detail": "Foundation family OPEN; footing RLs confirmed from resolved record. Footing plan dimensions and support IDs in foundation view not yet compared against booklet convention.",
+      "reviewer_verdict": "PENDING"
+    },
+    {
+      "id": "RR-ABUT-001",
+      "scope": "BOOKLET_CONVENTION",
+      "view": "Abutment details (Sheet 5)",
+      "target": "both abutments A/L and A/R",
+      "expected_primitive": "battered abutment with independent face/back batters; cap/seat/dirt-wall; drainage, wing, return interfaces",
+      "required_dimension_or_label": "stem height; batter ratios; cap/seat dimensions; wing/return wall extents",
+      "evidence": "artifacts/gad-acceptance/nine_span_slab_resolved/e969b72979196f78e2d04129c2462268d6caf099_Sheet5_PierAbutment.dxf; packages/bridgecad-core/bridgecad_core/geometry/abutment_profiles.py",
+      "status": "PARTIAL",
+      "status_detail": "Abutment profiles drawn with independent batters; pier shaft height from canonical record. Both abutment families (battered, cantilever) are not yet covered by measured layout gates.",
+      "reviewer_verdict": "PENDING"
+    },
+    {
+      "id": "RR-BEARING-001",
+      "scope": "BOOKLET_CONVENTION",
+      "view": "Bearings and joints (Sheet 6)",
+      "target": "all 10 support positions (2 abutments + 8 piers)",
+      "expected_primitive": "elastomeric bearing pad at correct support count; bearing dimensions; joint type",
+      "required_dimension_or_label": "bearing depth 50 mm; support count 10; bearing pad plan dimensions",
+      "evidence": "artifacts/gad-acceptance/nine_span_slab_resolved/e969b72979196f78e2d04129c2462268d6caf099_Sheet6_BearingsJoints.dxf",
+      "status": "PARTIAL",
+      "status_detail": "Bearing depth 50 mm declared in resolved stack. Sheet generated; designed bearing schedule not independently verified against booklet convention.",
+      "reviewer_verdict": "PENDING"
+    },
+    {
+      "id": "RR-REINF-001",
+      "scope": "BOOKLET_CONVENTION",
+      "view": "Reinforcement (Sheet 9)",
+      "target": "slab and pier reinforcement",
+      "expected_primitive": "bar arrangement by member; cover; bar marks; schedule cross-check",
+      "required_dimension_or_label": "bar mark table; member-specific arrangement; cover dimensions",
+      "evidence": "artifacts/gad-acceptance/nine_span_slab_resolved/e969b72979196f78e2d04129c2462268d6caf099_Sheet9_Reinforcement.dxf",
+      "status": "PARTIAL",
+      "status_detail": "Schedule table present and >= 20 entities (required_content gate PASSED). Designed cage completeness and cover values not independently verified against booklet convention.",
+      "reviewer_verdict": "PENDING"
+    },
+    {
+      "id": "RR-BOQ-001",
+      "scope": "BOOKLET_CONVENTION",
+      "view": "BOQ / schedules (Sheet 7)",
+      "target": "all items",
+      "expected_primitive": "quantity table with IDs, descriptions, units, quantities",
+      "required_dimension_or_label": "quantities traceable to resolved geometry; consistent IDs; declared exclusions",
+      "evidence": "artifacts/gad-acceptance/nine_span_slab_resolved/e969b72979196f78e2d04129c2462268d6caf099_Sheet7_BOQ.dxf",
+      "status": "PARTIAL",
+      "status_detail": "BOQ sheet present with >= 20 entities. Quantities traceable to resolved geometry not independently verified.",
+      "reviewer_verdict": "PENDING"
+    },
+    {
+      "id": "RR-TITLE-001",
+      "scope": "BOOKLET_CONVENTION",
+      "view": "Title block / notes (all sheets)",
+      "target": "all 9 sheets",
+      "expected_primitive": "title block with drawing number, job number, date, revision, prepared/checked/approved fields",
+      "required_dimension_or_label": "drawing number format; view-specific scale; unresolved inputs listed",
+      "evidence": "artifacts/reference-overlay/comparison.json (title block format: DIFFER)",
+      "status": "PARTIAL",
+      "status_detail": "Title block present on all sheets; format DIFFERS from booklet convention (booklet: 'DRG. No. BR-I / 2022 - 002', 'JOB No.', 'GOVT. OF MAHARASHTRA', 'KONKAN BHAVAN'; generated: hyphenated number, 'CLIENT: STATE_PWD'). Unresolved inputs listed in quality.json notes.",
+      "reviewer_verdict": "PENDING"
+    },
+    {
+      "id": "RR-SCALE-001",
+      "scope": "BOOKLET_CONVENTION",
+      "view": "All sheets",
+      "target": "all printed scales",
+      "expected_primitive": "declared scale on the ladder; no silent X/Y stretch; vertical exaggeration stated when used",
+      "required_dimension_or_label": "scales on ISO 5455 ladder; V.E. value stated for exaggerated views",
+      "evidence": "artifacts/gad-acceptance/nine_span_slab_resolved/e969b72979196f78e2d04129c2462268d6caf099/layout-audit.json (scales_ok: true); scale DIFFER vs booklet (booklet 1:250/1:100/1:50; generated 1:150/1:150H-1:26V/1:50)",
+      "status": "PARTIAL",
+      "status_detail": "All printed scales on the ladder (layout gate PASSED). Declared scales differ from booklet convention. V.E.=5.68x stated on long section.",
+      "reviewer_verdict": "PENDING"
+    },
+    {
+      "id": "RR-ANNOT-001",
+      "scope": "NINE_SPAN_GEOMETRY",
+      "view": "All sheets",
+      "target": "annotation placement",
+      "expected_primitive": "no label-label, dimension-geometry or schedule text overlap",
+      "required_dimension_or_label": "annotation_overlap_count in quality.json",
+      "evidence": "artifacts/gad-acceptance/nine_span_slab_resolved/e969b72979196f78e2d04129c2462268d6caf099/quality.json (annotation_overlap_count)",
+      "status": "PARTIAL",
+      "status_detail": "annotation_overlap_count measured and reported in quality.json. Not yet a gate pass/fail because per-view bounding rectangles are not declared — the estimator may flag cross-view adjacency as overlap. Reserved-zone checks (clipping, title-block, notes intrusion) have passed.",
+      "reviewer_verdict": "PENDING"
+    }
+  ],
+  "open_items": [
+    "RR-PLAN-002 and RR-PLAN-003 carriageway/wing dimensions not compared against booklet annotation convention",
+    "RR-LONGSEC-002 RL label notation differs from booklet (R.T.L. vs RL prefix)",
+    "RR-CROSSSEC-001 slab depth / camber annotation not compared",
+    "RR-FOUND-001 footing plan dimensions and support IDs not compared",
+    "RR-ABUT-001 cantilever abutment family not covered by measured layout gates",
+    "RR-BEARING-001 designed bearing schedule not independently verified",
+    "RR-REINF-001 designed cage completeness and cover not verified",
+    "RR-BOQ-001 quantities not traced to resolved geometry",
+    "RR-TITLE-001 title block format differs from booklet convention",
+    "RR-ANNOT-001 annotation-overlap count not yet a gate (per-view rectangles needed)"
+  ],
+  "duplicate_renderer_maintenance_task": {
+    "description": "bridgecad_draw/sheets/* duplicates the root sheetN_*.py modules (contract/plugin base only). The production renderer uses the root modules; the duplicate tree is not a defect but is a maintenance hazard. Retained here as an open task.",
+    "status": "OPEN",
+    "blocker": false
+  },
+  "combined_suite_stall_evidence": {
+    "description": "The combined pytest stall was diagnosed and corrected (not merely diagnosed). Root cause: scripts/prove_detection.py copied the full tree per mutation (7859 files / 303 MB ~45 s per copy * 19 copies). Fixed by adding _IGNORE_EXT binary list and extra ignore dirs.",
+    "evidence_file": "artifacts/continue/T8-full-suite.txt",
+    "result": "1461 passed / 9 skipped / 5 xfailed in 962.24 s",
+    "detection_proof": "artifacts/continue/T8-prove-detection-after.json (control_passed=True, detected=17/17, ok=True, 112.9 s)"
+  }
+}

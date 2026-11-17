@@ -1,0 +1,91 @@
+{
+  "fixture": "nine_span_slab_conflict",
+  "commit": "e969b72979196f78e2d04129c2462268d6caf099",
+  "overrides": {
+    "span_count": "9",
+    "span_length_m": "10",
+    "wearing_coat_thickness_mm": "75",
+    "bearing_depth_mm": "50",
+    "pier_pedestal_height_m": "0.15",
+    "pier_cap_depth_m": "0.8",
+    "pile_cap_thickness_mm": "1500",
+    "footing_bottom_rl_m": "93.425",
+    "pier_height_m": "8.0"
+  },
+  "generated": false,
+  "message": "REJECTED \u2014 conflict in support records; no DXF written",
+  "failed_run_label": "FAILED-RUN: this directory contains evidence from a rejected generation attempt.  It is not a deliverable package.",
+  "statuses": [
+    "CONFLICT"
+  ],
+  "authorities": [
+    "LEVEL_CONTROLLED"
+  ],
+  "sheets": [],
+  "supports": [
+    {
+      "support_id": "P1",
+      "status": "CONFLICT",
+      "authority": "LEVEL_CONTROLLED",
+      "issue_codes": [
+        "E-CONFLICT-SHAFT-HEIGHT"
+      ]
+    },
+    {
+      "support_id": "P2",
+      "status": "CONFLICT",
+      "authority": "LEVEL_CONTROLLED",
+      "issue_codes": [
+        "E-CONFLICT-SHAFT-HEIGHT"
+      ]
+    },
+    {
+      "support_id": "P3",
+      "status": "CONFLICT",
+      "authority": "LEVEL_CONTROLLED",
+      "issue_codes": [
+        "E-CONFLICT-SHAFT-HEIGHT"
+      ]
+    },
+    {
+      "support_id": "P4",
+      "status": "CONFLICT",
+      "authority": "LEVEL_CONTROLLED",
+      "issue_codes": [
+        "E-CONFLICT-SHAFT-HEIGHT"
+      ]
+    },
+    {
+      "support_id": "P5",
+      "status": "CONFLICT",
+      "authority": "LEVEL_CONTROLLED",
+      "issue_codes": [
+        "E-CONFLICT-SHAFT-HEIGHT"
+      ]
+    },
+    {
+      "support_id": "P6",
+      "status": "CONFLICT",
+      "authority": "LEVEL_CONTROLLED",
+      "issue_codes": [
+        "E-CONFLICT-SHAFT-HEIGHT"
+      ]
+    },
+    {
+      "support_id": "P7",
+      "status": "CONFLICT",
+      "authority": "LEVEL_CONTROLLED",
+      "issue_codes": [
+        "E-CONFLICT-SHAFT-HEIGHT"
+      ]
+    },
+    {
+      "support_id": "P8",
+      "status": "CONFLICT",
+      "authority": "LEVEL_CONTROLLED",
+      "issue_codes": [
+        "E-CONFLICT-SHAFT-HEIGHT"
+      ]
+    }
+  ]
+}

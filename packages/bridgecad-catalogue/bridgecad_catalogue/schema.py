@@ -141,6 +141,51 @@ VARIABLES: dict[str, VariableSpec] = {
     "piles_per_pier": _free("piles_per_pier", "no", 2, 12, CLAUSE_PILE),
     "well_diameter_m": _free("well_diameter_m", "m", 4.0, 8.0, "IRC 78 cl.709", step=0.5),
     "sbc_t_per_m2": _free("sbc_t_per_m2", "t/m²", 10.0, 200.0, "IRC 78 cl.701"),
+    # ── foundation / seat design dials ──────────────────────────────────────
+    # These feed the canonical support-level contract.  ``footing_bottom_rl_m``
+    # is an EXPLICITLY SUPPLIED founding RL: supplying it (with a footing
+    # thickness) makes the contract LEVEL_CONTROLLED and derives the shaft height
+    # from it. Leaving it unset keeps the honest HEIGHT_CONTROLLED default, where
+    # the contract only PROPOSES a founding RL from the card's pier height.
+    "footing_bottom_rl_m": _free(
+        "footing_bottom_rl_m",
+        "m",
+        -100.0,
+        9000.0,
+        "IRC 78 cl.701",
+        note="explicitly supplied founding RL; unset ⇒ pier height governs (proposed level)",
+    ),
+    "pile_cap_thickness_mm": _free(
+        "pile_cap_thickness_mm",
+        "mm",
+        0.0,
+        6000.0,
+        CLAUSE_PILE,
+        step=50,
+        note="footing thickness; 0 = not designed (contract stays UNRESOLVED)",
+    ),
+    "pile_cutoff_level_m": _free(
+        "pile_cutoff_level_m", "m", -100.0, 9000.0, CLAUSE_PILE,
+        note="embedment rule-of-thumb datum; never the founding level",
+    ),
+    "pier_cap_depth_m": _free(
+        "pier_cap_depth_m", "m", 0.3, 6.0, "IRC 112 cl.16", step=0.05
+    ),
+    "pier_pedestal_height_m": _free(
+        "pier_pedestal_height_m", "m", 0.05, 3.0, CLAUSE_BEARING, step=0.05
+    ),
+    "bearing_depth_mm": _free(
+        "bearing_depth_mm",
+        "mm",
+        0.0,
+        500.0,
+        CLAUSE_BEARING,
+        step=5,
+        note="bearing unit height; 0 = monolithic/unspecified (assumed)",
+    ),
+    "wearing_coat_thickness_mm": _free(
+        "wearing_coat_thickness_mm", "mm", 0.0, 500.0, "MoRTH 500 series", step=5
+    ),
     # booklet identity — protected
     "foundation_type": _lock("foundation_type", "-"),
     "superstructure_type": _lock("superstructure_type", "-"),

@@ -96,4 +96,6 @@ def test_generation_is_deterministic_and_reports_render_status(monkeypatch, tmp_
     monkeypatch.setattr(png_engine, 'render_png', blank)
     result = generator.generate_one(params, tmp_path / 'c')
     assert not result[1]
-    assert json.loads((tmp_path / 'c' / params['id'] / 'render-status.json').read_text())['png'] == 'failed'
+    # A failed run (blank PNG) goes to FAILED-RUN/ under the label directory.
+    failed_dir = tmp_path / 'c' / params['id'] / 'FAILED-RUN'
+    assert json.loads((failed_dir / 'render-status.json').read_text())['png'] == 'failed'

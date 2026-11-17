@@ -281,28 +281,40 @@ def test_abutment_stack_shares_the_canonical_soffit(span_variant):
 
 
 def test_typical_pier_foundation_level_reads_the_canonical_contract(project, span_variant):
-    """Sheet 4 (foundation) reads its pile-cap top from the canonical record.
+    """Sheet 4 (foundation) reads its pile-cap (footing) from the canonical record.
 
-    Sheet 4 used to compute ``cap_top = pile_cutoff + cap_thickness`` itself.
-    That is the record's own ``footing_top = footing_bottom + footing_depth``,
-    so it must come from one place. The single-span fixture has no intermediate
-    pier, so the *nominal* typical-pier record must still resolve the same
-    founding levels; the nine-span variant's real P1 must agree.
+    The model supplies a pier HEIGHT and NO supplied founding RL: the modelled
+    ``pile_cutoff_level_m`` is a rule-of-thumb embedment datum, not a designed
+    founding level, so it must NOT be handed to the resolver as the footing
+    bottom. The honest authority is therefore HEIGHT_CONTROLLED — the record
+    derives the shaft base from the supplied height and PROPOSES the founding RL
+    from the footing thickness, marking it ``W-PROPOSED-FOUNDING`` and reporting
+    UNRESOLVED (a proposed level is not a designed one). Sheet 4 draws the same
+    ``footing_top``; the single-span nominal record and the nine-span P1 agree.
     """
     from bridgecad_core.geometry.long_section import typical_pier_support_level
 
     fd = project.foundation_details
-    bottom = D(str(fd.pile_cutoff_level_m))
+    cutoff_datum = D(str(fd.pile_cutoff_level_m))
     depth = D(str(fd.pile_cap_thickness_mm)) / D("1000")
+    height = D(str(project.substructure.pier_height_typical_m))
 
     single = typical_pier_support_level(project)
-    assert single.footing_bottom_rl_m == bottom
+    assert single.authority is AuthorityMode.HEIGHT_CONTROLLED
+    assert single.shaft_height_m == height
     assert single.footing_depth_m == depth
-    assert single.footing_top_rl_m == bottom + depth
+    assert single.footing_bottom_rl_m == single.footing_top_rl_m - depth
+    assert single.provenance["footing_bottom_rl_m"] is FieldSource.PROPOSED
+    # the modelled embedment datum is NOT a designed founding level
+    assert single.footing_bottom_rl_m != cutoff_datum
+    assert any(i.code == "W-PROPOSED-FOUNDING" for i in single.issues)
+    assert single.status is ResolutionStatus.UNRESOLVED
 
     nine = typical_pier_support_level(span_variant([10] * 9))
     assert nine.support_id == "P1"
-    assert nine.footing_top_rl_m == bottom + depth
+    assert nine.authority is AuthorityMode.HEIGHT_CONTROLLED
+    assert nine.footing_depth_m == depth
+    assert nine.footing_top_rl_m == nine.footing_bottom_rl_m + depth
 
 
 def test_drawing_conversion_is_the_only_float_boundary():

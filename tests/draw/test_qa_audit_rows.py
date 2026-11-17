@@ -195,6 +195,33 @@ def test_bbox_overlap_semantics():
     assert a.overlaps(BBox(11, 0, 20, 10), tol=0.5) is False
 
 
+def test_region_intersects_semantics():
+    from bridgecad_draw.layout_audit import Region
+
+    a = Region(0, 0, 10, 10)
+    assert a.as_tuple() == (0.0, 0.0, 10.0, 10.0)
+    assert a.intersects(Region(5, 5, 15, 15)) is True
+    assert a.intersects(Region(11, 0, 20, 10)) is False
+
+
+def test_note_line_classifier_rejects_decimals_but_keeps_notes():
+    """A decimal is not a numbered note.
+
+    ``"10.0 m (eff 9.7)"`` is a span-length *dimension* label drawn on the
+    longitudinal section. Treating it as a note manufactured a phantom notes
+    zone across that sheet's deck hatching and reported the hatching as an
+    intrusion — a layout failure on a sheet that drew no notes.
+    """
+    from bridgecad_draw.layout_audit import _is_note_line
+
+    assert _is_note_line("10.0 m (eff 9.7)") is False
+    assert _is_note_line("10.0 m") is False
+    assert _is_note_line("93.425") is False
+    assert _is_note_line("") is False
+    assert _is_note_line("1. Quantities are preliminary") is True
+    assert _is_note_line("NOTES") is True
+
+
 # ── the audit reads the rendered DXF, not the intent ────────────────────────
 def test_enabled_audit_renders_and_reads_the_document(baseline):
     from bridgecad_draw import layout_audit as la

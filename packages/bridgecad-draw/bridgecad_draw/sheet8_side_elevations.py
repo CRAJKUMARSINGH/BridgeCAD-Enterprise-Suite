@@ -1,7 +1,7 @@
-"""
-bridgecad_draw.sheet8_side_elevations — Sheet 8: Side & End Elevations.
+﻿"""
+bridgecad_draw.sheet8_side_elevations â€” Sheet 8: Side & End Elevations.
 
-Production-quality GAD sheet on A1 landscape — two views side-by-side:
+Production-quality GAD sheet on A1 landscape â€” two views side-by-side:
 
   **View 1 (Left half):  Abutment End-Face A2** (viewer looking back from A2 towards A1)
     - Full transverse cross-face of the abutment:
@@ -17,13 +17,13 @@ Production-quality GAD sheet on A1 landscape — two views side-by-side:
         pier shaft (hatch), pile cap (hatch), full pile-group
         transverse elevation with column/pile count labels, all RL tags.
     - If span_count == 1 (no internal piers):
-        *Fallback:* "TYPICAL ABUTMENT TRANSVERSE SECTION" — same
+        *Fallback:* "TYPICAL ABUTMENT TRANSVERSE SECTION" â€” same
         abutment end-face geometry as View 1 but labelled generically
         (so the sheet still carries meaningful content on single-span
         projects like the simple_12m smoke fixture).
 
 Layers, text heights, and dimension style follow IRC SP:55-2019 Annex F / Annex D
-patterns used on sheets 1–7.  Drawing title matches IRC example naming.
+patterns used on sheets 1â€“7.  Drawing title matches IRC example naming.
 """
 
 from __future__ import annotations
@@ -48,7 +48,7 @@ from .primitives import (
 )
 from .titleblocks import draw_border, draw_title_block
 
-# ── Sheet constants (A1 landscape, mm model-space) ──────────────────────────
+# â”€â”€ Sheet constants (A1 landscape, mm model-space) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 _SHEET_W = 841.0
 _SHEET_H = 594.0
 _MARGIN = 10.0
@@ -64,12 +64,17 @@ _VIEW_Y0 = _MARGIN + _TB_H + _CHECKS_ROWS_H + 8.0
 _CHECKS_Y = _MARGIN + _TB_H + 6.0
 _VIEW_H = _SHEET_H - _VIEW_Y0 - _MARGIN - 22.0
 
+#: Minimum vertical paper-mm separation between successive RL label centres.
+#: Below this threshold two tags would collide; the lower one is nudged down
+#: so both labels remain readable and above the declared text floor.
+_RL_TAG_MIN_GAP_MM = 7.5
+
 
 def generate(project: Any, output_path: str | Path, scale_denom: int | None = None) -> Path:
     """Generate Sheet 8 (Side & End Elevations) as a DXF file.
 
     ``scale_denom=None`` lets the sheet pick the largest rung of the shared
-    scale ladder that fits its end elevations, and prints that rung — the
+    scale ladder that fits its end elevations, and prints that rung â€” the
     printed scale and the drawn scale are then the same number.
     """
     doc, msp = new_sheet("S8 Side Elevations")
@@ -92,11 +97,11 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     has_internal_pier = span_count > 1
 
     ls = compute_long_section_geometry(project)
-    # §3 — one abutment ladder for the whole suite; this sheet reads it rather
+    # Â§3 â€” one abutment ladder for the whole suite; this sheet reads it rather
     # than subtracting its own bearing/pedestal/cap constants.
     stack = resolve_abutment_stack(project)
 
-    # ── Derived geometry (metres) ──────────────────────────────────────────
+    # â”€â”€ Derived geometry (metres) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     cw = float(gi.carriageway_width_m)
     kerb_l = float(gi.kerb_width_left_m or 0.25)
     kerb_r = float(gi.kerb_width_right_m or 0.25)
@@ -144,9 +149,9 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     ).upper()
     # Pile cut-off RL.  The PWD booklet fixtures carry no absolute RLs, and the
     # old hard-coded 110.5 fallback then hung the pile cap ~110 m above the deck
-    # — the pile group plotted ~1.9 m below the sheet frame.  Anchor the fallback
+    # â€” the pile group plotted ~1.9 m below the sheet frame.  Anchor the fallback
     # to the project's own datum instead: pile-cap top = abutment base =
-    # soffit − abutment_height (see the ``abutment_height_m`` datum note below).
+    # soffit âˆ’ abutment_height (see the ``abutment_height_m`` datum note below).
     pile_cut_rl = fd.pile_cutoff_level_m
     if not pile_cut_rl and "PILE" in found_type:
         pile_cut_rl = (
@@ -162,14 +167,23 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     # `abutment_height_m` is the TOTAL height, GL to deck soffit (models.py):
     # the shaft base sits one abutment-height below the deck soffit.  The cap,
     # pedestal and bearing all live inside that span (cap bottom = shaft top),
-    # so they are NOT added again here — adding the cap term drew the shaft a
+    # so they are NOT added again here â€” adding the cap term drew the shaft a
     # full cap depth too tall and broke parity with Sheet 5.
     abt_base_rl = sof_rl - abt_h_m  # bottom of abutment shaft
     # If pile foundation, abutment sits on pile cap top (= pile_cut + pile_cap_t)
     if "PILE" in found_type:
-        # §3 — the pile-cap top is the canonical record's footing top, not a
-        # local re-add of the two pile-cap inputs.
-        _foot_top = stack.record.footing_top_rl_m if stack.record else None
+        # Â§3 â€” the pile-cap top is the canonical record's footing top, not a
+        # local re-add of the two pile-cap inputs. Only a RESOLVED record has a
+        # meaningful footing top: a CONFLICT/UNRESOLVED record can still carry
+        # the field, and drawing it would publish a rejected level.
+        from bridgecad_core.geometry.support_levels import ResolutionStatus
+
+        _foot_top = (
+            stack.record.footing_top_rl_m
+            if stack.record is not None
+            and stack.record.status is ResolutionStatus.RESOLVED
+            else None
+        )
         pile_cap_top_rl = (
             float(_foot_top) if _foot_top is not None else pile_cut_rl + pile_cap_t_m
         )
@@ -180,13 +194,13 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     _cap_proj_m_abt = float(sub.abutment_cap_projection_front_mm or 300) / 1000.0
     _dirt_t_m_abt = float(sub.dirt_wall_thickness_mm or 300) / 1000.0
 
-    # ── Adaptive scale per view (fit overall_w × total_height into box) ──
+    # â”€â”€ Adaptive scale per view (fit overall_w Ã— total_height into box) â”€â”€
     # We try to pick a single *standard* scale mm/m that fits the larger of the
     # two views. The end elevation used to self-fit (`min(...) * 0.88`) and then
     # print a constant denominator beside it; the two disagreed on every sheet.
     abut_vheight_m = (tod_rl + par_h_m + 0.5) - min(pile_tip_rl, scour_rl - 0.5)
     pier_vheight_m = (tod_rl + par_h_m + 0.5) - min(pile_tip_rl, scour_rl - 0.5)
-    # Horizontal fit: abutment end-face needs overall_w + 2×ret_w_m + approach
+    # Horizontal fit: abutment end-face needs overall_w + 2Ã—ret_w_m + approach
     abut_hwidth_m = overall_w + 2 * ret_w_m + max(app_l_m, wing_splay_m) * 0.75
     pier_hwidth_m = overall_w + 2.0
 
@@ -215,14 +229,14 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
 
     th = max(MIN_TEXT_MM, sc * 0.22)  # text height mm
 
-    # ── BORDER + TITLE BLOCK ───────────────────────────────────────────────
+    # â”€â”€ BORDER + TITLE BLOCK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     draw_border(msp, "A1")
     draw_title_block(
         msp,
         project_title=getattr(pm, "project_title", "") or "",
         bridge_name=getattr(pm, "bridge_name", "") or "",
         drawing_no=getattr(pm, "drawing_no", "GAD-008") or "GAD-008",
-        drawing_title="GENERAL ARRANGEMENT — SIDE & END ELEVATIONS",
+        drawing_title="GENERAL ARRANGEMENT â€” SIDE & END ELEVATIONS",
         revision=getattr(getattr(pm, "revision", None), "name", "R0") or "R0",
         date_str=str(getattr(pm, "date_issued", "") or ""),
         designed_by=getattr(pm, "designed_by", "") or "",
@@ -235,16 +249,16 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
         total_sheets="9",
     )
 
-    # ═══════════════════════════════════════════════════════════════════════
-    #  VIEW 1 — Abutment End-Face A2 (left half of page)
-    # ═══════════════════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    #  VIEW 1 â€” Abutment End-Face A2 (left half of page)
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     v1_cx = _VIEW1_X0 + _VIEW_W / 2.0
 
     def v1hx(x_m):
         return v1_cx + x_m * sc  # transverse x
 
     def v1vy(rl):
-        return _VIEW_Y0 + (rl - (tod_rl + par_h_m + 0.8)) * (-sc)  # RL → y
+        return _VIEW_Y0 + (rl - (tod_rl + par_h_m + 0.8)) * (-sc)  # RL â†’ y
 
     _draw_abutment_endface(
         msp,
@@ -291,14 +305,14 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
         hfl_rl,
         scour_rl,
         found_type,
-        view_label="VIEW 1 — SECTION A-A  |  ABUTMENT A2 END-FACE (LOOKING A1)",
+        view_label="VIEW 1 â€” SECTION A-A  |  ABUTMENT A2 END-FACE (LOOKING A1)",
         bear_rl=float(stack.bear_rl),
         cap_top_rl=float(stack.cap_top),
         cap_bot_rl=float(stack.cap_bot),
         cap_proj_m=_cap_proj_m_abt,
         dirt_t_m=_dirt_t_m_abt,
     )
-    # ═══════════════════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     v2_cx = _VIEW2_X0 + _VIEW_W / 2.0
 
     def v2hx(x_m):
@@ -308,7 +322,7 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
         return _VIEW_Y0 + (rl - (tod_rl + par_h_m + 0.8)) * (-sc)
 
     if has_internal_pier:
-        # §3 — the pier cap datums come from the canonical support record (all
+        # Â§3 â€” the pier cap datums come from the canonical support record (all
         # internal piers share one seat datum). The local pedestal/cap-depth
         # fallback only stands in for a project that produced no record.
         _prec = ls.support_level_records[0] if ls.support_level_records else None
@@ -321,6 +335,15 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
             float(_prec.cap_bottom_rl_m)
             if _prec is not None and _prec.cap_bottom_rl_m is not None
             else pier_cap_top_rl - pier_cap_d_m
+        )
+        # Â§3 â€” the shaft base is the canonical record's ``shaft_base_rl_m``, not
+        # a locally re-derived ``cap_bottom âˆ’ 6.0 m``. The old hard-coded height
+        # put this transverse view's pier base at a different RL than the long
+        # section. ``None`` only when the record genuinely carries no base.
+        pier_shaft_base_rl = (
+            float(_prec.shaft_base_rl_m)
+            if _prec is not None and _prec.shaft_base_rl_m is not None
+            else None
         )
         _draw_pier_transverse(
             msp,
@@ -360,13 +383,14 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
             sof_rl,
             pier_cap_top_rl,
             pier_cap_bot_rl,
+            pier_shaft_base_rl,
             hfl_rl,
             scour_rl,
             found_type,
-            view_label="VIEW 2 — SECTION B-B  |  PIER P1 TRANSVERSE FACE",
+            view_label="VIEW 2 â€” SECTION B-B  |  PIER P1 TRANSVERSE FACE",
         )
     else:
-        # ── Fallback: Typical Abutment Transverse Section ─────────────────
+        # â”€â”€ Fallback: Typical Abutment Transverse Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         _draw_abutment_endface(
             msp,
             v2hx,
@@ -412,7 +436,7 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
             hfl_rl,
             scour_rl,
             found_type,
-            view_label="VIEW 2 — TYPICAL ABUTMENT TRANSVERSE SECTION",
+            view_label="VIEW 2 â€” TYPICAL ABUTMENT TRANSVERSE SECTION",
             bear_rl=float(stack.bear_rl),
             cap_top_rl=float(stack.cap_top),
             cap_bot_rl=float(stack.cap_bot),
@@ -420,7 +444,7 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
             dirt_t_m=_dirt_t_m_abt,
         )
 
-    # ── Scale bar below View 2 ─────────────────────────────────────────────
+    # â”€â”€ Scale bar below View 2 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     scale_bar(
         msp,
         _VIEW2_X0 + 6.0,
@@ -431,14 +455,14 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
         text_height=th * 0.85,
     )
 
-    # ── Sheet self-audit table (clause-tagged checks) ─────────────────────
+    # â”€â”€ Sheet self-audit table (clause-tagged checks) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     from .checks_table import build_abutment_rows, draw_checks_table
 
     draw_checks_table(
         msp, _VIEW1_X0, _CHECKS_Y, build_abutment_rows(project), text_height=th * 0.85
     )
 
-    # ── Scale statement (FR-8: demoted, grey 8, 10% smaller) ─────────────
+    # â”€â”€ Scale statement (FR-8: demoted, grey 8, 10% smaller) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # The end elevations are drawn at the printed rung, so this states the
     # scale rather than disclaiming it.
     # `th` scales with the view fit, so a compact structure inflates it and the
@@ -446,7 +470,7 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     # on the arch types).  Clamp it inside the margin.
     text(
         msp,
-        f"SCALE 1:{denom} — DIMENSIONS IN METRES UNLESS NOTED",
+        f"SCALE 1:{denom} â€” DIMENSIONS IN METRES UNLESS NOTED",
         (_VIEW1_X0 + _VIEW_W / 2.0 + _VIEW2_X0 + _VIEW_W / 2.0) / 2.0,
         min(_VIEW_Y0 + _VIEW_H + th * 6.0, _SHEET_H - _MARGIN - th * 0.9 - 1.0),
         height=th * 0.9,
@@ -456,7 +480,7 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     )
 
 
-# ── Sub-routines: two view drawers ──────────────────────────────────────────
+# â”€â”€ Sub-routines: two view drawers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def _draw_abutment_endface(
     msp,
     vhx,
@@ -511,11 +535,11 @@ def _draw_abutment_endface(
 ):
     """Draw a single abutment end-face view at the given coordinate origin."""
 
-    # ── Header label (view title) ──────────────────────────────────────────
+    # â”€â”€ Header label (view title) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     hdr_y = vvy(tod_rl + par_h_m + 0.55)
     text(msp, view_label, vhx(0.0), hdr_y, height=th * 1.45, layer="TEXT-HEADER", halign="CENTER")
 
-    # ── Parapets ───────────────────────────────────────────────────────────
+    # â”€â”€ Parapets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     max(cb_l, 0.25)
     for side, sign, par_w_actual in [("L", -1, max(cb_l, 0.25)), ("R", +1, max(cb_r, 0.25))]:
         xp = vhx(sign * (half_cw + kerb_l + fp_l if sign == -1 else half_cw + kerb_r + fp_r))
@@ -537,7 +561,7 @@ def _draw_abutment_endface(
             layer="STRUC-HATCHING",
         )
 
-    # ── Footpaths (if present) ─────────────────────────────────────────────
+    # â”€â”€ Footpaths (if present) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     for sign, fp_w, cb_w, kerb_w, idx in [
         (-1, fp_l, cb_l, kerb_l, 0),
         (+1, fp_r, cb_r, kerb_r, 1),
@@ -552,7 +576,7 @@ def _draw_abutment_endface(
         y_fp_bot = vvy(tod_rl - wc_t_m)
         rectangle(msp, x1, y_fp_top, x2 - x1, y_fp_bot - y_fp_top, layer="SUPER-FOOTPATH", lw=25)
 
-    # ── Kerbs ──────────────────────────────────────────────────────────────
+    # â”€â”€ Kerbs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     kerb_h_sc = 0.22 * sc
     # Left kerb
     xs_outer_L = -(half_cw + kerb_l)
@@ -579,7 +603,7 @@ def _draw_abutment_endface(
     polyline(msp, kerb_pts_R, layer="SUPER-KERB", close=True, lw=35)
     hatch_poly(msp, kerb_pts_R, pattern="ANSI31", scale=sc * 0.014, layer="STRUC-HATCHING")
 
-    # ── Wearing coat ───────────────────────────────────────────────────────
+    # â”€â”€ Wearing coat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     wc_y_top = vvy(tod_rl)
     wc_y_bot = vvy(tod_rl - wc_t_m)
     x1_cw = vhx(-half_cw)
@@ -597,7 +621,7 @@ def _draw_abutment_endface(
     )
     rectangle(msp, x1_cw, wc_y_bot, x2_cw - x1_cw, wc_y_top - wc_y_bot, layer="SUPER-WEARING")
 
-    # ── Deck slab ──────────────────────────────────────────────────────────
+    # â”€â”€ Deck slab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     deck_y_top = wc_y_bot
     deck_y_bot = vvy(tod_rl - wc_t_m - deck_t_m)
     x1_ow = vhx(-half_ow)
@@ -616,7 +640,7 @@ def _draw_abutment_endface(
         layer="STRUC-HATCHING",
     )
 
-    # ── Girders (elevation — dashed hidden-line beneath deck) ──────────────
+    # â”€â”€ Girders (elevation â€” dashed hidden-line beneath deck) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if gd_m > 0:
         gir_bot_y = vvy(sof_rl)
         g_cents = [(i - (n_girders - 1) / 2.0) * gs_m for i in range(n_girders)]
@@ -640,12 +664,12 @@ def _draw_abutment_endface(
             color=8,
         )
 
-    # ── Vertical stack — read from the canonical §3 abutment ladder ───────
+    # â”€â”€ Vertical stack â€” read from the canonical Â§3 abutment ladder â”€â”€â”€â”€â”€â”€â”€
     # Bearing seat, cap top and cap bottom come from ``resolve_abutment_stack``:
     # this view must not re-derive them from a local bearing depth (the old
     # hard-coded 0.10 m put the abutment cap datum 100 mm off Sheet 5's).
     bearing_w_m = 0.40
-    # Cap and dirt wall geometry — passed in from _draw via model fields.
+    # Cap and dirt wall geometry â€” passed in from _draw via model fields.
     _cap_proj_m = cap_proj_m
     _dirt_t_m = dirt_t_m
 
@@ -656,7 +680,7 @@ def _draw_abutment_endface(
     shaft_half_w_m = min(overall_w * 0.46, abt_len_m * 0.5)
     cap_half_m = shaft_half_w_m + _cap_proj_m
 
-    # ── Abutment shaft — stops at the cap soffit ──────────────────────────
+    # â”€â”€ Abutment shaft â€” stops at the cap soffit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     abt_shaft_y_top = vvy(cap_bot_rl_s8)
     abt_shaft_y_bot = vvy(abt_base_rl)
     sa_x1 = vhx(-shaft_half_w_m)
@@ -681,7 +705,7 @@ def _draw_abutment_endface(
         layer="STRUC-HATCHING",
     )
 
-    # ── Abutment cap — bearing shelf, projecting both faces ───────────────
+    # â”€â”€ Abutment cap â€” bearing shelf, projecting both faces â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     cx1_s8 = vhx(-cap_half_m)
     cx2_s8 = vhx(cap_half_m)
     rectangle(
@@ -704,7 +728,7 @@ def _draw_abutment_endface(
         layer="STRUC-HATCHING",
     )
 
-    # ── Bearing pedestals + bearings on the cap ───────────────────────────
+    # â”€â”€ Bearing pedestals + bearings on the cap â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     for off_sign in (-1, +1):
         px_s8 = vhx(off_sign * (abt_len_m * 0.40)) - bearing_w_m * sc * 0.9 / 2.0
         rectangle(
@@ -726,7 +750,7 @@ def _draw_abutment_endface(
             lw=30,
         )
 
-    # ── Dirt wall — beyond the cap (phantom / informational) ─────────────
+    # â”€â”€ Dirt wall â€” beyond the cap (phantom / informational) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     dw_top_rl_s8 = tod_rl - wc_t_m - app_t_m
     if dw_top_rl_s8 > cap_top_rl_s8:
         rectangle(
@@ -749,7 +773,7 @@ def _draw_abutment_endface(
             color=3,
         )
 
-    # ── Return walls L / R ─────────────────────────────────────────────────
+    # â”€â”€ Return walls L / R â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     for sign in (-1, +1):
         rw_x_start = vhx(sign * shaft_half_w_m)
         rw_x_end = vhx(sign * (shaft_half_w_m + ret_w_m))
@@ -786,7 +810,7 @@ def _draw_abutment_endface(
             color=3,
         )
 
-    # ── Wing wall splay (dashed lines, view indicator) ────────────────────
+    # â”€â”€ Wing wall splay (dashed lines, view indicator) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     for sign in (-1, +1):
         start = (vhx(sign * shaft_half_w_m), vvy(cap_bot_rl_s8))
         end = (
@@ -805,7 +829,7 @@ def _draw_abutment_endface(
             halign="LEFT" if sign == +1 else "RIGHT",
         )
 
-    # ── Approach slab — FULL length end-to-end, wearing coat over it ──────
+    # â”€â”€ Approach slab â€” FULL length end-to-end, wearing coat over it â”€â”€â”€â”€â”€â”€
     if app_l_m > 0 and app_t_m > 0:
         as_x_left = vhx(-half_ow - app_l_m)
         as_x_right = vhx(-half_ow)
@@ -831,12 +855,16 @@ def _draw_abutment_endface(
             layer="STRUC-HATCHING",
             color=7,
         )
-        level_tag(msp, as_x_left - th * 2, as_y_top, road_rl_approach, text_height=th * 0.85)
+        # The slab's own RL tag is placed clear of the abutment RL staff, which
+        # owns the strip immediately left of the deck edge (SS3 §5).
+        level_tag(
+            msp, as_x_left + th * 1.0, as_y_top, road_rl_approach, text_height=th * 0.85
+        )
         text(
             msp,
-            f"APPROACH SLAB  {app_l_m:.1f}×{app_t_m*1000:.0f}mm",
+            f"APPROACH SLAB  {app_l_m:.1f}Ã—{app_t_m*1000:.0f}mm",
             (as_x_left + as_x_right) / 2.0,
-            as_y_bot - th * 1.5,
+            as_y_bot - th * 2.0,
             height=th * 0.75,
             layer="TEXT-GENERAL",
             halign="CENTER",
@@ -864,7 +892,7 @@ def _draw_abutment_endface(
             layer="SUPER-WEARING",
         )
 
-    # ── Pile cap + piles (if PILE foundation) ─────────────────────────────
+    # â”€â”€ Pile cap + piles (if PILE foundation) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if "PILE" in found_type:
         cap_top_y = vvy(pile_cut_rl + pile_cap_t_m)
         cap_bot_y = vvy(pile_cut_rl)
@@ -905,7 +933,7 @@ def _draw_abutment_endface(
             )
 
         pile_label = (
-            f"{pile_dia_m*1000:.0f} Ø BORED PILE  " f"/ {piles_cols} NOS  c/c {spacing_m:.2f}m"
+            f"{pile_dia_m*1000:.0f} Ã˜ BORED PILE  " f"/ {piles_cols} NOS  c/c {spacing_m:.2f}m"
         )
         text(
             msp,
@@ -917,10 +945,10 @@ def _draw_abutment_endface(
             halign="CENTER",
         )
 
-    # ── RL level tags (left side of view 1) ────────────────────────────────
+    # â”€â”€ RL level tags (left side of view 1) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # The staff offset must be PAPER millimetres.  The previous expression added
     # `th * 5.5` *inside* the metre-space transform, so it was multiplied by the
-    # fit scale and pushed the whole staff — tick, leader, RL tag and label —
+    # fit scale and pushed the whole staff â€” tick, leader, RL tag and label â€”
     # roughly 400 mm off the left edge of the sheet.
     tag_x_left = max(_MARGIN + 14.0, vhx(-half_ow) - 21.0 * th)
     levels = [
@@ -937,6 +965,8 @@ def _draw_abutment_endface(
             ("PILE TIP RL", pile_tip_rl),
         ]
     drawn = set()
+    last_label_y_v1: float | None = None
+    last_true_y_v1: float | None = None
     for label, rl in levels:
         if round(rl, 2) in drawn:
             continue
@@ -944,12 +974,39 @@ def _draw_abutment_endface(
         yy = vvy(rl)
         if not (_VIEW_Y0 + 2 < yy < _VIEW_Y0 + _VIEW_H - 2):
             continue
-        # tick to abutment
+        # Minimum-gap separation, applied *in the direction the staff runs*.
+        # The old test (`last - label_y < gap`) was sign-blind: on a staff that
+        # descends in RL — i.e. every tag sits *below* the one before it in
+        # paper y — the difference is large, negative and therefore always
+        # "too small", so every tag was pulled 7.5 mm back up the staff until
+        # the floor clamp stacked the last two on the same line.  A tag may
+        # only be pushed away from its neighbour, never back through it.
+        label_y = yy
+        if last_label_y_v1 is not None and last_true_y_v1 is not None:
+            if yy >= last_true_y_v1:
+                label_y = max(yy, last_label_y_v1 + _RL_TAG_MIN_GAP_MM)
+            else:
+                label_y = min(yy, last_label_y_v1 - _RL_TAG_MIN_GAP_MM)
+        label_y = min(max(_VIEW_Y0 + 2, label_y), _VIEW_Y0 + _VIEW_H - 2)
+        last_label_y_v1 = label_y
+        last_true_y_v1 = yy
+        # tick to abutment always at true structural y
         line(msp, (tag_x_left, yy), (vhx(-shaft_half_w_m - 0.1), yy), layer="DIM-LEVEL", color=5)
-        level_tag(msp, tag_x_left, yy, rl, text_height=th * 0.85)
-        text(msp, label, tag_x_left + th * 8, yy - th * 0.5, height=th * 0.75, layer="TEXT-LEVEL")
-
-    # ── Width dimension strings ───────────────────────────────────────────
+        if abs(label_y - yy) > 0.5:
+            line(msp, (tag_x_left, yy), (tag_x_left, label_y), layer="DIM-LEVEL", color=5)
+        level_tag(msp, tag_x_left, label_y, rl, text_height=th * 0.85)
+        # Level names lead out to the LEFT of the staff, clear of the approach
+        # slab's own annotations, which occupy the deck-level strip to its right
+        # (SS3 §5 — no text may overlap text).
+        text(
+            msp,
+            label,
+            tag_x_left - th * 4.5,
+            label_y - th * 0.5,
+            height=th * 0.75,
+            layer="TEXT-LEVEL",
+            halign="RIGHT",
+        )
     dim_y_par = vvy(tod_rl - wc_t_m - deck_t_m - gd_m * 0.05) - th * 2.0
     # Parapet-to-parapet (overall width)
     dim_linear_h(
@@ -988,7 +1045,7 @@ def _draw_abutment_endface(
         text_height=th * 0.8,
     )
 
-    # ── Structural dimensions — cap / shaft widths and heights ────────────
+    # â”€â”€ Structural dimensions â€” cap / shaft widths and heights â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # Abutment cap width (transverse).
     dim_y_cap = vvy(cap_bot_rl_s8) + th * 2.0
     dim_linear_h(
@@ -1013,7 +1070,7 @@ def _draw_abutment_endface(
         label=f"SHAFT W = {shaft_half_w_m * 2:.3f} m",
         text_height=th * 0.8,
     )
-    # Wearing coat + deck thickness — vertical staff at the deck's left edge.
+    # Wearing coat + deck thickness â€” vertical staff at the deck's left edge.
     wc_staff_x = vhx(-half_ow) - th * 4.0
     dim_linear_v(
         msp,
@@ -1035,7 +1092,7 @@ def _draw_abutment_endface(
         label=f"DECK {int(deck_t_m * 1000)}mm",
         text_height=th * 0.8,
     )
-    # Abutment shaft height (base of shaft → cap soffit).
+    # Abutment shaft height (base of shaft â†’ cap soffit).
     shaft_h_m = cap_bot_rl_s8 - abt_base_rl
     if shaft_h_m > 0.01:
         shaft_staff_x = vhx(-shaft_half_w_m) - th * 4.0
@@ -1050,7 +1107,7 @@ def _draw_abutment_endface(
             text_height=th * 0.8,
         )
 
-    # ── HFL line (if within viewport) ──────────────────────────────────────
+    # â”€â”€ HFL line (if within viewport) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if _VIEW_Y0 < vvy(hfl_rl) < _VIEW_Y0 + _VIEW_H:
         y_hfl = vvy(hfl_rl)
         line(
@@ -1071,7 +1128,7 @@ def _draw_abutment_endface(
             color=5,
         )
 
-    # ── Scour line ─────────────────────────────────────────────────────────
+    # â”€â”€ Scour line â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if _VIEW_Y0 < vvy(scour_rl) < _VIEW_Y0 + _VIEW_H:
         y_sc = vvy(scour_rl)
         line(
@@ -1131,6 +1188,7 @@ def _draw_pier_transverse(
     sof_rl,
     cap_top_rl,
     cap_bot_rl,
+    shaft_base_rl,
     hfl_rl,
     scour_rl,
     found_type,
@@ -1138,16 +1196,17 @@ def _draw_pier_transverse(
 ):
     """Pier transverse cut (Section B-B): deck + girder + bearings + cap + shaft + piles.
 
-    ``cap_top_rl`` / ``cap_bot_rl`` are the canonical §3 pier-cap datums from
-    ``ls.support_level_records`` — not re-derived here from pedestal + cap depth,
-    so a declared bearing depth shifts this view with the long section.
+    ``cap_top_rl`` / ``cap_bot_rl`` / ``shaft_base_rl`` are the canonical Â§3 pier
+    datums from ``ls.support_level_records`` â€” not re-derived here from pedestal
+    + cap depth or a hard-coded 6 m height, so a declared bearing depth or shaft
+    height shifts this view together with the long section.
     """
 
-    # ── Header label ───────────────────────────────────────────────────────
+    # â”€â”€ Header label â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     hdr_y = vvy(tod_rl + par_h_m + 0.55)
     text(msp, view_label, vhx(0.0), hdr_y, height=th * 1.45, layer="TEXT-HEADER", halign="CENTER")
 
-    # ── Parapets ───────────────────────────────────────────────────────────
+    # â”€â”€ Parapets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     for side_sign, par_w in [(-1, max(cb_l, 0.25)), (+1, max(cb_r, 0.25))]:
         xp = vhx(-half_ow) if side_sign == -1 else vhx(half_ow - par_w * sc)
         if side_sign == +1:
@@ -1166,7 +1225,7 @@ def _draw_pier_transverse(
             layer="STRUC-HATCHING",
         )
 
-    # ── Kerbs ──────────────────────────────────────────────────────────────
+    # â”€â”€ Kerbs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     kerb_h_sc = 0.22 * sc
     for side_sign, kw in [(-1, kerb_l), (+1, kerb_r)]:
         xs_outer = -(half_cw + kw) if side_sign == -1 else (half_cw + kw)
@@ -1181,7 +1240,7 @@ def _draw_pier_transverse(
         polyline(msp, kerb_pts, layer="SUPER-KERB", close=True, lw=35)
         hatch_poly(msp, kerb_pts, pattern="ANSI31", scale=sc * 0.014, layer="STRUC-HATCHING")
 
-    # ── Wearing coat + Deck slab ─────────────────────────────────────────
+    # â”€â”€ Wearing coat + Deck slab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     wc_y_top = vvy(tod_rl)
     wc_y_bot = vvy(tod_rl - wc_t_m)
     hatch_rect(
@@ -1213,7 +1272,7 @@ def _draw_pier_transverse(
         layer="STRUC-HATCHING",
     )
 
-    # ── Girders (transverse — I/box outline) ──────────────────────────────
+    # â”€â”€ Girders (transverse â€” I/box outline) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     gir_top = deck_y_bot
     gir_bot = vvy(sof_rl)
     if gd_m > 0 and n_girders >= 2:
@@ -1241,7 +1300,7 @@ def _draw_pier_transverse(
             polyline(msp, pts, layer="SUPER-GIRDER", close=True, lw=40)
             hatch_poly(msp, pts, pattern="ANSI31", scale=sc * 0.016, layer="STRUC-HATCHING")
 
-    # ── Bearing pads ──────────────────────────────────────────────────────
+    # â”€â”€ Bearing pads â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     brg_w_m = 0.40
     brg_t_m = pier_ped_h_m * 0.55
     brg_y_bot = vvy(sof_rl - brg_t_m)
@@ -1252,7 +1311,7 @@ def _draw_pier_transverse(
             msp, bx, brg_y_bot, brg_w_m * sc, vvy(sof_rl) - brg_y_bot, layer="SUB-BEARING", lw=30
         )
 
-    # ── Pedestal ──────────────────────────────────────────────────────────
+    # â”€â”€ Pedestal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     ped_y_top = vvy(sof_rl)
     ped_y_bot = vvy(cap_top_rl)
     ped_half = pier_shaft_l_m * 0.42
@@ -1266,10 +1325,10 @@ def _draw_pier_transverse(
         lw=30,
     )
 
-    # ── Pier cap ──────────────────────────────────────────────────────────
+    # â”€â”€ Pier cap â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     cap_y_top = ped_y_bot
     cap_y_bot = vvy(cap_bot_rl)
-    # Cap is sized by its own length field, not the shaft length — a cap
+    # Cap is sized by its own length field, not the shaft length â€” a cap
     # shorter than the shaft is legal and the old code could never show it.
     cap_half_l = pier_cap_length_m / 2.0
     rectangle(
@@ -1303,10 +1362,18 @@ def _draw_pier_transverse(
         layer="TEXT-HEADER",
     )
 
-    # ── Pier shaft ────────────────────────────────────────────────────────
+    # â”€â”€ Pier shaft â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     shaft_y_top = cap_y_bot
+    # Â§3 â€” the shaft base RL is canonical. ``None`` only when the record carries
+    # no base, in which case the historical ``cap_bottom âˆ’ 6 m`` is a last resort.
     shaft_y_bot = (
-        vvy(pile_cut_rl + pile_cap_t_m) if "PILE" in found_type else (cap_y_bot - 6.0 * sc)
+        vvy(pile_cut_rl + pile_cap_t_m)
+        if "PILE" in found_type
+        else (
+            vvy(shaft_base_rl)
+            if shaft_base_rl is not None
+            else (cap_y_bot - 6.0 * sc)
+        )
     )
     sh_half_w_l = pier_shaft_l_m / 2.0
     rectangle(
@@ -1330,7 +1397,7 @@ def _draw_pier_transverse(
         color=8,
     )
 
-    # ── Pile cap + piles ──────────────────────────────────────────────────
+    # â”€â”€ Pile cap + piles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if "PILE" in found_type:
         pcap_top = shaft_y_bot
         pcap_bot = pcap_top + pile_cap_t_m * sc  # thickness governs, not cutoff RL
@@ -1371,7 +1438,7 @@ def _draw_pier_transverse(
                 color=4,
             )
 
-        label = f"{pile_dia_m*1000:.0f} Ø BORED PILE / " f"{piles_cols} NOS  c/c {pile_sp_m:.2f}m"
+        label = f"{pile_dia_m*1000:.0f} Ã˜ BORED PILE / " f"{piles_cols} NOS  c/c {pile_sp_m:.2f}m"
         text(
             msp,
             label,
@@ -1382,7 +1449,7 @@ def _draw_pier_transverse(
             halign="CENTER",
         )
 
-    # ── RL level tags (right side of pier view) ────────────────────────────
+    # â”€â”€ RL level tags (right side of pier view) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # The staff must clear the widest structure (deck / pier cap / shaft) *and*
     # leave the RL value column inside the sheet border.  The old offset had no
     # right-hand bound, so on the wider multi-span decks the descriptive label
@@ -1395,7 +1462,7 @@ def _draw_pier_transverse(
         ("T.O.D. / FORMATION RL", tod_rl),
         ("SOFFIT RL", sof_rl),
         ("TOP OF PIER CAP RL", cap_top_rl),
-        ("BASE OF PIER SHAFT", shaft_y_bot if shaft_y_bot else pile_cut_rl),
+        ("BASE OF PIER SHAFT", shaft_base_rl if shaft_base_rl is not None else pile_cut_rl),
     ]
     if "PILE" in found_type:
         levels += [
@@ -1403,6 +1470,8 @@ def _draw_pier_transverse(
             ("PILE TIP RL", pile_tip_rl),
         ]
     drawn = set()
+    last_label_y_v2: float | None = None
+    last_true_y_v2: float | None = None
     for label, rl in levels:
         if round(rl, 2) in drawn:
             continue
@@ -1410,21 +1479,34 @@ def _draw_pier_transverse(
         yy = vvy(rl) if rl > 50 else rl  # if not RL (rare) use as mm
         if not (_VIEW_Y0 + 2 < yy < _VIEW_Y0 + _VIEW_H - 2):
             continue
+        # Same direction-aware minimum gap as View 1: separate a tag from its
+        # neighbour by pushing it away, never back through it.
+        label_y = yy
+        if last_label_y_v2 is not None and last_true_y_v2 is not None:
+            if yy >= last_true_y_v2:
+                label_y = max(yy, last_label_y_v2 + _RL_TAG_MIN_GAP_MM)
+            else:
+                label_y = min(yy, last_label_y_v2 - _RL_TAG_MIN_GAP_MM)
+        label_y = min(max(_VIEW_Y0 + 2, label_y), _VIEW_Y0 + _VIEW_H - 2)
+        last_label_y_v2 = label_y
+        last_true_y_v2 = yy
         # try to find the right x-tick point on structure
         tick_end = vhx(sh_half_w_l + 0.2)
         line(msp, (tag_x, yy), (tick_end, yy), layer="DIM-LEVEL", color=5)
-        level_tag(msp, tag_x, yy, rl, text_height=th * 0.85)
+        if abs(label_y - yy) > 0.5:
+            line(msp, (tag_x, yy), (tag_x, label_y), layer="DIM-LEVEL", color=5)
+        level_tag(msp, tag_x, label_y, rl, text_height=th * 0.85)
         text(
             msp,
             label,
             tag_x - th * 1.5,
-            yy - th * 0.5,
+            label_y - th * 0.5,
             height=th * 0.75,
             layer="TEXT-LEVEL",
             halign="RIGHT",
         )
 
-    # ── Width dims (carriageway + overall) ────────────────────────────────
+    # â”€â”€ Width dims (carriageway + overall) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     dim_base_y = gir_bot - th * 1.5
     dim_linear_h(
         msp,
@@ -1448,7 +1530,7 @@ def _draw_pier_transverse(
         text_height=th * 0.9,
     )
 
-    # ── HFL line ──────────────────────────────────────────────────────────
+    # â”€â”€ HFL line â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if _VIEW_Y0 < vvy(hfl_rl) < _VIEW_Y0 + _VIEW_H:
         y_hfl = vvy(hfl_rl)
         line(

@@ -8,6 +8,7 @@ from .compliance_engine import (
     build_compliance_report,
     calc_sheet_markdown,
 )
+from .quality_manifest import Gate, QualityIssue, QualityManifest, Verdict
 from .reports import generate_html_report
 from .rules_engine import run_qa
 
@@ -22,4 +23,8 @@ __all__ = [
     "ComplianceReport",
     "build_compliance_report",
     "calc_sheet_markdown",
+    "Gate",
+    "Verdict",
+    "QualityIssue",
+    "QualityManifest",
 ]

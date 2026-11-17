@@ -1,4 +1,0 @@
-﻿cba78cbc78f7a579dac8fd0d26220c1180bf7160
-cba78cbc78f7a579dac8fd0d26220c1180bf7160
-feat(catalogue,ci): apply CODE-JUNCTION patch — sweep guards, blank-PNG gate, CI workflow, docs update (36 new tests pass)
-Sat Nov 14 11:32:32 2026 +0530

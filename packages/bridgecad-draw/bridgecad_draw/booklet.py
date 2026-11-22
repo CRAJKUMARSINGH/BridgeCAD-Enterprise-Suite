@@ -88,6 +88,26 @@ _SHEET_MANIFEST = [
     ("9",   "sheet9_reinforcement",        "Sheet9_Reinforcement",   1,    None),
 ]
 
+#: Public, stable view of the sheet manifest — the single source of truth for
+#: "how many sheets does a GAD package contain" and for resolving a sheet id.
+#: Callers (API preview, UI counters, tests) MUST import this rather than
+#: hard-coding a count: adding a sheet (as EP-2026-12 did for 5A/5B) otherwise
+#: silently drifts every hard-coded number out of step with the generator.
+SHEET_MANIFEST: tuple[tuple[str, str, str, int | None, str | None], ...] = tuple(_SHEET_MANIFEST)
+
+#: Convenience: the number of DXF files a complete package emits.
+SHEET_COUNT: int = len(SHEET_MANIFEST)
+
+
+def resolve_sheet(sheet: str) -> tuple[str, str, str, int | None, str | None] | None:
+    """Return the manifest row whose sheet id is *sheet* (e.g. ``"5"``, ``"5A"``).
+
+    Comparison is string-normalised so an integer path/query parameter and the
+    string manifest id agree.  Returns ``None`` when the id is unknown.
+    """
+    key = str(sheet).strip().upper()
+    return next((row for row in SHEET_MANIFEST if row[0] == key), None)
+
 
 def _apply_native_dims(path: Path, scale_denom: int | None) -> None:
     """Post-process a generated DXF: convert all DIMENSIONs to measured text.
@@ -192,4 +212,10 @@ def generate_package(
     return results
 
 
-__all__ = ["generate_package", "PackageGenerationError"]
+__all__ = [
+    "generate_package",
+    "PackageGenerationError",
+    "SHEET_MANIFEST",
+    "SHEET_COUNT",
+    "resolve_sheet",
+]

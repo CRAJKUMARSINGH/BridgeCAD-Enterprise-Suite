@@ -358,10 +358,10 @@ def run_integration_smoke() -> int:
     except Exception as exc:
         results.append(_fail("T03", str(exc)))
 
-    # ── T04: 8-sheet DXF package ─────────────────────────────────────────
+    # ── T04: full DXF package (one sheet per manifest row) ───────────────
     dxf_sheets: list[Path] = []
     try:
-        from bridgecad_draw.booklet import generate_package
+        from bridgecad_draw.booklet import SHEET_COUNT, generate_package
         with tempfile.TemporaryDirectory() as td:
             sheets = generate_package(project, Path(td),
                                       prefix="SMOKE")
@@ -373,10 +373,10 @@ def run_integration_smoke() -> int:
                 shutil.copy(s, dest)
                 dxf_sheets.append(dest)
         total_kb = sum(s.stat().st_size for s in dxf_sheets) // 1024
-        ok = len(dxf_sheets) == 9 and total_kb > 50
+        ok = len(dxf_sheets) == SHEET_COUNT and total_kb > 50
         results.append(
-            _ok("T04", f"{len(dxf_sheets)}/9 sheets  total {total_kb} KB")
-            if ok else _fail("T04", f"only {len(dxf_sheets)}/9 sheets or too small")
+            _ok("T04", f"{len(dxf_sheets)}/{SHEET_COUNT} sheets  total {total_kb} KB")
+            if ok else _fail("T04", f"only {len(dxf_sheets)}/{SHEET_COUNT} sheets or too small")
         )
     except Exception as exc:
         results.append(_fail("T04", str(exc))); traceback.print_exc()

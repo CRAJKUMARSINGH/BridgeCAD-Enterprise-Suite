@@ -216,16 +216,18 @@ def _staged_zip_response(
 draw_router = APIRouter(prefix="/draw", tags=["Drawing"])
 
 
-@draw_router.post("/gad", summary="Generate 8-sheet GAD DXF package → ZIP download")
+@draw_router.post("/gad", summary="Generate a GAD DXF package → ZIP download")
 async def draw_gad(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     scale: int | None = None,
     prefix: str = "GAD",
 ) -> FileResponse:
-    """Upload Excel, generate 8-sheet DXF package, return as ZIP.
+    """Upload Excel, generate the full GAD DXF package, return as ZIP.
 
-    A partial package (any sheet failing) is an error, not a smaller ZIP.
+    The package is whatever ``bridgecad_draw.booklet.SHEET_MANIFEST`` defines
+    (currently 11 sheets: 1–9 plus the enlarged-pier 5A and enlarged-abutment
+    5B).  A partial package (any sheet failing) is an error, not a smaller ZIP.
     """
     scale = _validate_scale(scale)
     prefix = _validate_prefix(prefix)
@@ -259,21 +261,27 @@ async def draw_gad(
 
 @draw_router.post("/preview/{sheet}", summary="Render one sheet to SVG preview")
 async def draw_preview(
-    sheet: int,
+    sheet: str,
     file: UploadFile = File(...),
     scale: int | None = None,
 ) -> Any:
-    """Generate a single GAD sheet and return it as an SVG preview."""
+    """Generate a single GAD sheet and return it as an SVG preview.
+
+    ``sheet`` is a manifest id (``"1"``…``"9"``, plus the enlarged-detail ids
+    ``"5A"``/``"5B"``).  It is bound as ``str`` — not ``int`` — so the manifest's
+    string ids match without a type-mismatched lookup, and the non-numeric ids
+    stay addressable.
+    """
     from fastapi.responses import Response
 
     scale = _validate_scale(scale)
     data = await enforce_upload_limits(file)
-    from bridgecad_draw.booklet import _SHEET_MANIFEST
+    from bridgecad_draw.booklet import resolve_sheet
 
-    entry = next((e for e in _SHEET_MANIFEST if e[0] == sheet), None)
+    entry = resolve_sheet(sheet)
     if entry is None:
-        raise HTTPException(404, detail=f"no sheet {sheet} in the GAD manifest")
-    _no, mod_attr, stem, sheet_scale = entry
+        raise HTTPException(404, detail=f"no sheet {sheet!r} in the GAD manifest")
+    _no, mod_attr, stem, sheet_scale, part = entry
     try:
         import importlib
 
@@ -281,7 +289,11 @@ async def draw_preview(
         with tempfile.TemporaryDirectory() as td:
             mod = importlib.import_module(f"bridgecad_draw.{mod_attr}")
             dxf_path = Path(td) / f"{stem}.dxf"
-            mod.generate(project, dxf_path, scale_denom=scale or sheet_scale)
+            if part is not None:
+                # Multi-variant sheet (e.g. sheet5_enlarged_details) needs `part`.
+                mod.generate(project, dxf_path, part=part)
+            else:
+                mod.generate(project, dxf_path, scale_denom=scale or sheet_scale)
             from bridgecad_draw.engines.svg_engine import render_svg
 
             svg_path = Path(td) / f"{stem}.svg"

@@ -87,7 +87,9 @@ def test_generation_is_deterministic_and_reports_render_status(monkeypatch, tmp_
     a = tmp_path / 'a' / params['id']
     b = tmp_path / 'b' / params['id']
     files = list(a.glob('*.dxf'))
-    assert len(files) == 9
+    # One DXF per manifest row — the generator's single source of truth.
+    from bridgecad_draw.booklet import SHEET_COUNT
+    assert len(files) == SHEET_COUNT
     assert all(f.read_bytes() == (b / f.name).read_bytes() for f in files)
     assert json.loads((a / 'render-status.json').read_text())['png'] == 'skipped'
     monkeypatch.delenv('SKIP_PNG')

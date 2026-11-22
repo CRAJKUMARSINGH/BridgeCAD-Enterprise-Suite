@@ -122,7 +122,7 @@ if selected == "🏠 Home":
 | 200+ IRC/MORTH enums | ✅ Done |
 | 427-field Pydantic models (14 sheets) | ✅ Done |
 | Excel ↔ BridgeProject IO | ✅ Done |
-| 9-sheet DXF GAD package (Plan/Long-section/Cross-section/Foundation/Pier-Abutment/Bearings/BOQ/Side-elevations/Reinforcement) | ✅ Done |
+| Full GAD DXF package (Plan / Long-section / Cross-section / Foundation / Pier-Abutment / Enlarged-Pier / Enlarged-Abutment / Bearings / BOQ / Side-elevations / Reinforcement) | ✅ Done |
 | **15 Maharashtra PWD standard types** with parametric variation (`--set/--sweep`) | ✅ Done |
 | **Abutment cap + dirt wall + continuous WC** (Venice-patch geometry) | ✅ Done |
 | **Standard scale ladder** — 1:50→1:500, broken-band for 270 m bridges | ✅ Done |
@@ -234,7 +234,7 @@ elif selected == "✅ Validate":
 # TAB: Drawing Gen
 # ===========================================================================
 elif selected == "📐 Drawing Gen":
-    st.markdown("Generate a full 9-sheet DXF package from your Excel workbook.")
+    st.markdown("Generate the full GAD DXF package from your Excel workbook.")
     uploaded = _upload_widget("draw_xl")
     col_s, col_f, col_p = st.columns(3)
     with col_s:
@@ -260,7 +260,7 @@ elif selected == "📐 Drawing Gen":
     want_png = fmt == "DXF + PNG preview"
     safe_prefix = _safe_prefix(prefix)  # S9 sanitise
 
-    if uploaded and st.button("Generate 9-Sheet DXF Package 🚀"):
+    if uploaded and st.button("Generate GAD DXF Package 🚀"):
         data = uploaded.read()
         # S6 — file size guard (PATCH_GUIDE §6)
         if len(data) == 0:
@@ -313,7 +313,7 @@ elif selected == "📐 Drawing Gen":
                 zip_bytes = Path(zip_buf.name).read_bytes()
 
         if sheets is not None:
-            st.success(f"✅ {len(sheets)}/9 sheets generated!")
+            st.success(f"✅ {len(sheets)} sheets generated!")
             total_kb = sum(s.stat().st_size for s in sheets) // 1024
             st.metric("Total DXF size", f"{total_kb} KB")
             import pandas as pd
@@ -340,7 +340,7 @@ elif selected == "📐 Drawing Gen":
 # ===========================================================================
 elif selected == "🎛️ PWD Generator":
     st.markdown("""
-Generate a 9-sheet DXF package for any of the **15 Maharashtra PWD standard bridge types**
+Generate the full GAD DXF package for any of the **15 Maharashtra PWD standard bridge types**
 (C.E. Designs letter No. 2473, dt. 31.12.2022) with full parametric control.
 
 No Excel workbook needed — the catalogue provides booklet-faithful baseline values.

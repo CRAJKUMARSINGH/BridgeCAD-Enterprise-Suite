@@ -215,13 +215,15 @@ def draw_gad_cmd(
     ),
     prefix: str = typer.Option("GAD", "-p", "--prefix"),
 ) -> None:
-    """Generate a 9-sheet GAD DXF package from an Excel workbook."""
+    """Generate the full GAD DXF package (one sheet per manifest row)."""
     if not input_file.exists():
         console.print(f"[red]Not found: {input_file}[/]")
         raise typer.Exit(1)
+    from bridgecad_draw.booklet import SHEET_COUNT
+
     with console.status("Loading workbook …"):
         project = _load_project(input_file)
-    with console.status(f"Generating 9-sheet DXF package → {output_dir} …"):
+    with console.status(f"Generating {SHEET_COUNT}-sheet DXF package → {output_dir} …"):
         from bridgecad_draw.booklet import PackageGenerationError, generate_package
 
         try:
@@ -230,9 +232,7 @@ def draw_gad_cmd(
             console.print(f"[red]Drawing package incomplete:[/] {exc}")
             raise typer.Exit(1) from exc
 
-    from bridgecad_draw.booklet import _SHEET_MANIFEST
-
-    expected = len(_SHEET_MANIFEST)
+    expected = SHEET_COUNT
     t = Table(title=f"📐 DXF Package — {len(sheets)}/{expected} sheets")
     t.add_column("Sheet", style="cyan")
     t.add_column("Size", justify="right")

@@ -1,9 +1,10 @@
 """File-integrity and determinism oracles for the real export surface.
 
-Bound to ``bridgecad_draw.booklet.generate_package`` (which emits **9** sheets,
-not the 7 the older docs claim), ``bridgecad_export.orchestrator.export_all``,
-and the ``bridgecad_io`` workbook round-trip. A green UI over a corrupt or
-nondeterministic drawing is still a FAIL.
+Bound to ``bridgecad_draw.booklet.generate_package`` (which emits one DXF per
+``SHEET_MANIFEST`` row — currently 11: sheets 1–9 plus the enlarged-pier 5A and
+enlarged-abutment 5B — not the 7/8/9 the older docs claim),
+``bridgecad_export.orchestrator.export_all``, and the ``bridgecad_io`` workbook
+round-trip. A green UI over a corrupt or nondeterministic drawing is still a FAIL.
 """
 
 from __future__ import annotations
@@ -28,7 +29,11 @@ def package(project, tmp_path_factory):
 
 
 def test_package_emits_every_sheet(package):
-    assert len(package) == 9, f"expected 9 sheets, got {len(package)}"
+    # Derive the expectation from the manifest — the single source of truth —
+    # so adding a sheet can never silently drift this count out of step again.
+    from bridgecad_draw.booklet import SHEET_COUNT
+
+    assert len(package) == SHEET_COUNT, f"expected {SHEET_COUNT} sheets, got {len(package)}"
     for sheet in package:
         assert sheet.exists()
         assert sheet.stat().st_size > 0
@@ -47,8 +52,10 @@ def test_partial_package_raises_instead_of_shipping(project, tmp_path, monkeypat
     with pytest.raises(PackageGenerationError) as excinfo:
         generate_package(project, tmp_path / "partial", prefix="GAD")
 
-    assert 5 in excinfo.value.failures
-    assert "RuntimeError" in excinfo.value.failures[5]
+    # Manifest sheet ids are strings ("5", "5A", …) — the failure map is keyed
+    # by that id, not by the integer the sheet number looks like.
+    assert "5" in excinfo.value.failures
+    assert "RuntimeError" in excinfo.value.failures["5"]
 
 
 def test_every_sheet_is_a_valid_dxf(package):

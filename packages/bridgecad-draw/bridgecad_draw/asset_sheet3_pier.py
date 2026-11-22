@@ -226,21 +226,24 @@ def generate(spec: SlabBridgeSpec = PMGSY_SLAB,
     # ---- verification + notes ----------------------------------------
     sh.notes(296.0, 148.0, 112.0, [
         "PIER IS MASS CONCRETE PCC M20, CAP RCC M20.",
-        "PIERS P1 TO P6 ARE IDENTICAL.",
+        "PIERS P1 TO P{} ARE IDENTICAL.".format(spec.spans - 1),
         "ENVELOPES ARE CONCENTRIC ABOUT BOTH AXES.",
         "CUTWATER NOSE ON THE U/S FACE OF THE SHAFT.",
         f"FOUNDING LEVEL RL {spec.found_level:.3f} m.",
     ], heading="PIER NOTES :-", th=TXT_XS, gap=3.4)
-    sh.text("SOURCE : ilide.info-01-gad-at-ch-2-300-7x9-0-pr.pdf, page 3",
+    sh.text("DETAILS GENERATED FROM SPEC \u2014 NOT REPRODUCED FROM ANY SOURCE SHEET",
             296.0, 120.0, 1.5, "TEXT-SPEC")
 
     # ---- envelope arithmetic, clear of the title block ----------------
-    sh.text("ENVELOPE ARITHMETIC (REPRODUCED FROM SOURCE)", 12.0, 100.0, 2.1, "TEXT-HEADER")
+    sh.text("ENVELOPE ARITHMETIC", 12.0, 100.0, 2.1, "TEXT-HEADER")
     sh.text(f"{spec.pier_steps_m[0]:.1f} \u2192 {spec.pier_steps_m[1]:.1f} \u2192 "
             f"{spec.pier_steps_m[2]:.1f} \u2192 {spec.pier_steps_m[3]:.1f} m :  "
             f"EACH STEP ADDS {2 * spec.pier_step_m:.1f} m "
             f"({spec.pier_step_m * 1000:.0f} mm EACH SIDE)", 12.0, 94.0, 1.7, "TEXT-SPEC")
-    sh.text(f"STEPPED HEIGHT (3 x 300) = 900 mm, FOOTING SLAB 450 mm, "
+    sh.text(f"STEPPED HEIGHT ({len(spec.pier_steps_m) - 1} x "
+            f"{spec.pier_step_m * 1000:.0f}) = "
+            f"{(len(spec.pier_steps_m) - 1) * spec.pier_step_m * 1000:.0f} mm, "
+            f"FOOTING SLAB 450 mm, "
             f"TOTAL BELOW BED {spec.bed_level - spec.found_level:.2f} m",
             12.0, 89.0, 1.7, "TEXT-SPEC")
 

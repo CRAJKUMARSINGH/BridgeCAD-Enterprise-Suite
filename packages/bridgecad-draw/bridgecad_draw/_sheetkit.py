@@ -613,7 +613,9 @@ class Sheet:
             cx = xs[col] + 1.6
             cw = (xs[col + 1] - xs[col]) - 3.2
             top = y0 + rows * k
-            self.text(label, cx, top - 3.0, th, "TITLEBLK-TEXT")
+            # EP-P2: fit the LABEL to its cell too — a long label used to overrun
+            # into the neighbouring column and collide with that cell's value.
+            self.text(fit_text(label, cw, th), cx, top - 3.0, th, "TITLEBLK-TEXT")
             if value:
                 self.text(fit_text(value, cw, th + 0.2), cx, top - 6.6, th + 0.2,
                           "TITLEBLK-TEXT")

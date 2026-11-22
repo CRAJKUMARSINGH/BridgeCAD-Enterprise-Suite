@@ -61,6 +61,7 @@ class SlabBridgeSpec:
     found_level: float = 95.610  # 2.0 m below bed, per general note 11
     deck_slab_mm: float = 600.0
     wearing_mm: float = 75.0
+    camber_pct: float = 2.0  # crossfall/camber % — EP-P1: single source, was hard-typed on sheets
     approach_slab_mm: float = 300.0
     levelling_mm: float = 150.0
     footing_depth_mm: float = 1200.0

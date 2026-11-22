@@ -76,16 +76,17 @@ def _deck_section(sh: Sheet, spec: SlabBridgeSpec,
              f"{spec.wearing_mm:.0f}", off=4.0, th=1.6)
 
     # ---- callouts ----------------------------------------------------
-    panel.leader(0.0, top_mid, 0.0, 6.0, "CAMBER 2.0 % (CROWN)")
+    panel.leader(0.0, top_mid, 0.0, 6.0, f"CAMBER {spec.camber_pct:.1f} % (CROWN)")
     panel.leader(-cw * 0.55, slab + wc, 0.0, 8.0, "75 mm WEARING COAT")
     panel.leader(cw * 0.45, slab * 0.55, 0.0, -8.0,
                  f"R.C.C. SOLID SLAB {spec.deck_slab_mm:.0f} THK")
     panel.leader(-hw + 0.06, -0.36, -14.0, -8.0, "ABUTMENT CAP", align="RIGHT")
-    panel.leader(hw - 0.06, slab + wc + 0.90, 14.0, 6.0, "R.C.C. RAILING", align="LEFT")
+    panel.leader(-hw + 0.06, slab + wc + 0.90, -14.0, 6.0, "R.C.C. RAILING",
+                 align="RIGHT")
 
     panel.caption_below("Section A-A",
                         f"TRANSVERSE SECTION OF DECK \u2014 {spec.deck_width_m:.1f} m WIDE  |  "
-                        f"CAMBER 2.0 %  \u2014  NOT TO SCALE")
+                        f"CAMBER {spec.camber_pct:.1f} %  \u2014  NOT TO SCALE")
 
 
 # ---------------------------------------------------------------------------
@@ -219,23 +220,32 @@ def generate(spec: SlabBridgeSpec = PMGSY_SLAB,
     _return_wall_section(sh, spec, (202.0, 128.0, 288.0, 186.0))
     _toe_wall_section(sh, spec, (294.0, 128.0, 374.0, 186.0))
 
-    # notes in two columns so the block clears both title block and captions
+    # notes in three columns (EP-P4) — the old two-column split let long
+    # wrapped notes overrun into the title block / drawing title area
     all_notes = list(spec.notes)
-    split = (len(all_notes) + 1) // 2
-    sh.notes(12.0, 112.0, 196.0, all_notes[:split], heading="GENERAL NOTES :-",
-             th=TXT_XS, gap=3.2)
-    sh.notes(216.0, 112.0, 196.0, all_notes[split:], heading="", th=TXT_XS, gap=3.2,
-             start=split + 1)
+    n3 = (len(all_notes) + 2) // 3
+    col_defs = [((12.0, 126.0), all_notes[:n3], 1),
+                ((142.0, 126.0), all_notes[n3:2 * n3], n3 + 1),
+                ((272.0, 118.0), all_notes[2 * n3:], 2 * n3 + 1)]
+    first = True
+    for (cx, cw), items, st in col_defs:
+        if not items:
+            continue
+        sh.notes(cx, 112.0, cw, items, heading="GENERAL NOTES :-" if first else "",
+                 th=TXT_XS, gap=3.2, start=st)
+        first = False
 
     # geometry checks, top right
     sh.text("GEOMETRY CHECKS", 296.0, 264.0, 2.3, "TEXT-HEADER")
     checks = [
         ["CHECK", "RESULT"],
-        ["FRL \u2212 BL", f"{spec.height_m:.3f} m (source 5.015)"],
-        ["FRL \u2212 (75+600)", f"{spec.soffit:.3f} m soffit"],
+        ["FRL \u2212 BL", f"{spec.height_m:.3f} m (FRL \u2212 BL)"],
+        [f"FRL \u2212 ({spec.wearing_mm:.0f}+{spec.deck_slab_mm:.0f})",
+         f"{spec.soffit:.3f} m soffit"],
         ["B1 + 2x700 + B2", f"{spec.b1 + 1.4 + spec.b2:.2f} m"],
         ["DECK \u2212 CW \u2212 2 KERB", f"{spec.deck_width_m - spec.carriageway_m - 2 * spec.kerb_mm / 1000:.3f} m"],
         ["SPAN x N", f"{spec.span_m:.1f} x {spec.spans} = {spec.length_m:.1f} m"],
+        [f"L/d ({spec.deck_slab_mm:.0f} SLAB)", f"{spec.span_m * 1000 / spec.deck_slab_mm:.1f} \u2014 IRC:112"],
     ]
     sh.table(296.0, 260.0, (34.0, 42.0), checks, row_h=4.0, th=1.6)
 

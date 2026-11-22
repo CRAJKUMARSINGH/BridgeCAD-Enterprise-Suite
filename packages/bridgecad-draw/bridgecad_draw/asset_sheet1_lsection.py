@@ -145,12 +145,14 @@ def _elevation(sh: Sheet, spec: SlabBridgeSpec) -> None:
              th=2.0)
 
     # ---- levels ------------------------------------------------------
+    # EP-P5: level tags moved from midspan (where they collided with the
+    # wearing-coat / slab leaders) to the quiet zone near the left abutment.
     for val, tag in ((wc_top, "F.R.L."), (slab_bot, "SOFFIT"),
                      (spec.bed_level, "BED LVL"), (spec.found_level, "FOUND. LVL")):
-        sh.level(panel.X(L * 0.5), panel.Y(val), val, prefix=tag, dx=-3.0)
+        sh.level(panel.X(L * 0.08), panel.Y(val), val, prefix=tag, dx=-3.0)
 
     # ---- leaders (all relative to the feature) ------------------------
-    panel.leader(L * 0.62, wc_top, 0.0, 7.0, "75 mm THK R.C.C. WEARING COAT")
+    panel.leader(L * 0.70, wc_top, 0.0, 7.0, f"{spec.wearing_mm:.0f} mm THK R.C.C. WEARING COAT")
     panel.leader(L * 0.30, slab_bot + 0.30, 0.0, -9.0,
                  f"R.C.C. SOLID SLAB {spec.deck_slab_mm:.0f} THK")
     panel.leader(0.0, wc_top + 0.28, -22.0, 4.0, "DIRT WALL", align="RIGHT")
@@ -249,10 +251,11 @@ def _schedule(sh: Sheet, spec: SlabBridgeSpec) -> None:
     rows = [["PARAMETER", "VALUE"]] + spec.schedule_rows()
     bot = sh.table(x, y - 1.0, (48.0, 50.0), rows, row_h=4.0, th=1.85)
     sh.text(f"HEIGHT CHECK :  FRL {spec.frl:.3f} \u2212 BL {spec.bed_level:.3f} = "
-            f"{spec.height_m:.3f} m  (source schedule 5.015 m)", x, bot - 5.0, 1.8,
+            f"{spec.height_m:.3f} m  (self-checking pair)", x, bot - 5.0, 1.8,
             "TEXT-SPEC")
-    sh.text(f"SOFFIT (DERIVED) :  FRL \u2212 (75 WC + {spec.deck_slab_mm:.0f} SLAB) = "
-            f"{spec.soffit:.3f} m", x, bot - 9.5, 1.8, "TEXT-SPEC")
+    sh.text(f"SOFFIT (DERIVED) :  FRL \u2212 ({spec.wearing_mm:.0f} WC + "
+            f"{spec.deck_slab_mm:.0f} SLAB) = {spec.soffit:.3f} m", x, bot - 9.5, 1.8,
+            "TEXT-SPEC")
 
     # legend, to the right of the schedule and clear of the title block
     lx = 118.0
@@ -271,8 +274,9 @@ def _schedule(sh: Sheet, spec: SlabBridgeSpec) -> None:
         sh.rect(lx, ly - 3.0, 9.0, 4.0, layer="BORDER-INNER", lw=9)
         sh.text(name, lx + 12.0, ly - 1.8, 1.8, "TEXT-GENERAL")
         ly -= 7.6
-    sh.text("DRAWING SET REPRODUCES SAMPLE-GAD-DRAWINGS/", lx, ly - 2.0, 1.6, "TEXT-SPEC")
-    sh.text("ilide.info-01-gad-at-ch-2-300-7x9-0-pr.pdf  (page 1)", lx, ly - 5.4, 1.6,
+    sh.text(f"GENERATED FROM SPEC \u2014 {spec.ident.set_name}", lx, ly - 2.0, 1.6,
+            "TEXT-SPEC")
+    sh.text("VERIFY ALL LEVELS AGAINST SITE HYDROLOGY / SOIL REPORT", lx, ly - 5.4, 1.6,
             "TEXT-SPEC")
 
 
@@ -293,8 +297,7 @@ def generate(spec: SlabBridgeSpec = PMGSY_SLAB,
         date=spec.ident.date, drawn=spec.ident.drawn, designed=spec.ident.designed,
         approved=spec.ident.approved, revision=spec.ident.revision,
     )
-    sh.footer("BridgeCAD Enterprise Suite \u2014 asset pack \u2014 sheet 01/03 \u2014 "
-              "dimensions verbatim from source GAD")
+    sh.footer(f"BridgeCAD Enterprise Suite \u2014 {spec.ident.set_name} \u2014 sheet 01/03")
     return sh.save(output_path)
 
 

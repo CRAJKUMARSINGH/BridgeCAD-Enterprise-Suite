@@ -8,9 +8,8 @@ collapsed to a vertical line. That test proved labels were emitted; it did not
 prove the outline had real horizontal extent.
 
 Every check here reopens the saved DXF and measures actual drawing coordinates.
-Scale is recovered from the SUPER-DECK rectangle width divided by the known
-overall_width_m from the fixture — no hard-coded denominator.  Checks are then
-applied in real-world metres so tolerance statements are meaningful.
+The deck-width check uses a requested and printed 1:100 scale. Other checks
+recover the scale from the full deck width and apply tolerances in metres.
 
 Fixture: pwd_br2022_002_open_rcc_solidslab — SOLID_SLAB, 4 × 10 m,
   carriageway 7.5 m, kerb 0.25 m each side, crash barrier 0.45 m each side,
@@ -32,6 +31,7 @@ from . import contract  # noqa: E402
 
 FIXTURE = "tests/e2e/fixtures/pwd/pwd_br2022_002_open_rcc_solidslab.json"
 SHEET_MODULE = "bridgecad_draw.sheet3_cross_section"
+WIDTH_TEST_SCALE_DENOM = 100
 
 # Tolerances (metres in drawing space after scale inversion)
 TOL_M = 0.01     # ±10 mm for position/dimension checks
@@ -89,7 +89,7 @@ def _slab_dxf(_slab_project, tmp_path_factory):
     import importlib
     mod = importlib.import_module(SHEET_MODULE)
     out = tmp_path_factory.mktemp("sheet3") / "sheet3_slab.dxf"
-    mod.generate(_slab_project, out)
+    mod.generate(_slab_project, out, scale_denom=WIDTH_TEST_SCALE_DENOM)
     doc = ezdxf.readfile(str(out))
     return doc, _slab_project
 
@@ -97,7 +97,7 @@ def _slab_dxf(_slab_project, tmp_path_factory):
 # ── Priority 1a: outline must not be collapsed ────────────────────────────────
 
 def test_deck_slab_has_real_width(_slab_dxf):
-    """SUPER-DECK rectangle must span the declared overall width (± 1 %).
+    """SUPER-DECK rectangle must span the declared overall width (±10 mm).
 
     Failure here is the Venice defect: a collapsed outline returns width ≈ 0.
     """
@@ -107,7 +107,10 @@ def test_deck_slab_has_real_width(_slab_dxf):
     rects = _rects_on(doc.modelspace(), "SUPER-DECK")
     assert rects, "No SUPER-DECK rectangle found — slab outline was not drawn."
     widest = max(rects, key=lambda r: r["w"])
-    scale = _recover_scale(doc.modelspace(), overall_w)
+    # Use a requested scale that fits the fixture, independent of deck width.
+    expected_scale = f"Scale 1:{WIDTH_TEST_SCALE_DENOM}"
+    assert any(expected_scale in e.dxf.text for e in doc.modelspace().query("TEXT"))
+    scale = 1000.0 / WIDTH_TEST_SCALE_DENOM
     drawn_w_m = widest["w"] / scale
     assert abs(drawn_w_m - overall_w) < TOL_M, (
         f"Deck drawn width {drawn_w_m:.4f} m != expected {overall_w:.4f} m "

@@ -4,9 +4,9 @@ For each skew angle (0°, +15°, −15°) and a 3-span, 18 m bridge:
 
   (a) The correct number of intermediate piers is drawn — nspans − 1.
   (b) Each pier rectangle centre X matches the expected pier chainage, within
-      one paper millimetre at the recovered scale.
+      15 mm in bridge coordinates at the declared scale.
   (c) At non-zero skew the deck outline has non-zero horizontal offset between
-      its top and bottom edges (the parallelogram is not a rectangle).  At zero
+       its top and bottom edges (the parallelogram is not a rectangle).  At zero
       skew that offset must be negligible.
 
 What we do NOT test here
@@ -16,13 +16,11 @@ Pier nose arcs (rounded corners): Sheet 1 uses filled plan-view rectangles
 Sheet 5.  Measuring arc endpoints on Sheet 1 would test a feature that is not
 drawn there.
 
-Scale recovery
---------------
-The plan has no guaranteed reference dimension entity that is recoverable
-across all fixture combinations.  Instead we recover scale from the deck
-outline: the total_length_m from the fixture is known; the longest horizontal
-LINE on layer `C-DECK` or the C-DECK LWPOLYLINE span gives the drawn length in
-mm.  mm / total_length_m = scale.
+Scale
+-----
+The chainage test requests 1:150 and verifies the printed scale. The skewed
+deck's bounding-box width includes transverse offset, so it cannot be used
+as the longitudinal scale reference.
 """
 from __future__ import annotations
 
@@ -42,11 +40,9 @@ SHEET_MODULE = "bridgecad_draw.sheet1_plan"
 
 # 3-span 18 m fixture: intermediate piers at 18 m and 36 m.
 EXPECTED_PIER_CHAINAGES_3x18 = [18.0, 36.0]
-TOTAL_LEN_3x18 = 54.0
-TOTAL_LEN_1x12 = 12.0
 
 
-def _generate(project, tmp_path, skew_override=None):
+def _generate(project, tmp_path, skew_override=None, scale_denom=None):
     import importlib
     mod = importlib.import_module(SHEET_MODULE)
     if skew_override is not None:
@@ -57,7 +53,7 @@ def _generate(project, tmp_path, skew_override=None):
             )}
         )
     out = tmp_path / f"sheet1_skew{skew_override}.dxf"
-    mod.generate(project, out)
+    mod.generate(project, out, scale_denom=scale_denom)
     return ezdxf.readfile(str(out)), project
 
 
@@ -137,19 +133,23 @@ def test_pier_centre_chainages_match_expected(skew_deg, tmp_path):
     but we CAN check that the RELATIVE spacing between pier centres equals
     span_length_m in metres — that is the invariant skew cannot distort.
 
-    Scale is recovered from the title block '1:N' text, not from the deck
-    outline.  At non-zero skew the deck outline X span is total_len*cos(skew),
-    not total_len — using that span underestimates scale by cos(skew).
+    The chainage test requests 1:150 and verifies the printed scale. The skewed
+    deck's bounding-box width includes transverse offset, so it cannot be used
+    as the longitudinal scale reference.
     """
     data = contract._fixture_data(SKEW_FIXTURE)
     project = contract._build_from_fixture(data)
-    doc, project = _generate(project, tmp_path / f"skew{skew_deg:.0f}", skew_deg)
+    scale_denom = 150
+    doc, project = _generate(project, tmp_path / f"skew{skew_deg:.0f}", skew_deg, scale_denom)
     msp = doc.modelspace()
     centres = sorted(_pier_centres(msp), key=lambda c: c[0])
     assert len(centres) == 2, (
         f"skew={skew_deg}: expected 2 piers, got {len(centres)}"
     )
-    scale = _recover_scale_from_title_block(msp)
+    # The skewed outline bbox includes deck overhang in X. Use the
+    # declared plot scale so that overhang cannot change measured chainages.
+    assert any(f"SCALE 1:{scale_denom} " in e.dxf.text for e in msp.query("TEXT"))
+    scale = 1000.0 / scale_denom
     # Spacing between the two pier centre Xs (mm) → metres
     drawn_spacing_m = (centres[1][0] - centres[0][0]) / scale
     expected_spacing_m = 18.0  # each span is 18 m

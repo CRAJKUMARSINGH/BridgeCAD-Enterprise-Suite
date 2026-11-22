@@ -33,7 +33,7 @@ import math
 from dataclasses import dataclass
 
 # Standard IRC SP:55 scale ladder for plan-view sheets.
-LADDER: tuple[int, ...] = (50, 75, 100, 150, 200, 250, 300, 400, 500)
+LADDER: tuple[int, ...] = (10, 20, 25, 30, 40, 50, 75, 100, 150, 200, 250, 300, 400, 500)
 
 MIN_TEXT_MM: float = 2.5       # floor for adaptive text height
 MIN_ANNOT_GAP_MM: float = 8.0  # minimum clear gap between adjacent pier labels

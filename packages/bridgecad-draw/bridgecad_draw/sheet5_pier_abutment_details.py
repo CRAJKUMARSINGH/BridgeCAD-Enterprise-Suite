@@ -433,7 +433,7 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     # Weep holes through the dirt wall (elevation: dots on the wall face)
     for i in range(2):
         wy_e = cap_el_top + dw_mm_e * (i + 1) / 3.0
-        circle(msp, abt_cx, wy_e, 0.05 * sc, layer="ABUT-PROF", color=4)
+        circle(msp, abt_cx, wy_e, weephole_d * sc / 2.0, layer="ABUT-PROF", color=4)
 
     _abt_elev = view_spec("abutment_elevation")
     dim_along(

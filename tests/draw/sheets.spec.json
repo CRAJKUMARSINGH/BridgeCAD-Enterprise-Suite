@@ -41,6 +41,24 @@
         "must_contain_wing_walls": true
       }
     },
+    "sheet5A_pier_enlarged": {
+      "status": "scaffold",
+      "required": {
+        "min_entities": 50,
+        "min_dimensions": 2,
+        "must_contain_text": ["PIER"],
+        "must_contain_layers": ["DIM"]
+      }
+    },
+    "sheet5B_abutment_enlarged": {
+      "status": "scaffold",
+      "required": {
+        "min_entities": 50,
+        "min_dimensions": 2,
+        "must_contain_text": ["ABUTMENT"],
+        "must_contain_layers": ["DIM"]
+      }
+    },
     "sheet6_bearings_joints": {
       "status": "scaffold",
       "required": {

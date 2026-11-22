@@ -60,6 +60,7 @@ with st.sidebar:
         "🏗️ Geometry",
         "🌊 Hydraulics",
         "📄 Standards",
+        "🔎 Drawing Review",
         "🔁 History",
         "⚙️ Settings",
         "❓ Help",
@@ -895,6 +896,38 @@ elif selected == "📄 Standards":
 
     df = pd.DataFrame(list(standards.items()), columns=["Standard", "Description"])
     st.dataframe(df.set_index("Standard"), use_container_width=True)
+
+
+# ===========================================================================
+# TAB: Drawing Review
+# ===========================================================================
+elif selected == "🔎 Drawing Review":
+    import json as _json
+    import tempfile as _tf
+
+    from bridgecad_ai.drawing_review import review as _review, to_markdown as _md
+
+    st.caption("Upload a DXF sheet and project requirements (JSON) to get a review checklist.")
+    _sheet = st.file_uploader("Drawing sheet (.dxf)", type=["dxf"], key="rv_dxf")
+    _req_file = st.file_uploader("Requirements (.json)", type=["json"], key="rv_req")
+    _req_text = st.text_area(
+        "…or paste requirements JSON",
+        value='{"scale": "1:75", "drawing_no": "GAD-005", "required_notes": ["ALL DIMENSIONS"]}',
+    )
+    _use_ai = st.toggle("Add AI review (Lovable AI Gateway, needs LOVABLE_API_KEY)", value=False)
+    if st.button("Run review", type="primary", disabled=_sheet is None):
+        try:
+            _req = _json.loads(_req_file.read() if _req_file else _req_text)
+        except ValueError as _e:
+            st.error(f"Requirements are not valid JSON: {_e}")
+        else:
+            with _tf.NamedTemporaryFile(suffix=".dxf", delete=False) as _f:
+                _f.write(_sheet.read())
+            with st.spinner("Reviewing drawing…"):
+                _items = _review(_f.name, _req, use_ai=_use_ai)
+            _report = _md(_items)
+            st.markdown(_report)
+            st.download_button("Download checklist (.md)", _report, "review_checklist.md")
 
 
 # ===========================================================================

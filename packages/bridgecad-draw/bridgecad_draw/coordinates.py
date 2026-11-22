@@ -44,7 +44,7 @@ FRAME = {
 # plan. The preferred-number rungs of `fit.LADDER` (75, 150, 300, 400) are
 # included here so a view may be *chosen* at one of them — a ladder the
 # elevation sheets impose but the contract refused would be a latent bug.
-PLOT_SCALES = (1, 20, 25, 50, 75, 100, 150, 200, 250, 300, 400, 500, 1000)
+PLOT_SCALES = (1, 10, 20, 25, 30, 40, 50, 75, 100, 150, 200, 250, 300, 400, 500, 1000)
 
 TITLE_BLOCK = {"width_mm": 180.0, "height_mm": 60.0, "corner": "bottom_right"}
 
@@ -84,6 +84,8 @@ FRAMES: dict[str, SheetFrame] = {
     "sheet3_cross_section": SheetFrame("A1", 0.0, 0.0, 50),
     "sheet4_foundation": SheetFrame("A1", 0.0, 0.0, 100),
     "sheet5_pier_abutment_details": SheetFrame("A1", 0.0, 0.0, 50),
+    "sheet5A_pier_enlarged": SheetFrame("A1", 0.0, 0.0, 40),
+    "sheet5B_abutment_enlarged": SheetFrame("A1", 0.0, 0.0, 40),
     "sheet6_bearings_joints": SheetFrame("A1", 0.0, 0.0, 20),
     "sheet7_bill_of_quantities": SheetFrame("A1", 0.0, 0.0, 1),
 }

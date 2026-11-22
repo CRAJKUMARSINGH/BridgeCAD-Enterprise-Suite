@@ -259,7 +259,7 @@ def test_resolved_card_is_nine_spans_of_ten_metres(package):
 
 def test_package_renders_all_nine_sheets(package):
     paths = package["paths"]
-    assert len(paths) == 9
+    assert len(paths) == 11  # 9 original + Sheet 5A + Sheet 5B (EP-2026-12)
     for p in paths:
         assert p.exists() and p.stat().st_size > 0
 

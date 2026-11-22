@@ -249,6 +249,16 @@ def generate(spec: SlabBridgeSpec = PMGSY_SLAB,
     ]
     sh.table(296.0, 260.0, (34.0, 42.0), checks, row_h=4.0, th=1.6)
 
+    # EP-P6-4: L/d red-flag entry when span/depth is outside IRC solid-slab
+    # guidance range 10–18 (IRC:112-2020 for RCC solid slabs).
+    # A flag on the sheet — not a hard exception — so the drawing still ships
+    # but the reviewer sees a prominent warning at the check table.
+    _ld = spec.span_m * 1000 / spec.deck_slab_mm
+    if not (10.0 <= _ld <= 18.0):
+        _flag = (f"⚠ L/d {_ld:.1f} OUTSIDE IRC:112 SOLID-SLAB RANGE 10–18 — "
+                 f"REVIEW ECONOMY / ADEQUACY")
+        sh.text(_flag, 296.0, 215.0, 1.6, "TEXT-SPEC")
+
     sh.title_block(
         client=spec.ident.client, consultant=spec.ident.consultant, road=spec.ident.road,
         title="GENERAL ARRANGEMENT DRAWING \u2014 DECK SECTION & SUB-STRUCTURE DETAILS",

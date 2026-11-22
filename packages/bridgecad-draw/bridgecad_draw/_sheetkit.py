@@ -131,6 +131,15 @@ TXT_S = 2.0  # dimension text / table cell
 TXT_XS = 1.7  # legend, note continuation
 
 
+class LayoutAuditError(RuntimeError):
+    """Raised when a generated layout element intrudes on the title block.
+
+    EP-P6-1: ``Sheet.notes()`` raises this when the returned baseline falls
+    below the title-block top (65 mm from the sheet bottom), so a blocked
+    sheet is detected at generation time rather than on the plotter.
+    """
+
+
 # ---------------------------------------------------------------------------
 # Panel — model metres -> paper millimetres
 # ---------------------------------------------------------------------------
@@ -483,6 +492,12 @@ class Sheet:
 
         *start* keeps the numbering continuous when the notes are split across
         two columns on a crowded sheet.
+
+        EP-P6-1: Raises ``LayoutAuditError`` when the returned baseline would
+        fall into the title-block zone (y < 65 mm from the sheet bottom).
+        That overlap is a blocking drafting defect — it is better to raise at
+        generation time than to silently ship a sheet whose notes print over
+        the title block.
         """
         if heading:
             self.text(heading, x, y, th + 0.9, "TEXT-HEADER")
@@ -498,6 +513,13 @@ class Sheet:
                 if j < len(lines) - 1:
                     cy -= gap
             cy -= gap + 0.5
+        # EP-P6-1: guard against overflow into the title-block zone
+        _TITLE_BLOCK_TOP = 65.0  # mm from sheet bottom — consistent with title_block()
+        if cy < _TITLE_BLOCK_TOP:
+            raise LayoutAuditError(
+                f"notes() baseline {cy:.1f} mm < title-block top {_TITLE_BLOCK_TOP} mm — "
+                "notes overrun the title block; use more columns or shorter notes."
+            )
         return cy
 
     # -- table -----------------------------------------------------------
@@ -634,9 +656,14 @@ class Sheet:
         self.text(fit_text(title, col_a + col_b - 5.0, title_h), xs[0] + 1.6,
                   y0 + rows * 4 + 2.4, title_h, "TITLEBLK-TEXT")
         cell(2, 4, "DESIGNED BY :-", designed)
-        # signature strip
-        labels = ["APPROVED BY :-", approved or "", ""]
-        cell(0, 5, labels[0], labels[1])
+        # EP-P6-2: when approved is blank, pass the label as the value and
+        # an empty label — this writes one TEXT entity, not two at the same
+        # coordinates (the original label+value overlap that produced duplicate
+        # text at the same cell position for every sheet with no approver set).
+        if approved:
+            cell(0, 5, "APPROVED BY :-", approved)
+        else:
+            cell(0, 5, "", "APPROVED BY :-")
         cell(1, 5, "CHECKED BY :-", "")
         cell(2, 5, "DATE :-", date)
         return (x0, y0)
@@ -650,6 +677,7 @@ class Sheet:
 
 
 __all__ = [
+    "LayoutAuditError",
     "Panel",
     "Sheet",
     "PAPER_SIZES",

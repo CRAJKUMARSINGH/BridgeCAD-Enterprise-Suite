@@ -76,34 +76,29 @@ def _pier_centres(msp) -> list[tuple[float, float]]:
     return centres
 
 
-def _recover_scale_from_total_length(msp, total_len_m: float) -> float:
-    """Recover mm-per-metre by finding the longest C-DECK or SUPER-DECK span."""
-    best = 0.0
-    for layer in ("C-DECK", "SUPER-DECK"):
-        for e in msp.query(f'LWPOLYLINE[layer=="{layer}"]'):
-            pts = [p[0] for p in e.get_points("xy")]
-            if pts:
-                best = max(best, max(pts) - min(pts))
-        for e in msp.query(f'LINE[layer=="{layer}"]'):
-            dx = abs(e.dxf.end.x - e.dxf.start.x)
-            best = max(best, dx)
-    if best < 1.0:
-        # Fall back: use the widest span across any entity
-        all_x = []
-        for e in msp:
-            try:
-                b = ezdxf.bbox.extents([e], fast=True)
-                if b and b.has_data:
-                    all_x.extend([b.extmin.x, b.extmax.x])
-            except Exception:
-                pass
-        best = max(all_x) - min(all_x) if all_x else 1.0
-    scale = best / total_len_m
-    assert scale > 1.0, (
-        f"Recovered plan scale {scale:.3f} mm/m is implausible "
-        f"(best span {best:.1f} mm, total_len {total_len_m} m)"
+def _recover_scale_from_title_block(msp) -> float:
+    """Recover mm-per-metre from the 'SCALE: 1:N' title block text.
+
+    The plan title block always prints the scale denominator it was drawn at
+    (e.g. 'SCALE: 1:100').  At non-zero skew the deck outline is a sheared
+    parallelogram whose horizontal X extent is total_len * cos(skew), not
+    total_len — recovering scale from that X span underestimates by cos(skew)
+    and produces a systematically wrong measurement.  The title block is the
+    only reliable scale reference in the plan DXF.
+    """
+    import re
+    for e in msp:
+        if e.dxftype() != "TEXT":
+            continue
+        t = (e.dxf.text or "").strip()
+        m = re.search(r"1\s*:\s*(\d+)", t)
+        if m:
+            denom = int(m.group(1))
+            assert denom > 0, f"Non-positive scale denominator {denom} in '{t}'"
+            return 1000.0 / denom  # mm per metre
+    raise AssertionError(
+        "No '1:N' scale text found in modelspace — title block not drawn."
     )
-    return scale
 
 
 # ── tests ─────────────────────────────────────────────────────────────────────
@@ -141,6 +136,10 @@ def test_pier_centre_chainages_match_expected(skew_deg, tmp_path):
     Since cx_offset shifts with the layout we cannot predict its absolute value,
     but we CAN check that the RELATIVE spacing between pier centres equals
     span_length_m in metres — that is the invariant skew cannot distort.
+
+    Scale is recovered from the title block '1:N' text, not from the deck
+    outline.  At non-zero skew the deck outline X span is total_len*cos(skew),
+    not total_len — using that span underestimates scale by cos(skew).
     """
     data = contract._fixture_data(SKEW_FIXTURE)
     project = contract._build_from_fixture(data)
@@ -150,7 +149,7 @@ def test_pier_centre_chainages_match_expected(skew_deg, tmp_path):
     assert len(centres) == 2, (
         f"skew={skew_deg}: expected 2 piers, got {len(centres)}"
     )
-    scale = _recover_scale_from_total_length(msp, TOTAL_LEN_3x18)
+    scale = _recover_scale_from_title_block(msp)
     # Spacing between the two pier centre Xs (mm) → metres
     drawn_spacing_m = (centres[1][0] - centres[0][0]) / scale
     expected_spacing_m = 18.0  # each span is 18 m
@@ -193,6 +192,11 @@ def test_deck_outline_shear_matches_skew(skew_deg, expect_shear, tmp_path):
         pytest.skip("No deck outline found for skew shear check")
     top_x_min, bot_x_min = min(top_xs), min(bot_xs)
     shear_mm = abs(top_x_min - bot_x_min)
+    # Use title-block scale to convert paper mm to metres for the threshold
+    scale = _recover_scale_from_title_block(msp)
+    # At 15° skew over 8.9 m width: shear = width * tan(15°) * scale ≈ 20 mm
+    expected_shear_mm = (8.9 * math.tan(math.radians(abs(skew_deg))) * scale
+                         if abs(skew_deg) > 0.5 else 0.0)
     if expect_shear:
         assert shear_mm > 1.0, (
             f"skew={skew_deg}: expected parallelogram shear > 1 mm, "

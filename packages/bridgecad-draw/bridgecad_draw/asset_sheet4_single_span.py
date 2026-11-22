@@ -269,7 +269,21 @@ def generate(spec: SingleSpanSpec = AMARWADA_SINGLE,
     _boreholes(sh, spec, (12.0, 96.0, 130.0, 158.0))
     _index_plan(sh, spec, (140.0, 96.0, 240.0, 158.0))
 
-    sh.notes(252.0, 188.0, 148.0, list(spec.notes), heading="NOTES :-", th=TXT_XS, gap=3.1)
+    # EP-P6-3: three-column notes — same treatment as sheet 2 so long notes
+    # from a SingleSpanSpec cannot overflow into the title-block zone.
+    _notes = list(spec.notes)
+    _n3 = (len(_notes) + 2) // 3
+    _col_defs = [((252.0, 148.0), _notes[:_n3], 1),
+                 ((252.0 + 150.0, 148.0), _notes[_n3:2 * _n3], _n3 + 1),
+                 ((252.0 + 300.0, 118.0), _notes[2 * _n3:], 2 * _n3 + 1)]
+    _first = True
+    for (_cx, _cw), _items, _st in _col_defs:
+        if not _items:
+            continue
+        sh.notes(_cx, 188.0, _cw, _items,
+                 heading="NOTES :-" if _first else "",
+                 th=TXT_XS, gap=3.1, start=_st)
+        _first = False
 
     sh.title_block(
         client=spec.ident.client, consultant=spec.ident.consultant, road=spec.ident.road,

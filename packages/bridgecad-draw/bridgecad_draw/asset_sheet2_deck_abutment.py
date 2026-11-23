@@ -77,7 +77,7 @@ def _deck_section(sh: Sheet, spec: SlabBridgeSpec,
 
     # ---- callouts ----------------------------------------------------
     panel.leader(0.0, top_mid, 0.0, 6.0, f"CAMBER {spec.camber_pct:.1f} % (CROWN)")
-    panel.leader(-cw * 0.55, slab + wc, 0.0, 8.0, "75 mm WEARING COAT")
+    panel.leader(-cw * 0.55, slab + wc, 0.0, 8.0, f"{spec.wearing_mm:.0f} mm WEARING COAT")
     panel.leader(cw * 0.45, slab * 0.55, 0.0, -8.0,
                  f"R.C.C. SOLID SLAB {spec.deck_slab_mm:.0f} THK")
     panel.leader(-hw + 0.06, -0.36, -14.0, -8.0, "ABUTMENT CAP", align="RIGHT")
@@ -222,7 +222,7 @@ def generate(spec: SlabBridgeSpec = PMGSY_SLAB,
 
     # notes in three columns (EP-P4) — the old two-column split let long
     # wrapped notes overrun into the title block / drawing title area
-    all_notes = list(spec.notes)
+    all_notes = list(spec.full_notes)
     n3 = (len(all_notes) + 2) // 3
     col_defs = [((12.0, 126.0), all_notes[:n3], 1),
                 ((142.0, 126.0), all_notes[n3:2 * n3], n3 + 1),

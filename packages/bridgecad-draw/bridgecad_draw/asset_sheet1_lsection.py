@@ -57,8 +57,17 @@ def _elevation(sh: Sheet, spec: SlabBridgeSpec) -> None:
     panel.poly(prof, layer="CIVIL-GROUND", close=True)
     panel.band(-9.0, spec.found_level - 0.9, L + 9.0, spec.bed_level + 0.35,
                pattern="ANSI37", scale=9.0, layer="FOUND-SOIL")
-    panel.line(-9.0, spec.bed_level, L + 9.0, spec.bed_level, layer="CIVIL-HFL",
+    # Bed-level datum line — CIVIL-BED layer (not CIVIL-HFL; HFL is handled
+    # separately below with an RL label as required by IRC:5 Cl.106.1).
+    panel.line(-9.0, spec.bed_level, L + 9.0, spec.bed_level, layer="CIVIL-BED",
                linetype="DASHED")
+    # HFL line + RL label — IRC:5 Cl.106.1 requires HFL to be clearly shown
+    # and annotated with its RL value on the elevation view.
+    if spec.hfl is not None:
+        panel.line(-9.0, spec.hfl, L + 9.0, spec.hfl, layer="CIVIL-HFL",
+                   linetype="DASHED")
+        sh.level(panel.X(L * 0.08), panel.Y(spec.hfl), spec.hfl,
+                 prefix="H.F.L.", dx=-3.0)
 
     # ---- deck --------------------------------------------------------
     panel.rect(0.0, slab_bot, L, wc_bot - slab_bot, layer="SUPER-DECK")
@@ -150,6 +159,11 @@ def _elevation(sh: Sheet, spec: SlabBridgeSpec) -> None:
     for val, tag in ((wc_top, "F.R.L."), (slab_bot, "SOFFIT"),
                      (spec.bed_level, "BED LVL"), (spec.found_level, "FOUND. LVL")):
         sh.level(panel.X(L * 0.08), panel.Y(val), val, prefix=tag, dx=-3.0)
+    # HFL level tag — only when hfl is known (IRC:5 Cl.106.1).
+    # Placed slightly to the right of the other tags to avoid overlap.
+    if spec.hfl is not None:
+        sh.level(panel.X(L * 0.14), panel.Y(spec.hfl), spec.hfl,
+                 prefix="H.F.L.", dx=-3.0)
 
     # ---- leaders (all relative to the feature) ------------------------
     panel.leader(L * 0.70, wc_top, 0.0, 7.0, f"{spec.wearing_mm:.0f} mm THK R.C.C. WEARING COAT")
@@ -256,6 +270,17 @@ def _schedule(sh: Sheet, spec: SlabBridgeSpec) -> None:
     sh.text(f"SOFFIT (DERIVED) :  FRL \u2212 ({spec.wearing_mm:.0f} WC + "
             f"{spec.deck_slab_mm:.0f} SLAB) = {spec.soffit:.3f} m", x, bot - 9.5, 1.8,
             "TEXT-SPEC")
+    # IRC:6:2017 Cl.219 — seismic zone must be stated on the drawing.
+    sh.text(f"SEISMIC ZONE :- {spec.seismic_zone}  (IRC:6:2017 Cl.219)",
+            x, bot - 14.0, 1.8, "TEXT-SPEC")
+    # IRC:5 Cl.106.1 — freeboard must be stated when HFL is known.
+    if spec.hfl is not None:
+        freeboard = round(spec.soffit - spec.hfl, 3)
+        sh.text(
+            f"FREEBOARD :  SOFFIT {spec.soffit:.3f} \u2212 HFL {spec.hfl:.3f} = "
+            f"{freeboard:.3f} m  (IRC:5 Cl.106.1 min 0.6 m check)",
+            x, bot - 18.5, 1.8, "TEXT-SPEC",
+        )
 
     # legend, to the right of the schedule and clear of the title block
     lx = 118.0

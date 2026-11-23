@@ -74,6 +74,7 @@ class SlabBridgeSpec:
     pier_step_m: float = 0.30
     pier_steps_m: tuple[float, float, float, float] = (9.3, 9.9, 10.5, 11.1)
     hfl: float | None = None  # not scheduled on the source sheet
+    seismic_zone: str = "III"  # IRC:6:2017 Cl.219 — zone for drawing title block; override per project
     notes: tuple[str, ...] = (
         "ALL DIMENSIONS ARE IN mm AND LEVELS IN METRES UNLESS OTHERWISE STATED.",
         "DRAWING IS NOT TO SCALE. DO NOT SCALE THE PRINT.",
@@ -114,8 +115,17 @@ class SlabBridgeSpec:
     def pier_chainages(self) -> list[float]:
         return [i * self.span_m for i in range(1, self.spans)]
 
+    @property
+    def full_notes(self) -> tuple[str, ...]:
+        """Notes block with seismic zone appended (IRC:6:2017 Cl.219)."""
+        seismic_note = (
+            f"SEISMIC ZONE :- {self.seismic_zone}  (IRC:6:2017 Cl.219). "
+            "DESIGN FOR SEISMIC FORCES AS PER IRC:6:2017 Cl.219."
+        )
+        return self.notes + (seismic_note,)
+
     def schedule_rows(self) -> list[list[str]]:
-        return [
+        rows = [
             ["CHAINAGE", self.ident.chainage],
             ["STRUCTURE", "MNB (RCC SOLID SLAB)"],
             ["SPAN", f"{self.spans} x {self.span_m:.1f} m"],
@@ -128,7 +138,15 @@ class SlabBridgeSpec:
             ["B2 (FOOTING STEP)", f"{self.b2:.2f} m"],
             ["B3 (RETURN WALL BASE)", f"{self.b3:.2f} m"],
             ["B4 (DIRT WALL)", f"{self.b4:.2f} m"],
+            # IRC:6:2017 Cl.219 — seismic zone must appear in the schedule
+            ["SEISMIC ZONE", self.seismic_zone],
         ]
+        if self.hfl is not None:
+            # IRC:5 Cl.106.1 — HFL must be recorded in the schedule
+            rows.insert(5, ["HFL", f"{self.hfl:.3f} m"])
+            freeboard = round(self.soffit - self.hfl, 3)
+            rows.insert(6, ["FREEBOARD (SOFFIT - HFL)", f"{freeboard:.3f} m"])
+        return rows
 
 
 @dataclass(frozen=True)

@@ -96,6 +96,19 @@ def _pier_elevation(sh: Sheet, spec: SlabBridgeSpec,
     panel.text(f"FOUND. LVL RL {fl:.3f}", 0.0, fl - 0.22, 1.8, "TEXT-LEVEL", align="CENTER")
     panel.text(f"BED LVL RL {spec.bed_level:.3f}", 0.0, spec.bed_level + 0.08, 1.7,
                "TEXT-LEVEL", align="CENTER")
+    # HFL line + RL label on pier elevation — IRC:5 Cl.106.1 requires HFL to
+    # be annotated with its value on every elevation that shows the waterway.
+    if spec.hfl is not None:
+        panel.line(-steps[-1] / 2.0 - 0.4, spec.hfl, steps[-1] / 2.0 + 0.4, spec.hfl,
+                   layer="CIVIL-HFL", linetype="DASHED")
+        sh.level(panel.X(steps[-1] / 2.0 + 0.5), panel.Y(spec.hfl), spec.hfl,
+                 prefix="H.F.L.", dx=3.0, align="LEFT")
+    # Seismic zone — IRC:6:2017 Cl.219 requires this on every GAD sheet.
+    panel.text(f"SEISMIC ZONE :- {spec.seismic_zone}  (IRC:6:2017 Cl.219)",
+               0.0, frl + 0.70, 1.7, "TEXT-SPEC", align="CENTER")
+    # "TYPICAL PIER" label centred on the pier cap so the view is unambiguous.
+    panel.text(f"TYPICAL PIER (P1 TO P{spec.spans - 1})",
+               0.0, cap_bot - 0.17, 1.8, "TEXT-TITLE", align="CENTER")
     panel.leader(0.0, shaft_top - 0.15, 16.0, -2.0, f"PIER SHAFT {spec.pier_stem_m * 1000:.0f} WIDE")
     panel.leader(0.0, cap_bot - 0.03, 16.0, 2.0, "PIER CAP \u2014 RCC M20")
     panel.caption_below("Pier Elevation", f"TYPICAL FOR PIERS P1 TO P{spec.spans - 1}")
@@ -230,6 +243,14 @@ def generate(spec: SlabBridgeSpec = PMGSY_SLAB,
         "ENVELOPES ARE CONCENTRIC ABOUT BOTH AXES.",
         "CUTWATER NOSE ON THE U/S FACE OF THE SHAFT.",
         f"FOUNDING LEVEL RL {spec.found_level:.3f} m.",
+        # IRC:5 Cl.106.1 — freeboard must be stated when HFL is known.
+        *(
+            [f"FREEBOARD = SOFFIT {spec.soffit:.3f} \u2212 HFL {spec.hfl:.3f} = "
+             f"{round(spec.soffit - spec.hfl, 3):.3f} m  (IRC:5 Cl.106.1 min 0.6 m check)"]
+            if spec.hfl is not None else []
+        ),
+        # IRC:6:2017 Cl.219 — seismic zone must appear on every GAD sheet.
+        f"SEISMIC ZONE :- {spec.seismic_zone}  (IRC:6:2017 Cl.219).",
     ], heading="PIER NOTES :-", th=TXT_XS, gap=3.4)
     sh.text("DETAILS GENERATED FROM SPEC \u2014 NOT REPRODUCED FROM ANY SOURCE SHEET",
             296.0, 120.0, 1.5, "TEXT-SPEC")

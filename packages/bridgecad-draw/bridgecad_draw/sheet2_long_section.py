@@ -193,9 +193,12 @@ def _draw_long_section(
     _skew_cos = _math.cos(_math.radians(_skew_deg)) if _skew_deg else 1.0
 
     def _span_label(i: int, slen: float) -> str:
+        length = f"{slen:.3f}".rstrip("0")
+        if length.endswith("."):
+            length += "0"
         if _skew_deg < 0.5:
-            return f"{slen:.1f} m"
-        return f"{slen:.1f} m (eff {slen * _skew_cos:.1f})"
+            return f"{length} m"
+        return f"{length} m (eff {slen * _skew_cos:.1f})"
 
     hfl_rl = ls.hfl_rl
     lwl_rl = ls.lwl_rl
@@ -203,6 +206,12 @@ def _draw_long_section(
     soffit_rl = ls.soffit_rl
     top_rl = ls.top_of_deck_rl
     pile_tip_rl = ls.pile_tip_rl
+    pile_cutoff = fd.pile_cutoff_level_m if has_piles else None
+    draw_piles = (
+        pile_cutoff is not None
+        and math.isfinite(float(pile_cutoff))
+        and pile_tip_rl < float(pile_cutoff) < soffit_rl
+    )
 
     # The vertical fit must cover everything the sheet actually draws, not just
     # the hydraulic RLs: the pier shafts run down to the canonical record's
@@ -221,9 +230,13 @@ def _draw_long_section(
         else hfl_rl - float(sub.pier_height_typical_m or 8.0)
     )
     abt_base_rl = soffit_rl - float(sub.abutment_height_m or 3.2)
-    rl_low = min(pile_tip_rl, scour_rl, pier_base_rl, abt_base_rl)
-    datum_rl = rl_low - 2.0  # baseline datum
-    rl_range = max(top_rl + 2.0, hfl_rl + 3.0) - datum_rl
+    ground_levels = [rl for _, rl in ls.ground_profile_pts]
+    rl_low = min(scour_rl, lwl_rl, pier_base_rl, abt_base_rl, *ground_levels)
+    if draw_piles:
+        rl_low = min(rl_low, pile_tip_rl)
+    datum_rl = rl_low - 2.0
+    rl_range = max(top_rl + 2.0, hfl_rl + 3.0, lwl_rl + 2.0,
+                   *(rl + 2.0 for rl in ground_levels)) - datum_rl
 
     # The wearing coat and both approach slabs run a full approach-slab length
     # past each deck end, so the horizontal fit must span them or they plot off
@@ -258,6 +271,7 @@ def _draw_long_section(
     # already folded into `sc_v`, so the section drew flat under an exaggerated
     # caption. `v_exag=1.0` is an un-exaggerated fitted section.
     sc_v = (draw_h / max(rl_range, 0.1)) * v_exag
+    v_denom = f"{1000.0 / sc_v:.3f}".rstrip("0").rstrip(".")
     v_eff = sc_v / sc_h  # the *real* vertical exaggeration, for the caption
 
     CoordMapper(
@@ -299,7 +313,7 @@ def _draw_long_section(
         approved_by=getattr(pm, "approved_by", "") or "",
         client=getattr(getattr(pm, "client", None), "name", "") or "",
         consultant=getattr(getattr(pm, "consultant", None), "name", "") or "",
-        scale_str=f"{fit.scale_str} H   1:{round(1000.0 / sc_v)} V  (V.E.={v_eff:.2f}x)",
+        scale_str=f"{fit.scale_str} H   1:{v_denom} V  (V.E.={v_eff:.2f}x)",
         sheet_no="2",
         total_sheets="9",
     )
@@ -383,12 +397,12 @@ def _draw_long_section(
 
     # Level scale graduations every 1m RL
     rl_step = 1.0
-    rl_bot = max(pile_tip_rl - 1.0, datum_rl)
+    rl_bot = max(pile_tip_rl - 1.0, datum_rl) if draw_piles else datum_rl
     # The graduations must stop where the modelled extent stops, or the top tick
     # plots above the frame (a culvert with a low HFL left `rl_range` at
     # `top_rl + 2` while this loop ran to `top_rl + 2.5` → +2 mm over the top).
     rl_top = min(top_rl + 2.5, datum_rl + rl_range)
-    rl_val = math.floor(rl_bot)
+    rl_val = math.ceil(rl_bot)
     while rl_val <= rl_top:
         yy = vy(rl_val)
         tick_len = th * 2 if rl_val % 5 == 0 else th * 1.0
@@ -523,6 +537,15 @@ def _draw_long_section(
         )
         for jx in (0.0, total_len):  # break the slab at each joint — never the coat
             line(msp, (hx(jx), sof_y_mm), (hx(jx), slab_top_y), layer="SUPER-DECK", lw=25)
+
+        # Break marks indicate separate T-beam spans, not expansion-joint gaps.
+        if (
+            ss.type == T.SuperstructureType.RCC_TBEAM
+            and project.bridge_selection.span_configuration == T.SpanConfiguration.SIMPLY_SUPPORTED
+        ):
+            for station in ls.pier_chainage_m:
+                line(msp, (hx(station), sof_y_mm), (hx(station), slab_top_y),
+                     layer="SUPER-DECK", lw=25)
 
     level_tag(msp, draw_x0 - 2.0, sof_y_mm, soffit_rl, text_height=th * 0.85)
     level_tag(msp, draw_x0 - 2.0, top_y_mm, top_rl, text_height=th * 0.85)
@@ -1141,10 +1164,10 @@ def _draw_long_section(
     # ── Piles / foundations ───────────────────────────────────────────────
     # Presence gate (SS3 §A4): only a PILE foundation has piles. A raft or an
     # open footing previously inherited a pile group under every support.
-    if has_piles:
+    if draw_piles:
         pile_dia_mm = float(fd.pile_diameter_mm or 1200) / 1000.0 * sc_h
         pile_tip_y = vy(pile_tip_rl)
-        pile_cut_y = vy(float(fd.pile_cutoff_level_m or scour_rl) - 1.0)
+        pile_cut_y = vy(float(pile_cutoff))
 
         piles_per_pier = int(fd.piles_per_pier or 4)
         cols = max(1, round(piles_per_pier**0.5))
@@ -1172,6 +1195,12 @@ def _draw_long_section(
             pile_tip_y,
             height=th * 0.85,
             layer="TEXT-GENERAL",
+        )
+
+    elif has_piles:
+        text(
+            msp, "PILE DETAIL OMITTED: CUTOFF/TIP LEVELS UNRESOLVED OR CONFLICTING",
+            draw_x0 + 5.0, draw_y0 + 5.0, height=th, layer="TEXT-SPEC",
         )
 
     # ── Freeboard annotation ──────────────────────────────────────────────
@@ -1207,7 +1236,7 @@ def _draw_long_section(
     # caption typed a constant ("1:100 V, V.E.=2×") beside a fitted view.
     text(
         msp,
-        f"H Scale {fit.scale_str}   V Scale 1:{round(1000.0 / sc_v)}  (V.E.={v_eff:.2f}x)",
+        f"H Scale {fit.scale_str}   V Scale 1:{v_denom}  (V.E.={v_eff:.2f}x)",
         draw_x0 + draw_w / 2,
         vy(top_rl) + sy(1.0) - _lbl_shift,
         height=th * 0.9,
@@ -1237,9 +1266,9 @@ def _draw_long_section(
     abt_levels = [
         (f"ABUT={float(stack.cap_top) - float(stack.app_bot):.3f}m", float(stack.app_bot)),
     ]
-    if has_piles:
+    if draw_piles:
         abt_levels.append(
-            (f"PILE={pile_tip_rl - float(fd.pile_cutoff_level_m or scour_rl):.3f}m", pile_tip_rl)
+            (f"PILE={float(pile_cutoff) - pile_tip_rl:.3f}m", pile_tip_rl)
         )
     staffs = (
         (draw_x0 + draw_w * 0.97, (

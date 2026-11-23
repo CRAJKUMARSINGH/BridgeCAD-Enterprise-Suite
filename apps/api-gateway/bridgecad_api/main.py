@@ -23,7 +23,7 @@ from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import Response, FileResponse, HTMLResponse
 from pydantic import BaseModel
 
 from bridgecad_api.problems import enforce_upload_limits, install_problem_handlers
@@ -257,6 +257,29 @@ async def draw_gad(
         raise HTTPException(500, detail=f"drawing package incomplete: {exc}") from exc
     except Exception as exc:
         raise HTTPException(500, detail=str(exc)) from exc
+
+
+@draw_router.post("/ga", summary="Download a one-sheet A1 general arrangement PDF")
+async def draw_ga(excel_file: UploadFile = File(...), scale: int | None = None):
+    from starlette.concurrency import run_in_threadpool
+    from bridgecad_draw.engines.ga_sheet import GALayoutError, generate_ga_pdf
+
+    scale = _validate_scale(scale)
+    data = await enforce_upload_limits(excel_file)
+
+    def export() -> bytes:
+        project = _load_project_from_upload(data)
+        with tempfile.TemporaryDirectory() as folder:
+            return generate_ga_pdf(project, Path(folder) / "GA-01.pdf", scale).read_bytes()
+
+    try:
+        pdf = await run_in_threadpool(export)
+    except (GALayoutError, ValueError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return Response(
+        content=pdf, media_type="application/pdf",
+        headers={"Content-Disposition": 'attachment; filename="GA-01-A1.pdf"'},
+    )
 
 
 @draw_router.post("/preview/{sheet}", summary="Render one sheet to SVG preview")

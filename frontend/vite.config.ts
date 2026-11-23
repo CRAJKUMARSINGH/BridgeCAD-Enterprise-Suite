@@ -46,6 +46,13 @@ export default defineConfig(({ mode }) => {
   server: {
     port: 5173,
     proxy: {
+      "/api/predict": {
+        target: "http://localhost:3000",
+        rewrite: (url) => {
+          const query = new URL(url, "http://localhost").searchParams;
+          return query.get("output_format") === "ga_pdf" ? `/draw/ga?${query}` : url;
+        },
+      },
       "/api": "http://localhost:3000",
     },
     // Vite serves source modules as `Cache-Control: no-cache`, so the browser

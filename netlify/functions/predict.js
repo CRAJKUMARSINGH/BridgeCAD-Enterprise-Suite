@@ -9,7 +9,9 @@ exports.handler = async (event) => {
   }
 
   try {
-    const upstream = await fetch(`${fastApiUrl.replace(/\/$/, "")}/predict${event.rawQuery ? `?${event.rawQuery}` : ""}`, {
+    const query = new URLSearchParams(event.rawQuery || "");
+    const endpoint = query.get("output_format") === "ga_pdf" ? "/draw/ga" : "/predict";
+    const upstream = await fetch(`${fastApiUrl.replace(/\/$/, "")}${endpoint}${event.rawQuery ? `?${event.rawQuery}` : ""}`, {
       method: event.httpMethod,
       headers: { "content-type": event.headers["content-type"] || event.headers["Content-Type"] || "" },
       body: event.body ? Buffer.from(event.body, event.isBase64Encoded ? "base64" : "utf8") : undefined,

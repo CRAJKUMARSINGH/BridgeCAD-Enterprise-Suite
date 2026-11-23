@@ -198,3 +198,63 @@ def test_box_cell_superstructure_draws_no_piers(tmp_path):
     doc = ezdxf.readfile(str(out))
     layers = {e.dxf.layer for e in doc.modelspace()}
     assert "SUB-PIER" not in layers
+
+
+@pytest.mark.parametrize("valid_cutoff", [False, True])
+def test_pile_cutoff_geometry_uses_declared_level(tmp_path, valid_cutoff):
+    from decimal import Decimal
+
+    project = contract._build_from_fixture(
+        contract._fixture_data("tests/e2e/fixtures/gad_3x18m_skew15.json")
+    )
+    project.hydraulic_data.actual_soffit_level_m = Decimal("103.8")
+    project.project_master.road_level_rl_m = Decimal("105.85")
+    project.foundation_details.pile_cutoff_level_m = Decimal(
+        "95.0" if valid_cutoff else "110.5"
+    )
+    out = tmp_path / "checked-cutoff.dxf"
+    S2.generate(project, out)
+    doc = ezdxf.readfile(out)
+    piles = list(doc.modelspace().query('LINE[layer=="FOUND-PILE"]'))
+    if not valid_cutoff:
+        assert not piles
+        assert any("PILE DETAIL OMITTED" in t for t in _texts(doc))
+        return
+
+    import re
+    denom = float(re.search(r"V Scale 1:([\d.]+)", _caption(doc)).group(1))
+    assert piles
+    for e in piles:
+        y1, y2 = e.dxf.start.y, e.dxf.end.y
+        assert y1 > y2
+        assert (y1-y2) * denom / 1000 == pytest.approx(
+            float(project.foundation_details.pile_length_m), abs=.002
+        )
+
+
+def test_tbeam_span_labels_and_breaks_follow_articulation(tmp_path):
+    from decimal import Decimal
+    from bridgecad_core.types import SpanConfiguration
+
+    project = contract._build_from_fixture(
+        contract._fixture_data("tests/e2e/fixtures/gad_3x18m_skew15.json")
+    )
+    project.geometry_input.span_lengths_m = [Decimal("18.75")] * 3
+    project.geometry_input.skew_angle_deg = Decimal(0)
+    for mode, expected in (
+        (SpanConfiguration.SIMPLY_SUPPORTED, [18.75, 37.5]),
+        (SpanConfiguration.CONTINUOUS, []),
+    ):
+        project.bridge_selection.span_configuration = mode
+        out = tmp_path / f"{mode.name}.dxf"
+        S2.generate(project, out, scale_denom=100)
+        doc = ezdxf.readfile(out)
+        assert _texts(doc).count("18.75 m") == 3
+        top = max(_deck_slab_lines(doc), key=lambda line: line.dxf.start.y)
+        x0, x1 = top.dxf.start.x, top.dxf.end.x
+        stations = sorted(
+            (e.dxf.start.x - x0) / 10
+            for e in doc.modelspace().query('LINE[layer=="SUPER-DECK"]')
+            if e.dxf.start.x == e.dxf.end.x and x0 < e.dxf.start.x < x1
+        )
+        assert stations == pytest.approx(expected)

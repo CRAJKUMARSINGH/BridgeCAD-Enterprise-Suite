@@ -15,7 +15,7 @@ import { buildBoq, formatINR } from "./sheets/boq";
 
 type BackendState = "checking" | "online" | "demo" | "offline";
 type DockTab = "geometry" | "variants" | "checks" | "boq" | "export";
-type OutputFormat = "dxf" | "pdf" | "png";
+type OutputFormat = "dxf" | "pdf" | "png" | "ga_pdf";
 // B03 — one job-scoped artifact: the object URL, its download name and the job
 // that produced it, so a failed run B can never be presented as run A's output.
 type Artifact = { format: OutputFormat; url: string; filename: string; jobId: string };
@@ -60,11 +60,12 @@ const NAV: Array<{ id: DockTab; label: string; icon: string }> = [
 // selection is passed straight through as ?output_format=.
 const OUTPUT_FORMATS: Array<{ id: OutputFormat; label: string; note: string }> = [
   { id: "dxf", label: "DXF", note: "Full 9-sheet CAD package — open in AutoCAD, BricsCAD or LibreCAD." },
-  { id: "pdf", label: "PDF", note: "Issued set, converted from the DXF river-side by the Python engine." },
+  { id: "pdf", label: "PDF", note: "Multi-sheet drawing booklet." },
+  { id: "ga_pdf", label: "A1 GAD PDF", note: "One review sheet with plan, elevation and section. Straight, level, zero-skew solid slab, RCC T-beam or PSC I-girder." },
   { id: "png", label: "PNG", note: "Raster preview for checking geometry without a CAD viewer." },
 ];
 
-// IRC SP:55 rungs. "Auto" lets the ladder pick the largest rung that keeps
+// BridgeCAD plot-scale rungs. "Auto" lets the ladder pick the largest rung that keeps
 // text ≥ 2.5 mm and annotation gaps ≥ 8 mm per pier.
 const PLOT_SCALES: Array<{ id: string; label: string }> = [
   { id: "auto", label: "Auto" },
@@ -237,7 +238,7 @@ function App() {
     formData.append("excel_file", selectedFile);
     const query = new URLSearchParams({ output_format: outputFormat });
     // Only pin a scale when the engineer overrides Auto; the Python generator
-    // resolves the IRC SP:55 ladder itself when the parameter is absent.
+    // resolves the BridgeCAD scale ladder itself when the parameter is absent.
     if (plotScale !== "auto") query.set("scale", plotScale);
     try {
       const response = await fetch(`/api/predict?${query.toString()}`, {
@@ -252,7 +253,7 @@ function App() {
         throw new Error(`HTTP ${response.status}${serverMessage ? ` · ${serverMessage.slice(0, 160)}` : ""}`);
       }
       const blob = await response.blob();
-      if (outputFormat === "pdf" && blob.type.split(";")[0] !== "application/pdf") {
+      if ((outputFormat === "pdf" || outputFormat === "ga_pdf") && blob.type.split(";")[0] !== "application/pdf") {
         throw new Error("The server did not return a PDF");
       }
       const url = URL.createObjectURL(blob);
@@ -262,11 +263,11 @@ function App() {
         current.filter((entry) => entry.format === outputFormat).forEach((entry) => URL.revokeObjectURL(entry.url));
         return [
           ...current.filter((entry) => entry.format !== outputFormat),
-          { format: outputFormat, url, filename: `${project.number}.${outputFormat}`, jobId },
+          { format: outputFormat, url, filename: outputFormat === "ga_pdf" ? `${project.number}-GA-01-A1.pdf` : `${project.number}.${outputFormat}`, jobId },
         ];
       });
       setBackend("online");
-      const scaleLabel = plotScale === "auto" ? "Auto (IRC SP:55 ladder)" : `1:${plotScale}`;
+      const scaleLabel = plotScale === "auto" ? "Auto" : `1:${plotScale}`;
       setNotice(`${outputFormat.toUpperCase()} generated at plot scale ${scaleLabel} (job ${jobId.slice(-6)}). Download it from the export panel.`);
     } catch (error) {
       if ((error as { name?: string })?.name === "AbortError") return;
@@ -713,7 +714,7 @@ function App() {
                         download={artifact.filename}
                         title={`Job ${artifact.jobId}`}
                       >
-                        Download {artifact.format.toUpperCase()}
+                        Download {artifact.format === "ga_pdf" ? "A1 GAD PDF" : artifact.format.toUpperCase()}
                       </a>
                     ))}
                     {generated.length === 0 && (

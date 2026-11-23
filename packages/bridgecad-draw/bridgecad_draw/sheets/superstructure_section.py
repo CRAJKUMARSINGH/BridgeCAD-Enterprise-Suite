@@ -199,4 +199,6 @@ def render(cv: Any, prims: SectionPrimitives) -> None:
         with cv.on(l.layer):
             cv.text(l.text, l.x, l.y)
     if prims.notes:
-        cv.notes_block(prims.notes)
+        xs = [r.x for r in prims.rects] + [l.x for l in prims.labels]
+        ys = [r.y for r in prims.rects]
+        cv.note(prims.notes, min(xs) if xs else 0.0, (min(ys) if ys else 0.0) - 240.0)

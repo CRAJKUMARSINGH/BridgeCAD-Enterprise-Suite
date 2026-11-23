@@ -12,6 +12,12 @@ from __future__ import annotations
 
 from bridgecad_draw.primitives import circle as _circle
 from bridgecad_draw.sheets._common import Canvas, field
+from bridgecad_draw.sheets.superstructure_section import (
+    SectionPrimitives,
+    SectionSpec,
+    render,
+    section_primitives,
+)
 
 SHEET = "sheet3_cross_section"
 TITLE = "S3 Typical Cross Section"
@@ -361,19 +367,27 @@ def build(project):
         )
 
     # ── girders under the slab ─────────────────────────────────────────────
-    # Centres are spread evenly across the deck rather than stepped at the
-    # model's spacing from the left kerb: an evenly spread set always lands
-    # inside the deck, so the count drawn matches the count annotated.
+    # Type-aware (audit R1/R2): a solid slab, a box cell or an undeclared type
+    # draws no girders at all, and girder types step at the MODELLED spacing
+    # rather than an even spread.  The deck slab and wearing coat are already
+    # drawn above, so only the girder webs the model declares are rendered.
     count = max(n_girders, 1)
-    depth = y_wear - y_girder_bot
-    with cv.on("SUPER-GIRDER"):
-        for i in range(count):
-            gx = x0 + total * (i + 0.5) / count
-            cv.rect(gx, y_girder_bot, cv.mm(0.3), depth)
-    with cv.on("HTCH"):
-        for i in range(count):
-            gx = x0 + total * (i + 0.5) / count
-            cv.hatch(gx, y_girder_bot, cv.mm(0.3), depth, pattern="ANSI31", scale=cv.height * 0.35)
+    prims = section_primitives(
+        SectionSpec(
+            bridge_type=str(getattr(ss.type, "value", ss.type)),
+            deck_t_mm=deck_t_mm,
+            wear_t_mm=wear_t_mm,
+            girder_d_mm=girder_d_mm,
+            girder_spacing_m=spacing_m,
+            girders_per_deck=count,
+        ),
+        x0,
+        x1,
+        y_deck_top,
+        y_wear,
+        y_girder_bot,
+    )
+    render(cv, SectionPrimitives(rects=[r for r in prims.rects if r.layer == "SUPER-GIRDER"]))
 
     # ── cross-fall arrows, one per half ────────────────────────────────────
     with cv.on("DIM-SLOPE"):

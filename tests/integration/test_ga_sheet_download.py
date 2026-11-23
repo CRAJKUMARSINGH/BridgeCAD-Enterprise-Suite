@@ -100,6 +100,7 @@ def test_ga_pdf_download_and_reject_conflicting_soffit(tmp_path, family, girder_
                                if abs(paper((f.x0 + f.x1 - r.x0 - r.x1) / 2)) < .01
                                and abs(paper(f.y0) - slab_bottom) < .01]
                 assert len(top_flanges) == 1
+                assert paper(top_flanges[0].width) * section_scale == pytest.approx(500, abs=.2)
                 if girder_type == "I_GIRDER_PSC":
                     assert r.width == pytest.approx(top_flanges[0].width, abs=.01)
                 else:
@@ -109,3 +110,10 @@ def test_ga_pdf_download_and_reject_conflicting_soffit(tmp_path, family, girder_
     rejected = upload()
     assert rejected.status_code == 422
     assert "reconcile" in rejected.text
+
+    if depth:
+        project.hydraulic_data.actual_soffit_level_m += Decimal("0.3")
+        project.superstructure.girder_spacing_m = Decimal("1.6")
+        rejected = upload()
+        assert rejected.status_code == 422
+        assert "Girder centres must fit" in rejected.text

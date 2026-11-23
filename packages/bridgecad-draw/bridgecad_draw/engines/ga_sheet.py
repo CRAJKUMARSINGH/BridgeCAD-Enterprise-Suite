@@ -55,7 +55,8 @@ def generate_ga_pdf(project, output_pdf: str | Path, scale_denom: int | None = N
         raise GALayoutError("Road, surfacing and structural depth must reconcile with the supplied soffit RL.")
     count = 0 if is_slab else int(s.girders_per_deck_count or 0)
     spacing = 0.0 if is_slab else float(s.girder_spacing_m or 0)
-    if not is_slab and (count < 1 or spacing <= 0 or (count - 1) * spacing >= width):
+    if not is_slab and (count < 1 or not isfinite(spacing) or spacing <= 0
+                        or (count - 1) * spacing >= width):
         raise GALayoutError("Girder centres must fit within the declared overall deck width.")
     girder_axes = [width / 2 + (i - (count - 1) / 2) * spacing for i in range(count)]
     if not spans or min(spans) <= 0 or not scour < lwl <= hfl:
@@ -132,6 +133,8 @@ def generate_ga_pdf(project, output_pdf: str | Path, scale_denom: int | None = N
     tx(681,457,f"{width:.2f} m overall",3.6,bold=True)
     tx(681,446,"Zero skew assumed",3.2)
     tx(681,435,"Support axes shown" if is_slab else "Dashed girder axes",3.2)
+    if girder_axes:
+        tx(681,425,f"{count} girders at {spacing:.2f} m c/c",3.2)
 
     ln(21,337,819,337)
     tx(21,324,f"02  LONGITUDINAL ELEVATION  /  H 1:{ga_denom}  |  V 1:{ga_denom}",4,accent,bold=True)
@@ -168,23 +171,24 @@ def generate_ga_pdf(project, output_pdf: str | Path, scale_denom: int | None = N
     by=103
     box(bx,by-slab*u,width*u,slab*u,light)
     ln(bx+clear0*u,by+wear*u,bx+(clear0+cw)*u,by+wear*u,accent,.45)
-    # Symbol widths are deliberately schematic. Count, centres and depths
-    # are derived from the same model used for the framing axes in plan.
-    for i, axis in enumerate(girder_axes, start=1):
-        x = bx + axis*u
-        top = by-slab*u
-        bottom = top-depth*u
-        flange_depth = min(4.0, (top-bottom)/4)
-        flange_half = min(6.0, spacing*u/4, axis*u, (width-axis)*u)
-        web_half = min(2.0, flange_half/2)
-        if is_psc_i:
-            box(x-flange_half, bottom, 2*flange_half, flange_depth, light)
-            web_bottom = bottom + flange_depth
-        else:
-            web_bottom = bottom
-        box(x-web_half, web_bottom, 2*web_half, top-flange_depth-web_bottom, light)
-        box(x-flange_half, top-flange_depth, 2*flange_half, flange_depth, light)
-        tx(x,bottom-5,str(i),2.3,center=True)
+    if girder_axes:
+        # Draw review symbols in model units and apply the section scale once.
+        # No flange, haunch or web dimension here is a design input.
+        edge_clearance = min(girder_axes[0], width - girder_axes[-1])
+        flange_width = min(0.50, spacing / 2, 2 * edge_clearance)
+        web_width = min(0.20, flange_width / 2)
+        flange_depth = min(0.15, depth / 4)
+        top = by - slab * u
+        bottom = top - depth * u
+        for i, axis in enumerate(girder_axes, start=1):
+            x = bx + axis * u
+            web_base = bottom
+            if is_psc_i:
+                box(x - flange_width*u/2, bottom, flange_width*u, flange_depth*u, light)
+                web_base += flange_depth * u
+            box(x - web_width*u/2, web_base, web_width*u, top - flange_depth*u - web_base, light)
+            box(x - flange_width*u/2, top - flange_depth*u, flange_width*u, flange_depth*u, light)
+            tx(x, bottom - 5, str(i), 2.3, center=True)
     hd(bx,112,bx+width*u,f"{width:.2f} m overall")
     if is_slab:
         tx(bx,23,f"Solid slab thickness {slab*1000:g} mm",3)

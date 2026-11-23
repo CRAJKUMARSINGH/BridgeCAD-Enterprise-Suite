@@ -1,0 +1,61 @@
+# Render.com one-click deploy — BridgeCAD Enterprise API Gateway
+# ----------------------------------------------------------------
+# 1. Push this file to GitHub (already tracked).
+# 2. Go to https://dashboard.render.com → New → Blueprint.
+# 3. Connect your GitHub repo. Render detects this file automatically.
+# 4. Click "Apply". The service builds and starts at a *.onrender.com URL.
+# 5. Copy that URL into your Netlify production env:
+#      FASTAPI_URL = https://<your-service>.onrender.com
+#    (Netlify → Site settings → Environment variables → Production)
+# 6. Trigger a Netlify redeploy.  /api/health will return mode:live.
+#
+# Free-tier note: Render free web services sleep after 15 min idle.
+# Upgrade to Starter ($7/mo) for always-on.  The /health endpoint
+# can be pinged by UptimeRobot to prevent cold-start gaps for free.
+
+services:
+  - type: web
+    name: bridgecad-api
+    runtime: python
+    region: singapore           # closest to India — change to frankfurt if preferred
+    plan: free                  # upgrade to starter for always-on
+    pythonVersion: "3.11"
+
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -e packages/bridgecad-core \
+                  -e packages/bridgecad-draw \
+                  -e packages/bridgecad-io \
+                  -e packages/bridgecad-bill \
+                  -e packages/bridgecad-qa \
+                  -e packages/bridgecad-export \
+                  -e packages/bridgecad-infra \
+                  -e apps/api-gateway
+
+    startCommand: >
+      uvicorn bridgecad_api.main:app
+      --host 0.0.0.0
+      --port $PORT
+      --workers 2
+      --log-level info
+
+    envVars:
+      - key: PYTHONPATH
+        value: .
+      - key: ENV
+        value: production
+      - key: API_CORS_ORIGINS
+        value: https://bridge-gad.netlify.app
+      - key: LOG_LEVEL
+        value: INFO
+      # Set these in the Render dashboard (not here) — keep secrets out of git:
+      #   APP_SECRET_KEY  — 64 random hex chars
+      #   BRIDGECAD_API_KEYS  — e.g.  prod-key-abc123:admin
+      - key: APP_SECRET_KEY
+        generateValue: true     # Render generates a random value at deploy time
+      - key: BRIDGECAD_API_KEYS
+        value: render-auto-key:admin   # replace via dashboard before prod use
+
+    healthCheckPath: /health
+
+    autoDeploy: true            # redeploy on every push to main

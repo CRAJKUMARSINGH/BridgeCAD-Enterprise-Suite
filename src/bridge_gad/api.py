@@ -126,11 +126,26 @@ async def root():
     }
 
 
+def _generate_gad_pdf(data: bytes, scale: int | None) -> bytes:
+    from bridgecad_draw.booklet import generate_package
+    from bridgecad_draw.engines.pdf_engine import generate_pdf_booklet
+    from bridgecad_io.excel_reader import read_excel
+
+    with tempfile.TemporaryDirectory() as td:
+        folder = Path(td)
+        workbook = folder / "input.xlsx"
+        workbook.write_bytes(data)
+        project = read_excel(workbook)
+        sheets = generate_package(project, folder / "dxf", scale_denom=scale)
+        return generate_pdf_booklet(sheets, folder / "bridge_gad.pdf").read_bytes()
+
+
 @app.post("/predict")
 async def predict(
     excel_file: UploadFile = File(...),
     config_file: Optional[UploadFile] = None,
     output_format: str = "dxf",
+    scale: int | None = None,
 ):
     """Synchronous generation — blocks until the drawing is ready.
     For large files prefer POST /jobs (async).
@@ -141,6 +156,24 @@ async def predict(
     exits, then returning Response(content=bytes).  This keeps the fix minimal and
     avoids any change to generate_bridge_drawing().
     """
+    fmt = output_format.lower()
+    if fmt == "pdf" and config_file is None:
+        if scale is not None and scale <= 0:
+            raise HTTPException(status_code=422, detail="Plot scale must be positive")
+        try:
+            from starlette.concurrency import run_in_threadpool
+
+            data = await excel_file.read()
+            pdf_bytes = await run_in_threadpool(_generate_gad_pdf, data, scale)
+        except Exception as exc:
+            logger.exception("GAD PDF generation failed")
+            raise HTTPException(status_code=500, detail="GAD PDF generation failed") from exc
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": 'attachment; filename="bridge_gad.pdf"'},
+        )
+
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir)
 
@@ -183,9 +216,10 @@ async def predict(
                     if converted_path.exists():
                         result_path = converted_path
                     else:
-                        # Conversion produced nothing — return DXF instead
-                        fmt = "dxf"
+                        raise RuntimeError("Conversion produced no file")
                 except Exception as conv_exc:
+                    if fmt == "pdf":
+                        raise HTTPException(status_code=500, detail="PDF conversion failed") from conv_exc
                     logger.warning("Format conversion failed (%s) — returning DXF", conv_exc)
                     fmt = "dxf"
 

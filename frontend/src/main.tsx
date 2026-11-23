@@ -252,6 +252,9 @@ function App() {
         throw new Error(`HTTP ${response.status}${serverMessage ? ` · ${serverMessage.slice(0, 160)}` : ""}`);
       }
       const blob = await response.blob();
+      if (outputFormat === "pdf" && blob.type.split(";")[0] !== "application/pdf") {
+        throw new Error("The server did not return a PDF");
+      }
       const url = URL.createObjectURL(blob);
       setGenerated((current) => {
         // Supersede any earlier artifact of the same format so the object URL

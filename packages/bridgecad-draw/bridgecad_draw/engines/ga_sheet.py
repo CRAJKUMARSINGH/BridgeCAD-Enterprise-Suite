@@ -3,7 +3,8 @@ from itertools import accumulate
 from math import isfinite
 from pathlib import Path
 
-from bridgecad_core.types import SpanConfiguration, SuperstructureType
+from bridgecad_core.geometry.abutment_profiles import elevation_outline, family_for
+from bridgecad_core.types import AbutmentType, SpanConfiguration, SuperstructureType
 
 from ..fit import LADDER
 
@@ -12,7 +13,10 @@ class GALayoutError(ValueError):
     """The project cannot be represented by this GA layout."""
 
 
-def generate_ga_pdf(project, output_pdf: str | Path, scale_denom: int | None = None) -> Path:
+def generate_ga_pdf(
+    project, output_pdf: str | Path, scale_denom: int | None = None,
+    *, abutment_type: AbutmentType | None = None,
+) -> Path:
     from reportlab.lib.colors import HexColor
     from reportlab.lib.units import mm
     from reportlab.pdfgen.canvas import Canvas
@@ -68,6 +72,21 @@ def generate_ga_pdf(project, output_pdf: str | Path, scale_denom: int | None = N
     show_ground = ground is not None and scour <= float(ground) < soffit
     ground_rl = float(ground) if show_ground else None
 
+    sub = project.substructure
+    selected_abutment = abutment_type or sub.abutment_type
+    abutment_labels = {
+        AbutmentType.CANTILEVER: "Cantilever",
+        AbutmentType.GRAVITY: "Gravity",
+        AbutmentType.FULL_HEIGHT_WALL: "Full-height wall",
+    }
+    if selected_abutment not in abutment_labels:
+        raise GALayoutError("A1 GA supports Cantilever, Gravity and Full-height wall abutments.")
+    abutment_label = abutment_labels[selected_abutment]
+    abutment_width = float(sub.abutment_width_m or 1.5)
+    abutment_length = float(sub.abutment_length_m or width)
+    abutment_base = soffit - float(sub.abutment_height_m or 2)
+    vertical_base = min(scour, abutment_base)
+
     def pick_scale(candidates, extents):
         for denom in candidates:
             if denom > 0 and all(m * 1000 / denom <= limit for m, limit in extents):
@@ -75,7 +94,9 @@ def generate_ga_pdf(project, output_pdf: str | Path, scale_denom: int | None = N
         raise GALayoutError("The bridge does not fit GA-01 at the requested plot scale. Use Auto or a smaller drawing scale.")
 
     ga_denom = pick_scale((scale_denom,) if scale_denom is not None else LADDER,
-                         ((stations[-1], 565), (width, 127), (max(road, hfl)-scour, 137)))
+                         ((stations[-1], 565), (abutment_width / 2, 14),
+                          (max(width, abutment_length), 127),
+                          (max(road, hfl) - vertical_base, 137)))
     section_denom = pick_scale(LADDER, ((width, 420), (slab + depth, 68)))
 
     ink, accent, water, light = map(HexColor,("#152638","#004e64","#1872aa","#e6edf1"))
@@ -114,6 +135,10 @@ def generate_ga_pdf(project, output_pdf: str | Path, scale_denom: int | None = N
     tx(21,521,f"01  PLAN  /  1:{ga_denom}",4,accent,bold=True)
     py=374
     box(x0,py,x1-x0,width*sx,light)
+    abutment_ink = HexColor("#c4d6df")
+    for station in (stations[0], stations[-1]):
+        box(X(station) - abutment_width*sx/2, py + (width-abutment_length)*sx/2,
+            abutment_width*sx, abutment_length*sx, abutment_ink)
     edges=[clear0, clear0+cw]
     for e in edges:ln(x0,py+e*sx,x1,py+e*sx)
     c.setDash(3*mm,2*mm);ln(x0,py+width*sx/2,x1,py+width*sx/2,accent);c.setDash()
@@ -138,9 +163,11 @@ def generate_ga_pdf(project, output_pdf: str | Path, scale_denom: int | None = N
 
     ln(21,337,819,337)
     tx(21,324,f"02  LONGITUDINAL ELEVATION  /  H 1:{ga_denom}  |  V 1:{ga_denom}",4,accent,bold=True)
-    elevation_height = (max(road, hfl) - scour) * sx
+    tx(681,410,f"A1 / A2: {abutment_label}",3.2,bold=True)
+
+    elevation_height = (max(road, hfl) - vertical_base) * sx
     elevation_base = 174 + (137 - elevation_height) / 2
-    Y = lambda rl: elevation_base + (rl - scour) * sx
+    Y = lambda rl: elevation_base + (rl - vertical_base) * sx
     # Dimension only the declared envelope. Support silhouettes stop short of any
     # founding RL and do not imply an approved pile group or wall design.
     box(x0, Y(soffit), x1-x0, (road-wear-soffit)*sx, light)
@@ -148,7 +175,19 @@ def generate_ga_pdf(project, output_pdf: str | Path, scale_denom: int | None = N
         for station in stations[1:-1]:
             ln(X(station), Y(soffit), X(station), Y(road-wear), ink, .38)
     ln(x0,Y(road),x1,Y(road),ink,.42)
-    for ch in stations:
+    outline = elevation_outline(family_for(selected_abutment))
+    for station, direction in ((stations[0], -1), (stations[-1], 1)):
+        path = c.beginPath()
+        for index, (px, py_norm) in enumerate(outline):
+            vertex = ((X(station) + direction * (px - .5) * abutment_width * sx) * mm,
+                      Y(abutment_base + py_norm * (soffit - abutment_base)) * mm)
+            (path.moveTo if index == 0 else path.lineTo)(*vertex)
+        path.close()
+        c.setFillColor(abutment_ink)
+        c.setStrokeColor(ink)
+        c.setLineWidth(.24 * mm)
+        c.drawPath(path, fill=1)
+    for ch in stations[1:-1]:
         x=X(ch)
         symbol_bottom = Y(ground_rl) if ground_rl is not None else Y(soffit) - 12
         box(x-7, symbol_bottom, 14, Y(soffit)-symbol_bottom, light)
@@ -156,7 +195,7 @@ def generate_ga_pdf(project, output_pdf: str | Path, scale_denom: int | None = N
     if ground_rl is not None:
         ln(x0-10,Y(ground_rl),x1+8,Y(ground_rl),accent)
         tx(x1+13,Y(ground_rl)-1,f"MODEL GROUND RL {ground_rl:.3f}",color=accent)
-    tx(21,151,"Support outlines schematic. Founding levels, pile geometry and bearing articulation unresolved.",3.2)
+    tx(21,151,"A1/A2 outlines schematic. Footing, wing walls, bearings and founding levels require separate details.",3.2)
     for rl,label in [(hfl,"HFL"),(lwl,"LWL"),(scour,"SCOUR")]:
         c.setDash(4*mm,2*mm);ln(x0-10,Y(rl),x1+8,Y(rl),water);c.setDash()
         tx(x1+13,Y(rl)-1,f"{label} RL {rl:.3f}",color=water)
@@ -200,7 +239,10 @@ def generate_ga_pdf(project, output_pdf: str | Path, scale_denom: int | None = N
         (f"Slab {slab*1000:g} mm; surfacing {wear*1000:g} mm." if is_slab else
          f"Slab {slab*1000:g} mm; girder below slab {depth*1000:g} mm; surfacing {wear*1000:g} mm."),
         "Span separation marks apply to simply supported spans. Joint gap unspecified.",
-        "Crossfall and supports are schematic. Reinforcement excluded.",
+        (f"A1/A2 abutment symbols: {abutment_label}. "
+         + ("Missing dimensions shown schematically." if any(v is None for v in (
+             sub.abutment_width_m, sub.abutment_length_m, sub.abutment_height_m,
+         )) else "Envelope from workbook.")),
         "Confirm survey, hydraulic, foundation and detailing inputs before release.",
         "GA-01  /  A1  /  REVIEW DRAFT"
     )):

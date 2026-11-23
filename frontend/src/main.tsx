@@ -103,6 +103,7 @@ function App() {
   const [generated, setGenerated] = useState<Artifact[]>([]);
   const [notice, setNotice] = useState("Detail sheets 04 and 05 render locally — no Python engine required.");
   const [outputFormat, setOutputFormat] = useState<OutputFormat>("dxf");
+  const [abutmentType, setAbutmentType] = useState("");
   const [plotScale, setPlotScale] = useState<string>("auto");
   const [theme, setTheme] = useState<SheetTheme>(INK);
   const [zoom, setZoom] = useState<number | "fit">("fit");
@@ -225,9 +226,13 @@ function App() {
       setNotice("Choose an .xlsx parameter workbook first.");
       return;
     }
+    if (outputFormat === "ga_pdf" && !abutmentType) {
+      setNotice("Choose an abutment type for the A1 GAD.");
+      return;
+    }
     // B03 — job identity: the input fingerprint plus a monotonic suffix, so
     // every artifact stays attributable to the workbook/format/scale that made it.
-    const fingerprint = `${selectedFile.name}|${selectedFile.size}|${project.number}|${outputFormat}|${plotScale}`;
+    const fingerprint = `${selectedFile.name}|${selectedFile.size}|${project.number}|${outputFormat}|${plotScale}|${outputFormat === "ga_pdf" ? abutmentType : ""}`;
     const jobId = `${fingerprint}#${Date.now().toString(36)}`;
     jobAbortRef.current?.abort();
     const controller = new AbortController();
@@ -239,6 +244,7 @@ function App() {
     const query = new URLSearchParams({ output_format: outputFormat });
     // Only pin a scale when the engineer overrides Auto; the Python generator
     // resolves the BridgeCAD scale ladder itself when the parameter is absent.
+    if (outputFormat === "ga_pdf" && abutmentType !== "workbook") query.set("abutment_type", abutmentType);
     if (plotScale !== "auto") query.set("scale", plotScale);
     try {
       const response = await fetch(`/api/predict?${query.toString()}`, {
@@ -537,6 +543,18 @@ function App() {
                     ))}
                   </div>
                   <p className="notice">{OUTPUT_FORMATS.find((f) => f.id === outputFormat)?.note}</p>
+                  {outputFormat === "ga_pdf" && (
+                    <label>
+                      Abutment type for A1 and A2
+                      <select required value={abutmentType} onChange={(event) => setAbutmentType(event.target.value)}>
+                        <option value="">Select abutment type</option>
+                        <option value="workbook">Use workbook type</option>
+                        <option value="CANTILEVER">Cantilever</option>
+                        <option value="GRAVITY">Gravity</option>
+                        <option value="FULL_HEIGHT_WALL">Full-height wall</option>
+                      </select>
+                    </label>
+                  )}
 
                   <div className="panel-heading compact">
                     <div><span className="eyebrow">LAYOUT</span><h2>Plot scale</h2></div>

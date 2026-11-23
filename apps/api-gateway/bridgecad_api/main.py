@@ -21,6 +21,7 @@ from contextlib import asynccontextmanager, suppress
 from pathlib import Path
 from typing import Any
 
+from bridgecad_core.types import AbutmentType
 from fastapi import APIRouter, BackgroundTasks, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, FileResponse, HTMLResponse
@@ -260,7 +261,10 @@ async def draw_gad(
 
 
 @draw_router.post("/ga", summary="Download a one-sheet A1 general arrangement PDF")
-async def draw_ga(excel_file: UploadFile = File(...), scale: int | None = None):
+async def draw_ga(
+    excel_file: UploadFile = File(...), scale: int | None = None,
+    abutment_type: AbutmentType | None = None,
+):
     from starlette.concurrency import run_in_threadpool
     from bridgecad_draw.engines.ga_sheet import GALayoutError, generate_ga_pdf
 
@@ -270,7 +274,9 @@ async def draw_ga(excel_file: UploadFile = File(...), scale: int | None = None):
     def export() -> bytes:
         project = _load_project_from_upload(data)
         with tempfile.TemporaryDirectory() as folder:
-            return generate_ga_pdf(project, Path(folder) / "GA-01.pdf", scale).read_bytes()
+            return generate_ga_pdf(
+                project, Path(folder) / "GA-01.pdf", scale, abutment_type=abutment_type,
+            ).read_bytes()
 
     try:
         pdf = await run_in_threadpool(export)

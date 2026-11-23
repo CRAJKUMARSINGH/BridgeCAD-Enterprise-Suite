@@ -41,9 +41,9 @@ def test_ga_pdf_download_and_reject_conflicting_soffit(tmp_path, family, girder_
     project = type(project).model_validate(payload)
     client = TestClient(app)
 
-    def upload():
+    def upload(**query):
         path = write_excel(project, tmp_path / "input.xlsx")
-        return client.post("/draw/ga", files={"excel_file": (path.name, path.read_bytes())})
+        return client.post("/draw/ga", params=query, files={"excel_file": (path.name, path.read_bytes())})
 
     response = upload()
     assert response.status_code == 200, response.text[:400]
@@ -105,6 +105,17 @@ def test_ga_pdf_download_and_reject_conflicting_soffit(tmp_path, family, girder_
                     assert r.width == pytest.approx(top_flanges[0].width, abs=.01)
                 else:
                     assert r.width < top_flanges[0].width
+
+    for kind, label in (("CANTILEVER", "Cantilever"), ("GRAVITY", "Gravity"),
+                        ("FULL_HEIGHT_WALL", "Full-height wall")):
+        selected = upload(abutment_type=kind)
+        assert selected.status_code == 200, selected.text[:400]
+        with pymupdf.open(stream=selected.content, filetype="pdf") as pdf:
+            assert f"A1 / A2: {label}" in pdf[0].get_text()
+            outlines = [path for path in pdf[0].get_drawings()
+                        if path["fill"] == pytest.approx((196/255, 214/255, 223/255), abs=.002)]
+            assert len(outlines) == 4  # two plan footprints and two elevation profiles
+    assert upload(abutment_type="COUNTERFORT").status_code == 422
 
     project.hydraulic_data.actual_soffit_level_m -= Decimal("0.3")
     rejected = upload()

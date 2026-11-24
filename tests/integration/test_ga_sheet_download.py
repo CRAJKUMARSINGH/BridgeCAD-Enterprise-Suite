@@ -115,6 +115,13 @@ def test_ga_pdf_download_and_reject_conflicting_soffit(tmp_path, family, girder_
             outlines = [path for path in pdf[0].get_drawings()
                         if path["fill"] == pytest.approx((196/255, 214/255, 223/255), abs=.002)]
             assert len(outlines) == 4  # two plan footprints and two elevation profiles
+            for footprint, elevation in zip(outlines[:2], outlines[2:]):
+                assert footprint["rect"].x0 == pytest.approx(elevation["rect"].x0, abs=.05)
+                assert footprint["rect"].x1 == pytest.approx(elevation["rect"].x1, abs=.05)
+            if kind == "GRAVITY":
+                assert all(len(profile["items"]) >= 12 for profile in outlines[2:])
+                assert "Footing 1.0 m thick" in pdf[0].get_text()
+
     assert upload(abutment_type="COUNTERFORT").status_code == 422
 
     project.hydraulic_data.actual_soffit_level_m -= Decimal("0.3")

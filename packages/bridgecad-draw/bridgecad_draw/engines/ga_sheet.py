@@ -3,7 +3,7 @@ from itertools import accumulate
 from math import isfinite
 from pathlib import Path
 
-from bridgecad_core.geometry.abutment_profiles import elevation_outline, family_for
+from bridgecad_core.geometry.abutment_profiles import battered_side_outline, elevation_outline, family_for
 from bridgecad_core.types import AbutmentType, SpanConfiguration, SuperstructureType
 
 from ..fit import LADDER
@@ -85,7 +85,31 @@ def generate_ga_pdf(
     abutment_width = float(sub.abutment_width_m or 1.5)
     abutment_length = float(sub.abutment_length_m or width)
     abutment_base = soffit - float(sub.abutment_height_m or 2)
-    vertical_base = min(scour, abutment_base)
+    outline = [
+        ((x - .5) * abutment_width, abutment_base + y * (soffit - abutment_base))
+        for x, y in elevation_outline(family_for(selected_abutment))
+    ]
+    battered = selected_abutment == AbutmentType.GRAVITY
+    if battered:
+        cap_depth = (sub.abutment_cap_depth_mm or 450) / 1000
+        stem_height = soffit - abutment_base - cap_depth
+        if stem_height < .5:
+            raise GALayoutError("Gravity abutment requires at least 0.5 m between cap soffit and footing top.")
+        face = float(sub.abutment_face_batter_1n or 10)
+        back = float(sub.abutment_back_batter_1n or 3)
+        profile = battered_side_outline(
+            stem_height, cap_w_m=abutment_width, cap_d_m=cap_depth,
+            face_batter_1n=face, back_batter_1n=back,
+            above_m=float(sub.dirt_wall_height_m or .98),
+            dirt_w_m=(sub.dirt_wall_thickness_mm or 300) / 1000,
+            toe_m=1.5, foot_d_m=1.0,
+        )
+        outline = [(x - abutment_width / 2, soffit + y - profile.cap_top_y)
+                   for x, y in profile.points]
+    min_x = min(x for x, _ in outline)
+    max_x = max(x for x, _ in outline)
+    vertical_base = min(scour, *(rl for _, rl in outline))
+    vertical_top = max(road, hfl, *(rl for _, rl in outline))
 
     def pick_scale(candidates, extents):
         for denom in candidates:
@@ -94,9 +118,9 @@ def generate_ga_pdf(
         raise GALayoutError("The bridge does not fit GA-01 at the requested plot scale. Use Auto or a smaller drawing scale.")
 
     ga_denom = pick_scale((scale_denom,) if scale_denom is not None else LADDER,
-                         ((stations[-1], 565), (abutment_width / 2, 14),
+                         ((stations[-1], 565), (max(-min_x, max_x), 40),
                           (max(width, abutment_length), 127),
-                          (max(road, hfl) - vertical_base, 137)))
+                          (vertical_top - vertical_base, 137)))
     section_denom = pick_scale(LADDER, ((width, 420), (slab + depth, 68)))
 
     ink, accent, water, light = map(HexColor,("#152638","#004e64","#1872aa","#e6edf1"))
@@ -136,9 +160,17 @@ def generate_ga_pdf(
     py=374
     box(x0,py,x1-x0,width*sx,light)
     abutment_ink = HexColor("#c4d6df")
-    for station in (stations[0], stations[-1]):
-        box(X(station) - abutment_width*sx/2, py + (width-abutment_length)*sx/2,
-            abutment_width*sx, abutment_length*sx, abutment_ink)
+    ends = ((stations[0], 1), (stations[-1], -1))
+    for station, direction in ends:
+        y0 = py + (width - abutment_length) * sx / 2
+        y1 = y0 + abutment_length * sx
+        left = X(station) + min(direction * min_x, direction * max_x) * sx
+        box(left, y0, (max_x - min_x) * sx, y1 - y0, abutment_ink)
+        if battered:
+            # Dirt wall, cap and stem stations come from the elevation polygon.
+            for index in (1, 2, 4, 5, 10, 13):
+                x = X(station) + direction * outline[index][0] * sx
+                ln(x, y0, x, y1, accent, .2)
     edges=[clear0, clear0+cw]
     for e in edges:ln(x0,py+e*sx,x1,py+e*sx)
     c.setDash(3*mm,2*mm);ln(x0,py+width*sx/2,x1,py+width*sx/2,accent);c.setDash()
@@ -165,7 +197,7 @@ def generate_ga_pdf(
     tx(21,324,f"02  LONGITUDINAL ELEVATION  /  H 1:{ga_denom}  |  V 1:{ga_denom}",4,accent,bold=True)
     tx(681,410,f"A1 / A2: {abutment_label}",3.2,bold=True)
 
-    elevation_height = (max(road, hfl) - vertical_base) * sx
+    elevation_height = (vertical_top - vertical_base) * sx
     elevation_base = 174 + (137 - elevation_height) / 2
     Y = lambda rl: elevation_base + (rl - vertical_base) * sx
     # Dimension only the declared envelope. Support silhouettes stop short of any
@@ -175,12 +207,10 @@ def generate_ga_pdf(
         for station in stations[1:-1]:
             ln(X(station), Y(soffit), X(station), Y(road-wear), ink, .38)
     ln(x0,Y(road),x1,Y(road),ink,.42)
-    outline = elevation_outline(family_for(selected_abutment))
-    for station, direction in ((stations[0], -1), (stations[-1], 1)):
+    for station, direction in ends:
         path = c.beginPath()
-        for index, (px, py_norm) in enumerate(outline):
-            vertex = ((X(station) + direction * (px - .5) * abutment_width * sx) * mm,
-                      Y(abutment_base + py_norm * (soffit - abutment_base)) * mm)
+        for index, (local_x, rl) in enumerate(outline):
+            vertex = ((X(station) + direction * local_x * sx) * mm, Y(rl) * mm)
             (path.moveTo if index == 0 else path.lineTo)(*vertex)
         path.close()
         c.setFillColor(abutment_ink)
@@ -195,7 +225,10 @@ def generate_ga_pdf(
     if ground_rl is not None:
         ln(x0-10,Y(ground_rl),x1+8,Y(ground_rl),accent)
         tx(x1+13,Y(ground_rl)-1,f"MODEL GROUND RL {ground_rl:.3f}",color=accent)
-    tx(21,151,"A1/A2 outlines schematic. Footing, wing walls, bearings and founding levels require separate details.",3.2)
+    tx(21,151,"A1/A2 outlines are for review. Confirm wing walls, bearings and founding levels.",3.2)
+    if battered:
+        tx(21,146,f"Gravity batter: river 1:{face:g}, earth 1:{back:g}. "
+           "Footing 1.0 m thick and 1.5 m projections assumed.",3)
     for rl,label in [(hfl,"HFL"),(lwl,"LWL"),(scour,"SCOUR")]:
         c.setDash(4*mm,2*mm);ln(x0-10,Y(rl),x1+8,Y(rl),water);c.setDash()
         tx(x1+13,Y(rl)-1,f"{label} RL {rl:.3f}",color=water)
@@ -242,7 +275,7 @@ def generate_ga_pdf(
         (f"A1/A2 abutment symbols: {abutment_label}. "
          + ("Missing dimensions shown schematically." if any(v is None for v in (
              sub.abutment_width_m, sub.abutment_length_m, sub.abutment_height_m,
-         )) else "Envelope from workbook.")),
+         )) else ("Body from workbook; footing assumed." if battered else "Envelope from workbook."))),
         "Confirm survey, hydraulic, foundation and detailing inputs before release.",
         "GA-01  /  A1  /  REVIEW DRAFT"
     )):

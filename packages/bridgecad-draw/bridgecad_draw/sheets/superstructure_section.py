@@ -108,12 +108,8 @@ def girder_positions(spec: SectionSpec, x0: float, x1: float) -> list[float]:
         return []
     pitch = spec.girder_spacing_m * 1000.0  # mm
     width_mm = x1 - x0
-    if pitch <= 0 or (n - 1) * pitch >= width_mm:
-        # spacing does not fit: fall back to even spread so girders stay inside,
-        # and let the caller annotate the actual (fitted) pitch instead.
-        if n == 1:
-            return [x0 + width_mm / 2.0]
-        return [x0 + width_mm * (i + 0.5) / n for i in range(n)]
+    if not 0 < pitch or (n - 1) * pitch >= width_mm:
+        raise ValueError("Girder centres must fit within the declared overall deck width.")
     # Start half a pitch clear of each edge where possible, then centre the
     # group on the deck: standard PWD practice shows symmetric spacing about CL.
     span_of_girders = (n - 1) * pitch

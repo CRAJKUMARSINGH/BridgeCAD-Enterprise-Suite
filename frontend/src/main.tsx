@@ -550,7 +550,7 @@ function App() {
                         <option value="">Select abutment type</option>
                         <option value="workbook">Use workbook type</option>
                         <option value="CANTILEVER">Cantilever</option>
-                        <option value="GRAVITY">Gravity</option>
+                        <option value="GRAVITY">Gravity (battered profile)</option>
                         <option value="FULL_HEIGHT_WALL">Full-height wall</option>
                       </select>
                     </label>

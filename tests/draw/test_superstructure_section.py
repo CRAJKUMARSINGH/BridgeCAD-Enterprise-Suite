@@ -5,6 +5,8 @@ Pure data-level tests; no ezdxf required.
 """
 from __future__ import annotations
 
+import pytest
+
 from bridgecad_draw.sheets.superstructure_section import (
     SectionSpec,
     girder_positions,
@@ -57,11 +59,10 @@ def test_unknown_type_is_explicit_not_invented():
     assert any("not declared" in n for n in prims.notes)
 
 
-def test_spacing_that_does_not_fit_falls_back_and_stays_inside():
+def test_spacing_that_does_not_fit_is_rejected():
     spec = _spec("I_GIRDER", girder_spacing_m=3.0, girders_per_deck=5)
-    xs = girder_positions(spec, X0, X1)
-    assert len(xs) == 5
-    assert all(X0 <= x <= X1 for x in xs)
+    with pytest.raises(ValueError, match="Girder centres must fit"):
+        girder_positions(spec, X0, X1)
 
 
 def test_slab_note_present():

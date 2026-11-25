@@ -21,7 +21,7 @@ import sys
 from pathlib import Path
 from datetime import date
 
-ROOT = Path(__file__).parent.resolve()
+ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "outputs" / "11span_110m_rcc_slab"
 OUT.mkdir(parents=True, exist_ok=True)
 

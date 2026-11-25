@@ -26,7 +26,7 @@ if hasattr(sys.stdout, "reconfigure"):
     except Exception:
         pass
 
-ROOT = Path(__file__).parent.resolve()
+ROOT = Path(__file__).resolve().parents[2]
 for pkg in [
     "bridgecad-core", "bridgecad-io", "bridgecad-draw",
     "bridgecad-bill", "bridgecad-qa",  "bridgecad-export",

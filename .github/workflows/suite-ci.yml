@@ -186,7 +186,7 @@ jobs:
           extras: dev
           extra-pip: "openpyxl ezdxf scipy numpy sqlalchemy pyyaml"
       - name: RC1 Smoke
-        run: python rc1_smoke.py
+        run: python scripts/rc1_smoke.py
 
   react-build:
     name: "[Suite] React TypeCheck + Build"

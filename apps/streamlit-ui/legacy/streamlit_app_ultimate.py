@@ -23,7 +23,7 @@ import numpy as np
 import json
 from datetime import datetime
 
-sys.path.insert(0, str(Path(__file__).parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "src"))
 
 
 @st.cache_resource

@@ -142,7 +142,7 @@ jobs:
 
       # ── Unit tests ────────────────────────────────────────────────────────
       - name: Run tests
-        run: pytest test_ultimate_app.py -v --tb=short
+        run: pytest scripts/legacy/test_ultimate_app.py -v --tb=short
 
       # ── Robotic harness (smoke) ───────────────────────────────────────────
       - name: Robotic pipeline smoke test

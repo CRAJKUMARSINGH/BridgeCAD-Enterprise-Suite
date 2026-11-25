@@ -1,9 +1,8 @@
 """
 sitecustomize.py — workspace bootstrap for the FLATTENED ROOT REPOSITORY.
 
-Placed at the repo-root (which is the first sys.path entry when running
-`python <script.py>` from that folder, and therefore automatically loaded by
-CPython's `site` module at interpreter startup).
+Source checkout launchers can put `scripts/` on PYTHONPATH to load this hook
+through CPython's `site` module at interpreter startup.
 
 WHAT IT DOES
 ------------
@@ -30,7 +29,7 @@ def _apply() -> None:
     if getattr(sys, _BOOTSTRAP_MARKER, False):
         return  # idempotent
 
-    repo_root = Path(__file__).resolve().parent
+    repo_root = Path(__file__).resolve().parents[1]
     repo_root_candidates: list[Path] = [repo_root]
     try:
         repo_root_candidates.append(Path(os.getcwd()).resolve())

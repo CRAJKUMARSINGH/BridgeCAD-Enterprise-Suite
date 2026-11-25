@@ -47,8 +47,9 @@ except ImportError:
     import urllib.parse
 
 BASE_URL   = os.environ.get("BRIDGECAD_API_URL", "http://127.0.0.1:8765")
-REPORT_MD  = Path(__file__).parent / "app-robustness-testing.md"
-INPUTS_DIR = Path(__file__).parent / "inputs"
+ROOT = Path(__file__).resolve().parents[2]
+REPORT_MD  = ROOT / "app-robustness-testing.md"
+INPUTS_DIR = ROOT / "inputs"
 TIMEOUT_S  = 60  # per-request timeout
 
 # ── Test result dataclass ─────────────────────────────────────────────────────

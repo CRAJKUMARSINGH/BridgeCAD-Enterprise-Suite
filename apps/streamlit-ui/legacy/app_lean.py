@@ -11,7 +11,7 @@ from io import BytesIO
 import sys
 
 # Add src to path
-sys.path.insert(0, str(Path(__file__).parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "src"))
 
 from bridge_gad.bridge_generator import BridgeGADGenerator
 

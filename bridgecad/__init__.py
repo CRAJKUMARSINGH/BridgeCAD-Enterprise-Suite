@@ -34,9 +34,8 @@ Two `sys.path` bootstrap approaches are supported:
    → setuptools `package-dir` mappings in pyproject.toml make `bridgecad_core`,
      `bridgecad_io`, … importable directly.  Facade sub-modules are lazy aliases.
 
-2. SCRIPT MODE (default for root scripts):  `python _generate_11span_gad.py`
-   → sitecustomize.py at repo-root auto-injects all the package directories
-     into sys.path before user-imports fire. Facade works identically.
+2. SOURCE CHECKOUT MODE: importing the facade injects the package directories
+   into sys.path. Source checkout launchers can also use `scripts/sitecustomize.py`.
 
 Both modes are 100 % API compatible; no source change required when moving
 between "workstation script" → "installed docker image".
@@ -60,12 +59,8 @@ __moniker__ = "M1 · 11-span RCC Solid Slab · Major Bridge GAD"
 def ensure_workspace() -> None:
     """Prepend the workspace package roots to ``sys.path`` (idempotent).
 
-    ``sitecustomize.py`` covers ``python script.py`` and ``python -m bridgecad``:
-    CPython's ``site`` module imports it at startup because the repo root is on
-    ``sys.path``. Under ``python -c "import bridgecad"`` and some IDE runners the
-    root is *not* on ``sys.path``, so the facade resolves but ``bridgecad_core``
-    does not. This mirrors the same mapping sitecustomize uses and is safe to
-    call repeatedly.
+    The facade resolves member packages directly from a source checkout.
+    Installed packages remain importable through Python's normal lookup.
     """
     import sys
     from pathlib import Path
@@ -137,7 +132,7 @@ def _import_facade(name: str) -> Any:
         raise ModuleNotFoundError(
             f"bridgecad.{name} requires package `{real_path}` on sys.path.  "
             "Run `pip install -e .` from the repo root, or make sure "
-            "sitecustomize.py bootstrap has been executed."
+            "workspace packages are installed or on PYTHONPATH."
         ) from exc
     # Several sub-packages (io, draw, bill, qa, plugins, geometry) have their
     # own sub-modules that are NOT auto-imported in their respective

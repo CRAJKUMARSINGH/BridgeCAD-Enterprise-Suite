@@ -8,21 +8,10 @@ most-used entry points (verify / generate / qa).
 from __future__ import annotations
 
 import json as _json
+import os
 import subprocess
 import sys
 from pathlib import Path
-
-# Self-bootstrap: when python -m bridgecad is executed via runpy, sys.path[0]
-# might be the `bridgecad/` package dir itself (not the repo root containing
-# sitecustomize.py).  Ensure sitecustomize fires once so bridgecad_core, …
-# are all importable regardless of cwd.
-try:
-    import sitecustomize as _sitecustomize  # noqa: F401
-except Exception:  # pragma: no cover
-    _repo_root = Path(__file__).resolve().parent.parent
-    if str(_repo_root) not in sys.path:
-        sys.path.insert(0, str(_repo_root))
-
 
 def app() -> int:
     # Make sure the facade banner is always printed first on `python -m bridgecad`.
@@ -58,10 +47,12 @@ def app() -> int:
         root = Path(__file__).resolve().parent.parent
         suites = root / "packages" / "bridgecad-core"
         print("[bridgecad] verify :: day3_verify.py + day4_verify.py")
-        # Execute both scripts in-process so sitecustomize.paths stays intact.
-        py = sys.executable
-        rc3 = subprocess.call([py, str(suites / "day3_verify.py")])
-        rc4 = subprocess.call([py, str(suites / "day4_verify.py")])
+        env = {
+            **os.environ,
+            "PYTHONPATH": os.pathsep.join(filter(None, (str(root / "scripts"), os.environ.get("PYTHONPATH")))),
+        }
+        rc3 = subprocess.call([sys.executable, str(suites / "day3_verify.py")], env=env)
+        rc4 = subprocess.call([sys.executable, str(suites / "day4_verify.py")], env=env)
         return 0 if (rc3 == 0 and rc4 == 0) else 1
 
     # ── generate ──────────────────────────────────────────────────────
@@ -72,7 +63,7 @@ def app() -> int:
             "11span": "_generate_11span_gad.py",
             "elegant": "_enhance_elegant_pdf.py",
         }
-        script = root / mapping.get(variant, mapping["11span"])
+        script = root / "scripts" / "legacy" / mapping.get(variant, mapping["11span"])
         if not script.exists():
             print(f"[bridgecad] generate :: unknown variant {variant!r}")
             return 2
@@ -152,7 +143,6 @@ def app() -> int:
 
     # ── info ──────────────────────────────────────────────────────────
     if cmd == "info":
-        import os
         info_lines = [
             banner,
             f"  interpreter : {sys.executable}",

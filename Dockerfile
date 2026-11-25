@@ -7,11 +7,11 @@
 # `src/bridge_gad` surface is fenced (ADR-0001) and no longer exercised here.
 FROM python:3.11-slim
 
-# PYTHONPATH=/app so the repo-root sitecustomize.py fires at interpreter start
+# Put the source checkout's startup hook on PYTHONPATH
 # and injects every workspace package (bridgecad_core, …) into sys.path.
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONPATH=/app
+    PYTHONPATH=/app/scripts:/app
 
 WORKDIR /app
 

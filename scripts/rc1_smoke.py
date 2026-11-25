@@ -10,7 +10,7 @@ Runs all 5 E2E fixtures through the full pipeline and verifies:
   ★ M8-Infra DB creates tables (SQLite, idempotent)
 
 Run:
-    python rc1_smoke.py
+    python scripts/rc1_smoke.py
 """
 from __future__ import annotations
 import sys
@@ -21,7 +21,7 @@ import traceback
 from pathlib import Path
 
 # ── bootstrap ────────────────────────────────────────────────────────────
-_SUITE = Path(__file__).parent
+_SUITE = Path(__file__).resolve().parents[1]
 for _pkg in ["bridgecad-core","bridgecad-io","bridgecad-draw",
              "bridgecad-bill","bridgecad-qa","bridgecad-export",
              "bridgecad-plugins","bridgecad-ai","bridgecad-infra"]:

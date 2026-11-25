@@ -687,13 +687,13 @@ def extract_and_price(
             _grade_known = _concrete_grade_known(project)
             _seen: dict[str, int] = {}
             for _section in boq.sections:
-                for _item in _section.items:
-                    _code = _item.item_code
+                for item in _section.items:
+                    _code = item.item_code
                     _seen[_code] = _seen.get(_code, 0) + 1
                     _no = _code if _seen[_code] == 1 else f"{_code}.{_seen[_code]}"
-                    _line = _provenance_line(_no, _item, _grade_known)
-                    _item.status = str(_line.status)
-                    _item.basis = _line.formula or _line.multiplier_source or _line.reason or ""
+                    _line = _provenance_line(_no, item, _grade_known)
+                    item.status = str(_line.status)
+                    item.basis = _line.formula or _line.multiplier_source or _line.reason or ""
         except Exception:  # provenance must never break pricing
             pass
 
@@ -956,4 +956,4 @@ def build_boq(project: Any, state: str | None = None) -> list[BoqLine]:
     return lines
 
 
-__all__ = ["extract_and_price", "build_boq"]
+__all__ = ["build_boq", "extract_and_price"]

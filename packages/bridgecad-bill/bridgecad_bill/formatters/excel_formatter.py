@@ -161,6 +161,7 @@ def format_excel(boq: Any, output_path: str | Path, live_formulas: bool = True) 
     # Grand total block — each row references the ones above it.
     subtotal_row = row
     contingency_row = row + 1
+    subtotal_expr: str | float
     if live_formulas and section_total_rows:
         subtotal_expr = "=" + "+".join(f"F{r}" for r in section_total_rows)
     else:

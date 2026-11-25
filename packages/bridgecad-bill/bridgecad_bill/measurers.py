@@ -70,16 +70,18 @@ def measure_dirt_wall(
 def measure_formwork(project: Any, faces: list[tuple[str, float, float]]) -> MeasuredItem:
     """Formwork area = exposed face areas, soffit-bearing contact deducted.
 
-    *faces* is ``(face_name, area_m2, deduction_m2)`` tuples.
+    *faces* is a non-empty list of ``(face_name, area_m2, deduction_m2)`` tuples.
     """
-    total = sum(Decimal(str(a)) - Decimal(str(d)) for _n, a, d in faces)
+    if not faces:
+        raise ValueError("Formwork measurement requires at least one measured face.")
+    total = sum((Decimal(str(a)) - Decimal(str(d)) for _n, a, d in faces), Decimal(0))
     return MeasuredItem(
         item_code="MORTH-1700-FORMWORK",
         element="FORMWORK",
         basis=MeasureBasis.AREA_FACE,
         quantity=total.quantize(Decimal("0.01")),
         unit="sqm",
-        entity_ids=tuple(n for n, _a, _d in faces) or ("formwork_faces",),
+        entity_ids=tuple(n for n, _a, _d in faces),
         derivation=" + ".join(f"{Decimal(str(a)) - Decimal(str(d)):.2f}" for _n, a, d in faces),
     )
 
@@ -129,9 +131,9 @@ def measure_all(project: Any) -> list[MeasuredItem]:
 
 
 __all__ = [
+    "measure_all",
     "measure_cap",
     "measure_dirt_wall",
     "measure_formwork",
     "measure_rebar",
-    "measure_all",
 ]

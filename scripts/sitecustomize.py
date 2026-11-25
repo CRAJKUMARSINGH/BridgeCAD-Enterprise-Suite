@@ -16,10 +16,12 @@ WHAT IT DOES
 This file is idempotent.  It also avoids mutation when the workspace is
 installed via `pip install -e .` (setuptools already took care of paths then).
 """
+
 from __future__ import annotations
 
 import os
 import sys
+from contextlib import suppress
 from pathlib import Path
 
 _BOOTSTRAP_MARKER = "__bridgecad_workspace_bootstrap_applied__"
@@ -31,10 +33,8 @@ def _apply() -> None:
 
     repo_root = Path(__file__).resolve().parents[1]
     repo_root_candidates: list[Path] = [repo_root]
-    try:
-        repo_root_candidates.append(Path(os.getcwd()).resolve())
-    except Exception:  # pragma: no cover
-        pass
+    with suppress(OSError):
+        repo_root_candidates.append(Path.cwd().resolve())
     try:
         if sys.argv and sys.argv[0]:
             script_path = Path(sys.argv[0]).resolve()
@@ -65,21 +65,21 @@ def _apply() -> None:
         return
 
     packages_dir = base_dir / "packages"
-    apps_dir     = base_dir / "apps"
+    apps_dir = base_dir / "apps"
 
     new_paths: list[str] = []
     if packages_dir.is_dir():
         for pkg_meta in [
-            ("bridgecad-core",    "bridgecad_core"),
-            ("bridgecad-io",      "bridgecad_io"),
-            ("bridgecad-draw",    "bridgecad_draw"),
-            ("bridgecad-bill",    "bridgecad_bill"),
-            ("bridgecad-qa",      "bridgecad_qa"),
-            ("bridgecad-export",  "bridgecad_export"),
+            ("bridgecad-core", "bridgecad_core"),
+            ("bridgecad-io", "bridgecad_io"),
+            ("bridgecad-draw", "bridgecad_draw"),
+            ("bridgecad-bill", "bridgecad_bill"),
+            ("bridgecad-qa", "bridgecad_qa"),
+            ("bridgecad-export", "bridgecad_export"),
             ("bridgecad-plugins", "bridgecad_plugins"),
-            ("bridgecad-ai",      "bridgecad_ai"),
-            ("bridgecad-infra",   "bridgecad_infra"),
-            ("bridgecad-refs",    "bridgecad_refs"),
+            ("bridgecad-ai", "bridgecad_ai"),
+            ("bridgecad-infra", "bridgecad_infra"),
+            ("bridgecad-refs", "bridgecad_refs"),
         ]:
             pkg_dir = packages_dir / pkg_meta[0]
             if pkg_dir.is_dir():
@@ -87,8 +87,8 @@ def _apply() -> None:
 
     if apps_dir.is_dir():
         for app_dir_name, _py_name in [
-            ("api-gateway",  "bridgecad_api"),
-            ("cli-console",  "bridgecad_cli"),
+            ("api-gateway", "bridgecad_api"),
+            ("cli-console", "bridgecad_cli"),
         ]:
             app_dir = apps_dir / app_dir_name
             if app_dir.is_dir():
@@ -96,7 +96,7 @@ def _apply() -> None:
 
     new_paths.append(str(base_dir))
 
-    existing = set(os.path.normcase(p) for p in sys.path if isinstance(p, str))
+    existing = {os.path.normcase(p) for p in sys.path if isinstance(p, str)}
     prepend: list[str] = []
     for p in new_paths:
         np = os.path.normcase(p)

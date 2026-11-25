@@ -72,11 +72,17 @@ def measure_drawings(checkout: Path, output: Path) -> dict:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--checkout", type=Path, required=True, help="Extracted Git archive of the revision")
+    parser.add_argument(
+        "--checkout", type=Path, required=True, help="Extracted Git archive of the revision"
+    )
     parser.add_argument("--revision", required=True, help="Git revision represented by the archive")
-    parser.add_argument("--coverage-json", type=Path, help="Explicit coverage.py JSON report for this revision")
+    parser.add_argument(
+        "--coverage-json", type=Path, help="Explicit coverage.py JSON report for this revision"
+    )
     parser.add_argument("--coverage-scope", help="Test selection used for the coverage report")
-    parser.add_argument("--repeat-drawings", action="store_true", help="Compare DXF bytes across two runs")
+    parser.add_argument(
+        "--repeat-drawings", action="store_true", help="Compare DXF bytes across two runs"
+    )
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     checkout = args.checkout.resolve()

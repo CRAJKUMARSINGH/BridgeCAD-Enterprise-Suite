@@ -21,9 +21,8 @@ import sys
 from dataclasses import asdict
 from pathlib import Path
 
-# Self-bootstrap: when launched as `python scripts/refs_extract.py`, sys.path[0]
-# is scripts/ and the repo-root sitecustomize.py is NOT imported, so the
-# packages/* layout would be invisible. Prepend every packages/<name> directory.
+# Direct script execution needs the member package paths when the checkout
+# is used without an editable install.
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 for _pkg in sorted((_REPO_ROOT / "packages").glob("*/")):
     if _pkg.is_dir():

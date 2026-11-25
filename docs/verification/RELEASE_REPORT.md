@@ -12,6 +12,9 @@
 | Unit baseline | `coverage run --branch -m pytest -p no:hypothesispytest -q tests/unit` in the tagged archive | 190 tests passed. Combined line and branch coverage from this lane was 72.67%, below the 75% floor |
 | CLI after the file moves | `python -m bridgecad verify` | Pass. All 15 checks passed |
 | Documentation | `python -m mkdocs build --strict` | Pass locally |
+| Release-candidate smoke | `python scripts/rc1_smoke.py` in the Phase 0 snapshot with a temporary SQLite database | 34 of 34 checks passed, including 28 E2E fixtures |
+| Triage merge gate | `python scripts/robot/gate.py --json` after restoring the historical triage log from Git | Pass. The restored records contain no open blocking entries |
+| CI lint | Ruff 0.6.0 over `packages/`, `apps/` and `scripts/` | Fails. The tagged baseline has 133 findings. The Phase 0 snapshot has 504, including findings in entry points moved into those directories |
 | Reference drawings | `python scripts/capture_release_baseline.py` with the tagged archive and `--repeat-drawings` | Three fixtures generated 11 DXFs each. The two runs differed in each fixture's hash manifest |
 | Remote phase gate | CI run and merged Phase 0 pull request | Pending |
 
@@ -29,7 +32,7 @@ The source revision, timings, and SHA-256 values are in `audit/baseline.json`.
 | AC-6 Issued BOQ integrity | Pending |
 | AC-7 Byte-identical DXF | Failed at the baseline. All three fixture manifests differed on repeat generation |
 | AC-8 Clause traceability and provisional markers | Pending |
-| AC-9 Strict typing and lint | Pending |
+| AC-9 Strict typing and lint | Pending. The CI lint command reports findings in both the tagged baseline and the Phase 0 snapshot |
 | AC-10 Coverage | Pending. The measured unit lane was below the repository floor |
 | AC-11 Security scanning and SBOM | Pending |
 | AC-12 Container service and image checks | Pending |

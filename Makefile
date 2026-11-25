@@ -45,7 +45,7 @@ verify:          ## Acceptance verifiers
 	python -m bridgecad verify
 
 smoke:           ## Release gate
-	python rc1_smoke.py
+	python scripts/rc1_smoke.py
 
 robotic:         ## Simulate Basic + Intermediate + Advanced users (seeded)
 	python scripts/robotic_smoke.py --persona all --seed 42

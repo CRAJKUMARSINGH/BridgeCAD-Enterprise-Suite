@@ -16,6 +16,7 @@
 | Triage merge gate | `python scripts/robot/gate.py --json` after restoring the historical triage log from Git | Pass. The restored records contain no open blocking entries |
 | CI lint | Ruff 0.6.0 over `packages/`, `apps/` and `scripts/` | Fails. The tagged baseline has 133 findings. The Phase 0 snapshot has 504, including findings in entry points moved into those directories |
 | CI unit and integration selection | CI test selection with fail-fast enabled and the Hypothesis collection plugin disabled for this run | 222 passed before the first failure. `Asset_S4_SingleSpan_6m` extends past the A3 frame. The same assertion failed on the tagged baseline |
+| CI workspace setup | Resolve all editable member packages and the root project in one pip invocation | Clean-environment resolver dry run passed. The first PR run failed during ordered installation because `bridgecad-export` requires the local `bridgecad-qa` package |
 | Reference drawings | `python scripts/capture_release_baseline.py` with the tagged archive and `--repeat-drawings` | Three fixtures generated 11 DXFs each. The two runs differed in each fixture's hash manifest |
 | Remote phase gate | CI run and merged Phase 0 pull request | Pending |
 

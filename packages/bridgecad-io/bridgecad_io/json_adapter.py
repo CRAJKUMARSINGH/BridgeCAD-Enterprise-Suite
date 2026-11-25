@@ -20,7 +20,7 @@ from __future__ import annotations
 import json
 import typing
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, overload
+from typing import TYPE_CHECKING, Any
 
 from .exceptions import JsonParseError
 
@@ -48,18 +48,14 @@ def _model_types(annotation: Any) -> list[type[BaseModel]]:
     return out
 
 
-@overload
-def _strip_computed(model_cls: type[BaseModel], data: dict[str, Any]) -> dict[str, Any]: ...
-
-
-@overload
-def _strip_computed(model_cls: type[BaseModel], data: object) -> object: ...
-
-
 def _strip_computed(model_cls: type[BaseModel], data: object) -> object:
     """Recursively drop computed-field keys that ``extra='forbid'`` would reject."""
-    if not isinstance(data, dict):
-        return data
+    if isinstance(data, dict):
+        return _strip_computed_mapping(model_cls, data)
+    return data
+
+
+def _strip_computed_mapping(model_cls: type[BaseModel], data: dict[str, Any]) -> dict[str, Any]:
     computed = set(getattr(model_cls, "model_computed_fields", {}) or {})
     fields = getattr(model_cls, "model_fields", {}) or {}
     clean: dict[str, Any] = {}
@@ -88,14 +84,14 @@ def project_to_dict(project: BridgeProject, exclude: set[str] | None = None) -> 
     """BridgeProject → plain JSON-safe dict without computed fields."""
     model_cls: type[BaseModel] = type(project)
     data: dict[str, Any] = project.model_dump(mode="json", exclude=exclude)
-    return _strip_computed(model_cls, data)
+    return _strip_computed_mapping(model_cls, data)
 
 
 def project_from_dict(data: dict) -> Any:
     """Plain dict → validated BridgeProject (computed fields tolerated)."""
     cls = _bp_cls()
     try:
-        return cls.model_validate(_strip_computed(cls, data))
+        return cls.model_validate(_strip_computed_mapping(cls, data))
     except Exception as exc:  # pydantic.ValidationError and friends
         raise JsonParseError(f"Invalid BridgeProject JSON: {exc}") from exc
 

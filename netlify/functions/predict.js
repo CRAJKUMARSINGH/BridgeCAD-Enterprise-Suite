@@ -1,11 +1,13 @@
 exports.handler = async (event) => {
+  const privateHeaders = { "cache-control": "no-store" };
+  const jsonFailure = (statusCode, error) => ({
+    statusCode,
+    headers: { ...privateHeaders, "content-type": "application/json" },
+    body: JSON.stringify({ error }),
+  });
   const fastApiUrl = process.env.FASTAPI_URL;
   if (!fastApiUrl) {
-    return {
-      statusCode: 501,
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ error: "Live Python generation is not configured. Use the review catalogue or set FASTAPI_URL." }),
-    };
+    return jsonFailure(501, "Live generation is unavailable. You can use live drafting in this browser.");
   }
 
   try {
@@ -16,17 +18,19 @@ exports.handler = async (event) => {
       headers: { "content-type": event.headers["content-type"] || event.headers["Content-Type"] || "" },
       body: event.body ? Buffer.from(event.body, event.isBase64Encoded ? "base64" : "utf8") : undefined,
     });
+    if (upstream.status >= 500) return jsonFailure(upstream.status, "The drawing service could not complete the request.");
     const arrayBuffer = await upstream.arrayBuffer();
     return {
       statusCode: upstream.status,
       isBase64Encoded: true,
       headers: {
+        ...privateHeaders,
         "content-type": upstream.headers.get("content-type") || "application/octet-stream",
         "content-disposition": upstream.headers.get("content-disposition") || "attachment",
       },
       body: Buffer.from(arrayBuffer).toString("base64"),
     };
-  } catch (error) {
-    return { statusCode: 502, body: JSON.stringify({ error: error instanceof Error ? error.message : "FastAPI proxy failed" }) };
+  } catch {
+    return jsonFailure(502, "The drawing service is unavailable.");
   }
 };

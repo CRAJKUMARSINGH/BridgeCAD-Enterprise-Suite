@@ -17,8 +17,9 @@
 | CI lint | Ruff 0.6.0 over `packages/`, `apps/` and `scripts/` | Fails. The tagged baseline has 133 findings. The Phase 0 snapshot has 504, including findings in entry points moved into those directories |
 | CI unit and integration selection | CI test selection with fail-fast enabled and the Hypothesis collection plugin disabled for this run | 222 passed before the first failure. `Asset_S4_SingleSpan_6m` extends past the A3 frame. The same assertion failed on the tagged baseline |
 | CI workspace setup | Resolve all editable member packages and the root project in one pip invocation | Clean-environment resolver dry run passed. The first PR run failed during ordered installation because `bridgecad-export` requires the local `bridgecad-qa` package |
+| Published schema | `python scripts/export_project_schema.py --check` | Passed locally after regenerating the checked-in schema from the existing model. GitHub's interoperability job had stopped at the stale-schema check |
 | Reference drawings | `python scripts/capture_release_baseline.py` with the tagged archive and `--repeat-drawings` | Three fixtures generated 11 DXFs each. The two runs differed in each fixture's hash manifest |
-| Remote phase gate | CI run and merged Phase 0 pull request | Pending |
+| Remote phase gate | [Phase 0 draft PR](https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/pull/1) | Base collection and documentation passed on GitHub after the installer fix. Broader CI and merge remain open |
 
 The source revision, timings, and SHA-256 values are in `audit/baseline.json`.
 

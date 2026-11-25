@@ -32,7 +32,6 @@
         "approach_gradient_pct": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -93,7 +92,6 @@
         "approach_slope_width_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -153,7 +151,6 @@
         "left_approach_length_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -182,7 +179,6 @@
         "retaining_wall_height_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -229,7 +225,6 @@
         "right_approach_length_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -243,7 +238,6 @@
         "shoulder_width_left_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -257,7 +251,6 @@
         "shoulder_width_right_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -277,7 +270,6 @@
         "soil_embankment_unit_weight_kN_m3": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -306,7 +298,6 @@
         "transition_curve_length_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -392,7 +383,6 @@
         "design_load_kn": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,10}|(?=[\\d.]{1,13}0*$)\\d{0,10}\\.\\d{0,2}0*$)",
               "type": "string"
             },
             {
@@ -441,7 +431,6 @@
         "pot_pressure_mpa": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,10}|(?=[\\d.]{1,13}0*$)\\d{0,10}\\.\\d{0,2}0*$)",
               "type": "string"
             },
             {
@@ -499,7 +488,6 @@
         "spherical_rotation_rad": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,7}|(?=[\\d.]{1,13}0*$)\\d{0,7}\\.\\d{0,5}0*$)",
               "type": "string"
             },
             {
@@ -528,6 +516,21 @@
       "additionalProperties": false,
       "description": "Sheet 10: BEARINGS_JOINTS — bearing schedule + expansion joint schedule.",
       "properties": {
+        "bearing_clearance_mm": {
+          "anyOf": [
+            {
+              "maximum": 2000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Bearing edge clearance to seat, mm",
+          "title": "Bearing Clearance Mm"
+        },
         "bearing_schedule": {
           "description": "One entry per distinct bearing group in the bridge",
           "items": {
@@ -535,6 +538,73 @@
           },
           "title": "Bearing Schedule",
           "type": "array"
+        },
+        "bearing_seat_width_mm": {
+          "anyOf": [
+            {
+              "maximum": 5000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Bearing seat (clear width at soffit level), mm",
+          "title": "Bearing Seat Width Mm"
+        },
+        "bearing_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "ELASTOMERIC_NEOPRENE",
+                "ELASTOMERIC_NATURAL_RUBBER",
+                "ELASTOMERIC_NITRILE",
+                "ELASTOMERIC_POLYURETHANE",
+                "POT_PTFE",
+                "POT_ELASTOMERIC",
+                "SPHERICAL_PTFE",
+                "SPHERICAL_ROLLER",
+                "DISC_SPRING",
+                "ROCKER_STEEL",
+                "ROLLER_KNIFE_EDGE",
+                "ROLLER_BASCOPE",
+                "KNIFE_EDGE",
+                "GUIDE_BEARING",
+                "FIXED_BEARING",
+                "FREE_BEARING",
+                "COMPOSITE_LAMINATED",
+                "HINGE_BEARING",
+                "TENSION_BEARING",
+                "ISOLATOR_LRB_LEAD_RUBBER",
+                "ISOLATOR_HDRB_HIGH_DAMPING_RUBBER",
+                "ISOLATOR_FRICTION_PENDULUM"
+              ],
+              "title": "BearingType",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Primary bearing system class for the deck"
+        },
+        "design_movement_mm": {
+          "anyOf": [
+            {
+              "maximum": 3000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Design thermal / seismic movement demand, mm",
+          "title": "Design Movement Mm"
         },
         "expansion_joint_schedule": {
           "description": "One entry per distinct expansion joint location",
@@ -571,6 +641,18 @@
           "default": null,
           "description": "General notes on expansion joint sequencing, sealing type",
           "title": "Notes Joints"
+        },
+        "restrained_longitudinal": {
+          "default": false,
+          "description": "True = longitudinal movement restrained at this bearing",
+          "title": "Restrained Longitudinal",
+          "type": "boolean"
+        },
+        "restrained_transverse": {
+          "default": false,
+          "description": "True = transverse movement restrained at this bearing",
+          "title": "Restrained Transverse",
+          "type": "boolean"
         },
         "total_bearings_quantity": {
           "readOnly": true,
@@ -651,7 +733,10 @@
             "HYBRID_STEEL_CONCRETE",
             "MOVABLE_BRIDGE_BASCULE",
             "MOVABLE_BRIDGE_SWING",
-            "MOVABLE_BRIDGE_LIFT"
+            "MOVABLE_BRIDGE_LIFT",
+            "BOX_CELL_MULTI",
+            "RCC_ARCH_OPEN_SPANDREL",
+            "PRECAST_ARCH"
           ],
           "title": "SuperstructureType",
           "type": "string"
@@ -1091,7 +1176,6 @@
         "concrete_volume_foundation_cum": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -1105,7 +1189,6 @@
         "concrete_volume_substructure_cum": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -1119,7 +1202,6 @@
         "concrete_volume_superstructure_cum": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -1163,7 +1245,6 @@
         "deck_area_sqm": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -1177,7 +1258,6 @@
         "deflection_check_ratio_live_load": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,8}|(?=[\\d.]{1,13}0*$)\\d{0,8}\\.\\d{0,4}0*$)",
               "type": "string"
             },
             {
@@ -1281,7 +1361,6 @@
         "freeboard_actual_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,8}|(?=[\\d.]{1,13}0*$)\\d{0,8}\\.\\d{0,4}0*$)",
               "type": "string"
             },
             {
@@ -1295,7 +1374,6 @@
         "horizontal_clearance_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -1391,7 +1469,6 @@
         "minimum_vertical_clearance_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -1418,7 +1495,6 @@
         "prestress_tonnes_approx": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -1432,7 +1508,6 @@
         "rebar_weight_tonnes_approx": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -1479,7 +1554,6 @@
         "seismic_coeff_applied": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,7}|(?=[\\d.]{1,13}0*$)\\d{0,7}\\.\\d{0,5}0*$)",
               "type": "string"
             },
             {
@@ -1508,7 +1582,6 @@
         "span_depth_ratio": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -1557,7 +1630,6 @@
         "total_estimated_quantity_cost_inr": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,18}|(?=[\\d.]{1,21}0*$)\\d{0,18}\\.\\d{0,2}0*$)",
               "type": "string"
             },
             {
@@ -1571,7 +1643,6 @@
         "total_length_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -1620,7 +1691,6 @@
         "drainage_spout_spacing_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -1774,7 +1844,6 @@
         "standard_drainage_spout_spacing_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -2219,7 +2288,6 @@
         "drawing_rotation_deg": {
           "default": "0.0",
           "description": "Plot rotation angle (degrees, CCW positive)",
-          "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,4}|(?=[\\d.]{1,7}0*$)\\d{0,4}\\.\\d{0,2}0*$)",
           "title": "Drawing Rotation Deg",
           "type": "string"
         },
@@ -2528,7 +2596,6 @@
         "lineweight_scale_factor": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -2760,7 +2827,6 @@
         "text_height_scale_factor": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -2970,7 +3036,6 @@
         "transverse_length_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -3010,7 +3075,6 @@
         "bearing_capacity_kpa": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,10}|(?=[\\d.]{1,13}0*$)\\d{0,10}\\.\\d{0,2}0*$)",
               "type": "string"
             },
             {
@@ -3057,10 +3121,52 @@
           "default": null,
           "description": "Soil classification for bearing purpose"
         },
+        "cell_clear_m": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Clear cell dimension of the box-cell unit, m (booklet 004: 5.0)",
+          "title": "Cell Clear M"
+        },
+        "cell_haunch_mm": {
+          "anyOf": [
+            {
+              "maximum": 3000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Internal corner haunch size, mm (004: 500)",
+          "title": "Cell Haunch Mm"
+        },
+        "cell_wall_mm": {
+          "anyOf": [
+            {
+              "maximum": 3000,
+              "minimum": 100,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Box-cell wall thickness, mm (004: 500)",
+          "title": "Cell Wall Mm"
+        },
         "combined_footing_length_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -3074,7 +3180,6 @@
         "combined_footing_width_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -3085,10 +3190,22 @@
           "description": "Combined footing width (transverse), m",
           "title": "Combined Footing Width M"
         },
+        "cutoff_wall_depth_m": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Detached cut-off wall depth below the bed, m (004)",
+          "title": "Cutoff Wall Depth M"
+        },
         "factor_of_safety_on_bearing": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -3098,6 +3215,19 @@
           "default": null,
           "description": "Factor of safety against bearing failure (>=2.5 IRC)",
           "title": "Factor Of Safety On Bearing"
+        },
+        "footing_bottom_rl_m": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "EXPLICITLY SUPPLIED founding RL (underside of the footing/pile cap), m. This is a designed level, not a rule-of-thumb embedment: when supplied WITH a footing depth the canonical support-level contract becomes LEVEL_CONTROLLED and the shaft height is derived from it. Left unset the contract stays HEIGHT_CONTROLLED and only PROPOSES a founding RL.",
+          "title": "Footing Bottom Rl M"
         },
         "ground_improvement": {
           "anyOf": [
@@ -3138,7 +3268,6 @@
         "open_depth_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -3172,7 +3301,6 @@
         "open_length_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -3192,7 +3320,6 @@
         "open_width_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -3246,7 +3373,6 @@
         "pile_cutoff_level_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,8}|(?=[\\d.]{1,13}0*$)\\d{0,8}\\.\\d{0,4}0*$)",
               "type": "string"
             },
             {
@@ -3319,7 +3445,6 @@
         "pile_length_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -3363,7 +3488,6 @@
         "pile_spacing_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -3415,6 +3539,21 @@
           ],
           "default": null,
           "description": "Pile installation family (Bored/Driven/Under-reamed/Micro/Compaction)"
+        },
+        "piles_per_abutment": {
+          "anyOf": [
+            {
+              "maximum": 40,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Number of piles supporting a single abutment (transverse row)",
+          "title": "Piles Per Abutment"
         },
         "piles_per_pier": {
           "anyOf": [
@@ -3598,10 +3737,40 @@
           "default": null,
           "description": "Number of under-ream bulbs (0/1/2/3) for under-reamed piles"
         },
+        "unit_cell_counts": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cells per box-cell unit, e.g. [4, 3, 4] (004)",
+          "title": "Unit Cell Counts"
+        },
+        "unit_joint_mm": {
+          "anyOf": [
+            {
+              "maximum": 2000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Construction joint between box-cell units, mm (004: 100)",
+          "title": "Unit Joint Mm"
+        },
         "well_cap_width_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -3615,7 +3784,6 @@
         "well_curb_height_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -3674,7 +3842,6 @@
         "well_depth_below_bed_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -3688,7 +3855,6 @@
         "well_diameter_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -3741,7 +3907,6 @@
         "well_sump_depth_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -3781,7 +3946,6 @@
         "bearing_pad_spacing_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -3833,14 +3997,12 @@
         "carriageway_width_m": {
           "default": null,
           "description": "Through carriageway width, metres (curb-face to curb-face)",
-          "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
           "title": "Carriageway Width M",
           "type": "string"
         },
         "chainage_end_km": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,6}|(?=[\\d.]{1,13}0*$)\\d{0,6}\\.\\d{0,6}0*$)",
               "type": "string"
             },
             {
@@ -3854,7 +4016,6 @@
         "chainage_start_km": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,6}|(?=[\\d.]{1,13}0*$)\\d{0,6}\\.\\d{0,6}0*$)",
               "type": "string"
             },
             {
@@ -3908,7 +4069,6 @@
         "crash_barrier_width_left_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -3922,7 +4082,6 @@
         "crash_barrier_width_right_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -3951,7 +4110,6 @@
         "curve_radius_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -3971,7 +4129,6 @@
         "footpath_left_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -3985,7 +4142,6 @@
         "footpath_right_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -4022,7 +4178,6 @@
         "gradient_pct": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -4036,7 +4191,6 @@
         "horizontal_curve_R_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -4096,7 +4250,6 @@
         "kerb_width_left_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -4110,7 +4263,6 @@
         "kerb_width_right_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -4124,7 +4276,6 @@
         "left_ditch_width_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -4138,7 +4289,6 @@
         "median_barrier_width_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -4176,7 +4326,6 @@
         "median_width_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -4194,7 +4343,6 @@
           "type": "boolean"
         },
         "overall_width_m": {
-          "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
           "readOnly": true,
           "title": "Overall Width M",
           "type": "string"
@@ -4238,7 +4386,6 @@
         "right_ditch_width_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -4269,7 +4416,6 @@
         "service_road_left_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -4283,7 +4429,6 @@
         "service_road_right_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -4321,7 +4466,6 @@
         "skew_angle_deg": {
           "default": "0.0",
           "description": "Angle between normal to alignment and pier line, degrees (0..60 IRC limit)",
-          "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,3}|(?=[\\d.]{1,6}0*$)\\d{0,3}\\.\\d{0,2}0*$)",
           "title": "Skew Angle Deg",
           "type": "string"
         },
@@ -4348,7 +4492,6 @@
         "span_lengths_m": {
           "description": "Individual span lengths, metres (order from Abutment-1 to Abutment-2)",
           "items": {
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "type": "string"
           },
           "title": "Span Lengths M",
@@ -4357,7 +4500,6 @@
         "superelevation_pct": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -4389,7 +4531,6 @@
           "description": "Rotation axis for superelevation transition (centre/inner-edge)"
         },
         "total_length_m": {
-          "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
           "readOnly": true,
           "title": "Total Length M",
           "type": "string"
@@ -4439,7 +4580,6 @@
         "vertical_curve_passing_R_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -4487,7 +4627,6 @@
         "actual_soffit_level_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,8}|(?=[\\d.]{1,13}0*$)\\d{0,8}\\.\\d{0,4}0*$)",
               "type": "string"
             },
             {
@@ -4533,7 +4672,6 @@
         "afflux_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,8}|(?=[\\d.]{1,13}0*$)\\d{0,8}\\.\\d{0,4}0*$)",
               "type": "string"
             },
             {
@@ -4615,7 +4753,6 @@
         "catchment_area_sqkm": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -4626,10 +4763,15 @@
           "description": "Catchment / drainage area up to site, km^2",
           "title": "Catchment Area Sqkm"
         },
+        "debris_prone": {
+          "default": false,
+          "description": "True = waterway prone to debris / floating log accumulation",
+          "title": "Debris Prone",
+          "type": "boolean"
+        },
         "design_discharge_cumecs": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -4643,7 +4785,6 @@
         "design_scour_depth_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -4749,7 +4890,6 @@
         "freeboard_actual_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
               "type": "string"
             },
             {
@@ -4792,7 +4932,6 @@
         "freeboard_m": {
           "default": "2.0",
           "description": "Freeboard to be maintained above HFL to deck soffit (m)",
-          "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,5}|(?=[\\d.]{1,9}0*$)\\d{0,5}\\.\\d{0,3}0*$)",
           "title": "Freeboard M",
           "type": "string"
         },
@@ -4829,7 +4968,6 @@
         "hfl_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,8}|(?=[\\d.]{1,13}0*$)\\d{0,8}\\.\\d{0,4}0*$)",
               "type": "string"
             },
             {
@@ -4916,7 +5054,6 @@
         "lacey_silt_factor": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,8}|(?=[\\d.]{1,13}0*$)\\d{0,8}\\.\\d{0,4}0*$)",
               "type": "string"
             },
             {
@@ -4930,7 +5067,6 @@
         "lwl_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,8}|(?=[\\d.]{1,13}0*$)\\d{0,8}\\.\\d{0,4}0*$)",
               "type": "string"
             },
             {
@@ -4944,7 +5080,6 @@
         "max_afflux_allowable_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -4955,10 +5090,22 @@
           "description": "Maximum allowable afflux per IRC:5, m (typical 0.3 m)",
           "title": "Max Afflux Allowable M"
         },
+        "max_velocity_ms": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Design waterway / channel velocity, m/s",
+          "title": "Max Velocity Ms"
+        },
         "normal_wl_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,8}|(?=[\\d.]{1,13}0*$)\\d{0,8}\\.\\d{0,4}0*$)",
               "type": "string"
             },
             {
@@ -4999,7 +5146,6 @@
         "regime_depth_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -5013,7 +5159,6 @@
         "regime_perimeter_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -5027,7 +5172,6 @@
         "regime_velocity_mps": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,8}|(?=[\\d.]{1,13}0*$)\\d{0,8}\\.\\d{0,4}0*$)",
               "type": "string"
             },
             {
@@ -5165,7 +5309,6 @@
         "river_bed_slope_m_per_km": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,8}|(?=[\\d.]{1,13}0*$)\\d{0,8}\\.\\d{0,4}0*$)",
               "type": "string"
             },
             {
@@ -5271,7 +5414,6 @@
         "scour_level_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,8}|(?=[\\d.]{1,13}0*$)\\d{0,8}\\.\\d{0,4}0*$)",
               "type": "string"
             },
             {
@@ -5372,6 +5514,26 @@
           ],
           "default": null,
           "description": "Scour analysis model: Lacey / Regime / USGS / Pelton"
+        },
+        "scour_zone": {
+          "anyOf": [
+            {
+              "description": "Design scour severity class at the foundation.",
+              "enum": [
+                "NONE",
+                "MINOR",
+                "MODERATE",
+                "SEVERE"
+              ],
+              "title": "ScourZone",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Design scour severity class at the foundation"
         },
         "sediment_load_transport": {
           "anyOf": [
@@ -5605,7 +5767,6 @@
         "waterway_provided_m2": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -5619,7 +5780,6 @@
         "waterway_required_m2": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -6302,6 +6462,14 @@
           "default": null,
           "description": "Expansion joint sealant substance type"
         },
+        "max_temp_c": {
+          "default": 35.0,
+          "description": "Maximum service temperature, deg C",
+          "maximum": 60.0,
+          "minimum": -10.0,
+          "title": "Max Temp C",
+          "type": "number"
+        },
         "metal_parapet_finish": {
           "anyOf": [
             {
@@ -6315,6 +6483,14 @@
           "default": null,
           "description": "Metal parapet finish description (Hot-dip galvanized + paint / powder coated)",
           "title": "Metal Parapet Finish"
+        },
+        "min_temp_c": {
+          "default": -5.0,
+          "description": "Minimum service temperature, deg C",
+          "maximum": 30.0,
+          "minimum": -40.0,
+          "title": "Min Temp C",
+          "type": "number"
         },
         "mortar_type": {
           "anyOf": [
@@ -6493,6 +6669,11 @@
           "title": "SteelGrade",
           "type": "string"
         },
+        "temp_range_c": {
+          "readOnly": true,
+          "title": "Temp Range C",
+          "type": "number"
+        },
         "waterproofing_membrane": {
           "anyOf": [
             {
@@ -6643,7 +6824,8 @@
         "reinforcement_steel_grade",
         "prestressing_steel",
         "bearing_type",
-        "expansion_joint_type"
+        "expansion_joint_type",
+        "temp_range_c"
       ],
       "title": "Materials",
       "type": "object"
@@ -6676,7 +6858,6 @@
         "chainage_km": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,6}|(?=[\\d.]{1,13}0*$)\\d{0,6}\\.\\d{0,6}0*$)",
               "type": "string"
             },
             {
@@ -6719,6 +6900,12 @@
             "OTHER"
           ],
           "title": "ClientType",
+          "type": "string"
+        },
+        "code_profile": {
+          "default": "aashto_lrfd",
+          "description": "Jurisdiction code profile name (profiles/*.yaml) driving rule constants",
+          "title": "Code Profile",
           "type": "string"
         },
         "consultant": {
@@ -6955,7 +7142,6 @@
         "ground_level_rl_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,8}|(?=[\\d.]{1,13}0*$)\\d{0,8}\\.\\d{0,4}0*$)",
               "type": "string"
             },
             {
@@ -6991,7 +7177,6 @@
         "latitude_deg": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,5}|(?=[\\d.]{1,13}0*$)\\d{0,5}\\.\\d{0,7}0*$)",
               "type": "string"
             },
             {
@@ -7005,7 +7190,6 @@
         "longitude_deg": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,5}|(?=[\\d.]{1,13}0*$)\\d{0,5}\\.\\d{0,7}0*$)",
               "type": "string"
             },
             {
@@ -7093,7 +7277,6 @@
         "road_level_rl_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,8}|(?=[\\d.]{1,13}0*$)\\d{0,8}\\.\\d{0,4}0*$)",
               "type": "string"
             },
             {
@@ -7230,7 +7413,6 @@
         "total_estimated_cost_inr": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,16}|(?=[\\d.]{1,19}0*$)\\d{0,16}\\.\\d{0,2}0*$)",
               "type": "string"
             },
             {
@@ -7288,10 +7470,90 @@
       "title": "ProjectMaster",
       "type": "object"
     },
+    "SeismicData": {
+      "additionalProperties": false,
+      "description": "Seismic demand parameters. Defaults represent a non-seismic zone.",
+      "properties": {
+        "importance_factor": {
+          "default": 1.0,
+          "description": "Seismic importance factor I",
+          "maximum": 2.0,
+          "minimum": 0.5,
+          "title": "Importance Factor",
+          "type": "number"
+        },
+        "pga_g": {
+          "default": 0.0,
+          "description": "Peak ground acceleration, g",
+          "maximum": 1.5,
+          "minimum": 0.0,
+          "title": "Pga G",
+          "type": "number"
+        },
+        "response_modifier_r": {
+          "default": 3.0,
+          "description": "Response reduction factor R",
+          "maximum": 6.0,
+          "minimum": 1.0,
+          "title": "Response Modifier R",
+          "type": "number"
+        },
+        "seat_width_seismic_mm": {
+          "default": 0.0,
+          "description": "Minimum bearing seat width under seismic, mm (0 = derive)",
+          "maximum": 2000.0,
+          "minimum": 0.0,
+          "title": "Seat Width Seismic Mm",
+          "type": "number"
+        },
+        "site_class": {
+          "default": "C",
+          "description": "Site class for response spectrum",
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F"
+          ],
+          "title": "SeismicSiteClass",
+          "type": "string"
+        },
+        "zone": {
+          "default": "ZONE_0_NON_SEISMIC",
+          "description": "Seismic zone per IS 1893 (ZONE_0 = non-seismic)",
+          "enum": [
+            "ZONE_II",
+            "ZONE_III",
+            "ZONE_IV",
+            "ZONE_V",
+            "ZONE_0_NON_SEISMIC"
+          ],
+          "title": "SeismicZone",
+          "type": "string"
+        }
+      },
+      "title": "SeismicData",
+      "type": "object"
+    },
     "Substructure": {
       "additionalProperties": false,
       "description": "Sheet 5: SUBSTRUCTURE — piers, abutments, wings, returns, backfill.",
       "properties": {
+        "abutment_back_batter_1n": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Abutment back (earthside, dirt-wall side) batter, 1:n — steeper than the face batter (LISP ALBB/ARBB, default 3)",
+          "title": "Abutment Back Batter 1N"
+        },
         "abutment_backfill_spec": {
           "anyOf": [
             {
@@ -7321,10 +7583,67 @@
           "default": null,
           "description": "Backfill material gradation class behind abutment"
         },
+        "abutment_cap_depth_mm": {
+          "anyOf": [
+            {
+              "maximum": 1200,
+              "minimum": 300,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Abutment cap depth, mm (bearing-shelf vertical depth, IRC:21 min 450)",
+          "title": "Abutment Cap Depth Mm"
+        },
+        "abutment_cap_projection_front_mm": {
+          "anyOf": [
+            {
+              "maximum": 600,
+              "minimum": 150,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cap front projection beyond the shaft face (bearing shelf), mm",
+          "title": "Abutment Cap Projection Front Mm"
+        },
+        "abutment_cap_projection_rear_mm": {
+          "anyOf": [
+            {
+              "maximum": 600,
+              "minimum": 100,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cap rear projection beyond the shaft face (dirt wall seat), mm",
+          "title": "Abutment Cap Projection Rear Mm"
+        },
+        "abutment_face_batter_1n": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Abutment face (riverside) batter, 1:n — horizontal run = height/n; larger n is gentler (LISP ALFB/ARFB, default 10)",
+          "title": "Abutment Face Batter 1N"
+        },
         "abutment_height_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -7338,7 +7657,6 @@
         "abutment_length_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -7348,6 +7666,66 @@
           "default": null,
           "description": "Abutment transverse length (road width +), m",
           "title": "Abutment Length M"
+        },
+        "abutment_link_dia_mm": {
+          "anyOf": [
+            {
+              "maximum": 16,
+              "minimum": 8,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Abutment shaft link diameter, mm",
+          "title": "Abutment Link Dia Mm"
+        },
+        "abutment_link_spacing_mm": {
+          "anyOf": [
+            {
+              "maximum": 300,
+              "minimum": 100,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Abutment shaft link spacing c/c, mm (max 200)",
+          "title": "Abutment Link Spacing Mm"
+        },
+        "abutment_main_bar_dia_mm": {
+          "anyOf": [
+            {
+              "maximum": 32,
+              "minimum": 12,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Abutment shaft main bar diameter, mm",
+          "title": "Abutment Main Bar Dia Mm"
+        },
+        "abutment_main_bar_spacing_mm": {
+          "anyOf": [
+            {
+              "maximum": 300,
+              "minimum": 100,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Abutment shaft main bar spacing c/c, mm (max 200)",
+          "title": "Abutment Main Bar Spacing Mm"
         },
         "abutment_material": {
           "description": "Abutment concrete grade",
@@ -7373,7 +7751,6 @@
         "abutment_pedestal_height_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -7439,7 +7816,6 @@
         "abutment_width_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -7453,7 +7829,6 @@
         "approach_slab_length_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -7523,10 +7898,140 @@
           "description": "Number of bearings supported on a single pier",
           "title": "Bearings Per Pier"
         },
+        "cap_main_bar_dia_mm": {
+          "anyOf": [
+            {
+              "maximum": 32,
+              "minimum": 12,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cap main bar diameter, mm",
+          "title": "Cap Main Bar Dia Mm"
+        },
+        "cap_main_bar_spacing_mm": {
+          "anyOf": [
+            {
+              "maximum": 300,
+              "minimum": 100,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cap main bar spacing c/c, mm (max 200)",
+          "title": "Cap Main Bar Spacing Mm"
+        },
+        "dirt_wall_height_m": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Dirt wall height, cap top to approach slab soffit, m",
+          "title": "Dirt Wall Height M"
+        },
+        "dirt_wall_horiz_bar_dia_mm": {
+          "anyOf": [
+            {
+              "maximum": 16,
+              "minimum": 8,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Dirt wall horizontal distribution bar diameter, mm",
+          "title": "Dirt Wall Horiz Bar Dia Mm"
+        },
+        "dirt_wall_horiz_bar_spacing_mm": {
+          "anyOf": [
+            {
+              "maximum": 300,
+              "minimum": 100,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Dirt wall horizontal bar spacing c/c, mm (max 200)",
+          "title": "Dirt Wall Horiz Bar Spacing Mm"
+        },
+        "dirt_wall_thickness_mm": {
+          "anyOf": [
+            {
+              "maximum": 400,
+              "minimum": 200,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Dirt (back) wall stem thickness, mm (min 200)",
+          "title": "Dirt Wall Thickness Mm"
+        },
+        "dirt_wall_vert_bar_dia_mm": {
+          "anyOf": [
+            {
+              "maximum": 25,
+              "minimum": 10,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Dirt wall vertical bar diameter, mm",
+          "title": "Dirt Wall Vert Bar Dia Mm"
+        },
+        "dirt_wall_vert_bar_spacing_mm": {
+          "anyOf": [
+            {
+              "maximum": 300,
+              "minimum": 100,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Dirt wall vertical bar spacing c/c, mm (max 200)",
+          "title": "Dirt Wall Vert Bar Spacing Mm"
+        },
+        "pier_batter_1n": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Pier face batter (1:n horizontal:vertical, LISP 'battr'); 0 = plumb (no batter)",
+          "title": "Pier Batter 1N"
+        },
         "pier_cap_depth_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -7540,7 +8045,6 @@
         "pier_cap_length_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -7578,7 +8082,6 @@
         "pier_cap_width_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -7592,7 +8095,6 @@
         "pier_diameter_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -7612,7 +8114,6 @@
         "pier_hammerhead_overhang_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -7626,7 +8127,6 @@
         "pier_height_typical_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -7661,7 +8161,6 @@
         "pier_pedestal_height_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -7675,7 +8174,6 @@
         "pier_shaft_length_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -7714,7 +8212,6 @@
         "pier_shaft_width_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -7805,7 +8302,6 @@
         "return_wall_height_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -7819,7 +8315,6 @@
         "return_wall_length_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -7857,10 +8352,37 @@
           "default": null,
           "description": "Return (rear) wall at abutment: Cantilever / Buttress / None"
         },
+        "weep_hole_diameter_mm": {
+          "anyOf": [
+            {
+              "maximum": 150,
+              "minimum": 50,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Weep hole diameter through the dirt wall, mm",
+          "title": "Weep Hole Diameter Mm"
+        },
+        "weep_hole_spacing_m": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Weep hole centre-to-centre spacing, m",
+          "title": "Weep Hole Spacing M"
+        },
         "well_cap_width_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -7874,7 +8396,6 @@
         "wing_wall_angle_deg": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,10}|(?=[\\d.]{1,13}0*$)\\d{0,10}\\.\\d{0,2}0*$)",
               "type": "string"
             },
             {
@@ -7888,7 +8409,6 @@
         "wing_wall_height_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -7902,7 +8422,6 @@
         "wing_wall_splay_length_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -7990,6 +8509,75 @@
           "default": null,
           "description": "Steel / rebar anti-corrosion system"
         },
+        "arch_block_count": {
+          "anyOf": [
+            {
+              "maximum": 60,
+              "minimum": 5,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precast-arch voussoir blocks along the arc (booklet 015: 27)",
+          "title": "Arch Block Count"
+        },
+        "arch_ring_thickness_mm": {
+          "anyOf": [
+            {
+              "maximum": 800,
+              "minimum": 250,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Arch rib / ring thickness, mm (014: 350, 015: 400)",
+          "title": "Arch Ring Thickness Mm"
+        },
+        "arch_rise_mm": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Arch rise H in mm, springing to crown soffit",
+          "title": "Arch Rise Mm"
+        },
+        "arch_schedule_mm": {
+          "anyOf": [
+            {
+              "items": {
+                "maxItems": 2,
+                "minItems": 2,
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "type": "array"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Arch soffit coordinate schedule (x, y) in mm, x measured from the springing.  Floats: the booklet's pitch is 1045.833 mm.",
+          "title": "Arch Schedule Mm"
+        },
         "arch_shape_type": {
           "anyOf": [
             {
@@ -8019,10 +8607,52 @@
           "default": null,
           "description": "Arch rib shape type (Parabolic/Circular/Tied/Deck/Through)"
         },
+        "arch_strip_count": {
+          "anyOf": [
+            {
+              "maximum": 6,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precast-arch strips across the width (booklet 015: 3)",
+          "title": "Arch Strip Count"
+        },
+        "arch_strip_gap_mm": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Precast-arch strip joint gap in mm (booklet 015: 100)",
+          "title": "Arch Strip Gap Mm"
+        },
+        "bearing_depth_mm": {
+          "anyOf": [
+            {
+              "maximum": 2000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Vertical depth of the bearing unit itself (pad/pot height), millimetres. This is the SEPARATE piece above the pedestal: the canonical support-level contract subtracts bearing_depth + pedestal_height once. Unset = not yet declared; 0 = a monolithic/integral joint with no bearing pad.",
+          "title": "Bearing Depth Mm"
+        },
         "bearing_shelf_width_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -8107,7 +8737,6 @@
         "cantilever_overhang_left_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -8121,7 +8750,6 @@
         "cantilever_overhang_right_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -8274,7 +8902,6 @@
         "drainage_spacing_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -8343,7 +8970,6 @@
         "girder_spacing_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -8562,10 +9188,24 @@
           "default": null,
           "description": "Deck slab structural behaviour (Solid / Voided / Ribbed / HollowCore)"
         },
+        "spandrel_wall_thickness_mm": {
+          "anyOf": [
+            {
+              "maximum": 800,
+              "minimum": 200,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Open-spandrel wall thickness, mm (booklet 015: 400)",
+          "title": "Spandrel Wall Thickness Mm"
+        },
         "stay_sag_ratio_for_cable": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,8}|(?=[\\d.]{1,13}0*$)\\d{0,8}\\.\\d{0,4}0*$)",
               "type": "string"
             },
             {
@@ -8607,7 +9247,6 @@
         "transverse_diaphragm_spacing_m": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -8683,7 +9322,10 @@
             "HYBRID_STEEL_CONCRETE",
             "MOVABLE_BRIDGE_BASCULE",
             "MOVABLE_BRIDGE_SWING",
-            "MOVABLE_BRIDGE_LIFT"
+            "MOVABLE_BRIDGE_LIFT",
+            "BOX_CELL_MULTI",
+            "RCC_ARCH_OPEN_SPANDREL",
+            "PRECAST_ARCH"
           ],
           "title": "SuperstructureType",
           "type": "string"
@@ -8717,6 +9359,12 @@
           ],
           "default": null,
           "description": "Deck waterproofing membrane product type"
+        },
+        "wearing_coat_continuous_over_approach": {
+          "default": false,
+          "description": "Wearing coat runs end to end over both approach slabs (patch guide #1)",
+          "title": "Wearing Coat Continuous Over Approach",
+          "type": "boolean"
         },
         "wearing_coat_grade": {
           "anyOf": [
@@ -8761,7 +9409,6 @@
         "wearing_coat_slope_pct": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,9}|(?=[\\d.]{1,13}0*$)\\d{0,9}\\.\\d{0,3}0*$)",
               "type": "string"
             },
             {
@@ -8959,14 +9606,12 @@
         "score_0_to_100": {
           "default": "100.0",
           "description": "Composite quality score 0..100 (100 = perfect)",
-          "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,4}|(?=[\\d.]{1,7}0*$)\\d{0,4}\\.\\d{0,2}0*$)",
           "title": "Score 0 To 100",
           "type": "string"
         },
         "score_drawing_standards": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,10}|(?=[\\d.]{1,13}0*$)\\d{0,10}\\.\\d{0,2}0*$)",
               "type": "string"
             },
             {
@@ -8980,7 +9625,6 @@
         "score_geometry": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,10}|(?=[\\d.]{1,13}0*$)\\d{0,10}\\.\\d{0,2}0*$)",
               "type": "string"
             },
             {
@@ -8994,7 +9638,6 @@
         "score_hydraulic": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,10}|(?=[\\d.]{1,13}0*$)\\d{0,10}\\.\\d{0,2}0*$)",
               "type": "string"
             },
             {
@@ -9008,7 +9651,6 @@
         "score_irc05": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,10}|(?=[\\d.]{1,13}0*$)\\d{0,10}\\.\\d{0,2}0*$)",
               "type": "string"
             },
             {
@@ -9022,7 +9664,6 @@
         "score_irc21": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,10}|(?=[\\d.]{1,13}0*$)\\d{0,10}\\.\\d{0,2}0*$)",
               "type": "string"
             },
             {
@@ -9036,7 +9677,6 @@
         "score_ircsp55": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,10}|(?=[\\d.]{1,13}0*$)\\d{0,10}\\.\\d{0,2}0*$)",
               "type": "string"
             },
             {
@@ -9050,7 +9690,6 @@
         "score_materials": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,10}|(?=[\\d.]{1,13}0*$)\\d{0,10}\\.\\d{0,2}0*$)",
               "type": "string"
             },
             {
@@ -9064,7 +9703,6 @@
         "score_structural": {
           "anyOf": [
             {
-              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,10}|(?=[\\d.]{1,13}0*$)\\d{0,10}\\.\\d{0,2}0*$)",
               "type": "string"
             },
             {
@@ -9122,13 +9760,15 @@
       "$ref": "#/$defs/Materials"
     },
     "overall_bridge_width_m": {
-      "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
       "readOnly": true,
       "title": "Overall Bridge Width M",
       "type": "string"
     },
     "project_master": {
       "$ref": "#/$defs/ProjectMaster"
+    },
+    "seismic_data": {
+      "$ref": "#/$defs/SeismicData"
     },
     "span_count_propagated": {
       "readOnly": true,
@@ -9142,7 +9782,6 @@
       "$ref": "#/$defs/Superstructure"
     },
     "total_bridge_length_m": {
-      "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
       "readOnly": true,
       "title": "Total Bridge Length M",
       "type": "string"

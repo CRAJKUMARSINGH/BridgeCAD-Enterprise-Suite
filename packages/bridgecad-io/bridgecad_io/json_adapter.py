@@ -86,8 +86,9 @@ def _strip_computed(model_cls: type[BaseModel], data: object) -> object:
 
 def project_to_dict(project: BridgeProject, exclude: set[str] | None = None) -> dict[str, Any]:
     """BridgeProject → plain JSON-safe dict without computed fields."""
+    model_cls: type[BaseModel] = type(project)
     data: dict[str, Any] = project.model_dump(mode="json", exclude=exclude)
-    return _strip_computed(type(project), data)
+    return _strip_computed(model_cls, data)
 
 
 def project_from_dict(data: dict) -> Any:

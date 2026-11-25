@@ -48,12 +48,12 @@ jobs:
       # such as *.egg-info/, which repeat the author email from pyproject).
       - name: Check for PII in tracked source
         run: |
-          PII_PATTERNS='@hotmail\|@gmail\|+91[0-9]\{10\}'
+          PII_PATTERNS='[[:alnum:]_.%+-]+@([h]otmail|[g]mail)[.]com|[+]91[0-9]{10}'
           EXCLUDE_DIRS='{*.egg-info/*,*/.egg-info/*,egg-info/*,dist/*,build/*,vendor/*,03_outputs/*,outputs/*,node_modules/*,.venv/*,venv/*,__pycache__/*}'
           if command -v git >/dev/null 2>&1 && git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
             echo "[PII] Using git grep over tracked files only"
             EXIT_CODE=0
-            git grep -n "$PII_PATTERNS" ':(exclude,glob)**/*.egg-info/**' \
+            git grep -E -i -l "$PII_PATTERNS" ':(exclude,glob)**/*.egg-info/**' \
                                     ':(exclude,glob)**/vendor/**'        \
                                     ':(exclude,glob)**/03_outputs/**'   \
                                     ':(exclude,glob)**/outputs/**'       \
@@ -65,6 +65,7 @@ jobs:
               exit 1
             elif [ "$EXIT_CODE" -eq 1 ]; then
               echo "No PII found in git-tracked source."
+              exit 0
             else
               echo "[PII] git grep exit=$EXIT_CODE; falling back to find + grep"
             fi
@@ -73,7 +74,7 @@ jobs:
           find . -type f \
             \( -name "*.py" -o -name "*.md" -o -name "*.txt" -o -name "*.yaml" -o -name "*.yml" -o -name "*.json" -o -name "*.sh" -o -name "*.ps1" -o -name "*.toml" \) \
             ! -path "./$EXCLUDE_DIRS" \
-            -exec grep -l "$PII_PATTERNS" {} + 2>/dev/null || EXIT_CODE=$?
+            -exec grep -E -i -l "$PII_PATTERNS" {} + 2>/dev/null || EXIT_CODE=$?
           if [ "$EXIT_CODE" -eq 0 ]; then
             echo "::error::PII detected by fallback scan — see files above"
             exit 1

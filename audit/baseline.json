@@ -1,0 +1,142 @@
+{
+  "revision": "a488ea85b3f6b803659ec8d5e48079eb3d9885dc",
+  "python": "3.11.9",
+  "platform": "Windows",
+  "toolchain": {
+    "ezdxf": "1.4.5",
+    "pydantic": "2.14.4",
+    "pytest": "8.4.1"
+  },
+  "tracked_files": 1976,
+  "python_files": 443,
+  "python_lines": 103332,
+  "collection": {
+    "exit_code": 0,
+    "test_count": 1587,
+    "summary": "1587 tests collected in 3.72s",
+    "hypothesis_plugin": "disabled for the inventory"
+  },
+  "coverage": {
+    "source": "phase0-coverage.json",
+    "test_selection": "tests/unit against packages branch coverage",
+    "totals": {
+      "covered_lines": 5699,
+      "num_statements": 7472,
+      "percent_covered": 72.66503667481662,
+      "percent_covered_display": "72.67",
+      "missing_lines": 1773,
+      "excluded_lines": 12,
+      "percent_statements_covered": 76.27141327623126,
+      "percent_statements_covered_display": "76.27",
+      "num_branches": 708,
+      "num_partial_branches": 97,
+      "covered_branches": 245,
+      "missing_branches": 463,
+      "percent_branches_covered": 34.6045197740113,
+      "percent_branches_covered_display": "34.60"
+    }
+  },
+  "reference_drawings": {
+    "simple_12m": {
+      "wall_seconds": 1.303,
+      "sha256": {
+        "simple_12m_Sheet1_Plan.dxf": "8579c858cd7640cf2ae4333817e9c03ccaf12ba94dfae709f86ed70f10b5464b",
+        "simple_12m_Sheet2_LongSection.dxf": "0382f38026fe4ebedf6760e3b3af283e3c445a66522212ff613eae62a034e59d",
+        "simple_12m_Sheet3_CrossSection.dxf": "cbb15c0063a25b27e623fb4646aa15247eba15801a602b9316e8cde7d06d05ad",
+        "simple_12m_Sheet4_Foundation.dxf": "bcdd9e1888590155270e194ac884728dc14753f1fe5278ddac104adab78d5bcf",
+        "simple_12m_Sheet5_PierAbutment.dxf": "11f1b2862f1345f9f4b3c3f63932d5a7dc3cf7b09c792176a855dab64dbdba3e",
+        "simple_12m_Sheet5A_PierEnlarged.dxf": "6fa8b70091bc81f5911a6e05f1f3f8c4206eca899d026e3c12a514c05acfd7b5",
+        "simple_12m_Sheet5B_AbutEnlarged.dxf": "c88e3e793be59cbb411e8a1e34ffa482e73972035fd227cd06831f60afb75f5e",
+        "simple_12m_Sheet6_BearingsJoints.dxf": "3098234ce42dab12cc7ba8b19ae45282d163d4375fe53832819067ff5770a865",
+        "simple_12m_Sheet7_BOQ.dxf": "a6016d4f24bbf013ddf8130dbd5ccd676fa66a6608a912566bd5b5f81a2f1ea8",
+        "simple_12m_Sheet8_SideElevations.dxf": "a102d1681249d8ed9aea79798dd7b024cd8df66cc23118cc98b1e9618e3ab43e",
+        "simple_12m_Sheet9_Reinforcement.dxf": "bd5ba1cfeb7fc94acce9380c018de1fcc29670a71ba046fa76b1dc199f077ba9"
+      }
+    },
+    "continuous_3x12m": {
+      "wall_seconds": 1.21,
+      "sha256": {
+        "continuous_3x12m_Sheet1_Plan.dxf": "7dd840889c6c08eeca30bf10fb9d52101d40903b3457533749a6ee9766c439f0",
+        "continuous_3x12m_Sheet2_LongSection.dxf": "f86171737b5e62b8baaae9b78c2adb319b884e96d505bf9910b1aba97a61815f",
+        "continuous_3x12m_Sheet3_CrossSection.dxf": "304055c4ebda8d7c7ffc5238be5e38e831d0fb300d2b6e6103e52b9c3e6e21e4",
+        "continuous_3x12m_Sheet4_Foundation.dxf": "6716d499c204a85b597d9d817ecfb823a5ed1211075080c972774a9231939da1",
+        "continuous_3x12m_Sheet5_PierAbutment.dxf": "e675c519cf7510a21c49980607eaa77b6a88e70c5b412463544b86dbf30ff9e4",
+        "continuous_3x12m_Sheet5A_PierEnlarged.dxf": "1cf8111ce483fc6e96fac3d72df20afd03999248d7363398dd26049b2b31ac77",
+        "continuous_3x12m_Sheet5B_AbutEnlarged.dxf": "386b05bd7e4ba169848f72469f3841d5c2e832af9e54fec71f9d2c677ca3963c",
+        "continuous_3x12m_Sheet6_BearingsJoints.dxf": "51cbd64cb2ccdc77f3381dc894924f3ae65d9545fbbf9cd911aa1e0235efadac",
+        "continuous_3x12m_Sheet7_BOQ.dxf": "c991314b7d9d39a9ed287662a583d1880ecf5f11c0f1b4fd6c209c447440b902",
+        "continuous_3x12m_Sheet8_SideElevations.dxf": "b6909e4653ce0d5835e209daf730acb38a85186a105d76cc09cfa5800ac5de85",
+        "continuous_3x12m_Sheet9_Reinforcement.dxf": "11d2210c5f16b379598de65c533e64d24ecd479959fbfea9b38f7dbb49a4118c"
+      }
+    },
+    "girder_4x18m": {
+      "wall_seconds": 1.241,
+      "sha256": {
+        "girder_4x18m_Sheet1_Plan.dxf": "8ad1a4776c63e8db30dfc850239e1c6692a32d7a3b486ac1aa22556410a712d5",
+        "girder_4x18m_Sheet2_LongSection.dxf": "2d5e1a7a18f0dcecd5a2b94af6e11c82118af8b541cfd9c664075dbc6d13ed5e",
+        "girder_4x18m_Sheet3_CrossSection.dxf": "971bc71a7fa06b48e4738e47bf8d2b85c0fafe4b8365ed20fd9b99320904102a",
+        "girder_4x18m_Sheet4_Foundation.dxf": "9fb12bb0e62d449810296ccb2d16c22c16ca6aa6c6298aedaafb8dcb7600e46e",
+        "girder_4x18m_Sheet5_PierAbutment.dxf": "36596f0749b70841f3185194da44c30ae3e67d5e2021dd78829a447856a71bcb",
+        "girder_4x18m_Sheet5A_PierEnlarged.dxf": "9200e935aa86b258218232ceb4493ed489a434b864b23850795c5d71573a1d66",
+        "girder_4x18m_Sheet5B_AbutEnlarged.dxf": "ab52f65f5b651ed1fa8a3a126206921719d35ac87de3b1baf76f6aba41a1cbbd",
+        "girder_4x18m_Sheet6_BearingsJoints.dxf": "974ec83b28c6bdab675355644e167556ab20ed5d7d03532536da1db15c3344ec",
+        "girder_4x18m_Sheet7_BOQ.dxf": "3d8447d262e989f376c016c3d2b8bf7ef22a137f3930242ccc95eb949222a76a",
+        "girder_4x18m_Sheet8_SideElevations.dxf": "2c47deabd3f4199bb88132ab157c1736c6efe91465744c80f7f568798e41788e",
+        "girder_4x18m_Sheet9_Reinforcement.dxf": "24bcbe7dce65ac520ff0bba12bb7890e5f6aa992e29322542e36da26adb8b826"
+      }
+    }
+  },
+  "repeat_drawings": {
+    "simple_12m": {
+      "wall_seconds": 1.212,
+      "sha256": {
+        "simple_12m_Sheet1_Plan.dxf": "02572997b89761010e3dec138e8197044c4945bb88ead35860420a0deed11921",
+        "simple_12m_Sheet2_LongSection.dxf": "0dc09c309d032088e02ab6380c9025abb5a95150cf10bbde722441f2f16e7a7a",
+        "simple_12m_Sheet3_CrossSection.dxf": "72b246b14d9e58b54c9880cc2eb559487fb499acc2dccbfd6911f9b3767eca5d",
+        "simple_12m_Sheet4_Foundation.dxf": "0bee45546bb719582916ebad9665ede6bc9351c4baed502286ebc29686623ccf",
+        "simple_12m_Sheet5_PierAbutment.dxf": "84fe4769be5e61c867c9ce9703c2a0c4dfe94c035ada6c7b37fe7824cf19aacf",
+        "simple_12m_Sheet5A_PierEnlarged.dxf": "26bba5711f27120dd3f431537d8d8147ce08ea0767d33ff6ddac447a48785d90",
+        "simple_12m_Sheet5B_AbutEnlarged.dxf": "9ab6846eeee400d072d75bb49b30bc952dddde60d6c4e098ef76148875055b5e",
+        "simple_12m_Sheet6_BearingsJoints.dxf": "c25c663ddab841a7e38f91f82b5cb0640b46ce478ca8682a4c1d0b3dca421bc3",
+        "simple_12m_Sheet7_BOQ.dxf": "764dcd507684229b6af46a6dd4c47ecba315e9f130fa1e15bc30702f18959c1c",
+        "simple_12m_Sheet8_SideElevations.dxf": "de50441e2420ee095c404fe202eeae12a45d00827715355b056d376d247027d0",
+        "simple_12m_Sheet9_Reinforcement.dxf": "91e00ab3431abc782468fefa6b68547775d6df2f3cfe570829bb586e8857d0ec"
+      },
+      "identical": false
+    },
+    "continuous_3x12m": {
+      "wall_seconds": 1.205,
+      "sha256": {
+        "continuous_3x12m_Sheet1_Plan.dxf": "aa745ecc742c25607c4fce3683bb67472aaeb41d8100682cf1980e40820e2ff6",
+        "continuous_3x12m_Sheet2_LongSection.dxf": "8958dbd7ace54484754c259dd89fa5639ab3a7d08919b2546f1a8c1b638e130b",
+        "continuous_3x12m_Sheet3_CrossSection.dxf": "1e9169ff19d497628d585e3c88fc22787a5d4bf8e0fa93937618699be28aebf7",
+        "continuous_3x12m_Sheet4_Foundation.dxf": "3558ee3367906a37a8d27def76c3c038fe62806db52132cdd4597fc107f1c0bf",
+        "continuous_3x12m_Sheet5_PierAbutment.dxf": "3a78da3b08a2e5f5ef00939f883eb5ab7af6f403d46f0fa93a0d8d314aa48464",
+        "continuous_3x12m_Sheet5A_PierEnlarged.dxf": "39ef2600b4d91ae667fea3de933d0c57d92e2bbb072b0f57076e9b8cbadc1568",
+        "continuous_3x12m_Sheet5B_AbutEnlarged.dxf": "1f691a11c5929dafdf7ad18cb0f858d5608862b331b67c41cb41a21124aad66b",
+        "continuous_3x12m_Sheet6_BearingsJoints.dxf": "e44d08c604b1dfed24db31e0a867929f69514361c83be5c644a333471a2421c6",
+        "continuous_3x12m_Sheet7_BOQ.dxf": "9ce31a93ef76f45c0401dc1d2f5dbd07441b14e99b1fa73459ebf5c5c84155ac",
+        "continuous_3x12m_Sheet8_SideElevations.dxf": "8481fafa1e2394efb5d550675e65e6e5f547f5cbe1c487cf951c216f7aebbc9d",
+        "continuous_3x12m_Sheet9_Reinforcement.dxf": "12d067d645bb20c029bdb8039462785a5d36b4a12de1c077f28808b8cbcdc378"
+      },
+      "identical": false
+    },
+    "girder_4x18m": {
+      "wall_seconds": 1.242,
+      "sha256": {
+        "girder_4x18m_Sheet1_Plan.dxf": "d134c4053519a9f094d121c115017db0f64cf3dfab9b71ee18fe2338958fa070",
+        "girder_4x18m_Sheet2_LongSection.dxf": "7536736869c080583274384a33206b6ffbb6fc01293d863d76b5a31c7e13bff3",
+        "girder_4x18m_Sheet3_CrossSection.dxf": "b33a3362e9d2b88fd81cbe6c954e06f8fc569a877a704733c2dd39efed94f08b",
+        "girder_4x18m_Sheet4_Foundation.dxf": "c21ecd8b5666e000f4bc6475fa950a9039a3c907923b7a2a83d922b0a240fdd3",
+        "girder_4x18m_Sheet5_PierAbutment.dxf": "a51acfc2ef1940445bd81e8545f312ef4e603ce15e5b2fcada8bf3935dd51d80",
+        "girder_4x18m_Sheet5A_PierEnlarged.dxf": "bdb993a07a5526d3ff72bde70cfe1585e0b36333fa192a18e387a0b43d2ded9c",
+        "girder_4x18m_Sheet5B_AbutEnlarged.dxf": "dd86287cc64024a271e72f765640133e8c934828c686bcfeebfadf770bdef699",
+        "girder_4x18m_Sheet6_BearingsJoints.dxf": "3719ae3bab2d6caab8d53f27ddd99ff92d37e6b523365664d526ddfd2f4f082b",
+        "girder_4x18m_Sheet7_BOQ.dxf": "9e8bb7fbbdc99c7b139d66415fd0953a82655c46577ea74d5e0227ff5ad9b326",
+        "girder_4x18m_Sheet8_SideElevations.dxf": "b4a9cbcb6930de43562350ae380796e2a2cafa6c0705f009080f6ad6d9e26c6d",
+        "girder_4x18m_Sheet9_Reinforcement.dxf": "12cbd399c3b5128adbbb8f84dc4c613373518420bce9d16808b26e946af0ed9b"
+      },
+      "identical": false
+    }
+  }
+}

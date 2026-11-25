@@ -152,7 +152,6 @@ wing-report.json
 site/
 site-api/
 docs/guide.md
-docs/index.md
 docs/contributing.md
 docs/changelog.md
 docs/security.md

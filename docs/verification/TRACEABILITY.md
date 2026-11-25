@@ -7,7 +7,7 @@ name, on one row:
 1. its governing **standard** and **clause**,
 2. an **existing test node** (`path::function`) that exercises the identity, and
 3. an **existing V&V benchmark** registered in
-   [`tests/verification/cases.py`](../../tests/verification/cases.py).
+   [`tests/verification/cases.py`](https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/blob/main/tests/verification/cases.py).
 
 CI enforces "no gap": `tests/compliance/test_compliance_engine.py` fails if any
 `CHECK_IDS` entry is absent, under-specified, names a missing test, or points at

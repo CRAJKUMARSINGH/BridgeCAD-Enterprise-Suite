@@ -7,9 +7,13 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from .models import BridgeProject
 from .types import ConcreteGrade, SeismicZone, ValidationSeverity
+
+if TYPE_CHECKING:
+    from bridgecad_draw.layout_audit import LayoutAudit
 
 # ===========================================================================
 # Core data structures (unchanged from scaffold)
@@ -3478,7 +3482,7 @@ def _foundation_family(p: BridgeProject) -> str:
     ).upper()
 
 
-def _layout_audit(p: BridgeProject):
+def _layout_audit(p: BridgeProject) -> LayoutAudit | None:
     """Return the layout audit, or ``None`` when the draw package is absent."""
     try:
         from bridgecad_draw.layout_audit import collect

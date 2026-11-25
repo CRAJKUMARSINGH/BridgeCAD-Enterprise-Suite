@@ -85,7 +85,11 @@ def _sheet_to_dict(ws: Any) -> dict[str, Any]:
     return result
 
 
-def _model_sheet_parser(model_cls: Any, *, extra: Callable | None = None) -> Callable:
+SheetParser = Callable[[Any, Any, Any], dict[str, Any]]
+SheetExtras = Callable[[Any, dict[str, Any], Any, Any], dict[str, Any]]
+
+
+def _model_sheet_parser(model_cls: Any, *, extra: SheetExtras | None = None) -> SheetParser:
     """Build a parser that reads a flat ``Field | Value`` sheet into *model_cls*.
 
     Every flat field the model declares is read straight from the sheet, so the
@@ -112,7 +116,7 @@ def _model_sheet_parser(model_cls: Any, *, extra: Callable | None = None) -> Cal
     return _parse
 
 
-def _generic(model_name: str) -> Callable:
+def _generic(model_name: str) -> SheetParser:
     """A parser that reads a flat sheet straight into ``models.<model_name>``."""
 
     def _parse(ws: Any, m: Any, t: Any) -> dict[str, Any]:
@@ -370,7 +374,7 @@ _SHEET_ALIASES: dict[str, str] = {
     "s15": "S15",
 }
 
-_PARSERS = {
+_PARSERS: dict[str, SheetParser] = {
     # Bespoke parsers: the workbook's own spellings / multi-row layouts.
     "S01": _parse_project_master,
     "S02": _parse_bridge_selection,

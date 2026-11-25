@@ -20,22 +20,27 @@ from __future__ import annotations
 import json
 import typing
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any, overload
 
 from .exceptions import JsonParseError
 
+if TYPE_CHECKING:
+    from pydantic import BaseModel
 
-def _bp_cls() -> Any:
-    from bridgecad_core import BridgeProject
+    from bridgecad_core.models import BridgeProject
+
+
+def _bp_cls() -> type[BridgeProject]:
+    from bridgecad_core.models import BridgeProject
 
     return BridgeProject
 
 
-def _model_types(annotation: Any) -> list[type]:
+def _model_types(annotation: Any) -> list[type[BaseModel]]:
     """Return every pydantic model class reachable inside *annotation*."""
     from pydantic import BaseModel
 
-    out: list[type] = []
+    out: list[type[BaseModel]] = []
     if isinstance(annotation, type) and issubclass(annotation, BaseModel):
         out.append(annotation)
     for arg in typing.get_args(annotation):
@@ -43,7 +48,15 @@ def _model_types(annotation: Any) -> list[type]:
     return out
 
 
-def _strip_computed(model_cls: Any, data: Any) -> Any:
+@overload
+def _strip_computed(model_cls: type[BaseModel], data: dict[str, Any]) -> dict[str, Any]: ...
+
+
+@overload
+def _strip_computed(model_cls: type[BaseModel], data: object) -> object: ...
+
+
+def _strip_computed(model_cls: type[BaseModel], data: object) -> object:
     """Recursively drop computed-field keys that ``extra='forbid'`` would reject."""
     if not isinstance(data, dict):
         return data
@@ -62,7 +75,8 @@ def _strip_computed(model_cls: Any, data: Any) -> Any:
                     value = [_strip_computed(sub, v) for v in value]
                 elif isinstance(value, dict):
                     # dict value may be the sub-model itself or a mapping of sub-models
-                    if set(value) & (set(sub.model_fields) | set(sub.model_computed_fields)):
+                    computed_keys = getattr(sub, "model_computed_fields", {}) or {}
+                    if set(value) & (set(sub.model_fields) | set(computed_keys)):
                         value = _strip_computed(sub, value)
                     else:
                         value = {k: _strip_computed(sub, v) for k, v in value.items()}
@@ -70,9 +84,9 @@ def _strip_computed(model_cls: Any, data: Any) -> Any:
     return clean
 
 
-def project_to_dict(project: Any, exclude: set[str] | None = None) -> dict:
+def project_to_dict(project: BridgeProject, exclude: set[str] | None = None) -> dict[str, Any]:
     """BridgeProject → plain JSON-safe dict without computed fields."""
-    data = project.model_dump(mode="json", exclude=exclude)
+    data: dict[str, Any] = project.model_dump(mode="json", exclude=exclude)
     return _strip_computed(type(project), data)
 
 

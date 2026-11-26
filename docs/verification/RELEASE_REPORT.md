@@ -1,6 +1,24 @@
 # BridgeCAD release verification
 
-25 November 2026 IST
+Updated 26 November 2026 IST
+
+## Due versus done
+
+| Work | Done / due | Completion | Evidence |
+|---|---:|---:|---|
+| `CODE-JUNCTION` file dispositions | 3 / 3 | 100% | All three reviewed files were removed and the directory was checked recursively. |
+| Focused asset-pack tests | 34 / 34 | 100% | Local drawing regression tests passed. |
+| Sheet 04/05 contract tests | 27 / 27 | 100% | The layer visibility fix passed the full contract suite locally. |
+| Seeded sheet audit | 3,000 / 3,000 | 100% | The audit rendered 6,000 sheets with zero failures. |
+| Sheet audit mutation drills | 6 / 6 | 100% | The audit detected all six injected drawing errors. |
+| Release phases merged | 0 / 7 | 0% | Phase 0 remains open as draft PR #1. The green CI and merge gate still applies. |
+| Release acceptance criteria recorded as passed | 1 / 17 | 5.9% | AC-2 passed in the local baseline. One criterion failed, one is partial, and 14 are pending. |
+
+On 26 November, GitHub reported 20 successful, six failed, eight skipped, and one
+neutral check on [Phase 0 draft PR #1](https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/pull/1)
+at `3110881`. The checks include suite lint, architecture, mypy, sheet details,
+and two invocations of the legacy job. The frontend production build also passed
+locally after the sheet fix. Release certification remains open.
 
 ## Phase 0 baseline
 
@@ -121,7 +139,7 @@ whether the printed geometry is correctly located or sized.
 | `pytest -p no:hypothesispytest -q tests/test_asset_pack.py` | 34 passed, including the A3 bounds regression, all three non-default footer checks, and the weep-hole radius check. |
 | `mkdocs build --strict` | Passed with this review included. |
 | SHA-256 comparison of the three input files | All three hashes match the initial inventory. |
-| Draft PR #1 at `6ddf860` | The latest completed run showed five failed jobs. The drawing changes in this review were tested locally and are pending CI. |
+| Draft PR #1 at `6ddf860` | That CI snapshot showed five failed jobs. The current PR snapshot is recorded above. |
 
 ### Cleanup outcome
 

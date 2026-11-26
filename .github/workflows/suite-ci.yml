@@ -128,6 +128,9 @@ jobs:
         run: mypy packages/bridgecad-core/bridgecad_core --ignore-missing-imports --no-strict-optional
 
       - name: mypy bridgecad_io
+        env:
+          # Resolve the core model from typed source when checking IO separately.
+          MYPYPATH: packages/bridgecad-core
         run: mypy packages/bridgecad-io/bridgecad_io --ignore-missing-imports --no-strict-optional
 
       - name: mypy bridgecad_bill

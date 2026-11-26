@@ -11,14 +11,15 @@ Updated 26 November 2026 IST
 | Sheet 04/05 contract tests | 27 / 27 | 100% | The layer visibility fix passed the full contract suite locally. |
 | Seeded sheet audit | 3,000 / 3,000 | 100% | The audit rendered 6,000 sheets with zero failures. |
 | Sheet audit mutation drills | 6 / 6 | 100% | The audit detected all six injected drawing errors. |
+| Previously failing Phase 0 CI jobs restored | 2 / 6 | 33.3% | GitHub confirmed that the sheet detail and suite mypy checks passed at `a12ec15`. |
 | Release phases merged | 0 / 7 | 0% | Phase 0 remains open as draft PR #1. The green CI and merge gate still applies. |
 | Release acceptance criteria recorded as passed | 1 / 17 | 5.9% | AC-2 passed in the local baseline. One criterion failed, one is partial, and 14 are pending. |
 
-On 26 November, GitHub reported 20 successful, six failed, eight skipped, and one
-neutral check on [Phase 0 draft PR #1](https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/pull/1)
-at `3110881`. The checks include suite lint, architecture, mypy, sheet details,
-and two invocations of the legacy job. The frontend production build also passed
-locally after the sheet fix. Release certification remains open.
+On 26 November, [Phase 0 draft PR #1](https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/pull/1)
+at `a12ec15` had 22 passing checks, four failures, and nine checks classified as
+skipped by GitHub CLI. The remaining failures are suite lint, architecture
+invariants, and two invocations of the same legacy job. The frontend production
+build also passed locally. Release certification remains open.
 
 ## Phase 0 baseline
 

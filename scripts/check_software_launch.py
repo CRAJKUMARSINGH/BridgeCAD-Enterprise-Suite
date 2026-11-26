@@ -19,7 +19,10 @@ def main() -> int:
     checks = [
         ("Browser tests", [npm, "--prefix", "frontend", "test"]),
         ("Browser typecheck and production build", [npm, "--prefix", "frontend", "run", "build"]),
-        ("Static browser demo and downloads", [sys.executable, "scripts/check_browser_drafting.py"]),
+        (
+            "Static browser demo and downloads",
+            [sys.executable, "scripts/check_browser_drafting.py"],
+        ),
         (
             "Drawing API test dependencies",
             [sys.executable, "-c", "import ezdxf, fastapi, httpx, matplotlib, pymupdf, reportlab"],

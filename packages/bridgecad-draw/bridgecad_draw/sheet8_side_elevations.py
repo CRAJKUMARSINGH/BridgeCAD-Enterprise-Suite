@@ -1,4 +1,4 @@
-﻿"""
+"""
 bridgecad_draw.sheet8_side_elevations â€” Sheet 8: Side & End Elevations.
 
 Production-quality GAD sheet on A1 landscape â€” two views side-by-side:
@@ -154,9 +154,7 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     # soffit âˆ’ abutment_height (see the ``abutment_height_m`` datum note below).
     pile_cut_rl = fd.pile_cutoff_level_m
     if not pile_cut_rl and "PILE" in found_type:
-        pile_cut_rl = (
-            float(hd.actual_soffit_level_m or ls.soffit_rl) - abt_h_m
-        ) - pile_cap_t_m
+        pile_cut_rl = (float(hd.actual_soffit_level_m or ls.soffit_rl) - abt_h_m) - pile_cap_t_m
     pile_cut_rl = float(pile_cut_rl or 110.5)
     pile_tip_rl = pile_cut_rl - pile_len_m
 
@@ -180,13 +178,10 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
 
         _foot_top = (
             stack.record.footing_top_rl_m
-            if stack.record is not None
-            and stack.record.status is ResolutionStatus.RESOLVED
+            if stack.record is not None and stack.record.status is ResolutionStatus.RESOLVED
             else None
         )
-        pile_cap_top_rl = (
-            float(_foot_top) if _foot_top is not None else pile_cut_rl + pile_cap_t_m
-        )
+        pile_cap_top_rl = float(_foot_top) if _foot_top is not None else pile_cut_rl + pile_cap_t_m
         abt_base_rl = min(abt_base_rl, pile_cap_top_rl)
     hfl_rl = float(hd.hfl_m or 0)
     scour_rl = float(hd.scour_level_m or 0)
@@ -857,9 +852,7 @@ def _draw_abutment_endface(
         )
         # The slab's own RL tag is placed clear of the abutment RL staff, which
         # owns the strip immediately left of the deck edge (SS3 §5).
-        level_tag(
-            msp, as_x_left + th * 1.0, as_y_top, road_rl_approach, text_height=th * 0.85
-        )
+        level_tag(msp, as_x_left + th * 1.0, as_y_top, road_rl_approach, text_height=th * 0.85)
         text(
             msp,
             f"APPROACH SLAB  {app_l_m:.1f}Ã—{app_t_m*1000:.0f}mm",
@@ -1350,9 +1343,7 @@ def _draw_pier_transverse(
         scale=sc * 0.015,
         layer="STRUC-HATCHING",
     )
-    level_tag(
-        msp, vhx(-cap_half_l) - th * 3, cap_y_top, cap_top_rl, text_height=th * 0.85
-    )
+    level_tag(msp, vhx(-cap_half_l) - th * 3, cap_y_top, cap_top_rl, text_height=th * 0.85)
     text(
         msp,
         "T.O.C. (TOP OF PIER CAP)",
@@ -1369,11 +1360,7 @@ def _draw_pier_transverse(
     shaft_y_bot = (
         vvy(pile_cut_rl + pile_cap_t_m)
         if "PILE" in found_type
-        else (
-            vvy(shaft_base_rl)
-            if shaft_base_rl is not None
-            else (cap_y_bot - 6.0 * sc)
-        )
+        else (vvy(shaft_base_rl) if shaft_base_rl is not None else (cap_y_bot - 6.0 * sc))
     )
     sh_half_w_l = pier_shaft_l_m / 2.0
     rectangle(

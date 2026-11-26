@@ -8,8 +8,8 @@ count is what the QA row asserts, so a dropped wall cannot pass unnoticed.
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Iterator
 
 from ._errors import Violation
 

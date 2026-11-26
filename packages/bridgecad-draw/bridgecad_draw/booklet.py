@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 # per-sheet trace stays available at -v.
 _missing_dep_warned = False
 
+
 class PackageGenerationError(RuntimeError):
     """Raised when one or more GAD sheets fail to generate.
 
@@ -65,17 +66,17 @@ class PackageGenerationError(RuntimeError):
 # elevations (8) each resolve their own rung.  Sheet 4 (foundation) is pinned
 # at 1:50.  Sheets 6, 7 and 9 are schedules (NTS).
 _SHEET_MANIFEST = [
-    ("1",   "sheet1_plan",                 "Sheet1_Plan",            None, None),
-    ("2",   "sheet2_long_section",         "Sheet2_LongSection",     None, None),
-    ("3",   "sheet3_cross_section",        "Sheet3_CrossSection",    None, None),
-    ("4",   "sheet4_foundation",           "Sheet4_Foundation",      50,   None),
-    ("5",   "sheet5_pier_abutment_details","Sheet5_PierAbutment",      75, None),
-    ("5A",  "sheet5_enlarged_details",     "Sheet5A_PierEnlarged",   None, "pier"),
-    ("5B",  "sheet5_enlarged_details",     "Sheet5B_AbutEnlarged",   None, "abutment"),
-    ("6",   "sheet6_bearings_joints",      "Sheet6_BearingsJoints",  20,   None),
-    ("7",   "sheet7_bill_of_quantities",   "Sheet7_BOQ",             1,    None),
-    ("8",   "sheet8_side_elevations",      "Sheet8_SideElevations",  None, None),
-    ("9",   "sheet9_reinforcement",        "Sheet9_Reinforcement",   1,    None),
+    ("1", "sheet1_plan", "Sheet1_Plan", None, None),
+    ("2", "sheet2_long_section", "Sheet2_LongSection", None, None),
+    ("3", "sheet3_cross_section", "Sheet3_CrossSection", None, None),
+    ("4", "sheet4_foundation", "Sheet4_Foundation", 50, None),
+    ("5", "sheet5_pier_abutment_details", "Sheet5_PierAbutment", 75, None),
+    ("5A", "sheet5_enlarged_details", "Sheet5A_PierEnlarged", None, "pier"),
+    ("5B", "sheet5_enlarged_details", "Sheet5B_AbutEnlarged", None, "abutment"),
+    ("6", "sheet6_bearings_joints", "Sheet6_BearingsJoints", 20, None),
+    ("7", "sheet7_bill_of_quantities", "Sheet7_BOQ", 1, None),
+    ("8", "sheet8_side_elevations", "Sheet8_SideElevations", None, None),
+    ("9", "sheet9_reinforcement", "Sheet9_Reinforcement", 1, None),
 ]
 
 #: Public, stable view of the sheet manifest — the single source of truth for
@@ -109,6 +110,7 @@ def _apply_native_dims(path: Path, scale_denom: int) -> None:
     """
     try:
         import ezdxf
+
         from .dim_style import DimStyleConfig, apply_native_dimensions
 
         doc = ezdxf.readfile(str(path))

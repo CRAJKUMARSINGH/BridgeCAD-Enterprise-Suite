@@ -7,8 +7,8 @@ be interpreted as emitted-entity counts or engineering capability.
 
 from __future__ import annotations
 
-import re
 import hashlib
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -108,7 +108,9 @@ def _expression_end(tokens: list[tuple[str, str]], index: int) -> int:
 def _setq_from_tokens(tokens: list[tuple[str, str]]) -> list[str]:
     names: list[str] = []
     for i in range(len(tokens) - 1):
-        if tokens[i][0] != "(" or (tokens[i + 1][0] != "atom" or tokens[i + 1][1].lower() != "setq"):
+        if tokens[i][0] != "(" or (
+            tokens[i + 1][0] != "atom" or tokens[i + 1][1].lower() != "setq"
+        ):
             continue
         j = i + 2
         while j < len(tokens) and tokens[j][0] != ")":
@@ -130,7 +132,17 @@ def inventory(path: str | Path) -> LispInventory:
     # AutoLISP symbols are case-insensitive; string content keeps its case.
     tokens = [(kind, value.lower() if kind == "atom" else value) for kind, value in tokens]
     inv = LispInventory(path=str(path), sha256=hashlib.sha256(raw).hexdigest())
-    commands = {"LINE", "PLINE", "RECTANG", "CIRCLE", "TEXT", "MTEXT", "HATCH", "DIMLINEAR", "INSERT"}
+    commands = {
+        "LINE",
+        "PLINE",
+        "RECTANG",
+        "CIRCLE",
+        "TEXT",
+        "MTEXT",
+        "HATCH",
+        "DIMLINEAR",
+        "INSERT",
+    }
     for i in range(len(tokens) - 2):
         if tokens[i][0] != "(":
             continue
@@ -140,9 +152,19 @@ def inventory(path: str | Path) -> LispInventory:
             cmd = tokens[i + 2][1].upper()
             if cmd in commands:
                 inv.entity_counts[cmd] = inv.entity_counts.get(cmd, 0) + 1
-    inv.layers = sorted({value for kind, value in tokens if kind == "string" and _LAYER.fullmatch('"' + value + '"')})
+    inv.layers = sorted(
+        {
+            value
+            for kind, value in tokens
+            if kind == "string" and _LAYER.fullmatch('"' + value + '"')
+        }
+    )
     inv.setq_names = _setq_from_tokens(tokens)
-    inv.numeric_literal_count = sum(bool(re.fullmatch(r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?", value)) for kind, value in tokens if kind == "atom")
+    inv.numeric_literal_count = sum(
+        bool(re.fullmatch(r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?", value))
+        for kind, value in tokens
+        if kind == "atom"
+    )
 
     for key, pattern in _GEOMETRY_OF_INTEREST.items():
         inv.interest_hits[key] = [layer for layer in inv.layers if pattern.search(layer)]
@@ -168,7 +190,10 @@ def report(inventories: list[LispInventory]) -> str:
         "",
         "| source | SHA-256 | functions observed |",
         "| --- | --- | --- |",
-        *[f"| `{i.path}` | `{i.sha256}` | {', '.join(f'`{n}`' for n in i.defuns)} |" for i in inventories],
+        *[
+            f"| `{i.path}` | `{i.sha256}` | {', '.join(f'`{n}`' for n in i.defuns)} |"
+            for i in inventories
+        ],
         "",
         "## Parametrisation",
         "",

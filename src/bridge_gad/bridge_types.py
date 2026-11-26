@@ -7,7 +7,7 @@ and their associated characteristics.
 """
 
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import Dict, List
 from dataclasses import dataclass
 
 
@@ -160,7 +160,7 @@ def validate_span_for_bridge_type(bridge_type: BridgeType, span_length: float) -
 def get_recommended_supports(bridge_type: BridgeType, span_length: float) -> int:
     """Get recommended number of supports based on bridge type and span"""
     characteristics = get_bridge_characteristics(bridge_type)
-    
+
     if span_length <= characteristics.typical_span:
         return characteristics.min_supports
     else:
@@ -174,7 +174,7 @@ def get_bridge_type_display_name(bridge_type: BridgeType) -> str:
     """Get user-friendly display name for bridge type"""
     display_names = {
         BridgeType.SLAB: "Slab Bridge",
-        BridgeType.BEAM: "Beam Bridge", 
+        BridgeType.BEAM: "Beam Bridge",
         BridgeType.T_BEAM: "T-Beam Bridge",
         BridgeType.BOX_GIRDER: "Box Girder Bridge",
         BridgeType.TRUSS: "Truss Bridge",
@@ -189,7 +189,7 @@ def get_output_format_extension(output_format: OutputFormat) -> str:
     """Get file extension for output format"""
     extensions = {
         OutputFormat.DXF: ".dxf",
-        OutputFormat.PDF: ".pdf", 
+        OutputFormat.PDF: ".pdf",
         OutputFormat.SVG: ".svg",
         OutputFormat.PNG: ".png",
         OutputFormat.HTML: ".html"

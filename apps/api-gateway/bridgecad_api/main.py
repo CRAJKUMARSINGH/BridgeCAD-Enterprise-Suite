@@ -21,14 +21,14 @@ from contextlib import asynccontextmanager, suppress
 from pathlib import Path
 from typing import Any, Literal
 
-from bridgecad_core.types import AbutmentType
 from fastapi import APIRouter, BackgroundTasks, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response, FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, Response
 from pydantic import BaseModel
 from starlette.concurrency import run_in_threadpool
 
 from bridgecad_api.problems import enforce_upload_limits, install_problem_handlers
+from bridgecad_core.types import AbutmentType
 
 # ── package path bootstrap ────────────────────────────────────────────────
 _SUITE = Path(__file__).parents[3]
@@ -74,7 +74,9 @@ def _load_drawing_workbook(data: bytes) -> Any:
     try:
         return _load_project_from_upload(data)
     except ExcelParseError as exc:
-        detail = " · ".join(part for part in (exc.sheet, exc.field, exc.message, exc.suggestion) if part)
+        detail = " · ".join(
+            part for part in (exc.sheet, exc.field, exc.message, exc.suggestion) if part
+        )
         raise HTTPException(422, detail=detail) from exc
     except ValueError as exc:
         raise HTTPException(422, detail=f"Invalid drawing workbook: {exc}") from exc
@@ -274,7 +276,8 @@ async def draw_gad(
 
 @draw_router.post("/ga", summary="Download a one-sheet A1 general arrangement PDF")
 async def draw_ga(
-    excel_file: UploadFile = File(...), scale: int | None = None,
+    excel_file: UploadFile = File(...),
+    scale: int | None = None,
     abutment_type: AbutmentType | None = None,
 ):
     from bridgecad_draw.engines.ga_sheet import GALayoutError, generate_ga_pdf
@@ -286,7 +289,10 @@ async def draw_ga(
         project = _load_drawing_workbook(data)
         with tempfile.TemporaryDirectory() as folder:
             return generate_ga_pdf(
-                project, Path(folder) / "GA-01.pdf", scale, abutment_type=abutment_type,
+                project,
+                Path(folder) / "GA-01.pdf",
+                scale,
+                abutment_type=abutment_type,
             ).read_bytes()
 
     try:
@@ -294,8 +300,12 @@ async def draw_ga(
     except (GALayoutError, ValueError) as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     return Response(
-        content=pdf, media_type="application/pdf",
-        headers={"Content-Disposition": 'attachment; filename="GA-01-A1.pdf"', "Cache-Control": "no-store"},
+        content=pdf,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": 'attachment; filename="GA-01-A1.pdf"',
+            "Cache-Control": "no-store",
+        },
     )
 
 
@@ -760,12 +770,21 @@ async def predict(
     except PackageGenerationError as exc:
         raise HTTPException(500, detail=f"drawing package incomplete: {exc}") from exc
 
-    filename, media_type = ("bridge_gad.pdf", "application/pdf") if output_format == "pdf" else (
-        "bridge_gad_plan.png", "image/png",
+    filename, media_type = (
+        ("bridge_gad.pdf", "application/pdf")
+        if output_format == "pdf"
+        else (
+            "bridge_gad_plan.png",
+            "image/png",
+        )
     )
     return Response(
-        payload, media_type=media_type,
-        headers={"Content-Disposition": f'attachment; filename="{filename}"', "Cache-Control": "no-store"},
+        payload,
+        media_type=media_type,
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Cache-Control": "no-store",
+        },
     )
 
 

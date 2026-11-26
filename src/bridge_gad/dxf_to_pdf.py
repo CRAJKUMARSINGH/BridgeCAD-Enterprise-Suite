@@ -214,7 +214,6 @@ def convert_dxf_to_pdf(
     import ezdxf
     from ezdxf import recover
     from ezdxf.addons.drawing import (
-        Frontend,
         RenderContext,
         config,
         matplotlib,
@@ -348,7 +347,6 @@ def bundle_drawings_to_pdf(
     from ezdxf import recover
     import ezdxf
     from ezdxf.addons.drawing import (
-        Frontend,
         RenderContext,
         config,
         matplotlib as ez_matplotlib,

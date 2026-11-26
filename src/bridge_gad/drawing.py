@@ -1,23 +1,25 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import List
 
 import ezdxf
 import pandas as pd
 from ezdxf.math import Vec2
 from .config import Settings
 
+
 class BridgeDrawing:
     def __init__(self, settings=None):
         self.settings = settings or Settings()
 
+
 def generate_bridge_drawing(*, excel_file: Path, output_path: Path) -> Path:
-    df = pd.read_excel(excel_file)
+    _ = pd.read_excel(excel_file)
     doc = ezdxf.new()
-    msp = doc.modelspace()
+    _ = doc.modelspace()
     # TODO: actual drawing logic
     doc.saveas(output_path)
     return output_path
+
 
 class SlabBridgeGAD:
     """Slab bridge general-arrangement drawing from Excel."""
@@ -34,7 +36,7 @@ class SlabBridgeGAD:
         for idx, row in enumerate(self.rows, 1):
             L = float(row["Length (m)"])
             W = float(row["Width (m)"])
-            T = float(row["Thickness (m)"])
+            _ = float(row["Thickness (m)"])
             # Handle both possible column names for pier width
             pier_width_cols = ["Pier_Width (m)", "Pier\\_Width (m)", "Pier Width (m)"]
             P = None

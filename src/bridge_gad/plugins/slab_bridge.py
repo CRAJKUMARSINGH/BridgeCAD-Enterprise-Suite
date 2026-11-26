@@ -1,6 +1,7 @@
 from bridge_gad.plugins import PluginBase
 from tkinter import messagebox
 
+
 class SlabBridgePlugin(PluginBase):
     name = "Slab Bridge Design"
     version = "1.0.0"

@@ -28,9 +28,10 @@ CONVENTIONS
 
 from __future__ import annotations
 
-import math
+import contextlib
+from collections.abc import Iterable, Sequence
 from pathlib import Path
-from typing import Any, Iterable, Sequence
+from typing import Any
 
 from .dxf_engine import new_sheet, save
 from .primitives import dim_linear_h, dim_linear_v, north_arrow, polyline, rectangle
@@ -42,14 +43,14 @@ from .primitives import dim_linear_h, dim_linear_v, north_arrow, polyline, recta
 # right for the 1:100 GAD sheets (a 0.35 mm label there is a mistake), but this
 # module needs sub-2 mm table cells, so the raw entity is written directly.
 try:  # ezdxf is optional at import time, like every other module here
-    from ezdxf.enums import TextEntityAlignment as _TEA
+    from ezdxf.enums import TextEntityAlignment
 
     _ALIGN = {
-        "LEFT": _TEA.LEFT,
-        "CENTER": _TEA.CENTER,
-        "RIGHT": _TEA.RIGHT,
-        "MIDDLE": _TEA.MIDDLE,
-        "TOP_LEFT": _TEA.TOP_LEFT,
+        "LEFT": TextEntityAlignment.LEFT,
+        "CENTER": TextEntityAlignment.CENTER,
+        "RIGHT": TextEntityAlignment.RIGHT,
+        "MIDDLE": TextEntityAlignment.MIDDLE,
+        "TOP_LEFT": TextEntityAlignment.TOP_LEFT,
     }
 except Exception:  # pragma: no cover - ezdxf present in every real run
     _ALIGN = {}
@@ -203,8 +204,17 @@ class Panel:
         return self.sx
 
     # -- drawing ---------------------------------------------------------
-    def line(self, x1: float, y1: float, x2: float, y2: float, layer: str = "STRUC-OUTLINE",
-             color: int | None = None, linetype: str | None = None, lw: int | None = None) -> Any:
+    def line(
+        self,
+        x1: float,
+        y1: float,
+        x2: float,
+        y2: float,
+        layer: str = "STRUC-OUTLINE",
+        color: int | None = None,
+        linetype: str | None = None,
+        lw: int | None = None,
+    ) -> Any:
         try:
             attribs: dict[str, Any] = {"layer": layer}
             if color is not None:
@@ -220,19 +230,26 @@ class Panel:
         except Exception:
             return None
 
-    def poly(self, pts: Iterable[tuple[float, float]], layer: str = "STRUC-OUTLINE",
-             close: bool = False, **kw: Any) -> Any:
+    def poly(
+        self,
+        pts: Iterable[tuple[float, float]],
+        layer: str = "STRUC-OUTLINE",
+        close: bool = False,
+        **kw: Any,
+    ) -> Any:
         paper = [self.P(x, y) for x, y in pts]
         return polyline(self.msp, paper, layer=layer, close=close, **kw)
 
-    def rect(self, x: float, y: float, w: float, h: float, layer: str = "STRUC-OUTLINE",
-             **kw: Any) -> Any:
+    def rect(
+        self, x: float, y: float, w: float, h: float, layer: str = "STRUC-OUTLINE", **kw: Any
+    ) -> Any:
         return self.poly(
             [(x, y), (x + w, y), (x + w, y + h), (x, y + h)], layer=layer, close=True, **kw
         )
 
-    def circle(self, x: float, y: float, r: float, layer: str = "STRUC-OUTLINE",
-               color: int | None = None) -> Any:
+    def circle(
+        self, x: float, y: float, r: float, layer: str = "STRUC-OUTLINE", color: int | None = None
+    ) -> Any:
         try:
             attribs: dict[str, Any] = {"layer": layer}
             if color is not None:
@@ -241,8 +258,14 @@ class Panel:
         except Exception:
             return None
 
-    def hatch(self, pts: Iterable[tuple[float, float]], pattern: str = "ANSI31",
-              scale: float = 1.0, layer: str = "STRUC-HATCHING", color: int | None = None) -> Any:
+    def hatch(
+        self,
+        pts: Iterable[tuple[float, float]],
+        pattern: str = "ANSI31",
+        scale: float = 1.0,
+        layer: str = "STRUC-HATCHING",
+        color: int | None = None,
+    ) -> Any:
         try:
             attribs: dict[str, Any] = {"layer": layer}
             if color is not None:
@@ -257,21 +280,60 @@ class Panel:
         except Exception:
             return None
 
-    def band(self, x0: float, y0: float, x1: float, y1: float, pattern: str = "ANSI31",
-             scale: float = 1.0, layer: str = "STRUC-HATCHING", color: int | None = None) -> Any:
+    def band(
+        self,
+        x0: float,
+        y0: float,
+        x1: float,
+        y1: float,
+        pattern: str = "ANSI31",
+        scale: float = 1.0,
+        layer: str = "STRUC-HATCHING",
+        color: int | None = None,
+    ) -> Any:
         return self.hatch(
-            [(x0, y0), (x1, y0), (x1, y1), (x0, y1)], pattern=pattern, scale=scale,
-            layer=layer, color=color,
+            [(x0, y0), (x1, y0), (x1, y1), (x0, y1)],
+            pattern=pattern,
+            scale=scale,
+            layer=layer,
+            color=color,
         )
 
-    def text(self, content: Any, x: float, y: float, h: float = TXT_S,
-             layer: str = "TEXT-GENERAL", align: str = "LEFT", rot: float = 0.0,
-             dx: float = 0.0, dy: float = 0.0, color: int | None = None) -> Any:
-        return put_text(self.msp, content, self.X(x) + dx, self.Y(y) + dy, h, layer,
-                        rotation=rot, align=align, color=color)
+    def text(
+        self,
+        content: Any,
+        x: float,
+        y: float,
+        h: float = TXT_S,
+        layer: str = "TEXT-GENERAL",
+        align: str = "LEFT",
+        rot: float = 0.0,
+        dx: float = 0.0,
+        dy: float = 0.0,
+        color: int | None = None,
+    ) -> Any:
+        return put_text(
+            self.msp,
+            content,
+            self.X(x) + dx,
+            self.Y(y) + dy,
+            h,
+            layer,
+            rotation=rot,
+            align=align,
+            color=color,
+        )
 
-    def label_at(self, content: Any, x_paper: float, y_paper: float, h: float = TXT_S,
-                 layer: str = "TEXT-GENERAL", align: str = "LEFT", rot: float = 0.0) -> Any:
+    def label_at(
+        self,
+        content: Any,
+        x_paper: float,
+        y_paper: float,
+        h: float = TXT_S,
+        layer: str = "TEXT-GENERAL",
+        align: str = "LEFT",
+        rot: float = 0.0,
+    ) -> Any:
         return put_text(self.msp, content, x_paper, y_paper, h, layer, rotation=rot, align=align)
 
     # -- annotations attached to the geometry, never to the sheet --------
@@ -296,26 +358,34 @@ class Panel:
         try:
             px, py = self.P(xm, ym)
             tx, ty = px + dx, py + dy
-            self.msp.add_line((px, py), (tx, ty), dxfattribs={"layer": "DIM-LEADER",
-                                                             "lineweight": 9})
+            self.msp.add_line(
+                (px, py), (tx, ty), dxfattribs={"layer": "DIM-LEADER", "lineweight": 9}
+            )
             sgn = shelf if align.upper() == "LEFT" else -shelf
-            self.msp.add_line((tx, ty), (tx + sgn, ty),
-                              dxfattribs={"layer": "DIM-LEADER", "lineweight": 9})
-            put_text(self.msp, label, tx + sgn + (1.0 if sgn > 0 else -1.0), ty + 0.6,
-                     th, "TEXT-SPEC", align=align)
+            self.msp.add_line(
+                (tx, ty), (tx + sgn, ty), dxfattribs={"layer": "DIM-LEADER", "lineweight": 9}
+            )
+            put_text(
+                self.msp,
+                label,
+                tx + sgn + (1.0 if sgn > 0 else -1.0),
+                ty + 0.6,
+                th,
+                "TEXT-SPEC",
+                align=align,
+            )
         except Exception:
             pass
 
     def sample(self, xm: float, ym: float, r: float = 2.0, layer: str = "MISC-DEFPOINTS") -> None:
         """Small circle marking a feature (weep hole, spout, bearing)."""
-        try:
+        with contextlib.suppress(Exception):
             self.msp.add_circle(self.P(xm, ym), r, dxfattribs={"layer": layer})
-        except Exception:
-            pass
 
     # -- captions --------------------------------------------------------
-    def caption_below(self, title: str, sub: str | None = None, th: float = TXT_H,
-                      drop: float = 4.2) -> None:
+    def caption_below(
+        self, title: str, sub: str | None = None, th: float = TXT_H, drop: float = 4.2
+    ) -> None:
         """View caption in the strip reserved *under* the panel.
 
         Captions sit below their view on every sheet of this pack.  Doing that
@@ -327,13 +397,15 @@ class Panel:
         put_text(self.msp, title.upper(), cx, y, th, "TEXT-TITLE", align="CENTER")
         try:
             tw = len(title) * _char_w(th)
-            self.msp.add_line((cx - tw / 2.0, y - 1.5), (cx + tw / 2.0, y - 1.5),
-                              dxfattribs={"layer": "TEXT-TITLE"})
+            self.msp.add_line(
+                (cx - tw / 2.0, y - 1.5),
+                (cx + tw / 2.0, y - 1.5),
+                dxfattribs={"layer": "TEXT-TITLE"},
+            )
         except Exception:
             pass
         if sub:
-            put_text(self.msp, sub, cx, y - (th + 1.8), th * 0.60, "TEXT-HEADER",
-                     align="CENTER")
+            put_text(self.msp, sub, cx, y - (th + 1.8), th * 0.60, "TEXT-HEADER", align="CENTER")
 
 
 # ---------------------------------------------------------------------------
@@ -350,17 +422,40 @@ class Sheet:
         self.w, self.h = PAPER_SIZES.get(self.size, PAPER_SIZES["A3"])
         self.m = 8.0 if self.size == "A3" else 10.0
         rectangle(self.msp, 0, 0, self.w, self.h, layer="BORDER-OUTER", lw=60)
-        rectangle(self.msp, self.m, self.m, self.w - 2 * self.m, self.h - 2 * self.m,
-                  layer="BORDER-INNER", lw=35)
+        rectangle(
+            self.msp,
+            self.m,
+            self.m,
+            self.w - 2 * self.m,
+            self.h - 2 * self.m,
+            layer="BORDER-INNER",
+            lw=35,
+        )
 
     # -- primitives ------------------------------------------------------
-    def text(self, content: Any, x: float, y: float, h: float = TXT_M,
-             layer: str = "TEXT-GENERAL", align: str = "LEFT", rot: float = 0.0,
-             color: int | None = None) -> Any:
+    def text(
+        self,
+        content: Any,
+        x: float,
+        y: float,
+        h: float = TXT_M,
+        layer: str = "TEXT-GENERAL",
+        align: str = "LEFT",
+        rot: float = 0.0,
+        color: int | None = None,
+    ) -> Any:
         return put_text(self.msp, content, x, y, h, layer, rotation=rot, align=align, color=color)
 
-    def line(self, x1: float, y1: float, x2: float, y2: float, layer: str = "STRUC-OUTLINE",
-             lw: int | None = None, linetype: str | None = None) -> Any:
+    def line(
+        self,
+        x1: float,
+        y1: float,
+        x2: float,
+        y2: float,
+        layer: str = "STRUC-OUTLINE",
+        lw: int | None = None,
+        linetype: str | None = None,
+    ) -> Any:
         try:
             attribs: dict[str, Any] = {"layer": layer}
             if lw is not None:
@@ -373,17 +468,33 @@ class Sheet:
         except Exception:
             return None
 
-    def rect(self, x: float, y: float, w: float, h: float, layer: str = "STRUC-OUTLINE",
-             lw: int | None = None) -> Any:
+    def rect(
+        self,
+        x: float,
+        y: float,
+        w: float,
+        h: float,
+        layer: str = "STRUC-OUTLINE",
+        lw: int | None = None,
+    ) -> Any:
         return rectangle(self.msp, x, y, w, h, layer=layer, lw=lw)
 
-    def poly(self, pts: Sequence[tuple[float, float]], layer: str = "STRUC-OUTLINE",
-             close: bool = False) -> Any:
+    def poly(
+        self, pts: Sequence[tuple[float, float]], layer: str = "STRUC-OUTLINE", close: bool = False
+    ) -> Any:
         return polyline(self.msp, list(pts), layer=layer, close=close)
 
-    def hatch_box(self, x: float, y: float, w: float, h: float, pattern: str = "ANSI31",
-                  scale: float = 1.0, layer: str = "STRUC-HATCHING",
-                  color: int | None = None) -> Any:
+    def hatch_box(
+        self,
+        x: float,
+        y: float,
+        w: float,
+        h: float,
+        pattern: str = "ANSI31",
+        scale: float = 1.0,
+        layer: str = "STRUC-HATCHING",
+        color: int | None = None,
+    ) -> Any:
         try:
             attribs: dict[str, Any] = {"layer": layer}
             if color is not None:
@@ -400,39 +511,73 @@ class Sheet:
         except Exception:
             return None
 
-    def panel(self, rect: tuple[float, float, float, float], x_range: tuple[float, float],
-              y_range: tuple[float, float], fit: str = "uniform", pad: float = 2.0) -> Panel:
+    def panel(
+        self,
+        rect: tuple[float, float, float, float],
+        x_range: tuple[float, float],
+        y_range: tuple[float, float],
+        fit: str = "uniform",
+        pad: float = 2.0,
+    ) -> Panel:
         return Panel(self.msp, rect, x_range, y_range, fit=fit, pad=pad)
 
-    def view_frame(self, x: float, y: float, w: float, h: float, layer: str = "STRUC-DETAIL") -> None:
+    def view_frame(
+        self, x: float, y: float, w: float, h: float, layer: str = "STRUC-DETAIL"
+    ) -> None:
         """Thin enclosure around a detail view (the source sheets use one)."""
         self.rect(x, y, w, h, layer=layer, lw=9)
 
     # -- dimensions ------------------------------------------------------
-    def dim_h(self, x1: float, x2: float, y: float, label: str | None = None,
-              off: float = 6.0, th: float = TXT_S, layer: str = "DIM-LINEAR") -> None:
-        try:
+    def dim_h(
+        self,
+        x1: float,
+        x2: float,
+        y: float,
+        label: str | None = None,
+        off: float = 6.0,
+        th: float = TXT_S,
+        layer: str = "DIM-LINEAR",
+    ) -> None:
+        with contextlib.suppress(Exception):
             dim_linear_h(self.msp, x1, y, x2, y, y + off, label=label, layer=layer, text_height=th)
-        except Exception:
-            pass
 
-    def dim_v(self, y1: float, y2: float, x: float, label: str | None = None,
-              off: float = 6.0, th: float = TXT_S, layer: str = "DIM-LINEAR") -> None:
-        try:
+    def dim_v(
+        self,
+        y1: float,
+        y2: float,
+        x: float,
+        label: str | None = None,
+        off: float = 6.0,
+        th: float = TXT_S,
+        layer: str = "DIM-LINEAR",
+    ) -> None:
+        with contextlib.suppress(Exception):
             dim_linear_v(self.msp, x, y1, x, y2, x + off, label=label, layer=layer, text_height=th)
-        except Exception:
-            pass
 
-    def dim_chain_h(self, xs: Sequence[float], y: float, labels: Sequence[str] | None = None,
-                    off: float = 6.0, th: float = TXT_S) -> None:
+    def dim_chain_h(
+        self,
+        xs: Sequence[float],
+        y: float,
+        labels: Sequence[str] | None = None,
+        off: float = 6.0,
+        th: float = TXT_S,
+    ) -> None:
         """A continuous horizontal chain: one DIMENSION per gap, ticks shared."""
         for i in range(len(xs) - 1):
             lab = labels[i] if labels and i < len(labels) else None
             self.dim_h(xs[i], xs[i + 1], y, lab, off=off, th=th)
 
     # -- level tag, leader ----------------------------------------------
-    def level(self, x: float, y: float, value: float, prefix: str = "RL",
-              th: float = TXT_S, align: str = "RIGHT", dx: float = -3.0) -> None:
+    def level(
+        self,
+        x: float,
+        y: float,
+        value: float,
+        prefix: str = "RL",
+        th: float = TXT_S,
+        align: str = "RIGHT",
+        dx: float = -3.0,
+    ) -> None:
         """Reduced-level tag: tick, level line, value."""
         try:
             w = 3.0
@@ -442,8 +587,17 @@ class Sheet:
         except Exception:
             pass
 
-    def leader(self, x1: float, y1: float, x2: float, y2: float, label: str,
-               th: float = TXT_XS, align: str = "LEFT", layer: str = "DIM-LEADER") -> None:
+    def leader(
+        self,
+        x1: float,
+        y1: float,
+        x2: float,
+        y2: float,
+        label: str,
+        th: float = TXT_XS,
+        align: str = "LEFT",
+        layer: str = "DIM-LEADER",
+    ) -> None:
         """Leader from geometry (x1,y1) to a labelled shelf at (x2,y2)."""
         shelf = 12.0 if align == "LEFT" else -12.0
         try:
@@ -455,8 +609,15 @@ class Sheet:
             pass
 
     # -- view heading ----------------------------------------------------
-    def heading(self, x: float, y: float, title: str, sub: str | None = None,
-                align: str = "CENTER", th: float = TXT_H) -> None:
+    def heading(
+        self,
+        x: float,
+        y: float,
+        title: str,
+        sub: str | None = None,
+        align: str = "CENTER",
+        th: float = TXT_H,
+    ) -> None:
         self.text(title.upper(), x, y, th, "TEXT-TITLE", align=align)
         if sub:
             self.text(sub, x, y - (th + 1.6), th * 0.62, "TEXT-HEADER", align=align)
@@ -469,8 +630,14 @@ class Sheet:
         except Exception:
             pass
 
-    def banner(self, text: str, y: float, x0: float | None = None, x1: float | None = None,
-               th: float = TXT_H) -> None:
+    def banner(
+        self,
+        text: str,
+        y: float,
+        x0: float | None = None,
+        x1: float | None = None,
+        th: float = TXT_H,
+    ) -> None:
         """Full-width title bar used by the PMGSY sheets.
 
         A solid black bar with knocked-out text is not achievable in DXF (the
@@ -485,9 +652,18 @@ class Sheet:
         self.text(text.upper(), (x0 + x1) / 2, y + 1.8, th, "TEXT-TITLE", align="CENTER")
 
     # -- notes -----------------------------------------------------------
-    def notes(self, x: float, y: float, w: float, items: Sequence[str],
-              heading: str = "NOTES :-", th: float = TXT_XS, gap: float = 3.7,
-              numbered: bool = True, start: int = 1) -> float:
+    def notes(
+        self,
+        x: float,
+        y: float,
+        w: float,
+        items: Sequence[str],
+        heading: str = "NOTES :-",
+        th: float = TXT_XS,
+        gap: float = 3.7,
+        numbered: bool = True,
+        start: int = 1,
+    ) -> float:
         """Numbered note block. Returns the y of the last baseline.
 
         *start* keeps the numbering continuous when the notes are split across
@@ -523,9 +699,17 @@ class Sheet:
         return cy
 
     # -- table -----------------------------------------------------------
-    def table(self, x: float, y: float, widths: Sequence[float],
-              rows: Sequence[Sequence[str]], row_h: float = 6.6, th: float = TXT_S,
-              header: bool = True, top: bool = False) -> float:
+    def table(
+        self,
+        x: float,
+        y: float,
+        widths: Sequence[float],
+        rows: Sequence[Sequence[str]],
+        row_h: float = 6.6,
+        th: float = TXT_S,
+        header: bool = True,
+        top: bool = False,
+    ) -> float:
         """Draw a ruled table whose first row is a header. Returns its bottom y.
 
         Rows are ordered top-down starting at *y* (the header baseline box) and
@@ -542,16 +726,16 @@ class Sheet:
         for r, row in enumerate(rows):
             ry = y_top - row_h * (r + 1)
             if r:
-                self.line(x, y_top - row_h * r, x + width, y_top - row_h * r,
-                          layer="TABL", lw=9)
+                self.line(x, y_top - row_h * r, x + width, y_top - row_h * r, layer="TABL", lw=9)
             cx = x
             for c, cell in enumerate(row):
                 cw = widths[c] if c < len(widths) else widths[-1]
                 if c:
                     self.line(cx, ry, cx, ry + row_h, layer="TABL", lw=9)
                 style = "TEXT-HEADER" if (header and r == 0) else "TEXT-GENERAL"
-                self.text(fit_text(cell, cw - 3.0, th), cx + 1.6, ry + row_h / 2 - th / 2,
-                          th, style)
+                self.text(
+                    fit_text(cell, cw - 3.0, th), cx + 1.6, ry + row_h / 2 - th / 2, th, style
+                )
                 cx += cw
         if top:
             self.text("", x, y_top, th)
@@ -565,14 +749,22 @@ class Sheet:
         except Exception:
             pass
 
-    def scalebar(self, x: float, y: float, total_mm: float, segments: int = 4,
-                 label: str = "SCALE 1:100", th: float = TXT_XS) -> None:
+    def scalebar(
+        self,
+        x: float,
+        y: float,
+        total_mm: float,
+        segments: int = 4,
+        label: str = "SCALE 1:100",
+        th: float = TXT_XS,
+    ) -> None:
         seg = total_mm / segments
         for i in range(segments):
             self.rect(x + i * seg, y, seg, 2.6, layer="SYM-SCALE", lw=9)
             if i % 2 == 0:
-                self.hatch_box(x + i * seg, y, seg, 2.6, pattern="SOLID", scale=1.0,
-                               layer="SYM-SCALE")
+                self.hatch_box(
+                    x + i * seg, y, seg, 2.6, pattern="SOLID", scale=1.0, layer="SYM-SCALE"
+                )
         self.text("0", x, y - 3.2, th, "TEXT-GENERAL", align="CENTER")
         self.text(label, x + total_mm, y - 3.2, th, "TEXT-GENERAL", align="RIGHT")
 
@@ -580,7 +772,7 @@ class Sheet:
         """Cut line with end tags A-A."""
         try:
             self.line(x1, y1, x2, y2, layer="SYM-SECTIONMARK", linetype="CENTER")
-            for (px, py) in ((x1, y1), (x2, y2)):
+            for px, py in ((x1, y1), (x2, y2)):
                 self.rect(px - 3.0, py - 3.0, 6.0, 6.0, layer="SYM-SECTIONMARK", lw=13)
                 self.text(tag, px, py - 1.3, TXT_S, "TEXT-TITLE", align="CENTER")
                 self.line(px, py, px + (6 if px <= x1 else -6), py, layer="SYM-SECTIONMARK")
@@ -618,7 +810,7 @@ class Sheet:
         y0 = self.m
         self.rect(x0, y0, tb_w, tb_h, layer="TITLEBLK-BOX", lw=50)
 
-        col_a, col_b, col_c = tb_w * 0.40, tb_w * 0.36, tb_w * 0.24
+        col_a, col_b = tb_w * 0.40, tb_w * 0.36
         xs = [x0, x0 + col_a, x0 + col_a + col_b, x0 + tb_w]
         for xv in xs[1:-1]:
             self.line(xv, y0, xv, y0 + tb_h, layer="TITLEBLK-BOX", lw=18)
@@ -639,8 +831,7 @@ class Sheet:
             # into the neighbouring column and collide with that cell's value.
             self.text(fit_text(label, cw, th), cx, top - 3.0, th, "TITLEBLK-TEXT")
             if value:
-                self.text(fit_text(value, cw, th + 0.2), cx, top - 6.6, th + 0.2,
-                          "TITLEBLK-TEXT")
+                self.text(fit_text(value, cw, th + 0.2), cx, top - 6.6, th + 0.2, "TITLEBLK-TEXT")
 
         cell(0, 1, "CLIENT :-", client)
         cell(1, 1, "DRAWING NO. :-", drawing_no)
@@ -653,8 +844,13 @@ class Sheet:
         cell(2, 3, "DRAWN BY :-", drawn)
         cell(0, 4, "DRAWING TITLE :-", "", TXT_XS)
         title_h = TXT_M - 0.2
-        self.text(fit_text(title, col_a + col_b - 5.0, title_h), xs[0] + 1.6,
-                  y0 + rows * 4 + 2.4, title_h, "TITLEBLK-TEXT")
+        self.text(
+            fit_text(title, col_a + col_b - 5.0, title_h),
+            xs[0] + 1.6,
+            y0 + rows * 4 + 2.4,
+            title_h,
+            "TITLEBLK-TEXT",
+        )
         cell(2, 4, "DESIGNED BY :-", designed)
         # EP-P6-2: when approved is blank, pass the label as the value and
         # an empty label — this writes one TEXT entity, not two at the same

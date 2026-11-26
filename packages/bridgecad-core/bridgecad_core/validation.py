@@ -3486,17 +3486,15 @@ def _layout_audit(p: BridgeProject) -> LayoutAudit | None:
     """Return the layout audit, or ``None`` when the draw package is absent."""
     try:
         from bridgecad_draw.layout_audit import collect
-    except Exception:  # noqa: BLE001 — draw package not installed in this env
+    except Exception:  # — draw package not installed in this env
         return None
     try:
         return collect(p)
-    except Exception:  # noqa: BLE001 — a failed audit must not become an ERR row
+    except Exception:  # — a failed audit must not become an ERR row
         return None
 
 
-def _skip(
-    check_id: str, desc: str, sev: ValidationSeverity, reason: str
-) -> ValidationFinding:
+def _skip(check_id: str, desc: str, sev: ValidationSeverity, reason: str) -> ValidationFinding:
     """PASS that keeps its reason — "not evaluable", never a silent CLEAN.
 
     ``_f`` blanks the message on a pass, which is right for a real clean result
@@ -3781,7 +3779,7 @@ def check_dr_layer_coverage(p: BridgeProject) -> ValidationFinding:
         return _info_f("I53", desc, False, "layout audit not evaluated")
     try:
         from bridgecad_draw.layers import LAYER_REGISTRY
-    except Exception:  # noqa: BLE001
+    except Exception:
         return _info_f("I53", desc, False, "layer registry unavailable")
     unknown = sorted(audit.layers_drawn - set(LAYER_REGISTRY) - {"0"})
     return _info_f(

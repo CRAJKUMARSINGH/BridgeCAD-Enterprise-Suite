@@ -239,7 +239,6 @@ _FURNITURE_PREFIXES = ("BORDER-", "TITLEBLK-")
 _FURNITURE_LAYERS = frozenset({"TEXT-SPEC", "TEXT-HEADER", "TEXT-TITLE"})
 
 
-
 def _frame() -> tuple[float, float, float, float]:
     """Inner drawing border as ``(x0, y0, x1, y1)`` in millimetres."""
     m = _FRAME_MARGIN_MM
@@ -295,7 +294,7 @@ def _collect_uncached(project: Any) -> LayoutAudit:
     audit = LayoutAudit()
     try:
         dxf_paths = _render_to_tempdir(project)
-    except Exception as exc:  # noqa: BLE001 — a failed render must not mask a QA row
+    except Exception as exc:  # — a failed render must not mask a QA row
         audit.error = f"{type(exc).__name__}: {exc}"
         return audit
 
@@ -305,7 +304,7 @@ def _collect_uncached(project: Any) -> LayoutAudit:
     for path in dxf_paths:
         try:
             doc = ezdxf.readfile(str(path))
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             audit.error = f"{path.name}: {type(exc).__name__}: {exc}"
             continue
         msp = doc.modelspace()
@@ -383,9 +382,7 @@ def _collect_uncached(project: Any) -> LayoutAudit:
 
         for text_ent in msp.query("TEXT MTEXT"):
             content = (
-                getattr(text_ent.dxf, "text", None)
-                or getattr(text_ent, "text", "")
-                or ""
+                getattr(text_ent.dxf, "text", None) or getattr(text_ent, "text", "") or ""
             ).upper()
             if "BAND" in content and "/" in content:
                 audit.band_counts[sheet] = audit.band_counts.get(sheet, 0) + 1
@@ -407,7 +404,7 @@ def _extent(e: Any, ezbbox: Any) -> tuple[float, float, float, float] | None:
         return None
     try:
         ext = ezbbox.extents([e])
-    except Exception:  # noqa: BLE001 — entities without extents are skipped
+    except Exception:  # — entities without extents are skipped
         return None
     if not getattr(ext, "has_data", True):
         return None
@@ -454,13 +451,8 @@ def _is_note_line(content: str) -> bool:
         return True
     head, sep, rest = s.partition(".")
     return (
-        head.isdigit()
-        and sep == "."
-        and rest[:1].isspace()
-        and bool(rest.strip())
-        and len(s) > 12
+        head.isdigit() and sep == "." and rest[:1].isspace() and bool(rest.strip()) and len(s) > 12
     )
-
 
 
 def scale_on_ladder(denom: int) -> bool:

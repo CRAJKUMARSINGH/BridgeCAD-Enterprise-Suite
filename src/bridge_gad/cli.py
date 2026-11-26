@@ -9,10 +9,11 @@ from bridge_gad.config import DEFAULT_E, DEFAULT_I
 
 logger = logging.getLogger(__name__)
 
+
 def main() -> None:
     """Command-line interface for Bridge_GAD calculations."""
     configure_logging(level=logging.INFO)
-    
+
     parser = argparse.ArgumentParser(
         description="Bridge_GAD: Compute basic beam parameters (Moment, Shear, Deflection)"
     )
@@ -34,6 +35,7 @@ def main() -> None:
     if args.output:
         save_results_to_excel(results, args.output)
         print(f"\nResults saved to: {args.output}")
+
 
 if __name__ == "__main__":
     main()

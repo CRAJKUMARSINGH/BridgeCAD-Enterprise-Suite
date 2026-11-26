@@ -14,15 +14,13 @@ from __future__ import annotations
 
 import argparse
 import csv
-import itertools
 import json
 import logging
 import random
 import sys
 import zipfile
-from dataclasses import asdict
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 logger = logging.getLogger("generate_all_drawings")
 
@@ -37,11 +35,9 @@ from .dxf_to_pdf import (
     RenderOptions,
     bundle_drawings_to_pdf,
     convert_dxf_to_pdf,
-    convert_directory_to_pdfs,
 )
 from .multi_sheet_generator import DetailedSheetGenerator
 from .standards import (
-    DEFAULT_METADATA,
     get_owner_profile,
     merge_with_metadata,
 )
@@ -192,7 +188,7 @@ def generate_all_drawings(
 
         # 4) Phase 2 7-sheet package DXF + per-sheet PDF + booklet PDF
         pkg_base = tree["dxfs_pkg"] / f"{tpl_idx:02d}_{tpl_key}_Sheet.dxf"
-        ok2 = bool(dsg.generate_phase_two_package(enriched, pkg_base))
+        _ = bool(dsg.generate_phase_two_package(enriched, pkg_base))
         # The generator names each sheet {stem}Sheet1..Sheet7; glob on that.
         produced = sorted(pkg_base.parent.glob(
             f"{pkg_base.stem.replace('Sheet', '')}Sheet*.dxf"
@@ -267,7 +263,7 @@ def generate_all_drawings(
         writer.writeheader()
         writer.writerows(manifest_rows)
     run_stats["total_files"] += 1
-    manifest_rows_meta = {
+    _ = {
         "manifest.csv": manifest_csv.stat().st_size,
     }
 

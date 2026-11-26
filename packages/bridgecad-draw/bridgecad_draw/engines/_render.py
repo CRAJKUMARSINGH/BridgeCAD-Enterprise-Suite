@@ -25,5 +25,7 @@ def render_figure(dxf_path: str | Path, size_in: tuple[float, float] = (23.39, 1
     # export exposes the white figure underneath, making schedules disappear.
     fig.patch.set_facecolor("white")
     config = Configuration(background_policy=BackgroundPolicy.WHITE)
-    Frontend(RenderContext(doc), MatplotlibBackend(ax, adjust_figure=False), config=config).draw_layout(doc.modelspace(), finalize=True)
+    Frontend(
+        RenderContext(doc), MatplotlibBackend(ax, adjust_figure=False), config=config
+    ).draw_layout(doc.modelspace(), finalize=True)
     return fig

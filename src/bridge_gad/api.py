@@ -26,12 +26,12 @@ from typing import AsyncGenerator, Optional
 
 from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import StreamingResponse
 import tempfile
 import shutil
 
 from . import __version__
-from .config import Settings, load_settings
+from .config import load_settings
 from .core import generate_bridge_drawing
 from .logger_config import configure_logging
 
@@ -40,14 +40,14 @@ logger = logging.getLogger(__name__)
 
 # ── MIME type map ─────────────────────────────────────────────────────────────
 _MIME_TYPES = {
-    "dxf":   "application/dxf",
-    "pdf":   "application/pdf",
-    "png":   "image/png",
-    "svg":   "image/svg+xml",
+    "dxf": "application/dxf",
+    "pdf": "application/pdf",
+    "png": "image/png",
+    "svg": "image/svg+xml",
     "excel": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "xlsx":  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "csv":   "text/csv",
-    "html":  "text/html",
+    "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "csv": "text/csv",
+    "html": "text/html",
 }
 
 # ── In-memory job store (replace with Redis in production) ────────────────────
@@ -91,6 +91,8 @@ app.add_middleware(
 )
 
 # ── Request tracing middleware ────────────────────────────────────────────────
+
+
 @app.middleware("http")
 async def trace_requests(request: Request, call_next):
     request_id = str(uuid.uuid4())[:8]
@@ -107,21 +109,22 @@ settings = load_settings()
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
+
 @app.get("/")
 async def root():
     return {
         "name": "Bridge GAD Generator API",
         "version": __version__,
         "endpoints": [
-            {"path": "/predict",        "method": "POST", "description": "Sync: generate drawing (blocks until done)"},
-            {"path": "/template",       "method": "GET",  "description": "Download template workbook (query: template_key=[simple_12m|...])"},
-            {"path": "/package",        "method": "GET",  "description": "Download submission ZIP (template_key + include_phase_three bool)"},
-            {"path": "/generate_sample_pdf", "method": "GET",  "description": "Generate sample PDF drawing"},
-            {"path": "/jobs",           "method": "POST", "description": "Async: enqueue generation job"},
-            {"path": "/jobs/{job_id}",  "method": "GET",  "description": "Poll job status"},
+            {"path": "/predict", "method": "POST", "description": "Sync: generate drawing (blocks until done)"},
+            {"path": "/template", "method": "GET", "description": "Download template workbook (query: template_key=[simple_12m|...])"},
+            {"path": "/package", "method": "GET", "description": "Download submission ZIP (template_key + include_phase_three bool)"},
+            {"path": "/generate_sample_pdf", "method": "GET", "description": "Generate sample PDF drawing"},
+            {"path": "/jobs", "method": "POST", "description": "Async: enqueue generation job"},
+            {"path": "/jobs/{job_id}", "method": "GET", "description": "Poll job status"},
             {"path": "/jobs/{job_id}/stream", "method": "GET", "description": "SSE: stream job status"},
-            {"path": "/health",         "method": "GET",  "description": "Health check"},
-            {"path": "/metrics",        "method": "GET",  "description": "Basic metrics"},
+            {"path": "/health", "method": "GET", "description": "Health check"},
+            {"path": "/metrics", "method": "GET", "description": "Basic metrics"},
         ],
     }
 
@@ -257,7 +260,7 @@ async def enqueue_job(
 
     # Try ARQ if available, else run in asyncio background task
     try:
-        from arq.connections import ArqRedis, RedisSettings
+        from arq.connections import ArqRedis
         redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379")
         redis: ArqRedis = await ArqRedis.from_url(redis_url)
         await redis.enqueue_job(
@@ -350,7 +353,7 @@ async def stream_job(job_id: str):
         for _ in range(120):  # max 120 × 1s = 2 min
             job = _jobs.get(job_id)
             if not job:
-                yield f"data: {{\"error\": \"job not found\"}}\n\n"
+                yield "data: {\"error\": \"job not found\"}\n\n"
                 return
             payload = f'{{"status": "{job["status"]}", "progress": {job.get("progress", 0)}}}'
             yield f"data: {payload}\n\n"
@@ -481,7 +484,7 @@ async def generate_sample_pdf():
         # Generate Excel input from template
         template_key = "simple_12m"
         params = BRIDGE_TEMPLATES[template_key]["parameters"]
-        xls_bytes = make_template_excel(params)
+        _ = make_template_excel(params)
 
         # Convert to the row-oriented format BridgeGADGenerator.read_variables_from_excel expects
         import pandas as pd  # noqa: F811 — already imported above, re-import for clarity

@@ -263,9 +263,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         # Fit-only placeholders so the view can still be scaled: these are NOT
         # used to draw a footing (the elevation block is gated below).
         pile_cut = (
-            float(fd.pile_cutoff_level_m)
-            if fd.pile_cutoff_level_m is not None
-            else scour_rl + 2.0
+            float(fd.pile_cutoff_level_m) if fd.pile_cutoff_level_m is not None else scour_rl + 2.0
         )
         cap_thk = float(fd.pile_cap_thickness_mm or 1500) / 1000.0
         cap_top = pile_cut + cap_thk
@@ -278,8 +276,7 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
         _codes = ", ".join(i.code for i in _prec.issues) or "no footing data"
         text(
             msp,
-            f"PIER FOOTING LEVELS {_prec.status.value} ({_codes}) — "
-            "footing not drawn",
+            f"PIER FOOTING LEVELS {_prec.status.value} ({_codes}) — " "footing not drawn",
             elev_cx,
             185.0,
             height=th * 0.9,
@@ -422,7 +419,11 @@ def _draw(msp: Any, project: Any, scale_denom: int = 50) -> None:
             ("Cap Thickness", str(getattr(fd, "pile_cap_thickness_mm", 1500)), "mm"),
             ("Pile Cutoff RL", str(float(getattr(fd, "pile_cutoff_level_m", 0) or 0)), "m"),
             ("FOS Bearing", str(float(getattr(fd, "factor_of_safety_on_bearing", 3) or 3)), "-"),
-            ("Allow. Bearing Cap.", str(float(getattr(fd, "bearing_capacity_kpa", 450) or 450)), "kPa"),
+            (
+                "Allow. Bearing Cap.",
+                str(float(getattr(fd, "bearing_capacity_kpa", 450) or 450)),
+                "kPa",
+            ),
             ("Scour Level RL", str(float(getattr(hd, "scour_level_m", 0) or 0)), "m"),
             ("Scour Depth", str(float(getattr(hd, "design_scour_depth_m", 2) or 2)), "m"),
         ]

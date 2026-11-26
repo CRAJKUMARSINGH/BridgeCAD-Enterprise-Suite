@@ -43,6 +43,7 @@ in ``bridgecad_draw.layout_audit`` over-reports adjacent labels, and turning it
 into a pass/fail needs per-view rectangles that no sheet declares yet.  Reporting
 the number keeps it visible without a false pass.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -80,22 +81,14 @@ class Verdict(str, Enum):
 #: clean pass.
 _ALLOWED: dict[Gate, frozenset[Verdict]] = {
     Gate.GENERATION: frozenset({Verdict.SUCCEEDED, Verdict.FAILED}),
-    Gate.MODEL_VALIDATION: frozenset(
-        {Verdict.PASSED, Verdict.FAILED, Verdict.UNRESOLVED}
-    ),
-    Gate.GEOMETRY_CONTRACT: frozenset(
-        {Verdict.PASSED, Verdict.FAILED, Verdict.NOT_TESTED}
-    ),
-    Gate.REQUIRED_CONTENT: frozenset(
-        {Verdict.PASSED, Verdict.FAILED, Verdict.NOT_TESTED}
-    ),
+    Gate.MODEL_VALIDATION: frozenset({Verdict.PASSED, Verdict.FAILED, Verdict.UNRESOLVED}),
+    Gate.GEOMETRY_CONTRACT: frozenset({Verdict.PASSED, Verdict.FAILED, Verdict.NOT_TESTED}),
+    Gate.REQUIRED_CONTENT: frozenset({Verdict.PASSED, Verdict.FAILED, Verdict.NOT_TESTED}),
     Gate.LAYOUT: frozenset({Verdict.PASSED, Verdict.FAILED, Verdict.NOT_TESTED}),
     Gate.REFERENCE_FIDELITY: frozenset(
         {Verdict.PASSED, Verdict.FAILED, Verdict.NOT_TESTED, Verdict.BLOCKED}
     ),
-    Gate.ENGINEERING_REVIEW: frozenset(
-        {Verdict.PENDING, Verdict.APPROVED, Verdict.FAILED}
-    ),
+    Gate.ENGINEERING_REVIEW: frozenset({Verdict.PENDING, Verdict.APPROVED, Verdict.FAILED}),
 }
 
 #: The gates that must pass before the drawing is quality/layout complete. The
@@ -200,11 +193,9 @@ class QualityManifest:
             raise KeyError(f"unknown quality gate {gate!r}")
         if verdict not in _ALLOWED[gate]:
             allowed = ", ".join(sorted(v.value for v in _ALLOWED[gate]))
-            raise ValueError(
-                f"{gate.value} cannot be {verdict.value}; allowed: {allowed}"
-            )
+            raise ValueError(f"{gate.value} cannot be {verdict.value}; allowed: {allowed}")
 
-    def set(self, gate: Gate, verdict: Verdict, reason: str = "") -> "QualityManifest":
+    def set(self, gate: Gate, verdict: Verdict, reason: str = "") -> QualityManifest:
         """Record one gate verdict (fail-closed: an invalid pair raises)."""
         self._check(gate, verdict)
         self.verdicts[gate] = verdict
@@ -256,11 +247,9 @@ class QualityManifest:
         if self.accepted:
             return "ACCEPTED"
         if self.quality_and_layout_passed:
-            return ("GENERATION/CONTENT/LAYOUT GATES PASSED — acceptance pending "
-                    "reference/review")
+            return "GENERATION/CONTENT/LAYOUT GATES PASSED — acceptance pending " "reference/review"
         if self.generation_gates_passed:
-            return ("GENERATION GATES PASSED — acceptance pending "
-                    "content/layout/reference/review")
+            return "GENERATION GATES PASSED — acceptance pending " "content/layout/reference/review"
         return "DRAFT — generation gates not all passed"
 
     def to_json(self) -> dict[str, Any]:

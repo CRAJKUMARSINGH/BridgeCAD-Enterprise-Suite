@@ -24,7 +24,7 @@ class Kind(str, Enum):
     LOCKED = "locked"
 
 
-class Violation(Exception):
+class Violation(Exception):  # noqa: N818  # Public exception name.
     """A rejected override.  Carries field, accepted range and clause."""
 
 
@@ -44,7 +44,7 @@ class VariableSpec:
         if isinstance(raw, bool):
             raise Violation(f"{self.key}: booleans are not valid variable values")
         if self.choices:
-            if all(isinstance(choice, (int, float, Decimal)) for choice in self.choices):
+            if all(isinstance(choice, int | float | Decimal) for choice in self.choices):
                 try:
                     candidate = Decimal(str(raw))
                 except Exception as exc:
@@ -55,9 +55,7 @@ class VariableSpec:
                     if candidate == Decimal(str(choice)):
                         return choice
             if raw not in self.choices:
-                raise Violation(
-                    f"{self.key}: {raw!r} not in {list(self.choices)} [{self.clause}]"
-                )
+                raise Violation(f"{self.key}: {raw!r} not in {list(self.choices)} [{self.clause}]")
             return raw
         # A LOCKED identity field is not a dial: it carries no range and no
         # choices, so its value passes through unchanged once ``--force`` has
@@ -70,7 +68,10 @@ class VariableSpec:
             raise Violation(f"{self.key}: {raw!r} is not numeric ({self.unit})") from exc
         if not val.is_finite():
             raise Violation(f"{self.key}: value must be finite")
-        if self.key in {"span_count", "girders_per_deck", "piles_per_pier"} and val != val.to_integral_value():
+        if (
+            self.key in {"span_count", "girders_per_deck", "piles_per_pier"}
+            and val != val.to_integral_value()
+        ):
             raise Violation(f"{self.key}: must be a whole number")
         if self.lo is not None and val < self.lo:
             raise Violation(f"{self.key}: {val} < min {self.lo} {self.unit} [{self.clause}]")
@@ -119,14 +120,16 @@ VARIABLES: dict[str, VariableSpec] = {
         note="applies to every span; use span_overrides for a mix",
     ),
     "carriageway_width": VariableSpec(
-        "carriageway_width", "m", Kind.FREE, choices=(3.5, 7.5, 11.0), clause="IRC 73 / IRC 5 cl.101"
+        "carriageway_width",
+        "m",
+        Kind.FREE,
+        choices=(3.5, 7.5, 11.0),
+        clause="IRC 73 / IRC 5 cl.101",
     ),
     "footpath_width": _free("footpath_width", "m", 0.0, 2.0, "IRC 103", step=0.25),
     "skew_deg": _free("skew_deg", "deg", 0, 30, CLAUSE_SKEW, step=5),
     "pier_height_m": _free("pier_height_m", "m", 3.0, 25.0, "site datum"),
-    "pier_shaft_width_m": _free(
-        "pier_shaft_width_m", "m", 0.8, 3.0, "IRC 112 cl.16", step=0.1
-    ),
+    "pier_shaft_width_m": _free("pier_shaft_width_m", "m", 0.8, 3.0, "IRC 112 cl.16", step=0.1),
     "deck_thickness_mm": _free("deck_thickness_mm", "mm", 200, 900, CLAUSE_DEPTH, step=25),
     "girder_depth_mm": _free("girder_depth_mm", "mm", 600, 3000, CLAUSE_DEPTH, step=50),
     "girder_spacing_m": _free("girder_spacing_m", "m", 1.5, 3.5, CLAUSE_DEPTH, step=0.1),
@@ -165,12 +168,14 @@ VARIABLES: dict[str, VariableSpec] = {
         note="footing thickness; 0 = not designed (contract stays UNRESOLVED)",
     ),
     "pile_cutoff_level_m": _free(
-        "pile_cutoff_level_m", "m", -100.0, 9000.0, CLAUSE_PILE,
+        "pile_cutoff_level_m",
+        "m",
+        -100.0,
+        9000.0,
+        CLAUSE_PILE,
         note="embedment rule-of-thumb datum; never the founding level",
     ),
-    "pier_cap_depth_m": _free(
-        "pier_cap_depth_m", "m", 0.3, 6.0, "IRC 112 cl.16", step=0.05
-    ),
+    "pier_cap_depth_m": _free("pier_cap_depth_m", "m", 0.3, 6.0, "IRC 112 cl.16", step=0.05),
     "pier_pedestal_height_m": _free(
         "pier_pedestal_height_m", "m", 0.05, 3.0, CLAUSE_BEARING, step=0.05
     ),

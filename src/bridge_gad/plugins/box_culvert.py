@@ -1,6 +1,7 @@
 from bridge_gad.plugins import PluginBase
 from tkinter import messagebox
 
+
 class BoxCulvertPlugin(PluginBase):
     name = "Box Culvert Design"
     version = "1.0.0"

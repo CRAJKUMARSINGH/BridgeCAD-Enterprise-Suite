@@ -26,14 +26,16 @@ sheet, text strings present on the sheet, and sheet presence.  It does not
 its declared layer/label/schedule is on the sheet.  Reviewer verdicts and the
 engineering review remain separate gates.
 """
+
 from __future__ import annotations
 
 import json
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 MANIFEST_VERSION = "1.0.0"
 _DEFAULT_MANIFEST = Path(__file__).with_name("required_content.json")
@@ -90,18 +92,15 @@ class Requirement:
     scope: str = DRAWING
 
     @classmethod
-    def from_json(cls, raw: dict[str, Any]) -> "Requirement":
+    def from_json(cls, raw: dict[str, Any]) -> Requirement:
         status = str(raw.get("status", "MISSING")).upper()
         if status not in DECLARED_STATUSES:
             raise ValueError(
-                f"{raw.get('id')}: status must be one of {DECLARED_STATUSES}, "
-                f"got {status!r}"
+                f"{raw.get('id')}: status must be one of {DECLARED_STATUSES}, " f"got {status!r}"
             )
         scope = str(raw.get("scope", DRAWING)).lower()
         if scope not in SCOPES:
-            raise ValueError(
-                f"{raw.get('id')}: scope must be one of {SCOPES}, got {scope!r}"
-            )
+            raise ValueError(f"{raw.get('id')}: scope must be one of {SCOPES}, got {scope!r}")
         return cls(
             id=raw["id"],
             area=raw["area"],
@@ -162,11 +161,7 @@ class RequirementResult:
     @property
     def ok(self) -> bool:
         """Credited only when declared IMPLEMENTED *and* measured present."""
-        return (
-            self.applicable
-            and self.declared_status == "IMPLEMENTED"
-            and self.present
-        )
+        return self.applicable and self.declared_status == "IMPLEMENTED" and self.present
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -219,16 +214,22 @@ class ContentReport:
     def summary(self) -> str:
         fails = self.failures
         if self.passed:
-            return (f"required content: {len(self.applicable)} applicable "
-                    f"requirement(s) present on {len(self.sheets_found)} sheet(s)")
-        detail = "; ".join(f"{r.id} ({r.declared_status}, measured {r.measured})"
-                           for r in fails[:4])
+            return (
+                f"required content: {len(self.applicable)} applicable "
+                f"requirement(s) present on {len(self.sheets_found)} sheet(s)"
+            )
+        detail = "; ".join(
+            f"{r.id} ({r.declared_status}, measured {r.measured})" for r in fails[:4]
+        )
         more = "" if len(fails) <= 4 else f" (+{len(fails) - 4} more)"
-        return (f"required content: {len(fails)}/{len(self.applicable)} "
-                f"applicable requirement(s) unmet — {detail}{more}")
+        return (
+            f"required content: {len(fails)}/{len(self.applicable)} "
+            f"applicable requirement(s) unmet — {detail}{more}"
+        )
 
 
 # ── manifest loading ─────────────────────────────────────────────────────────
+
 
 def load_manifest(path: str | Path | None = None) -> tuple[dict[str, Any], list[Requirement]]:
     """Load the versioned manifest. Returns ``(raw, requirements)``."""
@@ -243,6 +244,7 @@ def load_manifest(path: str | Path | None = None) -> tuple[dict[str, Any], list[
 
 
 # ── measurement ──────────────────────────────────────────────────────────────
+
 
 def read_sheet(path: Path, stem: str) -> SheetContent:
     """Read one DXF's modelspace layers and text strings."""
@@ -298,7 +300,7 @@ def _applies(when: dict[str, Any], params: dict[str, Any]) -> bool:
             if "max" in allowed and value > float(allowed["max"]):
                 return False
         else:
-            if isinstance(allowed, (list, tuple, set)):
+            if isinstance(allowed, list | tuple | set):
                 if str(actual) not in {str(a) for a in allowed}:
                     return False
             elif str(actual) != str(allowed):
@@ -317,8 +319,7 @@ def _measure(req: Requirement, sheets: dict[str, SheetContent]) -> tuple[int, st
         n = content.layers.get(str(req.value), 0)
         return n, f"{req.sheet}: layer {req.value!r} × {n}"
     if req.kind in (RequirementKind.TEXT, RequirementKind.TEXT_REGEX):
-        pool = (content.title_block_texts if req.scope == TITLE_BLOCK
-                else content.drawing_texts)
+        pool = content.title_block_texts if req.scope == TITLE_BLOCK else content.drawing_texts
         label = "title-block" if req.scope == TITLE_BLOCK else "drawing"
         if req.kind is RequirementKind.TEXT:
             n = sum(1 for t in pool if t == req.value)
@@ -327,8 +328,7 @@ def _measure(req: Requirement, sheets: dict[str, SheetContent]) -> tuple[int, st
             n = sum(1 for t in pool if rx.search(t))
         return n, f"{req.sheet}: {label} text /{req.value}/ × {n}"
     if req.kind is RequirementKind.GEOMETRY:
-        drawn = [lyr for lyr in content.layers
-                 if not lyr.startswith(_ANNOTATION_PREFIXES)]
+        drawn = [lyr for lyr in content.layers if not lyr.startswith(_ANNOTATION_PREFIXES)]
         return len(drawn), f"{req.sheet}: drawn layers {sorted(drawn)}"
     return 0, f"{req.sheet}: unknown requirement kind {req.kind}"
 
@@ -366,18 +366,30 @@ def evaluate(
     )
     for req in reqs:
         if not _applies(req.when, params):
-            report.requirements.append(RequirementResult(
-                id=req.id, area=req.area, declared_status=req.status,
-                applicable=False, measured=0, required_count=req.min_count,
-                detail=f"not applicable for {sorted(req.when)}={ {k: params.get(k) for k in req.when} }",
-            ))
+            report.requirements.append(
+                RequirementResult(
+                    id=req.id,
+                    area=req.area,
+                    declared_status=req.status,
+                    applicable=False,
+                    measured=0,
+                    required_count=req.min_count,
+                    detail=f"not applicable for {sorted(req.when)}={ {k: params.get(k) for k in req.when} }",
+                )
+            )
             continue
         count, detail = _measure(req, sheets)
-        report.requirements.append(RequirementResult(
-            id=req.id, area=req.area, declared_status=req.status,
-            applicable=True, measured=count, required_count=req.min_count,
-            detail=detail,
-        ))
+        report.requirements.append(
+            RequirementResult(
+                id=req.id,
+                area=req.area,
+                declared_status=req.status,
+                applicable=True,
+                measured=count,
+                required_count=req.min_count,
+                detail=detail,
+            )
+        )
     return report
 
 

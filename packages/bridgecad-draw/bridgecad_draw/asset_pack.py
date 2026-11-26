@@ -29,8 +29,8 @@ USAGE
 from __future__ import annotations
 
 import logging
+from collections.abc import Iterable, Sequence
 from pathlib import Path
-from typing import Any, Iterable, Sequence
 
 logger = logging.getLogger(__name__)
 
@@ -111,9 +111,10 @@ def build_asset_pack(
             mod = importlib.import_module(f".{mod_name}", package="bridgecad_draw")
             p = mod.generate(SPECS[spec_key], path)
             results.append(p)
-            logger.info("Asset sheet %s \u2192 %s (%d KB)", sheet_id, p.name,
-                        p.stat().st_size // 1024)
-        except Exception as exc:  # noqa: BLE001 - surfaced, never swallowed
+            logger.info(
+                "Asset sheet %s \u2192 %s (%d KB)", sheet_id, p.name, p.stat().st_size // 1024
+            )
+        except Exception as exc:  # - surfaced, never swallowed
             failures[sheet_id] = f"{type(exc).__name__}: {exc}"
             logger.warning("Asset sheet %s (%s) failed: %s", sheet_id, stem, exc)
 

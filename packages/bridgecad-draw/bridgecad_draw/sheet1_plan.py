@@ -18,8 +18,8 @@ Draws (on a single DXF modelspace):
 from __future__ import annotations
 
 import math
-from pathlib import Path
 from itertools import accumulate
+from pathlib import Path
 from typing import Any
 
 from .deck_joints import deck_intervals, pier_joints
@@ -129,11 +129,15 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     # Sheet 1 drew pier caps and bearing symbols unconditionally. A box cell
     # (004) or a box culvert is monolithic: there is no separate pier cap and
     # no bearing, so both must be gated on the *model*, not the sheet.
-    from bridgecad_core import types as T
+    from bridgecad_core import types as core_types
 
     _no_pier_ss = (
-        T.SuperstructureType.BOX_CULVERT,
-        getattr(T.SuperstructureType, "BOX_CELL_MULTI", T.SuperstructureType.BOX_CULVERT),
+        core_types.SuperstructureType.BOX_CULVERT,
+        getattr(
+            core_types.SuperstructureType,
+            "BOX_CELL_MULTI",
+            core_types.SuperstructureType.BOX_CULVERT,
+        ),
     )
     has_piers = project.superstructure.type not in _no_pier_ss
     # A bearingless structure carries no bearing symbol. The model encodes
@@ -248,8 +252,17 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int | None = None) -> None:
         # Audit-required SUPER-DECK layer tag for the deck plan outline.
         polyline(msp, deck_pts, layer="SUPER-DECK", close=True, lw=30)
         if abs(skew_deg) < 0.5:
-            hatch_rect(msp, hpos(start), vpos(-half_cw), (end-start)*scale, cw*scale,
-                       pattern="ANSI31", scale=scale*0.08, layer="STRUC-HATCHING", color=8)
+            hatch_rect(
+                msp,
+                hpos(start),
+                vpos(-half_cw),
+                (end - start) * scale,
+                cw * scale,
+                pattern="ANSI31",
+                scale=scale * 0.08,
+                layer="STRUC-HATCHING",
+                color=8,
+            )
 
     # ── Abutments ─────────────────────────────────────────────────────────
     # Wing-wall splay / return-wall footprint (RC-PLAN-11). The abutment
@@ -371,8 +384,13 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int | None = None) -> None:
 
     for joint in joints:
         for face in joint.faces:
-            line(msp, (hpos(face)+half_w*scale*sin_t, vpos(-half_w)),
-                 (hpos(face)-half_w*scale*sin_t, vpos(half_w)), layer="SUB-EXPJOINT", lw=35)
+            line(
+                msp,
+                (hpos(face) + half_w * scale * sin_t, vpos(-half_w)),
+                (hpos(face) - half_w * scale * sin_t, vpos(half_w)),
+                layer="SUB-EXPJOINT",
+                lw=35,
+            )
 
     # ── Skew annotation (guide #4): angle at CL of each support ────────────
     if abs(skew_deg) >= 0.5:

@@ -10,16 +10,18 @@ from bridgecad_core.types import SpanConfiguration, SuperstructureType
 if TYPE_CHECKING:
     from bridgecad_core.models import BridgeProject
 
-_DISCONTINUOUS_DECKS = frozenset({
-    SuperstructureType.SOLID_SLAB,
-    SuperstructureType.VOIDED_SLAB,
-    SuperstructureType.PREFAB_PSC_SLAB,
-    SuperstructureType.RCC_TBEAM,
-    SuperstructureType.PSC_IGIRDER,
-    SuperstructureType.PSC_I_GIRDER_COMPOSITE,
-    SuperstructureType.PSC_U_GIRDER,
-    SuperstructureType.PSC_BOX_GIRDER,
-})
+_DISCONTINUOUS_DECKS = frozenset(
+    {
+        SuperstructureType.SOLID_SLAB,
+        SuperstructureType.VOIDED_SLAB,
+        SuperstructureType.PREFAB_PSC_SLAB,
+        SuperstructureType.RCC_TBEAM,
+        SuperstructureType.PSC_IGIRDER,
+        SuperstructureType.PSC_I_GIRDER_COMPOSITE,
+        SuperstructureType.PSC_U_GIRDER,
+        SuperstructureType.PSC_BOX_GIRDER,
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -50,7 +52,8 @@ def pier_joints(project: "BridgeProject", pier_stations: Iterable[float]) -> lis
     for row in project.bearings_joints.expansion_joint_schedule:
         location = re.fullmatch(
             r"P(?:IER\s*)?(\d+)(?:[\s-]+(?:CENTRE(?:LINE)?|CENTER(?:LINE)?|CL))?",
-            row.location.strip(), re.IGNORECASE,
+            row.location.strip(),
+            re.IGNORECASE,
         )
         if location and row.quantity == 1:
             scheduled.setdefault(int(location[1]), set()).add(row.gap_mm)
@@ -63,11 +66,15 @@ def pier_joints(project: "BridgeProject", pier_stations: Iterable[float]) -> lis
     for pier, station in enumerate(pier_stations, 1):
         gaps = scheduled.get(pier, set())
         if separate or gaps:
-            joints.append(PierJoint(pier, station, next(iter(gaps)) if len(gaps) == 1 else None, bool(gaps)))
+            joints.append(
+                PierJoint(pier, station, next(iter(gaps)) if len(gaps) == 1 else None, bool(gaps))
+            )
     return joints
 
 
-def deck_intervals(start: float, end: float, joints: Iterable[PierJoint]) -> Iterator[tuple[float, float]]:
+def deck_intervals(
+    start: float, end: float, joints: Iterable[PierJoint]
+) -> Iterator[tuple[float, float]]:
     """Deck extents between consecutive joint faces."""
     for joint in joints:
         yield start, joint.station - joint.half_gap_m

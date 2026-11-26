@@ -23,10 +23,11 @@ Usage inside a sheet generator::
     from .fit import choose_fit, Fit
 
     fit = choose_fit(total_len, draw_w, n_annotations=span_count + 2)
-    sc_h  = fit.mm_per_m
+    sc_h = fit.mm_per_m
     # title block:
     scale_str = f"{fit.scale_str} H  1:{fit.denom // int(v_exag)} V"
 """
+
 from __future__ import annotations
 
 import math
@@ -35,7 +36,7 @@ from dataclasses import dataclass
 # Standard IRC SP:55 scale ladder for plan-view sheets.
 LADDER: tuple[int, ...] = (10, 20, 25, 30, 40, 50, 75, 100, 150, 200, 250, 300, 400, 500)
 
-MIN_TEXT_MM: float = 2.5       # floor for adaptive text height
+MIN_TEXT_MM: float = 2.5  # floor for adaptive text height
 MIN_ANNOT_GAP_MM: float = 8.0  # minimum clear gap between adjacent pier labels
 
 
@@ -55,6 +56,7 @@ class Fit:
     bands : int
         Number of drawing bands needed (always 1 when ``broken`` is ``False``).
     """
+
     denom: int
     mm_per_m: float
     broken: bool
@@ -112,7 +114,7 @@ def choose_fit(
     # No single rung works — use the coarsest and split into bands.
     denom = LADDER[-1]
     mm_per_m = 1000.0 / denom
-    band_len_m = draw_w_mm / mm_per_m          # real metres per band
+    band_len_m = draw_w_mm / mm_per_m  # real metres per band
     n_bands = math.ceil(length_m / max(band_len_m * 0.95, 0.001))
     return Fit(denom=denom, mm_per_m=mm_per_m, broken=True, bands=max(2, n_bands))
 

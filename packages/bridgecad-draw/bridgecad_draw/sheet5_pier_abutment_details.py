@@ -40,8 +40,7 @@ def _family_for(abutment_type: Any) -> str:
 _DEFAULT_SCALE = 75
 
 
-def generate(project: Any, output_path: str | Path,
-             scale_denom: int | None = None) -> Path:
+def generate(project: Any, output_path: str | Path, scale_denom: int | None = None) -> Path:
     """Generate Sheet 5 — Pier & Abutment Details.
 
     Four views share one sheet at one scale.  ``scale_denom=None`` uses the
@@ -410,8 +409,13 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     # The approach slab spans the full deck width, centred on the bridge axis.
     approach_width_mm = float(project.geometry_input.overall_width_m) * sc
     rectangle(
-        msp, abt_cx - approach_width_mm / 2, slab_top_e - app_t_mm_e,
-        approach_width_mm, app_t_mm_e, layer="CIVIL-ROAD", lw=25,
+        msp,
+        abt_cx - approach_width_mm / 2,
+        slab_top_e - app_t_mm_e,
+        approach_width_mm,
+        app_t_mm_e,
+        layer="CIVIL-ROAD",
+        lw=25,
     )
     # wearing coat — continuous over the approach slab
     rectangle(

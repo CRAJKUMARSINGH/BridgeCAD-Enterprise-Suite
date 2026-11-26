@@ -1199,14 +1199,12 @@ _DRAWING_AUDIT_RULES: list[RuleSpec] = [
         "BridgeCAD drawing contract",
     ),
 ]
-assert len(_DRAWING_AUDIT_RULES) == 13, (
-    f"drawing-audit group expected 13, got {len(_DRAWING_AUDIT_RULES)}"
-)
+assert (
+    len(_DRAWING_AUDIT_RULES) == 13
+), f"drawing-audit group expected 13, got {len(_DRAWING_AUDIT_RULES)}"
 
 
-ALL_RULES: list[RuleSpec] = (
-    _CRITICAL_RULES + _WARNING_RULES + _INFO_RULES + _DRAWING_AUDIT_RULES
-)
+ALL_RULES: list[RuleSpec] = _CRITICAL_RULES + _WARNING_RULES + _INFO_RULES + _DRAWING_AUDIT_RULES
 assert len(ALL_RULES) == 163, f"ALL_RULES expected 163, got {len(ALL_RULES)}"
 
 

@@ -1,4 +1,7 @@
-import importlib, pkgutil, inspect
+import importlib
+import pkgutil
+import inspect
+
 
 class PluginBase:
     """Base class every plugin must subclass."""
@@ -9,6 +12,7 @@ class PluginBase:
 
     def run(self, parent=None):
         raise NotImplementedError("Each plugin must implement run()")
+
 
 def load_plugins():
     """Auto-discover plugins under bridge_gad.plugins package."""

@@ -83,7 +83,9 @@ for fn in ["predict.js", "health.js"]:
         src = fn_path.read_text()
         check(f"{fn} exports handler", "exports.handler" in src)
         proxy_path = fns_dir.parent / "lib" / "drawing-proxy.cjs"
-        config_src = proxy_path.read_text() if "proxyDrawing" in src and proxy_path.is_file() else src
+        config_src = (
+            proxy_path.read_text() if "proxyDrawing" in src and proxy_path.is_file() else src
+        )
         check(f"{fn} uses FASTAPI_URL env var", "FASTAPI_URL" in config_src)
 
 # ── 4. Vite frontend source ─────────────────────────────────────────────────
@@ -91,7 +93,12 @@ section("4. Vite frontend source")
 
 if publish_dir == "frontend/dist":
     frontend = (ROOT / publish_dir).parent
-    for relative in ("index.html", "package-lock.json", "src/main.tsx", "public/samples/sample_input.xlsx"):
+    for relative in (
+        "index.html",
+        "package-lock.json",
+        "src/main.tsx",
+        "public/samples/sample_input.xlsx",
+    ):
         check(f"Frontend contains {relative}", (frontend / relative).is_file())
 
 # ── 5. Python package integrity ───────────────────────────────────────────────

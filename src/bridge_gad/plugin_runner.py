@@ -3,6 +3,7 @@ import traceback
 from tkinter import messagebox
 from bridge_gad import logger
 
+
 def _plugin_target(plugin_class):
     """Executed in a separate process."""
     try:
@@ -12,6 +13,7 @@ def _plugin_target(plugin_class):
         tb = traceback.format_exc()
         print("Plugin crashed:\n", tb)
         messagebox.showerror("Plugin Error", f"{plugin_class.name} failed:\n{e}")
+
 
 def safe_run(plugin_class):
     """Run plugin safely in isolated process."""

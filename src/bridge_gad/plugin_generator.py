@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from tkinter import simpledialog, messagebox
 
@@ -14,6 +13,7 @@ class {class_name}(PluginBase):
     def run(self, parent=None):
         messagebox.showinfo("{display_name}", "This is a placeholder for {display_name} module.")
 '''
+
 
 def create_plugin():
     """Prompt user for plugin details and auto-create module."""

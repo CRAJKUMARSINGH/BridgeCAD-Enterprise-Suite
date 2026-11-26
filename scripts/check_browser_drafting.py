@@ -22,7 +22,9 @@ def check_demo(url: str) -> None:
             page.goto(f"{url}/#home")
             page.get_by_role("link", name="Open live drafting").click()
             expect(page.get_by_role("heading", name="Live drafting")).to_be_visible()
-            expect(page.get_by_role("button", name="GAD + plan")).to_have_attribute("aria-pressed", "true")
+            expect(page.get_by_role("button", name="GAD + plan")).to_have_attribute(
+                "aria-pressed", "true"
+            )
             svg = page.get_by_role("button", name="SVG", exact=True)
             dxf = page.get_by_role("button", name="DXF", exact=True)
             spans = page.get_by_label("Span lengths in order")
@@ -43,7 +45,9 @@ def check_demo(url: str) -> None:
 def main() -> None:
     if not (DIST / "index.html").is_file():
         raise SystemExit("Build the frontend before running the browser check.")
-    with ThreadingHTTPServer(("127.0.0.1", 0), partial(SimpleHTTPRequestHandler, directory=DIST)) as server:
+    with ThreadingHTTPServer(
+        ("127.0.0.1", 0), partial(SimpleHTTPRequestHandler, directory=DIST)
+    ) as server:
         thread = Thread(target=server.serve_forever, daemon=True)
         thread.start()
         try:

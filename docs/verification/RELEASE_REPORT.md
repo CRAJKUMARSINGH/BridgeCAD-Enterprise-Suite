@@ -1,6 +1,6 @@
 # BridgeCAD release verification
 
-Updated 26 November 2026 IST
+Updated 27 November 2026 IST
 
 ## Due versus done
 
@@ -11,15 +11,21 @@ Updated 26 November 2026 IST
 | Sheet 04/05 contract tests | 27 / 27 | 100% | The layer visibility fix passed the full contract suite locally. |
 | Seeded sheet audit | 3,000 / 3,000 | 100% | The audit rendered 6,000 sheets with zero failures. |
 | Sheet audit mutation drills | 6 / 6 | 100% | The audit detected all six injected drawing errors. |
-| Previously failing Phase 0 CI jobs restored | 2 / 6 | 33.3% | GitHub confirmed that the sheet detail and suite mypy checks passed at `a12ec15`. |
+| Legacy regression tests | 6 / 6 | 100% | The legacy drawing generator now uses the supported `ezdxf.document.Drawing` annotation. |
+| Legacy workbook smoke cases | 11 / 11 | 100% | The robotic harness passed ingestion, calculation, drawing, and validation locally. |
+| Netlify readiness checks | 25 / 25 | 100% | All checks passed locally with gateway dependencies installed. |
+| Originally failing Phase 0 CI jobs restored | 5 / 6 | 83.3% | GitHub confirmed suite lint, suite mypy, sheet details, and both legacy jobs passed at `48fa296`. |
 | Release phases merged | 0 / 7 | 0% | Phase 0 remains open as draft PR #1. The green CI and merge gate still applies. |
 | Release acceptance criteria recorded as passed | 1 / 17 | 5.9% | AC-2 passed in the local baseline. One criterion failed, one is partial, and 14 are pending. |
 
-On 26 November, [Phase 0 draft PR #1](https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/pull/1)
-at `a12ec15` had 22 passing checks, four failures, and nine checks classified as
-skipped by GitHub CLI. The remaining failures are suite lint, architecture
-invariants, and two invocations of the same legacy job. The frontend production
-build also passed locally. Release certification remains open.
+On 27 November, [Phase 0 draft PR #1](https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite/pull/1)
+at `48fa296` had 25 passing checks, three failed jobs, and eight skipped or neutral
+checks. Both unit jobs ran after lint passed and exposed missing gateway and CLI test
+dependencies. The Python 3.11 unit job reached 79.73% coverage against the 75% floor.
+The architecture checker still reports imports from core validation into drawing
+audits and from the infrastructure worker into drawing, bill, and export packages.
+Those imports also break the transitive dependency contracts. Release certification
+remains open.
 
 ## Phase 0 baseline
 

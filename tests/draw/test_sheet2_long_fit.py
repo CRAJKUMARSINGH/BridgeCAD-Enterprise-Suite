@@ -71,8 +71,41 @@ def _h_lines(doc, layer: str):
 
 
 def _deck_slab_lines(doc):
-    """The two long horizontal deck lines: slab top and soffit."""
+    """Horizontal slab top and soffit, including each split span."""
     return _h_lines(doc, "SUPER-DECK")
+
+
+@pytest.mark.parametrize(("family", "girder_depth"), [("SOLID_SLAB", None), ("RCC_TBEAM", 1150), ("PSC_IGIRDER", 1800)])
+def test_dirt_wall_tops_match_both_slabs_in_booklet_drawings(tmp_path, family, girder_depth):
+    from bridgecad_core.types import SuperstructureType
+    from bridgecad_draw import sheet5_pier_abutment_details as S5
+
+    project = contract.make_project("blank", nspan=2, span_m=12)
+    project.superstructure = project.superstructure.model_copy(update={
+        "type": SuperstructureType(family), "girder_depth_mm": girder_depth,
+    })
+
+    def tops(doc, *layers):
+        return sorted(max(y for _, y in e.get_points("xy")) for e in doc.modelspace().query("LWPOLYLINE")
+                      if e.dxf.layer in layers)
+
+    elevation = ezdxf.readfile(S2.generate(project, tmp_path / "elevation.dxf"))
+    deck_top = max(line.dxf.start.y for line in _deck_slab_lines(elevation))
+    assert tops(elevation, "CIVIL-ROAD") == pytest.approx([deck_top, deck_top])
+    assert tops(elevation, "SUB-DIRT-WALL") == pytest.approx([deck_top, deck_top])
+
+    detail_scale = 100
+    detail = ezdxf.readfile(S5.generate(project, tmp_path / "details.dxf", scale_denom=detail_scale))
+    assert len(tops(detail, "CIVIL-ROAD")) == 2
+    assert tops(detail, "ABUT-PROF", "SUB-DIRT-WALL") == pytest.approx(tops(detail, "CIVIL-ROAD"))
+    approach_spans = []
+    for slab in detail.modelspace().query('LWPOLYLINE[layer=="CIVIL-ROAD"]'):
+        xs = [x for x, _ in slab.get_points("xy")]
+        approach_spans.append(max(xs) - min(xs))
+    assert sorted(approach_spans) == pytest.approx(sorted([
+        float(project.substructure.approach_slab_length_m or 3.5) * 1000 / detail_scale,
+        float(project.geometry_input.overall_width_m) * 1000 / detail_scale,
+    ]))
 
 
 def test_270m_fits_a_ladder_rung_without_breaking(tmp_path):
@@ -86,9 +119,11 @@ def test_printed_scale_matches_the_geometry(tmp_path):
     """The deck line is drawn at exactly 1000/denom mm per metre — no drift."""
     doc, _ = _render(tmp_path)
     denom = _printed_h_denom(doc)
-    spans = [abs(e.dxf.end.x - e.dxf.start.x) for e in _deck_slab_lines(doc)]
-    assert spans, "no horizontal SUPER-DECK line — the section did not draw a deck"
-    drawn_mm_per_m = max(spans) / TOTAL_M
+    edges = _deck_slab_lines(doc)
+    assert edges, "no horizontal SUPER-DECK line — the section did not draw a deck"
+    x0 = min(e.dxf.start.x for e in edges)
+    x1 = max(e.dxf.end.x for e in edges)
+    drawn_mm_per_m = (x1 - x0) / TOTAL_M
     assert drawn_mm_per_m == pytest.approx(1000.0 / denom, rel=1e-6), (
         f"deck drawn at {drawn_mm_per_m:.4f} mm/m but captioned 1:{denom}"
     )
@@ -232,7 +267,7 @@ def test_pile_cutoff_geometry_uses_declared_level(tmp_path, valid_cutoff):
         )
 
 
-def test_tbeam_span_labels_and_breaks_follow_articulation(tmp_path):
+def test_tbeam_span_labels_and_breaks_are_drawn_for_both_articulations(tmp_path):
     from decimal import Decimal
     from bridgecad_core.types import SpanConfiguration
 
@@ -241,20 +276,15 @@ def test_tbeam_span_labels_and_breaks_follow_articulation(tmp_path):
     )
     project.geometry_input.span_lengths_m = [Decimal("18.75")] * 3
     project.geometry_input.skew_angle_deg = Decimal(0)
-    for mode, expected in (
-        (SpanConfiguration.SIMPLY_SUPPORTED, [18.75, 37.5]),
-        (SpanConfiguration.CONTINUOUS, []),
-    ):
+    for mode in (SpanConfiguration.SIMPLY_SUPPORTED, SpanConfiguration.CONTINUOUS):
         project.bridge_selection.span_configuration = mode
         out = tmp_path / f"{mode.name}.dxf"
         S2.generate(project, out, scale_denom=100)
         doc = ezdxf.readfile(out)
         assert _texts(doc).count("18.75 m") == 3
-        top = max(_deck_slab_lines(doc), key=lambda line: line.dxf.start.y)
-        x0, x1 = top.dxf.start.x, top.dxf.end.x
+        x0 = min(line.dxf.start.x for line in _deck_slab_lines(doc))
         stations = sorted(
             (e.dxf.start.x - x0) / 10
-            for e in doc.modelspace().query('LINE[layer=="SUPER-DECK"]')
-            if e.dxf.start.x == e.dxf.end.x and x0 < e.dxf.start.x < x1
+            for e in doc.modelspace().query('LINE[layer=="SUB-EXPJOINT"]')
         )
-        assert stations == pytest.approx(expected)
+        assert stations == pytest.approx([18.75, 37.5])

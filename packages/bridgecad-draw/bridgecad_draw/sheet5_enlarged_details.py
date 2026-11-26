@@ -126,11 +126,9 @@ def generate(project: Any, output_path: str | Path, part: Part = "pier") -> Path
     # replacing the stale cross-document INSERT references.  Any dimension whose
     # render fails is left as-is; it still represents the correct measurement,
     # it just won't have arrow geometry.
-    for dim in msp.query("DIMENSION"):
-        try:
-            dim.render()
-        except Exception:
-            pass
+    from .dim_style import DimStyleConfig, apply_native_dimensions
+
+    apply_native_dimensions(doc, DimStyleConfig(units="m", decimals=3), denom)
 
     msp.add_text(
         f"ENLARGED {part.upper()} DETAILS  —  SCALE 1:{denom}",

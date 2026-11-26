@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import exportPackage from "../../netlify/functions/export_package.js";
+import generateSamplePdf from "../../netlify/functions/generate_sample_pdf.js";
 import predict from "../../netlify/functions/predict.js";
+import template from "../../netlify/functions/template.js";
 
 const request = {
   httpMethod: "POST",
@@ -36,4 +39,16 @@ test("workbook proxy protects downloads and hides backend failure details", asyn
   assert.equal(unavailable.statusCode, 502);
   assert.equal(unavailable.headers["cache-control"], "no-store");
   assert.doesNotMatch(unavailable.body, /internal backend URL/);
+
+  for (const [endpoint, proxy] of [
+    ["/package", exportPackage],
+    ["/generate_sample_pdf", generateSamplePdf],
+    ["/template", template],
+  ]) {
+    const response = await proxy.handler({ rawQuery: "template_key=sample" });
+    assert.equal(upstream.mock.calls.at(-1).arguments[0], `https://drawing.example.test${endpoint}?template_key=sample`);
+    assert.equal(response.statusCode, 502);
+    assert.equal(response.headers["cache-control"], "no-store");
+    assert.doesNotMatch(response.body, /internal backend URL/);
+  }
 });

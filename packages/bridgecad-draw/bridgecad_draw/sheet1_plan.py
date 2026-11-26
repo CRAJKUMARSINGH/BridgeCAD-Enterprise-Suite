@@ -19,8 +19,10 @@ from __future__ import annotations
 
 import math
 from pathlib import Path
+from itertools import accumulate
 from typing import Any
 
+from .deck_joints import deck_intervals, pier_joints
 from .dxf_engine import new_sheet, save
 from .fit import LADDER, MIN_TEXT_MM
 from .primitives import (
@@ -234,38 +236,20 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     # everything uses this one mapping.
     skew_rad = math.radians(skew_deg)
     cos_t = math.cos(skew_rad)
-    sin_t = math.sin(skew_rad)
-    deck_pts = [
-        (hpos(0) + half_w * scale * sin_t, vpos(-half_w)),
-        (hpos(0) - half_w * scale * sin_t, vpos(half_w)),
-        (hpos(total_len) - half_w * scale * sin_t, vpos(half_w)),
-        (hpos(total_len) + half_w * scale * sin_t, vpos(-half_w)),
-    ]
-    # Fall back to simple rect when skew ≈ 0
-    if abs(skew_deg) < 0.5:
+    sin_t = math.sin(skew_rad) if abs(skew_deg) >= 0.5 else 0
+    pier_stations = list(accumulate(span_lens[:-1])) if has_piers else []
+    joints = pier_joints(project, pier_stations)
+    for start, end in deck_intervals(0, total_len, [joint for joint in joints if joint.half_gap_m]):
         deck_pts = [
-            (hpos(0), vpos(-half_w)),
-            (hpos(0), vpos(half_w)),
-            (hpos(total_len), vpos(half_w)),
-            (hpos(total_len), vpos(-half_w)),
+            (hpos(ch) - offset * scale * sin_t, vpos(offset))
+            for ch, offset in ((start, -half_w), (start, half_w), (end, half_w), (end, -half_w))
         ]
-    polyline(msp, deck_pts, layer="STRUC-OUTLINE", close=True, lw=50)
-    # Audit-required SUPER-DECK layer tag (IRC standard domain layer for deck plan outline)
-    polyline(msp, deck_pts, layer="SUPER-DECK", close=True, lw=30)
-
-    # Carriageway zone hatch (light)
-    if abs(skew_deg) < 0.5:
-        hatch_rect(
-            msp,
-            hpos(0),
-            vpos(-half_cw),
-            total_len * scale,
-            cw * scale,
-            pattern="ANSI31",
-            scale=scale * 0.08,
-            layer="STRUC-HATCHING",
-            color=8,
-        )
+        polyline(msp, deck_pts, layer="STRUC-OUTLINE", close=True, lw=50)
+        # Audit-required SUPER-DECK layer tag for the deck plan outline.
+        polyline(msp, deck_pts, layer="SUPER-DECK", close=True, lw=30)
+        if abs(skew_deg) < 0.5:
+            hatch_rect(msp, hpos(start), vpos(-half_cw), (end-start)*scale, cw*scale,
+                       pattern="ANSI31", scale=scale*0.08, layer="STRUC-HATCHING", color=8)
 
     # ── Abutments ─────────────────────────────────────────────────────────
     # Wing-wall splay / return-wall footprint (RC-PLAN-11). The abutment
@@ -385,6 +369,11 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int | None = None) -> None:
             layer="TEXT-GENERAL",
         )
 
+    for joint in joints:
+        for face in joint.faces:
+            line(msp, (hpos(face)+half_w*scale*sin_t, vpos(-half_w)),
+                 (hpos(face)-half_w*scale*sin_t, vpos(half_w)), layer="SUB-EXPJOINT", lw=35)
+
     # ── Skew annotation (guide #4): angle at CL of each support ────────────
     if abs(skew_deg) >= 0.5:
         skew_dir = getattr(gi, "skew_direction", None)
@@ -492,9 +481,9 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     for ch, tag in ((0.0, "A1"), (total_len, "A2")):
         dim_linear_h(
             msp,
-            hpos(ch) - abt_w * scale,
+            hpos(ch - abt_w / 2),
             vpos(0.0),
-            hpos(ch),
+            hpos(ch + abt_w / 2),
             vpos(0.0),
             dim_y=vpos(0.0) - _OFF_ABUT,
             label=f"{tag} W={abt_w:.3f} m",
@@ -592,16 +581,9 @@ def _draw_plan(msp: Any, project: Any, scale_denom: int | None = None) -> None:
         msp, aa_x, aa_y2, aa_y1, label="A-A", size=_SECTION_SIZE, text_height=text_h * 0.95
     )
 
-    # B-B cut line: at first internal pier chainage (or 1 m past A1 if no pier,
-    # i.e. span_count == 1) — matches Sheet 8 View 2 pier transverse / fallback.
-    # A box cell / culvert has no pier to cut through, so B-B is not shown and
-    # the sheet says why (SS3 §A6) instead of drawing a section that does not
-    # exist.
-    if has_piers:
-        bb_ch: float = pier_ch[0] if (pier_ch := geom.pier_centrelines) else 1.0
-        if isinstance(bb_ch, tuple):
-            bb_ch = float(bb_ch[0])
-        bb_x = hpos(bb_ch)
+    # B-B marks Sheet 8's pier cross-section where an actual pier exists.
+    if pier_stations:
+        bb_x = hpos(pier_stations[0])
         bb_y1 = vpos(-half_w) - _OFF_SECTION
         bb_y2 = vpos(+half_w) + _OFF_SECTION
         section_arrow(

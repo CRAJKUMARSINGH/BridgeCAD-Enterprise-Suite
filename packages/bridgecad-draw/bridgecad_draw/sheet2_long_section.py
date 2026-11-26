@@ -22,6 +22,10 @@ import math
 from pathlib import Path
 from typing import Any
 
+from bridgecad_core.geometry.abutment_profiles import family_for, longitudinal_outline
+from bridgecad_core.types import AbutmentType
+
+from .deck_joints import deck_intervals, pier_joints
 from .dxf_engine import CoordMapper, new_sheet, save
 from .fit import MIN_TEXT_MM, Fit, choose_fit
 from .primitives import (
@@ -510,63 +514,48 @@ def _draw_long_section(
     )
 
     # ── Deck profile: slab + continuous wearing coat (guide #1 step 3) ────
-    wc_t = float(project.superstructure.wearing_coat_thickness_mm or 65) / 1000.0
+    wearing_mm = project.superstructure.wearing_coat_thickness_mm
+    wc_t = float(65 if wearing_mm is None else wearing_mm) / 1000.0
 
     sof_y_mm = vy(soffit_rl)
     top_y_mm = vy(top_rl)
-    slab_top_y = vy(top_rl - wc_t)  # top of deck slab = road level less the coat
+    slab_top_y = vy(top_rl - wc_t)
 
-    # Deck slab outline — the slab, and only the slab, breaks at each joint.
-    # A precast block arch has no separate deck slab: its 400 mm ring *is* the
-    # deck (the card's ring and deck thicknesses are the same figure), so the
-    # flat band is suppressed and the ring is drawn by the arch block below.
     arch = _arch_kind(project)
+    joints = pier_joints(project, ls.pier_chainage_m) if has_piers and not arch else []
+    # The precast ring is itself the deck. Other decks are split at the same
+    # support stations shown in plan.
     if arch != "precast":
-        line(msp, (hx(0), slab_top_y), (hx(total_len), slab_top_y), layer="SUPER-DECK")
-        line(msp, (hx(0), sof_y_mm), (hx(total_len), sof_y_mm), layer="SUPER-DECK")
-        hatch_rect(
-            msp,
-            hx(0),
-            sof_y_mm,
-            total_len * sc_h,
-            slab_top_y - sof_y_mm,
-            pattern="ANSI31",
-            scale=sc_h * 0.04,
-            layer="STRUC-HATCHING",
-            color=8,
-        )
-        for jx in (0.0, total_len):  # break the slab at each joint — never the coat
+        for start, end in deck_intervals(0, total_len, joints):
+            line(msp, (hx(start), slab_top_y), (hx(end), slab_top_y), layer="SUPER-DECK")
+            line(msp, (hx(start), sof_y_mm), (hx(end), sof_y_mm), layer="SUPER-DECK")
+            hatch_rect(msp, hx(start), sof_y_mm, (end-start)*sc_h, slab_top_y-sof_y_mm,
+                       pattern="ANSI31", scale=sc_h*0.04, layer="STRUC-HATCHING", color=8)
+        for jx in (0.0, total_len):
             line(msp, (hx(jx), sof_y_mm), (hx(jx), slab_top_y), layer="SUPER-DECK", lw=25)
-
-        # Break marks indicate separate T-beam spans, not expansion-joint gaps.
-        if (
-            ss.type == T.SuperstructureType.RCC_TBEAM
-            and project.bridge_selection.span_configuration == T.SpanConfiguration.SIMPLY_SUPPORTED
-        ):
-            for station in ls.pier_chainage_m:
-                line(msp, (hx(station), sof_y_mm), (hx(station), slab_top_y),
-                     layer="SUPER-DECK", lw=25)
+        for joint in joints:
+            joint_top = top_y_mm if joint.scheduled else slab_top_y
+            for face in joint.faces:
+                line(msp, (hx(face), sof_y_mm), (hx(face), joint_top), layer="SUB-EXPJOINT", lw=35)
 
     level_tag(msp, draw_x0 - 2.0, sof_y_mm, soffit_rl, text_height=th * 0.85)
     level_tag(msp, draw_x0 - 2.0, top_y_mm, top_rl, text_height=th * 0.85)
 
-    # ── Continuous wearing coat over both approach slabs ──────────────────
-    # The coat runs end to end over both approach slabs; only its ends taper
-    # (1:20). Nothing else may break it — the slab joints do not.
+    # The coat spans both approaches, with tapers at the outer ends and
+    # interruptions wherever the schedule identifies an expansion joint.
     x_left = -app_l
     x_right = total_len + app_l
     taper_len = wc_t * 20.0
-    coat_pts = [
-        (hx(x_left), vy(top_rl)),
-        (hx(x_right), vy(top_rl)),
-        (hx(x_right - taper_len), slab_top_y),
-        (hx(x_left + taper_len), slab_top_y),
-    ]
-    polyline(msp, coat_pts, layer="SUPER-WEARING", close=True, lw=25)
-    hatch_poly(msp, coat_pts, pattern="SOLID", scale=1.0, layer="SUPER-WEARING", color=8)
+    scheduled = [joint for joint in joints if joint.scheduled]
+    for start, end in deck_intervals(x_left, x_right, scheduled):
+        coat_pts = [(hx(start), top_y_mm), (hx(end), top_y_mm),
+                    (hx(end - taper_len if end == x_right else end), slab_top_y),
+                    (hx(start + taper_len if start == x_left else start), slab_top_y)]
+        polyline(msp, coat_pts, layer="SUPER-WEARING", close=True, lw=25)
+        hatch_poly(msp, coat_pts, pattern="SOLID", scale=1.0, layer="SUPER-WEARING", color=8)
     text(
         msp,
-        "CONTINUOUS WEARING COAT OVER APPROACH SLABS",
+        "WEARING COAT OVER APPROACH SLABS",
         hx(x_left),
         vy(top_rl) + th * 1.4,
         height=th * 0.8,
@@ -575,7 +564,7 @@ def _draw_long_section(
     )
 
     # ── Approach slabs (resolved stack) ───────────────────────────────────
-    app_bot_y = vy(float(stack.app_bot))
+    app_bot_y = slab_top_y - sy(float(stack.slab_top - stack.app_bot))
     for ax in (x_left, total_len):
         rectangle(
             msp,
@@ -605,33 +594,6 @@ def _draw_long_section(
             height=th * 0.8,
             layer="TEXT-SPEC",
             halign="CENTER",
-        )
-
-    # ── Dirt wall at each abutment (resolved stack) ───────────────────────
-    # Thin wall (DWTH) flush with the deck end, cap top up to approach-slab
-    # soffit — never a full-width abutment extension.
-    dw_t = float(sub.dirt_wall_thickness_mm or 300) / 1000.0
-    cap_top_y = vy(float(stack.cap_top))
-    for ax, side in ((0.0, -1.0), (total_len, 1.0)):
-        dw_x = hx(ax) - dw_t * sc_h if side < 0 else hx(ax)
-        rectangle(
-            msp,
-            dw_x,
-            cap_top_y,
-            dw_t * sc_h,
-            app_bot_y - cap_top_y,
-            layer="ABUT-PROF",
-            lw=35,
-        )
-        text(
-            msp,
-            "DWTH",
-            dw_x + dw_t * sc_h / 2.0,
-            cap_top_y + (app_bot_y - cap_top_y) / 2.0,
-            height=th * 0.7,
-            layer="TEXT-SPEC",
-            halign="CENTER",
-            color=4,
         )
 
     # ── Pier shafts ───────────────────────────────────────────────────────
@@ -838,14 +800,12 @@ def _draw_long_section(
     # ── Abutments ─────────────────────────────────────────────────────────
     abt_w_mm = float(sub.abutment_width_m or 1.2) * sc_h
     abt_h_mm = sy(float(sub.abutment_height_m or 3.2))
-    cap_d2 = float(sub.abutment_cap_depth_mm or 600) / 1000.0
     cap_proj2 = float(sub.abutment_cap_projection_front_mm or 300) / 1000.0
     cap_proj2_r = float(sub.abutment_cap_projection_rear_mm or 300) / 1000.0
     dw_t2 = float(sub.dirt_wall_thickness_mm or 300) / 1000.0
-    app_t2 = float(sub.approach_slab_thickness_mm or 200) / 1000.0
-
-    def sy2(m: float) -> float:
-        return sy(m)
+    shape = longitudinal_outline(family_for(sub.abutment_type)) if sub.abutment_type in (
+        AbutmentType.CANTILEVER, AbutmentType.GRAVITY, AbutmentType.FULL_HEIGHT_WALL,
+    ) else longitudinal_outline("battered")
 
     for ch, label, sgn in [(0.0, "A1", -1.0), (total_len, "A2", +1.0)]:
         ax = hx(ch) - abt_w_mm if sgn < 0 else hx(ch)
@@ -857,23 +817,16 @@ def _draw_long_section(
         cap_top_y2 = vy(float(stack.cap_bot))
         y_bear_rl = vy(float(stack.bear_rl))
 
-        # Shaft stops at the cap soffit
-        rectangle(msp, ax, shaft_bot, abt_w_mm, cap_bot_y2 - shaft_bot, layer="SUB-ABUT", lw=40)
-        hatch_rect(
-            msp,
-            ax,
-            shaft_bot,
-            abt_w_mm,
-            cap_bot_y2 - shaft_bot,
-            pattern="ANSI31",
-            scale=sc_h * 0.04,
-            layer="STRUC-HATCHING",
-        )
+        # Keep the schematic body below the resolved cap soffit.
+        shaft = [(hx(ch)+sgn*u*abt_w_mm, shaft_bot+v*(cap_top_y2-shaft_bot)) for u, v in shape]
+        if cap_top_y2 > shaft_bot:
+            polyline(msp, shaft, layer="SUB-ABUT", close=True, lw=40)
+            hatch_poly(msp, shaft, pattern="ANSI31", scale=sc_h*0.04, layer="STRUC-HATCHING", color=8)
 
         # Cap — asymmetric: front (bearing shelf) on the river side, larger
         # rear (dirt-wall seat) on the approach side. sgn=+1 → approach to +x.
-        cap_front_off = sy2(cap_proj2)
-        cap_rear_off = sy2(cap_proj2_r)
+        cap_front_off = cap_proj2 * sc_h
+        cap_rear_off = cap_proj2_r * sc_h
         cap_x0_2 = ax - (cap_front_off if sgn > 0 else cap_rear_off)
         cap_x1_2 = ax + abt_w_mm + (cap_rear_off if sgn > 0 else cap_front_off)
         cap_w2 = cap_x1_2 - cap_x0_2
@@ -914,16 +867,16 @@ def _draw_long_section(
                 lw=30,
             )
 
-        # Dirt wall on the rear (approach) face, standing ON the cap top and up
-        # to the approach-slab soffit.
-        dirt_x_2 = cap_x0_2 if sgn < 0 else cap_x0_2 + cap_w2 - sy2(dw_t2)
-        dw_top_y2 = vy(top_rl - wc_t) - sy2(app_t2)
+        # Rear dirt wall runs from the cap to the common concrete slab top.
+        dirt_width = dw_t2 * sc_h
+        dirt_x_2 = cap_x0_2 if sgn < 0 else cap_x1_2 - dirt_width
+        dw_top_y2 = slab_top_y
         if dw_top_y2 > cap_bot_y2:
             rectangle(
                 msp,
                 dirt_x_2,
                 cap_bot_y2,
-                sy2(dw_t2),
+                dirt_width,
                 dw_top_y2 - cap_bot_y2,
                 layer="SUB-DIRT-WALL",
                 lw=40,
@@ -932,7 +885,7 @@ def _draw_long_section(
                 msp,
                 dirt_x_2,
                 cap_bot_y2,
-                sy2(dw_t2),
+                dirt_width,
                 dw_top_y2 - cap_bot_y2,
                 pattern="ANSI31",
                 scale=sc_h * 0.04,
@@ -945,7 +898,7 @@ def _draw_long_section(
             text(
                 msp,
                 "DIRT WALL",
-                dirt_x_2 + sy2(dw_t2) + th * 0.6 if sgn > 0 else dirt_x_2 - th * 4,
+                dirt_x_2 + dirt_width + th * 0.6 if sgn > 0 else dirt_x_2 - th * 4,
                 cap_bot_y2 + (dw_top_y2 - cap_bot_y2) * 0.5,
                 height=th * 0.75,
                 layer="TEXT-SPEC",
@@ -1258,45 +1211,24 @@ def _draw_long_section(
     # The drawing area has no gutter below the chainage axis and the deck-top
     # band already carries the view title, so the section's principal
     # dimensions run as vertical staffs stacked just inside the right edge,
-    # each measured against the datum baseline.
+    # with offsets measured between the actual faces or reference levels.
     deck_t = float(getattr(project.superstructure, "deck_thickness_mm", 0) or 0) / 1000.0
-    base_y = vy(datum_rl)
-    # The abutment staff only carries a PILE leg when the foundation has piles
-    # (SS3 §A4 — a raft/open footing must not claim a pile-tip dimension).
-    abt_levels = [
-        (f"ABUT={float(stack.cap_top) - float(stack.app_bot):.3f}m", float(stack.app_bot)),
+    dimensions = [
+        (0.97, "T.O.DECK", datum_rl, top_rl),
+        (0.97, "HFL", datum_rl, hfl_rl),
+        (0.97, "LWL", datum_rl, lwl_rl),
+        (0.93, f"WC={wc_t * 1000:.0f}mm", top_rl - wc_t, top_rl),
+        (0.93, f"DECK={deck_t * 1000:.0f}mm", top_rl - wc_t - deck_t, top_rl - wc_t),
+        (0.89, f"SCOUR={hfl_rl - scour_rl:.3f}m", scour_rl, hfl_rl),
+        (0.85, f"ABUT ENV={soffit_rl - abt_base_rl:.3f}m", abt_base_rl, soffit_rl),
     ]
     if draw_piles:
-        abt_levels.append(
-            (f"PILE={float(pile_cutoff) - pile_tip_rl:.3f}m", pile_tip_rl)
-        )
-    staffs = (
-        (draw_x0 + draw_w * 0.97, (
-            ("T.O.DECK", top_rl),
-            ("HFL", hfl_rl),
-            ("LWL", lwl_rl),
-        )),
-        (draw_x0 + draw_w * 0.93, (
-            (f"WC={wc_t * 1000:.0f}mm", top_rl - wc_t),
-            (f"DECK={deck_t * 1000:.0f}mm", top_rl - wc_t - deck_t),
-        )),
-        (draw_x0 + draw_w * 0.89, (
-            (f"SCOUR={hfl_rl - scour_rl:.3f}m", scour_rl),
-        )),
-        (draw_x0 + draw_w * 0.85, tuple(abt_levels)),
-    )
-    for staff_x, levels in staffs:
-        for lv_label, lv_rl in levels:
-            dim_linear_v(
-                msp,
-                staff_x,
-                base_y,
-                staff_x,
-                vy(lv_rl),
-                dim_x=staff_x,
-                label=lv_label,
-                text_height=th * 0.85,
-            )
+        dimensions.append((0.85, f"PILE={float(pile_cutoff) - pile_tip_rl:.3f}m", pile_tip_rl, float(pile_cutoff)))
+    for staff, label, lower_rl, upper_rl in dimensions:
+        if upper_rl > lower_rl:
+            staff_x = draw_x0 + draw_w * staff
+            dim_linear_v(msp, staff_x, vy(lower_rl), staff_x, vy(upper_rl),
+                         dim_x=staff_x, label=label, text_height=th * 0.85)
 
     # ── Assumptions / unresolved inputs / review status (Spec §4, RC-TTL-06) ─
     # The sheet must state which foundation-stack inputs the caller SUPPLIED

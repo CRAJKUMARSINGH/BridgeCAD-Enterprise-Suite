@@ -19,6 +19,7 @@ __all__ = [
     "Family",
     "family_for",
     "elevation_outline",
+    "longitudinal_outline",
     "battered_side_outline",
     "BatteredSide",
 ]
@@ -80,6 +81,20 @@ def elevation_outline(
         ]
     # BATTERED / unknown — plain rectangle
     return [(0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (0.0, 0.0)]
+
+
+def longitudinal_outline(family: Family) -> list[tuple[float, float]]:
+    """Schematic section within the abutment envelope, river to approach.
+
+    x runs from the river-side edge (0) to the approach-side edge (1), and
+    y runs from base to top. Mirror x at A1. The proportions are symbolic.
+    """
+    if family == GRAVITY:
+        return [(0, 1), (0.60, 1), (1, 0), (0, 0)]
+    if family == CANTILEVER:
+        return [(0.25, 1), (0.60, 1), (0.60, 0.18), (1, 0.18),
+                (1, 0), (0, 0), (0, 0.18), (0.25, 0.18)]
+    return [(0, 1), (1, 1), (1, 0), (0, 0)]
 
 
 # ── LISP abt1() battered side profile ──────────────────────────────────────

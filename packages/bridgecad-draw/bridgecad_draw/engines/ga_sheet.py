@@ -3,9 +3,11 @@ from itertools import accumulate
 from math import isfinite
 from pathlib import Path
 
-from bridgecad_core.geometry.abutment_profiles import battered_side_outline, elevation_outline, family_for
+from bridgecad_core.geometry.abutment_profiles import battered_side_outline, family_for, longitudinal_outline
+from bridgecad_core.geometry.long_section import compute_long_section_geometry
 from bridgecad_core.types import AbutmentType, SpanConfiguration, SuperstructureType
 
+from ..deck_joints import deck_intervals, pier_joints
 from ..fit import LADDER
 
 
@@ -87,18 +89,18 @@ def generate_ga_pdf(
     abutment_base = soffit - float(sub.abutment_height_m or 2)
     outline = [
         ((x - .5) * abutment_width, abutment_base + y * (soffit - abutment_base))
-        for x, y in elevation_outline(family_for(selected_abutment))
+        for x, y in longitudinal_outline(family_for(selected_abutment))
     ]
     battered = selected_abutment == AbutmentType.GRAVITY
     if battered:
-        cap_depth = (sub.abutment_cap_depth_mm or 450) / 1000
-        stem_height = soffit - abutment_base - cap_depth
+        abutment_cap_depth = (sub.abutment_cap_depth_mm or 450) / 1000
+        stem_height = soffit - abutment_base - abutment_cap_depth
         if stem_height < .5:
             raise GALayoutError("Gravity abutment requires at least 0.5 m between cap soffit and footing top.")
         face = float(sub.abutment_face_batter_1n or 10)
         back = float(sub.abutment_back_batter_1n or 3)
         profile = battered_side_outline(
-            stem_height, cap_w_m=abutment_width, cap_d_m=cap_depth,
+            stem_height, cap_w_m=abutment_width, cap_d_m=abutment_cap_depth,
             face_batter_1n=face, back_batter_1n=back,
             above_m=float(sub.dirt_wall_height_m or .98),
             dirt_w_m=(sub.dirt_wall_thickness_mm or 300) / 1000,
@@ -108,8 +110,26 @@ def generate_ga_pdf(
                    for x, y in profile.points]
     min_x = min(x for x, _ in outline)
     max_x = max(x for x, _ in outline)
-    vertical_base = min(scour, *(rl for _, rl in outline))
     vertical_top = max(road, hfl, *(rl for _, rl in outline))
+    pier_width = float(sub.pier_shaft_width_m or sub.pier_diameter_m or 1.5)
+    cap_width = float(sub.pier_cap_width_m or max(pier_width, 2))
+    cap_length = float(sub.pier_cap_length_m or width)
+    cap_depth = float(sub.pier_cap_depth_m or 0.8)
+    pier_levels = []
+    if len(spans) > 1:
+        for record in compute_long_section_geometry(project).support_level_records:
+            cap_top = float(record.cap_top_rl_m) if record.cap_top_rl_m is not None else soffit
+            shaft_top = float(record.shaft_top_rl_m) if record.shaft_top_rl_m is not None else cap_top-cap_depth
+            shaft_base = float(record.shaft_base_rl_m) if record.shaft_base_rl_m is not None else None
+            pier_levels.append((cap_top, shaft_top, shaft_base))
+    known_bases = [base for _, _, base in pier_levels if base is not None]
+    vertical_base = min(scour, *known_bases, *(rl for _, rl in outline))
+    joints = pier_joints(project, stations[1:-1])
+    joint_by_station = {joint.station: joint for joint in joints}
+    half_gaps = {joint.station: joint.half_gap_m for joint in joints}
+    deck_runs = list(deck_intervals(0, stations[-1], joints))
+    if any(end <= start for start, end in deck_runs):
+        raise GALayoutError("The scheduled pier joint gaps must leave a positive deck length in each span.")
 
     def pick_scale(candidates, extents):
         for denom in candidates:
@@ -118,9 +138,9 @@ def generate_ga_pdf(
         raise GALayoutError("The bridge does not fit GA-01 at the requested plot scale. Use Auto or a smaller drawing scale.")
 
     ga_denom = pick_scale((scale_denom,) if scale_denom is not None else LADDER,
-                         ((stations[-1], 565), (max(-min_x, max_x), 40),
-                          (max(width, abutment_length), 127),
-                          (vertical_top - vertical_base, 137)))
+                         ((stations[-1], 565), (max(-min_x, max_x), 40 if battered else 14),
+                          (max(width, abutment_length, cap_length if len(spans) > 1 else 0), 118),
+                          (vertical_top - vertical_base, 130)))
     section_denom = pick_scale(LADDER, ((width, 420), (slab + depth, 68)))
 
     ink, accent, water, light = map(HexColor,("#152638","#004e64","#1872aa","#e6edf1"))
@@ -154,60 +174,111 @@ def generate_ga_pdf(
 
     x0=100
     sx = 1000 / ga_denom
+    min_span_on_paper = min(spans)*sx
+    span_schedule = min_span_on_paper < 12
     X=lambda m:x0+m*sx
     x1=X(stations[-1])
+    label_indices = {0, len(spans)}
+    last_label = x0
+    for index, station in enumerate(stations[1:-1], 1):
+        if X(station)-last_label >= 9 and x1-X(station) >= 9:
+            label_indices.add(index)
+            last_label = X(station)
+
+    def support_name(index):
+        return "A1" if index == 0 else "A2" if index == len(spans) else f"P{index}"
+
     tx(21,521,f"01  PLAN  /  1:{ga_denom}",4,accent,bold=True)
-    py=374
-    box(x0,py,x1-x0,width*sx,light)
+    plan_center = 436
+    py = plan_center - width*sx/2
     abutment_ink = HexColor("#c4d6df")
-    ends = ((stations[0], 1), (stations[-1], -1))
-    for station, direction in ends:
-        y0 = py + (width - abutment_length) * sx / 2
-        y1 = y0 + abutment_length * sx
-        left = X(station) + min(direction * min_x, direction * max_x) * sx
-        box(left, y0, (max_x - min_x) * sx, y1 - y0, abutment_ink)
+    joint_ink = HexColor("#963d2d")
+    # The battered profile's dirt wall is on its negative-x side.
+    a1_direction = 1 if battered else -1
+    end_supports = ((stations[0], a1_direction), (stations[-1], -a1_direction))
+    for start, end in deck_runs:
+        box(X(start), py, (end-start)*sx, width*sx, light)
+        for edge in (clear0, clear0+cw):
+            ln(X(start), py+edge*sx, X(end), py+edge*sx)
+    c.setDash(2*mm, 1.5*mm)
+    for station, direction in end_supports:
+        y0 = plan_center - abutment_length*sx/2
+        y1 = y0 + abutment_length*sx
+        left = X(station) + min(direction * min_x, direction * max_x)*sx
+        box(left, y0, (max_x - min_x)*sx, y1 - y0, abutment_ink)
         if battered:
-            # Dirt wall, cap and stem stations come from the elevation polygon.
             for index in (1, 2, 4, 5, 10, 13):
-                x = X(station) + direction * outline[index][0] * sx
+                x = X(station) + direction * outline[index][0]*sx
                 ln(x, y0, x, y1, accent, .2)
-    edges=[clear0, clear0+cw]
-    for e in edges:ln(x0,py+e*sx,x1,py+e*sx)
-    c.setDash(3*mm,2*mm);ln(x0,py+width*sx/2,x1,py+width*sx/2,accent);c.setDash()
+    for station in stations[1:-1]:
+        box(X(station)-cap_width*sx/2, plan_center-cap_length*sx/2, cap_width*sx, cap_length*sx)
+    c.setDash([5*mm, 2*mm, 1*mm, 2*mm])
+    ln(x0-5, plan_center, x1+5, plan_center, accent, .18)
+    c.setDash()
     if girder_axes:
         c.setDash(2*mm, 2*mm)
         for axis in girder_axes:
             for start, end in zip(stations, stations[1:]):
-                ln(X(start), py+axis*sx, X(end), py+axis*sx, accent, .15)
+                ln(X(start+half_gaps.get(start, 0)), py+axis*sx,
+                   X(end-half_gaps.get(end, 0)), py+axis*sx, accent, .15)
         c.setDash()
-    tx((x0+x1)/2,py+width*sx/2+3,f"{cw:.2f} m clear carriageway",center=True)
+    support_extent = max(width, abutment_length, cap_length if len(spans) > 1 else 0)*sx/2
+    support_top = plan_center + support_extent
+    support_bottom = plan_center - support_extent
     for i,ch in enumerate(stations):
-        x=X(ch);ln(x,py-6,x,py+width*sx+9,accent)
-        name = "A1" if i==0 else "A2" if i==len(spans) else f"P{i}"
-        tx(x,py+width*sx+12,f"{name}  /  CH {ch:.2f}",center=True,bold=True)
-    for a,b in zip(stations,stations[1:]):hd(X(a),360,X(b),f"{b-a:.3f} m")
+        x = X(ch)
+        ln(x, support_bottom-4, x, 360, accent, .18)
+        ln(x, support_top+1, x, support_top+5, accent, .18)
+        if i in label_indices:
+            tx(x, support_top+7, support_name(i), center=True, bold=True)
+        joint = joint_by_station.get(ch)
+        if joint:
+            for face in joint.faces:
+                ln(X(face), py, X(face), py+width*sx, joint_ink, .32)
+    if span_schedule:
+        tx(681, 493, "SPAN LENGTHS IN ORDER FROM A1 (m)", 3.1, accent, bold=True)
+        for index, span in enumerate(spans):
+            column, row = divmod(index, 20)
+            tx(681+28*column, 485-5.1*row, f"{index+1}. {span:.3f}", 2.5)
+    else:
+        stagger = 6 if min_span_on_paper < 18 else 0
+        for i, (a, b) in enumerate(zip(stations, stations[1:])):
+            hd(X(a), 360+(i%2)*stagger, X(b), f"{b-a:.3f} m")
     hd(x0,349,x1,f"{stations[-1]:.3f} m c/c end supports")
-    tx(681,457,f"{width:.2f} m overall",3.6,bold=True)
-    tx(681,446,"Zero skew assumed",3.2)
-    tx(681,435,"Support axes shown" if is_slab else "Dashed girder axes",3.2)
+    tx(233,521,f"Deck {width:.2f} m overall   |   Carriageway {cw:.2f} m clear",3.2)
+    tx(449,521,"Dashed outlines: supports below deck",3.2)
     if girder_axes:
-        tx(681,425,f"{count} girders at {spacing:.2f} m c/c",3.2)
+        tx(681,521,f"{count} girders at {spacing:.2f} m c/c",3.2)
 
     ln(21,337,819,337)
     tx(21,324,f"02  LONGITUDINAL ELEVATION  /  H 1:{ga_denom}  |  V 1:{ga_denom}",4,accent,bold=True)
-    tx(681,410,f"A1 / A2: {abutment_label}",3.2,bold=True)
+    tx(681, 324, f"A1 / A2: {abutment_label}", 3.2, bold=True)
+    if joints:
+        tx(449, 324, "Deck joint / span break", 3.2, color=joint_ink)
+        known = [f"P{joint.pier} {joint.gap_mm} mm" for joint in joints if joint.gap_mm is not None]
+        if len(known) <= 4 and known:
+            tx(498, 29, "Installation gaps  |  " + ", ".join(known), 3.1, color=joint_ink)
+        elif known:
+            tx(498, 29, "Installation gaps in workbook joint schedule", 3.1, color=joint_ink)
 
     elevation_height = (vertical_top - vertical_base) * sx
-    elevation_base = 174 + (137 - elevation_height) / 2
+    elevation_base = 174 + (130 - elevation_height) / 2
     Y = lambda rl: elevation_base + (rl - vertical_base) * sx
     # Dimension only the declared envelope. Support silhouettes stop short of any
     # founding RL and do not imply an approved pile group or wall design.
-    box(x0, Y(soffit), x1-x0, (road-wear-soffit)*sx, light)
-    if span_configuration == SpanConfiguration.SIMPLY_SUPPORTED:
-        for station in stations[1:-1]:
-            ln(X(station), Y(soffit), X(station), Y(road-wear), ink, .38)
-    ln(x0,Y(road),x1,Y(road),ink,.42)
-    for station, direction in ends:
+    for start, end in deck_runs:
+        box(X(start), Y(soffit), (end-start)*sx, (road-wear-soffit)*sx, light)
+        ln(X(start), Y(road), X(end), Y(road), ink, .42)
+        if not is_slab:
+            ln(X(start), Y(road-wear-slab), X(end), Y(road-wear-slab), ink, .18)
+    for joint in joints:
+        for face in joint.faces:
+            ln(X(face), Y(soffit), X(face), Y(road if joint.scheduled else road-wear), joint_ink, .32)
+    support_label_y = Y(vertical_top) + 6
+    for i, station in enumerate(stations):
+        if i in label_indices:
+            tx(X(station), support_label_y, support_name(i), center=True, bold=True)
+    for station, direction in end_supports:
         path = c.beginPath()
         for index, (local_x, rl) in enumerate(outline):
             vertex = ((X(station) + direction * local_x * sx) * mm, Y(rl) * mm)
@@ -217,23 +288,39 @@ def generate_ga_pdf(
         c.setStrokeColor(ink)
         c.setLineWidth(.24 * mm)
         c.drawPath(path, fill=1)
-    for ch in stations[1:-1]:
-        x=X(ch)
-        symbol_bottom = Y(ground_rl) if ground_rl is not None else Y(soffit) - 12
-        box(x-7, symbol_bottom, 14, Y(soffit)-symbol_bottom, light)
-        ln(x-9, symbol_bottom, x+9, symbol_bottom, accent, .38)
-    if ground_rl is not None:
-        ln(x0-10,Y(ground_rl),x1+8,Y(ground_rl),accent)
-        tx(x1+13,Y(ground_rl)-1,f"MODEL GROUND RL {ground_rl:.3f}",color=accent)
-    tx(21,151,"A1/A2 outlines are for review. Confirm wing walls, bearings and founding levels.",3.2)
+    for ch, (cap_top, shaft_top, shaft_base) in zip(stations[1:-1], pier_levels):
+        x = X(ch)
+        if shaft_base is None:
+            c.setDash(2*mm, 1*mm)
+            for face in (x-pier_width*sx/2, x+pier_width*sx/2):
+                ln(face, Y(shaft_top), face, Y(shaft_top)-8)
+            c.setDash()
+        else:
+            box(x-pier_width*sx/2, Y(shaft_base), pier_width*sx, (shaft_top-shaft_base)*sx, light)
+        box(x-cap_width*sx/2, Y(shaft_top), cap_width*sx, (cap_top-shaft_top)*sx, light)
+        if cap_top < soffit:
+            seat_width = min(pier_width, cap_width)*sx
+            box(x-seat_width/2, Y(cap_top), seat_width, (soffit-cap_top)*sx, light)
+    tx(21,151,"Support profiles are schematic. See separate sheets for foundations, bearings and wing walls.",3.2)
+    if any(base is None for _, _, base in pier_levels):
+        tx(449,151,"Dashed pier stems indicate unresolved base levels.",3.2)
     if battered:
         tx(21,146,f"Gravity batter: river 1:{face:g}, earth 1:{back:g}. "
            "Footing 1.0 m thick and 1.5 m projections assumed.",3)
-    for rl,label in [(hfl,"HFL"),(lwl,"LWL"),(scour,"SCOUR")]:
-        c.setDash(4*mm,2*mm);ln(x0-10,Y(rl),x1+8,Y(rl),water);c.setDash()
-        tx(x1+13,Y(rl)-1,f"{label} RL {rl:.3f}",color=water)
-    tx(x1+13,Y(road)+1,f"ROAD RL {road:.3f}")
-    tx(x1+13,Y(soffit)-1,f"{'SLAB' if is_slab else 'GIRDER'} SOFFIT RL {soffit:.3f}")
+    level_marks = [(hfl, "HFL", water), (lwl, "LWL", water), (scour, "SCOUR", water)]
+    for rl, _, color in level_marks:
+        c.setDash(4*mm, 2*mm)
+        ln(x0-10, Y(rl), x1+8, Y(rl), color)
+        c.setDash()
+    if ground_rl is not None:
+        ln(x0-10, Y(ground_rl), x1+8, Y(ground_rl), accent)
+        level_marks.append((ground_rl, "MODEL GROUND", accent))
+    level_marks.extend([(road, "ROAD", ink), (soffit, "SLAB SOFFIT" if is_slab else "GIRDER SOFFIT", ink)])
+    label_y = 174
+    for rl, label, color in sorted(level_marks, key=lambda item: item[0]):
+        label_y = max(Y(rl), label_y+5.2)
+        ln(x1+8, Y(rl), x1+18, label_y, color, .18)
+        tx(x1+20, label_y-1, f"{label} RL {rl:.3f}", 3, color)
     tx(21,163,f"Input soffit minus HFL = {soffit-hfl:.2f} m. Hydraulic clearance acceptance pending.",3.2,color=water)
 
     ln(21,141,819,141)
@@ -271,7 +358,8 @@ def generate_ga_pdf(
         "DRAWING BASIS AND RELEASE STATUS",
         (f"Slab {slab*1000:g} mm; surfacing {wear*1000:g} mm." if is_slab else
          f"Slab {slab*1000:g} mm; girder below slab {depth*1000:g} mm; surfacing {wear*1000:g} mm."),
-        "Span separation marks apply to simply supported spans. Joint gap unspecified.",
+        ("Deck breaks at pier centres. Installation gaps are taken from the workbook schedule."
+         if joints else "Single span between A1 and A2."),
         (f"A1/A2 abutment symbols: {abutment_label}. "
          + ("Missing dimensions shown schematically." if any(v is None for v in (
              sub.abutment_width_m, sub.abutment_length_m, sub.abutment_height_m,

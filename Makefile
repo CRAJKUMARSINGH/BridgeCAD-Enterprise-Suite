@@ -1,6 +1,6 @@
 .PHONY: help install dev lint format typecheck test cov test-e2e test-integration \
         verify smoke robotic robot robot-full gates bench build clean docker-up \
-        docker-down api ui web \
+        docker-down api ui web worker \
         refs-extract refs-check refs-coverage refs-verify refs-verify-crops \
         drawing-standards green-stack hooks hooks-check
 
@@ -79,6 +79,9 @@ bench:           ## Benchmarks, 20% regression gate
 
 api:             ## Run the API
 	uvicorn bridgecad_api.main:app --reload --app-dir apps/api-gateway
+
+worker:          ## Run the ARQ background worker
+	python -m bridgecad_infra.queue
 
 ui:              ## Run the Streamlit console
 	streamlit run apps/streamlit-ui/app.py

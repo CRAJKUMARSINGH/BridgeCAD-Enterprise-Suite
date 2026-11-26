@@ -353,6 +353,22 @@ def test_measured_span_count_and_total_length(package):
     assert sum(spans) == pytest.approx(90.0, abs=TOL_DRAW_M)
 
 
+def test_slab_breaks_follow_pier_centres_and_dirt_walls_are_unique(package, section_model):
+    plan = _read(_sheet_path(package["paths"], "Sheet1_Plan"))
+    section = section_model["space"]
+    x0, _, x1, _ = _lwp_rects(plan, "STRUC-OUTLINE")[0]
+    scale = (x1 - x0) / 90
+    plan_joints = sorted((line.dxf.start.x - x0) / scale
+                         for line in plan.query('LINE[layer=="SUB-EXPJOINT"]'))
+    elevation_joints = sorted(section_model["chainage"](line.dxf.start.x)
+                              for line in section.query('LINE[layer=="SUB-EXPJOINT"]'))
+    expected = list(range(10, 90, 10))
+    assert plan_joints == pytest.approx(expected, abs=TOL_DRAW_M)
+    assert elevation_joints == pytest.approx(expected, abs=TOL_DRAW_M)
+    assert len(_lwp_rects(section, "SUB-DIRT-WALL")) == 2
+    assert not _lwp_rects(section, "ABUT-PROF")
+
+
 def test_cap_bottom_equals_shaft_top_across_the_views(package, section_model):
     """cap bottom (record + drawn cap rect) == shaft top (record + drawn shaft).
 

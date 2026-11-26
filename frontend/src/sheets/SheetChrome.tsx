@@ -28,9 +28,10 @@ export function SheetFrame({ theme, children }: { theme: SheetTheme; children: R
 
 export function Prim({ p, theme }: { p: PrimShape; theme: SheetTheme }) {
   const ink = inkFor(theme, p.layer);
+  const isPcc = p.layer === "FOUND-PCC";
   const stroke = {
     stroke: ink,
-    strokeWidth: p.layer === "HTCH" ? 0.5 : 1,
+    strokeWidth: isPcc ? 1.75 : p.layer === "HTCH" ? 0.5 : 1,
     strokeDasharray: DASH[LINETYPE[p.layer] ?? ""],
     strokeLinecap: "round" as const,
     strokeLinejoin: "round" as const,
@@ -52,7 +53,7 @@ export function Prim({ p, theme }: { p: PrimShape; theme: SheetTheme }) {
       // parabola) must not be closed up by the renderer.
       return p.closed === false
         ? <polyline {...stroke} points={pts.join(" ")} />
-        : <polygon {...stroke} points={pts.join(" ")} />;
+        : <polygon {...stroke} points={pts.join(" ")} fill={isPcc ? ink : "none"} fillOpacity={isPcc ? .22 : undefined} />;
     }
     case "text":
       return (

@@ -30,6 +30,25 @@ env:
   NODE_VERSION:   "20"
 
 jobs:
+  software-launch:
+    name: "[Suite] Software launch checks"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: ./.github/actions/setup-suite
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          extras: "dev,api,draw"
+          extra-pip: "httpx playwright"
+      - run: npm ci --include=dev --prefix frontend
+      - run: python -m playwright install --with-deps chromium
+      - run: python scripts/check_software_launch.py
+
   # Runs first and gates everything: the 2026-10 `setuptools → hatchling`
   # migration shipped an invalid Trove classifier that broke metadata
   # generation and reddened ~14 jobs across 6 workflows. `python -m build`

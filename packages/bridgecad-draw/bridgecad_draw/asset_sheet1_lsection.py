@@ -128,7 +128,7 @@ def _elevation(sh: Sheet, spec: SlabBridgeSpec) -> None:
         panel.rect(min(x, x + side * 0.30), wc_top, 0.30, 0.55, layer="SUB-DIRT-WALL")
         panel.rect(min(x, x + side * 1.10), wc_top - 0.30, 1.10, 0.30, layer="SUB-ABUT")
         for wy in (wc_top - 1.10, wc_top - 2.10):
-            panel.sample(x + side * 0.72, wy, 0.11, layer="SUB-PIER")
+            panel.circle(x + side * 0.72, wy, spec.weep_hole_mm / 2000.0, layer="SUB-PIER")
 
     # ---- approach slabs ---------------------------------------------
     for side, x in ((-1, 0.0), (1, L)):
@@ -322,7 +322,10 @@ def generate(spec: SlabBridgeSpec = PMGSY_SLAB,
         date=spec.ident.date, drawn=spec.ident.drawn, designed=spec.ident.designed,
         approved=spec.ident.approved, revision=spec.ident.revision,
     )
-    sh.footer(f"BridgeCAD Enterprise Suite \u2014 {spec.ident.set_name} \u2014 sheet 01/03")
+    sh.footer(
+        f"BridgeCAD Enterprise Suite \u2014 {spec.ident.set_name} \u2014 "
+        f"sheet 01/{spec.ident.total_sheets:02d}"
+    )
     return sh.save(output_path)
 
 

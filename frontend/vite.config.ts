@@ -45,16 +45,7 @@ export default defineConfig(({ mode }) => {
   plugins: [react(), skipTypeDeclarations(), ...(env.VITE_DEMO_HEALTH === "1" ? [devHealthStub()] : [])],
   server: {
     port: 5173,
-    proxy: {
-      "/api/predict": {
-        target: "http://localhost:3000",
-        rewrite: (url) => {
-          const query = new URL(url, "http://localhost").searchParams;
-          return query.get("output_format") === "ga_pdf" ? `/draw/ga?${query}` : url;
-        },
-      },
-      "/api": "http://localhost:3000",
-    },
+    proxy: { "/api": "http://localhost:3000" },
     // Vite serves source modules as `Cache-Control: no-cache`, so the browser
     // revalidates each one and then reads its own copy out of the disk cache.
     // If that entry is corrupt the read fails with `net::ERR_CACHE_READ_FAILURE`

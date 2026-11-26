@@ -23,13 +23,10 @@ def paper_size_inches(paper: str, orientation: str) -> tuple[float, float]:
 def render_png(dxf_path: str | Path, output_png: str | Path, dpi: int = 150,
                *, size_in: tuple[float, float] = (23.39, 16.54)) -> Path:
     """Rasterise one DXF sheet to PNG."""
-    import matplotlib.pyplot as plt
-
     out = Path(output_png)
     out.parent.mkdir(parents=True, exist_ok=True)
     fig = render_figure(dxf_path, size_in=size_in)
     fig.savefig(str(out), dpi=dpi)
-    plt.close(fig)
     return out
 
 

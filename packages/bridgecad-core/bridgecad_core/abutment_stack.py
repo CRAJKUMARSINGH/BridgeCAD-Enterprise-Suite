@@ -74,9 +74,14 @@ class AbutmentStack:
     record: SupportLevelRecord | None = None
 
     @property
+    def dirt_wall_top(self) -> Decimal:
+        """Top of the concrete deck slab and approach slab, below surfacing."""
+        return self.slab_top
+
+    @property
     def dirt_wall_h(self) -> Decimal:
-        """Derived dirt-wall height: cap top up to the approach-slab soffit."""
-        return self.app_bot - self.cap_top
+        """Height from the cap top to the top of the concrete slabs."""
+        return self.dirt_wall_top - self.cap_top
 
 
 def resolve_abutment_stack(project: Any, support_id: str = "A1") -> AbutmentStack:

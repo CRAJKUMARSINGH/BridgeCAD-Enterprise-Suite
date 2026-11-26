@@ -19,13 +19,14 @@ import tempfile
 import zipfile
 from contextlib import asynccontextmanager, suppress
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from bridgecad_core.types import AbutmentType
 from fastapi import APIRouter, BackgroundTasks, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, FileResponse, HTMLResponse
 from pydantic import BaseModel
+from starlette.concurrency import run_in_threadpool
 
 from bridgecad_api.problems import enforce_upload_limits, install_problem_handlers
 
@@ -65,6 +66,18 @@ def _load_project_from_upload(data: bytes) -> Any:
         return read_excel(tmp)
     finally:
         tmp.unlink(missing_ok=True)
+
+
+def _load_drawing_workbook(data: bytes) -> Any:
+    from bridgecad_io.exceptions import ExcelParseError
+
+    try:
+        return _load_project_from_upload(data)
+    except ExcelParseError as exc:
+        detail = " · ".join(part for part in (exc.sheet, exc.field, exc.message, exc.suggestion) if part)
+        raise HTTPException(422, detail=detail) from exc
+    except ValueError as exc:
+        raise HTTPException(422, detail=f"Invalid drawing workbook: {exc}") from exc
 
 
 def _project_summary(project: Any) -> dict:
@@ -235,8 +248,8 @@ async def draw_gad(
     data = await enforce_upload_limits(file)
     from bridgecad_draw.booklet import PackageGenerationError, generate_package
 
-    try:
-        project = _load_project_from_upload(data)
+    def export() -> FileResponse:
+        project = _load_drawing_workbook(data)
         with tempfile.TemporaryDirectory() as td:
             out_dir = Path(td)
 
@@ -252,12 +265,11 @@ async def draw_gad(
                 download_name=f"{prefix}_drawings.zip",
                 background_tasks=background_tasks,
             )
-    except HTTPException:
-        raise
+
+    try:
+        return await run_in_threadpool(export)
     except PackageGenerationError as exc:
         raise HTTPException(500, detail=f"drawing package incomplete: {exc}") from exc
-    except Exception as exc:
-        raise HTTPException(500, detail=str(exc)) from exc
 
 
 @draw_router.post("/ga", summary="Download a one-sheet A1 general arrangement PDF")
@@ -265,14 +277,13 @@ async def draw_ga(
     excel_file: UploadFile = File(...), scale: int | None = None,
     abutment_type: AbutmentType | None = None,
 ):
-    from starlette.concurrency import run_in_threadpool
     from bridgecad_draw.engines.ga_sheet import GALayoutError, generate_ga_pdf
 
     scale = _validate_scale(scale)
     data = await enforce_upload_limits(excel_file)
 
     def export() -> bytes:
-        project = _load_project_from_upload(data)
+        project = _load_drawing_workbook(data)
         with tempfile.TemporaryDirectory() as folder:
             return generate_ga_pdf(
                 project, Path(folder) / "GA-01.pdf", scale, abutment_type=abutment_type,
@@ -284,7 +295,7 @@ async def draw_ga(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     return Response(
         content=pdf, media_type="application/pdf",
-        headers={"Content-Disposition": 'attachment; filename="GA-01-A1.pdf"'},
+        headers={"Content-Disposition": 'attachment; filename="GA-01-A1.pdf"', "Cache-Control": "no-store"},
     )
 
 
@@ -652,7 +663,7 @@ app = FastAPI(
     title="BridgeCAD Enterprise API",
     description=(
         "🌉 **BridgeCAD Enterprise Suite** — REST API for automated bridge GAD generation.\n\n"
-        "Upload an Excel workbook and get 8-sheet DXF drawings, "
+        "Upload an Excel workbook and get a GAD drawing package, "
         "priced BOQ, QA reports, and a full ZIP bundle."
     ),
     version=__version__,
@@ -707,6 +718,55 @@ app.include_router(plugins_router)
 app.include_router(project_router)
 app.include_router(projects_router)
 app.include_router(io_router)
+
+
+@app.post("/predict", summary="Generate a drawing download from a workbook", tags=["Drawing"])
+async def predict(
+    background_tasks: BackgroundTasks,
+    excel_file: UploadFile = File(...),
+    output_format: Literal["dxf", "pdf", "png", "ga_pdf"] = "dxf",
+    scale: int | None = None,
+    abutment_type: AbutmentType | None = None,
+) -> Response:
+    """Download a DXF archive, PDF booklet, plan PNG, or single A1 GAD PDF."""
+    if output_format == "dxf":
+        return await draw_gad(background_tasks, excel_file, scale)
+    if output_format == "ga_pdf":
+        return await draw_ga(excel_file, scale, abutment_type)
+
+    from bridgecad_draw.booklet import PackageGenerationError, generate_package
+
+    scale = _validate_scale(scale)
+    data = await enforce_upload_limits(excel_file)
+
+    def export() -> bytes:
+        project = _load_drawing_workbook(data)
+        with tempfile.TemporaryDirectory() as td:
+            folder = Path(td)
+            if output_format == "pdf":
+                from bridgecad_draw.engines.pdf_engine import generate_pdf_booklet
+
+                sheets = generate_package(project, folder, scale_denom=scale)
+                return generate_pdf_booklet(sheets, folder / "bridge_gad.pdf").read_bytes()
+
+            from bridgecad_draw.engines.png_engine import render_png
+            from bridgecad_draw.sheet1_plan import generate
+
+            plan = generate(project, folder / "bridge_gad_plan.dxf", scale_denom=scale)
+            return render_png(plan, folder / "bridge_gad_plan.png").read_bytes()
+
+    try:
+        payload = await run_in_threadpool(export)
+    except PackageGenerationError as exc:
+        raise HTTPException(500, detail=f"drawing package incomplete: {exc}") from exc
+
+    filename, media_type = ("bridge_gad.pdf", "application/pdf") if output_format == "pdf" else (
+        "bridge_gad_plan.png", "image/png",
+    )
+    return Response(
+        payload, media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"', "Cache-Control": "no-store"},
+    )
 
 
 # Health / meta

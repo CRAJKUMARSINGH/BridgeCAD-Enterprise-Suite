@@ -267,7 +267,7 @@ def generate(spec: SlabBridgeSpec = PMGSY_SLAB,
         date=spec.ident.date, drawn=spec.ident.drawn, designed=spec.ident.designed,
         approved=spec.ident.approved, revision=spec.ident.revision,
     )
-    sh.footer("BridgeCAD Enterprise Suite \u2014 asset pack \u2014 sheet 02/03")
+    sh.footer(f"BridgeCAD Enterprise Suite \u2014 asset pack \u2014 sheet 02/{spec.ident.total_sheets:02d}")
     return sh.save(output_path)
 
 

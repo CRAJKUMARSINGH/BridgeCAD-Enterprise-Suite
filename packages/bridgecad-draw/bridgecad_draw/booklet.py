@@ -14,12 +14,9 @@ Sheet manifest:
   Sheet 8   SIDE & END ELEVATIONS           sheet8_side_elevations
   Sheet 9   REINFORCEMENT SCHEDULE          sheet9_reinforcement
 
-EP-2026-12 changes (applied):
-  • Sheets 5A and 5B added to the manifest.
-  • After every sheet is generated, ``dim_style.apply_native_dimensions`` is
-    called to convert all DIMENSION entities to measured ``"<>"`` text with the
-    correct ``DIMLFAC`` for the sheet's scale.  Sheets with no DIMENSION
-    entities (count = 0) are written back unchanged.
+Sheet 5 and the enlarged detail sheets use native measured dimensions with
+their individual scales. The other sheets retain the dimensions produced by
+their renderers, including named level values and independently fitted axes.
 """
 
 from __future__ import annotations
@@ -35,13 +32,6 @@ logger = logging.getLogger(__name__)
 # failure. Warn once for the first sheet, then drop to debug — the full
 # per-sheet trace stays available at -v.
 _missing_dep_warned = False
-
-# Fall-back scale denominator used by the native-dimension pass for sheets that
-# resolve their own rung at generate time and do not expose it.  1:100 is
-# conservative: it errs on the side of a larger DIMLFAC (displayed value is
-# slightly too large) rather than a smaller one (text would read mm instead of m).
-_FALLBACK_SCALE = 100
-
 
 class PackageGenerationError(RuntimeError):
     """Raised when one or more GAD sheets fail to generate.
@@ -79,7 +69,7 @@ _SHEET_MANIFEST = [
     ("2",   "sheet2_long_section",         "Sheet2_LongSection",     None, None),
     ("3",   "sheet3_cross_section",        "Sheet3_CrossSection",    None, None),
     ("4",   "sheet4_foundation",           "Sheet4_Foundation",      50,   None),
-    ("5",   "sheet5_pier_abutment_details","Sheet5_PierAbutment",    None, None),
+    ("5",   "sheet5_pier_abutment_details","Sheet5_PierAbutment",      75, None),
     ("5A",  "sheet5_enlarged_details",     "Sheet5A_PierEnlarged",   None, "pier"),
     ("5B",  "sheet5_enlarged_details",     "Sheet5B_AbutEnlarged",   None, "abutment"),
     ("6",   "sheet6_bearings_joints",      "Sheet6_BearingsJoints",  20,   None),
@@ -109,7 +99,7 @@ def resolve_sheet(sheet: str) -> tuple[str, str, str, int | None, str | None] | 
     return next((row for row in SHEET_MANIFEST if row[0] == key), None)
 
 
-def _apply_native_dims(path: Path, scale_denom: int | None) -> None:
+def _apply_native_dims(path: Path, scale_denom: int) -> None:
     """Post-process a generated DXF: convert all DIMENSIONs to measured text.
 
     Reads the file, applies ``dim_style.apply_native_dimensions``, and
@@ -121,9 +111,8 @@ def _apply_native_dims(path: Path, scale_denom: int | None) -> None:
         import ezdxf
         from .dim_style import DimStyleConfig, apply_native_dimensions
 
-        sc = scale_denom if (scale_denom and scale_denom > 1) else _FALLBACK_SCALE
         doc = ezdxf.readfile(str(path))
-        n = apply_native_dimensions(doc, DimStyleConfig(units="m", decimals=3), sc)
+        n = apply_native_dimensions(doc, DimStyleConfig(units="m", decimals=3), scale_denom)
         if n:
             doc.saveas(str(path))
             logger.debug("Native dims applied to %s: %d entities converted", path.name, n)
@@ -180,8 +169,10 @@ def generate_package(
                 p = mod.generate(project, out_path, part=part)
             else:
                 p = mod.generate(project, out_path, scale_denom=sc)
-            # EP-2026-12: convert hard-typed dim text to measured "<>" after generation
-            _apply_native_dims(p, sc)
+            # Sheet 5 uses one actual scale for all views. Other sheets may
+            # have fitted axes, insets, or dimension labels carrying RLs.
+            if sheet_id == "5" and sc is not None:
+                _apply_native_dims(p, sc)
             results.append(p)
             logger.info(
                 "Sheet %s (%s) → %s  (%d KB)", sheet_id, stem, p.name, p.stat().st_size // 1024

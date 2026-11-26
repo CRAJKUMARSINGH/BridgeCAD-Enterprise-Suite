@@ -16,6 +16,7 @@ def test_ga_pdf_download_and_reject_conflicting_soffit(tmp_path, family, girder_
     pytest.importorskip("reportlab")
     from fastapi.testclient import TestClient
     from bridgecad_api.main import app
+    from bridgecad_core.types import SpanConfiguration
     from bridgecad_io.excel_reader import read_excel
     from bridgecad_io.excel_writer import write_excel
 
@@ -24,7 +25,7 @@ def test_ga_pdf_download_and_reject_conflicting_soffit(tmp_path, family, girder_
     payload = project.model_dump(round_trip=True)
     payload["geometry_input"].update(span_count=3, span_lengths_m=[Decimal("18.75")] * 3)
     payload["geometry_input"].update(footpath_left_m=Decimal("2.05"), footpath_right_m=Decimal("2.05"), kerb_width_left_m=Decimal("0.45"), kerb_width_right_m=Decimal("0.45"))
-    payload["bridge_selection"]["span_count"] = 3
+    payload["bridge_selection"].update(span_count=3, span_configuration=SpanConfiguration.CONTINUOUS)
     slab_mm = 800 if not depth else 200
     payload["superstructure"].update(
         type=family, girder_type=girder_type, deck_thickness_mm=slab_mm,
@@ -48,6 +49,7 @@ def test_ga_pdf_download_and_reject_conflicting_soffit(tmp_path, family, girder_
     response = upload()
     assert response.status_code == 200, response.text[:400]
     assert response.headers["content-type"] == "application/pdf"
+    assert response.headers["cache-control"] == "no-store"
     assert "GA-01-A1.pdf" in response.headers["content-disposition"]
     with pymupdf.open(stream=response.content, filetype="pdf") as pdf:
         assert len(pdf) == 1
@@ -65,6 +67,8 @@ def test_ga_pdf_download_and_reject_conflicting_soffit(tmp_path, family, girder_
         section_scale = int(re.search(r"03  TYPICAL CROSS-SECTION  /  1:(\d+)", text)[1])
         paper = lambda points: points * 25.4 / 72
         paths = pdf[0].get_drawings()
+        p1, p2 = [100 + station*1000/ga_scale for station in (18.75, 37.5)]
+        assert _pier_joint_x(paths, paper) == pytest.approx([p1, p1, p2, p2], abs=.01)
         axes = [
             (paper(a.x), paper(z.x), paper(a.y))
             for path in paths if abs(paper(path["width"] or 0) - .15) < .001
@@ -121,7 +125,46 @@ def test_ga_pdf_download_and_reject_conflicting_soffit(tmp_path, family, girder_
             if kind == "GRAVITY":
                 assert all(len(profile["items"]) >= 12 for profile in outlines[2:])
                 assert "Footing 1.0 m thick" in pdf[0].get_text()
+            elif kind == "FULL_HEIGHT_WALL":
+                assert all(path["items"][0][0] == "re" for path in outlines[2:])
+            else:
+                left, right = outlines[2:]
+                def vertices(path):
+                    return {(round(point.x, 3), round(point.y, 3)) for op, *points in path["items"]
+                            if op == "l" for point in points}
 
+                left_points, right_points = vertices(left), vertices(right)
+                assert len(left_points) == len(right_points) == 8
+                mirror_sum = left["rect"].x0 + right["rect"].x1
+                for x, y in left_points:
+                    assert any(abs(x + xx - mirror_sum) < .01 and abs(y - yy) < .01 for xx, yy in right_points)
+
+    if not depth:
+        path = write_excel(project, tmp_path / "a1.xlsx")
+        via_predict = client.post("/predict?output_format=ga_pdf&abutment_type=GRAVITY",
+                                  files={"excel_file": (path.name, path.read_bytes())})
+        assert via_predict.status_code == 200, via_predict.text[:400]
+        with pymupdf.open(stream=via_predict.content, filetype="pdf") as pdf:
+            assert "A1 / A2: Gravity" in pdf[0].get_text()
+
+        from bridgecad_core.models import ExpansionJointScheduleRow
+        from bridgecad_core.types import ExpansionJointType
+
+        def joint_lines(response):
+            assert response.status_code == 200, response.text[:400]
+            with pymupdf.open(stream=response.content, filetype="pdf") as pdf:
+                return _pier_joint_x(pdf[0].get_drawings(), paper)
+
+        project.bridge_selection.span_configuration = SpanConfiguration.SIMPLY_SUPPORTED
+        assert joint_lines(upload()) == pytest.approx([p1, p1, p2, p2], abs=.01)
+        project.bridge_selection.span_configuration = SpanConfiguration.CONTINUOUS
+        project.bearings_joints.expansion_joint_schedule = [ExpansionJointScheduleRow(
+            location="P2 centreline", joint_type=ExpansionJointType.COMPRESSION_SEAL, gap_mm=50,
+        )]
+        half_gap = 25 / ga_scale
+        assert joint_lines(upload()) == pytest.approx(
+            [p1, p1, p2-half_gap, p2-half_gap, p2+half_gap, p2+half_gap], abs=.01,
+        )
     assert upload(abutment_type="COUNTERFORT").status_code == 422
 
     project.hydraulic_data.actual_soffit_level_m -= Decimal("0.3")
@@ -135,3 +178,9 @@ def test_ga_pdf_download_and_reject_conflicting_soffit(tmp_path, family, girder_
         rejected = upload()
         assert rejected.status_code == 422
         assert "Girder centres must fit" in rejected.text
+
+
+def _pier_joint_x(paths, paper):
+    return sorted(paper(a.x) for path in paths
+                  if path["color"] == pytest.approx((150/255, 61/255, 45/255), abs=.002)
+                  for op, a, z in path["items"] if op == "l" and a.x == z.x)

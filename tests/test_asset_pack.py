@@ -8,6 +8,7 @@ failure mode a plotted PDF cannot catch) fails here instead of at review.
 from __future__ import annotations
 
 import math
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -80,6 +81,32 @@ def test_sheet_generates(pack, stem):
 
 def test_four_sheets_cover_four_source_pages(pack):
     assert len(pack) == 4
+
+
+@pytest.mark.parametrize("sheet_no", [1, 2, 3])
+def test_pmgsy_footer_uses_configured_set_size(tmp_path, sheet_no):
+    from bridgecad_draw import asset_sheet1_lsection, asset_sheet2_deck_abutment, asset_sheet3_pier
+
+    generators = (asset_sheet1_lsection.generate, asset_sheet2_deck_abutment.generate,
+                  asset_sheet3_pier.generate)
+    spec = replace(PMGSY_SLAB, ident=replace(PMGSY_SLAB.ident, total_sheets=5))
+    path = generators[sheet_no - 1](spec, tmp_path / f"sheet{sheet_no}.dxf")
+    texts = [entity.dxf.text for entity in ezdxf.readfile(path).modelspace().query("TEXT")]
+
+    assert any(text.endswith(f"sheet {sheet_no:02d}/05") for text in texts)
+
+
+def test_weep_hole_markers_use_the_spec_diameter(tmp_path):
+    from bridgecad_draw.asset_sheet1_lsection import generate
+
+    spec = replace(PMGSY_SLAB, weep_hole_mm=150)
+    path = generate(spec, tmp_path / "weep-holes.dxf")
+    modelspace = ezdxf.readfile(path).modelspace()
+    holes = [entity.dxf.radius for entity in modelspace.query("CIRCLE")
+             if entity.dxf.layer == "SUB-PIER"]
+    # The elevation has 398 mm of usable paper width over the span plus 9 m at each end.
+    expected_radius = (0.150 / 2) * 398 / (spec.length_m + 18)
+    assert holes == pytest.approx([expected_radius] * 4)
 
 
 @pytest.mark.parametrize("stem", list(COVERAGE))

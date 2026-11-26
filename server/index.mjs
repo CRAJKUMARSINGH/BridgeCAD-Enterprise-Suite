@@ -15,11 +15,13 @@ const mimeTypes = {
   ".svg": "image/svg+xml",
   ".json": "application/json; charset=utf-8",
   ".ico": "image/x-icon",
+  ".pdf": "application/pdf",
+  ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 };
 
-function sendJson(response, status, payload) {
+function sendJson(response, status, payload, headers = {}) {
   const body = JSON.stringify(payload);
-  response.writeHead(status, { "content-type": "application/json; charset=utf-8", "content-length": Buffer.byteLength(body) });
+  response.writeHead(status, { "content-type": "application/json; charset=utf-8", "content-length": Buffer.byteLength(body), ...headers });
   response.end(body);
 }
 
@@ -39,8 +41,12 @@ async function proxyToPython(request, response, requestPath, query) {
     headers,
     body,
   });
-  const responseHeaders = {};
-  for (const name of ["content-type", "content-disposition", "cache-control"]) {
+  const responseHeaders = { "cache-control": "no-store" };
+  if (upstream.status >= 500) {
+    sendJson(response, upstream.status, { error: "The drawing service could not complete the request." }, responseHeaders);
+    return;
+  }
+  for (const name of ["content-type", "content-disposition"]) {
     const value = upstream.headers.get(name);
     if (value) responseHeaders[name] = value;
   }
@@ -52,9 +58,12 @@ function serveStatic(request, response, requestPath) {
   const requested = requestPath === "/" ? "/index.html" : requestPath;
   const candidate = path.resolve(dist, `.${requested}`);
   const safeCandidate = candidate.startsWith(`${dist}${path.sep}`) ? candidate : path.join(dist, "index.html");
-  const filePath = fs.existsSync(safeCandidate) && fs.statSync(safeCandidate).isFile()
-    ? safeCandidate
-    : path.join(dist, "index.html");
+  const exists = fs.existsSync(safeCandidate) && fs.statSync(safeCandidate).isFile();
+  if (!exists && path.extname(requested)) {
+    sendJson(response, 404, { error: "Asset not found" });
+    return;
+  }
+  const filePath = exists ? safeCandidate : path.join(dist, "index.html");
   if (!fs.existsSync(filePath)) {
     sendJson(response, 503, { error: "Frontend is not built. Run npm run build first." });
     return;
@@ -69,9 +78,9 @@ const server = http.createServer(async (request, response) => {
     if (url.pathname === "/api/health") {
       try {
         const upstream = await fetch(`${pythonApi}/health`);
-        sendJson(response, upstream.ok ? 200 : 503, { frontend: "online", python: upstream.ok ? "online" : "offline" });
+        sendJson(response, upstream.ok ? 200 : 503, { frontend: "online", python: upstream.ok ? "online" : "offline", mode: "live" });
       } catch {
-        sendJson(response, 503, { frontend: "online", python: "offline" });
+        sendJson(response, 503, { frontend: "online", python: "offline", mode: "live" });
       }
       return;
     }
@@ -80,8 +89,8 @@ const server = http.createServer(async (request, response) => {
       return;
     }
     serveStatic(request, response, url.pathname);
-  } catch (error) {
-    sendJson(response, 502, { error: error instanceof Error ? error.message : "Gateway error" });
+  } catch {
+    sendJson(response, 502, { error: "The drawing service is unavailable." }, { "cache-control": "no-store" });
   }
 });
 

@@ -581,7 +581,7 @@ def _build_bearings_joints(wb: Any, t: Any, project: Any = None) -> Any:
             getattr(er, "width_mm", None),
             getattr(er, "movement_range_mm", None),
             getattr(er, "gap_mm", None),
-            float(getattr(er, "transverse_length_m", 0) or 0),
+            getattr(er, "transverse_length_m", None),
             getattr(er, "quantity", 1),
         ]
         for col, v in enumerate(vals, 1):

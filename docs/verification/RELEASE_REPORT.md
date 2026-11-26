@@ -14,6 +14,7 @@ Updated 27 November 2026 IST
 | Legacy regression tests | 6 / 6 | 100% | The legacy drawing generator now uses the supported `ezdxf.document.Drawing` annotation. |
 | Legacy workbook smoke cases | 11 / 11 | 100% | The robotic harness passed ingestion, calculation, drawing, and validation locally. |
 | Netlify readiness checks | 25 / 25 | 100% | All checks passed locally with gateway dependencies installed. |
+| Suite integration smoke checks | 12 / 12 | 100% | The standalone script passed locally after importing the gateway as a package. |
 | Originally failing Phase 0 CI jobs restored | 5 / 6 | 83.3% | GitHub confirmed suite lint, suite mypy, sheet details, and both legacy jobs passed at `48fa296`. |
 | Suite unit jobs restored after lint passed | 2 / 2 | 100% | GitHub confirmed the Python 3.11 and 3.12 jobs passed at `4da0643` after adding test dependencies. |
 | Release phases merged | 0 / 7 | 0% | Phase 0 remains open as draft PR #1. The green CI and merge gate still applies. |
@@ -24,6 +25,8 @@ at `48fa296` had 25 passing checks, three failed jobs, and eight skipped or neut
 checks. Both unit jobs ran after lint passed and exposed missing gateway and CLI test
 dependencies. The Python 3.11 unit job reached 79.73% coverage against the 75% floor.
 Both unit jobs passed on the follow-up commit `4da0643`.
+That run exposed a gateway package import failure in the downstream integration
+smoke script. The script now uses the normal package import and passes locally.
 The architecture checker still reports imports from core validation into drawing
 audits and from the infrastructure worker into drawing, bill, and export packages.
 Those imports also break the transitive dependency contracts. Release certification

@@ -25,6 +25,10 @@ for _pkg in ["bridgecad-core", "bridgecad-io", "bridgecad-draw",
     if _p.exists() and str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
+_gateway = str(_SUITE / "apps" / "api-gateway")
+if _gateway not in sys.path:
+    sys.path.insert(0, _gateway)
+
 
 # ===========================================================================
 # Helpers
@@ -496,18 +500,13 @@ def run_integration_smoke() -> int:
 
     # ── T12: FastAPI app constructs ───────────────────────────────────────
     try:
-        import importlib.util
-        spec = importlib.util.spec_from_file_location(
-            "bridgecad_api.main",
-            _SUITE / "apps" / "api-gateway" / "bridgecad_api" / "main.py",
-        )
-        mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)    # type: ignore[union-attr]
-        has_app = hasattr(mod, "app")
-        ok = has_app
+        from fastapi import FastAPI
+
+        from bridgecad_api.main import app
+
         results.append(
             _ok("T12", "FastAPI app object found")
-            if ok else _fail("T12", "no 'app' in api main.py")
+            if isinstance(app, FastAPI) else _fail("T12", "no FastAPI app in gateway main.py")
         )
     except Exception as exc:
         results.append(_fail("T12", str(exc)[:120]))

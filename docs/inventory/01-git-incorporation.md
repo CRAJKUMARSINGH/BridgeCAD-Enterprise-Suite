@@ -1,6 +1,6 @@
 # Git Incorporation Inventory
 
-Snapshot: 27 November 2026 at `c428656` on `codex/phase-0-launch-baseline`.
+Snapshot: 27 November 2026 at `6cbc5a9` on `codex/phase-0-launch-baseline`.
 
 This report separates local Git hygiene from branch incorporation. A branch-only change is not necessarily an orphan or a runtime defect; it is committed work that has not yet been merged into local `main`.
 
@@ -10,14 +10,14 @@ This report separates local Git hygiene from branch incorporation. A branch-only
 |---|---:|---|
 | Tracked files | 2,005 | Known to Git. |
 | Staged files | 0 | No pending index changes. |
-| Unstaged modified files | 11 | Five inventory reports plus six source/manifest edits from the entry-point refactor (section 2.4). |
-| Untracked, non-ignored files | 2 | Two new wired source modules awaiting `git add` (section 2.4). |
+| Unstaged modified files | 0 | Working tree is clean. |
+| Untracked, non-ignored files | 0 | No local source or guidance awaiting initial Git incorporation. |
 | Actionable ignored source/guidance files | 0 | Remaining ignored files are caches, bytecode, dependencies, or generated output. |
-| Commits ahead of local `main` | 21 | Branch work remains to be merged. |
+| Commits ahead of local `main` | 23 | Branch work remains to be merged. |
 | Commits behind local `main` | 0 | Local `main` has no divergent commits. |
-| Branch-only change records | 187 | Complete list in section 3. |
+| Branch-only change records | 191 | Complete list in section 3. |
 
-The committed tree is synchronized with `origin/codex/phase-0-launch-baseline`. The 11 unstaged and 2 untracked items are an in-flight, uncommitted change set: a documentation refresh plus an entry-point refactor (see section 2.4).
+The committed tree is synchronized with `origin/codex/phase-0-launch-baseline`. The change set that was uncommitted at `c428656` (a documentation refresh plus an entry-point refactor) is now committed as `d0bfccc` and `6cbc5a9`; see section 2.4.
 
 ## 2. Resolved Historical Local Gaps
 
@@ -65,33 +65,32 @@ It remains required by:
 
 ### 2.3 Former Unstaged Modifications
 
-The earlier snapshot had 49 unstaged tracked-file modifications. All were committed in `3110881` and later commits; their current branch state is represented in the 187-record inventory below.
+The earlier snapshot had 49 unstaged tracked-file modifications. All were committed in `3110881` and later commits; their current branch state is represented in the 191-record inventory below.
 
-### 2.4 Current Uncommitted Change Set (New Since `3110881`)
+### 2.4 Recently Resolved Change Set (New Since `3110881`, Committed)
 
-The working tree is no longer clean. Two groups of uncommitted changes exist and should be incorporated together.
+At `c428656` the working tree held an uncommitted change set: a documentation refresh plus an entry-point refactor. It is now committed as `d0bfccc` (refactor) and `6cbc5a9` (docs). This section is retained as the resolution record; the untracked/ignored backlog is now empty.
 
-**Untracked, non-ignored files (2) — both are wired:**
+**Newly tracked modules (2) — both wired:**
 
-| File | Evidence of wiring | Recommended action |
+| File | Evidence of wiring | Disposition |
 |---|---|---|
-| `packages/bridgecad-core/bridgecad_core/drawing_audit.py` | Defines the `DrawingAudit` protocol, `register_layout_auditor()`, `layout_audit_requested()`, and `collect_layout_audit()`. Imported by `bridgecad/__init__.py`, `bridgecad_draw/layout_audit.py`, and `bridgecad_core/validation.py`. | `git add` and commit with the refactor below. |
-| `packages/bridgecad-export/bridgecad_export/worker_jobs.py` | Implements `generate_drawing`, `generate_bill`, and `export_package`. Registered as `bridgecad.worker_jobs` entry points in `packages/bridgecad-export/pyproject.toml`; resolved by `bridgecad_infra/queue.py`. | `git add` and commit with the refactor below. |
+| `packages/bridgecad-core/bridgecad_core/drawing_audit.py` | Defines the `DrawingAudit` protocol, `register_layout_auditor()`, `layout_audit_requested()`, and `collect_layout_audit()`. Imported by `bridgecad/__init__.py`, `bridgecad_draw/layout_audit.py`, and `bridgecad_core/validation.py`. | Committed in `d0bfccc`. |
+| `packages/bridgecad-export/bridgecad_export/worker_jobs.py` | Implements `generate_drawing`, `generate_bill`, and `export_package`. Registered as `bridgecad.worker_jobs` entry points in `packages/bridgecad-export/pyproject.toml`; resolved by `bridgecad_infra/queue.py`. | Committed in `d0bfccc`. |
 
-**Unstaged modified files (11):**
+**Companion edits (6):**
 
 | Group | File(s) | Role in the change set |
 |---|---|---|
-| Inventory refresh | `docs/inventory/README.md`, `01`–`04` | Documentation-only refresh tracked by this report. |
 | Entry-point refactor | `bridgecad/__init__.py`, `packages/bridgecad-core/bridgecad_core/validation.py`, `packages/bridgecad-draw/bridgecad_draw/layout_audit.py`, `packages/bridgecad-draw/pyproject.toml`, `packages/bridgecad-export/pyproject.toml`, `packages/bridgecad-infra/bridgecad_infra/queue.py` | Moves the draw/export coupling behind `bridgecad.layout_audit` and `bridgecad.worker_jobs` entry points so `core` and `infra` no longer import `draw`/`export` directly. |
 
-**Recommended action:** review the refactor as one coherent commit (the two new modules cannot function without the manifest entry points and the modified import sites), then `git add` the untracked and modified files together and commit.
+Four of these records were new relative to `c428656` (`A drawing_audit.py`, `A worker_jobs.py`, `M packages/bridgecad-draw/pyproject.toml`, `M packages/bridgecad-export/pyproject.toml`); the other four files were already branch-modified. See §3.8.
 
 ## 3. Complete Branch-only Change Inventory
 
-`git rev-list --left-right --count main...HEAD` reports `0 21`.
+`git rev-list --left-right --count main...HEAD` reports `0 23`.
 
-`git diff --name-status main...HEAD` reports 187 records. Status meanings:
+`git diff --name-status main...HEAD` reports 191 records. Status meanings:
 
 - `A` — added on the branch.
 - `M` — modified on the branch.
@@ -324,6 +323,17 @@ All 38 records below are modifications to the fenced legacy package. The Suite i
 | 186 | M | `tests/test_asset_pack.py` | Asset-pack regression. | Merge with asset-sheet changes. |
 | 187 | M | `tests/unit/test_abutment_stack.py` | Abutment geometry regression. | Merge with core/drawing changes. |
 
+### 3.8 Entry-point Refactor Records Added After `c428656` — Records 188–191
+
+These four records are the net-new branch-only change added by the refactor commit `d0bfccc`. The other four files in that commit (`bridgecad/__init__.py`, `validation.py`, `layout_audit.py`, `queue.py`) were already branch-modified records 24, 73, 95, and 107.
+
+| # | Status | Path | Classification | Recommended action |
+|---:|---|---|---|---|
+| 188 | A | `packages/bridgecad-core/bridgecad_core/drawing_audit.py` | New wired module (`DrawingAudit` protocol/registry). | Merge with core/draw changes (also §2.4). |
+| 189 | A | `packages/bridgecad-export/bridgecad_export/worker_jobs.py` | New wired module (`bridgecad.worker_jobs` provider). | Merge with export/infra changes (also §2.4). |
+| 190 | M | `packages/bridgecad-draw/pyproject.toml` | Entry-point declaration (`bridgecad.layout_audit`). | Merge with draw package changes. |
+| 191 | M | `packages/bridgecad-export/pyproject.toml` | Entry-point declaration (`bridgecad.worker_jobs`) and dependency. | Merge with export package changes. |
+
 ## 4. Ignored Noise Excluded from the Actionable List
 
 Git reports tens of thousands of ignored files. The largest groups are:
@@ -343,13 +353,13 @@ Do not force-add ignored output merely because it exists locally.
 
 ## 5. Recommended Merge Groups
 
-1. **Uncommitted change set (do first):** the two untracked modules plus the six refactor files in section 2.4.
+1. **Entry-point refactor (already committed in `d0bfccc`):** records 188–191 plus companions 24, 73, 95, and 107.
 2. **Repository/CI/governance:** records 1–17, 19, 22–25.
 3. **Documentation and verification:** records 26–37 and 55.
 4. **Frontend, Netlify, server, and startup:** records 38–60 and 133–134.
-5. **Python production packages:** records 61–115.
+5. **Python production packages:** records 61–115 and 188–191.
 6. **Tools and legacy relocations:** records 116–132 and 173.
 7. **Legacy `src/bridge_gad`:** records 135–172.
 8. **Tests:** records 174–187.
 
-Keep the branch review coherent by subsystem. The prior clean-clone defects are already fixed in committed branch content; the remaining Git action is to commit the in-flight change set and merge the branch into `main` after the open CI, security, and release gates are satisfied.
+Keep the branch review coherent by subsystem. The prior clean-clone defects are already fixed in committed branch content, and the former in-flight change set is now committed; the remaining Git action is to merge the branch into `main` after the open CI, security, and release gates are satisfied.

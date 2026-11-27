@@ -1,6 +1,6 @@
 # Standalone Tool and Verifier Inventory
 
-Snapshot: 27 November 2026 at `c428656`.
+Snapshot: 27 November 2026 at `6cbc5a9`.
 
 A script that is not imported by the application is not automatically unwired. Most files in this report are intended to be executed directly by developers, CI, release engineers, or acceptance workflows. The purpose of this inventory is to distinguish those intentional entrypoints from genuinely disconnected code.
 

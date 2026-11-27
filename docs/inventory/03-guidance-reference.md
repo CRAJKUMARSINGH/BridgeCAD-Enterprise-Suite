@@ -1,6 +1,6 @@
 # Guidance, Handover, and Reference Inventory
 
-Snapshot: 27 November 2026 at `c428656`.
+Snapshot: 27 November 2026 at `6cbc5a9`.
 
 This report inventories documentation, continuity material, enhancement guidance, reference corpora, learning assets, sample inputs, and handover evidence. It also records guidance that is referenced but absent, because those broken references are part of the incorporation problem.
 

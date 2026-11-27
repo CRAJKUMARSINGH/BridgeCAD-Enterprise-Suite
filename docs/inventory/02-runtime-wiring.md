@@ -1,10 +1,10 @@
 # Runtime Wiring Inventory
 
-Snapshot: 27 November 2026 at `c428656`.
+Snapshot: 27 November 2026 at `6cbc5a9`.
 
 This report focuses on source files that are not reachable from an active application, are only partially wired, or are advertised without a working implementation. Git-only incorporation gaps are listed in [01-git-incorporation.md](01-git-incorporation.md).
 
-No P0 clean-clone wiring defect remains. The current risks are authentication, lifecycle initialization, placeholders, and unimplemented dispositions for public or optional APIs. Two new modules — `bridgecad_core/drawing_audit.py` and `bridgecad_export/worker_jobs.py` — are wired but still untracked, and belong to an uncommitted entry-point refactor (see section 1.1).
+No P0 clean-clone wiring defect remains. The current risks are authentication, lifecycle initialization, placeholders, and unimplemented dispositions for public or optional APIs. Two modules, `bridgecad_core/drawing_audit.py` and `bridgecad_export/worker_jobs.py`, were wired by the entry-point refactor committed in `d0bfccc` (see section 1.1).
 
 ## 1. Resolved Clean-clone and Feature Wiring
 
@@ -24,16 +24,16 @@ Recorded verification from the fix pass:
 - A live drawing/BOQ worker smoke test was blocked before job execution by the local interpreter's mismatched Pydantic installation (`pydantic 2.5.3` with `pydantic_core 2.14.6`); the repository requires Pydantic `>=2.6`.
 - GNU Make and Docker were unavailable on the Windows host, so Compose execution was not performed locally.
 
-### 1.1 Entry-point Refactor Introduced by Uncommitted Work
+### 1.1 Entry-point Refactor (Committed in `d0bfccc`)
 
-An uncommitted refactor (see [01-git-incorporation.md](01-git-incorporation.md#24-current-uncommitted-change-set-new-since-3110881)) decouples `bridgecad-core` and `bridgecad-infra` from the draw and export packages by resolving behaviour through two entry-point groups. Both new modules are wired, but neither is tracked yet.
+The entry-point refactor committed in `d0bfccc` (see [01-git-incorporation.md](01-git-incorporation.md#24-recently-resolved-change-set-new-since-3110881-committed)) decouples `bridgecad-core` and `bridgecad-infra` from the draw and export packages by resolving behaviour through two entry-point groups. Both new modules are wired and tracked.
 
 | File | Git state | Wiring evidence |
 |---|---|---|
-| `packages/bridgecad-core/bridgecad_core/drawing_audit.py` | **Untracked** | Declares the `DrawingAudit` protocol and the `register_layout_auditor()` / `layout_audit_requested()` / `collect_layout_audit()` registry. `bridgecad_core/validation.py` imports `collect_layout_audit`; `bridgecad_draw/layout_audit.py` calls `register_layout_auditor(collect)`; `bridgecad/__init__.py` imports it to bootstrap the auditor. |
-| `packages/bridgecad-export/bridgecad_export/worker_jobs.py` | **Untracked** | Implements `generate_drawing`, `generate_bill`, and `export_package`. Registered as the `bridgecad.worker_jobs` group in `packages/bridgecad-export/pyproject.toml`; `bridgecad_infra/queue.py` resolves them via `entry_points(group="bridgecad.worker_jobs", name=...)`. |
+| `packages/bridgecad-core/bridgecad_core/drawing_audit.py` | **Tracked** (`d0bfccc`) | Declares the `DrawingAudit` protocol and the `register_layout_auditor()` / `layout_audit_requested()` / `collect_layout_audit()` registry. `bridgecad_core/validation.py` imports `collect_layout_audit`; `bridgecad_draw/layout_audit.py` calls `register_layout_auditor(collect)`; `bridgecad/__init__.py` imports it to bootstrap the auditor. |
+| `packages/bridgecad-export/bridgecad_export/worker_jobs.py` | **Tracked** (`d0bfccc`) | Implements `generate_drawing`, `generate_bill`, and `export_package`. Registered as the `bridgecad.worker_jobs` group in `packages/bridgecad-export/pyproject.toml`; `bridgecad_infra/queue.py` resolves them via `entry_points(group="bridgecad.worker_jobs", name=...)`. |
 
-The draw-side registration is declared in `packages/bridgecad-draw/pyproject.toml` (`bridgecad.layout_audit` → `bridgecad_draw.layout_audit:collect`). Committing the two modules is required before either entry-point group resolves in an installed environment.
+The draw-side registration is declared in `packages/bridgecad-draw/pyproject.toml` (`bridgecad.layout_audit` → `bridgecad_draw.layout_audit:collect`). A package (re)install is required before either entry-point group resolves in an installed environment.
 
 ## 2. Current High-risk or Incomplete Wiring
 
@@ -75,8 +75,8 @@ The following are connected to active surfaces and should not be labeled orphane
 | `packages/bridgecad-ai/bridgecad_ai/param_suggester.py` | Used by robotic verification tooling. |
 | `packages/bridgecad-refs/bridgecad_refs/parse.py` | Used by reference extraction and reference tests. |
 | `packages/bridgecad-refs/bridgecad_refs/lisp_baseline.py` | Used by reference tooling and tests. |
-| `packages/bridgecad-core/bridgecad_core/drawing_audit.py` | Imported by `bridgecad_core/validation.py` and registered by `bridgecad_draw/layout_audit.py`; untracked (section 1.1). |
-| `packages/bridgecad-export/bridgecad_export/worker_jobs.py` | `bridgecad.worker_jobs` entry-point provider resolved by `bridgecad_infra/queue.py`; untracked (section 1.1). |
+| `packages/bridgecad-core/bridgecad_core/drawing_audit.py` | Imported by `bridgecad_core/validation.py` and registered by `bridgecad_draw/layout_audit.py`; tracked (section 1.1). |
+| `packages/bridgecad-export/bridgecad_export/worker_jobs.py` | `bridgecad.worker_jobs` entry-point provider resolved by `bridgecad_infra/queue.py`; tracked (section 1.1). |
 
 ## 4. Legacy Package: `src/bridge_gad`
 

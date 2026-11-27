@@ -1,50 +1,65 @@
 # Guidance, Handover, and Reference Inventory
 
-Snapshot: 26 November 2026 at `6ddf860`.
+Snapshot: 27 November 2026 at `c428656`.
 
 This report inventories documentation, continuity material, enhancement guidance, reference corpora, learning assets, sample inputs, and handover evidence. It also records guidance that is referenced but absent, because those broken references are part of the incorporation problem.
+
+All current root guidance and inventory files are tracked. Their remaining Git gap is branch incorporation into `main`, not local file discovery.
 
 ## 1. Root Guidance and Reports
 
 | File | Git state | Purpose | Wiring/status | Recommended action |
 |---|---|---|---|---|
-| `README.md` | Tracked; unstaged changes | Primary repository guidance and launch instructions. | Linked by GitHub and documentation; operationally wired. | Commit current launch changes after review. |
-| `BASELINE.md` | Untracked | Original checkout and pre-launch verification baseline. | Linked by `LAUNCH_HARDENING_REPORT.md`. | Commit as point-in-time evidence. |
-| `CREAT.MD` | Untracked | Rolling 24-hour continuity log. | Linked by README standing instructions. | Update stale queue statements, then commit. |
-| `LAUNCH_HARDENING_REPORT.md` | Untracked | Launch changes, verification, and release status. | Linked by baseline/deployment guidance. | Commit with launch scripts and evidence. |
-| `CHANGELOG.md` | Branch-only addition | Keep-a-Changelog release history. | Referenced by project metadata. | Merge with Phase 0 documentation. |
-| `CODE_OF_CONDUCT.md` | Branch-only addition | Community conduct policy. | Standard repository governance file. | Merge with governance docs. |
-| `CONTRIBUTING.md` | Branch-only addition | Contribution, testing, and data-protection rules. | Linked by security policy. | Merge with governance docs. |
-| `SECURITY.md` | Branch-only addition | Private vulnerability reporting guidance. | Linked by contribution guidance. | Merge with governance docs. |
+| `README.md` | Tracked; modified on branch | Primary repository guidance and launch instructions. | Linked by GitHub and documentation; operationally wired. | Merge current launch instructions with the Phase 0 branch. |
+| `BASELINE.md` | Tracked; branch-only addition | Original checkout and pre-launch verification baseline. | Linked by `LAUNCH_HARDENING_REPORT.md`. | Merge as point-in-time evidence. |
+| `CREAT.MD` | Tracked; branch-only addition | Rolling 24-hour continuity log. | Linked by README standing instructions. | Correct stale queue statements, then merge. |
+| `LAUNCH_HARDENING_REPORT.md` | Tracked; branch-only addition | Launch changes, verification, and release status. | Linked by baseline/deployment guidance. | Merge with launch scripts and evidence. |
+| `CHANGELOG.md` | Tracked; branch-only addition | Keep-a-Changelog release history. | Referenced by project metadata. | Merge with Phase 0 documentation. |
+| `CODE_OF_CONDUCT.md` | Tracked; branch-only addition | Community conduct policy. | Standard repository governance file. | Merge with governance docs. |
+| `CONTRIBUTING.md` | Tracked; branch-only addition | Contribution, testing, and data-protection rules. | Linked by security policy. | Merge with governance docs. |
+| `SECURITY.md` | Tracked; branch-only addition | Private vulnerability reporting guidance. | Linked by contribution guidance. | Merge with governance docs. |
 
 ### Continuity Conflict to Resolve
 
-`CREAT.MD` contains 25 November entries saying enhancement guides are in `CODE-JUNCTION`. `docs/verification/RELEASE_REPORT.md` records that the queue was reviewed and emptied on 26 November. The release report is newer and explicit, so the continuity log is stale on this point.
+`CREAT.MD` contains 25 November entries saying enhancement guides are in `CODE-JUNCTION`. `docs/verification/RELEASE_REPORT.md` records that the queue was reviewed and emptied on 26 November. Git confirms that the queue contains no files.
 
-Recommended action: keep `CREAT.MD` as the rolling handoff file, but replace the obsolete queue statements with the cleanup outcome and current open gates.
+The release report is newer and explicit, so the continuity log is stale on this point.
+
+Recommended action: keep `CREAT.MD` as the rolling handoff file, but replace obsolete queue statements with the cleanup outcome and current open gates.
 
 ## 2. Documentation Site and Architecture Guidance
 
 | File | Purpose | Navigation/wiring | Recommended action |
 |---|---|---|---|
-| `docs/index.md` | MkDocs landing page. | `mkdocs.yml` Home entry. | Keep and merge with Phase 0. |
-| `docs/DEPLOYMENT.md` | Backend deployment, environment variables, verification, and rollback. | MkDocs Deployment entry; README link. | Reconcile API-key auth claims with actual gateway wiring. |
-| `docs/LISP_FIDELITY_AND_DIRT_WALL.md` | AutoLISP provenance, fidelity limits, acceptance gaps, and patch notes. | MkDocs AutoLISP provenance entry; README link. | Keep as engineering guidance; refresh historical patch references. |
-| `docs/interop.md` | JSON/CSV/Excel/IFC/DWG interoperability contract. | MkDocs Interoperability entry. | Keep; ensure public-only IFC/DWG APIs are documented as library or route options. |
-| `docs/verification/TRACEABILITY.md` | Compliance-check-to-test/benchmark matrix. | MkDocs Verification traceability entry. | Keep as definition-of-done guidance. |
-| `docs/verification/RELEASE_REPORT.md` | Phase 0 baseline, acceptance status, queue review, and cleanup outcome. | MkDocs Release verification entry. | Keep current; merge later working-tree updates. |
-| `docs/adr/README.md` | ADR index and authoring guidance. | MkDocs Architecture decisions index. | Keep. |
-| `docs/adr/0002-group-workspace-entry-points.md` | Accepted decision to group apps, scripts, tests, and startup hooks. | MkDocs ADR entry; explains legacy moves. | Keep with relocation changes. |
-| `mkdocs.yml` | Documentation navigation. | Controls MkDocs site. | Keep; add restored guidance if appropriate. |
-| `docs/schema/bridgeproject.schema.json` | Published project schema. | Checked by schema-export tooling. | Treat as generated contract artifact, not prose guidance. |
-| `audit/baseline.json` | Repository/test/reference baseline metrics and hashes. | Referenced by release report. | Keep as release evidence. |
-| `artifacts/TRIAGE_LOG.md` | S1/S2 defect register and merge-gate rules. | Read by `scripts/robot/gate.py`. | Keep operational; repair missing guide links. |
+| `docs/index.md` | MkDocs landing page. | `mkdocs.yml` Home entry; branch-only addition. | Merge with the documentation site. |
+| `docs/DEPLOYMENT.md` | Backend deployment, environment variables, verification, and rollback. | MkDocs Deployment entry; README link; modified on branch. | Reconcile API-key auth claims with actual gateway wiring. |
+| `docs/LISP_FIDELITY_AND_DIRT_WALL.md` | AutoLISP provenance, fidelity limits, acceptance gaps, and patch notes. | MkDocs AutoLISP provenance entry; README link. | Keep as engineering guidance; repair historical patch/result references. |
+| `docs/interop.md` | JSON/CSV/Excel/IFC/DWG interoperability contract. | MkDocs Interoperability entry. | Keep; document public-only IFC/DWG APIs as library or route options. |
+| `docs/verification/TRACEABILITY.md` | Compliance-check-to-test/benchmark matrix. | MkDocs Verification traceability entry; modified on branch. | Merge as definition-of-done guidance. |
+| `docs/verification/RELEASE_REPORT.md` | Phase 0 baseline, acceptance status, queue review, and cleanup outcome. | MkDocs Release verification entry; branch-only addition. | Keep current and merge with Phase 0 status. |
+| `docs/adr/README.md` | ADR index and authoring guidance. | MkDocs Architecture decisions index; branch-only addition. | Merge with ADR-0002. |
+| `docs/adr/0002-group-workspace-entry-points.md` | Accepted decision to group apps, scripts, tests, and startup hooks. | MkDocs ADR entry; branch-only addition. | Merge with relocation changes. |
+| `mkdocs.yml` | Documentation navigation. | Controls MkDocs site; branch-only addition. | Merge with docs and decide inventory navigation. |
+| `docs/schema/bridgeproject.schema.json` | Published project schema. | Checked by schema-export tooling; modified on branch. | Treat as generated contract artifact, not prose guidance. |
+| `audit/baseline.json` | Repository/test/reference baseline metrics and hashes. | Referenced by release report; branch-only addition. | Merge as release evidence. |
+| `artifacts/TRIAGE_LOG.md` | S1/S2 defect register and merge-gate rules. | Read by `scripts/robot/gate.py`; branch-only addition. | Keep operational; repair missing guide links. |
 | `docs/api/conf.py` | Sphinx API-reference configuration. | Used with generated API stubs. | Keep as docs tooling. |
 | `docs/api/index.rst` | Sphinx package-reference toctree. | CI generates package stub pages. | Keep; generated pages are build output. |
 | `docs/api/requirements.txt` | Sphinx documentation dependencies. | API-docs build input. | Keep. |
 | `docs/requirements-docs.txt` | MkDocs dependencies. | Documentation build input. | Keep. |
-| `docs/build_manual.py` | Standalone user-manual generator. | Not referenced by Makefile/CI; currently blocked by missing template. | Restore template/tooling or mark archival. |
+| `docs/build_manual.py` | Standalone user-manual generator. | Not referenced by Makefile/CI; blocked by missing template. | Restore template/tooling or mark archival. |
 | `docs/Bridge_GAD_User_Manual.pdf` | Existing legacy user manual. | Referenced by legacy GUI. | Keep as archival output until reproducible source is restored. |
+| `docs/inventory/README.md` | Inventory index and current action backlog. | Tracked; branch-only addition. | Merge and expose through MkDocs or root README. |
+| `docs/inventory/01-git-incorporation.md` | Git state and complete branch-only inventory. | Tracked; branch-only addition. | Merge and expose through the inventory index/navigation. |
+| `docs/inventory/02-runtime-wiring.md` | Runtime reachability, placeholders, and dispositions. | Tracked; branch-only addition. | Merge and expose through the inventory index/navigation. |
+| `docs/inventory/03-guidance-reference.md` | Guidance, references, and missing targets. | Tracked; branch-only addition. | Merge and expose through the inventory index/navigation. |
+| `docs/inventory/04-standalone-tools.md` | Direct tools, verifiers, and non-runtime tests. | Tracked; branch-only addition. | Merge and expose through the inventory index/navigation. |
+
+### Inventory Navigation Gap
+
+The five inventory reports link to one another, but `mkdocs.yml` has no Inventory section and the root `README.md` does not link to the inventory index. They are therefore available in the repository but not exposed through the main documentation navigation.
+
+Recommended action: add an Inventory section to `mkdocs.yml`, or add a root README link and explicitly label the reports as repository-local audit material.
 
 ## 3. `CODE-JUNCTION/` Enhancement Queue
 
@@ -60,7 +75,7 @@ Current state: the directory is intentionally preserved but **empty**.
 | `# CREAT.MD — Continuity Chat Log.MD` | Deleted after applicable BridgeCAD requirements were consolidated; unrelated legal/court material was excluded. | Does not currently exist. |
 | `Bcad venus 26.txt` | Deleted after applicable drafting fixes were reviewed; incomplete revisions and unverified engineering inputs were not adopted. | Does not currently exist. |
 
-Recommended action: do not recreate these files as if they were pending. Use the release report as the disposition record. Add new guidance to `CODE-JUNCTION/` only under the standing queue policy.
+Recommended action: do not recreate these files as if they were pending. Use the release report as the disposition record. Add new guidance to `CODE-JUNCTION/` only under the standing queue policy, and update `CREAT.MD` so it no longer contradicts the empty-queue state.
 
 ## 4. Preserved AutoLISP and Reference Corpus
 
@@ -114,7 +129,7 @@ These files are reference material, not production runtime modules. They support
 | `references/conflicts.jsonl` | Reference/implementation conflict register. |
 | `packages/bridgecad-refs/bridgecad_refs/gad_text.py` | Implemented legacy text codec, intentionally not wired to production pending semantic adaptation. |
 
-Recommended action: keep the corpus versioned and regenerate extracted/coverage/conflict data through the reference tools. Do not delete raw references merely because they are not runtime imports.
+`references/` contains 20 tracked files. Recommended action: keep the corpus versioned and regenerate extracted/coverage/conflict data through the reference tools. Do not delete raw references merely because they are not runtime imports.
 
 ## 5. Learning Centre and Manual Assets
 
@@ -196,8 +211,8 @@ No active runtime import of these files was found. Their value is historical tra
 
 ### Browser and acceptance evidence
 
-- Tracked browser evidence: `artifacts/browser-results/bills.json`, `defect-blank-template-parse.json`, and `qa-report.html`, plus associated generated files.
-- Former untracked browser evidence: the ten live-drafting files listed in [01-git-incorporation.md](01-git-incorporation.md) were deleted as regenerable duplicates. Future captures matching `artifacts/browser-results/live-drafting-*` are ignored.
+- Tracked browser evidence includes `artifacts/browser-results/bills.json`, `defect-blank-template-parse.json`, and `qa-report.html`, plus associated generated files.
+- The ten former untracked live-drafting files listed in [01-git-incorporation.md](01-git-incorporation.md#21-former-untracked-files) were deleted as regenerable duplicates. Future captures matching `artifacts/browser-results/live-drafting-*` are ignored.
 - Acceptance tooling: `artifacts/gad-acceptance/_gen_nine_span.py`.
 - Acceptance metadata: `collision-report.json`, `content-report.json`, `reference_requirements.json`, `variant-validation.json`, per-run `summary.json`, `params.resolved.json`, `quality.json`, `render-status.json`, `required-content.json`, and layout audits.
 - Acceptance output: generated DXF/PDF packages and failure reports under commit-keyed run directories.
@@ -221,6 +236,7 @@ The following references were found, but the target files do not exist in the cu
 
 | Missing target | Referenced by | Impact | Recommended action |
 |---|---|---|---|
+| `README_RAJKUMAR.md` | CORS comment in `apps/api-gateway/bridgecad_api/main.py`. | Gateway guidance points to an absent file. | Restore the intended guide or replace the comment with a current documentation link. |
 | `GUIDE.md` | Streamlit UI, import-linter comments, API comments, multiple code docstrings. | Users and maintainers are sent to a missing master guide. | Restore the guide or replace each reference with current documentation. |
 | `docs/USER-MANUAL.md` | Active Streamlit UI and `.gitignore` comments. | Broken user-manual link. | Restore, rename to the existing manual, or update links. |
 | `docs/PWD_ENRICHMENT_GUIDE.md` | Active Streamlit UI. | Broken PWD guidance link. | Restore or remove the link. |
@@ -231,7 +247,7 @@ The following references were found, but the target files do not exist in the cu
 | `CODE-JUNCTION/2026-01-irc-standards-enrichment/GUIDE.md` | `scripts/audit_dxf_conformance.py` docstring. | Historical queue reference remains after queue cleanup. | Replace with a permanent documentation reference or mark historical. |
 | `lisp-fidelity.patch` | `docs/LISP_FIDELITY_AND_DIRT_WALL.md`. | Patch-application instructions cannot be followed as written. | Mark the patch section historical or restore the patch in an archive. |
 | `TEST-RESULTS.txt` | `docs/LISP_FIDELITY_AND_DIRT_WALL.md`. | Verification instructions reference absent evidence. | Link the current release report/test records instead. |
-| `FAILED-RUN` | LISP documentation and acceptance tooling. | LISP document treats it as an existing artifact location. | Clarify that it is generated on failure, not a checked-in guide. |
+| `FAILED-RUN` | LISP documentation and acceptance tooling. | Documentation treats it as an existing artifact location. | Clarify that it is generated on failure, not a checked-in guide. |
 
 ## 9. Guidance Triage Summary
 
@@ -239,9 +255,10 @@ The following references were found, but the target files do not exist in the cu
 |---|---|
 | Keep operational | README, deployment, interoperability, traceability, release report, ADRs, triage log, MkDocs config. |
 | Keep governance | Changelog, code of conduct, contributing, security. |
-| Update before commit | `CREAT.MD`, deployment auth wording, missing-guide links, historical patch/manual references. |
+| Correct content | `CREAT.MD`, deployment auth wording, missing-guide links, inventory navigation, historical patch/manual references. |
 | Keep as point-in-time evidence | `BASELINE.md`, `LAUNCH_HARDENING_REPORT.md`, audit baseline, continue snapshots, browser/acceptance reports. |
 | Keep protected as reference | AutoLISP archives, raw reference PDFs, source drawing PDFs, expected facts, conflict records. |
 | Keep as direct tooling | Manual generator only after its missing source is restored; acceptance generator remains a direct tool. |
 | Do not treat as pending enhancement | The three deleted `CODE-JUNCTION/` files; the queue is empty. |
 | Review for archival cleanup | Large historical XML/diff snapshots and generated run output, subject to evidence-retention policy. |
+| Merge with Phase 0 | All five inventory reports and the other branch-only guidance after review. |

@@ -1,59 +1,72 @@
 # Repository Wiring and Incorporation Inventory
 
-Snapshot: 26 November 2026
+Snapshot: 27 November 2026
 
 Repository: `BridgeCAD-Enterprise-Suite`
 
 Branch: `codex/phase-0-launch-baseline`
 
-HEAD: `6ddf860`
+HEAD: `c428656`
+
+Baseline state: committed tree synchronized with `origin/codex/phase-0-launch-baseline`, with an in-flight uncommitted change set (11 unstaged files and 2 untracked modules).
+
+## Executive Finding
+
+The only local incorporation backlog is a small, uncommitted change set: two new wired modules (`bridgecad_core/drawing_audit.py`, `bridgecad_export/worker_jobs.py`) plus the entry-point refactor and documentation refresh that go with them. Everything else — the live drafting feature, Netlify proxy helper, worker entrypoint, launch scripts, guidance files, and inventory reports — is tracked on the current branch.
+
+The remaining incorporation backlog is the branch itself: local `main` is 21 commits behind, with 187 branch-only change records. The remaining engineering backlog is runtime policy and incomplete behavior, especially API authentication, gateway lifecycle setup, eight placeholder modules, and seven implemented modules with no production caller.
 
 ## Purpose
 
-This inventory separates four different conditions that are often confused:
+This inventory separates four conditions that are often confused:
 
-1. **Git incorporation gap** — a file exists locally but is untracked, ignored, uncommitted, or not merged into `main`.
-2. **Runtime wiring gap** — a file is tracked but is not reachable from an active application, API, CLI, or deployment entrypoint.
+1. **Git incorporation gap** — a change is committed on this branch but is not present in local `main`, or a local file is untracked, ignored, staged, or unstaged.
+2. **Runtime wiring gap** — a tracked file is not reachable from an active application, API, CLI, or deployment entrypoint.
 3. **Intentional non-runtime file** — a test, direct tool, fixture, reference asset, report, or generated artifact that is not expected to be imported by production code.
-4. **Incomplete implementation** — a module is imported or advertised but contains only a placeholder or lacks the symbol its caller expects.
+4. **Incomplete implementation** — a module is imported or advertised but contains only a placeholder or lacks required behavior.
 
-A file can belong to more than one category. For example, the live drafting sources are already imported by the frontend, but they remain untracked and therefore absent from a clean clone.
+A file can belong to more than one category. For example, the live drafting sources are runtime-wired and tracked, but their branch changes are still not incorporated into local `main`.
 
 ## Reports
 
 | Report | Contents |
 |---|---|
-| [01-git-incorporation.md](01-git-incorporation.md) | Every untracked file, the actionable ignored source file, all 47 branch-only change records, and all 49 unstaged modifications. |
-| [02-runtime-wiring.md](02-runtime-wiring.md) | Legacy code, test-only sheet scaffolds, placeholder modules, public-only APIs, unlinked pages, and confirmed broken or partial wiring. |
-| [03-guidance-reference.md](03-guidance-reference.md) | Reports, continuity material, documentation, reference corpora, learning assets, handover artifacts, and missing guidance references. |
-| [04-standalone-tools.md](04-standalone-tools.md) | Every tracked script and package-root verifier, classified as Makefile/CI-wired, directly invoked, supporting code, legacy, or historical. |
+| [01-git-incorporation.md](01-git-incorporation.md) | Current Git state, the uncommitted change set, resolved historical untracked/ignored gaps, and all 187 branch-only change records. |
+| [02-runtime-wiring.md](02-runtime-wiring.md) | Resolved clean-clone fixes, active entrypoints, legacy code, test-only scaffolds, eight placeholders, seven zero-production-reference modules, and partial wiring. |
+| [03-guidance-reference.md](03-guidance-reference.md) | Guidance, handover material, reference corpora, learning assets, missing guidance targets, stale continuity statements, and inventory-navigation gaps. |
+| [04-standalone-tools.md](04-standalone-tools.md) | All 77 tracked scripts, incorporated launch tools, package-root verifiers, and expected non-runtime test material. |
 
 ## Snapshot Counts
 
 | Measure | Count | Interpretation |
 |---|---:|---|
-| Tracked files | 1,989 | Files known to Git. |
-| Commits ahead of local `main` | 14 | The current branch has not been merged into local `main`. |
-| Branch-only change records vs `main...HEAD` | 47 | Includes additions, modifications, deletions, and rename records. |
-| Unstaged modified files | 49 | Existing tracked files with local changes. |
-| Untracked, non-ignored files | 20 | Local files not yet known to Git. |
-| Ignored files reported by Git | 36,710 | Dominated by test, type-check, bytecode, dependency, and build caches. |
-| Actionable ignored source files after excluding caches/build output | 1 | `netlify/lib/drawing-proxy.cjs`. |
-| Legacy `src/bridge_gad` files | 45 | Retained legacy surface, fenced from the Suite container contract. |
-| Test-only `bridgecad_draw/sheets` scaffold files | 12 | Not used by the production booklet manifest. |
-| Docstring-only placeholder modules | 9 | Advertised capabilities without implementation. |
+| Tracked files | 2,005 | Files known to Git at `c428656`. |
+| Commits ahead of local `main` | 21 | Branch changes are not yet merged into local `main`. |
+| Branch-only change records vs `main...HEAD` | 187 | Includes additions, modifications, deletions, and rename records. |
+| Staged files | 0 | No index changes at baseline capture. |
+| Unstaged modified files | 11 | Five inventory reports plus six source/manifest edits from the entry-point refactor. |
+| Untracked, non-ignored files | 2 | Two new wired modules (`drawing_audit.py`, `worker_jobs.py`) awaiting initial Git incorporation. |
+| Ignored files reported by Git | tens of thousands | Dominated by test, type-check, bytecode, dependency, and build caches. |
+| Actionable ignored source/guidance files after filtering | 0 | The Netlify helper exception is committed; remaining ignored files are regenerable. |
+| Tracked scripts under `scripts/` | 77 | Includes five legacy scripts and two active launch scripts. |
 | Tracked test files | 199 | Intentional non-runtime verification material. |
 | Tracked `EXAMPLES/` files | 802 | Generated exemplar corpus; not production imports. |
+| Legacy `src/bridge_gad` files | 45 | Retained legacy surface, fenced from the Suite container contract. |
+| Test-only `bridgecad_draw/sheets` scaffold files | 12 | Not used by the production booklet manifest. |
+| Docstring-only capability placeholders | 8 | Advertised capabilities without implementation. |
+| Implemented zero-production-reference modules | 7 | Four WIRE and three PLUGIN-PROMOTE decisions. |
 
-The counts above describe the repository before these five inventory reports were created.
+These counts describe the working tree at `c428656` plus the uncommitted change set.
 
-### Post-snapshot Working-tree Updates
+## Resolved Since the Previous Inventory
 
-- `netlify/lib/drawing-proxy.cjs` is no longer ignored and is now visible as untracked source.
-- `packages/bridgecad-infra/bridgecad_infra/queue.py` now implements `run_worker` and three ARQ jobs.
-- `Makefile` now exposes `make worker`.
-- The seven zero-production-reference modules now have explicit WIRE / PLUGIN-PROMOTE decisions in [02-runtime-wiring.md](02-runtime-wiring.md#6-implemented-but-not-connected-to-an-active-application-route).
-- Ten untracked live-drafting browser captures were deleted as regenerable duplicates; future captures under `artifacts/browser-results/live-drafting-*` are ignored.
+| Former issue | Current state |
+|---|---|
+| `netlify/lib/drawing-proxy.cjs` was hidden by the broad `lib/` ignore rule. | Narrow ignore exceptions are committed; the helper is tracked and required by four Netlify functions. |
+| Docker Compose called a missing `bridgecad_infra.queue.run_worker`. | `queue.py` implements `run_worker` and three ARQ jobs; `make worker` is present. |
+| Live drafting sources and launch scripts were untracked. | `DraftingStudio.tsx`, geometry, CSS, tests, `deck_joints.py`, and both launch scripts are tracked and wired. |
+| Ten transient live-drafting browser captures created status noise. | They were deleted as regenerable duplicates; future matching captures are ignored. |
+| Seven implemented modules had no explicit disposition. | Decisions are recorded in [02-runtime-wiring.md](02-runtime-wiring.md#7-implemented-but-not-connected-to-an-active-application-route): 4 WIRE, 3 PLUGIN-PROMOTE, 0 ARCHIVE. |
 
 ## Main Entrypoints Used for Reachability
 
@@ -63,43 +76,46 @@ The counts above describe the repository before these five inventory reports wer
 | Root frontend routes | `#drafting`, `#workspace`, default workflow landing | Active hash-routed application. |
 | Node server | `server/index.mjs` | Serves `frontend/dist` and proxies `/api/*`. |
 | Netlify functions | `netlify/functions/*.js` | Active serverless API surface. |
-| FastAPI gateway | `apps/api-gateway/bridgecad_api/main.py` | Active Python API. |
+| FastAPI gateway | `apps/api-gateway/bridgecad_api/main.py` | Active Python API; auth and lifespan gaps remain. |
 | Python CLI facade | `bridgecad/__main__.py` | Active `bridgecad` command. |
 | Streamlit console | `apps/streamlit-ui/app.py` | Active through `make ui` and README quick start. |
 | React console | `apps/web-console/src/main.tsx` | Separate active product surface with its own build, CI, Docker image, and `make web` target. |
 | Vercel static entrypoint | `public/index.html` | Active alternate entrypoint through `vercel.json`. |
-| Docker Compose worker | `docker-compose.yml` → `bridgecad_infra.queue.run_worker` | Active in the working tree; `run_worker` and `make worker` are implemented. |
+| Docker Compose worker | `docker-compose.yml` → `bridgecad_infra.queue.run_worker` | Implemented and tracked; Redis-backed smoke remains pending in a compliant environment. |
 
 `apps/web-console` and `public/index.html` are therefore **not** orphaned merely because they differ from the root Netlify entrypoint.
 
-## Highest-Priority Findings
+## Current Action Backlog
 
 | Priority | Finding | Evidence | Recommended action |
 |---|---|---|---|
-| P0 | A required production Netlify helper was ignored. | `netlify/lib/drawing-proxy.cjs` is required by four functions; the broad `lib/` rule previously hid it. | **Resolved in the working tree:** narrow ignore exceptions added. Commit the helper with its callers and verify a clean-checkout Netlify build. |
-| P0 | Docker Compose called a missing worker function. | `docker-compose.yml:95` imports `run_worker`; `queue.py` was previously a docstring-only stub. | **Resolved in the working tree:** worker implementation and `make worker` added. Run against Redis in CI/Compose, then commit. |
-| P1 | Live drafting code is wired locally but absent from Git. | `main.tsx` imports `DraftingStudio`; geometry, CSS, tests, `deck_joints.py`, and launch scripts are also locally connected but untracked. | Commit the complete feature set together, then run the launch check from a clean checkout. |
-| P1 | A large amount of active work is not incorporated. | 14 commits ahead of `main`, 47 branch-only change records, 49 unstaged modifications, and 20 untracked files. | Review and land in coherent groups; do not treat all of these as runtime orphans. |
-| P1 | Deployment documentation promises API-key auth that the gateway does not call. | `docs/DEPLOYMENT.md` lists `BRIDGECAD_API_KEYS`; no `verify_api_key`, `require_role`, or `ApiKey` use was found in the gateway. | Wire authentication before production or correct the deployment contract. |
-| P1 | Several guidance links point to absent files. | Active Streamlit copy references `GUIDE.md`, `docs/USER-MANUAL.md`, and `docs/PWD_ENRICHMENT_GUIDE.md`; triage guidance references two absent documents. | Restore, replace, or remove each reference and add a documentation-link check. |
-| P2 | Nine modules are placeholders despite being exported or facade-loaded. | Infra, export, QA, plugins, bill, and draw modules contain only milestone docstrings. | Implement, explicitly mark unsupported, or remove from public discovery. |
-| P2 | Legacy code is retained but outside the main Suite contract. | `Dockerfile` explicitly fences `src/bridge_gad`; ADR-0002 preserves legacy entrypoints. | Keep as legacy until feature parity is decided; do not silently merge it into the active facade. |
-| P2 | The enhancement queue is empty, but the continuity log still describes queued guides. | `RELEASE_REPORT.md` records three deleted guides; `CREAT.MD` still says guides are in `CODE-JUNCTION`. | Update the rolling continuity log to match the release report. |
-| P3 | The user-manual generator cannot regenerate its output. | `docs/build_manual.py` requires absent `docs/manual_template.md`; legacy GUI text references absent `build_manual.bat`. | Restore the source template/tooling or mark the PDF as an archival artifact. |
+| P1 | An uncommitted entry-point refactor is not yet in Git. | 2 untracked modules (`drawing_audit.py`, `worker_jobs.py`) and 6 refactor files across `core`, `draw`, `export`, and `infra`. | Review as one commit, `git add` the untracked and modified files together, and commit before merging the branch. |
+| P1 | The Phase 0 branch is not incorporated into `main`. | 21 commits ahead; 187 branch-only records. | Review and merge in coherent groups after open CI/release gates are green. |
+| P1 | Deployment configuration advertises API-key authentication that the gateway does not enforce. | `BRIDGECAD_API_KEYS` appears in deployment files; no gateway call to `verify_api_key`, `require_role`, or `ApiKey` was found. | Wire `bridgecad_infra.auth` into the gateway or correct the deployment contract before production. |
+| P1 | Gateway DB/cache/storage lifecycle is unimplemented. | `main.py` lifespan contains only `yield  # M8: init DB / cache / storage here`. | Implement lifecycle integration or explicitly document unsupported infrastructure. |
+| P1 | Guidance references are broken or stale. | Missing guides/manual sources, absent `README_RAJKUMAR.md`, and stale `CREAT.MD` queue statements. | Repair, replace, or retire each reference and add a documentation-link check. |
+| P2 | Eight capability modules are placeholders. | Infra, export, QA, plugins, bill, and draw modules contain only milestone docstrings. | Implement, mark unsupported, or remove from public discovery. |
+| P2 | Seven implemented modules have no production caller. | Four WIRE and three PLUGIN-PROMOTE decisions. | Wire the four core capabilities and promote the three optional adapters through discoverable plugins. |
+| P2 | Legacy and duplicate drawing surfaces need an explicit policy. | 45 legacy files and 12 test-only scaffold files remain referenced. | Retain as opt-in compatibility/test code, migrate selected capabilities, or archive with a record. |
+| P3 | The inventory reports are not in MkDocs navigation. | `mkdocs.yml` contains no `inventory/` entry. | Add an Inventory navigation section or document the reports as repository-local audit material. |
+| P3 | The user-manual generator cannot regenerate its output. | `docs/build_manual.py` requires absent `docs/manual_template.md`; legacy GUI text references absent `build_manual.bat`. | Restore source template/tooling or mark the PDF as archival. |
+| P3 | Standalone learning/demo surfaces are not linked from main navigation. | `learn.html` and `frontend/demo_pdf_button.html` have no root frontend navigation link. | Link deliberately, integrate, or archive with a documented route. |
 
 ## Recommended Incorporation Order
 
-1. **Land the resolved clean-clone fixes:** commit `netlify/lib/drawing-proxy.cjs`, the queue implementation, and the `make worker` target; verify from clean checkout/Compose.
-2. **Land live drafting as one feature:** drafting component, geometry, CSS, Python joint module, tests, launch scripts, and launch evidence.
-3. **Reconcile documentation with deployed behavior:** API auth, missing guides, manual generation, and stale `CREAT.MD` queue statements.
-4. **Merge the Phase 0 branch after its open CI/release gates are resolved.**
-5. **Decide placeholder policy:** implement M4–M8 features or stop advertising them as available.
-6. **Decide legacy policy:** retain as opt-in compatibility code, migrate selected capabilities, or archive with an explicit record.
-7. **Keep direct tools, tests, references, and generated exemplars out of the production import graph unless there is a concrete caller.**
+1. **Commit the in-flight change set first:** the two untracked modules plus the entry-point refactor (see [01-git-incorporation.md](01-git-incorporation.md#24-current-uncommitted-change-set-new-since-3110881)).
+2. **Review the 187-record branch diff by subsystem:** CI/governance, documentation, frontend/Netlify, Python packages, tools, legacy `src/bridge_gad`, and tests.
+3. **Close production behavior gaps:** API authentication and gateway lifespan initialization.
+4. **Repair guidance:** missing targets, stale `CREAT.MD`, manual generation, and inventory navigation.
+5. **Merge the Phase 0 branch after open CI/release gates are resolved.**
+6. **Decide placeholder policy:** implement M3–M8 features or stop advertising them as available.
+7. **Execute the seven zero-reference dispositions:** four WIRE and three PLUGIN-PROMOTE.
+8. **Decide legacy/scaffold policy:** retain as opt-in compatibility/test code, migrate selected capabilities, or archive explicitly.
+9. **Keep direct tools, tests, references, and generated exemplars out of the production import graph unless there is a concrete caller.**
 
 ## Scope and Confidence
 
 - **High confidence:** Git state, import statements, route entrypoints, Makefile/CI references, placeholder file contents, and explicit documentation statements.
-- **Static-analysis boundary:** “no production call site found” means no reference was found in the inspected application, CLI, deployment, frontend, and workspace configuration. It is not a proof that no external consumer imports a public Python API.
-- **Intentional exclusions:** routine tests, fixtures, generated drawings, example corpora, dependency locks, caches, bytecode, and build output are not treated as defects simply because production code does not import them.
-- **Working-tree changes:** the original inventory was documentation-only. Subsequent work implemented the worker, fixed the Netlify ignore rule, and removed transient browser captures; see the post-snapshot notes.
+- **Static-analysis boundary:** “no production call site found” means no reference was found in the inspected application, CLI, deployment, frontend, and workspace configuration. It is not proof that no external consumer imports a public Python API.
+- **Intentional exclusions:** routine tests, fixtures, generated drawings, example corpora, dependency locks, caches, bytecode, and build output are not defects merely because production code does not import them.
+- **Working-tree disclosure:** this refresh rewrites only `docs/inventory/README.md` and reports 01–04, which remain uncommitted until separately reviewed. The reports also describe the wider uncommitted change set (2 untracked modules and 6 refactor files) recorded in [01-git-incorporation.md](01-git-incorporation.md#24-current-uncommitted-change-set-new-since-3110881).

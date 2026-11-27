@@ -1,8 +1,10 @@
 # Standalone Tool and Verifier Inventory
 
-Snapshot: 26 November 2026 at `6ddf860`.
+Snapshot: 27 November 2026 at `c428656`.
 
 A script that is not imported by the application is not automatically unwired. Most files in this report are intended to be executed directly by developers, CI, release engineers, or acceptance workflows. The purpose of this inventory is to distinguish those intentional entrypoints from genuinely disconnected code.
+
+Current totals: **77 tracked scripts**, **zero untracked scripts**, five legacy scripts, and two active launch scripts. All are tracked on the current branch; the remaining Git action is merging the branch into `main`.
 
 ## 1. Tracked Scripts
 
@@ -19,79 +21,81 @@ A script that is not imported by the application is not automatically unwired. M
 | 9 | `scripts/bump_version_rc1.py` | Release/version tool. | Keep as direct release tool. |
 | 10 | `scripts/capture_release_baseline.py` | Phase 0 release evidence tool; branch-only addition. | Merge with baseline workflow/report. |
 | 11 | `scripts/check_boq_provenance.py` | Direct BOQ provenance check. | Keep as direct check. |
-| 12 | `scripts/check_checklists.py` | Direct checklist check. | Keep as direct check. |
-| 13 | `scripts/check_drafting_standard.py` | Direct drafting-standard check. | Keep as direct check. |
-| 14 | `scripts/check_notes.py` | Direct drawing-note check. | Keep as direct check. |
-| 15 | `scripts/check_pdfa.py` | Direct PDF/A check. | Keep as direct check. |
-| 16 | `scripts/check_perf_budgets.py` | Direct performance-budget check. | Keep as direct check. |
-| 17 | `scripts/check_text_heights.py` | Direct text-height check. | Keep as direct check. |
-| 18 | `scripts/check_traceability.py` | Direct traceability check. | Keep as direct check. |
-| 19 | `scripts/check_version_consistency.py` | Suite CI. | Keep; wired quality gate. |
-| 20 | `scripts/check_view_axes.py` | Makefile `lint`. | Keep; wired quality gate. |
-| 21 | `scripts/clear_stale_locks.py` | Direct maintenance tool. | Keep as operational tool. |
-| 22 | `scripts/create_repo_sample_catalogue.py` | Direct sample-catalogue generator. | Keep as direct tool. |
-| 23 | `scripts/dump_dxf_facts.py` | Direct DXF diagnostic tool. | Keep as diagnostic tool. |
-| 24 | `scripts/export_project_schema.py` | Interoperability CI schema check. | Keep; wired contract gate. |
-| 25 | `scripts/export_workflow_catalogue.py` | Direct workflow-catalogue generator. | Keep as direct tool. |
-| 26 | `scripts/fix_e2e_fixtures.py` | One-time/maintenance fixture migration tool. | Review for archival after fixtures stabilize. |
-| 27 | `scripts/freeze_golden.py` | Direct golden-baseline tool. | Keep as test tool. |
-| 28 | `scripts/gad_reference_overlay.py` | Direct reference-overlay generator. | Keep as reference tool. |
-| 29 | `scripts/gen_api_stubs.py` | Docs-deploy CI. | Keep; generated stubs are build output. |
-| 30 | `scripts/gen_changelog.py` | Direct release tool. | Keep as release tool. |
-| 31 | `scripts/generate_all_28_fixtures.py` | Direct fixture generator. | Keep as generation tool. |
-| 32 | `scripts/generate_all_pwd_gads.py` | PWD sweep CI and acceptance callers. | Keep; wired verification/generation tool. |
-| 33 | `scripts/generate_examples.py` | Direct example-corpus generator. | Keep as generation tool. |
-| 34 | `scripts/generate_random_drawings.py` | Direct random-corpus generator. | Keep as test-data tool. |
-| 35 | `scripts/generate_remaining.py` | Direct example-corpus completion tool. | Keep as generation tool. |
-| 36 | `scripts/generate_templates.py` | Direct template generator. | Keep as generation tool. |
-| 37 | `scripts/generate_test_corpus.py` | Direct test-corpus generator. | Keep as test-data tool. |
-| 38 | `scripts/intermediate_user_robot.py` | Makefile `robotic` target. | Keep; wired through developer workflow. |
-| 39 | `scripts/legacy/_enhance_elegant_pdf.py` | Legacy direct script. | Retain as legacy or archive after caller review. |
-| 40 | `scripts/legacy/_generate_11span_gad.py` | Legacy direct generator. | Retain as legacy/reference. |
-| 41 | `scripts/legacy/test_bridge_pdf.py` | Legacy manually invoked test. | Retain as opt-in legacy test. |
-| 42 | `scripts/legacy/test_robustness.py` | Legacy manually invoked test. | Retain as opt-in legacy test. |
-| 43 | `scripts/legacy/test_ultimate_app.py` | Explicit CI invocation. | Keep while legacy app remains supported. |
-| 44 | `scripts/lint_standards.py` | Direct standards lint tool. | Keep as direct check. |
-| 45 | `scripts/m0_scaffold_packages.py` | Historical one-time package scaffolder. | Keep only if needed to reproduce M0 setup; otherwise archive. |
-| 46 | `scripts/measure.sh` | Direct measurement shell tool. | Keep as direct tool. |
-| 47 | `scripts/parity_detail_sheets.py` | Direct detail-sheet parity audit. | Keep as direct verification tool. |
-| 48 | `scripts/pin_golden.py` | Direct golden-model pinning tool. | Keep as test tool. |
-| 49 | `scripts/promote_sheet.py` | Draw CI status/promotion tool. | Keep; wired workflow tool. |
-| 50 | `scripts/prove_draw_detection.py` | Makefile and Draw CI. | Keep; wired regression-proof tool. |
-| 51 | `scripts/rc1_smoke.py` | Makefile `smoke` and Suite CI. | Keep; active release gate. |
-| 52 | `scripts/refs_coverage.py` | Makefile and Draw CI. | Keep; active reference gate. |
-| 53 | `scripts/refs_extract.py` | Makefile and Draw CI. | Keep; active reference tool. |
-| 54 | `scripts/refs_lisp.py` | Direct LISP inventory/report tool. | Keep as reference tool. |
-| 55 | `scripts/refs_verify.py` | Makefile reference targets. | Keep; active reference tool. |
-| 56 | `scripts/regression_test_suite.py` | Direct regression runner. | Keep as direct test tool. |
-| 57 | `scripts/release_gate.py` | Direct release gate. | Keep as release tool. |
-| 58 | `scripts/render_asset_pack.py` | Direct asset-pack renderer. | Keep as generation tool. |
-| 59 | `scripts/robot/gate.py` | Makefile gates/robot-full and merge-gate logic. | Keep; active governance gate. |
-| 60 | `scripts/robot/personas.py` | Support module imported by robot runner. | Keep as supporting code, not standalone entrypoint. |
-| 61 | `scripts/robot/run_robot.py` | Makefile and Robot CI. | Keep; active UI verification tool. |
-| 62 | `scripts/robot/triage.py` | Makefile and Robot CI. | Keep; active defect-ingestion tool. |
-| 63 | `scripts/robotic_sheet_detail_audit.py` | Sheet-detail CI. | Keep; active drawing audit tool. |
-| 64 | `scripts/robotic_smoke.py` | Makefile, Suite CI, and green-stack. | Keep; active smoke tool. |
-| 65 | `scripts/robotic_test_harness.py` | CI workflow. | Keep; active test harness. |
-| 66 | `scripts/robotic_test_viaduct.py` | Direct end-to-end robotic verification. | Keep as direct verification tool. |
-| 67 | `scripts/scaffold_plugin.py` | Direct plugin scaffolder. | Keep as developer tool. |
-| 68 | `scripts/scaffold_sheet.py` | Direct sheet scaffolder. | Keep as developer tool. |
-| 69 | `scripts/simple_pdf_test.py` | Direct PDF smoke test. | Keep or fold into the main smoke suite. |
-| 70 | `scripts/sitecustomize.py` | Source-checkout startup hook used through `PYTHONPATH`/launchers. | Keep; it is intentionally not imported as a normal runtime module. |
-| 71 | `scripts/sync_labels.py` | Makefile and Labels CI. | Keep; active repository-maintenance tool. |
-| 72 | `scripts/test_deployed_app.py` | Direct deployed-app test. | Keep as deployment verification tool. |
-| 73 | `scripts/test_netlify_readiness.py` | CI and unstaged launch work. | Commit current changes with Netlify proxy work. |
-| 74 | `scripts/verify_wiring.py` | Direct wiring verifier. | Keep as architecture/verification tool. |
-| 75 | `scripts/wing_report.py` | Makefile and Draw CI. | Keep; active drawing-report tool. |
+| 12 | `scripts/check_browser_drafting.py` | Active launch dependency; branch-only addition. | Merge with launch checker and browser tests. |
+| 13 | `scripts/check_checklists.py` | Direct checklist check. | Keep as direct check. |
+| 14 | `scripts/check_drafting_standard.py` | Direct drafting-standard check. | Keep as direct check. |
+| 15 | `scripts/check_notes.py` | Direct drawing-note check. | Keep as direct check. |
+| 16 | `scripts/check_pdfa.py` | Direct PDF/A check. | Keep as direct check. |
+| 17 | `scripts/check_perf_budgets.py` | Direct performance-budget check. | Keep as direct check. |
+| 18 | `scripts/check_software_launch.py` | Active documented release gate; branch-only addition. | Merge with all source/test dependencies. |
+| 19 | `scripts/check_text_heights.py` | Direct text-height check. | Keep as direct check. |
+| 20 | `scripts/check_traceability.py` | Direct traceability check. | Keep as direct check. |
+| 21 | `scripts/check_version_consistency.py` | Suite CI. | Keep; wired quality gate. |
+| 22 | `scripts/check_view_axes.py` | Makefile `lint`. | Keep; wired quality gate. |
+| 23 | `scripts/clear_stale_locks.py` | Direct maintenance tool. | Keep as operational tool. |
+| 24 | `scripts/create_repo_sample_catalogue.py` | Direct sample-catalogue generator. | Keep as direct tool. |
+| 25 | `scripts/dump_dxf_facts.py` | Direct DXF diagnostic tool. | Keep as diagnostic tool. |
+| 26 | `scripts/export_project_schema.py` | Interoperability CI schema check. | Keep; wired contract gate. |
+| 27 | `scripts/export_workflow_catalogue.py` | Direct workflow-catalogue generator. | Keep as direct tool. |
+| 28 | `scripts/fix_e2e_fixtures.py` | One-time/maintenance fixture migration tool. | Review for archival after fixtures stabilize. |
+| 29 | `scripts/freeze_golden.py` | Direct golden-baseline tool. | Keep as test tool. |
+| 30 | `scripts/gad_reference_overlay.py` | Direct reference-overlay generator. | Keep as reference tool. |
+| 31 | `scripts/gen_api_stubs.py` | Docs-deploy CI. | Keep; generated stubs are build output. |
+| 32 | `scripts/gen_changelog.py` | Direct release tool. | Keep as release tool. |
+| 33 | `scripts/generate_all_28_fixtures.py` | Direct fixture generator. | Keep as generation tool. |
+| 34 | `scripts/generate_all_pwd_gads.py` | PWD sweep CI and acceptance callers. | Keep; wired verification/generation tool. |
+| 35 | `scripts/generate_examples.py` | Direct example-corpus generator. | Keep as generation tool. |
+| 36 | `scripts/generate_random_drawings.py` | Direct random-corpus generator. | Keep as test-data tool. |
+| 37 | `scripts/generate_remaining.py` | Direct example-corpus completion tool. | Keep as generation tool. |
+| 38 | `scripts/generate_templates.py` | Direct template generator. | Keep as generation tool. |
+| 39 | `scripts/generate_test_corpus.py` | Direct test-corpus generator. | Keep as test-data tool. |
+| 40 | `scripts/intermediate_user_robot.py` | Makefile `robotic` target. | Keep; wired through developer workflow. |
+| 41 | `scripts/legacy/_enhance_elegant_pdf.py` | Legacy direct script. | Retain as legacy or archive after caller review. |
+| 42 | `scripts/legacy/_generate_11span_gad.py` | Legacy direct generator. | Retain as legacy/reference. |
+| 43 | `scripts/legacy/test_bridge_pdf.py` | Legacy manually invoked test. | Retain as opt-in legacy test. |
+| 44 | `scripts/legacy/test_robustness.py` | Legacy manually invoked test. | Retain as opt-in legacy test. |
+| 45 | `scripts/legacy/test_ultimate_app.py` | Explicit CI invocation. | Keep while legacy app remains supported. |
+| 46 | `scripts/lint_standards.py` | Direct standards lint tool. | Keep as direct check. |
+| 47 | `scripts/m0_scaffold_packages.py` | Historical one-time package scaffolder. | Keep only if needed to reproduce M0 setup; otherwise archive. |
+| 48 | `scripts/measure.sh` | Direct measurement shell tool. | Keep as direct tool. |
+| 49 | `scripts/parity_detail_sheets.py` | Direct detail-sheet parity audit. | Keep as direct verification tool. |
+| 50 | `scripts/pin_golden.py` | Direct golden-model pinning tool. | Keep as test tool. |
+| 51 | `scripts/promote_sheet.py` | Draw CI status/promotion tool. | Keep; wired workflow tool. |
+| 52 | `scripts/prove_draw_detection.py` | Makefile and Draw CI. | Keep; wired regression-proof tool. |
+| 53 | `scripts/rc1_smoke.py` | Makefile `smoke` and Suite CI. | Keep; active release gate. |
+| 54 | `scripts/refs_coverage.py` | Makefile and Draw CI. | Keep; active reference gate. |
+| 55 | `scripts/refs_extract.py` | Makefile and Draw CI. | Keep; active reference tool. |
+| 56 | `scripts/refs_lisp.py` | Direct LISP inventory/report tool. | Keep as reference tool. |
+| 57 | `scripts/refs_verify.py` | Makefile reference targets. | Keep; active reference tool. |
+| 58 | `scripts/regression_test_suite.py` | Direct regression runner. | Keep as direct test tool. |
+| 59 | `scripts/release_gate.py` | Direct release gate. | Keep as release tool. |
+| 60 | `scripts/render_asset_pack.py` | Direct asset-pack renderer. | Keep as generation tool. |
+| 61 | `scripts/robot/gate.py` | Makefile gates/robot-full and merge-gate logic. | Keep; active governance gate. |
+| 62 | `scripts/robot/personas.py` | Support module imported by robot runner. | Keep as supporting code, not standalone entrypoint. |
+| 63 | `scripts/robot/run_robot.py` | Makefile and Robot CI. | Keep; active UI verification tool. |
+| 64 | `scripts/robot/triage.py` | Makefile and Robot CI. | Keep; active defect-ingestion tool. |
+| 65 | `scripts/robotic_sheet_detail_audit.py` | Sheet-detail CI. | Keep; active drawing audit tool. |
+| 66 | `scripts/robotic_smoke.py` | Makefile, Suite CI, and green-stack. | Keep; active smoke tool. |
+| 67 | `scripts/robotic_test_harness.py` | CI workflow. | Keep; active test harness. |
+| 68 | `scripts/robotic_test_viaduct.py` | Direct end-to-end robotic verification. | Keep as direct verification tool. |
+| 69 | `scripts/scaffold_plugin.py` | Direct plugin scaffolder. | Keep as developer tool. |
+| 70 | `scripts/scaffold_sheet.py` | Direct sheet scaffolder. | Keep as developer tool. |
+| 71 | `scripts/simple_pdf_test.py` | Direct PDF smoke test. | Keep or fold into the main smoke suite. |
+| 72 | `scripts/sitecustomize.py` | Source-checkout startup hook used through `PYTHONPATH`/launchers. | Keep; intentionally not imported as a normal runtime module. |
+| 73 | `scripts/sync_labels.py` | Makefile and Labels CI. | Keep; active repository-maintenance tool. |
+| 74 | `scripts/test_deployed_app.py` | Direct deployed-app test. | Keep as deployment verification tool. |
+| 75 | `scripts/test_netlify_readiness.py` | CI and launch verification. | Merge current branch changes with Netlify proxy work. |
+| 76 | `scripts/verify_wiring.py` | Direct wiring verifier. | Keep as architecture/verification tool. |
+| 77 | `scripts/wing_report.py` | Makefile and Draw CI. | Keep; active drawing-report tool. |
 
-## 2. Untracked but Active Launch Scripts
+## 2. Incorporated Active Launch Scripts
 
-| Script | Wiring | Recommended action |
+These two scripts were previously untracked. They are now tracked on the branch and stronger than ordinary direct tools because they are part of the documented release workflow.
+
+| Script | Current wiring | Remaining action |
 |---|---|---|
-| `scripts/check_browser_drafting.py` | Invoked by `scripts/check_software_launch.py`. | Commit with the launch checker and browser tests. |
-| `scripts/check_software_launch.py` | README, deployment docs, launch report, and Suite CI. | Commit with every source/test dependency required by the command. |
-
-These are stronger than ordinary direct tools: they are already part of the documented release workflow but absent from Git.
+| `scripts/check_browser_drafting.py` | Invoked by `scripts/check_software_launch.py`. | Merge with the launch checker and browser tests. |
+| `scripts/check_software_launch.py` | Referenced by README, deployment docs, launch report, and Suite CI. | Merge with every source/test dependency required by the command. |
 
 ## 3. Package-root Verifiers
 
@@ -119,12 +123,12 @@ These files sit outside their importable package directories by design. `pyproje
 | `artifacts/gad-acceptance/_gen_nine_span.py` | Direct acceptance generator; referenced by production generator comments and acceptance evidence. | Keep as a direct verification tool, not an application import. |
 | `docs/build_manual.py` | Standalone manual generator; blocked by missing `docs/manual_template.md`. | Restore source/tooling or retire with the archival PDF. |
 | `docs/api/conf.py` | Sphinx configuration, not runtime code. | Keep with API docs. |
-| `frontend/demo_pdf_button.html` | Standalone demo page. | Link, integrate, or archive; see [02-runtime-wiring.md](02-runtime-wiring.md). |
-| `learn.html` | Standalone learning page. | Link or document static route; see [02-runtime-wiring.md](02-runtime-wiring.md). |
+| `frontend/demo_pdf_button.html` | Standalone demo page. | Link, integrate, or archive; see [02-runtime-wiring.md](02-runtime-wiring.md#9-standalone-pages-and-unlinked-assets). |
+| `learn.html` | Standalone learning page. | Link or document static route; see [02-runtime-wiring.md](02-runtime-wiring.md#9-standalone-pages-and-unlinked-assets). |
 
 ## 5. Expected Non-runtime Test Material
 
-The repository tracks 199 test files. They are not production imports and should not be reported as orphan code.
+The repository tracks 199 test files in total: 197 under `tests/` and two at the root. They are not production imports and should not be reported as orphan code.
 
 | Test area | Tracked files |
 |---|---:|
@@ -160,4 +164,4 @@ Use these labels when a new script is added:
 5. **Legacy:** retained for compatibility; must be visibly separated from active entrypoints.
 6. **Historical scaffold/migration:** one-time setup or migration code; archive when no longer reproducible or needed.
 
-A script belongs in the incorporation backlog only if it is untracked/ignored, required by an active caller, documented as the canonical entrypoint, or intended for continued use but disconnected from every workflow.
+A script belongs in the incorporation backlog only if it is untracked/ignored, required by an active caller, documented as the canonical entrypoint but missing from Git, or intended for continued use but disconnected from every workflow.

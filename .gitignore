@@ -147,6 +147,10 @@ apps/web-console/audit_wc.json
 .deps/
 vendor/
 
+# Local Playwright browser bundle (installed via PLAYWRIGHT_BROWSERS_PATH). Large
+# regenerable binary download used by the browser checks — never commit.
+.playwright-browsers/
+
 site-wing/
 wing-report.json
 

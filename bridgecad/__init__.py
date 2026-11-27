@@ -43,6 +43,7 @@ between "workstation script" → "installed docker image".
 from __future__ import annotations
 
 import importlib
+import os
 from typing import TYPE_CHECKING, Any
 
 # ---------------------------------------------------------------------------
@@ -80,6 +81,11 @@ def ensure_workspace() -> None:
     if prepend:
         sys.path[:0] = prepend
 
+    if os.environ.get("BRIDGECAD_LAYOUT_AUDIT") and (root / "packages/bridgecad-draw").is_dir():
+        from bridgecad_core.drawing_audit import layout_audit_requested
+
+        if layout_audit_requested():
+            importlib.import_module("bridgecad_draw.layout_audit")
 
 ensure_workspace()
 

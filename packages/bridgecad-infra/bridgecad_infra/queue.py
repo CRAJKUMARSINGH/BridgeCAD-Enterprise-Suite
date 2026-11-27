@@ -7,15 +7,12 @@ base64 so callers never depend on a worker-local temporary path.
 from __future__ import annotations
 
 import asyncio
-import base64
-import io
 import logging
 import os
-import re
-import tempfile
-import zipfile
-from pathlib import Path
-from typing import Any, ClassVar
+from collections.abc import Callable
+from functools import cache
+from importlib.metadata import entry_points
+from typing import Any, ClassVar, cast
 
 logger = logging.getLogger(__name__)
 
@@ -40,127 +37,13 @@ def _redis_url() -> str:
     )
 
 
-def _safe_prefix(prefix: str) -> str:
-    if not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", prefix):
-        raise ValueError("prefix must be 1-64 letters, digits, underscores, or hyphens")
-    return prefix
-
-
-def _load_project(project_data: dict[str, Any]) -> Any:
-    from bridgecad_io.json_adapter import project_from_dict
-
-    return project_from_dict(project_data)
-
-
-def _zip_bytes(paths: list[Path]) -> bytes:
-    if not paths:
-        raise ValueError("job produced no files")
-    buffer = io.BytesIO()
-    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
-        for path in paths:
-            archive.write(path, path.name)
-    return buffer.getvalue()
-
-
-def _artifact(payload: bytes, filename: str, output_format: str, **metadata: Any) -> dict[str, Any]:
-    return {
-        "success": True,
-        "filename": filename,
-        "output_format": output_format,
-        "output_b64": base64.b64encode(payload).decode("ascii"),
-        **metadata,
-    }
-
-
-def _generate_drawing(
-    project_data: dict[str, Any],
-    prefix: str,
-    scale_denom: int | None,
-    output_format: str,
-) -> dict[str, Any]:
-    from bridgecad_draw.booklet import generate_package
-
-    prefix = _safe_prefix(prefix)
-    if scale_denom is not None and scale_denom <= 0:
-        raise ValueError("scale_denom must be positive")
-    project = _load_project(project_data)
-    output_format = output_format.lower()
-
-    with tempfile.TemporaryDirectory() as tmp:
-        root = Path(tmp)
-        if output_format == "dxf":
-            sheets = generate_package(project, root / "dxf", prefix=prefix, scale_denom=scale_denom)
-            return _artifact(
-                _zip_bytes(sheets),
-                f"{prefix}_drawings.zip",
-                "zip",
-                sheet_count=len(sheets),
-            )
-        if output_format == "pdf":
-            from bridgecad_draw.engines.pdf_engine import generate_pdf_booklet
-
-            sheets = generate_package(project, root / "dxf", prefix=prefix, scale_denom=scale_denom)
-            pdf = generate_pdf_booklet(sheets, root / f"{prefix}_booklet.pdf")
-            return _artifact(
-                pdf.read_bytes(),
-                pdf.name,
-                "pdf",
-                sheet_count=len(sheets),
-            )
-        if output_format == "png":
-            from bridgecad_draw.engines.png_engine import render_png
-            from bridgecad_draw.sheet1_plan import generate
-
-            dxf = generate(project, root / f"{prefix}_plan.dxf", scale_denom=scale_denom)
-            png = render_png(dxf, root / f"{prefix}_plan.png")
-            return _artifact(png.read_bytes(), png.name, "png")
-        raise ValueError(f"unsupported drawing output_format: {output_format!r}")
-
-
-def _generate_bill(
-    project_data: dict[str, Any],
-    prefix: str,
-    state: str | None,
-) -> dict[str, Any]:
-    from bridgecad_bill.formatters.excel_formatter import format_excel
-    from bridgecad_bill.processor import extract_and_price
-
-    prefix = _safe_prefix(prefix)
-    project = _load_project(project_data)
-    boq = extract_and_price(project, state=state)
-    with tempfile.TemporaryDirectory() as tmp:
-        workbook = format_excel(boq, Path(tmp) / f"{prefix}_BOQ.xlsx")
-        return _artifact(
-            workbook.read_bytes(),
-            workbook.name,
-            "xlsx",
-            grand_total_inr=str(boq.grand_total),
-        )
-
-
-def _export_package(
-    project_data: dict[str, Any],
-    prefix: str,
-    state: str | None,
-    scale_denom: int | None,
-    allow_fail: bool,
-) -> dict[str, Any]:
-    from bridgecad_export.orchestrator import export_all
-
-    prefix = _safe_prefix(prefix)
-    if scale_denom is not None and scale_denom <= 0:
-        raise ValueError("scale_denom must be positive")
-    project = _load_project(project_data)
-    with tempfile.TemporaryDirectory() as tmp:
-        bundle = export_all(
-            project,
-            Path(tmp),
-            prefix=prefix,
-            state=state,
-            scale_denom=scale_denom,
-            allow_fail=allow_fail,
-        )
-        return _artifact(bundle.read_bytes(), bundle.name, "zip")
+@cache
+def _load_job(name: str) -> Callable[..., dict[str, Any]]:
+    """Resolve a job supplied by the installed export package."""
+    provider = next(iter(entry_points(group="bridgecad.worker_jobs", name=name)), None)
+    if provider is None:
+        raise RuntimeError(f"Worker job {name!r} is unavailable. Install bridgecad-export.")
+    return cast(Callable[..., dict[str, Any]], provider.load())
 
 
 async def generate_drawing_job(
@@ -172,7 +55,7 @@ async def generate_drawing_job(
 ) -> dict[str, Any]:
     """Generate a DXF ZIP, PDF booklet, or plan PNG from project JSON."""
     return await asyncio.to_thread(
-        _generate_drawing, project_data, prefix, scale_denom, output_format
+        _load_job("drawing"), project_data, prefix, scale_denom, output_format
     )
 
 
@@ -183,7 +66,7 @@ async def generate_bill_job(
     state: str | None = None,
 ) -> dict[str, Any]:
     """Generate a priced BOQ workbook from project JSON."""
-    return await asyncio.to_thread(_generate_bill, project_data, prefix, state)
+    return await asyncio.to_thread(_load_job("bill"), project_data, prefix, state)
 
 
 async def export_package_job(
@@ -196,7 +79,7 @@ async def export_package_job(
 ) -> dict[str, Any]:
     """Generate the full DXF + BOQ + QA export bundle from project JSON."""
     return await asyncio.to_thread(
-        _export_package, project_data, prefix, state, scale_denom, allow_fail
+        _load_job("package"), project_data, prefix, state, scale_denom, allow_fail
     )
 
 

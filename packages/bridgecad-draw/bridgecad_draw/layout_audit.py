@@ -22,11 +22,15 @@ pay for one render between them.
 from __future__ import annotations
 
 import math
-import os
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
+
+from bridgecad_core.drawing_audit import layout_audit_requested, register_layout_auditor
+
+from .fit import LADDER as _SCALE_LADDER
+from .layers import LAYER_REGISTRY
 
 __all__ = [
     "BBox",
@@ -37,10 +41,6 @@ __all__ = [
     "set_enabled",
 ]
 
-#: Environment switch — the CI/booklet gate sets this; interactive runs leave it
-#: unset so a validation sweep does not render 135 sheets to answer six rows.
-_ENV_FLAG = "BRIDGECAD_LAYOUT_AUDIT"
-
 #: ``None`` → follow the environment. ``True``/``False`` → explicit override,
 #: used by tests that must force the audit on without mutating the process env.
 _override: bool | None = None
@@ -49,11 +49,6 @@ _override: bool | None = None
 #: function of the object graph that produced it, and a rebuilt project is a
 #: different drawing.
 _CACHE: dict[int, LayoutAudit] = {}
-
-#: First rung of the scale ladder — kept in step with ``fit.LADDER``. Duplicated
-#: rather than imported so ``layout_audit`` stays importable when ``fit`` is
-#: mid-refactor; ``test_scale_ladder`` asserts the two agree.
-from .fit import LADDER as _SCALE_LADDER
 
 #: A1 landscape, matching ``titleblocks._SHEET_SIZES["A1"]``.
 _SHEET_W_MM = 841.0
@@ -74,7 +69,7 @@ def audit_enabled() -> bool:
     """True when a layout audit should actually render the package."""
     if _override is not None:
         return _override
-    return os.environ.get(_ENV_FLAG, "").strip().lower() in {"1", "true", "yes", "on"}
+    return layout_audit_requested()
 
 
 @dataclass(frozen=True)
@@ -230,6 +225,16 @@ class LayoutAudit:
     #: Entities on a drawing layer that intrude into a reserved zone.
     title_block_intrusions: list[str] = field(default_factory=list)
     notes_intrusions: list[str] = field(default_factory=list)
+
+    def invalid_scales(self) -> list[tuple[str, int]]:
+        return [
+            (sheet, denom)
+            for sheet, denom in self.printed_scales
+            if denom != 1 and not scale_on_ladder(denom)
+        ]
+
+    def unregistered_layers(self) -> list[str]:
+        return sorted(self.layers_drawn - LAYER_REGISTRY.keys() - {"0"})
 
 
 #: Layers that belong to the sheet furniture rather than to a view. An entity on
@@ -458,6 +463,9 @@ def _is_note_line(content: str) -> bool:
 def scale_on_ladder(denom: int) -> bool:
     """True when *denom* is a rung of the standard scale ladder (ISO 5455)."""
     return denom in _SCALE_LADDER
+
+
+register_layout_auditor(collect)
 
 
 #: Minimum legible text height on PAPER, millimetres.

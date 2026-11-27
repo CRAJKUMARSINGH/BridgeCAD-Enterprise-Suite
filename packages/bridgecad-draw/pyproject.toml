@@ -16,6 +16,9 @@ dependencies = [
   "bridgecad-core"
 ]
 
+[project.entry-points."bridgecad.layout_audit"]
+dxf = "bridgecad_draw.layout_audit:collect"
+
 [tool.setuptools.packages.find]
 # Discover the package *and* its subpackages (engines/, sheets/). An explicit
 # packages = ["bridgecad_draw"] list silently dropped them from the wheel, so an

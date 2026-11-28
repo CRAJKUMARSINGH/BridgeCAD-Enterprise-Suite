@@ -1,5 +1,5 @@
 .PHONY: help install dev lint format typecheck test cov test-e2e test-integration \
-        verify smoke robotic robot robot-full gates bench build clean docker-up \
+        verify smoke robotic robot robot-full gates bench build clean clean-select docker-up \
         docker-down api ui web worker \
         refs-extract refs-check refs-coverage refs-verify refs-verify-crops \
         drawing-standards green-stack hooks hooks-check
@@ -98,9 +98,11 @@ docker-down:
 build:           ## Build distributions
 	python -m build
 
-clean:
-	rm -rf build dist *.egg-info .pytest_cache .mypy_cache .ruff_cache
-	find . -name __pycache__ -type d -prune -exec rm -rf {} +
+clean:           ## Remove regenerable artifacts — all categories, or SKIP=/ONLY= to select
+	python scripts/clean.py --yes $(if $(ONLY),--only $(ONLY)) $(if $(SKIP),--skip $(SKIP))
+
+clean-select:    ## Interactive cleaner — untick categories to skip them
+	python scripts/clean.py
 
 labels:          ## Create or update repo labels (needs gh, authenticated)
 	python scripts/sync_labels.py

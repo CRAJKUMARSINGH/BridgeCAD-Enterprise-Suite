@@ -65,6 +65,46 @@ streamlit run apps/streamlit-ui/app.py
 python -m pytest -q tests/draw
 ```
 
+## 🧹 Cleaning the workspace
+
+`scripts/clean.py` removes only regenerable artifacts — build output, caches,
+test dumps and stale git locks. It **never stops running processes**: browsers,
+AI tools, editors and `git` keep running, and protected paths (`.git`,
+`.env*`, `ATTACHED ASSETS/`, `CODE-JUNCTION/`, `.playwright-browsers/`) are
+always refused.
+
+Every category is selectable — untick what you want to keep:
+
+```bash
+make clean-select                  # interactive picker — enter numbers to exclude
+make clean                         # everything, non-interactive
+make clean SKIP=pytest,mypy        # everything except these categories
+make clean ONLY=dist,pycache       # only these categories
+python scripts/clean.py --dry-run  # preview without deleting
+python scripts/clean.py --list     # show all categories
+```
+
+| Category | Cleans |
+|---|---|
+| `dist` | `build/`, `dist/`, `*.egg-info/` |
+| `pycache` | all `__pycache__/` outside dependency trees |
+| `pytest` `mypy` `ruff` `hypothesis` | tool caches |
+| `coverage` | `.coverage`, `coverage.xml`, `htmlcov/` |
+| `robot-artifacts` | `artifacts/robot/`, `artifacts/browser_check/`, `.screenshots/` |
+| `draw-baselines` | `tests/draw/baselines/*.hash` |
+| `node-modules` | `node_modules/` trees |
+| `os-temp` | temp-dir files older than 7 days |
+| `ide-caches` | cache dirs inside `%APPDATA%` of Antigravity IDE, Cursor, Kiro, Qoder, Replit, Trae, devin, Windsurf — settings/sign-ins never touched |
+| `git-locks` | stale `.git/*.lock` files |
+
+📊 **Run statistics:** each clean records pre/post free space, bytes freed,
+paths removed and duration to `~/.bridgecad/clean_stats.json` on the local
+machine. Every **50th run** prints a full statistics report automatically —
+`python scripts/clean.py --stats` shows it anytime.
+
+See [OBJECTIVES.md](OBJECTIVES.md) for the full objective book of every
+cleaning script and target.
+
 ## Drawing review
 
 ```bash

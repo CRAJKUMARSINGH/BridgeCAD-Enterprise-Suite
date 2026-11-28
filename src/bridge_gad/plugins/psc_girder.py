@@ -1,6 +1,7 @@
 from bridge_gad.plugins import PluginBase
 from tkinter import messagebox
 
+
 class PSCGirderPlugin(PluginBase):
     name = "PSC Girder Design"
     version = "1.0.0"

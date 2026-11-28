@@ -42,13 +42,15 @@ def _normals(pts: list[Pt]) -> list[Pt]:
 
 def offset(pts: list[Pt], dist: float) -> list[Pt]:
     """Offset along station normals — constant ring thickness, no mitre blow-ups."""
-    return [(x + nx * dist, y + ny * dist) for (x, y), (nx, ny) in zip(pts, _normals(pts))]
+    return [
+        (x + nx * dist, y + ny * dist) for (x, y), (nx, ny) in zip(pts, _normals(pts), strict=False)
+    ]
 
 
 def ring_outline(soffit: list[Pt], thickness_m: float) -> list[Pt]:
     """Closed ring: intrados, up the end face, extrados reversed, down the other end."""
     extrados = offset(soffit, thickness_m)
-    return soffit + [extrados[-1]] + list(reversed(extrados)) + [soffit[0]]
+    return [*soffit, extrados[-1], *list(reversed(extrados)), soffit[0]]
 
 
 def rib_stations(soffit: list[Pt], rib_m: float = RIB_SPACING_M) -> list[Pt]:
@@ -74,7 +76,4 @@ def parabola_deviation(schedule_mm: list[tuple[int, int]]) -> float:
     "how far the printed table departs from a true parabola" the sheet prints.
     """
     apex_x, apex_y = max(schedule_mm, key=lambda p: p[1])
-    return max(
-        abs((apex_y - y) - PARABOLA_A * (x - apex_x) ** 2 / 1000.0)
-        for x, y in schedule_mm
-    )
+    return max(abs((apex_y - y) - PARABOLA_A * (x - apex_x) ** 2 / 1000.0) for x, y in schedule_mm)

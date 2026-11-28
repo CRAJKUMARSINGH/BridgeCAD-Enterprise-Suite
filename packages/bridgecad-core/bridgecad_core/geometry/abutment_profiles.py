@@ -12,13 +12,14 @@ level (0) to road level (1). Callers scale to sheet mm.
 
 from __future__ import annotations
 
-from typing import Any
 import math
+from typing import Any
 
 __all__ = [
     "Family",
     "family_for",
     "elevation_outline",
+    "longitudinal_outline",
     "battered_side_outline",
     "BatteredSide",
 ]
@@ -82,6 +83,28 @@ def elevation_outline(
     return [(0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (0.0, 0.0)]
 
 
+def longitudinal_outline(family: Family) -> list[tuple[float, float]]:
+    """Schematic section within the abutment envelope, river to approach.
+
+    x runs from the river-side edge (0) to the approach-side edge (1), and
+    y runs from base to top. Mirror x at A1. The proportions are symbolic.
+    """
+    if family == GRAVITY:
+        return [(0, 1), (0.60, 1), (1, 0), (0, 0)]
+    if family == CANTILEVER:
+        return [
+            (0.25, 1),
+            (0.60, 1),
+            (0.60, 0.18),
+            (1, 0.18),
+            (1, 0),
+            (0, 0),
+            (0, 0.18),
+            (0.25, 0.18),
+        ]
+    return [(0, 1), (1, 1), (1, 0), (0, 0)]
+
+
 # ── LISP abt1() battered side profile ──────────────────────────────────────
 # Faithful port of frontend/src/sheets/detailGeometry.js abutmentProfile().
 # This is the SIDE (longitudinal) profile: riverside face batter and earthside
@@ -135,7 +158,11 @@ def battered_side_outline(
     for name, value in (("front_break_h_m", front_break_h_m), ("back_break_h_m", back_break_h_m)):
         if not math.isfinite(value) or not 0 <= value <= stem_h:
             raise ValueError(f"{name} must be finite and between 0 and stem height")
-    for name, value in (("face_batter_1n", face_batter_1n), ("back_batter_1n", back_batter_1n), ("toe_batter_1n", toe_batter_1n)):
+    for name, value in (
+        ("face_batter_1n", face_batter_1n),
+        ("back_batter_1n", back_batter_1n),
+        ("toe_batter_1n", toe_batter_1n),
+    ):
         if not math.isfinite(value) or value <= 0:
             raise ValueError(f"{name} must be finite and positive")
     y_cap_bot = foot_d_m + stem_h  # cap soffit

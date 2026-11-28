@@ -368,9 +368,7 @@ def dim_linear_v(
     is emitted; the legacy lines and tick label are drawn only if ezdxf refuses
     the geometry.
     """
-    if _native_linear_dim(
-        msp, (x1, y1), (x2, y2), (dim_x, y1), 90.0, label, layer, text_height
-    ):
+    if _native_linear_dim(msp, (x1, y1), (x2, y2), (dim_x, y1), 90.0, label, layer, text_height):
         return None
     try:
         line(msp, (x1, y1), (dim_x, y1), layer=layer)
@@ -573,8 +571,11 @@ def scale_bar(
     """
     import math
 
-    for name, value in (("scale_denom", scale_denom), ("seg_len_m", seg_len_m),
-                        ("text_height", text_height)):
+    for name, value in (
+        ("scale_denom", scale_denom),
+        ("seg_len_m", seg_len_m),
+        ("text_height", text_height),
+    ):
         if isinstance(value, bool) or not math.isfinite(value) or value <= 0:
             raise ValueError(f"{name} must be finite and positive")
     if isinstance(segments, bool) or not isinstance(segments, int) or segments <= 0:
@@ -584,16 +585,36 @@ def scale_bar(
     rectangle(msp, x, y, total_paper_mm, text_height * 0.8, layer=layer)
     for i in range(segments):
         if i % 2 == 0:
-            hatch_rect(msp, x + i * paper_segment_mm, y,
-                       paper_segment_mm, text_height * 0.8,
-                       pattern="SOLID", scale=1.0, layer=layer, color=7)
+            hatch_rect(
+                msp,
+                x + i * paper_segment_mm,
+                y,
+                paper_segment_mm,
+                text_height * 0.8,
+                pattern="SOLID",
+                scale=1.0,
+                layer=layer,
+                color=7,
+            )
     for i in range(segments + 1):
-        text(msp, f"{i * seg_len_m:g}m", x + i * paper_segment_mm,
-             y - text_height * 1.2, height=text_height,
-             layer="TEXT-GENERAL", halign="CENTER")
-    text(msp, f"1 : {scale_denom}", x + total_paper_mm / 2,
-         y + text_height * 1.5, height=text_height,
-         layer="TEXT-GENERAL", halign="CENTER")
+        text(
+            msp,
+            f"{i * seg_len_m:g}m",
+            x + i * paper_segment_mm,
+            y - text_height * 1.2,
+            height=text_height,
+            layer="TEXT-GENERAL",
+            halign="CENTER",
+        )
+    text(
+        msp,
+        f"1 : {scale_denom}",
+        x + total_paper_mm / 2,
+        y + text_height * 1.5,
+        height=text_height,
+        layer="TEXT-GENERAL",
+        halign="CENTER",
+    )
 
 
 # ---------------------------------------------------------------------------

@@ -1,8 +1,7 @@
 name: Setup Suite
 description: >
-  Install the BridgeCAD workspace deterministically under pip: all workspace
-  members first (so intra-workspace deps resolve against the checkout), then the
-  root project with the requested extras. Fails loudly on the first bad install.
+  Install the BridgeCAD workspace under pip in one resolution so member
+  dependencies resolve from the checkout. Include the requested root extras.
 
 inputs:
   extras:
@@ -25,20 +24,22 @@ runs:
         python-version: ${{ inputs.python-version }}
         cache: pip
 
-    # `set -e` is the whole point. The old `for pkg in packages/*/pyproject.toml`
-    # loop returned only the LAST iteration's status, so a failed member install
-    # (bridgecad-draw) was silently swallowed.
     - name: Install workspace
       shell: bash
+      env:
+        BRIDGECAD_SUITE_EXTRAS: ${{ inputs.extras }}
       run: |
         set -euo pipefail
         python -m pip install --upgrade pip
-        python -m pip install -e packages/bridgecad-core --quiet
-        for pkg in packages/*/; do
-          [ "$pkg" = "packages/bridgecad-core/" ] && continue
-          python -m pip install -e "$pkg" --quiet
+        workspace=()
+        for manifest in packages/*/pyproject.toml; do
+          workspace+=(-e "${manifest%/pyproject.toml}")
         done
-        python -m pip install -e ".[${{ inputs.extras }}]" --quiet
+        root=.
+        if [ -n "$BRIDGECAD_SUITE_EXTRAS" ]; then
+          root=".[$BRIDGECAD_SUITE_EXTRAS]"
+        fi
+        python -m pip install "${workspace[@]}" -e "$root" --quiet
         if [ -n "${{ inputs.extra-pip }}" ]; then
           python -m pip install ${{ inputs.extra-pip }}
         fi

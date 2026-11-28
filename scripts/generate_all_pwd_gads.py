@@ -20,6 +20,7 @@ Run:
     python scripts/generate_all_pwd_gads.py --sweep pier_height_m=6:12:3 --dry-run
     python -m bridgecad generate-all-pwd --set span_length_m=12
 """
+
 from __future__ import annotations
 
 import argparse
@@ -30,12 +31,20 @@ import sys
 import tempfile
 from decimal import Decimal
 from pathlib import Path
+from typing import Any
 
 # ── path bootstrap ───────────────────────────────────────────────────────────
 _SUITE = Path(__file__).parents[1]
-for _pkg in ["bridgecad-core", "bridgecad-io", "bridgecad-draw",
-             "bridgecad-bill", "bridgecad-qa", "bridgecad-export",
-             "bridgecad-plugins", "bridgecad-catalogue"]:
+for _pkg in [
+    "bridgecad-core",
+    "bridgecad-io",
+    "bridgecad-draw",
+    "bridgecad-bill",
+    "bridgecad-qa",
+    "bridgecad-export",
+    "bridgecad-plugins",
+    "bridgecad-catalogue",
+]:
     _p = _SUITE / "packages" / _pkg
     if _p.exists() and str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
@@ -109,33 +118,48 @@ def _enum(enum_cls: Any, mapping: dict[str, str], raw: Any, card_id: str) -> Any
     name = mapping.get(str(raw))
     if name is None or not hasattr(enum_cls, name):
         raise KeyError(
-            f"{card_id}: {enum_cls.__name__} has no member for {raw!r} "
-            f"(mapped to {name!r})"
+            f"{card_id}: {enum_cls.__name__} has no member for {raw!r} " f"(mapped to {name!r})"
         )
     return enum_cls[name]
 
 
 def _build_project(params: dict):
     """Build a BridgeProject from a resolved catalogue parameter set."""
-    from bridgecad_core import types as T
+    from bridgecad_core import types as core_types
     from bridgecad_core.models import (
-        Approaches, BearingsJoints, BridgeProject, BridgeSelection,
-        Calculations, ComponentsLib, DrawingControl, FoundationDetails,
-        GeometryInput, HydraulicData, Materials, ProjectMaster, Substructure,
-        Superstructure, ValidationModel,
+        Approaches,
+        BearingsJoints,
+        BridgeProject,
+        BridgeSelection,
+        Calculations,
+        ComponentsLib,
+        DrawingControl,
+        FoundationDetails,
+        GeometryInput,
+        HydraulicData,
+        Materials,
+        ProjectMaster,
+        Substructure,
+        Superstructure,
+        ValidationModel,
     )
 
-    def _dec(v): return Decimal(str(v)) if v is not None else None
-    def _int(v): return int(v) if v is not None else None
-    def _int_list(v): return [int(n) for n in v] if v is not None else None
+    def _dec(v):
+        return Decimal(str(v)) if v is not None else None
+
+    def _int(v):
+        return int(v) if v is not None else None
+
+    def _int_list(v):
+        return [int(n) for n in v] if v is not None else None
 
     card_id = params["id"]
-    sst = T.SuperstructureType[_superstructure_name(params)]
-    fdn = _enum(T.FoundationType, _FOUNDATION_MAP, params["foundation_type"], card_id)
-    abt = _enum(T.AbutmentType, _ABUTMENT_MAP, params["abutment_type"], card_id)
-    pier_material = T.ConcreteGrade[params.get("pier_material", "M25")]
+    sst = core_types.SuperstructureType[_superstructure_name(params)]
+    fdn = _enum(core_types.FoundationType, _FOUNDATION_MAP, params["foundation_type"], card_id)
+    abt = _enum(core_types.AbutmentType, _ABUTMENT_MAP, params["abutment_type"], card_id)
+    pier_material = core_types.ConcreteGrade[params.get("pier_material", "M25")]
     bearing_name = _BEARING_MAP[params["bearing_type"]]
-    bearing = T.BearingType[bearing_name] if bearing_name else None
+    bearing = core_types.BearingType[bearing_name] if bearing_name else None
 
     hfl = _dec(params["hfl_m"])
     scour = _dec(params["scour_depth_m"])
@@ -153,11 +177,11 @@ def _build_project(params: dict):
         project_code=f"PWD-2022-{params['id'].split('-')[-1].zfill(3)}",
         bridge_name=f"PWD {params['id']}",
         drawing_no=params["id"],
-        client=T.ClientType.STATE_PWD,
-        revision=T.RevisionTag.R0,
-        state_code=T.IndianStateCode.MH,
-        language=T.Language.EN,
-        project_phase=T.ProjectPhase.DESIGN_GAD_60_PCT,
+        client=core_types.ClientType.STATE_PWD,
+        revision=core_types.RevisionTag.R0,
+        state_code=core_types.IndianStateCode.MH,
+        language=core_types.Language.EN,
+        project_phase=core_types.ProjectPhase.DESIGN_GAD_60_PCT,
         road_level_rl_m=_dec(params["road_level"]),
         ground_level_rl_m=hfl - scour,
     )
@@ -179,12 +203,13 @@ def _build_project(params: dict):
     # deck is wide.  Passing the carriageway width left every pier and abutment
     # short of the bearing line it actually carries.
     skew_deg = float(gi.skew_angle_deg or 0)
-    cross_len = (gi.overall_width_m / Decimal(str(math.cos(math.radians(skew_deg))))
-                 ).quantize(Decimal("0.001"))
+    cross_len = (gi.overall_width_m / Decimal(str(math.cos(math.radians(skew_deg))))).quantize(
+        Decimal("0.001")
+    )
 
     ss = Superstructure(
         type=sst,
-        deck_material=T.ConcreteGrade.M30,
+        deck_material=core_types.ConcreteGrade.M30,
         deck_thickness_mm=_int(params.get("deck_thickness_mm", 500)),
         wearing_coat_thickness_mm=_int(params.get("wearing_coat_thickness_mm", 65)),
         # An undeclared bearing height stays ``None`` so the canonical contract
@@ -207,7 +232,7 @@ def _build_project(params: dict):
     )
 
     sub = Substructure(
-        pier_type=T.PierType.WALL,
+        pier_type=core_types.PierType.WALL,
         pier_material=pier_material,
         pier_height_typical_m=_dec(params.get("pier_height_m", 6.0)),
         pier_shaft_width_m=_dec(params.get("pier_shaft_width_m", 1.5)),
@@ -216,7 +241,7 @@ def _build_project(params: dict):
         pier_cap_width_m=Decimal(str(round(float(params.get("pier_shaft_width_m", 1.5)) * 1.3, 3))),
         pier_pedestal_height_m=_dec(params.get("pier_pedestal_height_m", 0.15)),
         abutment_type=abt,
-        abutment_material=T.ConcreteGrade.M25,
+        abutment_material=core_types.ConcreteGrade.M25,
         abutment_width_m=Decimal("1.2"),
         abutment_length_m=cross_len,
         abutment_height_m=_dec(params.get("pier_height_m", 6.0)),
@@ -284,13 +309,13 @@ def _build_project(params: dict):
     )
 
     mt = Materials(
-        concrete_superstructure=T.ConcreteGrade.M30,
+        concrete_superstructure=core_types.ConcreteGrade.M30,
         concrete_substructure=pier_material,
-        concrete_foundation=T.ConcreteGrade.M25,
-        reinforcement_steel_grade=T.SteelGrade.Fe500D,
-        prestressing_steel=T.PrestressGrade.G1860,
-        bearing_type=T.BearingType.ELASTOMERIC_NEOPRENE,
-        expansion_joint_type=T.ExpansionJointType.STRIP_SEAL,
+        concrete_foundation=core_types.ConcreteGrade.M25,
+        reinforcement_steel_grade=core_types.SteelGrade.Fe500D,
+        prestressing_steel=core_types.PrestressGrade.G1860,
+        bearing_type=core_types.BearingType.ELASTOMERIC_NEOPRENE,
+        expansion_joint_type=core_types.ExpansionJointType.STRIP_SEAL,
     )
 
     bj = BearingsJoints(bearing_type=bearing)
@@ -298,16 +323,18 @@ def _build_project(params: dict):
     return BridgeProject(
         project_master=pm,
         bridge_selection=BridgeSelection(
-            bridge_category=(T.BridgeCategory.MINOR_BRIDGE
-                             if params["total_length_m"] < 30
-                             else T.BridgeCategory.MAJOR_BRIDGE),
+            bridge_category=(
+                core_types.BridgeCategory.MINOR_BRIDGE
+                if params["total_length_m"] < 30
+                else core_types.BridgeCategory.MAJOR_BRIDGE
+            ),
             bridge_type=sst,
-            span_configuration=T.SpanConfiguration.SIMPLY_SUPPORTED,
-            carriageway_config=T.CarriagewayLaneConfig.LANE_2,
-            design_code=T.DesignCode.IRC_6_2017,
-            loading_class=T.LoadClass.CLASS_A,
-            seismic_zone=T.SeismicZone.ZONE_III,
-            wind_zone_ms=T.WindSpeedBasic_ms.VB_39_ms_ZONE_2,
+            span_configuration=core_types.SpanConfiguration.SIMPLY_SUPPORTED,
+            carriageway_config=core_types.CarriagewayLaneConfig.LANE_2,
+            design_code=core_types.DesignCode.IRC_6_2017,
+            loading_class=core_types.LoadClass.CLASS_A,
+            seismic_zone=core_types.SeismicZone.ZONE_III,
+            wind_zone_ms=core_types.WindSpeedBasic_ms.VB_39_ms_ZONE_2,
             foundation_type=fdn,
         ),
         geometry_input=gi,
@@ -320,9 +347,9 @@ def _build_project(params: dict):
         bearings_joints=bj,
         components_lib=ComponentsLib(),
         drawing_control=DrawingControl(
-            sheet_size=T.SheetSize.A1,
-            drawing_scale=T.DrawingScale.S100,
-            title_block_style=T.TitleBlockStyle.STANDARD,
+            sheet_size=core_types.SheetSize.A1,
+            drawing_scale=core_types.DrawingScale.S100,
+            title_block_style=core_types.TitleBlockStyle.STANDARD,
         ),
         calculations=Calculations(),
         validation=ValidationModel(),
@@ -332,6 +359,7 @@ def _build_project(params: dict):
 def _check_completeness(sheets: list[Path]) -> list[str]:
     """Check every sheet has enough entities and is non-trivially populated."""
     import ezdxf
+
     issues = []
     for s in sheets:
         try:
@@ -343,11 +371,17 @@ def _check_completeness(sheets: list[Path]) -> list[str]:
     return issues
 
 
-def _render_pngs(sheets: list[Path], out_dir: Path, dpi: int = 150,
-                 render_paper: str = "A2", render_orientation: str = "landscape") -> list[str]:
+def _render_pngs(
+    sheets: list[Path],
+    out_dir: Path,
+    dpi: int = 150,
+    render_paper: str = "A2",
+    render_orientation: str = "landscape",
+) -> list[str]:
     """Return rendering failures, including decoded but entirely blank images."""
-    from bridgecad_draw.engines.png_engine import render_png, paper_size_inches
     from PIL import Image, ImageChops
+
+    from bridgecad_draw.engines.png_engine import paper_size_inches, render_png
 
     issues = []
     for s in sheets:
@@ -356,21 +390,27 @@ def _render_pngs(sheets: list[Path], out_dir: Path, dpi: int = 150,
             if render_paper == "A2" and render_orientation == "landscape":
                 render_png(s, png_out, dpi=dpi)
             else:
-                render_png(s, png_out, dpi=dpi, size_in=paper_size_inches(render_paper, render_orientation))
+                render_png(
+                    s, png_out, dpi=dpi, size_in=paper_size_inches(render_paper, render_orientation)
+                )
             with Image.open(png_out) as image:
                 rgba = image.convert("RGBA")
                 rgb = Image.new("RGBA", rgba.size, "white")
                 rgb.alpha_composite(rgba)
                 rgb = rgb.convert("RGB")
-                if ImageChops.difference(rgb, Image.new("RGB", rgb.size, "white")).getbbox() is None:
+                if (
+                    ImageChops.difference(rgb, Image.new("RGB", rgb.size, "white")).getbbox()
+                    is None
+                ):
                     issues.append(f"{s.name}: PNG is entirely blank")
         except Exception as exc:
             issues.append(f"{s.name}: PNG render failed: {type(exc).__name__}: {exc}")
     return issues
 
 
-def _write_readme(out_dir: Path, params: dict, sheets: list[Path],
-                  issues: list[str], dxf_kb: int) -> None:
+def _write_readme(
+    out_dir: Path, params: dict, sheets: list[Path], issues: list[str], dxf_kb: int
+) -> None:
     sheet_table = ""
     for i, s in enumerate(sheets, 1):
         size_kb = s.stat().st_size // 1024
@@ -380,19 +420,22 @@ def _write_readme(out_dir: Path, params: dict, sheets: list[Path],
     issues_text = "\n".join(f"- {i}" for i in issues) if issues else "No issues found."
     fidelity = ""
     if params.get("approximation"):
-        fidelity = ("\n> **Fidelity:** approximation — "
-                    f"{params.get('fidelity_note', 'engine primitive not implemented')}\n")
+        fidelity = (
+            "\n> **Fidelity:** approximation — "
+            f"{params.get('fidelity_note', 'engine primitive not implemented')}\n"
+        )
 
+    hard_break = "  "
     readme = f"""# {params['title']}
 
-**PWD Drawing No.:** {params['id']}  
-**Spans:** {params['spans']}  
-**Foundation:** {params['foundation_type']}  
-**Superstructure:** {params['superstructure_type']}  
-**Pier Material:** {params.get('pier_material', 'M25')}  
-**Carriageway:** {params['carriageway_width']} m  
-**Road RL:** {params['road_level']} m  
-**HFL:** {params['hfl_m']} m  
+**PWD Drawing No.:** {params['id']}{hard_break}
+**Spans:** {params['spans']}{hard_break}
+**Foundation:** {params['foundation_type']}{hard_break}
+**Superstructure:** {params['superstructure_type']}{hard_break}
+**Pier Material:** {params.get('pier_material', 'M25')}{hard_break}
+**Carriageway:** {params['carriageway_width']} m{hard_break}
+**Road RL:** {params['road_level']} m{hard_break}
+**HFL:** {params['hfl_m']} m{hard_break}
 {fidelity}
 ## Completeness check: {status}
 
@@ -457,8 +500,7 @@ def _support_level_chain(project) -> dict:
             "footing_depth_m": None if r.footing_depth_m is None else str(r.footing_depth_m),
             "provenance": {k: v.value for k, v in r.provenance.items()},
             "issues": [
-                {"code": i.code, "field": i.field_name, "message": i.message}
-                for i in r.issues
+                {"code": i.code, "field": i.field_name, "message": i.message} for i in r.issues
             ],
         }
 
@@ -468,11 +510,16 @@ def _support_level_chain(project) -> dict:
     }
 
 
-def generate_one(params: dict, out_root: Path,
-                 label: str | None = None, *, render_paper: str = "A2",
-                 render_orientation: str = "landscape",
-                 commit: str = "",
-                 publish: bool = True) -> tuple[str, bool, str]:
+def generate_one(
+    params: dict,
+    out_root: Path,
+    label: str | None = None,
+    *,
+    render_paper: str = "A2",
+    render_orientation: str = "landscape",
+    commit: str = "",
+    publish: bool = True,
+) -> tuple[str, bool, str]:
     """Generate one variant into ``out_root/<label>``.
 
     Returns ``(label, success, message)``.
@@ -494,25 +541,34 @@ def generate_one(params: dict, out_root: Path,
     out_root = Path(out_root)
     out_root.mkdir(parents=True, exist_ok=True)
     stage_root = (
-        Path(tempfile.mkdtemp(prefix=f".gen-{label}-", dir=str(out_root)))
-        if publish else out_root
+        Path(tempfile.mkdtemp(prefix=f".gen-{label}-", dir=str(out_root))) if publish else out_root
     )
     out_dir = stage_root / label
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    ok, msg = _draw_into(out_dir, params, label,
-                         render_paper=render_paper,
-                         render_orientation=render_orientation,
-                         commit=commit)
+    ok, msg = _draw_into(
+        out_dir,
+        params,
+        label,
+        render_paper=render_paper,
+        render_orientation=render_orientation,
+        commit=commit,
+    )
     if publish:
-        _publish(out_root / label, out_dir, ok=ok, label=label,
-                 commit=commit, message=msg)
+        _publish(out_root / label, out_dir, ok=ok, label=label, commit=commit, message=msg)
         shutil.rmtree(stage_root, ignore_errors=True)
     return label, ok, msg
 
 
-def _draw_into(out_dir: Path, params: dict, label: str, *, render_paper: str,
-               render_orientation: str, commit: str) -> tuple[bool, str]:
+def _draw_into(
+    out_dir: Path,
+    params: dict,
+    label: str,
+    *,
+    render_paper: str,
+    render_orientation: str,
+    commit: str,
+) -> tuple[bool, str]:
     """Draw the package into *out_dir*; return ``(ok, message)``."""
     from bridgecad_draw.booklet import generate_package
 
@@ -548,15 +604,25 @@ def _draw_into(out_dir: Path, params: dict, label: str, *, render_paper: str,
 
     issues = _check_completeness(sheets)
     import os
+
     render_issues = []
     skipped = os.getenv("SKIP_PNG") == "1"
     if not skipped:
-        render_issues = _render_pngs(sheets, out_dir, render_paper=render_paper, render_orientation=render_orientation)
+        render_issues = _render_pngs(
+            sheets, out_dir, render_paper=render_paper, render_orientation=render_orientation
+        )
         issues.extend(render_issues)
     (out_dir / "render-status.json").write_text(
-        json.dumps({"png": "skipped" if skipped else ("failed" if render_issues else "nonblank"),
-                    "render_issues": render_issues, "render_paper": render_paper,
-                    "render_orientation": render_orientation, "reference_fidelity": "not_verified"}, indent=2),
+        json.dumps(
+            {
+                "png": "skipped" if skipped else ("failed" if render_issues else "nonblank"),
+                "render_issues": render_issues,
+                "render_paper": render_paper,
+                "render_orientation": render_orientation,
+                "reference_fidelity": "not_verified",
+            },
+            indent=2,
+        ),
         encoding="utf-8",
     )
     dxf_kb = sum(s.stat().st_size for s in sheets) // 1024
@@ -575,20 +641,21 @@ def _draw_into(out_dir: Path, params: dict, label: str, *, render_paper: str,
     manifest.set(
         Gate.REQUIRED_CONTENT,
         Verdict.FAILED if issues else Verdict.PASSED,
-        f"{len(issues)} completeness issue(s)" if issues
+        f"{len(issues)} completeness issue(s)"
+        if issues
         else f"{len(sheets)} sheets, each >= {MIN_ENTITIES} entities",
     )
     for issue in issues:
         manifest.add_issue(Gate.REQUIRED_CONTENT, "E-SHEET-CONTENT", issue)
     (out_dir / "quality.json").write_text(
-        json.dumps(manifest.to_json(), indent=2), encoding="utf-8")
+        json.dumps(manifest.to_json(), indent=2), encoding="utf-8"
+    )
 
     status = "STRUCTURAL PASS (reference fidelity not verified)" if not issues else "FAIL"
     return not issues, f"{status} — {len(sheets)} sheets, {dxf_kb} KB, {len(issues)} issue(s)"
 
 
-def _publish(final: Path, staged: Path, *, ok: bool, label: str, commit: str,
-             message: str) -> None:
+def _publish(final: Path, staged: Path, *, ok: bool, label: str, commit: str, message: str) -> None:
     """Move *staged* into *final*, or label it as failed-run evidence.
 
     The destination is replaced wholesale in both cases: a successful run must
@@ -613,39 +680,65 @@ def _publish(final: Path, staged: Path, *, ok: bool, label: str, commit: str,
 
 def _write_index(root: Path, jobs: list[tuple[dict, str]], failed: set[str]) -> None:
     index = "# Maharashtra PWD Booklet — GAD Packages\n\n"
-    index += (f"**{len(jobs) - len(failed)}/{len(jobs)} variants** generated as "
-              "9-sheet DXF packages; PNG rendering is optional and must be checked separately.\n\n")
+    index += (
+        f"**{len(jobs) - len(failed)}/{len(jobs)} variants** generated as "
+        "9-sheet DXF packages; PNG rendering is optional and must be checked separately.\n\n"
+    )
     index += "| # | Folder | PWD Drawing No. | Type | Spans | Status |\n"
     index += "|---|---|---|---|---|---|\n"
     for i, (p, label) in enumerate(jobs, 1):
         ok = label not in failed
-        index += (f"| {i:02d} | {label} | {p['id']} | {p['title']} | {p['spans']} | "
-                  f"{'✅' if ok else '❌'} |\n")
+        index += (
+            f"| {i:02d} | {label} | {p['id']} | {p['title']} | {p['spans']} | "
+            f"{'✅' if ok else '❌'} |\n"
+        )
     index += "\n---\n*BridgeCAD Enterprise Suite v0.1.0-rc1 — BRIDGECAD-OSS-1.0*\n"
     (root / "README.md").write_text(index, encoding="utf-8")
 
 
 def main(argv: list[str] | None = None) -> int:
-    from bridgecad_catalogue import registry, resolve as R, sweep as S
+    from bridgecad_catalogue import registry, resolve, sweep
 
     ap = argparse.ArgumentParser(
         prog="generate_all_pwd_gads",
         description="Generate Maharashtra PWD booklet GAD packages from the catalogue.",
     )
-    ap.add_argument("--type", action="append", metavar="BR-I-2022-00N",
-                    help="restrict to one booklet type (repeatable)")
-    ap.add_argument("--set", action="append", default=[], metavar="key=value",
-                    help="pin one catalogue dial (repeatable) → writes to out/pwd_sweep")
-    ap.add_argument("--sweep", action="append", default=[], metavar="key=lo:hi:step",
-                    help="vary one catalogue dial (repeatable) → writes to out/pwd_sweep")
-    ap.add_argument("--force", action="store_true",
-                    help="allow LOCKED (booklet identity) edits")
-    ap.add_argument("--dry-run", action="store_true",
-                    help="resolve and print the variants, generate nothing")
-    ap.add_argument("--render-paper", choices=["A0", "A1", "A2", "A3", "A4"], default="A2",
-                    help="PNG output media only; does not change DXF layout/scale")
-    ap.add_argument("--render-orientation", choices=["landscape", "portrait"], default="landscape",
-                    help="PNG output orientation only")
+    ap.add_argument(
+        "--type",
+        action="append",
+        metavar="BR-I-2022-00N",
+        help="restrict to one booklet type (repeatable)",
+    )
+    ap.add_argument(
+        "--set",
+        action="append",
+        default=[],
+        metavar="key=value",
+        help="pin one catalogue dial (repeatable) → writes to out/pwd_sweep",
+    )
+    ap.add_argument(
+        "--sweep",
+        action="append",
+        default=[],
+        metavar="key=lo:hi:step",
+        help="vary one catalogue dial (repeatable) → writes to out/pwd_sweep",
+    )
+    ap.add_argument("--force", action="store_true", help="allow LOCKED (booklet identity) edits")
+    ap.add_argument(
+        "--dry-run", action="store_true", help="resolve and print the variants, generate nothing"
+    )
+    ap.add_argument(
+        "--render-paper",
+        choices=["A0", "A1", "A2", "A3", "A4"],
+        default="A2",
+        help="PNG output media only; does not change DXF layout/scale",
+    )
+    ap.add_argument(
+        "--render-orientation",
+        choices=["landscape", "portrait"],
+        default="landscape",
+        help="PNG output orientation only",
+    )
     a = ap.parse_args(argv)
 
     cards = registry.load()
@@ -657,8 +750,8 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     chosen = [c for c in cards if not a.type or c["id"] in a.type]
-    fixed = {k: v for k, v in (s.split("=", 1) for s in a.set)}
-    variants = S.matrix(a.sweep) if a.sweep else [{}]
+    fixed = dict(s.split("=", 1) for s in a.set)
+    variants = sweep.matrix(a.sweep) if a.sweep else [{}]
 
     jobs: list[tuple[dict, str]] = []
     rejected = 0
@@ -666,12 +759,12 @@ def main(argv: list[str] | None = None) -> int:
         for i, var in enumerate(variants):
             ov = {**fixed, **var}
             try:
-                p = R.resolve(card, ov, force=a.force)
-            except R.Violation as exc:
+                p = resolve.resolve(card, ov, force=a.force)
+            except resolve.Violation as exc:
                 rejected += 1
                 print(f"  [REJECT] {card['id']} {ov} — {exc}")
                 continue
-            p["id"] = card["id"]          # resolve() drops the identity key
+            p["id"] = card["id"]  # resolve() drops the identity key
             for w in p.warnings:
                 print(f"  [WARN]   {card['id']} — {w}")
             label = card["id"] if not ov else f"{card['id']}__v{i:02d}"
@@ -687,7 +780,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"\n  dry-run: {len(jobs)} variant(s) resolved, nothing written.")
         return 1 if rejected else 0
 
-    root = SWEEP_ROOT if (a.set or a.sweep or a.render_paper != "A2" or a.render_orientation != "landscape") else OUTPUT_ROOT
+    root = (
+        SWEEP_ROOT
+        if (a.set or a.sweep or a.render_paper != "A2" or a.render_orientation != "landscape")
+        else OUTPUT_ROOT
+    )
 
     print(f"\n{'='*72}")
     print("  Maharashtra PWD Booklet — GAD Generator")
@@ -696,7 +793,9 @@ def main(argv: list[str] | None = None) -> int:
 
     passed, failed = 0, []
     for p, label in jobs:
-        fid, ok, msg = generate_one(p, root, label, render_paper=a.render_paper, render_orientation=a.render_orientation)
+        fid, ok, msg = generate_one(
+            p, root, label, render_paper=a.render_paper, render_orientation=a.render_orientation
+        )
         print(f"  [{'DONE' if ok else 'FAIL':4s}] {label:<28} {p['title']:<46} {msg}")
         if ok:
             passed += 1

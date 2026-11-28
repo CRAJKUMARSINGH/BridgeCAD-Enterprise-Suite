@@ -1,0 +1,23 @@
+name: Base test collection and documentation
+
+on:
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  base-collection:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-suite
+        with:
+          extras: ""
+          extra-pip: pytest
+      - run: python -c "import importlib.util; assert importlib.util.find_spec('hypothesis') is None"
+      - run: python -m pytest --collect-only -q
+      - run: python -m pip install mkdocs
+      - run: python -m mkdocs build --strict

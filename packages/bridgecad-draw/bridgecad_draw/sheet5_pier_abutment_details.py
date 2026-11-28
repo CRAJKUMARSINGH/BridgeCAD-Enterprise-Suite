@@ -40,8 +40,7 @@ def _family_for(abutment_type: Any) -> str:
 _DEFAULT_SCALE = 75
 
 
-def generate(project: Any, output_path: str | Path,
-             scale_denom: int | None = None) -> Path:
+def generate(project: Any, output_path: str | Path, scale_denom: int | None = None) -> Path:
     """Generate Sheet 5 — Pier & Abutment Details.
 
     Four views share one sheet at one scale.  ``scale_denom=None`` uses the
@@ -307,16 +306,16 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     cap_pf = float(sub.abutment_cap_projection_front_mm or 300) / 1000.0
     cap_pr = float(sub.abutment_cap_projection_rear_mm or 300) / 1000.0
     dw_t = float(sub.dirt_wall_thickness_mm or 300) / 1000.0
-    dw_h = float(stack.app_bot) - float(stack.cap_top)
+    dw_h = float(stack.dirt_wall_h)
     weephole_d = float(sub.weep_hole_diameter_mm or 100) / 1000.0
     weephole_s = float(sub.weep_hole_spacing_m or 1.5)
     app_l = float(sub.approach_slab_length_m or 3.5)
-    app_t = float(sub.approach_slab_thickness_mm or 200) / 1000.0
+    app_t = float(stack.slab_top - stack.app_bot)
     ret_l = float(sub.return_wall_length_m or 4.0)
     ret_h = float(sub.return_wall_height_m or 3.0)
     ww_l = float(sub.wing_wall_splay_length_m or 3.0)
     ped_a_h = float(sub.abutment_pedestal_height_m or 0.15)
-    wc_t = float(project.superstructure.wearing_coat_thickness_mm or 65) / 1000.0
+    wc_t = float(pm.road_level_rl_m or 0) - float(stack.wc_bot)
 
     cap_ab_d_mm = cap_ab_d * sc
     ped_a_h_mm = ped_a_h * sc
@@ -387,15 +386,15 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
         polyline(msp, ww_pts, layer="SUB-ABUT", close=True, lw=35)
         hatch_poly(msp, ww_pts, pattern="ANSI31", scale=sc * 0.015, layer="STRUC-HATCHING")
 
-    # Rear stack, edge-on in transverse elevation: dirt wall on the cap rear
-    # ledge → approach slab → continuous wearing coat.  Heights come from the
-    # resolved abutment stack (dw_h / app_t / wc_t already bound above).
+    # The rear wall and approach slab share the concrete top RL. Their outlines
+    # overlap in transverse projection because the approach slab is behind the wall.
     dw_mm_e = dw_h * sc
     app_t_mm_e = app_t * sc
     wc_mm_e = wc_t * sc
     stack_l = L_mm * 0.96  # inset from wing-wall toes
     stack_x0 = abt_cx - stack_l / 2
-    # dirt wall band (cap top → approach slab soffit)
+    slab_top_e = cap_el_top + dw_mm_e
+    # Dirt wall band from the cap to the concrete top.
     rectangle(msp, stack_x0, cap_el_top, stack_l, dw_mm_e, layer="ABUT-PROF", lw=30)
     hatch_rect(
         msp,
@@ -407,13 +406,22 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
         scale=sc * 0.01,
         layer="STRUC-HATCHING",
     )
-    # approach slab band
-    rectangle(msp, stack_x0, cap_el_top + dw_mm_e, stack_l, app_t_mm_e, layer="CIVIL-ROAD", lw=25)
+    # The approach slab spans the full deck width, centred on the bridge axis.
+    approach_width_mm = float(project.geometry_input.overall_width_m) * sc
+    rectangle(
+        msp,
+        abt_cx - approach_width_mm / 2,
+        slab_top_e - app_t_mm_e,
+        approach_width_mm,
+        app_t_mm_e,
+        layer="CIVIL-ROAD",
+        lw=25,
+    )
     # wearing coat — continuous over the approach slab
     rectangle(
         msp,
         stack_x0,
-        cap_el_top + dw_mm_e + app_t_mm_e,
+        slab_top_e,
         stack_l,
         wc_mm_e,
         layer="SUPER-WEARING",
@@ -535,6 +543,8 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     cap_top_ly = cap_bot_ly + cap_ab_d_mm
     dw_mm = dw_h * sc
     app_t_mm = app_t * sc
+    app_top_ly = cap_top_ly + dw_mm
+    app_bot_ly = app_top_ly - app_t_mm
 
     # Abutment body — the battered families (GRAVITY, and the default
     # ``battered`` shape family that :func:`family_for` returns for a wall
@@ -733,11 +743,11 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     # Approach slab behind the dirt wall (its wearing coat is drawn once, as a
     # single continuous band, further down with the deck stub)
     app_x = dw_x + dw_t * sc
-    rectangle(msp, app_x, cap_top_ly + dw_mm, app_l * sc, app_t_mm, layer="CIVIL-ROAD", lw=25)
+    rectangle(msp, app_x, app_bot_ly, app_l * sc, app_t_mm, layer="CIVIL-ROAD", lw=25)
     hatch_rect(
         msp,
         app_x,
-        cap_top_ly + dw_mm,
+        app_bot_ly,
         app_l * sc,
         app_t_mm,
         pattern="ANSI31",
@@ -750,7 +760,7 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     rectangle(
         msp,
         ret_x,
-        cap_top_ly + dw_mm,
+        app_bot_ly,
         ret_l * sc,
         max(ret_h, 0.5) * sc * 0.5,
         layer="SUB-ABUT",
@@ -800,8 +810,8 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     )
     dim_along(
         _abt_sec,
-        (ret_x + th * 3, cap_top_ly + dw_mm),
-        (ret_x + th * 3, cap_top_ly + dw_mm + app_t_mm),
+        (ret_x + th * 3, app_bot_ly),
+        (ret_x + th * 3, app_top_ly),
         "VERTICAL",
         msp=msp,
         dim_x=ret_x + th * 8,

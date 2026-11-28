@@ -9,6 +9,7 @@ arch) each carry their family primitive as card data — the cell lattice, the
 25-point soffit schedule and the block/strip counts — so the sheets draw them
 from the booklet values rather than falling back to a generic girder / slab.
 """
+
 from __future__ import annotations
 
 import copy
@@ -362,12 +363,31 @@ PWD_CARDS: list[dict] = [
         "arch_rise_mm": 7805,
         "arch_ring_thickness_mm": 350,
         "arch_schedule_mm": [
-            [0, 0], [1045.83, 1006], [2091.67, 1943], [3137.5, 2810], [4183.33, 3608],
-            [5229.17, 4336], [6275.0, 5029], [7320.83, 5675], [8366.67, 6273], [9412.5, 6819],
-            [10458.33, 7313], [11504.17, 7752], [12550.0, 7805], [13595.83, 7752],
-            [14641.67, 7313], [15687.5, 6819], [16733.33, 6273], [17779.17, 5675],
-            [18825.0, 5029], [19870.83, 4336], [20916.67, 3608], [21962.5, 2810],
-            [23008.33, 1943], [24054.17, 1006], [25100.0, 0],
+            [0, 0],
+            [1045.83, 1006],
+            [2091.67, 1943],
+            [3137.5, 2810],
+            [4183.33, 3608],
+            [5229.17, 4336],
+            [6275.0, 5029],
+            [7320.83, 5675],
+            [8366.67, 6273],
+            [9412.5, 6819],
+            [10458.33, 7313],
+            [11504.17, 7752],
+            [12550.0, 7805],
+            [13595.83, 7752],
+            [14641.67, 7313],
+            [15687.5, 6819],
+            [16733.33, 6273],
+            [17779.17, 5675],
+            [18825.0, 5029],
+            [19870.83, 4336],
+            [20916.67, 3608],
+            [21962.5, 2810],
+            [23008.33, 1943],
+            [24054.17, 1006],
+            [25100.0, 0],
         ],
         # The span/depth governor compares deck_thickness_mm to span/ratio, but for
         # an arch bridge the structural depth is the arch rise (7805 mm), not the

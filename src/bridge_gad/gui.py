@@ -1,9 +1,7 @@
 import tkinter as tk
-from tkinter import ttk, messagebox, filedialog, Menu, simpledialog
-import requests
+from tkinter import ttk, messagebox, filedialog, Menu
 import webbrowser
 import os
-import time
 import threading
 from bridge_gad.geometry import summarize
 from bridge_gad.io_utils import save_results_to_excel
@@ -43,6 +41,7 @@ except ImportError:
     pdf = None
     print("tkPDFViewer not available - using external PDF viewer")
 
+
 def show_splash(root, duration=2.5):
     """Show a professional splash screen before the main window."""
     try:
@@ -50,14 +49,14 @@ def show_splash(root, duration=2.5):
         splash = tk.Toplevel(root)
         splash.overrideredirect(True)
         splash.geometry("400x300+600+300")
-        
+
         # Configure splash screen style
         splash.configure(bg="#f8f9fa")
-        
+
         # Create main frame
         splash_frame = tk.Frame(splash, bg="#f8f9fa", relief="raised", bd=2)
         splash_frame.pack(fill="both", expand=True)
-        
+
         # Try to show logo if PIL is available
         if PIL_AVAILABLE and Image and ImageTk:
             try:
@@ -73,94 +72,95 @@ def show_splash(root, duration=2.5):
                 # Fallback to text if image not found
                 print(f"Logo not found, using text fallback: {e}")
                 tk.Label(
-                    splash_frame, 
-                    text="BRIDGE\n  ___   \n |   |  \n |___|  \nGAD", 
-                    font=("Courier", 12, "bold"), 
-                    bg="#f8f9fa", 
+                    splash_frame,
+                    text="BRIDGE\n  ___   \n |   |  \n |___|  \nGAD",
+                    font=("Courier", 12, "bold"),
+                    bg="#f8f9fa",
                     fg="#2c3e50"
                 ).pack(pady=10)
         else:
             # Show text-based logo
             tk.Label(
-                splash_frame, 
-                text="BRIDGE\n  ___   \n |   |  \n |___|  \nGAD", 
-                font=("Courier", 12, "bold"), 
-                bg="#f8f9fa", 
+                splash_frame,
+                text="BRIDGE\n  ___   \n |   |  \n |___|  \nGAD",
+                font=("Courier", 12, "bold"),
+                bg="#f8f9fa",
                 fg="#2c3e50"
             ).pack(pady=10)
-        
+
         # Add title
         tk.Label(
-            splash_frame, 
-            text="Bridge_GAD", 
-            font=("Segoe UI", 20, "bold"), 
-            bg="#f8f9fa", 
+            splash_frame,
+            text="Bridge_GAD",
+            font=("Segoe UI", 20, "bold"),
+            bg="#f8f9fa",
             fg="#2c3e50"
         ).pack(pady=10)
-        
+
         # Add subtitle
         tk.Label(
-            splash_frame, 
-            text="Structural Engineering Analysis Tool", 
-            font=("Segoe UI", 11), 
-            bg="#f8f9fa", 
+            splash_frame,
+            text="Structural Engineering Analysis Tool",
+            font=("Segoe UI", 11),
+            bg="#f8f9fa",
             fg="#34495e"
         ).pack()
-        
+
         # Add version info
         tk.Label(
-            splash_frame, 
-            text=f"Version {__version__}", 
-            font=("Segoe UI", 9), 
-            bg="#f8f9fa", 
+            splash_frame,
+            text=f"Version {__version__}",
+            font=("Segoe UI", 9),
+            bg="#f8f9fa",
             fg="#7f8c8d"
         ).pack(pady=5)
-        
+
         # Add developer info
         tk.Label(
-            splash_frame, 
-            text="Developed by Er. Rajkumar Singh Chauhan", 
-            font=("Segoe UI", 10, "bold"), 
-            bg="#f8f9fa", 
+            splash_frame,
+            text="Developed by Er. Rajkumar Singh Chauhan",
+            font=("Segoe UI", 10, "bold"),
+            bg="#f8f9fa",
             fg="#2980b9"
         ).pack(pady=5)
-        
+
         tk.Label(
-            splash_frame, 
-            text="Institution of Engineers (India)", 
-            font=("Segoe UI", 9), 
-            bg="#f8f9fa", 
+            splash_frame,
+            text="Institution of Engineers (India)",
+            font=("Segoe UI", 9),
+            bg="#f8f9fa",
             fg="#34495e"
         ).pack()
-        
+
         tk.Label(
-            splash_frame, 
-            text="Udaipur Local Centre Initiative (2025)", 
-            font=("Segoe UI", 8), 
-            bg="#f8f9fa", 
+            splash_frame,
+            text="Udaipur Local Centre Initiative (2025)",
+            font=("Segoe UI", 8),
+            bg="#f8f9fa",
             fg="#7f8c8d"
         ).pack(pady=5)
-        
+
         # Add loading indicator
         loading_label = tk.Label(
-            splash_frame, 
-            text="Loading...", 
-            font=("Segoe UI", 8), 
-            bg="#f8f9fa", 
+            splash_frame,
+            text="Loading...",
+            font=("Segoe UI", 8),
+            bg="#f8f9fa",
             fg="#95a5a6"
         )
         loading_label.pack(side="bottom", pady=10)
-        
+
         # Update splash screen
         splash.update()
-        
+
         # Schedule splash screen to close and show main window
         root.after(int(duration * 1000), lambda: [splash.destroy(), root.deiconify()])
         root.withdraw()
-        
+
     except Exception as e:
         print(f"Splash screen error: {e}")
         root.deiconify()
+
 
 def show_plugin_registry():
     build_registry()
@@ -182,12 +182,14 @@ def show_plugin_registry():
     for name, info in data.items():
         tree.insert("", "end", values=(name, info["version"], info["author"], info["description"]))
 
+
 def _update_plugins():
     try:
         results = update_all_plugins()
         messagebox.showinfo("Plugin Manager", "\n".join(results))
     except Exception as e:
         messagebox.showerror("Update Error", str(e))
+
 
 def setup_plugins(menu_bar):
     """Set up the plugins menu and load all available plugins."""
@@ -208,13 +210,14 @@ def setup_plugins(menu_bar):
             )
     else:
         plugin_menu.add_command(label="No Plugins Found", state="disabled")
-    
+
     plugin_menu.add_separator()
     plugin_menu.add_command(label="📜 Plugin Registry", command=show_plugin_registry)
     plugin_menu.add_command(label="🔄 Check Plugin Updates", command=lambda: messagebox.showinfo("Plugin Updates", check_for_plugin_updates()))
     plugin_menu.add_command(label="📥 Update / Install Plugins", command=_update_plugins)
-    
+
     return plugins
+
 
 class BridgeGADApp(tk.Tk):
     def __init__(self):
@@ -240,7 +243,7 @@ class BridgeGADApp(tk.Tk):
     def create_menubar(self):
         """Create the application menubar."""
         menubar = Menu(self)
-        
+
         # Help menu
         help_menu = Menu(menubar, tearoff=0)
         help_menu.add_command(label="User Manual", command=lambda: (telemetry.telemetry.event("feature_user_manual"), self.open_user_manual()))
@@ -252,10 +255,10 @@ class BridgeGADApp(tk.Tk):
         help_menu.add_separator()
         help_menu.add_command(label="About", command=self.show_about)
         menubar.add_cascade(label="Help", menu=help_menu)
-        
+
         # Set up plugins menu
         self.plugins = setup_plugins(menubar)
-        
+
         self.config(menu=menubar)
 
     def export_diagnostics(self):
@@ -281,14 +284,14 @@ class BridgeGADApp(tk.Tk):
             os.path.join("docs", "Bridge_GAD_User_Manual.pdf"),
             os.path.join("docs", "Bridge_GAD_User_Manual.md")
         ]
-        
+
         manual_path = None
         for path in manual_paths:
             abs_path = os.path.abspath(path)
             if os.path.exists(abs_path):
                 manual_path = abs_path
                 break
-        
+
         if manual_path:
             # If it's a PDF and we have the embedded viewer, use it
             if manual_path.endswith('.pdf') and PDF_VIEWER_AVAILABLE and pdf:
@@ -300,9 +303,9 @@ class BridgeGADApp(tk.Tk):
                 except Exception as e:
                     messagebox.showerror("Error", f"Could not open manual: {e}")
         else:
-            messagebox.showerror("Manual Not Found", 
-                               "Bridge_GAD_User_Manual.pdf or .md not found.\n"
-                               "Please regenerate it using build_manual.bat.")
+            messagebox.showerror("Manual Not Found",
+                                 "Bridge_GAD_User_Manual.pdf or .md not found.\n"
+                                 "Please regenerate it using build_manual.bat.")
 
     def show_embedded_manual(self, pdf_path):
         """Show the manual in an embedded PDF viewer."""
@@ -310,11 +313,11 @@ class BridgeGADApp(tk.Tk):
             win = tk.Toplevel(self)
             win.title("Bridge_GAD User Manual")
             win.geometry("900x600")
-            
+
             # Create a frame for the PDF viewer
             pdf_frame = tk.Frame(win)
             pdf_frame.pack(fill="both", expand=True, padx=10, pady=10)
-            
+
             # Show the PDF
             if pdf and PDF_VIEWER_AVAILABLE:
                 v1 = pdf.ShowPdf()
@@ -323,7 +326,7 @@ class BridgeGADApp(tk.Tk):
             else:
                 # Fallback to external viewer
                 webbrowser.open_new(pdf_path)
-            
+
         except Exception as e:
             messagebox.showerror("Error", f"Could not display PDF: {e}\nOpening in external viewer instead.")
             webbrowser.open_new(pdf_path)
@@ -384,11 +387,13 @@ class BridgeGADApp(tk.Tk):
             save_results_to_excel(results, file_path)
             messagebox.showinfo("Saved", f"Results saved to:\n{file_path}")
 
+
 def main():
     app = BridgeGADApp()
     # Show splash screen
     show_splash(app)
     app.mainloop()
+
 
 if __name__ == "__main__":
     main()

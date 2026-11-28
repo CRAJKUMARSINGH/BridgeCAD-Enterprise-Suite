@@ -6,9 +6,8 @@ Advanced Features Module for Bridge GAD Generator
 - Design Comparison
 """
 
-import json
 import numpy as np
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, Optional
 from dataclasses import dataclass
 import logging
 
@@ -26,7 +25,7 @@ class BridgeTemplate:
 
 class BridgeTemplates:
     """Collection of standard bridge designs"""
-    
+
     TEMPLATES = {
         "rcc_slab_simple": BridgeTemplate(
             name="RCC Slab - Simple Span",
@@ -74,12 +73,12 @@ class BridgeTemplates:
             }
         )
     }
-    
+
     @classmethod
     def get_template(cls, template_id: str) -> Optional[BridgeTemplate]:
         """Get template by ID"""
         return cls.TEMPLATES.get(template_id)
-    
+
     @classmethod
     def list_templates(cls) -> Dict[str, str]:
         """List all available templates"""
@@ -88,7 +87,7 @@ class BridgeTemplates:
 
 class DesignQualityChecker:
     """Validates bridge design against IRC & IS standards"""
-    
+
     # IRC & IS Code Limits
     STANDARDS = {
         'min_clearance': 5.5,  # Vertical clearance (m)
@@ -100,12 +99,12 @@ class DesignQualityChecker:
         'min_kerb_height': 0.75,  # Minimum kerb height (m)
         'min_kerb_thickness': 0.23,  # Minimum kerb thickness (m)
     }
-    
+
     def __init__(self, variables: Dict):
         self.variables = variables
         self.issues = []
         self.warnings = []
-    
+
     def validate(self) -> Dict:
         """Run comprehensive design checks"""
         try:
@@ -115,7 +114,7 @@ class DesignQualityChecker:
             self.check_footing_requirements()
             self.check_deck_thickness()
             self.check_kerb_standards()
-            
+
             return {
                 'is_valid': len(self.issues) == 0,
                 'critical_issues': self.issues,
@@ -125,58 +124,58 @@ class DesignQualityChecker:
         except Exception as e:
             logger.error(f"Validation error: {e}")
             return {'is_valid': False, 'error': str(e)}
-    
+
     def check_vertical_clearance(self):
         """Check vertical clearance IRC 5:2015"""
         rtl = float(self.variables.get('RTL', 110.98))
         datum = float(self.variables.get('DATUM', 100))
         clearance = rtl - datum
-        
+
         if clearance < self.STANDARDS['min_clearance']:
             self.issues.append(f"Clearance {clearance}m < {self.STANDARDS['min_clearance']}m (IRC 5)")
-    
+
     def check_span_limits(self):
         """Check span limitations"""
         nspan = int(self.variables.get('NSPAN', 3))
         span1 = float(self.variables.get('SPAN1', 12))
-        
+
         if span1 > self.STANDARDS['max_span_slab']:
             self.warnings.append(f"Span {span1}m exceeds typical slab bridge limit")
-        
+
         if nspan > 10:
             self.warnings.append(f"Unusual number of spans: {nspan}")
-    
+
     def check_pier_dimensions(self):
         """Check pier width requirements"""
         piertw = float(self.variables.get('PIERTW', 1.2))
-        
+
         if piertw < self.STANDARDS['min_pier_width']:
             self.issues.append(f"Pier width {piertw}m < {self.STANDARDS['min_pier_width']}m minimum")
-    
+
     def check_footing_requirements(self):
         """Check footing depth"""
         futd = float(self.variables.get('FUTD', 1.0))
-        
+
         if futd < self.STANDARDS['min_footing_depth']:
             self.warnings.append(f"Footing depth {futd}m may be insufficient")
-    
+
     def check_deck_thickness(self):
         """Check slab thickness"""
         slbthe = float(self.variables.get('SLBTHE', 0.75))
         span1 = float(self.variables.get('SPAN1', 12))
-        
+
         min_thickness = span1 / 20  # L/20 rule
         if slbthe < min_thickness:
             self.issues.append(f"Slab thickness {slbthe}m < {min_thickness:.2f}m (L/20 rule)")
-    
+
     def check_kerb_standards(self):
         """Check kerb dimensions"""
         kerbw = float(self.variables.get('KERBW', 0.23))
-        kerbd = float(self.variables.get('KERBD', 0.15))
-        
+        _ = float(self.variables.get('KERBD', 0.15))
+
         if kerbw < self.STANDARDS['min_kerb_thickness']:
             self.warnings.append(f"Kerb thickness {kerbw}m may be below standard")
-    
+
     def calculate_score(self) -> int:
         """Calculate design compliance score (0-100)"""
         max_issues = 10
@@ -187,10 +186,10 @@ class DesignQualityChecker:
 
 class Bridge3DVisualizer:
     """Generate 3D visualization data for bridge"""
-    
+
     def __init__(self, variables: Dict):
         self.variables = variables
-    
+
     def generate_3d_mesh(self) -> Dict:
         """Generate 3D mesh data (vertices & faces)"""
         try:
@@ -198,11 +197,11 @@ class Bridge3DVisualizer:
             span1 = float(self.variables.get('SPAN1', 12))
             ccbr = float(self.variables.get('CCBR', 11.1))
             slbthe = float(self.variables.get('SLBTHE', 0.75))
-            
+
             # Deck slab vertices
             vertices = []
             faces = []
-            
+
             for i in range(nspan + 1):
                 x = i * span1
                 # Top surface
@@ -211,18 +210,18 @@ class Bridge3DVisualizer:
                 # Bottom surface
                 for y_pos in [0, ccbr]:
                     vertices.append([x, y_pos, -slbthe])
-            
+
             # Generate faces (simplified)
             num_verts_per_span = 4
             for span in range(nspan):
                 v_idx = span * num_verts_per_span
                 # Top face
-                faces.append([v_idx, v_idx + num_verts_per_span, 
-                            v_idx + num_verts_per_span + 1, v_idx + 1])
+                faces.append([v_idx, v_idx + num_verts_per_span,
+                              v_idx + num_verts_per_span + 1, v_idx + 1])
                 # Side faces
-                faces.append([v_idx, v_idx + 2, v_idx + num_verts_per_span + 2, 
-                            v_idx + num_verts_per_span])
-            
+                faces.append([v_idx, v_idx + 2, v_idx + num_verts_per_span + 2,
+                              v_idx + num_verts_per_span])
+
             return {
                 'vertices': np.array(vertices),
                 'faces': faces,
@@ -236,7 +235,7 @@ class Bridge3DVisualizer:
         except Exception as e:
             logger.error(f"3D mesh generation error: {e}")
             return {}
-    
+
     def get_summary_stats(self) -> Dict:
         """Get 3D visualization summary."""
         try:
@@ -264,19 +263,19 @@ class Bridge3DVisualizer:
 
 class DesignComparator:
     """Compare two bridge designs"""
-    
+
     def __init__(self, design1: Dict, design2: Dict):
         self.design1 = design1
         self.design2 = design2
-    
+
     def compare(self) -> Dict:
         """Compare key parameters"""
         comparison = {}
-        
+
         for key in set(self.design1.keys()) | set(self.design2.keys()):
             val1 = self.design1.get(key, 'N/A')
             val2 = self.design2.get(key, 'N/A')
-            
+
             try:
                 diff = float(val2) - float(val1) if isinstance(val1, (int, float)) and isinstance(val2, (int, float)) else None
                 comparison[key] = {
@@ -285,19 +284,19 @@ class DesignComparator:
                     'difference': diff,
                     'percent_change': (diff / float(val1) * 100) if diff and val1 else None
                 }
-            except:
+            except Exception:
                 comparison[key] = {'design1': val1, 'design2': val2}
-        
+
         return comparison
-    
+
     def get_summary(self) -> str:
         """Generate comparison summary"""
         comparison = self.compare()
         summary = "Design Comparison Summary:\n"
-        
+
         for key, data in comparison.items():
             if data.get('difference') is not None:
                 pct = data.get('percent_change', 0)
                 summary += f"  {key}: {data['design1']} → {data['design2']} ({pct:+.1f}%)\n"
-        
+
         return summary

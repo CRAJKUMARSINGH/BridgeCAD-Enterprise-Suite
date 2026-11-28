@@ -7,12 +7,14 @@ from bridge_gad.logger import log_plugin_sandbox
 
 PLUGIN_DIR = os.path.join(os.path.dirname(__file__), "plugins")
 
+
 def load_manifest():
     manifest_path = os.path.join(os.path.dirname(__file__), "plugin_manifest.json")
     if not os.path.exists(manifest_path):
         raise FileNotFoundError("plugin_manifest.json not found")
     with open(manifest_path, "r", encoding="utf-8") as f:
         return json.load(f)["plugins"]
+
 
 def install_plugin(plugin):
     name = plugin["name"]
@@ -33,6 +35,7 @@ def install_plugin(plugin):
 
     log_plugin_sandbox(name, f"Installed v{version}")
     return f"{name} v{version} installed successfully."
+
 
 def update_all_plugins():
     plugins = load_manifest()

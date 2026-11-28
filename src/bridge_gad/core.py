@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import Optional
 
 import ezdxf
-import pandas as pd
 from ezdxf import units
 
 from .config import Settings

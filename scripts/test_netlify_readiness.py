@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 """Netlify Deploy Readiness Test.
 
-Validates all pre-conditions for a successful Netlify build before pushing.
+Checks the Netlify build configuration and the gateway's public drawing routes.
 Runs as part of CI (see .github/workflows/ci.yml) and can be run locally:
 
     python scripts/test_netlify_readiness.py
 
 Exit codes:
-    0 — all checks passed, safe to deploy
+    0 — all configured checks passed
     1 — one or more checks failed
 """
 
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
@@ -59,9 +60,11 @@ section("2. netlify.toml")
 
 toml = ROOT / "netlify.toml"
 check("netlify.toml exists", toml.exists())
+publish_dir = None
 if toml.exists():
-    content = toml.read_text()
-    check("publish dir defined", "publish" in content)
+    content = toml.read_text(encoding="utf-8")
+    publish_dir = tomllib.loads(content).get("build", {}).get("publish")
+    check("Netlify publishes the Vite build", publish_dir == "frontend/dist")
     check("functions dir defined", "functions" in content)
     check("redirect /api/* defined", "/api/*" in content)
     check("security headers defined", "X-Frame-Options" in content)
@@ -79,19 +82,24 @@ for fn in ["predict.js", "health.js"]:
     if fn_path.exists():
         src = fn_path.read_text()
         check(f"{fn} exports handler", "exports.handler" in src)
-        check(f"{fn} reads FASTAPI_URL env var", "FASTAPI_URL" in src)
+        proxy_path = fns_dir.parent / "lib" / "drawing-proxy.cjs"
+        config_src = (
+            proxy_path.read_text() if "proxyDrawing" in src and proxy_path.is_file() else src
+        )
+        check(f"{fn} uses FASTAPI_URL env var", "FASTAPI_URL" in config_src)
 
-# ── 4. Static site (public/) ─────────────────────────────────────────────────
-section("4. Static site (public/)")
+# ── 4. Vite frontend source ─────────────────────────────────────────────────
+section("4. Vite frontend source")
 
-pub = ROOT / "public"
-check("public/ exists", pub.exists())
-check("public/index.html exists", (pub / "index.html").exists())
-if (pub / "index.html").exists():
-    html = (pub / "index.html").read_text(encoding="utf-8")
-    check("index.html has <title>", "<title>" in html)
-    check("index.html has /app link", "/app" in html)
-    check("index.html has /api/health call", "/api/health" in html)
+if publish_dir == "frontend/dist":
+    frontend = (ROOT / publish_dir).parent
+    for relative in (
+        "index.html",
+        "package-lock.json",
+        "src/main.tsx",
+        "public/samples/sample_input.xlsx",
+    ):
+        check(f"Frontend contains {relative}", (frontend / relative).is_file())
 
 # ── 5. Python package integrity ───────────────────────────────────────────────
 section("5. Python package integrity")
@@ -100,19 +108,17 @@ result = subprocess.run(
     [
         sys.executable,
         "-c",
-        "import sys; sys.path.insert(0,'src'); "
-        "from bridge_gad.bridge_generator import BridgeGADGenerator; "
-        "from bridge_gad.api import app; "
-        "from bridge_gad.calc_engine import CalcEngine; "
-        "from bridge_gad.worker import WorkerSettings; "
-        "print('ok')",
+        "import bridgecad; from bridgecad_api.main import app; "
+        "paths = app.openapi()['paths']; "
+        "assert 'post' in paths['/predict'] and 'post' in paths['/draw/ga']; "
+        "assert 'get' in paths['/health']; print('ok')",
     ],
     cwd=ROOT,
     capture_output=True,
     text=True,
 )
 check(
-    "Core Python imports clean",
+    "Enterprise gateway exposes the Netlify drawing routes",
     result.returncode == 0 and "ok" in result.stdout,
     result.stderr.strip()[:120] if result.returncode != 0 else "",
 )
@@ -180,11 +186,11 @@ if failed:
     for name in failed:
         print(f"    {FAIL}  {name}")
     print(f"\n  {'='*60}")
-    print("  NOT READY for Netlify deploy -- fix issues above")
+    print("  Netlify configuration checks failed")
     print(f"  {'='*60}\n")
     sys.exit(1)
 else:
     print(f"\n  {'='*60}")
-    print("  READY for Netlify deploy")
+    print("  Netlify configuration checks passed")
     print(f"  {'='*60}\n")
     sys.exit(0)

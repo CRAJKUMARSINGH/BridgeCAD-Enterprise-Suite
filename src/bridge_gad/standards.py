@@ -250,15 +250,15 @@ PARAMETER_SPECS: Dict[str, ParameterSpec] = {
     # Concrete grades, reinforcement, live load, bearing, backfill,
     # scour code, structure-to-weir distance.
     # ================================================================
-    "NOTE1_TEXT":  ParameterSpec("NOTE1_TEXT",  "Notes panel item 1 text (max 120 chars)", category="Notes"),
-    "NOTE2_TEXT":  ParameterSpec("NOTE2_TEXT",  "Notes panel item 2 text", category="Notes"),
-    "NOTE3_TEXT":  ParameterSpec("NOTE3_TEXT",  "Notes panel item 3 text", category="Notes"),
-    "NOTE4_TEXT":  ParameterSpec("NOTE4_TEXT",  "Notes panel item 4 text", category="Notes"),
-    "NOTE5_TEXT":  ParameterSpec("NOTE5_TEXT",  "Notes panel item 5 text", category="Notes"),
-    "NOTE6_TEXT":  ParameterSpec("NOTE6_TEXT",  "Notes panel item 6 text", category="Notes"),
-    "NOTE7_TEXT":  ParameterSpec("NOTE7_TEXT",  "Notes panel item 7 text (typically weep-hole 100 @ 1000c/c)", category="Notes"),
-    "NOTE8_TEXT":  ParameterSpec("NOTE8_TEXT",  "Notes panel item 8 text", category="Notes"),
-    "NOTE9_TEXT":  ParameterSpec("NOTE9_TEXT",  "Notes panel item 9 text", category="Notes"),
+    "NOTE1_TEXT": ParameterSpec("NOTE1_TEXT", "Notes panel item 1 text (max 120 chars)", category="Notes"),
+    "NOTE2_TEXT": ParameterSpec("NOTE2_TEXT", "Notes panel item 2 text", category="Notes"),
+    "NOTE3_TEXT": ParameterSpec("NOTE3_TEXT", "Notes panel item 3 text", category="Notes"),
+    "NOTE4_TEXT": ParameterSpec("NOTE4_TEXT", "Notes panel item 4 text", category="Notes"),
+    "NOTE5_TEXT": ParameterSpec("NOTE5_TEXT", "Notes panel item 5 text", category="Notes"),
+    "NOTE6_TEXT": ParameterSpec("NOTE6_TEXT", "Notes panel item 6 text", category="Notes"),
+    "NOTE7_TEXT": ParameterSpec("NOTE7_TEXT", "Notes panel item 7 text (typically weep-hole 100 @ 1000c/c)", category="Notes"),
+    "NOTE8_TEXT": ParameterSpec("NOTE8_TEXT", "Notes panel item 8 text", category="Notes"),
+    "NOTE9_TEXT": ParameterSpec("NOTE9_TEXT", "Notes panel item 9 text", category="Notes"),
     "NOTE10_TEXT": ParameterSpec("NOTE10_TEXT", "Notes panel item 10 text", category="Notes"),
     "NOTE11_TEXT": ParameterSpec("NOTE11_TEXT", "Notes panel item 11 text", category="Notes"),
     "NOTE12_TEXT": ParameterSpec("NOTE12_TEXT", "Notes panel item 12 text (typically scour IRC-78)", category="Notes"),
@@ -294,18 +294,18 @@ PARAMETER_SPECS: Dict[str, ParameterSpec] = {
     # 9 display columns: S.No / Chainage / Type / FRL / BL /
     #                     Proposed / Span / Height / B1..B4
     # ================================================================
-    "SCHED_SNO":       ParameterSpec("SCHED_SNO",       "Schedule row serial number (e.g. 1)", category="Schedule"),
-    "SCHED_CHAINAGE":  ParameterSpec("SCHED_CHAINAGE",  "Schedule: bridge centre chainage (CH display string)", category="Schedule"),
-    "SCHED_TYPE":      ParameterSpec("SCHED_TYPE",      "Schedule: structure type (e.g. Slab)", category="Schedule"),
-    "SCHED_FRL":       ParameterSpec("SCHED_FRL",       "Schedule: Finished Road Level (FRL) / RTL", "m", "Schedule"),
-    "SCHED_BL":        ParameterSpec("SCHED_BL",        "Schedule: Bed Level / Founding Level", "m", "Schedule"),
-    "SCHED_PROPOSED":  ParameterSpec("SCHED_PROPOSED",  "Schedule: proposed span text (e.g. 7x9.0m)", category="Schedule"),
+    "SCHED_SNO": ParameterSpec("SCHED_SNO", "Schedule row serial number (e.g. 1)", category="Schedule"),
+    "SCHED_CHAINAGE": ParameterSpec("SCHED_CHAINAGE", "Schedule: bridge centre chainage (CH display string)", category="Schedule"),
+    "SCHED_TYPE": ParameterSpec("SCHED_TYPE", "Schedule: structure type (e.g. Slab)", category="Schedule"),
+    "SCHED_FRL": ParameterSpec("SCHED_FRL", "Schedule: Finished Road Level (FRL) / RTL", "m", "Schedule"),
+    "SCHED_BL": ParameterSpec("SCHED_BL", "Schedule: Bed Level / Founding Level", "m", "Schedule"),
+    "SCHED_PROPOSED": ParameterSpec("SCHED_PROPOSED", "Schedule: proposed span text (e.g. 7x9.0m)", category="Schedule"),
     "SCHED_SPAN_TEXT": ParameterSpec("SCHED_SPAN_TEXT", "Schedule: span combination line", category="Schedule"),
-    "SCHED_HEIGHT":    ParameterSpec("SCHED_HEIGHT",    "Schedule: clear height / vertical clearance", "m", "Schedule"),
-    "SCHED_B1":        ParameterSpec("SCHED_B1",        "Schedule: B1 dimension (abutment front batter)", "m", "Schedule"),
-    "SCHED_B2":        ParameterSpec("SCHED_B2",        "Schedule: B2 dimension (abutment toe batter)", "m", "Schedule"),
-    "SCHED_B3":        ParameterSpec("SCHED_B3",        "Schedule: B3 dimension (pier cap / shaft)", "m", "Schedule"),
-    "SCHED_B4":        ParameterSpec("SCHED_B4",        "Schedule: B4 dimension (pier / footing base)", "m", "Schedule"),
+    "SCHED_HEIGHT": ParameterSpec("SCHED_HEIGHT", "Schedule: clear height / vertical clearance", "m", "Schedule"),
+    "SCHED_B1": ParameterSpec("SCHED_B1", "Schedule: B1 dimension (abutment front batter)", "m", "Schedule"),
+    "SCHED_B2": ParameterSpec("SCHED_B2", "Schedule: B2 dimension (abutment toe batter)", "m", "Schedule"),
+    "SCHED_B3": ParameterSpec("SCHED_B3", "Schedule: B3 dimension (pier cap / shaft)", "m", "Schedule"),
+    "SCHED_B4": ParameterSpec("SCHED_B4", "Schedule: B4 dimension (pier / footing base)", "m", "Schedule"),
 
     # ================================================================
     # PMGSY 2-Sheet — GROUND PROFILE DATA (Sheet 1 green wavy EG line)
@@ -398,10 +398,10 @@ PHASE_TWO_SHEETS: List[Dict[str, str]] = [
 ]
 
 PHASE_THREE_APPENDIX: List[Dict[str, str]] = [
-    {"Sheet No": "8",  "Code": "BRG-DET", "Title": "Bearing Details — Plan and Section",     "Purpose": "Bearing pad / pot plan, section through seat, dowels, anchor bolts, TBC markers"},
-    {"Sheet No": "9",  "Code": "EXPJ-DET","Title": "Expansion Joint Details",                "Purpose": "Strip-seal / modular joint section, filler board, sealant, movement gap"},
-    {"Sheet No": "10", "Code": "WING-DET","Title": "Wing and Return Wall Details",           "Purpose": "Wing wall section, stem + base, reinforcement schedule, TBC markers"},
-    {"Sheet No": "11", "Code": "DRN-DET", "Title": "Drainage Scupper and Downtake Details",  "Purpose": "Kerb scupper plan/section, downtake routing, downpipe/outlet details"},
+    {"Sheet No": "8", "Code": "BRG-DET", "Title": "Bearing Details — Plan and Section", "Purpose": "Bearing pad / pot plan, section through seat, dowels, anchor bolts, TBC markers"},
+    {"Sheet No": "9", "Code": "EXPJ-DET", "Title": "Expansion Joint Details", "Purpose": "Strip-seal / modular joint section, filler board, sealant, movement gap"},
+    {"Sheet No": "10", "Code": "WING-DET", "Title": "Wing and Return Wall Details", "Purpose": "Wing wall section, stem + base, reinforcement schedule, TBC markers"},
+    {"Sheet No": "11", "Code": "DRN-DET", "Title": "Drainage Scupper and Downtake Details", "Purpose": "Kerb scupper plan/section, downtake routing, downpipe/outlet details"},
 ]
 
 PHASE_THREE_SHEETS: List[Dict[str, str]] = PHASE_TWO_SHEETS + PHASE_THREE_APPENDIX

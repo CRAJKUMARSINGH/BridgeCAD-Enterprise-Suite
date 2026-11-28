@@ -13,9 +13,10 @@ from pathlib import Path
 
 
 def render(dxf_paths: list[Path], out_dir: Path, dpi: int = 150) -> list[Path]:
-    from ezdxf.addons.drawing import Frontend, RenderContext, matplotlib as mp
-    from ezdxf.addons.drawing.config import Configuration, BackgroundPolicy
     import matplotlib.pyplot as plt
+    from ezdxf.addons.drawing import Frontend, RenderContext
+    from ezdxf.addons.drawing import matplotlib as mp
+    from ezdxf.addons.drawing.config import BackgroundPolicy, Configuration
 
     out_dir.mkdir(parents=True, exist_ok=True)
     written: list[Path] = []

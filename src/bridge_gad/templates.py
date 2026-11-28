@@ -20,11 +20,11 @@ class BridgeTemplate:
     parameters: Dict[str, Any]
     tags: List[str]
     difficulty: str  # 'simple', 'medium', 'complex'
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return asdict(self)
-    
+
     def to_json(self) -> str:
         """Convert to JSON string"""
         return json.dumps(self.to_dict(), indent=2)
@@ -32,14 +32,14 @@ class BridgeTemplate:
 
 class TemplateLibrary:
     """Library of pre-configured bridge templates"""
-    
+
     def __init__(self):
         self.templates = self._create_default_templates()
-    
+
     def _create_default_templates(self) -> Dict[str, BridgeTemplate]:
         """Create default template library"""
         templates = {}
-        
+
         # 1. Simple Single-Span Slab Bridge
         templates['simple_slab'] = BridgeTemplate(
             name="Simple Slab Bridge",
@@ -64,7 +64,7 @@ class TemplateLibrary:
             tags=['simple', 'single-span', 'slab', 'beginner'],
             difficulty='simple'
         )
-        
+
         # 2. Multi-Span Beam Bridge
         templates['multi_span_beam'] = BridgeTemplate(
             name="Multi-Span Beam Bridge",
@@ -98,7 +98,7 @@ class TemplateLibrary:
             tags=['multi-span', 'beam', 'intermediate'],
             difficulty='medium'
         )
-        
+
         # 3. Skew Bridge
         templates['skew_bridge'] = BridgeTemplate(
             name="Skew Bridge",
@@ -123,7 +123,7 @@ class TemplateLibrary:
             tags=['skew', 'single-span', 'slab', 'advanced'],
             difficulty='medium'
         )
-        
+
         # 4. Large Multi-Span Bridge
         templates['large_bridge'] = BridgeTemplate(
             name="Large Multi-Span Bridge",
@@ -159,7 +159,7 @@ class TemplateLibrary:
             tags=['large', 'multi-span', 'beam', 'advanced'],
             difficulty='complex'
         )
-        
+
         # 5. Complex 23-Span Bridge
         templates['complex_23_span'] = BridgeTemplate(
             name="Complex 23-Span Bridge",
@@ -190,19 +190,19 @@ class TemplateLibrary:
             tags=['complex', 'multi-span', 'beam', 'expert', 'large-scale'],
             difficulty='complex'
         )
-        
+
         # Generate individual span lengths for 23-span bridge
         for i in range(1, 24):
             templates['complex_23_span'].parameters[f'SPAN{i}'] = 30000
-        
+
         return templates
-    
+
     def get_template(self, name: str) -> BridgeTemplate:
         """Get template by name"""
         if name not in self.templates:
             raise ValueError(f"Template '{name}' not found")
         return self.templates[name]
-    
+
     def list_templates(self) -> List[Dict[str, Any]]:
         """List all available templates"""
         return [
@@ -215,38 +215,38 @@ class TemplateLibrary:
             }
             for t in self.templates.values()
         ]
-    
+
     def get_by_difficulty(self, difficulty: str) -> List[BridgeTemplate]:
         """Get templates by difficulty level"""
         return [t for t in self.templates.values() if t.difficulty == difficulty]
-    
+
     def get_by_tag(self, tag: str) -> List[BridgeTemplate]:
         """Get templates by tag"""
         return [t for t in self.templates.values() if tag in t.tags]
-    
+
     def save_template(self, template: BridgeTemplate, output_dir: Path):
         """Save template to JSON file"""
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
-        
+
         filename = template.name.lower().replace(' ', '_') + '.json'
         filepath = output_dir / filename
-        
+
         with open(filepath, 'w') as f:
             f.write(template.to_json())
-        
+
         return filepath
-    
+
     def save_all_templates(self, output_dir: Path):
         """Save all templates to JSON files"""
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
-        
+
         saved_files = []
         for template in self.templates.values():
             filepath = self.save_template(template, output_dir)
             saved_files.append(filepath)
-        
+
         return saved_files
 
 

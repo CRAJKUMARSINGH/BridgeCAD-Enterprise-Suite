@@ -6,12 +6,13 @@ import "./styles.css";
 import "./sheets/sheets.css";
 import { DETAIL_DEFAULTS, audit, buildSheet4, buildSheet5, toDxf, type DetailParams } from "./sheets/detailGeometry";
 import { SHEETS, findSheet } from "./sheets/registry";
-import type { ProjectState } from "./sheets/Sheet01Overview";
+import { ABUTMENT_OPTIONS, type OverviewAbutment, type ProjectState } from "./sheets/Sheet01Overview";
 import { INK, PAPER, type SheetTheme } from "./sheets/theme";
 import { buildComplianceReport } from "./sheets/compliance";
 import { LAYER_GROUPS, hiddenLayersFor, DEFAULT_HIDDEN_GROUPS } from "./sheets/layerGroups";
 import { SUPERSTRUCTURE_TYPES, STANDARD_PRESETS, presetBundle, typeById, applySuperstructureType, DEFAULT_PRESET_ID } from "./sheets/presets";
 import { buildBoq, formatINR } from "./sheets/boq";
+import DraftingStudio from "./sheets/DraftingStudio";
 
 type BackendState = "checking" | "online" | "demo" | "offline";
 type DockTab = "geometry" | "variants" | "checks" | "boq" | "export";
@@ -59,11 +60,18 @@ const NAV: Array<{ id: DockTab; label: string; icon: string }> = [
 // Output formats the /predict endpoint actually converts to; the format chip
 // selection is passed straight through as ?output_format=.
 const OUTPUT_FORMATS: Array<{ id: OutputFormat; label: string; note: string }> = [
-  { id: "dxf", label: "DXF", note: "Full 9-sheet CAD package — open in AutoCAD, BricsCAD or LibreCAD." },
-  { id: "pdf", label: "PDF", note: "Multi-sheet drawing booklet." },
+  { id: "dxf", label: "DXF package (ZIP)", note: "Download the complete set of CAD sheets in a ZIP archive." },
+  { id: "pdf", label: "PDF booklet", note: "Fit-to-page review copy. Use the DXF or A1 GAD for scale-based measurements." },
   { id: "ga_pdf", label: "A1 GAD PDF", note: "One review sheet with plan, elevation and section. Straight, level, zero-skew solid slab, RCC T-beam or PSC I-girder." },
-  { id: "png", label: "PNG", note: "Raster preview for checking geometry without a CAD viewer." },
+  { id: "png", label: "Plan PNG", note: "Raster preview of Sheet 01 from the uploaded workbook." },
 ];
+
+const DOWNLOAD_TYPES: Record<OutputFormat, { mime: string; suffix: string }> = {
+  dxf: { mime: "application/zip", suffix: "-GAD.zip" },
+  pdf: { mime: "application/pdf", suffix: "-GAD.pdf" },
+  ga_pdf: { mime: "application/pdf", suffix: "-GA-01-A1.pdf" },
+  png: { mime: "image/png", suffix: "-Plan.png" },
+};
 
 // BridgeCAD plot-scale rungs. "Auto" lets the ladder pick the largest rung that keeps
 // text ≥ 2.5 mm and annotation gaps ≥ 8 mm per pier.
@@ -91,7 +99,7 @@ const DRAWING_SETS: Array<{ purpose: string; set: string }> = [
 
 function App() {
   const [project, setProject] = useState(initialProject);
-  const [sheetIndex, setSheetIndex] = useState(5);
+  const [sheetIndex, setSheetIndex] = useState(1);
   const [detail, setDetail] = useState<DetailParams>({ ...DETAIL_DEFAULTS });
   const [dock, setDock] = useState<DockTab>("geometry");
   const [typeId, setTypeId] = useState(typeById(presetBundle(DEFAULT_PRESET_ID)?.typeId ?? "").id);
@@ -103,7 +111,9 @@ function App() {
   const [generated, setGenerated] = useState<Artifact[]>([]);
   const [notice, setNotice] = useState("Detail sheets 04 and 05 render locally — no Python engine required.");
   const [outputFormat, setOutputFormat] = useState<OutputFormat>("dxf");
-  const [abutmentType, setAbutmentType] = useState("");
+  const [overviewAbutment, setOverviewAbutment] = useState<OverviewAbutment>("CANTILEVER");
+  const [useWorkbookAbutment, setUseWorkbookAbutment] = useState(true);
+  const abutmentType = useWorkbookAbutment ? "workbook" : overviewAbutment;
   const [plotScale, setPlotScale] = useState<string>("auto");
   const [theme, setTheme] = useState<SheetTheme>(INK);
   const [zoom, setZoom] = useState<number | "fit">("fit");
@@ -127,7 +137,8 @@ function App() {
   const hiddenLayers = useMemo(() => hiddenLayersFor(hiddenGroups), [hiddenGroups]);
 
   const sheet = findSheet(sheetIndex);
-  const ctx = { project, detail: liveDetail, theme, hiddenLayers };
+  const localDxfAvailable = sheetIndex === 4 || sheetIndex === 5;
+  const ctx = { project, detail: liveDetail, overviewAbutment, theme, hiddenLayers };
   const sheetWidth = sheetIndex === 1 ? 1200 : 841;
   const sheetOrdinal = SHEETS.findIndex((s) => s.index === sheetIndex) + 1;
   const activeNav = NAV.find((entry) => entry.id === dock) ?? NAV[0];
@@ -226,10 +237,6 @@ function App() {
       setNotice("Choose an .xlsx parameter workbook first.");
       return;
     }
-    if (outputFormat === "ga_pdf" && !abutmentType) {
-      setNotice("Choose an abutment type for the A1 GAD.");
-      return;
-    }
     // B03 — job identity: the input fingerprint plus a monotonic suffix, so
     // every artifact stays attributable to the workbook/format/scale that made it.
     const fingerprint = `${selectedFile.name}|${selectedFile.size}|${project.number}|${outputFormat}|${plotScale}|${outputFormat === "ga_pdf" ? abutmentType : ""}`;
@@ -238,7 +245,8 @@ function App() {
     const controller = new AbortController();
     jobAbortRef.current = controller;
     setBusy(true);
-    setNotice(`Generating ${outputFormat.toUpperCase()} output…`);
+    const formatLabel = OUTPUT_FORMATS.find((format) => format.id === outputFormat)!.label;
+    setNotice(`Generating ${formatLabel}…`);
     const formData = new FormData();
     formData.append("excel_file", selectedFile);
     const query = new URLSearchParams({ output_format: outputFormat });
@@ -255,13 +263,17 @@ function App() {
       // B02 — surface the real HTTP status and server message instead of
       // blaming the Python engine for every failure mode.
       if (!response.ok) {
-        const serverMessage = await response.text().catch(() => "");
-        throw new Error(`HTTP ${response.status}${serverMessage ? ` · ${serverMessage.slice(0, 160)}` : ""}`);
+        const payload = await response.json().catch(() => null);
+        const message = [payload?.detail, payload?.error, payload?.title].find((value) => typeof value === "string");
+        throw new Error(`HTTP ${response.status}${message ? ` · ${message}` : ""}`);
+      }
+      const expected = DOWNLOAD_TYPES[outputFormat];
+      if (response.headers.get("content-type")?.split(";")[0] !== expected.mime) {
+        throw new Error(`The server did not return a ${formatLabel} download`);
       }
       const blob = await response.blob();
-      if ((outputFormat === "pdf" || outputFormat === "ga_pdf") && blob.type.split(";")[0] !== "application/pdf") {
-        throw new Error("The server did not return a PDF");
-      }
+      if (!blob.size) throw new Error("The server returned an empty drawing");
+      if (jobAbortRef.current !== controller || controller.signal.aborted) return;
       const url = URL.createObjectURL(blob);
       setGenerated((current) => {
         // Supersede any earlier artifact of the same format so the object URL
@@ -269,23 +281,24 @@ function App() {
         current.filter((entry) => entry.format === outputFormat).forEach((entry) => URL.revokeObjectURL(entry.url));
         return [
           ...current.filter((entry) => entry.format !== outputFormat),
-          { format: outputFormat, url, filename: outputFormat === "ga_pdf" ? `${project.number}-GA-01-A1.pdf` : `${project.number}.${outputFormat}`, jobId },
+          { format: outputFormat, url, filename: `${project.number}${expected.suffix}`, jobId },
         ];
       });
       setBackend("online");
       const scaleLabel = plotScale === "auto" ? "Auto" : `1:${plotScale}`;
-      setNotice(`${outputFormat.toUpperCase()} generated at plot scale ${scaleLabel} (job ${jobId.slice(-6)}). Download it from the export panel.`);
+      setNotice(`${formatLabel} generated with drawing scale setting ${scaleLabel}. Download it from the export panel.`);
     } catch (error) {
-      if ((error as { name?: string })?.name === "AbortError") return;
+      if (jobAbortRef.current !== controller || controller.signal.aborted) return;
       // B02 — leave the probed backend status untouched; report the actual error.
       const message = error instanceof Error ? error.message : String(error);
-      setNotice(`Generation failed — ${message}. Sheets 04/05 still render locally; use the local DXF button.`);
+      setNotice(`Generation failed — ${message}`);
     } finally {
       if (jobAbortRef.current === controller) setBusy(false);
     }
   }
 
   function downloadLocalDxf() {
+    if (!localDxfAvailable) return;
     // B01 — build from the same canonical detail the sheet previews.
     const built = sheetIndex === 4 ? buildSheet4(liveDetail) : buildSheet5(liveDetail);
     const blob = new Blob([toDxf(built)], { type: "application/dxf" });
@@ -359,10 +372,14 @@ function App() {
               {compliance.nFailed === 0 ? `IRC checks ${compliance.nPassed}/${compliance.nChecks}` : `${compliance.nFailed} IRC check(s) fail`}
             </span>
             <span className={`audit-chip ${verdict.count === 0 ? "ok" : "bad"}`}>
-              {verdict.count === 0 ? "audit clean" : `${verdict.count} audit issue(s)`}
+              {verdict.count === 0 ? "Detail audit passed" : verdict.count < 0 ? "Detail audit unavailable" : `${verdict.count} detail audit issue(s)`}
             </span>
-            <button className="button button-outline" onClick={downloadLocalDxf} type="button">Export this sheet (DXF)</button>
-            <a className="button button-dark" href="/api/template?template_key=simple_12m">Download template</a>
+            {localDxfAvailable ? (
+              <button className="button button-outline" onClick={downloadLocalDxf} type="button">Export this sheet (DXF)</button>
+            ) : (
+              <button className="button button-outline" onClick={() => setDock("export")} type="button">Generate from workbook</button>
+            )}
+            <a className="button button-dark" href="/samples/sample_input.xlsx" download>Download sample workbook</a>
           </div>
         </header>
 
@@ -373,7 +390,7 @@ function App() {
                 <span className="eyebrow">SHEET REGISTER</span>
                 <h2>{sheet.title}</h2>
               </div>
-              <span className="ready-pill"><span className="status-dot online" /> Review-ready</span>
+              <span className="ready-pill">{localDxfAvailable ? "Detail preview" : "Schematic preview"}</span>
             </div>
 
             <div className="sheet-nav" role="tablist" aria-label="Sheet register">
@@ -394,12 +411,12 @@ function App() {
                     {z === "fit" ? "fit" : `${Math.round((z as number) * 100)}%`}
                   </button>
                 ))}
-                <button onClick={() => setTheme(theme.id === "ink" ? PAPER : INK)}>{theme.id === "ink" ? "paper" : "ink"}</button>
+                {localDxfAvailable && <button onClick={() => setTheme(theme.id === "ink" ? PAPER : INK)}>{theme.id === "ink" ? "paper" : "ink"}</button>}
                 <button onClick={() => window.print()}>print</button>
               </div>
             </div>
 
-            <div className="layer-strip" role="group" aria-label="Layer visibility">
+            {localDxfAvailable && <div className="layer-strip" role="group" aria-label="Layer visibility">
               <span className="layer-strip-label">LAYERS</span>
               {LAYER_GROUPS.map((group) => {
                 const hidden = hiddenGroups.includes(group.id);
@@ -424,7 +441,7 @@ function App() {
               >
                 ALL ON
               </button>
-            </div>
+            </div>}
 
             <div className="bcsheet-wrap">
               <div className="bcsheet-stage" style={{ width: zoom === "fit" ? "100%" : sheetWidth * zoom }}>
@@ -432,8 +449,9 @@ function App() {
               </div>
             </div>
             <div className="canvas-footer">
-              <span>Sheet 01 is the overview; 04 and 05 are the restored abutment-foundation and wing-wall detail sheets.</span>
-              <span className="legend"><i className="legend-line cyan" /> Structure <i className="legend-line amber" /> Foundation <i className="legend-line violet" /> Dimension</span>
+              {localDxfAvailable ? (
+                <span className="legend"><i className="legend-line cyan" /> Structure <i className="legend-line amber" /> Foundation <i className="legend-line violet" /> Dimension</span>
+              ) : <span>Generate from a workbook to download the scaled GAD.</span>}
             </div>
           </div>
 
@@ -500,6 +518,11 @@ function App() {
                     <label>Deck width (m)<input type="number" min="1" step="0.1" value={project.width} onChange={(e) => updateProject("width", Number(e.target.value))} /></label>
                     <label>Datum (m)<input type="number" step="0.001" value={project.datum} onChange={(e) => updateProject("datum", Number(e.target.value))} /></label>
                   </div>
+                  <label>Abutment profile · A1 and A2
+                    <select value={overviewAbutment} onChange={(event) => setOverviewAbutment(event.target.value as OverviewAbutment)}>
+                      {Object.entries(ABUTMENT_OPTIONS).map(([value, name]) => <option key={value} value={value}>{name}</option>)}
+                    </select>
+                  </label>
 
                   <div className="panel-heading compact">
                     <div><span className="eyebrow">DETAIL PARAMETERS</span><h2>Foundation & wing wall</h2></div>
@@ -546,12 +569,15 @@ function App() {
                   {outputFormat === "ga_pdf" && (
                     <label>
                       Abutment type for A1 and A2
-                      <select required value={abutmentType} onChange={(event) => setAbutmentType(event.target.value)}>
-                        <option value="">Select abutment type</option>
+                      <select value={abutmentType} onChange={(event) => {
+                        const value = event.target.value;
+                        setUseWorkbookAbutment(value === "workbook");
+                        if (value !== "workbook") setOverviewAbutment(value as OverviewAbutment);
+                      }}>
                         <option value="workbook">Use workbook type</option>
-                        <option value="CANTILEVER">Cantilever</option>
-                        <option value="GRAVITY">Gravity (battered profile)</option>
-                        <option value="FULL_HEIGHT_WALL">Full-height wall</option>
+                        {Object.entries(ABUTMENT_OPTIONS).map(([value, name]) => (
+                          <option key={value} value={value}>{value === "GRAVITY" ? "Gravity (battered profile)" : name}</option>
+                        ))}
                       </select>
                     </label>
                   )}
@@ -711,8 +737,8 @@ function App() {
                     <label className="upload-zone">
                       <span className="upload-icon">↑</span>
                       <strong>{selectedFile ? selectedFile.name : "Upload parameter workbook"}</strong>
-                      <span>Excel .xlsx or .xls · optional for the local detail sheets</span>
-                      <input type="file" accept=".xlsx,.xls" onChange={onFileChange} />
+                      <span>Excel .xlsx</span>
+                      <input type="file" accept=".xlsx" onChange={onFileChange} />
                     </label>
                     <button className="button button-primary" disabled={busy} type="submit">
                       {busy ? "Generating…" : "Generate via Python engine"} <span>→</span>
@@ -732,13 +758,13 @@ function App() {
                         download={artifact.filename}
                         title={`Job ${artifact.jobId}`}
                       >
-                        Download {artifact.format === "ga_pdf" ? "A1 GAD PDF" : artifact.format.toUpperCase()}
+                        Download {OUTPUT_FORMATS.find((format) => format.id === artifact.format)?.label}
                       </a>
                     ))}
                     {generated.length === 0 && (
                       <p className="notice">No engine output yet — pick a format in the <strong>Format &amp; variants</strong> dock and generate.</p>
                     )}
-                    <button className="button button-outline" onClick={downloadLocalDxf} type="button">Download local DXF</button>
+                    {localDxfAvailable && <button className="button button-outline" onClick={downloadLocalDxf} type="button">Download local DXF</button>}
                     <a className="button button-outline" href="/bridge-catalogue-11.pdf" target="_blank" rel="noreferrer">Open 11-bridge PDF catalogue ↗</a>
                     <a className="button button-outline" href="/samples/sample_input.xlsx" download>Download sample workbook</a>
                   </div>
@@ -759,6 +785,8 @@ function WorkflowRoot() {
     window.addEventListener("hashchange", update);
     return () => window.removeEventListener("hashchange", update);
   }, []);
-  return route.startsWith("#workspace") ? <><a className="workflow-back" href="#home">← Drawing selection & manual</a><App /></> : <WorkflowLanding />;
+  if (route === "#drafting") return <DraftingStudio />;
+  if (route.startsWith("#workspace")) return <><a className="workflow-back" href="#home">← Drawing selection & manual</a><a className="workflow-back" href="#drafting">Open live drafting →</a><App /></>;
+  return <WorkflowLanding />;
 }
 createRoot(document.getElementById("root")!).render(<WorkflowRoot />);

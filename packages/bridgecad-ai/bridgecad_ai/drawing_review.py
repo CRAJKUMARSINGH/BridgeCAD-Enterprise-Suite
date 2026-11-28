@@ -9,8 +9,10 @@ Two layers:
 
 CLI:  python -m bridgecad_ai.drawing_review SHEET.dxf REQUIREMENTS.json [--ai]
 """
+
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import re
@@ -64,10 +66,8 @@ def extract_facts(dxf_path: str | Path) -> DrawingFacts:
     hard = sum(1 for d in dims if (d.dxf.get("text", "<>") or "<>") not in ("<>", ""))
     values: list[float] = []
     for d in dims:
-        try:
+        with contextlib.suppress(Exception):
             values.append(round(float(d.get_measurement()), 3))
-        except Exception:
-            pass
     scales = sorted({int(m.group(1)) for t in texts for m in _SCALE_RE.finditer(t)})
     layers = sorted({e.dxf.layer for e in msp})
     return DrawingFacts(layers, texts, len(dims), hard, values, counts, scales)
@@ -78,27 +78,59 @@ def rule_checks(facts: DrawingFacts, req: dict[str, Any]) -> list[CheckItem]:
     blob = "\n".join(facts.texts).upper()
 
     def add(i, title, ok, detail, sev="major", warn=False):
-        items.append(CheckItem(i, title, "pass" if ok else ("warn" if warn else "fail"), detail, sev))
+        items.append(
+            CheckItem(i, title, "pass" if ok else ("warn" if warn else "fail"), detail, sev)
+        )
 
-    add("R01", "Sheet carries dimensions", facts.dimension_count > 0,
-        f"{facts.dimension_count} DIMENSION entities", "critical")
+    add(
+        "R01",
+        "Sheet carries dimensions",
+        facts.dimension_count > 0,
+        f"{facts.dimension_count} DIMENSION entities",
+        "critical",
+    )
     if facts.dimension_count:
-        add("R02", "Dimensions are measured (not hard-typed text)",
+        add(
+            "R02",
+            "Dimensions are measured (not hard-typed text)",
             facts.hard_text_dimensions == 0,
             f"{facts.hard_text_dimensions}/{facts.dimension_count} carry text overrides",
-            "minor", warn=True)
+            "minor",
+            warn=True,
+        )
     if req.get("scale"):
-        want = int(_SCALE_RE.search(str(req["scale"])).group(1)) if _SCALE_RE.search(str(req["scale"])) else None
-        add("R03", "Stated scale matches requirement", want in facts.scales,
-            f"required 1:{want}, found {['1:%d' % s for s in facts.scales] or 'none'}")
+        want = (
+            int(_SCALE_RE.search(str(req["scale"])).group(1))
+            if _SCALE_RE.search(str(req["scale"]))
+            else None
+        )
+        add(
+            "R03",
+            "Stated scale matches requirement",
+            want in facts.scales,
+            f"required 1:{want}, found {['1:%d' % s for s in facts.scales] or 'none'}",
+        )
         if len(facts.scales) > 1:
-            add("R04", "Single consistent scale caption", False,
-                f"multiple scales captioned: {facts.scales}", "minor", warn=True)
-    for key, label in (("drawing_no", "Drawing number"), ("bridge_name", "Bridge name"),
-                       ("project_title", "Project title")):
+            add(
+                "R04",
+                "Single consistent scale caption",
+                False,
+                f"multiple scales captioned: {facts.scales}",
+                "minor",
+                warn=True,
+            )
+    for key, label in (
+        ("drawing_no", "Drawing number"),
+        ("bridge_name", "Bridge name"),
+        ("project_title", "Project title"),
+    ):
         if req.get(key):
-            add(f"R1{len(items)}", f"{label} in title block", str(req[key]).upper() in blob,
-                f"expected '{req[key]}'")
+            add(
+                f"R1{len(items)}",
+                f"{label} in title block",
+                str(req[key]).upper() in blob,
+                f"expected '{req[key]}'",
+            )
     for note in req.get("required_notes", []):
         add(f"N{len(items)}", f"Note present: {note}", note.upper() in blob, "", "major")
     for layer in req.get("required_layers", []):
@@ -106,9 +138,16 @@ def rule_checks(facts: DrawingFacts, req: dict[str, Any]) -> list[CheckItem]:
     for name, value in (req.get("key_dimensions_m") or {}).items():
         sc = req.get("scale_denom") or 1
         want_paper = float(value) * 1000.0 / float(sc)
-        hit = any(abs(v - want_paper) <= max(0.5, want_paper * 0.01) for v in facts.dimension_values)
-        add(f"D{len(items)}", f"Dimension shown: {name} = {value} m", hit,
-            "no DIMENSION measures this value" if not hit else "", "major")
+        hit = any(
+            abs(v - want_paper) <= max(0.5, want_paper * 0.01) for v in facts.dimension_values
+        )
+        add(
+            f"D{len(items)}",
+            f"Dimension shown: {name} = {value} m",
+            hit,
+            "no DIMENSION measures this value" if not hit else "",
+            "major",
+        )
     return items
 
 
@@ -128,13 +167,21 @@ _AI_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
     "required": ["items"],
-    "properties": {"items": {"type": "array", "items": {
-        "type": "object", "additionalProperties": False,
-        "required": ["title", "detail", "severity"],
-        "properties": {
-            "title": {"type": "string"}, "detail": {"type": "string"},
-            "severity": {"type": "string", "enum": ["critical", "major", "minor"]},
-        }}}},
+    "properties": {
+        "items": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["title", "detail", "severity"],
+                "properties": {
+                    "title": {"type": "string"},
+                    "detail": {"type": "string"},
+                    "severity": {"type": "string", "enum": ["critical", "major", "minor"]},
+                },
+            },
+        }
+    },
 }
 
 
@@ -144,22 +191,44 @@ class AIReviewError(RuntimeError):
         self.status = status
 
 
-def ai_checks(facts, req, rules, api_key: str | None = None, model: str = DEFAULT_MODEL,
-              opener=urllib.request.urlopen) -> list[CheckItem]:
+def ai_checks(
+    facts,
+    req,
+    rules,
+    api_key: str | None = None,
+    model: str = DEFAULT_MODEL,
+    opener=urllib.request.urlopen,
+) -> list[CheckItem]:
     """Streamed Responses call; returns advisory items. Raises AIReviewError."""
     key = api_key or os.environ.get("LOVABLE_API_KEY")
     if not key:
         raise AIReviewError(401, "LOVABLE_API_KEY is not set")
     body = {
-        "model": model, "stream": True, "store": False,
+        "model": model,
+        "stream": True,
+        "store": False,
         "reasoning": {"effort": "low"},
         "input": _ai_prompt(facts, req, rules),
-        "text": {"format": {"type": "json_schema", "name": "review", "strict": True, "schema": _AI_SCHEMA}},
+        "text": {
+            "format": {
+                "type": "json_schema",
+                "name": "review",
+                "strict": True,
+                "schema": _AI_SCHEMA,
+            }
+        },
     }
-    r = urllib.request.Request(GATEWAY_URL, data=json.dumps(body).encode(), method="POST", headers={
-        "Content-Type": "application/json", "Lovable-API-Key": key,
-        "Authorization": f"Bearer {key}", "X-Lovable-AIG-SDK": "fetch",
-    })
+    r = urllib.request.Request(
+        GATEWAY_URL,
+        data=json.dumps(body).encode(),
+        method="POST",
+        headers={
+            "Content-Type": "application/json",
+            "Lovable-API-Key": key,
+            "Authorization": f"Bearer {key}",
+            "X-Lovable-AIG-SDK": "fetch",
+        },
+    )
     out = []
     try:
         with opener(r) as resp:
@@ -182,11 +251,15 @@ def ai_checks(facts, req, rules, api_key: str | None = None, model: str = DEFAUL
     if not text:
         raise AIReviewError(200, "model returned no review (possible refusal)")
     data = json.loads(text)
-    return [CheckItem(f"AI{i + 1}", it["title"], "warn", it["detail"], it["severity"], "ai")
-            for i, it in enumerate(data.get("items", []))]
+    return [
+        CheckItem(f"AI{i + 1}", it["title"], "warn", it["detail"], it["severity"], "ai")
+        for i, it in enumerate(data.get("items", []))
+    ]
 
 
-def review(dxf_path, requirements: dict[str, Any], use_ai: bool = False, **ai_kw) -> list[CheckItem]:
+def review(
+    dxf_path, requirements: dict[str, Any], use_ai: bool = False, **ai_kw
+) -> list[CheckItem]:
     facts = extract_facts(dxf_path)
     items = rule_checks(facts, requirements)
     if use_ai:
@@ -199,11 +272,18 @@ def review(dxf_path, requirements: dict[str, Any], use_ai: bool = False, **ai_kw
 
 def to_markdown(items: list[CheckItem]) -> str:
     mark = {"pass": "[x]", "fail": "[ ]", "warn": "[!]"}
-    rows = [f"- {mark[i.status]} **{i.id}** {i.title} — _{i.severity}_"
-            + (f" — {i.detail}" if i.detail else "") + (" (AI)" if i.source == "ai" else "")
-            for i in items]
+    rows = [
+        f"- {mark[i.status]} **{i.id}** {i.title} — _{i.severity}_"
+        + (f" — {i.detail}" if i.detail else "")
+        + (" (AI)" if i.source == "ai" else "")
+        for i in items
+    ]
     fails = sum(i.status == "fail" for i in items)
-    return f"# Drawing review checklist\n\n{fails} failing of {len(items)} checks\n\n" + "\n".join(rows) + "\n"
+    return (
+        f"# Drawing review checklist\n\n{fails} failing of {len(items)} checks\n\n"
+        + "\n".join(rows)
+        + "\n"
+    )
 
 
 def main(argv: list[str] | None = None) -> int:

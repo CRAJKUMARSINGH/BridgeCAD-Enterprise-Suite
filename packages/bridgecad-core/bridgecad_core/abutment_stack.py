@@ -74,9 +74,14 @@ class AbutmentStack:
     record: SupportLevelRecord | None = None
 
     @property
+    def dirt_wall_top(self) -> Decimal:
+        """Top of the concrete deck slab and approach slab, below surfacing."""
+        return self.slab_top
+
+    @property
     def dirt_wall_h(self) -> Decimal:
-        """Derived dirt-wall height: cap top up to the approach-slab soffit."""
-        return self.app_bot - self.cap_top
+        """Height from the cap top to the top of the concrete slabs."""
+        return self.dirt_wall_top - self.cap_top
 
 
 def resolve_abutment_stack(project: Any, support_id: str = "A1") -> AbutmentStack:
@@ -123,9 +128,7 @@ def resolve_abutment_stack(project: Any, support_id: str = "A1") -> AbutmentStac
             footing_bottom_rl_m=(
                 None if footing_bottom is None else _dec(footing_bottom, Decimal("0"))
             ),
-            footing_depth_m=(
-                None if footing_mm is None else Decimal(str(footing_mm)) / _MM
-            ),
+            footing_depth_m=(None if footing_mm is None else Decimal(str(footing_mm)) / _MM),
             authority=AuthorityMode.LEVEL_CONTROLLED,
         )
     )
@@ -142,16 +145,8 @@ def resolve_abutment_stack(project: Any, support_id: str = "A1") -> AbutmentStac
     # so the abutment and the piers share one seat datum. The earlier
     # ``app_bot − dirt_wall_height`` chain put the abutment cap a fabricated
     # bearing-plus-pedestal depth above the pier cap and above its own soffit.
-    cap_top = (
-        record.cap_top_rl_m if record.cap_top_rl_m is not None else deck_bot - ped_h
-    )
-    cap_bot = (
-        record.cap_bottom_rl_m
-        if record.cap_bottom_rl_m is not None
-        else cap_top - cap_d
-    )
+    cap_top = record.cap_top_rl_m if record.cap_top_rl_m is not None else deck_bot - ped_h
+    cap_bot = record.cap_bottom_rl_m if record.cap_bottom_rl_m is not None else cap_top - cap_d
     # Bearing seat = top of the pedestal = soffit minus the bearing unit once.
     bear_rl = deck_bot - ped_h
-    return AbutmentStack(
-        wc_bot, slab_top, deck_bot, app_bot, cap_top, cap_bot, bear_rl, record
-    )
+    return AbutmentStack(wc_bot, slab_top, deck_bot, app_bot, cap_top, cap_bot, bear_rl, record)

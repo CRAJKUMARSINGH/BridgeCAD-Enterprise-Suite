@@ -3,7 +3,7 @@
 The Netlify frontend at **https://bridge-gad.netlify.app** proxies every
 `/api/predict` and `/api/health` request through `netlify/functions/`.
 When `FASTAPI_URL` is set, those functions forward the request to your Python
-service. Without it they return HTTP 501 (`mode: demo`).
+service. Without it, `/api/health` reports `mode: demo` and generation returns HTTP 501.
 
 This document describes the fastest path to a live backend.
 
@@ -31,7 +31,7 @@ always-on production.
 3. **Confirm the service is healthy.**
    ```
    curl https://bridgecad-api.onrender.com/health
-   # Expected: {"status":"ok","mode":"live","python":"online"}
+   # Expected: {"status":"ok","version":"…","packages_loaded":[…]}
    ```
 
 4. **Set `FASTAPI_URL` in Netlify.**
@@ -50,10 +50,13 @@ always-on production.
 
 6. **Test the PDF download.**
    - Open the live site.
-   - Upload `frontend/public/samples/sample_input.xlsx` on the **Drawing Gen**
-     tab.
-   - Select **PDF** format, click **Generate GAD DXF Package**.
-   - Download the file. Open it and verify all 11 pages contain drawings.
+   - Select **PDF** under **Format & variants**.
+   - In **Export package**, upload `frontend/public/samples/sample_input.xlsx`
+     and choose **Generate via Python engine**.
+   - Open the download and verify all 11 pages contain drawings. Repeat with
+     **DXF package (ZIP)** and **Plan PNG** to check the archive and raster outputs.
+   - The PDF booklet is a fit-to-page review copy. Use the native DXF sheets
+     or the dedicated A1 GAD PDF printed at 100% for scale-based measurements.
 
 ---
 
@@ -93,11 +96,25 @@ Optional (leave blank to disable):
 
 ## Verification checklist
 
-- [ ] `GET /health` returns `mode: live` and `python: online`
+- [ ] Run `python scripts/check_software_launch.py` on the release commit.
+- [ ] Open `/#drafting` on the staging site, load a sample preset and check that
+      invalid geometry blocks SVG and DXF exports. Correct it and inspect both
+      downloaded review drawings. This path needs only the static frontend.
+- [ ] Direct gateway `GET /health` returns `status: ok`
 - [ ] Netlify `/api/health` returns `mode: live`
 - [ ] Upload sample workbook → PDF → 11 non-blank pages download correctly
 - [ ] `GET /health` still returns healthy after 20 min idle (Render free sleeps;
       Starter or UptimeRobot ping at 14-min intervals prevents this)
+
+---
+
+## Rollback
+
+Record the frontend deploy ID, gateway revision, and commit SHA before promotion.
+If the release fails its smoke checks, republish the previous successful Netlify
+deploy and roll the gateway back to the corresponding revision. Check
+`/api/health` and download a drawing from the sample workbook to confirm the
+restored pair works together. Keep the failed release logs for diagnosis.
 
 ---
 
@@ -117,5 +134,5 @@ this variable; mismatches produce `403` on cross-origin preflight requests.
 | `/api/predict` returns HTTP 501 | Same as above | Same fix |
 | `/api/predict` returns HTTP 502 | Render service sleeping (free tier) | Wait 30 s and retry, or upgrade to Starter |
 | `/api/predict` returns HTTP 500 | Python generation error | Check Render service logs |
-| PDF downloads but won't open | Content-type mismatch | Confirm the patched `/predict` fast-path is running (`0e599f4`) |
+| `/api/predict` returns HTTP 404 | Gateway deployment lacks the workbook download route | Check `/openapi.json` on the gateway for `POST /predict` and deploy the current gateway build |
 | CORS error in browser console | `API_CORS_ORIGINS` mismatch | Set to exact Netlify URL |

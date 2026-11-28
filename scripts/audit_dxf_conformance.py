@@ -19,6 +19,7 @@ Usage:
 
 Exit code 0 = pass, 1 = at least one fail.  Warnings never fail the run.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -27,6 +28,7 @@ import re
 import sys
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
+from typing import Any
 
 try:
     import ezdxf  # type: ignore
@@ -57,7 +59,7 @@ CHAINAGE_TICK_RE = re.compile(r"^(\d+(?:\.\d+)?)\s*m$", re.IGNORECASE)
 @dataclass
 class Finding:
     id: str
-    status: str            # "pass" | "fail" | "warn"
+    status: str  # "pass" | "fail" | "warn"
     detail: str = ""
     severity: str = "major"
 
@@ -88,7 +90,9 @@ def check_d01_superstructure(msp: Any, bridge_type: str) -> Finding:
     """Slab bridges must not carry girder entities or girder labels."""
     bt = bridge_type.strip().lower()
     if "slab" not in bt:
-        return Finding("DXF-01", "pass", f"bridge type '{bridge_type}' — girder check not applicable")
+        return Finding(
+            "DXF-01", "pass", f"bridge type '{bridge_type}' — girder check not applicable"
+        )
     girder_texts, girder_entities = [], 0
     for e in msp:
         layer = str(e.dxf.layer).upper()
@@ -99,9 +103,12 @@ def check_d01_superstructure(msp: Any, bridge_type: str) -> Finding:
             if "GIRDER" in t or "T-BEAM" in t or "IGIRDER" in t:
                 girder_texts.append(t[:60])
     if girder_entities or girder_texts:
-        return Finding("DXF-01", "fail",
-                       f"slab bridge carries {girder_entities} girder entities and "
-                       f"{len(girder_texts)} girder label(s): {girder_texts[:3]}")
+        return Finding(
+            "DXF-01",
+            "fail",
+            f"slab bridge carries {girder_entities} girder entities and "
+            f"{len(girder_texts)} girder label(s): {girder_texts[:3]}",
+        )
     return Finding("DXF-01", "pass", "no girder entities/labels on a slab bridge")
 
 
@@ -112,9 +119,12 @@ def check_d02_text_heights(texts: list[tuple[str, float, str]]) -> Finding:
     tol = 0.15
     off = [h for h in heights if not any(abs(h - s) <= tol for s in STANDARD_TEXT_HEIGHTS_MM)]
     if len(heights) > 4 and off:
-        return Finding("DXF-02", "fail",
-                       f"{len(heights)} distinct heights; off-hierarchy: {off[:6]} "
-                       f"(allowed paper heights {STANDARD_TEXT_HEIGHTS_MM})")
+        return Finding(
+            "DXF-02",
+            "fail",
+            f"{len(heights)} distinct heights; off-hierarchy: {off[:6]} "
+            f"(allowed paper heights {STANDARD_TEXT_HEIGHTS_MM})",
+        )
     if off:
         return Finding("DXF-02", "warn", f"heights off the standard set: {off[:6]}")
     return Finding("DXF-02", "pass", f"{len(heights)} distinct heights, all standard")
@@ -150,8 +160,11 @@ def check_d04_scale(texts: list[tuple[str, float, str]]) -> Finding:
     if len(set(declared)) > 1:
         return Finding("DXF-04", "fail", f"multiple declared scales: {declared}")
     if bars and any(b != declared[0] for b in bars):
-        return Finding("DXF-04", "fail",
-                       f"title-block scale 1:{declared[0]} contradicts scale-bar text(s) 1:{bars}")
+        return Finding(
+            "DXF-04",
+            "fail",
+            f"title-block scale 1:{declared[0]} contradicts scale-bar text(s) 1:{bars}",
+        )
     return Finding("DXF-04", "pass", f"single scale 1:{declared[0]}")
 
 
@@ -165,12 +178,18 @@ def check_d05_chainage(msp: Any, bridge_length_m: float, sheet_type: str) -> Fin
             over.append(float(m.group(1)))
     if sheet_type == "cross_section":
         # any chainage-like label at all is a defect here
-        any_tick = [float(CHAINAGE_TICK_RE.match(t).group(1))  # type: ignore[union-attr]
-                    for t, _, _ in _texts(msp) if CHAINAGE_TICK_RE.match(t)]
+        any_tick = [
+            float(CHAINAGE_TICK_RE.match(t).group(1))  # type: ignore[union-attr]
+            for t, _, _ in _texts(msp)
+            if CHAINAGE_TICK_RE.match(t)
+        ]
         if any_tick:
-            return Finding("DXF-05", "fail",
-                           f"cross-section carries chainage ticks {any_tick[:6]} — transverse "
-                           "sections have no chainage axis")
+            return Finding(
+                "DXF-05",
+                "fail",
+                f"cross-section carries chainage ticks {any_tick[:6]} — transverse "
+                "sections have no chainage axis",
+            )
         return Finding("DXF-05", "pass", "no chainage ticks on cross-section")
     if over:
         return Finding("DXF-05", "fail", f"chainage ticks exceed bridge length: {over[:6]}")
@@ -183,7 +202,9 @@ def check_d06_density(msp: Any, sheet_type: str) -> Finding:
         return Finding("DXF-06", "warn", f"no density floor configured for '{sheet_type}'")
     n = len(list(msp))
     if n < floor:
-        return Finding("DXF-06", "fail", f"{n} entities < floor {floor} for '{sheet_type}' — schematic stub")
+        return Finding(
+            "DXF-06", "fail", f"{n} entities < floor {floor} for '{sheet_type}' — schematic stub"
+        )
     return Finding("DXF-06", "pass", f"{n} entities >= floor {floor}")
 
 
@@ -207,16 +228,20 @@ def check_d08_units(doc: Any) -> Finding:
     # 6 = metres, 4 = millimetres.  Drawing generators that draw in paper mm
     # inside a metre-unit template must be flagged for verification.
     if insunits == 6:
-        return Finding("DXF-08", "warn",
-                       "$INSUNITS=6 (metres) while sheet geometry is drawn in paper mm — "
-                       "verify the unit contract on export/import")
+        return Finding(
+            "DXF-08",
+            "warn",
+            "$INSUNITS=6 (metres) while sheet geometry is drawn in paper mm — "
+            "verify the unit contract on export/import",
+        )
     if insunits == 4:
-        return Finding("DXF-08", "pass", "$INSUNITS=4 (millimetres) consistent with paper-space drafting")
+        return Finding(
+            "DXF-08", "pass", "$INSUNITS=4 (millimetres) consistent with paper-space drafting"
+        )
     return Finding("DXF-08", "warn", f"$INSUNITS={insunits} — verify")
 
 
-def audit_file(path: Path, bridge_type: str, bridge_length_m: float,
-               sheet_type: str) -> Audit:
+def audit_file(path: Path, bridge_type: str, bridge_length_m: float, sheet_type: str) -> Audit:
     doc = ezdxf.readfile(str(path))
     msp = doc.modelspace()
     texts = _texts(msp)
@@ -235,18 +260,26 @@ def audit_file(path: Path, bridge_type: str, bridge_length_m: float,
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("dxf", type=Path)
-    ap.add_argument("--bridge-type", required=True, help="slab | t_beam | i_girder | box | box_cell | arch ...")
+    ap.add_argument(
+        "--bridge-type", required=True, help="slab | t_beam | i_girder | box | box_cell | arch ..."
+    )
     ap.add_argument("--bridge-length-m", type=float, required=True)
-    ap.add_argument("--sheet-type", default="cross_section",
-                    help=f"one of {sorted(MIN_ENTITIES)}")
+    ap.add_argument("--sheet-type", default="cross_section", help=f"one of {sorted(MIN_ENTITIES)}")
     ap.add_argument("--json", action="store_true", dest="as_json")
     args = ap.parse_args(argv)
 
     audit = audit_file(args.dxf, args.bridge_type, args.bridge_length_m, args.sheet_type)
     if args.as_json:
-        print(json.dumps({"file": audit.file,
-                          "failed": audit.failed,
-                          "findings": [asdict(f) for f in audit.findings]}, indent=2))
+        print(
+            json.dumps(
+                {
+                    "file": audit.file,
+                    "failed": audit.failed,
+                    "findings": [asdict(f) for f in audit.findings],
+                },
+                indent=2,
+            )
+        )
     else:
         print(f"== {audit.file} ==")
         for f in audit.findings:

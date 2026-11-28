@@ -124,7 +124,9 @@ LAYER_REGISTRY: dict[str, LayerDef] = {
         LayerDef("MISC-SETOUT", 5, "CENTER2", 13, "Set-out points and traverse"),
         LayerDef("MISC-DEFPOINTS", 7, "Continuous", 0, "Definition points (non-printing)"),
         # ── Booklet primitives — box cell / arch / precast ───────────────────────
-        LayerDef("SUB-BOX-CELL", 7, "Continuous", 35, "Box-cell lattice walls and slabs (type 004)"),
+        LayerDef(
+            "SUB-BOX-CELL", 7, "Continuous", 35, "Box-cell lattice walls and slabs (type 004)"
+        ),
         LayerDef("SUB-BOX-HAUNCH", 7, "Continuous", 25, "Box-cell 45° corner haunches"),
         LayerDef("SUB-RAFT", 7, "Continuous", 50, "Box-cell raft outline"),
         LayerDef("SUB-CUTOFF", 7, "Continuous", 50, "Detached cut-off wall (booklet note 14)"),

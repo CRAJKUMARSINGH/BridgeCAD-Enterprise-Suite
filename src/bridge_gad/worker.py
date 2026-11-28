@@ -14,7 +14,7 @@ import logging
 import os
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +99,6 @@ except ImportError:
 # ── Entrypoint ────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    import asyncio
     try:
         from arq import run_worker
         run_worker(WorkerSettings)

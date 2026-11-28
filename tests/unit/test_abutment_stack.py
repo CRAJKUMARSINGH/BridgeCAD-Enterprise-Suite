@@ -35,7 +35,7 @@ def test_unset_dirt_wall_still_resolves(blank_project):
 
     The dirt wall is no longer an input that *sets* the cap top: §3 makes the
     cap seat-driven (soffit − bearing − pedestal) and the wall height the
-    derived clearance between the cap top and the approach-slab soffit. An
+    derived clearance between the cap top and the concrete slab top. An
     unset field therefore still resolves to an ordered, positive wall.
     """
     blank_project.substructure = blank_project.substructure.model_copy(
@@ -44,3 +44,5 @@ def test_unset_dirt_wall_still_resolves(blank_project):
     st = resolve_abutment_stack(blank_project)
     assert st.cap_top < st.app_bot
     assert st.dirt_wall_h > 0
+    assert st.dirt_wall_top == st.slab_top
+    assert st.cap_top + st.dirt_wall_h == st.slab_top

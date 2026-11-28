@@ -133,8 +133,7 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
     # at a large scale pushed the bar and its labels through the bottom border
     # (011 and 013 — labels at y=6.4 and y=-9.6 against a border at y=10).
     # Raise the road surface by the shortfall so the whole stack stays inside.
-    base_y = max(_BASE_Y, 12.0 + (wc_t_m + deck_t_m + gd_m) * sc
-                 + _OFF_SB + th * 1.2 + 4.0)
+    base_y = max(_BASE_Y, 12.0 + (wc_t_m + deck_t_m + gd_m) * sc + _OFF_SB + th * 1.2 + 4.0)
 
     def hx(x_m):
         return cx + x_m * sc  # transverse offset → sheet X
@@ -361,8 +360,14 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
             x0 = -outer_half if sx < 0 else clear / 2.0
             rectangle(msp, bx(x0), by(clear), wall * sc, clear * sc, layer="SUB-BOX-CELL", lw=35)
             hatch_rect(
-                msp, bx(x0), by(clear), wall * sc, clear * sc,
-                pattern="ANSI31", scale=sc * 0.016, layer="STRUC-HATCHING",
+                msp,
+                bx(x0),
+                by(clear),
+                wall * sc,
+                clear * sc,
+                pattern="ANSI31",
+                scale=sc * 0.016,
+                layer="STRUC-HATCHING",
             )
 
         # Four 45° haunches at the inner corners.
@@ -377,13 +382,23 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
         # Raft under the bottom slab, with a 900 mm rubble apron on each face.
         if raft:
             rectangle(
-                msp, bx(-outer_half - 0.55), by(clear + raft),
-                (2.0 * (outer_half + 0.55)) * sc, raft * sc, layer="SUB-RAFT", lw=50,
+                msp,
+                bx(-outer_half - 0.55),
+                by(clear + raft),
+                (2.0 * (outer_half + 0.55)) * sc,
+                raft * sc,
+                layer="SUB-RAFT",
+                lw=50,
             )
             for ax in (-outer_half - 0.9, outer_half):
                 rectangle(
-                    msp, bx(ax), by(clear + raft), 0.9 * sc, raft * sc,
-                    layer="SUB-APRON", lw=25,
+                    msp,
+                    bx(ax),
+                    by(clear + raft),
+                    0.9 * sc,
+                    raft * sc,
+                    layer="SUB-APRON",
+                    lw=25,
                 )
         gird_bot = by(clear + raft)
 
@@ -391,15 +406,22 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
             msp,
             f"RCC BOX CELL — TYPICAL CELL, CLEAR {clear:.2f} m, WALL {wall * 1000:.0f} mm, "
             f"HAUNCH {hch * 1000:.0f} mm",
-            hx(0), gird_bot - th * 2.4, height=th * 1.0,
-            layer="TEXT-GENERAL", halign="CENTER",
+            hx(0),
+            gird_bot - th * 2.4,
+            height=th * 1.0,
+            layer="TEXT-GENERAL",
+            halign="CENTER",
         )
         text(
             msp,
             f"{sum(fd.unit_cell_counts)} CELLS IN {len(fd.unit_cell_counts)} UNITS "
             f"ALONG THE DECK — SEE LONGITUDINAL SECTION",
-            hx(0), gird_bot - th * 3.8, height=th * 0.85,
-            layer="TEXT-SPEC", halign="CENTER", color=8,
+            hx(0),
+            gird_bot - th * 3.8,
+            height=th * 0.85,
+            layer="TEXT-SPEC",
+            halign="CENTER",
+            color=8,
         )
 
     elif is_arch:
@@ -417,16 +439,30 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
         ring_top = gird_top
         ring_bot = ring_top - ring_m * sc
         rectangle(
-            msp, hx(-ring_w / 2.0), ring_bot, ring_w * sc, ring_m * sc,
-            layer="SUPER-ARCH-RING", lw=35,
+            msp,
+            hx(-ring_w / 2.0),
+            ring_bot,
+            ring_w * sc,
+            ring_m * sc,
+            layer="SUPER-ARCH-RING",
+            lw=35,
         )
         hatch_rect(
-            msp, hx(-ring_w / 2.0), ring_bot, ring_w * sc, ring_m * sc,
-            pattern="ANSI31", scale=sc * 0.016, layer="STRUC-HATCHING",
+            msp,
+            hx(-ring_w / 2.0),
+            ring_bot,
+            ring_w * sc,
+            ring_m * sc,
+            pattern="ANSI31",
+            scale=sc * 0.016,
+            layer="STRUC-HATCHING",
         )
         line(
-            msp, (hx(-ring_w / 2.0), ring_top), (hx(ring_w / 2.0), ring_top),
-            layer="SUPER-ARCH-SOFFIT", lw=50,
+            msp,
+            (hx(-ring_w / 2.0), ring_top),
+            (hx(ring_w / 2.0), ring_top),
+            layer="SUPER-ARCH-SOFFIT",
+            lw=50,
         )
 
         if "PRECAST" in sst:
@@ -439,22 +475,34 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
             # view and the BOQ use, so the strip arrangement cannot drift.
             for gc in strip_offsets(n_str, strip_w, gap_m):
                 line(
-                    msp, (hx(gc), ring_bot), (hx(gc), ring_top),
-                    layer="SUPER-PRECAST-BLOCK", lw=25,
+                    msp,
+                    (hx(gc), ring_bot),
+                    (hx(gc), ring_top),
+                    layer="SUPER-PRECAST-BLOCK",
+                    lw=25,
                 )
             for i in range(gap_pairs(n_str, strip_w, gap_m)):
                 gx = -ring_w / 2.0 + (i + 1) * strip_w + i * gap_m
                 rectangle(
-                    msp, hx(gx), ring_bot, gap_m * sc, ring_m * sc,
-                    layer="SUPER-STRIP-GAP", lw=18,
+                    msp,
+                    hx(gx),
+                    ring_bot,
+                    gap_m * sc,
+                    ring_m * sc,
+                    layer="SUPER-STRIP-GAP",
+                    lw=18,
                 )
             text(
                 msp,
                 f"PRECAST BLOCK ARCH — {n_str} STRIPS @ {strip_w:.2f} m WITH "
                 f"{gap_m * 1000:.0f} mm GAPS ({gap_pairs(n_str, strip_w, gap_m)} LONGITUDINAL), "
                 f"{int(getattr(ss, 'arch_block_count', 0))} BLOCKS",
-                hx(0), ring_bot - th * 2.4, height=th * 0.85,
-                layer="TEXT-SPEC", halign="CENTER", color=8,
+                hx(0),
+                ring_bot - th * 2.4,
+                height=th * 0.85,
+                layer="TEXT-SPEC",
+                halign="CENTER",
+                color=8,
             )
         else:
             text(
@@ -462,8 +510,12 @@ def _draw(msp: Any, project: Any, scale_denom: int | None = None) -> None:
                 f"OPEN-SPANDREL ARCH — RING {ring_m * 1000:.0f} mm, "
                 f"RISE {float(getattr(ss, 'arch_rise_mm', 0) or 0) / 1000.0:.2f} m "
                 f"(25-STATION SOFFIT SCHEDULE ON LONGITUDINAL SECTION)",
-                hx(0), ring_bot - th * 2.4, height=th * 0.85,
-                layer="TEXT-SPEC", halign="CENTER", color=8,
+                hx(0),
+                ring_bot - th * 2.4,
+                height=th * 0.85,
+                layer="TEXT-SPEC",
+                halign="CENTER",
+                color=8,
             )
 
         gird_bot = ring_bot

@@ -6,6 +6,8 @@ is invisibly unknown.
 """
 from __future__ import annotations
 
+from decimal import Decimal
+
 import pytest
 
 from . import contract
@@ -20,6 +22,19 @@ from bridgecad_bill.provenance import (  # noqa: E402
 def _lines():
     from bridgecad_bill.processor import build_boq
     return build_boq(contract.make_project("simple_12m"))
+
+
+def test_formwork_requires_measurements_and_deducts_bearing_contact():
+    """Two faces give (10.00 − 0.25) + (5.00 − 0.50) = 14.25 square metres."""
+    from bridgecad_bill.measurers import measure_formwork
+
+    project = contract.make_project("simple_12m")
+    with pytest.raises(ValueError, match="requires at least one measured face"):
+        measure_formwork(project, [])
+
+    measured = measure_formwork(project, [("north", 10, 0.25), ("south", 5, 0.50)])
+    assert measured.quantity == Decimal("14.25")
+    assert measured.entity_ids == ("north", "south")
 
 
 def test_every_line_has_a_status():

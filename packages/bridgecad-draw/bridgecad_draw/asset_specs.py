@@ -23,8 +23,7 @@ WHAT IS *NOT* INVENTED
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Sequence
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
@@ -74,7 +73,9 @@ class SlabBridgeSpec:
     pier_step_m: float = 0.30
     pier_steps_m: tuple[float, float, float, float] = (9.3, 9.9, 10.5, 11.1)
     hfl: float | None = None  # not scheduled on the source sheet
-    seismic_zone: str = "III"  # IRC:6:2017 Cl.219 — zone for drawing title block; override per project
+    seismic_zone: str = (
+        "III"  # IRC:6:2017 Cl.219 — zone for drawing title block; override per project
+    )
     notes: tuple[str, ...] = (
         "ALL DIMENSIONS ARE IN mm AND LEVELS IN METRES UNLESS OTHERWISE STATED.",
         "DRAWING IS NOT TO SCALE. DO NOT SCALE THE PRINT.",
@@ -122,7 +123,7 @@ class SlabBridgeSpec:
             f"SEISMIC ZONE :- {self.seismic_zone}  (IRC:6:2017 Cl.219). "
             "DESIGN FOR SEISMIC FORCES AS PER IRC:6:2017 Cl.219."
         )
-        return self.notes + (seismic_note,)
+        return (*self.notes, seismic_note)
 
     def schedule_rows(self) -> list[list[str]]:
         rows = [

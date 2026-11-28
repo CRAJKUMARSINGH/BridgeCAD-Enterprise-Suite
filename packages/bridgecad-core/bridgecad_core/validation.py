@@ -8,6 +8,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass, field
 
+from .drawing_audit import collect_layout_audit
 from .models import BridgeProject
 from .types import ConcreteGrade, SeismicZone, ValidationSeverity
 
@@ -3478,21 +3479,7 @@ def _foundation_family(p: BridgeProject) -> str:
     ).upper()
 
 
-def _layout_audit(p: BridgeProject):
-    """Return the layout audit, or ``None`` when the draw package is absent."""
-    try:
-        from bridgecad_draw.layout_audit import collect
-    except Exception:  # noqa: BLE001 — draw package not installed in this env
-        return None
-    try:
-        return collect(p)
-    except Exception:  # noqa: BLE001 — a failed audit must not become an ERR row
-        return None
-
-
-def _skip(
-    check_id: str, desc: str, sev: ValidationSeverity, reason: str
-) -> ValidationFinding:
+def _skip(check_id: str, desc: str, sev: ValidationSeverity, reason: str) -> ValidationFinding:
     """PASS that keeps its reason — "not evaluable", never a silent CLEAN.
 
     ``_f`` blanks the message on a pass, which is right for a real clean result
@@ -3639,16 +3626,10 @@ def check_pa_strip_gap(p: BridgeProject) -> ValidationFinding:
 def check_sh_scale_on_ladder(p: BridgeProject) -> ValidationFinding:
     """W81 — QA-SH-SCALE-ON-LADDER: every printed scale is a rung of the ladder."""
     desc = "Printed scale is a rung of the standard scale ladder (ISO 5455)"
-    audit = _layout_audit(p)
+    audit = collect_layout_audit(p)
     if audit is None or not audit.rendered:
         return _needs_layout("W81", desc, ValidationSeverity.CRITICAL)
-    from bridgecad_draw.layout_audit import scale_on_ladder
-
-    bad = [
-        (sheet, denom)
-        for sheet, denom in audit.printed_scales
-        if denom != 1 and not scale_on_ladder(denom)
-    ]
+    bad = audit.invalid_scales()
     return _f(
         "W81",
         desc,
@@ -3663,7 +3644,7 @@ def check_sh_text_no_overlap(p: BridgeProject) -> ValidationFinding:
     from itertools import combinations
 
     desc = "No two sheet text bounding boxes overlap (ISO 128-22)"
-    audit = _layout_audit(p)
+    audit = collect_layout_audit(p)
     if audit is None or not audit.rendered:
         return _needs_layout("W82", desc, ValidationSeverity.CRITICAL)
     hits = [
@@ -3683,7 +3664,7 @@ def check_sh_text_no_overlap(p: BridgeProject) -> ValidationFinding:
 def check_sh_entity_in_frame(p: BridgeProject) -> ValidationFinding:
     """W83 — QA-SH-ENTITY-IN-FRAME: every drawn entity lies inside the frame."""
     desc = "Every drawn entity lies inside the sheet frame (ISO 5457)"
-    audit = _layout_audit(p)
+    audit = collect_layout_audit(p)
     if audit is None or not audit.rendered:
         return _needs_layout("W83", desc, ValidationSeverity.CRITICAL)
     return _f(
@@ -3756,7 +3737,7 @@ def check_ar_parabola_deviation(p: BridgeProject) -> ValidationFinding:
 def check_sh_band_count(p: BridgeProject) -> ValidationFinding:
     """I52 — QA-SH-BAND-COUNT: report how many bands a broken view was split into."""
     desc = "Report how many bands a broken view was split into"
-    audit = _layout_audit(p)
+    audit = collect_layout_audit(p)
     if audit is None or not audit.rendered:
         return _info_f("I52", desc, False, "layout audit not evaluated")
     if not audit.band_counts:
@@ -3772,14 +3753,10 @@ def check_sh_band_count(p: BridgeProject) -> ValidationFinding:
 def check_dr_layer_coverage(p: BridgeProject) -> ValidationFinding:
     """I53 — QA-DR-LAYER-COVERAGE: every drawn layer is in the layer registry."""
     desc = "Every drawn layer is present in the layer registry (ISO 13567)"
-    audit = _layout_audit(p)
+    audit = collect_layout_audit(p)
     if audit is None or not audit.rendered:
         return _info_f("I53", desc, False, "layout audit not evaluated")
-    try:
-        from bridgecad_draw.layers import LAYER_REGISTRY
-    except Exception:  # noqa: BLE001
-        return _info_f("I53", desc, False, "layer registry unavailable")
-    unknown = sorted(audit.layers_drawn - set(LAYER_REGISTRY) - {"0"})
+    unknown = audit.unregistered_layers()
     return _info_f(
         "I53",
         desc,
@@ -3791,7 +3768,7 @@ def check_dr_layer_coverage(p: BridgeProject) -> ValidationFinding:
 def check_dr_nts_claim(p: BridgeProject) -> ValidationFinding:
     """I54 — QA-DR-NTS-CLAIM: a broken view carries its not-to-scale claim."""
     desc = "A broken view carries its not-to-scale claim"
-    audit = _layout_audit(p)
+    audit = collect_layout_audit(p)
     if audit is None or not audit.rendered:
         return _info_f("I54", desc, False, "layout audit not evaluated")
     broken = sorted(audit.band_counts)

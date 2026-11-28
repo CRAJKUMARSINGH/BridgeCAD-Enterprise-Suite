@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import zipfile
 from io import BytesIO
 from pathlib import Path
@@ -35,6 +34,7 @@ logger = logging.getLogger(__name__)
 
 # ── IRC/IS Bridge Parameter Validator ────────────────────────────────────────
 
+
 def validate_bridge_parameters(variables: Dict[str, Any]) -> Dict[str, Any]:
     """Validate bridge parameters against IRC/IS standards.
 
@@ -48,8 +48,8 @@ def validate_bridge_parameters(variables: Dict[str, Any]) -> Dict[str, Any]:
 
     try:
         # Vertical clearance (IRC 5:2015 — minimum 5.5m)
-        rtl   = float(variables.get("RTL",   variables.get("rtl",   100)))
-        datum = float(variables.get("DATUM", variables.get("datum",  95)))
+        rtl = float(variables.get("RTL", variables.get("rtl", 100)))
+        datum = float(variables.get("DATUM", variables.get("datum", 95)))
         clearance = rtl - datum
         if clearance < 5.5:
             issues.append(
@@ -57,7 +57,7 @@ def validate_bridge_parameters(variables: Dict[str, Any]) -> Dict[str, Any]:
             )
 
         # Slab thickness — L/20 rule
-        span1  = float(variables.get("SPAN1",  variables.get("span1",  12)))
+        span1 = float(variables.get("SPAN1", variables.get("span1", 12)))
         slbthe = float(variables.get("SLBTHE", variables.get("slbthe", 0.75)))
         min_thickness = span1 / 20
         if slbthe < min_thickness:
@@ -157,10 +157,10 @@ def validate_bridge_parameters(variables: Dict[str, Any]) -> Dict[str, Any]:
 
     score = max(0, 100 - (len(issues) * 20 + len(warnings) * 5))
     return {
-        "is_valid":        len(issues) == 0,
+        "is_valid": len(issues) == 0,
         "critical_issues": issues,
-        "warnings":        warnings,
-        "score":           score,
+        "warnings": warnings,
+        "score": score,
     }
 
 
@@ -182,19 +182,19 @@ def cleanup_dxf_entities(doc, eps: float = 1e-6) -> Dict[str, int]:
     """
     msp = doc.modelspace()
     removed = {
-        "lines":      0,
-        "polylines":  0,
-        "circles":    0,
-        "arcs":       0,
-        "points":     0,
+        "lines": 0,
+        "polylines": 0,
+        "circles": 0,
+        "arcs": 0,
+        "points": 0,
     }
     to_remove: List[Tuple[str, Any]] = []
 
     for e in list(msp.query("LINE")):
         try:
             s, t = e.dxf.start, e.dxf.end
-            dx, dy, dz = float(s.x)-float(t.x), float(s.y)-float(t.y), float(s.z)-float(t.z)
-            if dx*dx + dy*dy + dz*dz <= eps*eps:
+            dx, dy, dz = float(s.x) - float(t.x), float(s.y) - float(t.y), float(s.z) - float(t.z)
+            if dx * dx + dy * dy + dz * dz <= eps * eps:
                 to_remove.append(("lines", e))
         except Exception:
             continue
@@ -203,9 +203,11 @@ def cleanup_dxf_entities(doc, eps: float = 1e-6) -> Dict[str, int]:
         try:
             pts = [tuple(p[:2]) for p in e.get_points("xy")]
             if len(pts) < 2:
-                to_remove.append(("polylines", e)); continue
-            xs = [p[0] for p in pts]; ys = [p[1] for p in pts]
-            if (max(xs)-min(xs))**2 + (max(ys)-min(ys))**2 <= eps*eps:
+                to_remove.append(("polylines", e))
+                continue
+            xs = [p[0] for p in pts]
+            ys = [p[1] for p in pts]
+            if (max(xs) - min(xs))**2 + (max(ys) - min(ys))**2 <= eps * eps:
                 to_remove.append(("polylines", e))
         except Exception:
             continue
@@ -412,65 +414,65 @@ BRIDGE_TEMPLATES: Dict[str, Dict[str, Any]] = {
             "WEEP_DIAM": 100, "WEEP_C_TO_C": 1000,
             "WEEP_ROWS": 2, "WEEP_STAGGER": 1,
             # ── Soil Profile (3 layers) ─────────────────────────────
-            "SOIL1_NAME":  "SOFT ROCK", "SOIL1_THICK": 0.50,
-            "SOIL1_HATCH": "ANSI31",    "SOIL1_COLOR": 6,
-            "SOIL2_NAME":  "SOIL",      "SOIL2_THICK": 0.50,
-            "SOIL2_HATCH": "ANSI37",    "SOIL2_COLOR": 3,
-            "SOIL3_NAME":  "HARD ROCK", "SOIL3_THICK": 0.50,
-            "SOIL3_HATCH": "AR-SAND",   "SOIL3_COLOR": 5,
+            "SOIL1_NAME": "SOFT ROCK", "SOIL1_THICK": 0.50,
+            "SOIL1_HATCH": "ANSI31", "SOIL1_COLOR": 6,
+            "SOIL2_NAME": "SOIL", "SOIL2_THICK": 0.50,
+            "SOIL2_HATCH": "ANSI37", "SOIL2_COLOR": 3,
+            "SOIL3_NAME": "HARD ROCK", "SOIL3_THICK": 0.50,
+            "SOIL3_HATCH": "AR-SAND", "SOIL3_COLOR": 5,
             "AVG_GL_RL": 101.50,
             # ── Bridge Schedule Table ───────────────────────────────
-            "SCHED_SNO":       "1",
-            "SCHED_CHAINAGE":  "CH 2+300",
-            "SCHED_TYPE":      "Slab",
-            "SCHED_FRL":       102.515,
-            "SCHED_BL":        96.900,
-            "SCHED_PROPOSED":  "7x9.0 m",
+            "SCHED_SNO": "1",
+            "SCHED_CHAINAGE": "CH 2+300",
+            "SCHED_TYPE": "Slab",
+            "SCHED_FRL": 102.515,
+            "SCHED_BL": 96.900,
+            "SCHED_PROPOSED": "7x9.0 m",
             "SCHED_SPAN_TEXT": "7x9.0m Slab (Total 63m)",
-            "SCHED_HEIGHT":    5.515,
-            "SCHED_B1":        1.90,
-            "SCHED_B2":        0.95,
-            "SCHED_B3":        2.25,
-            "SCHED_B4":        0.67,
+            "SCHED_HEIGHT": 5.515,
+            "SCHED_B1": 1.90,
+            "SCHED_B2": 0.95,
+            "SCHED_B3": 2.25,
+            "SCHED_B4": 0.67,
             # ── Notes Panel (13 items, matching sample PDF exactly) ─
-            "NOTE1_TEXT":  "1) All dimensions are in millimeters unless otherwise stated. Levels are in metres.",
-            "NOTE2_TEXT":  "2) All RCC works conforming to the relevant IRC/IS Specifications shall be adopted.",
-            "NOTE3_TEXT":  "3) Concrete mix: PCC M-10 for soling, PCC M-15 for abutment/return/well, RCC M-20 for general, RCC M-30 for deck slab/pier caps, minimum cement content 320 kg/m³.",
-            "NOTE4_TEXT":  "4) Reinforcement: HYSD bars Fe 500 IS:1786. TMT bars of approved make only.",
-            "NOTE5_TEXT":  "5) Clear cover to reinforcement: 40mm for deck, 50mm for piers, 60mm for footings in contact with soil.",
-            "NOTE6_TEXT":  "6) Bearing type – TAR PAPER bearing pad of approved thickness. Replace at 5 yearly maintenance cycle.",
-            "NOTE7_TEXT":  "7) Weep holes 100 mm diameter at 1000 mm c/c staggered in abutment & return walls. 300mm thick graded filter behind every weep hole.",
-            "NOTE8_TEXT":  "8) Backfill behind abutment / wing walls with non-plastic granular material. Parameters: C=0, φ ≥ 30°, γ = 18 kN/m³. Compacted 95% Proctor density in 250mm layers.",
-            "NOTE9_TEXT":  "9) Design live load basis: Class A-3 Tracked / 70-R Wheeled + Class A, per applicable IRC provisions.",
+            "NOTE1_TEXT": "1) All dimensions are in millimeters unless otherwise stated. Levels are in metres.",
+            "NOTE2_TEXT": "2) All RCC works conforming to the relevant IRC/IS Specifications shall be adopted.",
+            "NOTE3_TEXT": "3) Concrete mix: PCC M-10 for soling, PCC M-15 for abutment/return/well, RCC M-20 for general, RCC M-30 for deck slab/pier caps, minimum cement content 320 kg/m³.",
+            "NOTE4_TEXT": "4) Reinforcement: HYSD bars Fe 500 IS:1786. TMT bars of approved make only.",
+            "NOTE5_TEXT": "5) Clear cover to reinforcement: 40mm for deck, 50mm for piers, 60mm for footings in contact with soil.",
+            "NOTE6_TEXT": "6) Bearing type – TAR PAPER bearing pad of approved thickness. Replace at 5 yearly maintenance cycle.",
+            "NOTE7_TEXT": "7) Weep holes 100 mm diameter at 1000 mm c/c staggered in abutment & return walls. 300mm thick graded filter behind every weep hole.",
+            "NOTE8_TEXT": "8) Backfill behind abutment / wing walls with non-plastic granular material. Parameters: C=0, φ ≥ 30°, γ = 18 kN/m³. Compacted 95% Proctor density in 250mm layers.",
+            "NOTE9_TEXT": "9) Design live load basis: Class A-3 Tracked / 70-R Wheeled + Class A, per applicable IRC provisions.",
             "NOTE10_TEXT": "10) Scour depth: Minimum 2.00 m below HFL as per IRC-78 provisions. Founding level shall be checked against latest site bore log.",
             "NOTE11_TEXT": "11) Minimum clear vertical clearance under bridge superstructure: 5.50 m above HFL for waterway and 5.00 m above road top for approaches.",
             "NOTE12_TEXT": "12) Distance from bridge structure to nearest weir / barrage / obstruction: 20.00 metres minimum, verify with site plan.",
             "NOTE13_TEXT": "13) Expansion joints at every pier line. Neoprene / bituminous poured joint with top-seal cover plate at every 9.000 m c/c.",
             "NOTE_CONCRETE_GRADES": "PCC M-10 (soling) | PCC M-15 (abutment/return/well) | RCC M-20 (general) | RCC M-30 (deck/pier caps)",
-            "NOTE_REINF_STANDARD":   "Fe 500 HYSD bars conforming to IS:1786",
-            "NOTE_LIVE_LOAD_COMBO":  "Class A-3 Tracked / 70-R Wheeled + Class A (IRC)",
-            "NOTE_BACKFILL_PARAMS":  "C = 0 ; φ ≥ 30° ; γ = 18 kN/m³",
-            "NOTE_SCOUR_CODE":       "2.00 m below HFL — IRC-78",
-            "NOTE_DIST_TO_WEIR":     20.0,
+            "NOTE_REINF_STANDARD": "Fe 500 HYSD bars conforming to IS:1786",
+            "NOTE_LIVE_LOAD_COMBO": "Class A-3 Tracked / 70-R Wheeled + Class A (IRC)",
+            "NOTE_BACKFILL_PARAMS": "C = 0 ; φ ≥ 30° ; γ = 18 kN/m³",
+            "NOTE_SCOUR_CODE": "2.00 m below HFL — IRC-78",
+            "NOTE_DIST_TO_WEIR": 20.0,
             # ── Ground profile (optional JSON; user can provide Sheet2)
             "GROUND_PROFILE_JSON": "",
         },
-          DRAWING_NO="01-GAD-AT-CH-2-300-7X9-0",
-          PROJECT_NAME="PMGSY Minor Bridge — Chainage CH 2+300",
-          PROJECT_CODE="CH-2-300",
-          REVISION="R0",
-          OWNER_PROFILE="PMGSY",
-          SHEET_NO="1",
-          TOTAL_SHEETS="2",
-          DESIGN_LIVE_LOAD="Class A-3 / 70-R + Class A (IRC)",
-          DRAWING_STANDARD="PMGSY Minor Bridge 2-Sheet GAD Standard",
-          ROAD_CLASS="PMGSY Village Road — 7.50 m clear carriageway",
-          DRAWN_BY="Design Cell — Bridge GAD Generator",
-          CHECKED_BY="Design Engineer (Structures)",
-          APPROVED_BY="Executive Engineer / Competent Authority",
-          COMPANY_NAME="RKS LEGAL — Techno Legal Consultants",
-          COMPANY_FULL="RKS LEGAL, Techno Legal Consultants, Udaipur",
-          DRAWING_TITLE="GENERAL ARRANGEMENT DRAWING (GAD) FOR 7 × 9.0 m MINOR SLAB BRIDGE AT CH 2+300",
+            DRAWING_NO="01-GAD-AT-CH-2-300-7X9-0",
+            PROJECT_NAME="PMGSY Minor Bridge — Chainage CH 2+300",
+            PROJECT_CODE="CH-2-300",
+            REVISION="R0",
+            OWNER_PROFILE="PMGSY",
+            SHEET_NO="1",
+            TOTAL_SHEETS="2",
+            DESIGN_LIVE_LOAD="Class A-3 / 70-R + Class A (IRC)",
+            DRAWING_STANDARD="PMGSY Minor Bridge 2-Sheet GAD Standard",
+            ROAD_CLASS="PMGSY Village Road — 7.50 m clear carriageway",
+            DRAWN_BY="Design Cell — Bridge GAD Generator",
+            CHECKED_BY="Design Engineer (Structures)",
+            APPROVED_BY="Executive Engineer / Competent Authority",
+            COMPANY_NAME="RKS LEGAL — Techno Legal Consultants",
+            COMPANY_FULL="RKS LEGAL, Techno Legal Consultants, Udaipur",
+            DRAWING_TITLE="GENERAL ARRANGEMENT DRAWING (GAD) FOR 7 × 9.0 m MINOR SLAB BRIDGE AT CH 2+300",
         ),
     },
 }
@@ -827,24 +829,24 @@ def batch_generate(
                 if ok and output_path.exists():
                     results.append({
                         "filename": safe_name,
-                        "success":  True,
+                        "success": True,
                         "dxf_bytes": output_path.read_bytes(),
-                        "error":    None,
+                        "error": None,
                     })
                 else:
                     results.append({
                         "filename": safe_name,
-                        "success":  False,
+                        "success": False,
                         "dxf_bytes": None,
-                        "error":    "Generation returned no output",
+                        "error": "Generation returned no output",
                     })
         except Exception as exc:
             logger.exception("Batch generation failed for %s", safe_name)
             results.append({
                 "filename": safe_name,
-                "success":  False,
+                "success": False,
                 "dxf_bytes": None,
-                "error":    str(exc),
+                "error": str(exc),
             })
     return results
 

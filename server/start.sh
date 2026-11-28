@@ -6,8 +6,8 @@ npm run build
 
 # Keep the engineering API private to the deployment process. The Node gateway
 # forwards /api/* requests here and exposes only its own public port.
-PYTHONPATH=src python -m uvicorn bridge_gad.api:app \
-  --host 0.0.0.0 \
+PYTHONPATH=./scripts:. python -m uvicorn bridgecad_api.main:app \
+  --host 127.0.0.1 \
   --port 8000 &
 PYTHON_PID=$!
 

@@ -12,8 +12,10 @@ switching units (m / mm) meant re-generating every sheet.
     chosen unit, so CAD shows true site values and re-measures on edit,
   * carries the unit suffix/decimals from the style, not from a string.
 """
+
 from __future__ import annotations
 
+from contextlib import suppress
 from dataclasses import dataclass
 from typing import Any, Literal
 
@@ -50,7 +52,11 @@ def dimlfac_for(scale_denom: int, units: Units) -> float:
 
 def configure_dimstyle(doc: Any, cfg: DimStyleConfig, scale_denom: int) -> Any:
     """Create or update the named style; returns the DIMSTYLE table entry."""
-    ds = doc.dimstyles.get(cfg.name) if doc.dimstyles.has_entry(cfg.name) else doc.dimstyles.add(cfg.name)
+    ds = (
+        doc.dimstyles.get(cfg.name)
+        if doc.dimstyles.has_entry(cfg.name)
+        else doc.dimstyles.add(cfg.name)
+    )
     if doc.styles.has_entry(cfg.text_style):
         ds.dxf.dimtxsty = cfg.text_style
     ds.dxf.dimtxt = cfg.text_mm
@@ -79,10 +85,9 @@ def apply_native_dimensions(doc: Any, cfg: DimStyleConfig, scale_denom: int) -> 
         for key in ("dimtxt", "dimasz", "dimgap", "dimlfac", "dimdec", "dimpost"):
             ov.dimstyle_attribs.pop(key, None)
         ov.commit()
-        try:
+        # The entity remains valid with its previous geometry block if rendering fails.
+        with suppress(Exception):
             ov.render()
-        except Exception:  # geometry block stays as before; entity still valid
-            pass
         n += 1
     doc.header["$DIMSTYLE"] = cfg.name
     return n

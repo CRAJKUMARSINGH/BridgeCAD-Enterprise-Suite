@@ -220,8 +220,7 @@ class SupportLevelRecord:
     def to_drawing_floats(self) -> dict[str, float | None]:
         """Render-boundary conversion: the only place these become floats."""
         return {
-            key: (None if value is None else float(value))
-            for key, value in self.levels().items()
+            key: (None if value is None else float(value)) for key, value in self.levels().items()
         }
 
     def to_json(self) -> dict[str, Any]:
@@ -232,19 +231,15 @@ class SupportLevelRecord:
             "authority": self.authority.value,
             "topology": self.topology.value,
             "levels_m": {
-                key: (None if value is None else str(value))
-                for key, value in self.levels().items()
+                key: (None if value is None else str(value)) for key, value in self.levels().items()
             },
-            "shaft_height_m": (
-                None if self.shaft_height_m is None else str(self.shaft_height_m)
-            ),
+            "shaft_height_m": (None if self.shaft_height_m is None else str(self.shaft_height_m)),
             "footing_depth_m": (
                 None if self.footing_depth_m is None else str(self.footing_depth_m)
             ),
             "provenance": {k: v.value for k, v in self.provenance.items()},
             "issues": [
-                {"code": i.code, "field": i.field_name, "message": i.message}
-                for i in self.issues
+                {"code": i.code, "field": i.field_name, "message": i.message} for i in self.issues
             ],
         }
 
@@ -263,7 +258,7 @@ def _dec(value: Any) -> Decimal | None:
     else:
         try:
             out = Decimal(str(value))
-        except Exception:  # noqa: BLE001 - any uncoercible value is "absent"
+        except Exception:  # - any uncoercible value is "absent"
             return None
     return out if out.is_finite() else None
 
@@ -366,9 +361,7 @@ def resolve_support_levels(inp: SupportLevelInput) -> SupportLevelRecord:
                 FieldSource.ASSUMED if inp.bearing_depth_assumed else FieldSource.SUPPLIED
             )
             prov["pedestal_height_m"] = (
-                FieldSource.ASSUMED
-                if inp.pedestal_height_assumed
-                else FieldSource.SUPPLIED
+                FieldSource.ASSUMED if inp.pedestal_height_assumed else FieldSource.SUPPLIED
             )
             prov["cap_top_rl_m"] = FieldSource.DERIVED
 

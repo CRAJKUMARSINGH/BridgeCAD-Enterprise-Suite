@@ -30,6 +30,8 @@ const r2 = (n) => Math.round(n * 100) / 100;
 /** Layer table: name -> [colour, linetype]. */
 export const LAYERS = Object.freeze({
   "FOUND-CAP": ["#d9c26a", "CONTINUOUS"],
+  "FOUND-PIER": ["#d9c26a", "CONTINUOUS"],
+  "FOUND-PCC": ["#f5a880", "CONTINUOUS"],
   "FOUND-PILE": ["#d9c26a", "CONTINUOUS"],
   "FOUND-WELL": ["#d9c26a", "CONTINUOUS"],
   "SUB-PIER": ["#9fc3d8", "CONTINUOUS"],
@@ -52,6 +54,7 @@ export const LAYERS = Object.freeze({
   "TEXT-LEVEL": ["#e08a5a", "CONTINUOUS"],
   "CIVIL-SCOUR": ["#5fb0c8", "DASHED"],
   "CIVIL-HFL": ["#5fb0c8", "DASHED"],
+  "CIVIL-ROAD": ["#5fb0c8", "CONTINUOUS"],
   FRAME: ["#8a969e", "CONTINUOUS"],
 });
 
@@ -312,9 +315,9 @@ const ABT_PROFILE = Object.freeze({
  * wall outward at +x). The cap soffit sits on `yCapB` and the face is anchored
  * at `xFace`; the stem height is the project's abutment height.
  */
-/** @param {"left" | "right"} side @param {number} xFace @param {number} yCapB @param {number} stemHM @returns {any} */
-export function abutmentProfile(side, xFace, yCapB, stemHM) {
-  const A = ABT_PROFILE;
+/** @param {"left" | "right"} side @param {number} xFace @param {number} yCapB @param {number} stemHM @param {Partial<typeof ABT_PROFILE> & {heelOff?: number}} [dimensions] @returns {any} */
+export function abutmentProfile(side, xFace, yCapB, stemHM, dimensions = {}) {
+  const A = { ...ABT_PROFILE, ...dimensions };
   const s = side === "right" ? -1 : 1;
   const stemH = Math.max(NUM(stemHM, 2.8), 0.5);
   const x1 = xFace;
@@ -328,7 +331,7 @@ export function abutmentProfile(side, xFace, yCapB, stemHM) {
   const x7 = x6 + s * mm(A.toeOff);
   const x14 = x1 - s * mm(A.dirtW);
   const x12 = x14 - s * mm(stemH / A.backBatter);
-  const x10 = x12 - s * mm(A.toeOff);
+  const x10 = x12 - s * mm(dimensions.heelOff ?? A.toeOff);
   const pts = [
     x1, rtl, x1, capt, x3, capt, x3, yCapB,
     x5, altbl, x6, altbl, x7, altbl, x7, y8,

@@ -10,6 +10,7 @@ The geometry is *not* redrawn: Sheet 5 is built once at its own scale, the
 half's entities are copied and uniformly scaled. Pier and abutment stay
 byte-for-byte consistent with Sheet 5.
 """
+
 from __future__ import annotations
 
 import re
@@ -97,7 +98,8 @@ def generate(project: Any, output_path: str | Path, part: Part = "pier") -> Path
         msp,
         project_title=getattr(pm, "project_title", "") or "",
         bridge_name=getattr(pm, "bridge_name", "") or "",
-        drawing_no=(getattr(pm, "drawing_no", "GAD-005") or "GAD-005") + ("A" if part == "pier" else "B"),
+        drawing_no=(getattr(pm, "drawing_no", "GAD-005") or "GAD-005")
+        + ("A" if part == "pier" else "B"),
         drawing_title=f"ENLARGED {part.upper()} DETAILS",
         revision=getattr(getattr(pm, "revision", None), "name", "R0") or "R0",
         scale_str=f"1:{denom}",
@@ -126,11 +128,9 @@ def generate(project: Any, output_path: str | Path, part: Part = "pier") -> Path
     # replacing the stale cross-document INSERT references.  Any dimension whose
     # render fails is left as-is; it still represents the correct measurement,
     # it just won't have arrow geometry.
-    for dim in msp.query("DIMENSION"):
-        try:
-            dim.render()
-        except Exception:
-            pass
+    from .dim_style import DimStyleConfig, apply_native_dimensions
+
+    apply_native_dimensions(doc, DimStyleConfig(units="m", decimals=3), denom)
 
     msp.add_text(
         f"ENLARGED {part.upper()} DETAILS  —  SCALE 1:{denom}",

@@ -3,6 +3,7 @@ export type SheetTheme = {
   bg: string;
   frame: string;
   found: string;
+  pcc: string;
   sub: string;
   bearing: string;
   super: string;
@@ -25,6 +26,7 @@ export const INK: SheetTheme = {
   bg: "#0e1418",
   frame: "#8a969e",
   found: "#d9c26a",
+  pcc: "#f5a880",
   sub: "#9fc3d8",
   bearing: "#e08a5a",
   super: "#7fb2cc",
@@ -45,6 +47,7 @@ export const PAPER: SheetTheme = {
   bg: "#fbf9f2",
   frame: "#3c3c3c",
   found: "#8a6a12",
+  pcc: "#9a411f",
   sub: "#245a72",
   bearing: "#a4471c",
   super: "#2f6b8a",
@@ -63,6 +66,8 @@ export const PAPER: SheetTheme = {
 const TOKEN: Record<string, keyof SheetTheme> = {
   FRAME: "frame",
   "FOUND-CAP": "found",
+  "FOUND-PIER": "found",
+  "FOUND-PCC": "pcc",
   "FOUND-PILE": "found",
   "FOUND-WELL": "found",
   "SUB-PIER": "sub",
@@ -85,6 +90,9 @@ const TOKEN: Record<string, keyof SheetTheme> = {
   "TEXT-LEVEL": "level",
   "CIVIL-SCOUR": "civil",
   "CIVIL-HFL": "civil",
+  "CIVIL-ROAD": "civil",
+  "CIVIL-OFL": "civil",
+  "CIVIL-NGL": "civil",
 };
 
 export const inkFor = (theme: SheetTheme, layer: string): string =>

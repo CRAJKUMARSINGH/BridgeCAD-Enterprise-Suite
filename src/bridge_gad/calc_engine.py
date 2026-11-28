@@ -21,7 +21,7 @@ import ast
 import logging
 import math
 import operator
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Set
 
 logger = logging.getLogger(__name__)
 
@@ -221,11 +221,11 @@ class CalcEngine:
         """Return a CalcEngine pre-loaded with standard bridge derived formulas."""
         engine = cls()
         engine.register_formula("LBRIDGE", "SPAN1 * NSPAN")
-        engine.register_formula("RIGHT",   "LEFT + LBRIDGE")
-        engine.register_formula("CAPT",    "TOPRL + 0.5")
-        engine.register_formula("CAPB",    "TOPRL - 0.7")
-        engine.register_formula("SOFL",    "TOPRL - SLBTHE")
-        engine.register_formula("FUTRL",   "DATUM - 5.0")
+        engine.register_formula("RIGHT", "LEFT + LBRIDGE")
+        engine.register_formula("CAPT", "TOPRL + 0.5")
+        engine.register_formula("CAPB", "TOPRL - 0.7")
+        engine.register_formula("SOFL", "TOPRL - SLBTHE")
+        engine.register_formula("FUTRL", "DATUM - 5.0")
         return engine
 
     def summary(self) -> str:

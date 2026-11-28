@@ -49,7 +49,13 @@ from PIL import Image, ImageDraw  # noqa: E402
 # Fixed inputs (paths only; no measurements are fabricated here)
 # --------------------------------------------------------------------------- #
 REF_PDF = REPO / "CODE-JUNCTION" / "GENERAL ARRANGEMENT DRAWINGS.pdf"
-GEN_DIR = REPO / "artifacts" / "gad-acceptance" / "nine_span_slab" / "e969b72979196f78e2d04129c2462268d6caf099"
+GEN_DIR = (
+    REPO
+    / "artifacts"
+    / "gad-acceptance"
+    / "nine_span_slab"
+    / "e969b72979196f78e2d04129c2462268d6caf099"
+)
 GEN_PREFIX = "e969b72979196f78e2d04129c2462268d6caf099"
 PARAMS_JSON = GEN_DIR / "params.resolved.json"
 SUMMARY_JSON = GEN_DIR.parent / "summary.json"
@@ -61,9 +67,9 @@ OVL_DIR = OUT_DIR / "overlays"
 DPI = 150
 PT_PER_IN = 72.0
 MM_PER_IN = 25.4
-PT_TO_MM = MM_PER_IN / PT_PER_IN          # 0.352777...
-PX_PER_PT = DPI / PT_PER_IN               # reference raster px per PDF pt
-PX_PER_MM_PAPER = DPI / MM_PER_IN         # 1:1 paper mm -> px
+PT_TO_MM = MM_PER_IN / PT_PER_IN  # 0.352777...
+PX_PER_PT = DPI / PT_PER_IN  # reference raster px per PDF pt
+PX_PER_MM_PAPER = DPI / MM_PER_IN  # 1:1 paper mm -> px
 
 # PM==PDF page offset: printed booklet page n == PDF page n + 3 (index is PDF 3).
 PRINTED_TO_PDF_OFFSET = 3
@@ -240,7 +246,9 @@ def ink_bbox(arr: np.ndarray) -> tuple[int, int, int, int] | None:
 # Reference manifest
 # --------------------------------------------------------------------------- #
 def build_reference_manifest(doc, sha: str, nbytes: int) -> dict:
-    page_sizes = [[round(doc[i].rect.width, 2), round(doc[i].rect.height, 2)] for i in range(doc.page_count)]
+    page_sizes = [
+        [round(doc[i].rect.width, 2), round(doc[i].rect.height, 2)] for i in range(doc.page_count)
+    ]
     all_same = len({tuple(s) for s in page_sizes}) == 1
     w_pt, h_pt = page_sizes[0]
     w_mm, h_mm = round(w_pt * PT_TO_MM, 1), round(h_pt * PT_TO_MM, 1)
@@ -255,7 +263,9 @@ def build_reference_manifest(doc, sha: str, nbytes: int) -> dict:
         None,
     )
     if baseline_entry is None:
-        baseline_entry = next((e for e in entries if e["drawing_number"].replace(" ", "") == "BR-I/2022-002"), None)
+        baseline_entry = next(
+            (e for e in entries if e["drawing_number"].replace(" ", "") == "BR-I/2022-002"), None
+        )
 
     baseline = None
     if baseline_entry is not None:
@@ -339,10 +349,20 @@ def reference_evidence(doc, page_no_1based: int) -> dict:
     ]
     view_label_lines: list[str] = []
     for ln in lines:
-        if any(k in ln for k in (
-            "ELEVATION (", "PART PLAN", "CROSS SECTION AT", "SECTION AT",
-            "DETAILS OF ABUTMENT", "DETAILS OF CRASH BARRIER",
-        )) and ln not in view_label_lines:
+        if (
+            any(
+                k in ln
+                for k in (
+                    "ELEVATION (",
+                    "PART PLAN",
+                    "CROSS SECTION AT",
+                    "SECTION AT",
+                    "DETAILS OF ABUTMENT",
+                    "DETAILS OF CRASH BARRIER",
+                )
+            )
+            and ln not in view_label_lines
+        ):
             view_label_lines.append(ln)
 
     return {
@@ -369,16 +389,30 @@ def reference_evidence(doc, page_no_1based: int) -> dict:
         "sheet_titleblock_lines": [s for s in sheet_titleblock_lines if s],
         "level_notation_strings_present": rls,
         "datums_present": [
-            s for s in ("DATUM LEVEL 90.00M", "GROUND LEVEL", "D.H.F.L. 99.700", "H.F.L. 98.120")
+            s
+            for s in ("DATUM LEVEL 90.00M", "GROUND LEVEL", "D.H.F.L. 99.700", "H.F.L. 98.120")
             if s in txt
         ],
         "total_length_note": "TOTAL LENGTH OF BRIDGE 40.00M. (4 SPANS OF 10.00M. c/c.)" in txt,
         "titleblock_field_strings": [
-            s for s in (
-                "DRG. No.", "JOB No.", "Page-03", "NOTES :-", "REVISION",
-                "PREPARED BY", "CHECKED BY", "RECOMMENDED BY", "APPROVED BY", "DRN BY",
-                "GOVT. OF MAHARASHTRA", "KONKAN BHAVAN, NAVI MUMBAI, PIN-400614",
-                "NALLA PATNUS", "LETTER", "UNIT", "G. A. D. Dt. 31.12.2022",
+            s
+            for s in (
+                "DRG. No.",
+                "JOB No.",
+                "Page-03",
+                "NOTES :-",
+                "REVISION",
+                "PREPARED BY",
+                "CHECKED BY",
+                "RECOMMENDED BY",
+                "APPROVED BY",
+                "DRN BY",
+                "GOVT. OF MAHARASHTRA",
+                "KONKAN BHAVAN, NAVI MUMBAI, PIN-400614",
+                "NALLA PATNUS",
+                "LETTER",
+                "UNIT",
+                "G. A. D. Dt. 31.12.2022",
                 "EXCLUSIVE",
             )
             if s in txt
@@ -390,7 +424,11 @@ def generated_evidence() -> dict:
     params = json.loads(PARAMS_JSON.read_text(encoding="utf-8"))
     resolved = params.get("resolved", {})
     summary = json.loads(SUMMARY_JSON.read_text(encoding="utf-8")) if SUMMARY_JSON.exists() else {}
-    render_status = json.loads(RENDER_STATUS_JSON.read_text(encoding="utf-8")) if RENDER_STATUS_JSON.exists() else {}
+    render_status = (
+        json.loads(RENDER_STATUS_JSON.read_text(encoding="utf-8"))
+        if RENDER_STATUS_JSON.exists()
+        else {}
+    )
 
     plan_msp = msp_of(GEN_DIR / f"{GEN_PREFIX}_Sheet1_Plan.dxf")
     ls_msp = msp_of(GEN_DIR / f"{GEN_PREFIX}_Sheet2_LongSection.dxf")
@@ -406,7 +444,6 @@ def generated_evidence() -> dict:
     # ---- plan measurement -------------------------------------------------- #
     outline = rects(plan_msp, "STRUC-OUTLINE")
     ox0, oy0, ox1, oy1 = outline[0]
-    plan_scale_mm_per_m = (ox1 - ox0) / resolved["span_lengths"].__len__() / float(resolved["span_lengths"][0])
     # span_lengths are strings; recompute cleanly:
     span_m = float(resolved["span_lengths"][0])
     n_spans = int(resolved["span_count"])
@@ -468,14 +505,18 @@ def generated_evidence() -> dict:
     xs_mm_per_m = 1000.0 / xs_declared if xs_declared else None
     xs_width_m = round(xs_width_mm_model / xs_mm_per_m, 3) if xs_mm_per_m else "BLOCKED"
     xs_thick_m = round(xs_thick_mm_model / xs_mm_per_m, 3) if xs_mm_per_m else "BLOCKED"
-    xs_wear_w_m = round((wear_rect[0][2] - wear_rect[0][0]) / xs_mm_per_m, 3) if xs_mm_per_m else "BLOCKED"
+    xs_wear_w_m = (
+        round((wear_rect[0][2] - wear_rect[0][0]) / xs_mm_per_m, 3) if xs_mm_per_m else "BLOCKED"
+    )
 
     layers = {}
     for name, msp in (("plan", plan_msp), ("long_section", ls_msp), ("cross_section", xs_msp)):
         layers[name] = sorted({e.dxf.layer for e in msp})
 
     border = layer_bbox(plan_msp, lambda e: e.dxf.layer in ("BORDER-OUTER",))
-    sheet_mm = (round(border[2] - border[0], 1), round(border[3] - border[1], 1)) if border else None
+    sheet_mm = (
+        (round(border[2] - border[0], 1), round(border[3] - border[1], 1)) if border else None
+    )
 
     return {
         "params_resolved": resolved,
@@ -493,12 +534,14 @@ def generated_evidence() -> dict:
         "generated_sheet_size_mm": sheet_mm,
         "declared_paper_note": (
             "DXF border measured (BORDER-OUTER extents). render-status.json "
-            "records render_paper=%r, which is the raster media of "
-            "png_engine.render_png, not the DXF paper." % render_status.get("render_paper")
+            "records render_paper={!r}, which is the raster media of "
+            "png_engine.render_png, not the DXF paper.".format(render_status.get("render_paper"))
         ),
         "plan": {
             "titleblock_text": tb(plan_texts),
-            "scale_label": next((t["text"] for t in plan_texts if t["text"].startswith("SCALE:")), None),
+            "scale_label": next(
+                (t["text"] for t in plan_texts if t["text"].startswith("SCALE:")), None
+            ),
             "outline_mm": [round(v, 3) for v in outline[0]],
             "mm_per_m": round(plan_mm_per_m, 6),
             "measured_total_m": round((ox1 - ox0) / plan_mm_per_m, 6),
@@ -510,7 +553,9 @@ def generated_evidence() -> dict:
         },
         "long_section": {
             "titleblock_text": tb(ls_texts),
-            "scale_label": next((t["text"] for t in ls_texts if t["text"].startswith("SCALE:")), None),
+            "scale_label": next(
+                (t["text"] for t in ls_texts if t["text"].startswith("SCALE:")), None
+            ),
             "h_scale_spec": ls_spec,
             "mm_per_m_horizontal": round(ls_mm_per_m, 6),
             "mm_per_m_vertical": round(ls_v_mm_per_m, 6),
@@ -526,14 +571,18 @@ def generated_evidence() -> dict:
         },
         "cross_section": {
             "titleblock_text": tb(xs_texts),
-            "scale_label": next((t["text"] for t in xs_texts if t["text"].startswith("SCALE:")), None),
+            "scale_label": next(
+                (t["text"] for t in xs_texts if t["text"].startswith("SCALE:")), None
+            ),
             "declared_scale": xs_declared,
             "deck_polyline_mm": [round(v, 3) for v in deck_rect[0]],
             "width_m": xs_width_m,
             "thickness_m": xs_thick_m,
             "wearing_width_m": xs_wear_w_m,
             "level_labels": [t["text"] for t in xs_texts if t["layer"] == "TEXT-LEVEL"],
-            "width_caption": next((t["text"] for t in xs_texts if t["text"].startswith("CW")), None),
+            "width_caption": next(
+                (t["text"] for t in xs_texts if t["text"].startswith("CW")), None
+            ),
         },
         "layers": layers,
     }
@@ -546,182 +595,194 @@ def build_conventions(ref: dict, gen: dict) -> list[dict]:
     gen_sheet_mm = gen["generated_sheet_size_mm"]
     rows: list[dict] = []
 
-    rows.append({
-        "id": "CONV-PAPER",
-        "requirement": "Paper size and orientation",
-        "reference_evidence": {
-            "page": f"PDF page {ref['pdf_page']} (media box)",
-            "text": f"page {ref['page_size_pt'][0]:.1f} x {ref['page_size_pt'][1]:.1f} pt = "
-                    f"{ref['page_size_mm'][0]:.1f} x {ref['page_size_mm'][1]:.1f} mm -> A2 landscape",
-        },
-        "generated_evidence": {
-            "sheet": "Sheet1_Plan.dxf BORDER-OUTER extents",
-            "text": f"{gen_sheet_mm[0]:.1f} x {gen_sheet_mm[1]:.1f} mm -> A1 landscape "
-                    f"(bridgecad_draw.coordinates FRAMES: sheet1_plan = A1); "
-                    f"render-status.json says render_paper={gen['render_status'].get('render_paper')!r}",
-        },
-        "verdict": "DIFFER",
-        "difference": (
-            f"Reference paper is A2 landscape (594x420 mm); generated DXF paper is "
-            f"A1 landscape ({gen_sheet_mm[0]:.1f}x{gen_sheet_mm[1]:.1f} mm). One A-size step "
-            f"larger. Orientation (landscape) agrees."
-        ),
-    })
-
-    rows.append({
-        "id": "CONV-SCALE",
-        "requirement": "Declared drawing scale convention",
-        "reference_evidence": {
-            "page": f"PDF page {ref['pdf_page']}",
-            "text": "per-view 'SCALE-1:<denom>': "
-                    + ", ".join(f"{k} x{len(v)}" for k, v in ref["scale_labels"].items())
-                    + " (standard ladder 1:50/1:100/1:250, uniform, no vertical exaggeration stated)",
-        },
-        "generated_evidence": {
-            "sheet": "title blocks + sheet captions",
-            "text": (
-                f"plan '{gen['plan']['scale_label']}', "
-                f"long-section '{gen['long_section']['scale_label']}', "
-                f"cross-section '{gen['cross_section']['scale_label']}'; "
-                f"long-section spec {gen['long_section']['h_scale_spec']} "
-                f"(declared V.E. {gen['long_section']['vertical_exaggeration_declared']}x)"
+    rows.append(
+        {
+            "id": "CONV-PAPER",
+            "requirement": "Paper size and orientation",
+            "reference_evidence": {
+                "page": f"PDF page {ref['pdf_page']} (media box)",
+                "text": f"page {ref['page_size_pt'][0]:.1f} x {ref['page_size_pt'][1]:.1f} pt = "
+                f"{ref['page_size_mm'][0]:.1f} x {ref['page_size_mm'][1]:.1f} mm -> A2 landscape",
+            },
+            "generated_evidence": {
+                "sheet": "Sheet1_Plan.dxf BORDER-OUTER extents",
+                "text": f"{gen_sheet_mm[0]:.1f} x {gen_sheet_mm[1]:.1f} mm -> A1 landscape "
+                f"(bridgecad_draw.coordinates FRAMES: sheet1_plan = A1); "
+                f"render-status.json says render_paper={gen['render_status'].get('render_paper')!r}",
+            },
+            "verdict": "DIFFER",
+            "difference": (
+                f"Reference paper is A2 landscape (594x420 mm); generated DXF paper is "
+                f"A1 landscape ({gen_sheet_mm[0]:.1f}x{gen_sheet_mm[1]:.1f} mm). One A-size step "
+                f"larger. Orientation (landscape) agrees."
             ),
-        },
-        "verdict": "DIFFER",
-        "difference": (
-            "Notation '1:<denom>' per view agrees in form. Values differ: reference "
-            "uses standard 1:50/1:100/1:250 with a uniform scale and no declared "
-            "vertical exaggeration; the generated long section uses non-ladder "
-            "1:150 H / 1:26 V with an explicitly declared V.E.="
-            f"{gen['long_section']['vertical_exaggeration_declared']}x."
-        ),
-    })
+        }
+    )
 
-    rows.append({
-        "id": "CONV-TITLEBLOCK",
-        "requirement": "Title-block field set, order and drawing-number pattern",
-        "reference_evidence": {
-            "page": f"PDF page {ref['pdf_page']}",
-            "text": "title-block field strings found on the page (verbatim): "
-                    + ", ".join(f"'{s}'" for s in ref["titleblock_field_strings"])
-                    + ". Verbatim title-block lines: "
-                    + "; ".join(f"'{s}'" for s in ref["sheet_titleblock_lines"])
-                    + ". Order (reading order of the block): DRG. No. | JOB No. | SUB title | "
-                    "'Page-03' | NOTES | REVISION | authority name/address | "
-                    "PREPARED BY / CHECKED BY / RECOMMENDED BY / APPROVED BY | DRN BY. "
-                    "Drawing number on the sheet is 'BR-I / 2022 - 002'; the spaced form "
-                    "'BR- I / 2022 - 002' appears only in the INDEX page.",
-        },
-        "generated_evidence": {
-            "sheet": "Sheet1_Plan.dxf TITLEBLK-TEXT / TEXT-TITLE",
-            "text": "; ".join(gen["plan"]["titleblock_text"])
-                    + " | DRAWING TITLE: GENERAL ARRANGEMENT - PLAN VIEW"
-                    + " | PROJECT: Open Foundation + RCC Pier + Solid Slab"
-                    + " | BRIDGE: PWD BR-I-2022-002",
-        },
-        "verdict": "DIFFER",
-        "difference": (
-            "Both carry drawing no., title, scale, sheet index, revision and "
-            "discipline signatures, but the FIELD SET/ORDER differ. Reference adds "
-            "JOB No., a 'SUB' title, booklet 'Page-No.', a numbered NOTES block, the "
-            "authority name/address block, RECOMMENDED BY and DRN BY, and an "
-            "exclusive-property stamp. Generated adds PROJECT/BRIDGE/CLIENT/"
-            "CONSULTANT and uses 'SHEET n OF 9' instead of a booklet page. "
-            "Drawing-number pattern differs: reference 'BR-I / 2022 - 002' (spaced) "
-            "vs generated 'BR-I-2022-002' (hyphenated, e.g. 'DRG: BR-I-2022-002')."
-        ),
-    })
-
-    rows.append({
-        "id": "CONV-LEVEL",
-        "requirement": "Level-notation convention and level-axis placement",
-        "reference_evidence": {
-            "page": f"PDF page {ref['pdf_page']}",
-            "text": "discipline-specific datum abbreviations + 3-dp metres: "
-                    + ", ".join(f"'{s}'" for s in ref["level_notation_strings_present"][:12])
-                    + "; datum marker 'DATUM LEVEL 90.00M' with stations A/L, P-1, P-2, P-3, A/R "
-                    "along the section.",
-        },
-        "generated_evidence": {
-            "sheet": "Sheet2_LongSection.dxf / Sheet3_CrossSection.dxf TEXT-LEVEL",
-            "text": "single generic prefix 'RL <value>' (3-dp) e.g. "
-                    + ", ".join(f"'{t}'" for t in gen["cross_section"]["level_labels"][:6])
-                    + "; long-section series labels "
-                    + ", ".join(f"'{t}'" for t in gen["long_section"]["level_labels"][:8])
-                    + "; HFL/'SCOUR RL 98.000' used for the hydraulic datums.",
-        },
-        "verdict": "DIFFER",
-        "difference": (
-            "Both write reduced levels in metres to 3 decimals with a prefix. "
-            "Reference prefixes each level with the discipline datum it belongs to "
-            "(R.T.L. / SOFFIT R.L. / F.R.L. / H.F.L. / D.H.F.L.). Generated collapses "
-            "road/soffit/cap/top levels to a single generic 'RL' and uses only "
-            "'HFL'/'SCOUR' for datums, so a reader cannot tell R.T.L. from F.R.L. "
-            "from the label alone. Level-axis placement: reference puts the datum "
-            "row and station row beneath the elevation with a 'DATUM LEVEL 90.00M' "
-            "note; generated puts a vertical RL axis (98/100/102/104) plus chainage "
-            "axis with a 'BED LEVEL' label. Placement is the same idea but the "
-            "labelling vocabulary differs."
-        ),
-    })
-
-    rows.append({
-        "id": "CONV-VIEWS",
-        "requirement": "Section-mark / view-labelling convention and view order",
-        "reference_evidence": {
-            "page": f"PDF page {ref['pdf_page']}",
-            "text": "view/section label lines found on the page (verbatim): "
-                    + "; ".join(f"'{s}'" for s in ref["view_label_lines"])
-                    + ". The elevation is labelled with its scale ('ELEVATION (SCALE-1:250)') "
-                    "and the plan 'PLAN'; part plans 'PART PLAN AT TOP' / 'PART PLAN AT BOTTOM'; "
-                    "cut sections 'CROSS SECTION AT P-2' and 'SECTION AT P-2'; abutment details "
-                    "'DETAILS OF ABUTMENT A/L & BOX RETURN (SCALE-1:100)' and '... A/R ...'; "
-                    "plus 'DETAILS OF CRASH BARRIER'.",
-        },
-        "generated_evidence": {
-            "sheet": "one sheet per view",
-            "text": "section marks 'A-A'/'B-B'; labels "
-                    "'SECTION A-A - TYPICAL MID-SPAN CROSS SECTION' (Sheet3), "
-                    "'VIEW 1 - SECTION A-A ...' and 'VIEW 2 - SECTION B-B ...' (Sheet8), "
-                    "'GENERAL ARRANGEMENT - PLAN VIEW' (Sheet1), "
-                    "'GENERAL ARRANGEMENT - LONGITUDINAL SECTION' (Sheet2).",
-        },
-        "verdict": "NOT_COMPARABLE",
-        "difference": (
-            "Section-mark convention (letter pairs cutting the plan/long section) "
-            "AGREES. View ORDER cannot be compared: the reference packs elevation + "
-            "plan + part plans + cross sections + abutment details onto one compressed "
-            "booklet sheet, whereas the generated package emits one view per sheet "
-            "(Sheet1..Sheet9). There is no common sheet composition to compare."
-        ),
-    })
-
-    rows.append({
-        "id": "CONV-LAYERS",
-        "requirement": "Layer / entity vocabulary for corresponding features",
-        "reference_evidence": {
-            "page": f"PDF page {ref['pdf_page']}",
-            "text": "flattened PDF: vector paths only, no CAD layer/entity metadata "
-                    "retrievable (page exposes stroke paths and text spans, not layers).",
-        },
-        "generated_evidence": {
-            "sheet": "DXF layer tables",
-            "text": (
-                f"plan: {gen['layers']['plan']}; "
-                f"long-section: {gen['layers']['long_section']}; "
-                f"cross-section: {gen['layers']['cross_section']}"
+    rows.append(
+        {
+            "id": "CONV-SCALE",
+            "requirement": "Declared drawing scale convention",
+            "reference_evidence": {
+                "page": f"PDF page {ref['pdf_page']}",
+                "text": "per-view 'SCALE-1:<denom>': "
+                + ", ".join(f"{k} x{len(v)}" for k, v in ref["scale_labels"].items())
+                + " (standard ladder 1:50/1:100/1:250, uniform, no vertical exaggeration stated)",
+            },
+            "generated_evidence": {
+                "sheet": "title blocks + sheet captions",
+                "text": (
+                    f"plan '{gen['plan']['scale_label']}', "
+                    f"long-section '{gen['long_section']['scale_label']}', "
+                    f"cross-section '{gen['cross_section']['scale_label']}'; "
+                    f"long-section spec {gen['long_section']['h_scale_spec']} "
+                    f"(declared V.E. {gen['long_section']['vertical_exaggeration_declared']}x)"
+                ),
+            },
+            "verdict": "DIFFER",
+            "difference": (
+                "Notation '1:<denom>' per view agrees in form. Values differ: reference "
+                "uses standard 1:50/1:100/1:250 with a uniform scale and no declared "
+                "vertical exaggeration; the generated long section uses non-ladder "
+                "1:150 H / 1:26 V with an explicitly declared V.E.="
+                f"{gen['long_section']['vertical_exaggeration_declared']}x."
             ),
-        },
-        "verdict": "NOT_COMPARABLE",
-        "difference": (
-            "The reference is a flattened PDF with no layer model, so layer names "
-            "cannot be compared. The generated vocabulary is recorded for the "
-            "corresponding features only: SUPER-DECK (deck), SUB-PIER/SUB-ABUT "
-            "(supports), SUB-BEARING/SUB-DIRT-WALL (details), CIVIL-HFL/CIVIL-GROUND/"
-            "CIVIL-LWL/CIVIL-ROAD/CIVIL-SCOUR (civil datums), SUPER-WEARING/SUPER-KERB/"
-            "SUPER-PARAPET (cross-section), TEXT-LEVEL/DIM-*/TITLEBLK-* (annotation)."
-        ),
-    })
+        }
+    )
+
+    rows.append(
+        {
+            "id": "CONV-TITLEBLOCK",
+            "requirement": "Title-block field set, order and drawing-number pattern",
+            "reference_evidence": {
+                "page": f"PDF page {ref['pdf_page']}",
+                "text": "title-block field strings found on the page (verbatim): "
+                + ", ".join(f"'{s}'" for s in ref["titleblock_field_strings"])
+                + ". Verbatim title-block lines: "
+                + "; ".join(f"'{s}'" for s in ref["sheet_titleblock_lines"])
+                + ". Order (reading order of the block): DRG. No. | JOB No. | SUB title | "
+                "'Page-03' | NOTES | REVISION | authority name/address | "
+                "PREPARED BY / CHECKED BY / RECOMMENDED BY / APPROVED BY | DRN BY. "
+                "Drawing number on the sheet is 'BR-I / 2022 - 002'; the spaced form "
+                "'BR- I / 2022 - 002' appears only in the INDEX page.",
+            },
+            "generated_evidence": {
+                "sheet": "Sheet1_Plan.dxf TITLEBLK-TEXT / TEXT-TITLE",
+                "text": "; ".join(gen["plan"]["titleblock_text"])
+                + " | DRAWING TITLE: GENERAL ARRANGEMENT - PLAN VIEW"
+                + " | PROJECT: Open Foundation + RCC Pier + Solid Slab"
+                + " | BRIDGE: PWD BR-I-2022-002",
+            },
+            "verdict": "DIFFER",
+            "difference": (
+                "Both carry drawing no., title, scale, sheet index, revision and "
+                "discipline signatures, but the FIELD SET/ORDER differ. Reference adds "
+                "JOB No., a 'SUB' title, booklet 'Page-No.', a numbered NOTES block, the "
+                "authority name/address block, RECOMMENDED BY and DRN BY, and an "
+                "exclusive-property stamp. Generated adds PROJECT/BRIDGE/CLIENT/"
+                "CONSULTANT and uses 'SHEET n OF 9' instead of a booklet page. "
+                "Drawing-number pattern differs: reference 'BR-I / 2022 - 002' (spaced) "
+                "vs generated 'BR-I-2022-002' (hyphenated, e.g. 'DRG: BR-I-2022-002')."
+            ),
+        }
+    )
+
+    rows.append(
+        {
+            "id": "CONV-LEVEL",
+            "requirement": "Level-notation convention and level-axis placement",
+            "reference_evidence": {
+                "page": f"PDF page {ref['pdf_page']}",
+                "text": "discipline-specific datum abbreviations + 3-dp metres: "
+                + ", ".join(f"'{s}'" for s in ref["level_notation_strings_present"][:12])
+                + "; datum marker 'DATUM LEVEL 90.00M' with stations A/L, P-1, P-2, P-3, A/R "
+                "along the section.",
+            },
+            "generated_evidence": {
+                "sheet": "Sheet2_LongSection.dxf / Sheet3_CrossSection.dxf TEXT-LEVEL",
+                "text": "single generic prefix 'RL <value>' (3-dp) e.g. "
+                + ", ".join(f"'{t}'" for t in gen["cross_section"]["level_labels"][:6])
+                + "; long-section series labels "
+                + ", ".join(f"'{t}'" for t in gen["long_section"]["level_labels"][:8])
+                + "; HFL/'SCOUR RL 98.000' used for the hydraulic datums.",
+            },
+            "verdict": "DIFFER",
+            "difference": (
+                "Both write reduced levels in metres to 3 decimals with a prefix. "
+                "Reference prefixes each level with the discipline datum it belongs to "
+                "(R.T.L. / SOFFIT R.L. / F.R.L. / H.F.L. / D.H.F.L.). Generated collapses "
+                "road/soffit/cap/top levels to a single generic 'RL' and uses only "
+                "'HFL'/'SCOUR' for datums, so a reader cannot tell R.T.L. from F.R.L. "
+                "from the label alone. Level-axis placement: reference puts the datum "
+                "row and station row beneath the elevation with a 'DATUM LEVEL 90.00M' "
+                "note; generated puts a vertical RL axis (98/100/102/104) plus chainage "
+                "axis with a 'BED LEVEL' label. Placement is the same idea but the "
+                "labelling vocabulary differs."
+            ),
+        }
+    )
+
+    rows.append(
+        {
+            "id": "CONV-VIEWS",
+            "requirement": "Section-mark / view-labelling convention and view order",
+            "reference_evidence": {
+                "page": f"PDF page {ref['pdf_page']}",
+                "text": "view/section label lines found on the page (verbatim): "
+                + "; ".join(f"'{s}'" for s in ref["view_label_lines"])
+                + ". The elevation is labelled with its scale ('ELEVATION (SCALE-1:250)') "
+                "and the plan 'PLAN'; part plans 'PART PLAN AT TOP' / 'PART PLAN AT BOTTOM'; "
+                "cut sections 'CROSS SECTION AT P-2' and 'SECTION AT P-2'; abutment details "
+                "'DETAILS OF ABUTMENT A/L & BOX RETURN (SCALE-1:100)' and '... A/R ...'; "
+                "plus 'DETAILS OF CRASH BARRIER'.",
+            },
+            "generated_evidence": {
+                "sheet": "one sheet per view",
+                "text": "section marks 'A-A'/'B-B'; labels "
+                "'SECTION A-A - TYPICAL MID-SPAN CROSS SECTION' (Sheet3), "
+                "'VIEW 1 - SECTION A-A ...' and 'VIEW 2 - SECTION B-B ...' (Sheet8), "
+                "'GENERAL ARRANGEMENT - PLAN VIEW' (Sheet1), "
+                "'GENERAL ARRANGEMENT - LONGITUDINAL SECTION' (Sheet2).",
+            },
+            "verdict": "NOT_COMPARABLE",
+            "difference": (
+                "Section-mark convention (letter pairs cutting the plan/long section) "
+                "AGREES. View ORDER cannot be compared: the reference packs elevation + "
+                "plan + part plans + cross sections + abutment details onto one compressed "
+                "booklet sheet, whereas the generated package emits one view per sheet "
+                "(Sheet1..Sheet9). There is no common sheet composition to compare."
+            ),
+        }
+    )
+
+    rows.append(
+        {
+            "id": "CONV-LAYERS",
+            "requirement": "Layer / entity vocabulary for corresponding features",
+            "reference_evidence": {
+                "page": f"PDF page {ref['pdf_page']}",
+                "text": "flattened PDF: vector paths only, no CAD layer/entity metadata "
+                "retrievable (page exposes stroke paths and text spans, not layers).",
+            },
+            "generated_evidence": {
+                "sheet": "DXF layer tables",
+                "text": (
+                    f"plan: {gen['layers']['plan']}; "
+                    f"long-section: {gen['layers']['long_section']}; "
+                    f"cross-section: {gen['layers']['cross_section']}"
+                ),
+            },
+            "verdict": "NOT_COMPARABLE",
+            "difference": (
+                "The reference is a flattened PDF with no layer model, so layer names "
+                "cannot be compared. The generated vocabulary is recorded for the "
+                "corresponding features only: SUPER-DECK (deck), SUB-PIER/SUB-ABUT "
+                "(supports), SUB-BEARING/SUB-DIRT-WALL (details), CIVIL-HFL/CIVIL-GROUND/"
+                "CIVIL-LWL/CIVIL-ROAD/CIVIL-SCOUR (civil datums), SUPER-WEARING/SUPER-KERB/"
+                "SUPER-PARAPET (cross-section), TEXT-LEVEL/DIM-*/TITLEBLK-* (annotation)."
+            ),
+        }
+    )
     return rows
 
 
@@ -737,80 +798,104 @@ def build_variant_geometry(gen: dict) -> list[dict]:
     rec_levels = rec.get("levels_m", {})
 
     rows = []
-    rows.append({
-        "id": "VAR-TOTAL",
-        "quantity": "Total bridge length / number of spans",
-        "derivation": f"{n} spans x {span_m} m = {n * span_m} m",
-        "measured": {
-            "plan_outline_m": round((plan["outline_mm"][2] - plan["outline_mm"][0]) / plan["mm_per_m"], 3),
-            "long_section_deck_m": round((ls["deck_x_mm"][1] - ls["deck_x_mm"][0]) / ls["mm_per_m_horizontal"], 3),
-        },
-        "source": "params.resolved.json total_length_m; DXF STRUC-OUTLINE / SUPER-DECK measured",
-        "verdict": (
-            "AGREE" if abs(plan["measured_total_m"] - total) < 1e-3
-            and abs(ls["measured_total_m"] - total) < 1e-3 else "CHECK"
-        ),
-    })
-    rows.append({
-        "id": "VAR-PIERS",
-        "quantity": "Intermediate pier chainages",
-        "derivation": "8 piers at 10,20,...,80 m (one at each internal span joint)",
-        "measured": {
-            "plan_pier_chainages_m": plan["pier_chainages_m"],
-            "long_section_pier_chainages_m": ls["pier_chainages_m"],
-        },
-        "source": "plan SUB-PIER centres; long-section SUB-PIER x-centres",
-        "verdict": "AGREE" if plan["pier_chainages_m"] == [10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0] else "CHECK",
-    })
-    rows.append({
-        "id": "VAR-ABUTMENTS",
-        "quantity": "Abutment support axes at 0 m and 90 m",
-        "derivation": "2 abutments at the two bridge ends",
-        "measured": {
-            "plan_abutment_axes_m": plan["abutment_chainages_m"],
-            "long_section_abutment_footprint_centre_m": ls["abutment_footprint_centres_m"],
-        },
-        "source": "plan SUB-ABUT centres; long-section SUB-ABUT footprint centres",
-        "verdict": (
-            "AGREE" if plan["abutment_chainages_m"] == [0.0, 90.0] else "CHECK"
-        ) + " (plan axes at 0.000/90.000; long-section footprint centres sit just "
+    rows.append(
+        {
+            "id": "VAR-TOTAL",
+            "quantity": "Total bridge length / number of spans",
+            "derivation": f"{n} spans x {span_m} m = {n * span_m} m",
+            "measured": {
+                "plan_outline_m": round(
+                    (plan["outline_mm"][2] - plan["outline_mm"][0]) / plan["mm_per_m"], 3
+                ),
+                "long_section_deck_m": round(
+                    (ls["deck_x_mm"][1] - ls["deck_x_mm"][0]) / ls["mm_per_m_horizontal"], 3
+                ),
+            },
+            "source": "params.resolved.json total_length_m; DXF STRUC-OUTLINE / SUPER-DECK measured",
+            "verdict": (
+                "AGREE"
+                if abs(plan["measured_total_m"] - total) < 1e-3
+                and abs(ls["measured_total_m"] - total) < 1e-3
+                else "CHECK"
+            ),
+        }
+    )
+    rows.append(
+        {
+            "id": "VAR-PIERS",
+            "quantity": "Intermediate pier chainages",
+            "derivation": "8 piers at 10,20,...,80 m (one at each internal span joint)",
+            "measured": {
+                "plan_pier_chainages_m": plan["pier_chainages_m"],
+                "long_section_pier_chainages_m": ls["pier_chainages_m"],
+            },
+            "source": "plan SUB-PIER centres; long-section SUB-PIER x-centres",
+            "verdict": "AGREE"
+            if plan["pier_chainages_m"] == [10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0]
+            else "CHECK",
+        }
+    )
+    rows.append(
+        {
+            "id": "VAR-ABUTMENTS",
+            "quantity": "Abutment support axes at 0 m and 90 m",
+            "derivation": "2 abutments at the two bridge ends",
+            "measured": {
+                "plan_abutment_axes_m": plan["abutment_chainages_m"],
+                "long_section_abutment_footprint_centre_m": ls["abutment_footprint_centres_m"],
+            },
+            "source": "plan SUB-ABUT centres; long-section SUB-ABUT footprint centres",
+            "verdict": ("AGREE" if plan["abutment_chainages_m"] == [0.0, 90.0] else "CHECK")
+            + " (plan axes at 0.000/90.000; long-section footprint centres sit just "
             "outside the deck ends because the abutment body/dirt-wall extends "
             "beyond the bridge axis)",
-    })
-    rows.append({
-        "id": "VAR-CW",
-        "quantity": "Carriageway width",
-        "derivation": "params carriageway_width",
-        "measured": {
-            "params_m": r.get("carriageway_width"),
-            "cross_section_wearing_width_m": xs["wearing_width_m"],
-            "cross_section_caption": xs["width_caption"],
-        },
-        "source": "params.resolved.json; cross-section SUPER-WEARING width / (1000/declared scale)",
-        "verdict": "AGREE" if xs["wearing_width_m"] == r.get("carriageway_width") else "CHECK",
-    })
-    rows.append({
-        "id": "VAR-WIDTH",
-        "quantity": "Overall deck width",
-        "derivation": "carriageway + kerbs (not in params); read from geometry",
-        "measured": {
-            "cross_section_deck_width_m": xs["width_m"],
-            "plan_outline_width_m": plan["deck_width_m"],
-        },
-        "source": "cross-section SUPER-DECK polyline width; plan STRUC-OUTLINE width",
-        "verdict": "AGREE (no params value; the two views agree with each other)",
-    })
-    rows.append({
-        "id": "VAR-DECK-THK",
-        "quantity": "Deck (slab) thickness",
-        "derivation": "params deck_thickness_mm",
-        "measured": {
-            "params_mm": r.get("deck_thickness_mm"),
-            "cross_section_thickness_mm": round(xs["thickness_m"] * 1000.0, 1) if isinstance(xs["thickness_m"], (int, float)) else "BLOCKED",
-        },
-        "source": "params.resolved.json; cross-section SUPER-DECK polyline height",
-        "verdict": "AGREE" if isinstance(xs["thickness_m"], (int, float)) and round(xs["thickness_m"] * 1000.0) == r.get("deck_thickness_mm") else "CHECK",
-    })
+        }
+    )
+    rows.append(
+        {
+            "id": "VAR-CW",
+            "quantity": "Carriageway width",
+            "derivation": "params carriageway_width",
+            "measured": {
+                "params_m": r.get("carriageway_width"),
+                "cross_section_wearing_width_m": xs["wearing_width_m"],
+                "cross_section_caption": xs["width_caption"],
+            },
+            "source": "params.resolved.json; cross-section SUPER-WEARING width / (1000/declared scale)",
+            "verdict": "AGREE" if xs["wearing_width_m"] == r.get("carriageway_width") else "CHECK",
+        }
+    )
+    rows.append(
+        {
+            "id": "VAR-WIDTH",
+            "quantity": "Overall deck width",
+            "derivation": "carriageway + kerbs (not in params); read from geometry",
+            "measured": {
+                "cross_section_deck_width_m": xs["width_m"],
+                "plan_outline_width_m": plan["deck_width_m"],
+            },
+            "source": "cross-section SUPER-DECK polyline width; plan STRUC-OUTLINE width",
+            "verdict": "AGREE (no params value; the two views agree with each other)",
+        }
+    )
+    rows.append(
+        {
+            "id": "VAR-DECK-THK",
+            "quantity": "Deck (slab) thickness",
+            "derivation": "params deck_thickness_mm",
+            "measured": {
+                "params_mm": r.get("deck_thickness_mm"),
+                "cross_section_thickness_mm": round(xs["thickness_m"] * 1000.0, 1)
+                if isinstance(xs["thickness_m"], int | float)
+                else "BLOCKED",
+            },
+            "source": "params.resolved.json; cross-section SUPER-DECK polyline height",
+            "verdict": "AGREE"
+            if isinstance(xs["thickness_m"], int | float)
+            and round(xs["thickness_m"] * 1000.0) == r.get("deck_thickness_mm")
+            else "CHECK",
+        }
+    )
     # The declared parameter file must carry the SAME named chain the canonical
     # record in summary.json does — that is the whole point of exposing it there.
     chain = gen.get("params_support_levels") or {}
@@ -825,82 +910,91 @@ def build_variant_geometry(gen: dict) -> list[dict]:
         and chain_levels.get("shaft_base_rl_m") == rec_levels.get("shaft_base_rl_m")
         and chain_levels.get("footing_bottom_rl_m") == rec_levels.get("footing_bottom_rl_m")
     )
-    rows.append({
-        "id": "VAR-SUPPORT-LEVELS",
-        "quantity": "Support / foundation level chain from the canonical record",
-        "derivation": "expected: full named RL chain (road, soffit, bearing, pedestal, cap top/bottom, shaft top/base, footing) in params.resolved.json",
-        "measured": {
-            "params_resolved_has_full_chain": chain_present,
-            "params_resolved_chain_levels": sorted(chain_levels),
-            "params_resolved_chain_typical": chain_typical or None,
-            "params_resolved_chain_support_count": len(chain.get("supports") or []),
-            "chain_matches_summary_record": chain_matches_record,
-            "summary_status": rec.get("status"),
-            "summary_authority": rec.get("authority"),
-            "summary_shaft_base_rl_m": rec_levels.get("shaft_base_rl_m"),
-            "summary_footing_bottom_rl_m": rec_levels.get("footing_bottom_rl_m"),
-        },
-        "source": "params.resolved.json support_levels.typical (written by generate_all_pwd_gads._support_level_chain); summary.json support_level_record",
-        "verdict": (
-            "AGREE" if chain_matches_record else ("CHECK" if chain_present else "BLOCKED")
-        ),
-        "reason": (
-            "params.resolved.json now carries the full named chain under "
-            "support_levels.typical / support_levels.supports, read from the same "
-            "resolver the sheets consume, and it agrees level-for-level with the "
-            f"canonical record: status={rec.get('status')}, "
-            f"authority={rec.get('authority')}, "
-            f"cap_bottom={rec_levels.get('cap_bottom_rl_m')}, "
-            f"shaft_base={rec_levels.get('shaft_base_rl_m')}, "
-            f"footing_bottom={rec_levels.get('footing_bottom_rl_m')}. "
-            "The authority is LEVEL_CONTROLLED only when an explicitly supplied founding RL and "
-            "an open-footing thickness are both supplied; this card supplies neither, "
-            "so the chain is honestly UNRESOLVED with E-MISSING-FOOTING-DEPTH rather "
-            "than a fabricated footing level."
-            if chain_matches_record else
-            "params.resolved.json does not carry a chain matching the canonical "
-            "support_level_record, so the 'level chain consumed from params' claim "
-            "cannot be verified."
-        ),
-    })
-    drawn_bases = [b for b in (ls["pier_base_rl_m"] or []) if isinstance(b, (int, float))]
+    rows.append(
+        {
+            "id": "VAR-SUPPORT-LEVELS",
+            "quantity": "Support / foundation level chain from the canonical record",
+            "derivation": "expected: full named RL chain (road, soffit, bearing, pedestal, cap top/bottom, shaft top/base, footing) in params.resolved.json",
+            "measured": {
+                "params_resolved_has_full_chain": chain_present,
+                "params_resolved_chain_levels": sorted(chain_levels),
+                "params_resolved_chain_typical": chain_typical or None,
+                "params_resolved_chain_support_count": len(chain.get("supports") or []),
+                "chain_matches_summary_record": chain_matches_record,
+                "summary_status": rec.get("status"),
+                "summary_authority": rec.get("authority"),
+                "summary_shaft_base_rl_m": rec_levels.get("shaft_base_rl_m"),
+                "summary_footing_bottom_rl_m": rec_levels.get("footing_bottom_rl_m"),
+            },
+            "source": "params.resolved.json support_levels.typical (written by generate_all_pwd_gads._support_level_chain); summary.json support_level_record",
+            "verdict": (
+                "AGREE" if chain_matches_record else ("CHECK" if chain_present else "BLOCKED")
+            ),
+            "reason": (
+                "params.resolved.json now carries the full named chain under "
+                "support_levels.typical / support_levels.supports, read from the same "
+                "resolver the sheets consume, and it agrees level-for-level with the "
+                f"canonical record: status={rec.get('status')}, "
+                f"authority={rec.get('authority')}, "
+                f"cap_bottom={rec_levels.get('cap_bottom_rl_m')}, "
+                f"shaft_base={rec_levels.get('shaft_base_rl_m')}, "
+                f"footing_bottom={rec_levels.get('footing_bottom_rl_m')}. "
+                "The authority is LEVEL_CONTROLLED only when an explicitly supplied founding RL and "
+                "an open-footing thickness are both supplied; this card supplies neither, "
+                "so the chain is honestly UNRESOLVED with E-MISSING-FOOTING-DEPTH rather "
+                "than a fabricated footing level."
+                if chain_matches_record
+                else "params.resolved.json does not carry a chain matching the canonical "
+                "support_level_record, so the 'level chain consumed from params' claim "
+                "cannot be verified."
+            ),
+        }
+    )
+    drawn_bases = [b for b in (ls["pier_base_rl_m"] or []) if isinstance(b, int | float)]
     rec_shaft_base = rec_levels.get("shaft_base_rl_m")
     base_agrees = (
         rec_shaft_base is not None
         and bool(drawn_bases)
         and all(abs(b - float(rec_shaft_base)) <= 1e-3 for b in drawn_bases)
     )
-    rows.append({
-        "id": "VAR-PIER-BASE-DISCREPANCY",
-        "quantity": "Drawn long-section pier base RL vs canonical record",
-        "derivation": "record shaft_base should equal the drawn pier base",
-        "measured": {
-            "long_section_pier_base_rl_m_measured": ls["pier_base_rl_m"],
-            "record_shaft_base_rl_m": rec_shaft_base,
-            "hfl_minus_pier_height_m": float(r.get("hfl_m", 0.0)) - float(r.get("pier_height_m", 0.0)),
-        },
-        "source": "long-section SUB-PIER rect base measured via CIVIL-HFL calibration; summary.json",
-        "verdict": "AGREE" if base_agrees else "DISAGREE",
-        "difference": (
-            f"The long-section draws every pier base at RL "
-            f"{drawn_bases[0] if drawn_bases else 'BLOCKED'} m and the canonical "
-            f"record resolves shaft_base at RL {rec_shaft_base} m — the drawn base "
-            "CONSUMES the record's shaft_base (delta <= 1 mm), so this cross-view "
-            "check now AGREES. The old HFL − pier_height datum "
-            f"({float(r.get('hfl_m', 0.0)) - float(r.get('pier_height_m', 0.0))} m) "
-            "is no longer used to place the pier base."
-        ) if base_agrees else (
-            "The drawn long-section pier base disagrees with the canonical "
-            f"record's shaft_base ({rec_shaft_base} m) by more than 1 mm."
-        ),
-    })
+    rows.append(
+        {
+            "id": "VAR-PIER-BASE-DISCREPANCY",
+            "quantity": "Drawn long-section pier base RL vs canonical record",
+            "derivation": "record shaft_base should equal the drawn pier base",
+            "measured": {
+                "long_section_pier_base_rl_m_measured": ls["pier_base_rl_m"],
+                "record_shaft_base_rl_m": rec_shaft_base,
+                "hfl_minus_pier_height_m": float(r.get("hfl_m", 0.0))
+                - float(r.get("pier_height_m", 0.0)),
+            },
+            "source": "long-section SUB-PIER rect base measured via CIVIL-HFL calibration; summary.json",
+            "verdict": "AGREE" if base_agrees else "DISAGREE",
+            "difference": (
+                f"The long-section draws every pier base at RL "
+                f"{drawn_bases[0] if drawn_bases else 'BLOCKED'} m and the canonical "
+                f"record resolves shaft_base at RL {rec_shaft_base} m — the drawn base "
+                "CONSUMES the record's shaft_base (delta <= 1 mm), so this cross-view "
+                "check now AGREES. The old HFL − pier_height datum "
+                f"({float(r.get('hfl_m', 0.0)) - float(r.get('pier_height_m', 0.0))} m) "
+                "is no longer used to place the pier base."
+            )
+            if base_agrees
+            else (
+                "The drawn long-section pier base disagrees with the canonical "
+                f"record's shaft_base ({rec_shaft_base} m) by more than 1 mm."
+            ),
+        }
+    )
     return rows
 
 
 # --------------------------------------------------------------------------- #
 # Overlays
 # --------------------------------------------------------------------------- #
-def build_view_crop(kind: str, page, ref_rects: dict) -> tuple[tuple[float, float, float, float], dict]:
+def build_view_crop(
+    kind: str, _page, ref_rects: dict
+) -> tuple[tuple[float, float, float, float], dict]:
     """Return (crop_pt, provenance) for a reference view, from a measured label
     bbox expanded by DECLARED margins."""
     # margins: (left, up, right, down) in PDF pt
@@ -957,7 +1051,11 @@ def make_overlays(doc, ref_page_no, gen: dict) -> tuple[dict, dict]:
     ref_rects = ref_view_rects(page)
 
     pix = page.get_pixmap(matrix=pymupdf.Matrix(DPI / PT_PER_IN, DPI / PT_PER_IN))
-    ref_arr = np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.height, pix.width, pix.n)[:, :, :3].copy()
+    ref_arr = (
+        np.frombuffer(pix.samples, dtype=np.uint8)
+        .reshape(pix.height, pix.width, pix.n)[:, :, :3]
+        .copy()
+    )
     ref_full = Image.fromarray(ref_arr, "RGB")
 
     declared_scale_ref = {"plan": 250, "long_section": 250, "cross_section": 100}
@@ -969,7 +1067,10 @@ def make_overlays(doc, ref_page_no, gen: dict) -> tuple[dict, dict]:
     for kind, sheet_name, _ in SHEETS:
         label = ref_rects[kind]
         if label is None:
-            transformations[kind] = {"status": "BLOCKED", "reason": "reference view label not found on the page"}
+            transformations[kind] = {
+                "status": "BLOCKED",
+                "reason": "reference view label not found on the page",
+            }
             continue
         crop_pt, prov = build_view_crop(kind, page, ref_rects)
 
@@ -978,8 +1079,10 @@ def make_overlays(doc, ref_page_no, gen: dict) -> tuple[dict, dict]:
         ry0 = int(round(crop_pt[1] * PX_PER_PT))
         rx1 = int(round(crop_pt[2] * PX_PER_PT))
         ry1 = int(round(crop_pt[3] * PX_PER_PT))
-        rx0 = max(0, rx0); ry0 = max(0, ry0)
-        rx1 = min(ref_full.width, rx1); ry1 = min(ref_full.height, ry1)
+        rx0 = max(0, rx0)
+        ry0 = max(0, ry0)
+        rx1 = min(ref_full.width, rx1)
+        ry1 = min(ref_full.height, ry1)
         ref_crop = ref_full.crop((rx0, ry0, rx1, ry1))
 
         # generated sheet render (A1) with exact model-mm -> px transform.
@@ -1010,8 +1113,10 @@ def make_overlays(doc, ref_page_no, gen: dict) -> tuple[dict, dict]:
         gx0, gx1 = sorted((gx0, gx1))
         gy0, gy1 = sorted((gy0, gy1))
         pad = 18
-        gx0 = max(0, int(gx0) - pad); gy0 = max(0, int(gy0) - pad)
-        gx1 = min(gen_full.width, int(gx1) + pad); gy1 = min(gen_full.height, int(gy1) + pad)
+        gx0 = max(0, int(gx0) - pad)
+        gy0 = max(0, int(gy0) - pad)
+        gx1 = min(gen_full.width, int(gx1) + pad)
+        gy1 = min(gen_full.height, int(gy1) + pad)
         gen_crop = gen_full.crop((gx0, gy0, gx1, gy1))
 
         # apply uniform scale to the generated crop
@@ -1083,8 +1188,16 @@ def make_overlays(doc, ref_page_no, gen: dict) -> tuple[dict, dict]:
         sb.paste(ref_crop, (0, 20))
         sb.paste(gen_scaled, (ref_crop.width + gap, 20))
         d2 = ImageDraw.Draw(sb)
-        d2.text((6, 4), f"REFERENCE PDF p{ref_page_no} crop {tuple(round(v) for v in crop_pt)}", fill=(0, 0, 0))
-        d2.text((ref_crop.width + gap + 6, 4), f"GENERATED {sheet_name} (scaled x{uniform_scale:.3f})", fill=(0, 0, 0))
+        d2.text(
+            (6, 4),
+            f"REFERENCE PDF p{ref_page_no} crop {tuple(round(v) for v in crop_pt)}",
+            fill=(0, 0, 0),
+        )
+        d2.text(
+            (ref_crop.width + gap + 6, 4),
+            f"GENERATED {sheet_name} (scaled x{uniform_scale:.3f})",
+            fill=(0, 0, 0),
+        )
         sb.save(OVL_DIR / f"{kind}_side_by_side.png")
 
         transformations[kind] = {
@@ -1101,7 +1214,9 @@ def make_overlays(doc, ref_page_no, gen: dict) -> tuple[dict, dict]:
             "translation_px": [trans_x, trans_y],
             "alignment": "ink-bbox centre coincidence (measured control, symmetric anchor)",
             "declared_vertical_exaggeration": (
-                gen["long_section"]["vertical_exaggeration_declared"] if kind == "long_section" else 1.0
+                gen["long_section"]["vertical_exaggeration_declared"]
+                if kind == "long_section"
+                else 1.0
             ),
             "residual_ink_bbox_size_ratio": {
                 "width": round((gen_bb[2] - gen_bb[0]) / max(1, (ref_bb[2] - ref_bb[0])), 4),
@@ -1133,7 +1248,9 @@ def main() -> int:
     doc = pymupdf.open(str(REF_PDF))
 
     manifest = build_reference_manifest(doc, sha, nbytes)
-    baseline_page = manifest["baseline_family_page"]["pdf_page"] if manifest["baseline_family_page"] else None
+    baseline_page = (
+        manifest["baseline_family_page"]["pdf_page"] if manifest["baseline_family_page"] else None
+    )
 
     ref_ev = reference_evidence(doc, baseline_page) if baseline_page else {"status": "BLOCKED"}
     ref_ev["page_size_pt"] = manifest["page_size_pt"]
@@ -1143,7 +1260,9 @@ def main() -> int:
     conventions = build_conventions(ref_ev, gen_ev)
     variant = build_variant_geometry(gen_ev)
 
-    transformations, raster_scores = make_overlays(doc, baseline_page, gen_ev) if baseline_page else ({}, {})
+    transformations, raster_scores = (
+        make_overlays(doc, baseline_page, gen_ev) if baseline_page else ({}, {})
+    )
 
     unresolved = [
         {
@@ -1221,8 +1340,12 @@ def main() -> int:
         ),
         "reference_baseline": {
             "page": baseline_page,
-            "drawing_number": manifest["baseline_family_page"]["drawing_number"] if manifest["baseline_family_page"] else None,
-            "why": manifest["baseline_family_page"]["why"] if manifest["baseline_family_page"] else None,
+            "drawing_number": manifest["baseline_family_page"]["drawing_number"]
+            if manifest["baseline_family_page"]
+            else None,
+            "why": manifest["baseline_family_page"]["why"]
+            if manifest["baseline_family_page"]
+            else None,
         },
         "invariant_conventions": conventions,
         "variant_geometry": variant,
@@ -1238,9 +1361,7 @@ def main() -> int:
     (OUT_DIR / "reference-manifest.json").write_text(
         json.dumps(manifest, indent=2), encoding="utf-8"
     )
-    (OUT_DIR / "comparison.json").write_text(
-        json.dumps(comparison, indent=2), encoding="utf-8"
-    )
+    (OUT_DIR / "comparison.json").write_text(json.dumps(comparison, indent=2), encoding="utf-8")
 
     # clean the intermediate sheet renders (keep only overlays)
     for k, _, _ in SHEETS:
@@ -1248,14 +1369,33 @@ def main() -> int:
         if p.exists():
             p.unlink()
 
-    print("reference:", manifest["filename"], "sha256", sha, "bytes", nbytes, "pages", manifest["page_count"])
+    print(
+        "reference:",
+        manifest["filename"],
+        "sha256",
+        sha,
+        "bytes",
+        nbytes,
+        "pages",
+        manifest["page_count"],
+    )
     print("baseline page:", baseline_page, manifest["baseline_family_page"]["drawing_number"])
     print("conventions:", [(c["id"], c["verdict"]) for c in conventions])
     print("variant:", [(v["id"], v["verdict"]) for v in variant])
     for k, t in transformations.items():
-        print(f"transform[{k}]:", t.get("status"), "scale", t.get("uniform_scale_applied_to_generated"),
-              "trans", t.get("translation_px"), "residual", t.get("residual_ink_bbox_size_ratio"))
-    print("raster diff (diagnostic):", {k: v["mean_abs_gray_diff"] for k, v in raster_scores.items()})
+        print(
+            f"transform[{k}]:",
+            t.get("status"),
+            "scale",
+            t.get("uniform_scale_applied_to_generated"),
+            "trans",
+            t.get("translation_px"),
+            "residual",
+            t.get("residual_ink_bbox_size_ratio"),
+        )
+    print(
+        "raster diff (diagnostic):", {k: v["mean_abs_gray_diff"] for k, v in raster_scores.items()}
+    )
     print("status:", comparison["status"])
     print("wrote:", OUT_DIR)
     return 0

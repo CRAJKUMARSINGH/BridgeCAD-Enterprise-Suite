@@ -1,6 +1,7 @@
 import logging
 import sys
 
+
 def configure_logging(level: int = logging.INFO) -> None:
     """Configure global logging format and level."""
     logging.basicConfig(

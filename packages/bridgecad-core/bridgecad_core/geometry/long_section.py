@@ -129,7 +129,7 @@ def _dec_or_none(value: object) -> Decimal | None:
 
 
 def _pier_support_level_input(
-    project: "BridgeProject",
+    project: BridgeProject,
     *,
     support_id: str,
     top_of_deck_rl: float,
@@ -158,9 +158,7 @@ def _pier_support_level_input(
     hd = project.hydraulic_data
 
     bearing_mm = getattr(ss, "bearing_depth_mm", None)
-    bearing = (
-        Decimal("0") if bearing_mm is None else Decimal(str(bearing_mm)) / _MM_PER_M
-    )
+    bearing = Decimal("0") if bearing_mm is None else Decimal(str(bearing_mm)) / _MM_PER_M
 
     wearing_m = Decimal(str(ss.wearing_coat_thickness_mm or 0)) / _MM_PER_M
     structural_m = Decimal(str(ss.deck_thickness_mm or 0)) / _MM_PER_M
@@ -182,9 +180,7 @@ def _pier_support_level_input(
         road_rl_m=Decimal(str(top_of_deck_rl)),
         wearing_depth_m=wearing_m,
         structural_depth_m=structural_m,
-        supplied_soffit_rl_m=(
-            None if soffit_rl is None else Decimal(str(soffit_rl))
-        ),
+        supplied_soffit_rl_m=(None if soffit_rl is None else Decimal(str(soffit_rl))),
         bearing_depth_m=bearing,
         bearing_depth_assumed=bearing_mm is None,
         pedestal_height_m=_dec_or_none(getattr(sub, "pier_pedestal_height_m", None))
@@ -211,7 +207,7 @@ def _pier_support_level_input(
     )
 
 
-def typical_pier_support_level(project: "BridgeProject") -> SupportLevelRecord:
+def typical_pier_support_level(project: BridgeProject) -> SupportLevelRecord:
     """The canonical §3 record for a *typical* pier.
 
     Sheet 4 (Foundation Details) details one typical pier. On a multi-span
@@ -230,9 +226,7 @@ def typical_pier_support_level(project: "BridgeProject") -> SupportLevelRecord:
             support_id="P-typical",
             top_of_deck_rl=ls.top_of_deck_rl,
             soffit_rl=(
-                float(hd.actual_soffit_level_m)
-                if hd.actual_soffit_level_m is not None
-                else None
+                float(hd.actual_soffit_level_m) if hd.actual_soffit_level_m is not None else None
             ),
         )
     )
@@ -256,7 +250,6 @@ def compute_long_section_geometry(project: BridgeProject) -> LongSectionGeometry
     hd = project.hydraulic_data
     fd = project.foundation_details
     ss = project.superstructure
-    sub = project.substructure
 
     # ---- level values ----------------------------------------------------
     hfl_rl = float(hd.hfl_m) if hd.hfl_m is not None else 0.0

@@ -167,21 +167,21 @@ def is_pdf_a1b(facts: dict[str, Any]) -> bool:
 
 def generate_pdf_booklet(dxf_paths: list[str | Path], output_pdf: str | Path) -> Path:
     """Render every DXF in *dxf_paths* into a single multi-page PDF."""
-    import matplotlib.pyplot as plt
     from matplotlib.backends.backend_pdf import PdfPages
 
     from ._render import render_figure
 
     out = Path(output_pdf)
     out.parent.mkdir(parents=True, exist_ok=True)
-    paths = [Path(p) for p in dxf_paths if Path(p).exists()]
+    paths = [Path(p) for p in dxf_paths]
     if not paths:
-        raise FileNotFoundError("generate_pdf_booklet: no existing DXF files supplied")
+        raise FileNotFoundError("generate_pdf_booklet: no DXF sheets supplied")
+    missing = [p.name for p in paths if not p.is_file()]
+    if missing:
+        raise FileNotFoundError(f"generate_pdf_booklet: missing DXF sheets {', '.join(missing)}")
     with PdfPages(str(out)) as pdf:
         for p in paths:
-            fig = render_figure(p)
-            pdf.savefig(fig)
-            plt.close(fig)
+            pdf.savefig(render_figure(p))
     return out
 
 

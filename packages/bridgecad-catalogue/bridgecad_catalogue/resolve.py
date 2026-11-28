@@ -59,8 +59,12 @@ def _derive(p: ResolvedParams, *, cw_overridden: bool = False) -> None:
     # deviation stated rather than hidden.
     cw = Decimal(str(p["carriageway_width"]))
     if cw < MIN_CARRIAGEWAY_M:
-        p.note("carriageway_width", cw, MIN_CARRIAGEWAY_M,
-               "below the 3.5 m model carriageway floor — clamped")
+        p.note(
+            "carriageway_width",
+            cw,
+            MIN_CARRIAGEWAY_M,
+            "below the 3.5 m model carriageway floor — clamped",
+        )
         p.warnings.append(
             f"carriageway {cw} m is below the 3.5 m model floor — clamped to "
             "3.5 m (deviation stated, not hidden)"
@@ -126,8 +130,9 @@ def _derive(p: ResolvedParams, *, cw_overridden: bool = False) -> None:
         if cw_overridden or not stated:
             need = math.ceil(float(str(p["carriageway_width"])) / float(spacing)) + 1
             if stated < need:
-                p.note("girders_per_deck", p.get("girders_per_deck"), need,
-                       "spacing vs carriageway")
+                p.note(
+                    "girders_per_deck", p.get("girders_per_deck"), need, "spacing vs carriageway"
+                )
                 p["girders_per_deck"] = need
 
     # GAP 09 — camber default: derive L/1000 (minimum 10 mm) so the dashed
@@ -185,9 +190,13 @@ def _check(p: ResolvedParams) -> None:
         p.warnings.append("box-cell types are normally ≤ 3 units")
 
 
-def resolve(card: Mapping[str, object], overrides: Mapping[str, object], *, force: bool = False) -> ResolvedParams:
+def resolve(
+    card: Mapping[str, object], overrides: Mapping[str, object], *, force: bool = False
+) -> ResolvedParams:
     p = ResolvedParams({k: v for k, v in card.items() if k != "id"})
-    p["span_lengths"] = [Decimal(str(s)) for s in cast("list[object]", card.get("span_lengths", []))]
+    p["span_lengths"] = [
+        Decimal(str(s)) for s in cast("list[object]", card.get("span_lengths", []))
+    ]
 
     for key, raw in overrides.items():
         spec = VARIABLES.get(key)
@@ -206,7 +215,9 @@ def resolve(card: Mapping[str, object], overrides: Mapping[str, object], *, forc
         p[key] = value
 
     if "span_length_m" in overrides:
-        p["span_lengths"] = [VARIABLES["span_length_m"].coerce(overrides["span_length_m"])] * int(p["span_count"])
+        p["span_lengths"] = [VARIABLES["span_length_m"].coerce(overrides["span_length_m"])] * int(
+            p["span_count"]
+        )
 
     _derive(p, cw_overridden="carriageway_width" in overrides)
     if "span_count" in overrides or "span_length_m" in overrides:

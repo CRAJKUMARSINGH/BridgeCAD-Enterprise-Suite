@@ -23,7 +23,7 @@ export const LAYER_GROUPS = [
   {
     id: "STRUCTURE", label: "STRUCT", hint: "Superstructure, substructure, abutment profiles and bearings",
     layers: [
-      "FOUND-CAP", "FOUND-PILE", "FOUND-WELL",
+      "FOUND-CAP", "FOUND-PIER", "FOUND-PCC", "FOUND-PILE", "FOUND-WELL",
       "SUB-PIER", "SUB-ABUT", "ABUT-PROF", "SUB-BEARING",
       "SUPER-GIRDER", "SUPER-DECK", "SUPER-WEARING", "SUPER-CAMBER",
       "STRUC-DETAIL", "STRUC-SECTION", "STRUC-OUTLINE",
@@ -33,7 +33,7 @@ export const LAYER_GROUPS = [
   { id: "DIM", label: "DIM", hint: "Dimension lines, ticks and values", layers: ["DIM"] },
   { id: "TEXT", label: "TEXT", hint: "Labels, panel titles and general annotation", layers: ["TEXT", "TEXT-HEADER"] },
   { id: "LEVELS", label: "LEVELS", hint: "Reduced-level callouts (RL text)", layers: ["TEXT-LEVEL"] },
-  { id: "CIVIL", label: "SOIL", hint: "Civil / hydraulic lines — scour and HFL", layers: ["CIVIL-SCOUR", "CIVIL-HFL"] },
+  { id: "CIVIL", label: "SOIL", hint: "Scour, high flood level and approach roads", layers: ["CIVIL-SCOUR", "CIVIL-HFL", "CIVIL-ROAD"] },
   { id: "CENTER", label: "CENTER", hint: "Centre lines and pier/pile centrelines", layers: ["CL"] },
   { id: "FRAME", label: "FRAME", hint: "Sheet border, title block and scale bar", layers: ["FRAME"] },
 ];

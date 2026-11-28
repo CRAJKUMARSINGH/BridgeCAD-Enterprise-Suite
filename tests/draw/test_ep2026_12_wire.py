@@ -93,6 +93,8 @@ def test_booklet_5A_stem_present(tmp_path):
 
 def test_sheet5A_5B_are_dimensioned_after_native_dim_pass(tmp_path):
     """Sheets 5A and 5B must have DIMENSION entities with text '<>' after package generation."""
+    import re
+
     from .contract import make_project
     from bridgecad_draw.booklet import generate_package
 
@@ -101,6 +103,8 @@ def test_sheet5A_5B_are_dimensioned_after_native_dim_pass(tmp_path):
     for p in paths:
         if "Sheet5A" in p.stem or "Sheet5B" in p.stem:
             doc = ezdxf.readfile(str(p))
+            titles = [e.dxf.text for e in doc.modelspace().query('TEXT[layer=="TEXT-TITLE"]')]
+            scale = next(int(match[1]) for title in titles if (match := re.search(r"SCALE 1:(\d+)", title)))
             dims = list(doc.modelspace().query("DIMENSION"))
             assert len(dims) > 0, f"{p.name} has no DIMENSION entities"
             for d in dims:
@@ -108,3 +112,4 @@ def test_sheet5A_5B_are_dimensioned_after_native_dim_pass(tmp_path):
                     f"{p.name}: DIMENSION text should be '<>' after native-dim pass, "
                     f"got {d.dxf.text!r}"
                 )
+                assert doc.dimstyles.get(d.dxf.dimstyle).dxf.dimlfac == pytest.approx(scale / 1000)

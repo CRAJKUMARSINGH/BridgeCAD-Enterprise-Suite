@@ -1,0 +1,12 @@
+site_name: BridgeCAD Enterprise Suite
+repo_url: https://github.com/CRAJKUMARSINGH/BridgeCAD-Enterprise-Suite
+nav:
+  - Home: index.md
+  - Deployment: DEPLOYMENT.md
+  - AutoLISP provenance: LISP_FIDELITY_AND_DIRT_WALL.md
+  - Interoperability: interop.md
+  - Verification traceability: verification/TRACEABILITY.md
+  - Release verification: verification/RELEASE_REPORT.md
+  - Architecture decisions:
+      - Index: adr/README.md
+      - Group workspace entry points: adr/0002-group-workspace-entry-points.md

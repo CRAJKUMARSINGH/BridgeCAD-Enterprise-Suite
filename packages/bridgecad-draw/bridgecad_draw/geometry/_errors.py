@@ -9,5 +9,5 @@ sheets let it propagate rather than drawing something the model does not say.
 from __future__ import annotations
 
 
-class Violation(ValueError):
+class Violation(ValueError):  # noqa: N818  # Public exception name.
     """A geometry that cannot be built as declared."""

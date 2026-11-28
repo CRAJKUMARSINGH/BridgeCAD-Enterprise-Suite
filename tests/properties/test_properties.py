@@ -13,6 +13,9 @@ from decimal import Decimal
 from itertools import pairwise
 
 import pytest
+
+pytest.importorskip("hypothesis")
+
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 from pydantic import ValidationError

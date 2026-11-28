@@ -12,10 +12,16 @@ dependencies = [
   "reportlab>=4.0.0",
   "cairosvg>=2.7.0",
   "bridgecad-core",
+  "bridgecad-io",
   "bridgecad-draw",
   "bridgecad-bill",
   "bridgecad-qa"
 ]
+
+[project.entry-points."bridgecad.worker_jobs"]
+drawing = "bridgecad_export.worker_jobs:generate_drawing"
+bill = "bridgecad_export.worker_jobs:generate_bill"
+package = "bridgecad_export.worker_jobs:export_package"
 
 [tool.setuptools]
 packages = ["bridgecad_export"]

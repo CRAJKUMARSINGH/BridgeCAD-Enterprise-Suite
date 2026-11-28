@@ -127,3 +127,20 @@ def test_issues_are_carried_with_their_gate():
             "detail": "",
         }
     ]
+
+
+@pytest.mark.parametrize("missing", list(Gate))
+def test_acceptance_fails_when_any_single_gate_lacks_evidence(missing):
+    evidence = {
+        Gate.GENERATION: Verdict.SUCCEEDED,
+        Gate.MODEL_VALIDATION: Verdict.PASSED,
+        Gate.GEOMETRY_CONTRACT: Verdict.PASSED,
+        Gate.REQUIRED_CONTENT: Verdict.PASSED,
+        Gate.LAYOUT: Verdict.PASSED,
+        Gate.REFERENCE_FIDELITY: Verdict.PASSED,
+        Gate.ENGINEERING_REVIEW: Verdict.APPROVED,
+    }
+    evidence.pop(missing)
+    manifest = QualityManifest(verdicts=evidence)
+    assert manifest.accepted is False
+    assert manifest.to_json()["accepted"] is False
